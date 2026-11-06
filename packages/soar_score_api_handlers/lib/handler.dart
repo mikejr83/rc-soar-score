@@ -1,6 +1,7 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api_handlers/handlers/handlers.dart';
+import 'package:soar_score_api_handlers/handlers/invitation_handlers.dart';
 import 'package:soar_score_api_handlers/middleware/failure_rate_limiter.dart';
 import 'package:soar_score_api_handlers/middleware/middleware.dart';
 import 'package:soar_score_core/repositories/repository.dart';
@@ -66,6 +67,9 @@ final _logger = Logger('Handler');
 /// answer 409 `invitations_not_available`. [invitationRateLimiter] replaces
 /// the default limit on failed link attempts (tests).
 ///
+/// [selfScoringBaseUrl] is the site invitation links point at (the director's
+/// `GET`/`POST /contests/{id}/invitations` build `{base}/invitations/{credential}`).
+///
 /// [corsAllowedOrigins] are the exact browser origins (for example
 /// `http://127.0.0.1:8091`) allowed to call the API cross-origin. Empty, the
 /// default, adds no CORS headers.
@@ -83,6 +87,7 @@ Handler buildApiHandler({
   Set<String> corsAllowedOrigins = const {},
   InvitationService? invitations,
   FailureRateLimiter? invitationRateLimiter,
+  String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
 }) {
   final handlers = createHandlers(
     name,
@@ -97,6 +102,7 @@ Handler buildApiHandler({
     invitations: invitations,
     invitationRateLimiter: invitationRateLimiter,
     corsAllowedOrigins: corsAllowedOrigins,
+    selfScoringBaseUrl: selfScoringBaseUrl,
   );
   Handler api = handlers.apiHandler;
 

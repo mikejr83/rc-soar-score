@@ -621,4 +621,200 @@ void _tests(SliceBackend backend) {
       throwsA(isA<core.InvitationAccessError>()),
     );
   });
+
+  group('the director\'s invitations', () {
+    late Handler asDirector;
+    late Handler asStranger;
+
+    setUp(() {
+      Handler build(core.Id account) => createServerHandler(
+        api.database,
+        authMiddleware: fixedPrincipal(Principal(accountId: account)),
+        invitationSecret: _secret,
+        selfScoringBaseUrl: 'https://score.example/',
+      );
+      asDirector = build(api.director);
+      asStranger = build(core.Id.create());
+    });
+
+    Future<(int, Map<String, Object?>)> director(
+      String method, {
+      Object? body,
+      Handler? as,
+    }) async {
+      final response = await (as ?? asDirector)(
+        Request(
+          method,
+          Uri.parse('http://localhost/api/v1/contests/$_contestId/invitations'),
+          body: body == null ? null : jsonEncode(body),
+        ),
+      );
+      final text = await response.readAsString();
+      return (
+        response.statusCode,
+        text.isEmpty
+            ? <String, Object?>{}
+            : jsonDecode(text) as Map<String, Object?>,
+      );
+    }
+
+    Map<String, Object?> issueBody(
+      List<String> participations, [
+      String requestId = 'req-1',
+    ]) => {'request_id': requestId, 'participation_ids': participations};
+
+    List<Map<String, Object?>> links(Map<String, Object?> body) => [
+      for (final item in body['invitations']! as List<Object?>)
+        item! as Map<String, Object?>,
+    ];
+
+    test('lists nobody, then the pilots issued, with the same link', () async {
+      await configureAndAddPilots();
+      var (status, body) = await director('GET');
+      expect(status, 200);
+      expect(body['can_issue'], isTrue);
+      expect(links(body), isEmpty);
+
+      (status, body) = await director(
+        'POST',
+        body: issueBody([_participationId]),
+      );
+      expect(status, 200);
+      expect(body['issued_count'], 1);
+      final issued = links(body).single;
+      expect(issued['participation_id'], _participationId);
+      final link = issued['link']! as String;
+
+      // The same link a resolve accepts, built from the configured site.
+      expect(link, startsWith('https://score.example/invitations/'));
+      final credential = link.substring(
+        'https://score.example/invitations/'.length,
+      );
+      expect((await resolve(credential)).$1, 200);
+
+      (status, body) = await director('GET');
+      expect(links(body).single, issued);
+      expect(body.toString(), isNot(contains('protected')));
+    });
+
+    test('sending twice, or a reprint, issues nothing new', () async {
+      await configureAndAddPilots();
+      final ids = [_participationId, _otherParticipationId];
+      final (_, first) = await director('POST', body: issueBody(ids));
+      expect(first['issued_count'], 2);
+      final (_, again) = await director('POST', body: issueBody(ids, 'req-2'));
+      expect(again['issued_count'], 0);
+      expect(links(again), links(first));
+      final (_, retry) = await director('POST', body: issueBody(ids));
+      expect(links(retry), links(first));
+      expect(
+        await repository.invitationRepository.listForContest(
+          core.Id.parse(_contestId),
+        ),
+        hasLength(2),
+      );
+    });
+
+    test('a request that cannot complete issues nothing', () async {
+      await configureAndAddPilots();
+      final (status, body) = await director(
+        'POST',
+        body: issueBody([
+          _participationId,
+          '019c0000-0000-7000-8000-0000000002ff',
+        ]),
+      );
+      expect(status, 404);
+      expect(body['error'], isNotNull);
+      expect(
+        await repository.invitationRepository.listForContest(
+          core.Id.parse(_contestId),
+        ),
+        isEmpty,
+      );
+      expect((await director('POST', body: issueBody([]))).$1, 400);
+    });
+
+    test('says why a Created or Completed contest cannot issue', () async {
+      // Created: no configuration yet.
+      var (status, body) = await director('GET');
+      expect(status, 200);
+      expect(body['can_issue'], isFalse);
+      expect(body['cannot_issue_code'], 'invitations_not_issuable');
+      expect(body['cannot_issue_reason'], isA<String>());
+
+      await configureAndAddPilots();
+      (status, body) = await director('GET');
+      expect(body['can_issue'], isTrue);
+      expect(body['cannot_issue_reason'], isNull);
+
+      await director('POST', body: issueBody([_participationId]));
+      final contest = await repository.contestRepository.findById(
+        core.Id.parse(_contestId),
+      );
+      await repository.contestRepository.save(
+        contest!.copyWithState(
+          lifecycleState: core.LifecycleState.completed,
+          scoringAccess: core.ScoringAccess.closed,
+          updatedAt: clock,
+        ),
+        metadata: core.MutationMetadata(
+          clientMutationId: 'complete',
+          authority: core.Authority.director,
+          clientTime: clock,
+          actorId: api.director,
+        ),
+      );
+      (status, body) = await director('GET');
+      expect(body['can_issue'], isFalse);
+      expect(links(body), hasLength(1), reason: 'existing links still list');
+      // Nothing new is issued for a Completed contest, but a reprint of an
+      // existing one is not an issue.
+      (status, body) = await director(
+        'POST',
+        body: issueBody([_participationId], 'req-3'),
+      );
+      expect(status, 200);
+      expect(body['issued_count'], 0);
+      (status, body) = await director(
+        'POST',
+        body: issueBody([_otherParticipationId], 'req-4'),
+      );
+      expect(status, 409);
+      expect((body['error']! as Map)['code'], 'invitations_not_issuable');
+    });
+
+    test('only the director may list or issue', () async {
+      await configureAndAddPilots();
+      for (final (method, body) in [
+        ('GET', null),
+        ('POST', issueBody([_participationId])),
+      ]) {
+        final (status, answer) = await director(
+          method,
+          body: body,
+          as: asStranger,
+        );
+        expect(status, 403);
+        expect((answer['error']! as Map)['code'], 'not_director');
+      }
+      expect(
+        await repository.invitationRepository.listForContest(
+          core.Id.parse(_contestId),
+        ),
+        isEmpty,
+      );
+    });
+
+    test('a server without a secret does not issue', () async {
+      await configureAndAddPilots();
+      final bare = createServerHandler(
+        api.database,
+        authMiddleware: fixedPrincipal(Principal(accountId: api.director)),
+      );
+      final (status, body) = await director('GET', as: bare);
+      expect(status, 409);
+      expect((body['error']! as Map)['code'], 'invitations_not_available');
+    });
+  });
 }

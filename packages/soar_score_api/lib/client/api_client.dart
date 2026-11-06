@@ -12,6 +12,7 @@ import '../dto/audit_event_dto.dart';
 import '../dto/claim_local_account_request.dart';
 import '../dto/contest_action_request.dart';
 import '../dto/contest_archive_dto.dart';
+import '../dto/contest_invitations_dto.dart';
 import '../dto/create_contest_request.dart';
 import '../dto/create_landing_table_request.dart';
 import '../dto/create_participant_request.dart';
@@ -545,6 +546,37 @@ class ApiClient {
         for (final item in json['participations'] as List<dynamic>)
           ContestParticipation.fromJson(item as Map<String, dynamic>),
       ],
+    );
+  }
+
+  /// `GET /api/v1/contests/{id}/invitations` — the participations of contest
+  /// [id] that have an active invitation, with the link each one's QR code
+  /// carries, and whether the contest may issue more now. The hosted server
+  /// answers 404 for a contest it has not synchronized.
+  Future<ContestInvitationsDto> contestInvitations(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/invitations');
+    final response = await _send('GET', uri);
+    return _decode<ContestInvitationsDto>(
+      response,
+      uri,
+      ContestInvitationsDto.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/contests/{id}/invitations` — issues an invitation for each
+  /// participation in [request] that has none. Sends no email. Pilots that
+  /// already have one keep it, so repeating changes nothing. All or nothing:
+  /// a request that cannot complete is an error and issues nothing.
+  Future<IssueInvitationsResponse> issueInvitations(
+    Id id,
+    IssueInvitationsRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/invitations');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<IssueInvitationsResponse>(
+      response,
+      uri,
+      IssueInvitationsResponse.fromJson,
     );
   }
 

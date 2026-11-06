@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 import 'package:test/test.dart';
 
 String _fixture(String name) =>
@@ -130,4 +131,57 @@ void main() {
     );
     expect(error.participantError, isNull);
   });
+
+  test(
+    'contestInvitations and issueInvitations call the director routes',
+    () async {
+      const id = '019c0000-0000-7000-8000-000000000020';
+      const participation = '019c0000-0000-7000-8000-000000000201';
+      final client = clientFor((request) {
+        final created = request.method == 'POST';
+        return http.Response(
+          jsonEncode({
+            if (created)
+              'issued_count': 1
+            else ...{
+              'contest_id': id,
+              'can_issue': false,
+              'cannot_issue_code': 'invitations_not_issuable',
+              'cannot_issue_reason': 'not now',
+            },
+            'invitations': [
+              {
+                'participation_id': participation,
+                'link': 'https://score.example/invitations/abc.def',
+              },
+            ],
+          }),
+          200,
+          headers: jsonHeaders,
+        );
+      });
+
+      final listed = await client.contestInvitations(Id.parse(id));
+      expect(seen.method, 'GET');
+      expect(seen.url.path, '/api/v1/contests/$id/invitations');
+      expect(listed.canIssue, isFalse);
+      expect(listed.cannotIssueReason, 'not now');
+      expect(listed.invitations.single.participationId.value, participation);
+
+      final issued = await client.issueInvitations(
+        Id.parse(id),
+        IssueInvitationsRequest(
+          requestId: 'r1',
+          participationIds: [Id.parse(participation)],
+        ),
+      );
+      expect(seen.method, 'POST');
+      expect(jsonDecode(seen.body), {
+        'request_id': 'r1',
+        'participation_ids': [participation],
+      });
+      expect(issued.issuedCount, 1);
+      expect(issued.invitations.single.link, endsWith('/invitations/abc.def'));
+    },
+  );
 }

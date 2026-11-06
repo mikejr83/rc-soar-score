@@ -16,6 +16,7 @@ export 'dto/api_error_dto.dart';
 export 'dto/audit_event_dto.dart';
 export 'dto/contest_action_request.dart';
 export 'dto/contest_archive_dto.dart';
+export 'dto/contest_invitations_dto.dart';
 export 'dto/create_contest_request.dart';
 export 'dto/create_landing_table_request.dart';
 export 'dto/create_participant_request.dart';

@@ -99,6 +99,10 @@ class InvitationService {
       return _issued(earlier, created: false);
     }
 
+    final existing = await repository.invitationRepository
+        .findActiveForParticipation(participationId);
+    if (existing != null) return _issued(existing, created: false);
+
     if (contest.lifecycleState == LifecycleState.created ||
         contest.lifecycleState == LifecycleState.completed) {
       throw ContestStateError(
@@ -113,10 +117,6 @@ class InvitationService {
         'only pilots can be invited so far',
       );
     }
-
-    final existing = await repository.invitationRepository
-        .findActiveForParticipation(participationId);
-    if (existing != null) return _issued(existing, created: false);
 
     final all = await repository.invitationRepository.listForParticipation(
       participationId,
@@ -173,6 +173,101 @@ class InvitationService {
       credential: credential,
       created: true,
     );
+  }
+
+  /// Whether invitations can be issued for [contest] now, and the reason
+  /// (a stable code with text) when they cannot.
+  ///
+  /// Issuance is open while a contest is Configuring, Ready or Running.
+  ({bool canIssue, String? code, String? reason}) issuability(Contest contest) {
+    switch (contest.lifecycleState) {
+      case LifecycleState.created:
+      case LifecycleState.completed:
+        return (
+          canIssue: false,
+          code: 'invitations_not_issuable',
+          reason:
+              'invitations are issued while a contest is Configuring, Ready '
+              'or Running, this one is ${contest.lifecycleState.name}',
+        );
+      default:
+        return (canIssue: true, code: null, reason: null);
+    }
+  }
+
+  /// The active invitation of each participation of [contestId] that has
+  /// one, with the credential to print or copy, by participation.
+  Future<List<IssuedInvitation>> activeForContest(Id contestId) async {
+    final all = await repository.invitationRepository.listForContest(contestId);
+    return [
+      for (final invitation in all)
+        if (invitation.state == InvitationState.active)
+          _issued(invitation, created: false),
+    ];
+  }
+
+  /// Issues an invitation for each of [participationIds] that has none, as
+  /// one request: everything is checked first, so a request that cannot
+  /// complete issues nothing. Participations that already have an invitation
+  /// come back with the same link and `created` false, so a repeat or a
+  /// reprint changes nothing. Never sends email.
+  ///
+  /// Each participation's idempotency key is [requestId] with the
+  /// participation id, so a retry of the same request finds what it issued.
+  Future<List<IssuedInvitation>> issueMany({
+    required Id contestId,
+    required List<Id> participationIds,
+    required Id issuedBy,
+    required String requestId,
+  }) async {
+    final contest = await repository.contestRepository.findById(contestId);
+    if (contest == null) {
+      throw EntityNotFoundError(entityType: 'Contest', entityId: contestId);
+    }
+    final unique = participationIds.toSet().toList();
+    final participations = <Id, ContestParticipation>{};
+    for (final id in unique) {
+      final participation = await repository.contestParticipationRepository
+          .findById(id);
+      if (participation == null || participation.contestId != contestId) {
+        throw EntityNotFoundError(
+          entityType: 'ContestParticipation',
+          entityId: id,
+        );
+      }
+      participations[id] = participation;
+    }
+    final needNew = <Id>[
+      for (final id in unique)
+        if (await repository.invitationRepository.findActiveForParticipation(
+              id,
+            ) ==
+            null)
+          id,
+    ];
+    if (needNew.isNotEmpty) {
+      final check = issuability(contest);
+      if (!check.canIssue) {
+        throw ContestStateError(check.code!, check.reason!);
+      }
+      for (final id in needNew) {
+        if (participations[id]!.roleType != RoleType.pilot) {
+          throw ContestStateError(
+            'helper_invitations_unavailable',
+            'only pilots can be invited so far',
+          );
+        }
+      }
+    }
+    return [
+      for (final id in unique)
+        await issue(
+          contestId: contestId,
+          participationId: id,
+          issuedBy: issuedBy,
+          clientMutationId: '$requestId/${id.value}',
+        ),
+    ];
   }
 
   /// The link of an invitation already issued, for the director to print or
