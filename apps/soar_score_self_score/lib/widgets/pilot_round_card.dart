@@ -28,7 +28,15 @@ class PilotRoundCard extends StatelessWidget {
     final muted = scheme.onSurfaceVariant;
     final status = round.status;
     final isNext = status == PilotRoundStatus.nextToScore;
-    final locked = status == PilotRoundStatus.locked;
+    final note = switch (status) {
+      PilotRoundStatus.upcoming =>
+        'Score round $nextRound first. Rounds open in order.',
+      PilotRoundStatus.locked =>
+        round.unavailableReason ?? 'This round is locked.',
+      PilotRoundStatus.retired => 'You retired from this round.',
+      _ => null,
+    };
+    final dimmed = note != null;
     final chip = switch (status) {
       PilotRoundStatus.submitted => const StatusChip(
         label: 'Submitted',
@@ -43,9 +51,19 @@ class PilotRoundCard extends StatelessWidget {
         icon: Icons.edit_outlined,
         style: StatusChipStyle.filled,
       ),
+      PilotRoundStatus.upcoming => const StatusChip(
+        label: 'Not open yet',
+        icon: Icons.schedule,
+        style: StatusChipStyle.quiet,
+      ),
       PilotRoundStatus.locked => const StatusChip(
         label: 'Locked',
         icon: Icons.lock_outline,
+        style: StatusChipStyle.quiet,
+      ),
+      PilotRoundStatus.retired => const StatusChip(
+        label: 'Retired',
+        icon: Icons.flag_outlined,
         style: StatusChipStyle.quiet,
       ),
     };
@@ -58,7 +76,7 @@ class PilotRoundCard extends StatelessWidget {
             : 'Entered by ${round.enteredBy}',
     ].join(' · ');
     return Opacity(
-      opacity: locked ? 0.8 : 1,
+      opacity: dimmed ? 0.8 : 1,
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -85,10 +103,10 @@ class PilotRoundCard extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(draw, style: theme.textTheme.bodyMedium),
-              if (locked) ...[
+              if (note != null) ...[
                 const SizedBox(height: 6),
                 Text(
-                  'Score round $nextRound first. Rounds open in order.',
+                  note,
                   style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ] else ...[

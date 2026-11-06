@@ -8,6 +8,7 @@ class GuestSession {
     required this.pilotName,
     required this.token,
     required this.expiresAt,
+    this.pilotNumber,
     this.role = 'pilot',
   });
 
@@ -17,6 +18,7 @@ class GuestSession {
     pilotId: json['pilotId']! as String,
     pilotName: json['pilotName']! as String,
     token: json['token']! as String,
+    pilotNumber: json['pilotNumber'] as int?,
     role: json['role'] as String? ?? 'pilot',
     // A stored session with no readable expiry is refused, not kept for ever.
     expiresAt: DateTime.parse(json['expiresAt']! as String),
@@ -26,6 +28,9 @@ class GuestSession {
   final String contestName;
   final String pilotId;
   final String pilotName;
+
+  /// Null when the contest gives pilots no number.
+  final int? pilotNumber;
 
   /// Sent with every request. Never shown, and never put in an address.
   final String token;
@@ -46,6 +51,7 @@ class GuestSession {
     'contestName': contestName,
     'pilotId': pilotId,
     'pilotName': pilotName,
+    'pilotNumber': ?pilotNumber,
     'token': token,
     'role': role,
     'expiresAt': expiresAt.toUtc().toIso8601String(),

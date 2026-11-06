@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:soar_score_api/soar_score_api.dart';
 
 import '../models/contests_view.dart';
@@ -14,43 +16,77 @@ import '../models/score_submission.dart';
 import '../models/team_overview.dart';
 import '../services/flight_time_input.dart';
 import '../services/score_format.dart';
+import '../session/guest_session_store.dart';
 import 'self_score_repository.dart';
 
 /// Reads the self-scoring pages from the API. The guest session token travels
 /// in the [ApiClient]'s token provider, so the server decides whose data it
 /// is; the contest and pilot ids in a page address are not trusted.
 class ApiSelfScoreRepository implements SelfScoreRepository {
-  ApiSelfScoreRepository(this._client);
+  ApiSelfScoreRepository(this._client, this._sessions);
 
   final ApiClient _client;
+
+  /// Where the contest and pilot names come from. They were given with the
+  /// session, so pages that only need a name do not ask the server again.
+  final GuestSessionStore _sessions;
 
   static const _unreachable =
       'Could not reach the server. Check your connection and try again.';
 
   /// Runs an API call and turns its failures into words the person can read.
+  /// The server's own message text is never shown: it is for logs, and the
+  /// codes below are the contract.
   Future<T> _read<T>(Future<T> Function() call) async {
     try {
       return await call();
     } on ApiNetworkError {
       throw const SelfScoreLoadException(_unreachable);
     } on ApiHttpError catch (error) {
-      final refusal = error.participantError;
-      if (refusal?.code == ParticipantErrorCodes.sessionInvalid ||
+      final code = _codeOf(error);
+      if (code == ParticipantErrorCodes.sessionInvalid ||
           error.statusCode == 401) {
         throw const SessionEndedException();
       }
-      if (error.statusCode == 404) {
-        throw const SelfScoreLoadException('This page could not be found.');
-      }
-      throw SelfScoreLoadException(
-        refusal?.message ??
-            'Could not load this page. Check your connection and try again.',
-      );
+      throw SelfScoreLoadException(_messageFor(error.statusCode, code));
     } on ApiException {
       throw const SelfScoreLoadException(
         'Could not load this page. Try again in a moment.',
       );
     }
+  }
+
+  /// The error code in a response, whether the body is the bare participant
+  /// object or the director routes' `{"error": {...}}` envelope. Null when
+  /// the body is empty or not JSON.
+  static String? _codeOf(ApiHttpError error) {
+    final bare = error.participantError?.code;
+    if (bare != null) return bare;
+    try {
+      final decoded = jsonDecode(error.body);
+      if (decoded is Map<String, dynamic>) {
+        final inner = decoded['error'];
+        if (inner is Map<String, dynamic> && inner['code'] is String) {
+          return inner['code'] as String;
+        }
+      }
+    } on Object {
+      // Empty or not JSON.
+    }
+    return null;
+  }
+
+  static String _messageFor(int status, String? code) {
+    return switch (code) {
+      ParticipantErrorCodes.scoringClosed =>
+        'Scoring is closed for this contest.',
+      ParticipantErrorCodes.staleMatrix =>
+        'The draw changed. Reload the page to see the new draw.',
+      _ when status == 404 => 'This page could not be found.',
+      _ when status == 403 => 'You cannot open this page.',
+      _ when status == 429 => 'Too many requests. Wait a moment and try again.',
+      _ => 'Could not load this page. Check your connection and try again.',
+    };
   }
 
   @override
@@ -64,13 +100,16 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
         contestName: answer.contest.name,
         pilotId: answer.participant.participationId.value,
         pilotName: answer.participant.pilotName,
+        pilotNumber: answer.participant.pilotNumber,
         token: answer.sessionToken,
         role: answer.participant.role,
         expiresAt: answer.sessionExpiresAt,
       );
     } on ApiHttpError catch (error) {
-      if (error.participantError?.code ==
-          ParticipantErrorCodes.invalidInvitation) {
+      // Every way the server says no to a link reads the same, whatever
+      // the body: the bare error, the envelope, or nothing at all.
+      if (_codeOf(error) == ParticipantErrorCodes.invalidInvitation ||
+          const {400, 404, 410}.contains(error.statusCode)) {
         throw const InvalidInvitationException();
       }
       // Rate limiting and server faults are not the link's fault.
@@ -141,6 +180,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
 
   PilotOverview _overview(ParticipantOverviewDto dto) {
     final you = dto.participant.pilotName;
+    final open = dto.access.code == 'open';
     return PilotOverview(
       contestName: dto.contest.name,
       teamName: dto.participant.teamName,
@@ -152,7 +192,8 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
             number: round.round,
             group: round.group,
             lane: round.lane,
-            status: _status(round, locked: dto.access.code != 'open'),
+            status: _status(round, scoringOpen: open),
+            unavailableReason: open ? null : _accessReason(dto.access.code),
             enteredBy: switch (round.enteredBy) {
               null => null,
               final name when name == you => 'you',
@@ -163,21 +204,35 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
     );
   }
 
-  PilotRoundStatus _status(ParticipantRoundDto round, {required bool locked}) {
+  /// The server's state for the round decides the status. Closed access only
+  /// affects rounds that have no score yet: a score that is already in stays
+  /// as it is, and the pilot can still view it.
+  PilotRoundStatus _status(
+    ParticipantRoundDto round, {
+    required bool scoringOpen,
+  }) {
     return switch (round.state) {
       ParticipantScoreState.submitted ||
       ParticipantScoreState.official ||
-      ParticipantScoreState.zero ||
-      ParticipantScoreState.retired => PilotRoundStatus.submitted,
+      ParticipantScoreState.zero => PilotRoundStatus.submitted,
+      ParticipantScoreState.retired => PilotRoundStatus.retired,
       ParticipantScoreState.reviewRequested ||
       ParticipantScoreState.underReview => PilotRoundStatus.pendingReview,
       ParticipantScoreState.locked => PilotRoundStatus.locked,
       ParticipantScoreState.notEntered || ParticipantScoreState.draft =>
-        round.isNextToScore && !locked
+        !scoringOpen
+            ? PilotRoundStatus.locked
+            : round.isNextToScore
             ? PilotRoundStatus.nextToScore
-            : PilotRoundStatus.locked,
+            : PilotRoundStatus.upcoming,
     };
   }
+
+  /// A fixed sentence for why scoring is closed, whatever the server's text.
+  static String _accessReason(String code) => switch (code) {
+    'not_open' || 'not_started' => 'Scoring has not opened yet.',
+    _ => 'Scoring is closed for this contest.',
+  };
 
   @override
   Future<EntryContext> entryContext(
@@ -185,17 +240,17 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
     String pilotId,
     int round,
   ) => _read(() async {
-    final (overview, entry) = await (
-      _client.participantOverview(),
-      _client.participantEntryContext(round),
-    ).wait;
+    final session = _session();
+    final entry = await _client.participantEntryContext(round);
     return EntryContext(
-      pilotName: overview.participant.pilotName,
-      pilotNumber: overview.participant.pilotNumber,
+      pilotName: session.pilotName,
+      pilotNumber: session.pilotNumber,
       round: entry.round,
       roundCount: entry.roundCount,
       group: entry.group,
       lane: entry.lane,
+      taskType: entry.taskType,
+      fieldKeys: [for (final field in entry.fields) field.key],
       landingTable: [
         for (final option in entry.landingTable)
           LandingResult(
@@ -215,18 +270,24 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
     );
   });
 
+  /// The stored session, which every page after the invitation needs. With
+  /// none, the person has to open their link again.
+  GuestSession _session() {
+    final session = _sessions.read();
+    if (session == null) throw const SessionEndedException();
+    return session;
+  }
+
   @override
   Future<GroupResults> groupResults(
     String contestId,
     String pilotId,
     int round,
   ) => _read(() async {
-    final (overview, group) = await (
-      _client.participantOverview(),
-      _client.participantGroupResults(round),
-    ).wait;
+    final session = _session();
+    final group = await _client.participantGroupResults(round);
     return GroupResults(
-      contestName: overview.contest.name,
+      contestName: session.contestName,
       round: group.round,
       group: group.group,
       latestRound: group.latestRound,
@@ -267,14 +328,14 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   @override
   Future<ResultsView> results(String contestId, {int? asOfRound}) =>
       _read(() async {
-        final (overview, overall) = await (
-          _client.participantOverview(),
-          _client.participantOverallResults(asOfRound: asOfRound),
-        ).wait;
+        final session = _session();
+        final overall = await _client.participantOverallResults(
+          asOfRound: asOfRound,
+        );
         final place = overall.yourPlace;
         final score = overall.yourScore;
         return ResultsView(
-          contestName: overview.contest.name,
+          contestName: session.contestName,
           latestRound: overall.latestRound,
           heldRound: overall.heldAtRound,
           snapshot: ResultsSnapshot(

@@ -8,9 +8,11 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_self_score/data/api_self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_repository.dart';
 import 'package:soar_score_self_score/models/group_result_row.dart';
+import 'package:soar_score_self_score/models/guest_session.dart';
 import 'package:soar_score_self_score/models/pilot_round.dart';
 import 'package:soar_score_self_score/models/score_submission.dart';
 import 'package:soar_score_self_score/services/score_format.dart';
+import 'package:soar_score_self_score/session/guest_session_store.dart';
 
 String _fixture(String name) =>
     File('../../packages/soar_score_api/fixtures/self_scoring/$name.json')
@@ -22,15 +24,38 @@ http.Response _json(String body, [int status = 200]) => http.Response(
   headers: {'content-type': 'application/json; charset=utf-8'},
 );
 
+final _requested = <String>[];
+
 ApiSelfScoreRepository _repository(
-  http.Response Function(http.Request request) respond,
-) => ApiSelfScoreRepository(
-  ApiClient(
-    baseUrl: Uri.parse('http://localhost:8080'),
-    httpClient: MockClient((request) async => respond(request)),
-    tokenProvider: () async => 'session-1',
-  ),
-);
+  http.Response Function(http.Request request) respond, {
+  bool signedIn = true,
+}) {
+  final sessions = MemoryGuestSessionStore();
+  if (signedIn) {
+    sessions.write(
+      GuestSession(
+        contestId: 'c',
+        contestName: 'Summer Heater 2026',
+        pilotId: 'p',
+        pilotName: 'Alex Rivera',
+        pilotNumber: 7,
+        token: 'session-1',
+        expiresAt: DateTime.utc(2099),
+      ),
+    );
+  }
+  return ApiSelfScoreRepository(
+    ApiClient(
+      baseUrl: Uri.parse('http://localhost:8080'),
+      httpClient: MockClient((request) async {
+        _requested.add(request.url.path);
+        return respond(request);
+      }),
+      tokenProvider: () async => 'session-1',
+    ),
+    sessions,
+  );
+}
 
 http.Response _fixtures(http.Request request) => switch (request.url.path) {
   '/api/v1/self-scoring/overview' => _json(_fixture('participant_overview')),
@@ -55,6 +80,8 @@ const _submission = ScoreSubmission(
 );
 
 void main() {
+  setUp(_requested.clear);
+
   group('submitScore', () {
     test('an accepted score carries the server value and next round', () async {
       final result = await _repository(
@@ -97,6 +124,7 @@ void main() {
           baseUrl: Uri.parse('http://localhost:8080'),
           httpClient: MockClient((_) async => throw http.ClientException('x')),
         ),
+        MemoryGuestSessionStore(),
       );
       expect(
         repository.submitScore(_submission),
@@ -152,14 +180,102 @@ void main() {
     expect(overview.rounds.map((r) => r.status), [
       PilotRoundStatus.submitted,
       PilotRoundStatus.nextToScore,
-      PilotRoundStatus.locked,
+      PilotRoundStatus.upcoming,
     ]);
     expect(overview.rounds.first.enteredBy, 'you');
     expect(overview.nextRound, 2);
   });
 
+  test('closed scoring locks only rounds with no score', () async {
+    final body =
+        jsonDecode(_fixture('participant_overview')) as Map<String, dynamic>;
+    body['access'] = {'code': 'scoring_closed', 'message': 'raw words'};
+    final overview = await _repository((_) => _json(jsonEncode(body)))
+        .pilotOverview('c', 'p');
+    expect(overview.rounds.map((r) => r.status), [
+      PilotRoundStatus.submitted,
+      PilotRoundStatus.locked,
+      PilotRoundStatus.locked,
+    ]);
+    expect(
+      overview.rounds.last.unavailableReason,
+      'Scoring is closed for this contest.',
+    );
+  });
+
+  test('pages after the overview do not fetch the overview again', () async {
+    final repository = _repository(_fixtures);
+    await repository.entryContext('c', 'p', 2);
+    await repository.groupResults('c', 'p', 1);
+    await repository.results('c');
+    expect(_requested, isNot(contains('/api/v1/self-scoring/overview')));
+    expect(_requested, hasLength(3));
+  });
+
+  test('without a stored session the person starts again', () {
+    final repository = _repository(_fixtures, signedIn: false);
+    expect(
+      repository.entryContext('c', 'p', 2),
+      throwsA(isA<SessionEndedException>()),
+    );
+  });
+
+  test('a bad link reads the same with an envelope or an empty body', () {
+    for (final response in [
+      _json('{"error":{"code":"invalid_invitation","message":"x"}}', 404),
+      _json('', 404),
+      _json('{"error":{"code":"expired","message":"x"}}', 410),
+      _json('', 400),
+    ]) {
+      expect(
+        _repository((_) => response).acceptInvitation('x'),
+        throwsA(isA<InvalidInvitationException>()),
+      );
+    }
+  });
+
+  test('server message text never reaches the page', () async {
+    final repository = _repository(
+      (_) => _json(
+        '{"code":"something_new","message":"SELECT * FROM secrets","request_id":"r"}',
+        500,
+      ),
+    );
+    await expectLater(
+      repository.pilotOverview('c', 'p'),
+      throwsA(
+        isA<SelfScoreLoadException>().having(
+          (e) => e.message,
+          'message',
+          isNot(contains('SELECT')),
+        ),
+      ),
+    );
+  });
+
+  test('known refusals read as fixed sentences', () async {
+    final repository = _repository(
+      (_) => _json(
+        '{"code":"scoring_closed","message":"raw server words","request_id":"r"}',
+        409,
+      ),
+    );
+    await expectLater(
+      repository.pilotOverview('c', 'p'),
+      throwsA(
+        isA<SelfScoreLoadException>().having(
+          (e) => e.message,
+          'message',
+          'Scoring is closed for this contest.',
+        ),
+      ),
+    );
+  });
+
   test('the entry context carries the draw and the landing table', () async {
     final entry = await _repository(_fixtures).entryContext('c', 'p', 2);
+    expect(entry.pilotNumber, 7);
+    expect(entry.formSupported, isTrue);
     expect(entry.pilotName, 'Alex Rivera');
     expect(entry.group, 'B');
     expect(entry.lane, isNull);
