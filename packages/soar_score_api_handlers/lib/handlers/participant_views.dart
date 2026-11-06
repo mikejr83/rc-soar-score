@@ -234,6 +234,19 @@ Future<_PilotFlights> _pilotFlights(
     profile?.lastName,
   ].whereType<String>().join(' ');
 
+  // The scores of every flight, in three reads whatever the round count.
+  final placeholderIds = [
+    for (final assignment in byCredited.values)
+      if (placeholders[assignment.id] case final placeholder?) placeholder.id,
+  ];
+  final officials = await repository.officialScoreRepository
+      .currentForPlaceholders(placeholderIds);
+  final latestAttempts = await repository.scoreAttemptRepository
+      .latestForPlaceholders(placeholderIds);
+  final attempts = await repository.scoreAttemptRepository.findByIds([
+    for (final official in officials.values) official.scoreAttemptId,
+  ]);
+
   final flights = <_Flight>[];
   for (final round in matrix.rounds) {
     final assignment = byCredited[round.id];
@@ -244,20 +257,12 @@ Future<_PilotFlights> _pilotFlights(
     final groupLocked = groups.any(
       (g) => g.groupNumber == assignment.group && g.isLocked,
     );
-    final official = placeholder == null
-        ? null
-        : await repository.officialScoreRepository.currentForPlaceholder(
-            placeholder.id,
-          );
+    final official = placeholder == null ? null : officials[placeholder.id];
     final attempt = official != null
-        ? await repository.scoreAttemptRepository.findById(
-            official.scoreAttemptId,
-          )
+        ? attempts[official.scoreAttemptId]
         : placeholder == null || placeholder.scoreRevision == 0
         ? null
-        : await repository.scoreAttemptRepository.latestForPlaceholder(
-            placeholder.id,
-          );
+        : latestAttempts[placeholder.id];
     flights.add(
       _Flight(
         ordinal: round.ordinal,
