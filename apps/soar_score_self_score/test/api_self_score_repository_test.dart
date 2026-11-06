@@ -91,6 +91,11 @@ void main() {
       result as ScoreAccepted;
       expect(result.flightScore, '962.5');
       expect(result.nextRound, 3);
+      expect(result.details?.official, isFalse);
+      expect(result.details?.rawScore, '962.5');
+      expect(result.details?.roundScore, '962.5');
+      expect(result.details?.cumulativePenalty, isNull);
+      expect(result.details?.enteredBy, 'Alex Rivera');
     });
 
     test('score_already_submitted keeps the stored value', () async {

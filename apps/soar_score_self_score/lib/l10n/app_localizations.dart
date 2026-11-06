@@ -220,6 +220,36 @@ abstract class AppLocalizations {
   /// **'Official score: {score}'**
   String scoreAcceptedLine(String score);
 
+  /// Shown after the server accepted the score, before it is official. The score is the server's calculation.
+  ///
+  /// In en, this message translates to:
+  /// **'Score: {score}'**
+  String scoreCalculatedLine(String score);
+
+  /// The flight's score before normalising, from the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw score: {score}'**
+  String scoreRawLine(String score);
+
+  /// The pilot's score for the round, from the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Round score: {score}'**
+  String scoreRoundLine(String score);
+
+  /// The penalty points counted against the pilot so far, from the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty so far: {score}'**
+  String scorePenaltyLine(String score);
+
+  /// Who entered the stored score.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered by {name}'**
+  String scoreEnteredByLine(String name);
+
   /// Shown after the server accepted the score but gave no calculated value.
   ///
   /// In en, this message translates to:

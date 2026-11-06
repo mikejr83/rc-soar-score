@@ -84,6 +84,31 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String scoreCalculatedLine(String score) {
+    return 'Score: $score';
+  }
+
+  @override
+  String scoreRawLine(String score) {
+    return 'Raw score: $score';
+  }
+
+  @override
+  String scoreRoundLine(String score) {
+    return 'Round score: $score';
+  }
+
+  @override
+  String scorePenaltyLine(String score) {
+    return 'Penalty so far: $score';
+  }
+
+  @override
+  String scoreEnteredByLine(String name) {
+    return 'Entered by $name';
+  }
+
+  @override
   String get scoreAcceptedNoValue => 'Your score was received.';
 
   @override

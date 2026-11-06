@@ -99,6 +99,51 @@
       }
     }
   },
+  "scoreCalculatedLine": "Score: {score}",
+  "@scoreCalculatedLine": {
+    "description": "Shown after the server accepted the score, before it is official. The score is the server's calculation.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "scoreRawLine": "Raw score: {score}",
+  "@scoreRawLine": {
+    "description": "The flight's score before normalising, from the server.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "scoreRoundLine": "Round score: {score}",
+  "@scoreRoundLine": {
+    "description": "The pilot's score for the round, from the server.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "scorePenaltyLine": "Penalty so far: {score}",
+  "@scorePenaltyLine": {
+    "description": "The penalty points counted against the pilot so far, from the server.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "scoreEnteredByLine": "Entered by {name}",
+  "@scoreEnteredByLine": {
+    "description": "Who entered the stored score.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "scoreAcceptedNoValue": "Your score was received.",
   "@scoreAcceptedNoValue": {
     "description": "Shown after the server accepted the score but gave no calculated value."

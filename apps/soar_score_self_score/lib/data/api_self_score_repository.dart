@@ -134,6 +134,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       return ScoreAccepted(
         flightScore: score == null ? null : ScoreFormat.score(score),
         nextRound: answer.nextRound,
+        details: _details(answer.score),
       );
     } on ApiHttpError catch (error) {
       final refusal = error.participantError;
@@ -148,6 +149,9 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
         final score = refusal.acceptedScore?.flightScore;
         return ScoreAlreadySubmitted(
           flightScore: score == null ? null : ScoreFormat.score(score),
+          details: refusal.acceptedScore == null
+              ? null
+              : _details(refusal.acceptedScore!),
         );
       }
       return ScoreRejected(
@@ -160,6 +164,18 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       // may not be stored, and sending it again with the same id is safe.
       throw const SelfScoreOfflineException(_unreachable);
     }
+  }
+
+  static ScoreDetails _details(ParticipantScoreDto score) {
+    String? number(num? value) =>
+        value == null ? null : ScoreFormat.score(value);
+    return ScoreDetails(
+      official: score.state == ParticipantScoreState.official,
+      rawScore: number(score.rawScore),
+      roundScore: number(score.roundScore),
+      cumulativePenalty: number(score.cumulativePenalty),
+      enteredBy: score.enteredBy,
+    );
   }
 
   @override

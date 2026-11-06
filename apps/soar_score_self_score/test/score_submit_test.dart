@@ -100,7 +100,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Submitted'), findsOneWidget);
-    expect(find.text('Official score: 962.5'), findsOneWidget);
+    expect(find.text('Score: 962.5'), findsOneWidget);
     expect(find.text('Submit score'), findsNothing);
     expect(find.text('See group results'), findsOneWidget);
     final sent = repository.sent.single;
