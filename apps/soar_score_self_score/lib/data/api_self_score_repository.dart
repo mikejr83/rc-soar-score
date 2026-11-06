@@ -142,6 +142,13 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       teamName: dto.participant.teamName,
       pilotName: you,
       pilotNumber: dto.participant.pilotNumber,
+      access: switch (dto.access.code) {
+        'open' => ScoringAccess.open,
+        'not_open' || 'not_started' => ScoringAccess.notStarted,
+        'completed' => ScoringAccess.completed,
+        // Any other refusal is closed to the pilot.
+        _ => ScoringAccess.closed,
+      },
       rounds: [
         for (final round in dto.rounds)
           PilotRound(
