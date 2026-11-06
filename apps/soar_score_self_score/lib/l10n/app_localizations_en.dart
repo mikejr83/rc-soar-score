@@ -156,4 +156,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backToStart => 'Back to start';
+
+  @override
+  String get scoringOpen => 'Scoring open';
+
+  @override
+  String get scoringNotStarted => 'Scoring not open yet';
+
+  @override
+  String get scoringClosed => 'Scoring closed';
+
+  @override
+  String get scoringCompleted => 'Contest completed';
 }

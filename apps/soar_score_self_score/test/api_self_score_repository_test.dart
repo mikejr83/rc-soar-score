@@ -9,6 +9,7 @@ import 'package:soar_score_self_score/data/api_self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_repository.dart';
 import 'package:soar_score_self_score/models/group_result_row.dart';
 import 'package:soar_score_self_score/models/guest_session.dart';
+import 'package:soar_score_self_score/models/pilot_overview.dart';
 import 'package:soar_score_self_score/models/pilot_round.dart';
 import 'package:soar_score_self_score/models/score_submission.dart';
 import 'package:soar_score_self_score/services/score_format.dart';
@@ -202,6 +203,7 @@ void main() {
       PilotRoundStatus.locked,
       PilotRoundStatus.locked,
     ]);
+    expect(overview.access, ScoringAccess.closed);
     expect(
       overview.rounds.last.unavailableReason,
       'Scoring is closed for this contest.',
