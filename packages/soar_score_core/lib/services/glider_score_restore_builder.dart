@@ -199,6 +199,7 @@ class GliderScoreRestoreBuilder {
         clientMutationId:
             'gs:$fileFingerprint:${plan.sourceCompNo},${flight.key}',
         baseScoreRevision: 0,
+        acceptedAt: now,
       );
       final official = OfficialScore(
         id: newId(),

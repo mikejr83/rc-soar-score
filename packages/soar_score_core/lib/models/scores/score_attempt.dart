@@ -29,7 +29,9 @@ class ScoreAttempt extends Equatable implements AppendOnly {
     this.sourceDevice,
     required String clientMutationId,
     required this.baseScoreRevision,
+    required DateTime acceptedAt,
   }) : rawComponents = Map.unmodifiable(rawComponents),
+       acceptedAt = acceptedAt.toUtc(),
        clientMutationId = requireNotBlank(
          clientMutationId,
          'clientMutationId',
@@ -68,6 +70,11 @@ class ScoreAttempt extends Equatable implements AppendOnly {
   /// The score revision this attempt was based on.
   final int baseScoreRevision;
 
+  /// Server time at which this attempt was accepted and stored. Taken from
+  /// the service clock, never from the client, so it is the time shown as
+  /// when a score was entered.
+  final DateTime acceptedAt;
+
   @override
   String get entityType => 'ScoreAttempt';
 
@@ -90,5 +97,6 @@ class ScoreAttempt extends Equatable implements AppendOnly {
     sourceDevice,
     clientMutationId,
     baseScoreRevision,
+    acceptedAt,
   ];
 }

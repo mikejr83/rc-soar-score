@@ -24,6 +24,7 @@ class ScoreAttempts extends Table {
   TextColumn get sourceDevice => text().nullable()();
   TextColumn get clientMutationId => text()();
   IntColumn get baseScoreRevision => integer()();
+  TextColumn get acceptedAt => text()();
 
   @override
   Set<Column> get primaryKey => {id};

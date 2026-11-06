@@ -28436,6 +28436,17 @@ class $ScoreAttemptsTable extends ScoreAttempts
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _acceptedAtMeta = const VerificationMeta(
+    'acceptedAt',
+  );
+  @override
+  late final GeneratedColumn<String> acceptedAt = GeneratedColumn<String>(
+    'accepted_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -28450,6 +28461,7 @@ class $ScoreAttemptsTable extends ScoreAttempts
     sourceDevice,
     clientMutationId,
     baseScoreRevision,
+    acceptedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -28576,6 +28588,14 @@ class $ScoreAttemptsTable extends ScoreAttempts
     } else if (isInserting) {
       context.missing(_baseScoreRevisionMeta);
     }
+    if (data.containsKey('accepted_at')) {
+      context.handle(
+        _acceptedAtMeta,
+        acceptedAt.isAcceptableOrUnknown(data['accepted_at']!, _acceptedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_acceptedAtMeta);
+    }
     return context;
   }
 
@@ -28637,6 +28657,10 @@ class $ScoreAttemptsTable extends ScoreAttempts
         DriftSqlType.int,
         data['${effectivePrefix}base_score_revision'],
       )!,
+      acceptedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}accepted_at'],
+      )!,
     );
   }
 
@@ -28660,6 +28684,7 @@ class ScoreAttemptData extends DataClass
   final String? sourceDevice;
   final String clientMutationId;
   final int baseScoreRevision;
+  final String acceptedAt;
   const ScoreAttemptData({
     required this.id,
     required this.contestId,
@@ -28673,6 +28698,7 @@ class ScoreAttemptData extends DataClass
     this.sourceDevice,
     required this.clientMutationId,
     required this.baseScoreRevision,
+    required this.acceptedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -28693,6 +28719,7 @@ class ScoreAttemptData extends DataClass
     }
     map['client_mutation_id'] = Variable<String>(clientMutationId);
     map['base_score_revision'] = Variable<int>(baseScoreRevision);
+    map['accepted_at'] = Variable<String>(acceptedAt);
     return map;
   }
 
@@ -28714,6 +28741,7 @@ class ScoreAttemptData extends DataClass
           : Value(sourceDevice),
       clientMutationId: Value(clientMutationId),
       baseScoreRevision: Value(baseScoreRevision),
+      acceptedAt: Value(acceptedAt),
     );
   }
 
@@ -28737,6 +28765,7 @@ class ScoreAttemptData extends DataClass
       sourceDevice: serializer.fromJson<String?>(json['sourceDevice']),
       clientMutationId: serializer.fromJson<String>(json['clientMutationId']),
       baseScoreRevision: serializer.fromJson<int>(json['baseScoreRevision']),
+      acceptedAt: serializer.fromJson<String>(json['acceptedAt']),
     );
   }
   @override
@@ -28755,6 +28784,7 @@ class ScoreAttemptData extends DataClass
       'sourceDevice': serializer.toJson<String?>(sourceDevice),
       'clientMutationId': serializer.toJson<String>(clientMutationId),
       'baseScoreRevision': serializer.toJson<int>(baseScoreRevision),
+      'acceptedAt': serializer.toJson<String>(acceptedAt),
     };
   }
 
@@ -28771,6 +28801,7 @@ class ScoreAttemptData extends DataClass
     Value<String?> sourceDevice = const Value.absent(),
     String? clientMutationId,
     int? baseScoreRevision,
+    String? acceptedAt,
   }) => ScoreAttemptData(
     id: id ?? this.id,
     contestId: contestId ?? this.contestId,
@@ -28784,6 +28815,7 @@ class ScoreAttemptData extends DataClass
     sourceDevice: sourceDevice.present ? sourceDevice.value : this.sourceDevice,
     clientMutationId: clientMutationId ?? this.clientMutationId,
     baseScoreRevision: baseScoreRevision ?? this.baseScoreRevision,
+    acceptedAt: acceptedAt ?? this.acceptedAt,
   );
   ScoreAttemptData copyWithCompanion(ScoreAttemptsCompanion data) {
     return ScoreAttemptData(
@@ -28815,6 +28847,9 @@ class ScoreAttemptData extends DataClass
       baseScoreRevision: data.baseScoreRevision.present
           ? data.baseScoreRevision.value
           : this.baseScoreRevision,
+      acceptedAt: data.acceptedAt.present
+          ? data.acceptedAt.value
+          : this.acceptedAt,
     );
   }
 
@@ -28832,7 +28867,8 @@ class ScoreAttemptData extends DataClass
           ..write('invitationId: $invitationId, ')
           ..write('sourceDevice: $sourceDevice, ')
           ..write('clientMutationId: $clientMutationId, ')
-          ..write('baseScoreRevision: $baseScoreRevision')
+          ..write('baseScoreRevision: $baseScoreRevision, ')
+          ..write('acceptedAt: $acceptedAt')
           ..write(')'))
         .toString();
   }
@@ -28851,6 +28887,7 @@ class ScoreAttemptData extends DataClass
     sourceDevice,
     clientMutationId,
     baseScoreRevision,
+    acceptedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -28867,7 +28904,8 @@ class ScoreAttemptData extends DataClass
           other.invitationId == this.invitationId &&
           other.sourceDevice == this.sourceDevice &&
           other.clientMutationId == this.clientMutationId &&
-          other.baseScoreRevision == this.baseScoreRevision);
+          other.baseScoreRevision == this.baseScoreRevision &&
+          other.acceptedAt == this.acceptedAt);
 }
 
 class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
@@ -28883,6 +28921,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
   final Value<String?> sourceDevice;
   final Value<String> clientMutationId;
   final Value<int> baseScoreRevision;
+  final Value<String> acceptedAt;
   final Value<int> rowid;
   const ScoreAttemptsCompanion({
     this.id = const Value.absent(),
@@ -28897,6 +28936,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
     this.sourceDevice = const Value.absent(),
     this.clientMutationId = const Value.absent(),
     this.baseScoreRevision = const Value.absent(),
+    this.acceptedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ScoreAttemptsCompanion.insert({
@@ -28912,6 +28952,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
     this.sourceDevice = const Value.absent(),
     required String clientMutationId,
     required int baseScoreRevision,
+    required String acceptedAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        contestId = Value(contestId),
@@ -28922,7 +28963,8 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
        actorId = Value(actorId),
        authority = Value(authority),
        clientMutationId = Value(clientMutationId),
-       baseScoreRevision = Value(baseScoreRevision);
+       baseScoreRevision = Value(baseScoreRevision),
+       acceptedAt = Value(acceptedAt);
   static Insertable<ScoreAttemptData> custom({
     Expression<String>? id,
     Expression<String>? contestId,
@@ -28936,6 +28978,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
     Expression<String>? sourceDevice,
     Expression<String>? clientMutationId,
     Expression<int>? baseScoreRevision,
+    Expression<String>? acceptedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -28952,6 +28995,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
       if (sourceDevice != null) 'source_device': sourceDevice,
       if (clientMutationId != null) 'client_mutation_id': clientMutationId,
       if (baseScoreRevision != null) 'base_score_revision': baseScoreRevision,
+      if (acceptedAt != null) 'accepted_at': acceptedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -28969,6 +29013,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
     Value<String?>? sourceDevice,
     Value<String>? clientMutationId,
     Value<int>? baseScoreRevision,
+    Value<String>? acceptedAt,
     Value<int>? rowid,
   }) {
     return ScoreAttemptsCompanion(
@@ -28984,6 +29029,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
       sourceDevice: sourceDevice ?? this.sourceDevice,
       clientMutationId: clientMutationId ?? this.clientMutationId,
       baseScoreRevision: baseScoreRevision ?? this.baseScoreRevision,
+      acceptedAt: acceptedAt ?? this.acceptedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -29027,6 +29073,9 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
     if (baseScoreRevision.present) {
       map['base_score_revision'] = Variable<int>(baseScoreRevision.value);
     }
+    if (acceptedAt.present) {
+      map['accepted_at'] = Variable<String>(acceptedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -29048,6 +29097,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
           ..write('sourceDevice: $sourceDevice, ')
           ..write('clientMutationId: $clientMutationId, ')
           ..write('baseScoreRevision: $baseScoreRevision, ')
+          ..write('acceptedAt: $acceptedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -67898,6 +67948,7 @@ typedef $$ScoreAttemptsTableCreateCompanionBuilder =
       Value<String?> sourceDevice,
       required String clientMutationId,
       required int baseScoreRevision,
+      required String acceptedAt,
       Value<int> rowid,
     });
 typedef $$ScoreAttemptsTableUpdateCompanionBuilder =
@@ -67914,6 +67965,7 @@ typedef $$ScoreAttemptsTableUpdateCompanionBuilder =
       Value<String?> sourceDevice,
       Value<String> clientMutationId,
       Value<int> baseScoreRevision,
+      Value<String> acceptedAt,
       Value<int> rowid,
     });
 
@@ -68092,6 +68144,11 @@ class $$ScoreAttemptsTableFilterComposer
 
   ColumnFilters<int> get baseScoreRevision => $composableBuilder(
     column: $table.baseScoreRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get acceptedAt => $composableBuilder(
+    column: $table.acceptedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -68288,6 +68345,11 @@ class $$ScoreAttemptsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get acceptedAt => $composableBuilder(
+    column: $table.acceptedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ContestsTableOrderingComposer get contestId {
     final $$ContestsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -68422,6 +68484,11 @@ class $$ScoreAttemptsTableAnnotationComposer
 
   GeneratedColumn<int> get baseScoreRevision => $composableBuilder(
     column: $table.baseScoreRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get acceptedAt => $composableBuilder(
+    column: $table.acceptedAt,
     builder: (column) => column,
   );
 
@@ -68619,6 +68686,7 @@ class $$ScoreAttemptsTableTableManager
                 Value<String?> sourceDevice = const Value.absent(),
                 Value<String> clientMutationId = const Value.absent(),
                 Value<int> baseScoreRevision = const Value.absent(),
+                Value<String> acceptedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ScoreAttemptsCompanion(
                 id: id,
@@ -68633,6 +68701,7 @@ class $$ScoreAttemptsTableTableManager
                 sourceDevice: sourceDevice,
                 clientMutationId: clientMutationId,
                 baseScoreRevision: baseScoreRevision,
+                acceptedAt: acceptedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -68649,6 +68718,7 @@ class $$ScoreAttemptsTableTableManager
                 Value<String?> sourceDevice = const Value.absent(),
                 required String clientMutationId,
                 required int baseScoreRevision,
+                required String acceptedAt,
                 Value<int> rowid = const Value.absent(),
               }) => ScoreAttemptsCompanion.insert(
                 id: id,
@@ -68663,6 +68733,7 @@ class $$ScoreAttemptsTableTableManager
                 sourceDevice: sourceDevice,
                 clientMutationId: clientMutationId,
                 baseScoreRevision: baseScoreRevision,
+                acceptedAt: acceptedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

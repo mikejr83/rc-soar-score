@@ -302,6 +302,7 @@ class ScoresService {
       authority: Authority.director,
       clientMutationId: clientMutationId,
       baseScoreRevision: baseScoreRevision,
+      acceptedAt: now,
     );
     final official = OfficialScore(
       id: _newId(),

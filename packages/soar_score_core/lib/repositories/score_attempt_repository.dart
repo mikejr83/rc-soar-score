@@ -22,6 +22,16 @@ abstract interface class ScoreAttemptRepository {
   /// The newest attempt at [scorePlaceholderId], or `null` when there is none.
   Future<ScoreAttempt?> latestForPlaceholder(Id scorePlaceholderId);
 
+  /// The newest attempt at each of [scorePlaceholderIds] that has one, by
+  /// placeholder id, in one read.
+  Future<Map<Id, ScoreAttempt>> latestForPlaceholders(
+    Iterable<Id> scorePlaceholderIds,
+  );
+
+  /// The attempts with the given [ids], by id, in one read. Unknown ids are
+  /// left out.
+  Future<Map<Id, ScoreAttempt>> findByIds(Iterable<Id> ids);
+
   /// Stores a new [attempt].
   ///
   /// Throws an `AlreadyStoredError` if one with the same id is stored.
