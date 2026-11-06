@@ -82,10 +82,30 @@ abstract final class SampleData {
       lane: 1,
       status: PilotRoundStatus.nextToScore,
     ),
-    PilotRound(number: 5, group: 'D', lane: 4, status: PilotRoundStatus.locked),
-    PilotRound(number: 6, group: 'A', lane: 1, status: PilotRoundStatus.locked),
-    PilotRound(number: 7, group: 'C', lane: 2, status: PilotRoundStatus.locked),
-    PilotRound(number: 8, group: 'B', lane: 3, status: PilotRoundStatus.locked),
+    PilotRound(
+      number: 5,
+      group: 'D',
+      lane: 4,
+      status: PilotRoundStatus.upcoming,
+    ),
+    PilotRound(
+      number: 6,
+      group: 'A',
+      lane: 1,
+      status: PilotRoundStatus.upcoming,
+    ),
+    PilotRound(
+      number: 7,
+      group: 'C',
+      lane: 2,
+      status: PilotRoundStatus.upcoming,
+    ),
+    PilotRound(
+      number: 8,
+      group: 'B',
+      lane: 3,
+      status: PilotRoundStatus.upcoming,
+    ),
   ];
 
   static const groupBResults = [

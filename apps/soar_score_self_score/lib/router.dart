@@ -51,12 +51,17 @@ final router = GoRouter(
         GoRoute(
           path: ':contestId',
           redirect: (context, state) {
-            if (state.uri.pathSegments.length > 2) return null;
             final contestId = state.pathParameters['contestId']!;
             final session = context.guestSessions.read();
-            if (session != null &&
-                session.role == 'pilot' &&
-                session.contestId == contestId) {
+            // A guest belongs to one contest. Any page of another contest,
+            // at any depth, goes to their own. The server checks the token on
+            // every read as well; this keeps a hand-edited address from
+            // showing another contest's page shell.
+            if (session != null && session.contestId != contestId) {
+              return contestPath(session.contestId);
+            }
+            if (state.uri.pathSegments.length > 2) return null;
+            if (session != null && session.role == 'pilot') {
               return pilotPath(contestId, session.pilotId);
             }
             return teamPath(contestId);
@@ -90,13 +95,8 @@ final router = GoRouter(
                 if (session != null && session.role != 'pilot') {
                   return contestPath(contestId);
                 }
-                if (session != null &&
-                    session.contestId == contestId &&
-                    session.pilotId != pilotId) {
+                if (session != null && session.pilotId != pilotId) {
                   return pilotPath(contestId, session.pilotId);
-                }
-                if (session != null && session.contestId != contestId) {
-                  return contestPath(session.contestId);
                 }
                 return null;
               },
