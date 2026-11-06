@@ -16,11 +16,13 @@ const String serverVersion = '0.1.0';
 /// each request's principal. [corsAllowedOrigins] are the browser origins
 /// allowed to call the API cross-origin. [invitationSecret] turns on the
 /// participant routes (invitation links and guest sessions).
+/// [selfScoringBaseUrl] is the site those links point at.
 Handler createServerHandler(
   SoarScoreDatabase database, {
   required AuthMiddleware authMiddleware,
   Set<String> corsAllowedOrigins = const {},
   String? invitationSecret,
+  String? selfScoringBaseUrl,
 }) {
   final repository = Repository(database);
   return buildApiHandler(
@@ -30,6 +32,7 @@ Handler createServerHandler(
     repository: repository,
     authMiddleware: authMiddleware,
     publishingEnabled: true,
+    selfScoringBaseUrl: selfScoringBaseUrl ?? defaultSelfScoringBaseUrl,
     corsAllowedOrigins: corsAllowedOrigins,
     invitations: invitationSecret == null
         ? null

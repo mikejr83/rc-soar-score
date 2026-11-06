@@ -12,6 +12,7 @@ import 'package:soar_score_api_handlers/handlers/contests_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/landing_table_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/matrix_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/models_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/invitation_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participant_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participants_handlers.dart';
 import 'package:soar_score_api_handlers/middleware/failure_rate_limiter.dart';
@@ -47,6 +48,7 @@ createHandlers(
   InvitationService? invitations,
   FailureRateLimiter? invitationRateLimiter,
   Set<String> corsAllowedOrigins = const {},
+  String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
 }) {
   final router = Router()
     ..get(
@@ -59,6 +61,12 @@ createHandlers(
   addConfigurationRoutes(router, repository, recalculation: recalculation);
   addLandingTableRoutes(router, repository);
   addParticipantRoutes(router, repository);
+  addInvitationRoutes(
+    router,
+    repository,
+    service: invitations,
+    selfScoringBaseUrl: selfScoringBaseUrl,
+  );
   addModelRoutes(router, repository);
   addRoleRoutes(router, repository);
   addParticipationRoutes(router, repository, recalculation: recalculation);

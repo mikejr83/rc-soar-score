@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
+import '../schema/table_group.dart';
 import '../sync/unscored_matrix_rows.dart';
 import 'audit_event_repository.dart';
 import 'drift_repository.dart';
@@ -25,6 +26,42 @@ class ContestParticipationRepository extends DriftRepository
       participationId,
     )) {
       await context.delete(link, metadata: metadata.forPart(link.id.value));
+    }
+  }
+
+  /// Removes the invitations of [participation] (the server only; an
+  /// installation has none), newest first because a replacement refers to the
+  /// invitation it replaced. A participant who can be removed has no scores,
+  /// so nothing needs the invitations; each one still active leaves an
+  /// `InvitationRevoked` audit event, so the access history is kept.
+  Future<void> _removeInvitations(
+    core.ContestParticipation participation,
+    core.MutationMetadata metadata,
+  ) async {
+    if (!db.profile.groups.contains(TableGroup.backendOnly)) return;
+    final invitations = backendStore<core.Invitation>('Invitation');
+    final stored = await invitations.whereId(
+      'contest_participation_id',
+      participation.id,
+      orderBy: 'invitation_revision',
+    );
+    for (final invitation in stored.reversed) {
+      if (invitation.isActive) {
+        await _audits.append(
+          core.AuditEvent(
+            id: core.Id.create(),
+            entityType: 'Invitation',
+            entityId: invitation.id,
+            contestId: invitation.contestId,
+            action: core.AuditAction.invitationRevoked,
+            actorId: metadata.actorId,
+            authority: metadata.authority,
+            resultingRevision: invitation.invitationRevision,
+            serverTimestamp: DateTime.now().toUtc(),
+          ),
+        );
+      }
+      await invitations.remove(invitation.id);
     }
   }
 
@@ -107,6 +144,7 @@ class ContestParticipationRepository extends DriftRepository
       );
     }
     await _removeModelLinks(context, id, metadata);
+    await _removeInvitations(participation, metadata);
     await context.delete(participation, metadata: metadata);
     return (deleted: true, matrixRowsRemoved: removed);
   });

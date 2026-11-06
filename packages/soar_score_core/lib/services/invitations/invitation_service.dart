@@ -99,6 +99,10 @@ class InvitationService {
       return _issued(earlier, created: false);
     }
 
+    final existing = await repository.invitationRepository
+        .findActiveForParticipation(participationId);
+    if (existing != null) return _issued(existing, created: false);
+
     if (contest.lifecycleState == LifecycleState.created ||
         contest.lifecycleState == LifecycleState.completed) {
       throw ContestStateError(
@@ -113,10 +117,6 @@ class InvitationService {
         'only pilots can be invited so far',
       );
     }
-
-    final existing = await repository.invitationRepository
-        .findActiveForParticipation(participationId);
-    if (existing != null) return _issued(existing, created: false);
 
     final all = await repository.invitationRepository.listForParticipation(
       participationId,
@@ -175,17 +175,218 @@ class InvitationService {
     );
   }
 
+  /// Whether invitations can be issued for [contest] now, and the reason
+  /// (a stable code with text) when they cannot.
+  ///
+  /// Issuance is open while a contest is Configuring, Ready or Running.
+  ({bool canIssue, String? code, String? reason}) issuability(Contest contest) {
+    switch (contest.lifecycleState) {
+      case LifecycleState.created:
+      case LifecycleState.completed:
+        return (
+          canIssue: false,
+          code: 'invitations_not_issuable',
+          reason:
+              'invitations are issued while a contest is Configuring, Ready '
+              'or Running, this one is ${contest.lifecycleState.name}',
+        );
+      default:
+        return (canIssue: true, code: null, reason: null);
+    }
+  }
+
+  /// The active invitation of each participation of [contestId] that has
+  /// one, with the credential to print or copy.
+  ///
+  /// An invitation whose link cannot be reproduced (the server's secret
+  /// changed since it was issued, so the recomputed credential no longer
+  /// matches the stored hash) is listed in [unreproducible] instead, never
+  /// with a link that would not open.
+  Future<({List<IssuedInvitation> links, List<Id> unreproducible})>
+  activeForContest(Id contestId) async {
+    final all = await repository.invitationRepository.listForContest(contestId);
+    final links = <IssuedInvitation>[];
+    final unreproducible = <Id>[];
+    for (final invitation in all) {
+      if (invitation.state != InvitationState.active) continue;
+      if (_reproducible(invitation)) {
+        links.add(_issued(invitation, created: false));
+      } else {
+        unreproducible.add(invitation.contestParticipationId);
+      }
+    }
+    return (links: links, unreproducible: unreproducible);
+  }
+
+  bool _reproducible(Invitation invitation) => codec.matches(
+    codec.credentialFor(invitation.id, invitation.invitationRevision),
+    invitation.protectedCredential,
+  );
+
+  /// Issues an invitation for each of [participationIds] that has none, as
+  /// one request: everything is checked first, so a request that cannot
+  /// complete issues nothing. Participations that already have an invitation
+  /// come back with the same link and `created` false, so a repeat or a
+  /// reprint changes nothing. Never sends email.
+  ///
+  /// Each participation's idempotency key is [requestId] with the
+  /// participation id, so a retry of the same request finds what it issued.
+  Future<List<IssuedInvitation>> issueMany({
+    required Id contestId,
+    required List<Id> participationIds,
+    required Id issuedBy,
+    required String requestId,
+  }) async {
+    final contest = await repository.contestRepository.findById(contestId);
+    if (contest == null) {
+      throw EntityNotFoundError(entityType: 'Contest', entityId: contestId);
+    }
+    final unique = participationIds.toSet().toList();
+    final participations = <Id, ContestParticipation>{};
+    for (final id in unique) {
+      final participation = await repository.contestParticipationRepository
+          .findById(id);
+      if (participation == null || participation.contestId != contestId) {
+        throw EntityNotFoundError(
+          entityType: 'ContestParticipation',
+          entityId: id,
+        );
+      }
+      participations[id] = participation;
+    }
+    final needNew = <Id>[
+      for (final id in unique)
+        if (await repository.invitationRepository.findActiveForParticipation(
+              id,
+            ) ==
+            null)
+          id,
+    ];
+    if (needNew.isNotEmpty) {
+      final check = issuability(contest);
+      if (!check.canIssue) {
+        throw ContestStateError(check.code!, check.reason!);
+      }
+      for (final id in needNew) {
+        if (participations[id]!.roleType != RoleType.pilot) {
+          throw ContestStateError(
+            'helper_invitations_unavailable',
+            'only pilots can be invited so far',
+          );
+        }
+      }
+    }
+    // Prepare everything first, then store all the new invitations and their
+    // audit events in one transaction: a failure leaves nothing issued.
+    final now = _clock().toUtc();
+    final answers = <Id, IssuedInvitation>{};
+    final fresh = <IssuedInvitation>[];
+    final audits = <AuditEvent>[];
+    for (final id in unique) {
+      final mutation = '$requestId/${id.value}';
+      final earlier = await repository.invitationRepository
+          .findByClientMutationId(
+            contestId: contestId,
+            clientMutationId: mutation,
+          );
+      if (earlier != null) {
+        if (earlier.contestParticipationId != id) {
+          throw ContestStateError(
+            'client_mutation_reused',
+            'that request id was already used for another participant',
+          );
+        }
+        answers[id] = _issued(earlier, created: false);
+        continue;
+      }
+      final existing = await repository.invitationRepository
+          .findActiveForParticipation(id);
+      if (existing != null) {
+        answers[id] = _issued(existing, created: false);
+        continue;
+      }
+      final history = await repository.invitationRepository
+          .listForParticipation(id);
+      final invitationId = _newId();
+      final revision = history.isEmpty
+          ? 1
+          : history.last.invitationRevision + 1;
+      final credential = codec.credentialFor(invitationId, revision);
+      final invitation = Invitation(
+        id: invitationId,
+        contestId: contestId,
+        contestParticipationId: id,
+        type: InvitationType.qrCode,
+        protectedCredential: codec.protect(credential),
+        invitationRevision: revision,
+        audience: InvitationAudience.pilot,
+        issuedBy: issuedBy,
+        issuedAt: now,
+        replacesInvitationId: null,
+        clientMutationId: mutation,
+      );
+      final issued = IssuedInvitation(
+        invitation: invitation,
+        credential: credential,
+        created: true,
+      );
+      answers[id] = issued;
+      fresh.add(issued);
+      audits.add(
+        _auditEvent(
+          invitation,
+          AuditAction.invitationIssued,
+          actorId: issuedBy,
+          authority: Authority.director,
+          now: now,
+        ),
+      );
+    }
+    if (fresh.isNotEmpty) {
+      try {
+        await repository.invitationRepository.saveIssued([
+          for (final f in fresh) f.invitation,
+        ], audits);
+      } on Object {
+        // A concurrent request may have issued first. If every pilot now has
+        // an invitation, whoever won is the answer; anything else is a real
+        // failure of this request.
+        final winners = <Id, IssuedInvitation>{};
+        for (final id in unique) {
+          final active = await repository.invitationRepository
+              .findActiveForParticipation(id);
+          if (active == null) rethrow;
+          winners[id] = _issued(active, created: false);
+        }
+        return [for (final id in unique) winners[id]!];
+      }
+    }
+    return [for (final id in unique) answers[id]!];
+  }
+
   /// The link of an invitation already issued, for the director to print or
   /// copy.
-  IssuedInvitation _issued(Invitation invitation, {required bool created}) =>
-      IssuedInvitation(
-        invitation: invitation,
-        credential: codec.credentialFor(
-          invitation.id,
-          invitation.invitationRevision,
-        ),
-        created: created,
+  ///
+  /// Throws a [ContestStateError] (`invitation_link_unavailable`) when the
+  /// link cannot be reproduced because the server's secret changed.
+  IssuedInvitation _issued(Invitation invitation, {required bool created}) {
+    if (!_reproducible(invitation)) {
+      throw ContestStateError(
+        'invitation_link_unavailable',
+        'the invitation secret changed after this invitation was issued, so '
+            'its link cannot be reproduced; regenerating it is not available '
+            'yet (#791)',
       );
+    }
+    return IssuedInvitation(
+      invitation: invitation,
+      credential: codec.credentialFor(
+        invitation.id,
+        invitation.invitationRevision,
+      ),
+      created: created,
+    );
+  }
 
   /// The link of [invitation], to print or copy again.
   String credentialOf(Invitation invitation) =>
@@ -431,17 +632,33 @@ class InvitationService {
     required DateTime now,
     AuditOutcome outcome = AuditOutcome.success,
   }) => repository.auditEventRepository.append(
-    AuditEvent(
-      id: _newId(),
-      entityType: 'Invitation',
-      entityId: invitation.id,
-      contestId: invitation.contestId,
-      action: action,
+    _auditEvent(
+      invitation,
+      action,
       actorId: actorId,
       authority: authority,
-      resultingRevision: invitation.invitationRevision,
-      serverTimestamp: now,
+      now: now,
       outcome: outcome,
     ),
+  );
+
+  AuditEvent _auditEvent(
+    Invitation invitation,
+    AuditAction action, {
+    Id? actorId,
+    required Authority authority,
+    required DateTime now,
+    AuditOutcome outcome = AuditOutcome.success,
+  }) => AuditEvent(
+    id: _newId(),
+    entityType: 'Invitation',
+    entityId: invitation.id,
+    contestId: invitation.contestId,
+    action: action,
+    actorId: actorId,
+    authority: authority,
+    resultingRevision: invitation.invitationRevision,
+    serverTimestamp: now,
+    outcome: outcome,
   );
 }

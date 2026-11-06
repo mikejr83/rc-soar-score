@@ -12,7 +12,8 @@ enum _Reminder { sendAndPrint, printWithout, cancel }
 String _count(int n, String noun) => '$n $noun${n == 1 ? '' : 's'}';
 
 /// Asks to send invitations to [pilots]. Answers whether to go on. Sending is
-/// its own confirmation because it emails people and cannot be taken back.
+/// its own confirmation. It creates the QR codes and links only; nobody is
+/// emailed.
 Future<bool> confirmSendInvitations(
   BuildContext context,
   List<ReportPilot> pilots,
@@ -29,8 +30,9 @@ Future<bool> confirmSendInvitations(
         spacing: 12,
         children: [
           const Text(
-            'Invitations will be sent to participants, and each of these '
-            'cards will carry a QR code.',
+            'QR codes will be created for these pilots, and each of these '
+            'cards will carry one. Nobody is emailed: print the cards to '
+            'hand them out.',
           ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,10 +48,7 @@ Future<bool> confirmSendInvitations(
                         style: const TextStyle(fontWeight: FontWeight.w500),
                       ),
                       const TextSpan(
-                        text:
-                            ' — one per pilot, the same on every reprint. '
-                            'Pilots with an email address are also emailed '
-                            'their link.',
+                        text: ' — one per pilot, the same on every reprint.',
                       ),
                     ],
                   ),
@@ -173,9 +172,9 @@ List<ReportBanner> invitationBanners({
         ReportBanner(
           kind: ViewerBannerKind.neutral,
           icon: Icons.hourglass_top,
-          lead: 'Sending invitations.',
+          lead: 'Creating QR codes.',
           text:
-              'Issuing ${_count(missing.length, 'QR code')}. Print is paused '
+              'Creating ${_count(missing.length, 'QR code')}. Print is paused '
               'until the codes are ready; you can keep changing options.',
           busy: true,
           key: const ValueKey('cards-banner-sending'),
@@ -186,9 +185,9 @@ List<ReportBanner> invitationBanners({
         ReportBanner(
           kind: ViewerBannerKind.error,
           icon: Icons.error,
-          lead: 'Invitations could not be sent.',
+          lead: 'QR codes could not be created.',
           text:
-              'No QR codes were added and nothing was sent. Check the '
+              'No QR codes were added. Check the '
               'connection and try again, or print without QR codes.',
           actions: [
             ReportBannerAction(
@@ -206,10 +205,10 @@ List<ReportBanner> invitationBanners({
         ReportBanner(
           kind: ViewerBannerKind.info,
           icon: Icons.sync_problem,
-          lead: 'Invitations were sent.',
+          lead: 'QR codes were created.',
           text:
               'The QR codes could not be loaded, so the cards do not show them '
-              'yet. Don’t send again: the invitations are already out.',
+              'yet. No need to create them again: they already exist.',
           actions: [
             ReportBannerAction(
               'Load QR codes',
@@ -226,8 +225,8 @@ List<ReportBanner> invitationBanners({
         ReportBanner(
           kind: ViewerBannerKind.official,
           icon: Icons.check_circle,
-          lead: 'Invitations sent.',
-          text: 'QR codes added.',
+          lead: 'QR codes created.',
+          text: 'The cards now carry them. Nothing was emailed.',
           actions: [
             ReportBannerAction(
               'Dismiss',
@@ -236,6 +235,26 @@ List<ReportBanner> invitationBanners({
             ),
           ],
           key: const ValueKey('cards-banner-sent'),
+        ),
+      ];
+    case InvitationPhase.loadFailed:
+      return [
+        ReportBanner(
+          kind: ViewerBannerKind.error,
+          icon: Icons.sync_problem,
+          lead: 'QR codes could not be loaded.',
+          text:
+              'The cards print without QR codes until they load. Check the '
+              'connection and retry.',
+          actions: [
+            ReportBannerAction(
+              'Retry',
+              (_) => session.reload(),
+              filled: true,
+              key: const ValueKey('cards-banner-load-retry'),
+            ),
+          ],
+          key: const ValueKey('cards-banner-load-failed'),
         ),
       ];
     case InvitationPhase.idle:

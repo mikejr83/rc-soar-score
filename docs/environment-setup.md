@@ -166,6 +166,7 @@ The server loads variables from the process environment and from a `.env` file
 | `API_AUDIENCE`         | none (required) | Expected JWT audience (`https://soar-score.com/server`).                                                                                                                   |
 | `CORS_ALLOWED_ORIGINS` | none            | Comma-separated browser origins allowed to call the API, e.g. `http://127.0.0.1:8091`. Empty adds no CORS headers.                                                         |
 | `INVITATION_SECRET`    | none            | At least 32 characters. Signs invitation links and guest sessions. Without it the self-scoring routes answer 409 `invitations_not_available`. Changing it ends every link. |
+| `SELF_SCORING_BASE_URL` | `https://score.rcsoarscore.com` | The self-scoring site the director's invitation links and QR codes point at (`{base}/invitations/{credential}`). `http(s)://host[:port]`, no path. Set it for a local or staging site. |
 
 A minimal local `.env` at the repo root:
 

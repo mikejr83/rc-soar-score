@@ -18,6 +18,7 @@ import 'package:soar_score_core/config/log_format.dart';
 /// | `API_AUDIENCE` | API identifier access tokens must be issued for | required |
 /// | `CORS_ALLOWED_ORIGINS` | comma-separated browser origins allowed to call the API, such as `http://127.0.0.1:8091` | none |
 /// | `INVITATION_SECRET` | at least 32 characters; signs invitation links and guest sessions. Without it the participant routes answer 409 `invitations_not_available`. Changing it ends every link and session | none |
+/// | `SELF_SCORING_BASE_URL` | the self-scoring site invitation links point at, an `https://` URL (or `http://` for local use) with no path | `https://score.rcsoarscore.com` |
 /// | `DATABASE_URL` | a `postgresql://` connection URL (authority with password, database in the path, `sslmode` optional) | none — the URL wins over the discrete variables |
 /// | `POSTGRES_PASSWORD` | database password, when no `DATABASE_URL` is set | required |
 /// | `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_SSLMODE` | database connection, when no `DATABASE_URL` is set | see [PostgresConfig] |
@@ -31,6 +32,7 @@ class ServerConfig {
     required this.apiAudience,
     this.corsAllowedOrigins = const {},
     this.invitationSecret,
+    this.selfScoringBaseUrl,
   });
 
   /// The variables [ServerConfig.parse] reads.
@@ -42,6 +44,7 @@ class ServerConfig {
     'API_AUDIENCE',
     'CORS_ALLOWED_ORIGINS',
     'INVITATION_SECRET',
+    'SELF_SCORING_BASE_URL',
     'DATABASE_URL',
     'POSTGRES_PASSWORD',
     'POSTGRES_HOST',
@@ -67,6 +70,10 @@ class ServerConfig {
 
   /// The secret that signs invitation links and guest sessions, or null.
   final String? invitationSecret;
+
+  /// The self-scoring site invitation links point at, or null for the
+  /// default.
+  final String? selfScoringBaseUrl;
 
   /// Parses [environment].
   ///
@@ -161,6 +168,22 @@ class ServerConfig {
       problems.add('INVITATION_SECRET must be at least 32 characters.');
     }
 
+    final selfScoring = value('SELF_SCORING_BASE_URL');
+    if (selfScoring != null) {
+      final uri = Uri.tryParse(selfScoring);
+      if (uri == null ||
+          !(uri.isScheme('https') || uri.isScheme('http')) ||
+          uri.host.isEmpty ||
+          (uri.path.isNotEmpty && uri.path != '/') ||
+          uri.hasQuery ||
+          uri.hasFragment) {
+        problems.add(
+          'SELF_SCORING_BASE_URL must be an http(s) URL with no path, query '
+          'or fragment.',
+        );
+      }
+    }
+
     final rawDbUrl = value('DATABASE_URL');
     var databaseConfigured = rawDbUrl != null;
     if (databaseConfigured) {
@@ -206,6 +229,7 @@ class ServerConfig {
       apiAudience: audience!,
       corsAllowedOrigins: origins,
       invitationSecret: secret,
+      selfScoringBaseUrl: selfScoring,
     );
   }
 

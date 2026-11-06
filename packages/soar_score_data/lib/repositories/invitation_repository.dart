@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
+import 'audit_event_repository.dart';
 import 'drift_repository.dart';
 import 'latest_timestamps.dart';
 
@@ -10,6 +11,7 @@ class InvitationRepository extends DriftRepository
   InvitationRepository(super.db, {super.stores});
 
   late final _store = backendStore<core.Invitation>('Invitation');
+  late final _audits = AuditEventRepository(db, stores: stores);
 
   @override
   Future<core.Invitation?> findById(core.Id id) async => _store.find(id);
@@ -73,4 +75,17 @@ class InvitationRepository extends DriftRepository
     await _store.upsertJson(_store.encode(invitation));
     return invitation;
   }
+
+  @override
+  Future<void> saveIssued(
+    List<core.Invitation> invitations,
+    List<core.AuditEvent> audits,
+  ) => db.transaction(() async {
+    for (final invitation in invitations) {
+      await _store.upsertJson(_store.encode(invitation));
+    }
+    for (final audit in audits) {
+      await _audits.append(audit);
+    }
+  });
 }

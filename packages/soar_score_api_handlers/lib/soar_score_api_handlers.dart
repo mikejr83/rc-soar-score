@@ -16,6 +16,7 @@ export 'auth/user_profile.dart';
 export 'draw/delayed_draw_runner.dart';
 export 'draw/isolate_draw_runner.dart';
 export 'handler.dart';
+export 'handlers/invitation_handlers.dart' show defaultSelfScoringBaseUrl;
 export 'handlers/participant_handlers.dart';
 export 'middleware/failure_rate_limiter.dart';
 export 'middleware/middleware.dart';

@@ -12,7 +12,12 @@ class PilotInvitations {
     this.links = const {},
     this.synchronized = true,
     this.sendUnavailableReason,
+    this.loadFailed = false,
   });
+
+  /// True when the invitations could not be read. The report stays printable
+  /// (cards without QR codes) and offers a retry.
+  final bool loadFailed;
 
   /// The invitation link by participation id.
   final Map<String, String> links;
@@ -29,16 +34,15 @@ class PilotInvitations {
   String? linkOf(Id participation) => links[participation.value];
 }
 
-/// Where the cards read and issue pilot invitations. The server has no
-/// endpoint for either yet (tracked in the issue named in
-/// [UnavailablePilotInvitationSource]); the report is built against this
-/// seam so the API-backed source replaces the stub without touching a page.
+/// Where the cards read and issue pilot invitations. [ApiPilotInvitationSource]
+/// is the real one; the report is built against this seam so tests and the
+/// stand-ins can replace it without touching a page.
 abstract interface class PilotInvitationSource {
   /// The invitations issued for [contestId].
   Future<PilotInvitations> read(ApiClient client, Id contestId);
 
-  /// Issues an invitation for each of [participations] that has none and sends
-  /// the emails. Throws when nothing could be sent.
+  /// Issues an invitation for each of [participations] that has none. Never
+  /// emails (#790). Throws when nothing could be issued.
   Future<void> send(ApiClient client, Id contestId, List<Id> participations);
 }
 
@@ -59,7 +63,7 @@ class UnavailablePilotInvitationSource implements PilotInvitationSource {
       Future.error(StateError(reason));
 }
 
-/// A placeholder until the API exists (#589): every pilot of the contest gets
+/// A placeholder from before the invitations API (#589): every pilot of the contest gets
 /// the same QR code, which opens the project's web site, so the cards can be
 /// seen and printed with a code. It is not an invitation: scanning it does not
 /// open a pilot's scoring page, and nothing can be sent.
@@ -82,11 +86,71 @@ class PlaceholderPilotInvitationSource implements PilotInvitationSource {
       Future.error(StateError(UnavailablePilotInvitationSource.reason));
 }
 
+/// The invitations API of the server the client talks to (#589):
+/// `GET`/`POST /contests/{id}/invitations`. Issuing sends no email.
+///
+/// Only the hosted server issues invitations. A contest it has not
+/// synchronized (404) reads as not synchronized, a server that issues none
+/// (409 `invitations_not_available`) or a missing sign-in (401) reads as send
+/// unavailable with the reason in text, and a contest that may not issue now
+/// carries the server's reason.
+class ApiPilotInvitationSource implements PilotInvitationSource {
+  const ApiPilotInvitationSource();
+
+  static const notAvailableReason =
+      'This server doesn’t issue invitations, so QR codes can’t be made.';
+  static const unreproducibleReason =
+      'Some invitations can’t be shown as QR codes because the server’s '
+      'invitation secret changed after they were issued.';
+  static const signInReason = 'Sign in to send invitations.';
+
+  @override
+  Future<PilotInvitations> read(ApiClient client, Id contestId) async {
+    try {
+      final answer = await client.contestInvitations(contestId);
+      return PilotInvitations(
+        links: {
+          for (final invitation in answer.invitations)
+            invitation.participationId.value: invitation.link,
+        },
+        sendUnavailableReason: !answer.canIssue
+            ? answer.cannotIssueReason
+            : answer.unreproducibleParticipationIds.isEmpty
+            ? null
+            : unreproducibleReason,
+      );
+    } on ApiHttpError catch (error) {
+      switch (error.statusCode) {
+        case 404:
+          return const PilotInvitations(synchronized: false);
+        case 401:
+          return const PilotInvitations(sendUnavailableReason: signInReason);
+        case 409 when error.error?.code == 'invitations_not_available':
+          return const PilotInvitations(
+            sendUnavailableReason: notAvailableReason,
+          );
+      }
+      return const PilotInvitations(loadFailed: true);
+    } on ApiException {
+      return const PilotInvitations(loadFailed: true);
+    }
+  }
+
+  @override
+  Future<void> send(ApiClient client, Id contestId, List<Id> participations) =>
+      client.issueInvitations(
+        contestId,
+        IssueInvitationsRequest(
+          requestId: Id.create().value,
+          participationIds: participations,
+        ),
+      );
+}
+
 /// The source the cards use. Held here so an E2E journey or a test can swap
 /// it, as `ReportPrinters.current` does for the print dialogs.
 abstract final class PilotInvitationSources {
-  static PilotInvitationSource current =
-      const PlaceholderPilotInvitationSource();
+  static PilotInvitationSource current = const ApiPilotInvitationSource();
 }
 
 /// Where sending invitations from the report stands.
@@ -100,9 +164,12 @@ enum InvitationPhase {
   /// Sent, and the cards now have their QR codes.
   sent,
 
-  /// Sent, but the invitations could not be read afterwards, so the cards do
-  /// not show the QR codes yet. Sending again would only repeat the emails.
+  /// Created, but the invitations could not be read afterwards, so the cards
+  /// do not show the QR codes yet. Creating them again is not needed.
   sentNotLoaded,
+
+  /// The invitations could not be read when the report opened.
+  loadFailed,
 }
 
 /// The invitations of one open report and the send in progress. The report's
@@ -113,14 +180,17 @@ class PilotInvitationSession extends ChangeNotifier {
     required this.client,
     required this.contestId,
     required PilotInvitations initial,
-  }) : _invitations = initial;
+  }) : _invitations = initial,
+       _phase = initial.loadFailed
+           ? InvitationPhase.loadFailed
+           : InvitationPhase.idle;
 
   final PilotInvitationSource source;
   final ApiClient client;
   final Id contestId;
 
   PilotInvitations _invitations;
-  InvitationPhase _phase = InvitationPhase.idle;
+  InvitationPhase _phase;
   bool _disposed = false;
 
   PilotInvitations get invitations => _invitations;
@@ -154,14 +224,21 @@ class PilotInvitationSession extends ChangeNotifier {
     if (sending) {
       return false;
     }
+    final opening = _phase == InvitationPhase.loadFailed;
     _set(InvitationPhase.sending);
-    return _load(InvitationPhase.sent, InvitationPhase.sentNotLoaded);
+    return opening
+        ? _load(InvitationPhase.idle, InvitationPhase.loadFailed)
+        : _load(InvitationPhase.sent, InvitationPhase.sentNotLoaded);
   }
 
   Future<bool> _load(InvitationPhase ok, InvitationPhase failed) async {
     try {
       final fresh = await source.read(client, contestId);
       if (_disposed) {
+        return false;
+      }
+      if (fresh.loadFailed) {
+        _set(failed);
         return false;
       }
       _invitations = fresh;

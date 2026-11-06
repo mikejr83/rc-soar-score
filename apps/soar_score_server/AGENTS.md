@@ -34,4 +34,4 @@ Thin executable that wires dependencies, starts the shelf_io server, and exposes
 
 ## Guest sessions
 
-`/api/v1/self-scoring/*` is mounted before `/api/v1`, so it skips the Auth0 layer and answers to its own guest session (`guestSessionAuth`, a `ParticipantPrincipal`). `INVITATION_SECRET` turns it on; without it the routes answer 409 `invitations_not_available`. The slice test `test/api_slice/invitations_slice_test.dart` runs it on SQLite and PostgreSQL.
+`/api/v1/self-scoring/*` is mounted before `/api/v1`, so it skips the Auth0 layer and answers to its own guest session (`guestSessionAuth`, a `ParticipantPrincipal`). `INVITATION_SECRET` turns it on; without it the routes answer 409 `invitations_not_available`. The director's side is `GET`/`POST /api/v1/contests/{id}/invitations` (`invitation_handlers.dart`): list the active links, issue for the listed pilots, never email (#790); links are built from `SELF_SCORING_BASE_URL`. The slice test `test/api_slice/invitations_slice_test.dart` runs it on SQLite and PostgreSQL.
