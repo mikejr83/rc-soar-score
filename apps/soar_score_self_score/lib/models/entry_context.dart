@@ -13,6 +13,8 @@ class EntryContext {
     this.fieldKeys = const [],
     required this.landingTable,
     this.allowsMotorRestart = true,
+    this.matrixRevision = 0,
+    this.alreadySubmitted = false,
   });
 
   final String pilotName;
@@ -54,4 +56,10 @@ class EntryContext {
 
   /// Motor restart is hidden when the contest does not allow it.
   final bool allowsMotorRestart;
+
+  /// The draw revision this context was read at; sent back with the score.
+  final int matrixRevision;
+
+  /// A score already exists for this flight, so the form opens read-only.
+  final bool alreadySubmitted;
 }

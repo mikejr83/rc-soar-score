@@ -11,6 +11,7 @@ import 'package:soar_score_self_score/models/group_result_row.dart';
 import 'package:soar_score_self_score/models/guest_session.dart';
 import 'package:soar_score_self_score/models/pilot_overview.dart';
 import 'package:soar_score_self_score/models/pilot_round.dart';
+import 'package:soar_score_self_score/models/score_submission.dart';
 import 'package:soar_score_self_score/services/score_format.dart';
 import 'package:soar_score_self_score/session/guest_session_store.dart';
 
@@ -70,8 +71,82 @@ http.Response _fixtures(http.Request request) => switch (request.url.path) {
   _ => _json('{}', 404),
 };
 
+const _submission = ScoreSubmission(
+  contestId: 'c',
+  pilotId: 'p',
+  round: 2,
+  matrixRevision: 3,
+  clientMutationId: 'entry-7-2-1',
+  components: {'time_flown': 540},
+);
+
 void main() {
   setUp(_requested.clear);
+
+  group('submitScore', () {
+    test('an accepted score carries the server value and next round', () async {
+      final result = await _repository(
+        (_) => _json(_fixture('submit_response')),
+      ).submitScore(_submission);
+      expect(result, isA<ScoreAccepted>());
+      result as ScoreAccepted;
+      expect(result.flightScore, '962.5');
+      expect(result.nextRound, 3);
+      expect(result.details?.official, isFalse);
+      expect(result.details?.rawScore, '962.5');
+      expect(result.details?.roundScore, '962.5');
+      expect(result.details?.cumulativePenalty, isNull);
+      expect(result.details?.enteredBy, 'Alex Rivera');
+    });
+
+    test('score_already_submitted keeps the stored value', () async {
+      final result = await _repository(
+        (_) => _json(_fixture('error_score_already_submitted'), 409),
+      ).submitScore(_submission);
+      expect(result, isA<ScoreAlreadySubmitted>());
+      expect((result as ScoreAlreadySubmitted).flightScore, '962.5');
+    });
+
+    test('a refusal names the fields at fault', () async {
+      final result = await _repository(
+        (_) => _json(_fixture('error_validation_failed'), 422),
+      ).submitScore(_submission);
+      expect(result, isA<ScoreRejected>());
+      result as ScoreRejected;
+      expect(result.code, 'validation_failed');
+      expect(result.fields, ['time_flown', 'landing']);
+    });
+
+    test('a 401 with no body ends the session instead of queueing', () async {
+      for (final body in ['', '<html>']) {
+        final result = await _repository((_) => _json(body, 401))
+            .submitScore(_submission);
+        expect(result, isA<ScoreRejected>());
+        expect((result as ScoreRejected).code, 'session_invalid');
+      }
+    });
+
+    test('a server fault is retryable, not a refusal', () {
+      expect(
+        _repository((_) => _json('<html>', 503)).submitScore(_submission),
+        throwsA(isA<SelfScoreOfflineException>()),
+      );
+    });
+
+    test('a dead connection is retryable', () {
+      final repository = ApiSelfScoreRepository(
+        ApiClient(
+          baseUrl: Uri.parse('http://localhost:8080'),
+          httpClient: MockClient((_) async => throw http.ClientException('x')),
+        ),
+        MemoryGuestSessionStore(),
+      );
+      expect(
+        repository.submitScore(_submission),
+        throwsA(isA<SelfScoreOfflineException>()),
+      );
+    });
+  });
 
   test('accepting a link gives a guest session', () async {
     final session = await _repository(_fixtures).acceptInvitation('abc');

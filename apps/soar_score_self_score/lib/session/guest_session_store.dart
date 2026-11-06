@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../models/guest_session.dart';
+import 'key_value_store.dart';
 
 /// Keeps the guest session so a pilot can close the browser and come back.
 /// Kept thin so a native app can swap in secure storage later.
@@ -87,4 +88,21 @@ abstract interface class StringSlot {
   void write(String value);
 
   void clear();
+}
+
+/// A [StringSlot] that is one key of a [KeyValueStore].
+class KeyValueSlot implements StringSlot {
+  const KeyValueSlot(this._store, this._key);
+
+  final KeyValueStore _store;
+  final String _key;
+
+  @override
+  String? read() => _store.read(_key);
+
+  @override
+  void write(String value) => _store.write(_key, value);
+
+  @override
+  void clear() => _store.remove(_key);
 }

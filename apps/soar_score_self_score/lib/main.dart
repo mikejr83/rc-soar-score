@@ -10,9 +10,11 @@ import 'data/api_self_score_repository.dart';
 import 'data/sample_self_score_repository.dart';
 import 'data/self_score_repository.dart';
 import 'data/self_score_scope.dart';
-import 'session/browser_slot_stub.dart'
-    if (dart.library.js_interop) 'session/browser_slot_web.dart';
+import 'session/browser_storage_stub.dart'
+    if (dart.library.js_interop) 'session/browser_storage_web.dart';
 import 'session/guest_session_scope.dart';
+import 'session/guest_session_store.dart';
+import 'session/score_draft_store.dart';
 
 void main() {
   // Invitation links are plain paths, not `#/...` addresses.
@@ -26,7 +28,10 @@ void main() {
   final baseUrl = configuredUrl.isEmpty ? defaultUrl : configuredUrl;
   // The guest session token goes with every request except resolving the
   // invitation link itself.
-  final sessions = openGuestSessionStore();
+  final storage = openBrowserStorage();
+  final sessions = StringSlotGuestSessionStore(
+    KeyValueSlot(storage, 'soar_score_self_score.guest_session'),
+  );
   final client = ApiClient(
     baseUrl: Uri.parse(baseUrl),
     tokenProvider: () async => sessions.read()?.token,
@@ -44,9 +49,12 @@ void main() {
       client: client,
       child: GuestSessionScope(
         store: sessions,
-        child: SelfScoreScope(
-          repository: repository,
-          child: const SelfScoreApp(),
+        child: ScoreDraftScope(
+          store: ScoreDraftStore(storage),
+          child: SelfScoreScope(
+            repository: repository,
+            child: const SelfScoreApp(),
+          ),
         ),
       ),
     ),
