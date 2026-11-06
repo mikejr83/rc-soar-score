@@ -12,8 +12,8 @@ import 'package:shelf/shelf.dart';
 /// would reject it for lacking a token. The preflight allows whatever headers
 /// it asks for, so `Authorization` and `Content-Type` work. Every response to
 /// an allowed origin, errors included, carries `Access-Control-Allow-Origin`
-/// and `Vary: Origin`. Credentials are not allowed: the API takes bearer
-/// tokens, not cookies.
+/// and `Vary: Origin`. Credentials are allowed, for the self-scoring app's
+/// guest session cookie; the origin is always the exact one, never `*`.
 Middleware corsMiddleware(Set<String> allowedOrigins) {
   if (allowedOrigins.isEmpty) return (inner) => inner;
   return (inner) => (request) async {
@@ -32,6 +32,7 @@ Middleware corsMiddleware(Set<String> allowedOrigins) {
           'access-control-allow-origin': origin,
           'access-control-allow-methods': 'GET, POST, PUT, PATCH, DELETE',
           'access-control-allow-headers': ?requested,
+          'access-control-allow-credentials': 'true',
           'access-control-max-age': '600',
           'vary': 'Origin',
         },
@@ -41,6 +42,7 @@ Middleware corsMiddleware(Set<String> allowedOrigins) {
     return response.change(
       headers: {
         'access-control-allow-origin': origin,
+        'access-control-allow-credentials': 'true',
         'access-control-expose-headers': 'x-request-id',
         'vary': 'Origin',
       },

@@ -8,6 +8,7 @@ const _allowedImports = {
   'dart:core',
   'dart:convert',
   'dart:math',
+  'package:crypto/crypto.dart',
   'package:equatable/equatable.dart',
   'package:intl/intl.dart',
   'package:json_annotation/json_annotation.dart',

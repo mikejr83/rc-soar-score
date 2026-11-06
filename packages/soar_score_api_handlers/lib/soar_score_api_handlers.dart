@@ -7,10 +7,15 @@ library;
 
 export 'auth/account_principal_resolver.dart';
 export 'auth/bearer_auth.dart';
+export 'auth/guest_session_auth.dart';
+export 'auth/guest_session_cookie.dart';
+export 'auth/participant_principal.dart';
 export 'auth/principal.dart';
 export 'auth/token_verifier.dart';
 export 'auth/user_profile.dart';
 export 'draw/delayed_draw_runner.dart';
 export 'draw/isolate_draw_runner.dart';
 export 'handler.dart';
+export 'handlers/participant_handlers.dart';
+export 'middleware/failure_rate_limiter.dart';
 export 'middleware/middleware.dart';

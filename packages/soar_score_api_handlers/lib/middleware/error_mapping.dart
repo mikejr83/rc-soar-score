@@ -62,6 +62,7 @@ Response handledError(
 /// - `GliderScoreImportError`: its own status (503, 404, 415, 422) and code
 /// - `StaleRevisionError`, `AlreadyStoredError`, `AlreadySupersededError`,
 ///   `ContestStateError`, `BackendOnlyError` (code `backend_only`): 409
+/// - `InvitationAccessError`: 404 for a link, 401 for a guest session
 /// - `ForbiddenError`: 403
 /// - `EntityNotFoundError`: 404
 /// - `ArgumentError`, `FormatException`, `ScoringValidationError`: 400
@@ -83,6 +84,13 @@ Middleware errorMappingMiddleware() =>
         return handledError(request, 404, 'not_found', '$e');
       } on ForbiddenError catch (e) {
         return handledError(request, 403, e.code, e.message);
+      } on InvitationAccessError catch (e) {
+        return handledError(
+          request,
+          e.code == 'session_invalid' ? 401 : 404,
+          e.code,
+          e.message,
+        );
       } on SyncRefusal catch (e) {
         return handledError(request, e.statusCode, e.code, e.message);
       } on AccountClaimError catch (e) {

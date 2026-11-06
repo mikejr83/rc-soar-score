@@ -11,13 +11,14 @@ enough. No secret lives in the repository: `DATABASE_URL` is a Fly secret.
 
 ## Environment variables
 
-| Variable                          | Where      | Value                                                                        |
-| --------------------------------- | ---------- | ---------------------------------------------------------------------------- |
-| `DATABASE_URL`                    | Fly secret | Neon **direct** (not pooled) connection string; it ends in `sslmode=require` |
-| `AUTH0_DOMAIN`                    | `fly.toml` | `login.rcsoarscore.com` (the token issuer; not the `dev-...` tenant name)    |
-| `API_AUDIENCE`                    | `fly.toml` | `https://soar-score.com/server`                                              |
-| `CORS_ALLOWED_ORIGINS`            | `fly.toml` | app, score and public site origins                                           |
-| `PORT`, `LOG_LEVEL`, `LOG_FORMAT` | `fly.toml` | `8080`, `INFO`, `json`                                                       |
+| Variable                          | Where      | Value                                                                                                                                                         |
+| --------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                    | Fly secret | Neon **direct** (not pooled) connection string; it ends in `sslmode=require`                                                                                  |
+| `INVITATION_SECRET`               | Fly secret | 32+ random characters (`openssl rand -base64 48`); signs invitation links and guest sessions. Set it once: changing it ends every printed QR code and session |
+| `AUTH0_DOMAIN`                    | `fly.toml` | `login.rcsoarscore.com` (the token issuer; not the `dev-...` tenant name)                                                                                     |
+| `API_AUDIENCE`                    | `fly.toml` | `https://soar-score.com/server`                                                                                                                               |
+| `CORS_ALLOWED_ORIGINS`            | `fly.toml` | app, score and public site origins                                                                                                                            |
+| `PORT`, `LOG_LEVEL`, `LOG_FORMAT` | `fly.toml` | `8080`, `INFO`, `json`                                                                                                                                        |
 
 The full list is in `apps/soar_score_server/lib/config/server_config.dart`.
 
