@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/contest/report_viewer_page.dart';
 import 'package:soar_score_contest/services/reports/pilot_cards/pilot_invitations.dart';
 import 'package:soar_score_contest/services/reports/report_kind.dart';
@@ -37,10 +38,13 @@ class _FakeInvitations implements PilotInvitationSource {
   /// Reading always fails.
   bool failReadAlways;
   int sends = 0;
+  ApiClient? readWith;
+  ApiClient? sentWith;
   List<Id> lastSent = const [];
 
   @override
   Future<PilotInvitations> read(ApiClient client, Id contestId) async {
+    readWith = client;
     if (failReadAlways || (failRead && sends > 0)) {
       throw StateError('read failed');
     }
@@ -56,6 +60,7 @@ class _FakeInvitations implements PilotInvitationSource {
     List<Id> participations,
   ) async {
     sends++;
+    sentWith = client;
     lastSent = participations;
     if (fail) {
       throw StateError('no network');
@@ -71,6 +76,7 @@ Future<void> _pump(
   Size size = const Size(1280, 1000),
   ContestScores Function(CurrentMatrix matrix)? scores,
   ReportPrinter printer = const NotWiredReportPrinter(),
+  ApiClient? publicationClient,
 }) async {
   final matrix = drawnMatrix(lanes: lanes);
   final server = WorkspaceServer(
@@ -95,20 +101,29 @@ Future<void> _pump(
               : server.handle(request),
         ),
       ),
-      child: MaterialApp(
-        locale: const Locale('en', 'US'),
-        home: ReportViewerPage(
-          printer: printer,
-          contestId: matrixContestId,
-          report: ReportKind.cards,
-          params: params,
-          pollInterval: null,
+      child: _withPublicationClient(
+        publicationClient,
+        MaterialApp(
+          locale: const Locale('en', 'US'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: ReportViewerPage(
+            printer: printer,
+            contestId: matrixContestId,
+            report: ReportKind.cards,
+            params: params,
+            pollInterval: null,
+          ),
         ),
       ),
     ),
   );
   await tester.pumpAndSettle();
 }
+
+Widget _withPublicationClient(ApiClient? client, Widget child) => client == null
+    ? child
+    : PublicationClientInherited(client: client, child: child);
 
 String marginChoice(WidgetTester tester) => tester
     .widget<RadioGroup<String>>(
@@ -127,7 +142,7 @@ void main() {
   });
 
   tearDown(() {
-    PilotInvitationSources.current = const PlaceholderPilotInvitationSource();
+    PilotInvitationSources.current = const ApiPilotInvitationSource();
   });
 
   testWidgets('prints a card per pilot, by last name, with the draw rows', (
@@ -403,18 +418,42 @@ void main() {
     expect(find.byType(QrCodeView), findsNWidgets(4));
   });
 
-  testWidgets('the placeholder source gives every pilot the project link', (
+  testWidgets(
+    'invitations are read and issued through the publication client',
+    (tester) async {
+      final hosted = ApiClient(
+        baseUrl: Uri.parse('http://hosted.example'),
+        httpClient: MockClient((_) async => http.Response('{}', 500)),
+      );
+      final source = _FakeInvitations();
+      PilotInvitationSources.current = source;
+      await _pump(tester, publicationClient: hosted);
+
+      expect(source.readWith, same(hosted));
+      await tester.tap(find.byKey(const ValueKey('cards-banner-send')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+      await tester.pumpAndSettle();
+      expect(source.sentWith, same(hosted));
+    },
+  );
+
+  testWidgets('each card carries its own pilot\u2019s link, never the site', (
     tester,
   ) async {
-    PilotInvitationSources.current = const PlaceholderPilotInvitationSource();
+    final all = workspaceData(matrix: drawnMatrix()).participations
+        .map((p) => p.id.value)
+        .toSet();
+    PilotInvitationSources.current = _FakeInvitations(invited: all);
     await _pump(tester);
 
     expect(find.byType(QrCodeView), findsNWidgets(4));
-    final links = {
+    final links = [
       for (final view in tester.widgetList<QrCodeView>(find.byType(QrCodeView)))
         view.data,
-    };
-    expect(links, {'https://score.rcsoarscore.com'});
+    ];
+    expect(links.toSet(), hasLength(4));
+    expect(links, everyElement(isNot('https://score.rcsoarscore.com')));
     expect(
       find.textContaining('No QR code.', findRichText: true),
       findsNothing,
@@ -572,7 +611,11 @@ void main() {
     });
 
     testWidgets('only the typed pages are sent to the printer', (tester) async {
-      PilotInvitationSources.current = const PlaceholderPilotInvitationSource();
+      PilotInvitationSources.current = _FakeInvitations(
+        invited: workspaceData(matrix: drawnMatrix()).participations
+            .map((p) => p.id.value)
+            .toSet(),
+      );
       final printer = FakeReportPrinter(ReportPrintResult.sent);
       await _pump(
         tester,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:logging/logging.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -55,6 +56,32 @@ void main() {
     },
   );
 
+  test('logs each link so a developer can copy one from the console', () async {
+    final records = <LogRecord>[];
+    final sub = Logger('PilotInvitations').onRecord.listen(records.add);
+    addTearDown(sub.cancel);
+    Logger.root.level = Level.ALL;
+    final client = clientFor(
+      (_) => http.Response(
+        jsonEncode({
+          'contest_id': contest.value,
+          'can_issue': true,
+          'invitations': [
+            {'participation_id': lee.value, 'link': 'https://s.example/i/abc'},
+          ],
+        }),
+        200,
+        headers: headers,
+      ),
+    );
+    await source.read(client, contest);
+    expect(records, hasLength(1));
+    expect(
+      records.single.message,
+      contains('${lee.value}: https://s.example/i/abc'),
+    );
+  });
+
   test('a contest the server does not have is not synchronized', () async {
     final read = await source.read(
       clientFor((_) => error(404, 'not_found')),
@@ -69,18 +96,12 @@ void main() {
       clientFor((_) => error(401, 'unauthorized')),
       contest,
     );
-    expect(
-      signedOut.sendUnavailableReason,
-      ApiPilotInvitationSource.signInReason,
-    );
+    expect(signedOut.sendUnavailable, SendUnavailable.signIn);
     final none = await source.read(
       clientFor((_) => error(409, 'invitations_not_available')),
       contest,
     );
-    expect(
-      none.sendUnavailableReason,
-      ApiPilotInvitationSource.notAvailableReason,
-    );
+    expect(none.sendUnavailable, SendUnavailable.serverIssuesNone);
   });
 
   test('other failures read as a failed load, not as no invitations', () async {
@@ -110,10 +131,7 @@ void main() {
         ),
         contest,
       );
-      expect(
-        read.sendUnavailableReason,
-        ApiPilotInvitationSource.unreproducibleReason,
-      );
+      expect(read.sendUnavailable, SendUnavailable.linksUnreproducible);
     },
   );
 

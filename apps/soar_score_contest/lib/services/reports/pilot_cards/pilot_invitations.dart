@@ -1,16 +1,48 @@
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+
+final _logger = Logger('PilotInvitations');
+
+/// Writes each invitation link to the log, so a developer can copy one from
+/// the console and open it. A link opens a pilot's scoring page, so this is for
+/// debug and profile builds only and a release build logs nothing.
+void logInvitationLinks(Id contestId, Map<String, String> links) {
+  if (kReleaseMode || links.isEmpty) return;
+  final lines = [for (final e in links.entries) '  ${e.key}: ${e.value}'];
+  _logger.info(
+    'Invitation links of contest ${contestId.value} (development builds only):'
+    '\n${lines.join('\n')}',
+  );
+}
 
 /// The invitations a contest has issued, as the cards need them: for each
 /// pilot that has one, the link its QR code carries.
 ///
 /// A pilot's invitation is the same link an emailed invitation carries. It
 /// never changes once issued, so a reprinted card shows the same code.
+/// Why invitations cannot be sent, when the app itself knows. The server's own
+/// reason (a contest that may not issue now) is [PilotInvitations.sendUnavailableReason].
+enum SendUnavailable {
+  /// Nobody is signed in, so the hosted server refused the call.
+  signIn,
+
+  /// The server issues no invitations.
+  serverIssuesNone,
+
+  /// Existing links cannot be shown because the server's secret changed.
+  linksUnreproducible,
+
+  /// This build has no invitation support.
+  notInThisVersion,
+}
+
 class PilotInvitations {
   const PilotInvitations({
     this.links = const {},
     this.synchronized = true,
+    this.sendUnavailable,
     this.sendUnavailableReason,
     this.loadFailed = false,
   });
@@ -26,8 +58,16 @@ class PilotInvitations {
   /// QR codes can be made until it has.
   final bool synchronized;
 
-  /// Why invitations cannot be sent now, or `null` when they can.
+  /// Why invitations cannot be sent now when the app knows, or `null`.
+  final SendUnavailable? sendUnavailable;
+
+  /// Why invitations cannot be sent now in the server's words (a contest that
+  /// is not Configuring, Ready or Running), or `null`.
   final String? sendUnavailableReason;
+
+  /// Sending is not possible now, for whichever reason.
+  bool get cannotSend =>
+      sendUnavailable != null || sendUnavailableReason != null;
 
   bool has(Id participation) => links.containsKey(participation.value);
 
@@ -51,39 +91,13 @@ abstract interface class PilotInvitationSource {
 class UnavailablePilotInvitationSource implements PilotInvitationSource {
   const UnavailablePilotInvitationSource();
 
-  static const reason =
-      'Sending invitations isn’t available in this version of the app yet.';
-
   @override
   Future<PilotInvitations> read(ApiClient client, Id contestId) async =>
-      const PilotInvitations(sendUnavailableReason: reason);
+      const PilotInvitations(sendUnavailable: SendUnavailable.notInThisVersion);
 
   @override
   Future<void> send(ApiClient client, Id contestId, List<Id> participations) =>
-      Future.error(StateError(reason));
-}
-
-/// A placeholder from before the invitations API (#589): every pilot of the contest gets
-/// the same QR code, which opens the project's web site, so the cards can be
-/// seen and printed with a code. It is not an invitation: scanning it does not
-/// open a pilot's scoring page, and nothing can be sent.
-class PlaceholderPilotInvitationSource implements PilotInvitationSource {
-  const PlaceholderPilotInvitationSource();
-
-  static const link = 'https://score.rcsoarscore.com';
-
-  @override
-  Future<PilotInvitations> read(ApiClient client, Id contestId) async {
-    final participations = await client.participations(contestId);
-    return PilotInvitations(
-      links: {for (final p in participations) p.id.value: link},
-      sendUnavailableReason: UnavailablePilotInvitationSource.reason,
-    );
-  }
-
-  @override
-  Future<void> send(ApiClient client, Id contestId, List<Id> participations) =>
-      Future.error(StateError(UnavailablePilotInvitationSource.reason));
+      Future.error(StateError('Sending invitations is not available.'));
 }
 
 /// The invitations API of the server the client talks to (#589):
@@ -97,37 +111,36 @@ class PlaceholderPilotInvitationSource implements PilotInvitationSource {
 class ApiPilotInvitationSource implements PilotInvitationSource {
   const ApiPilotInvitationSource();
 
-  static const notAvailableReason =
-      'This server doesn’t issue invitations, so QR codes can’t be made.';
-  static const unreproducibleReason =
-      'Some invitations can’t be shown as QR codes because the server’s '
-      'invitation secret changed after they were issued.';
-  static const signInReason = 'Sign in to send invitations.';
-
   @override
   Future<PilotInvitations> read(ApiClient client, Id contestId) async {
     try {
       final answer = await client.contestInvitations(contestId);
+      final links = {
+        for (final invitation in answer.invitations)
+          invitation.participationId.value: invitation.link,
+      };
+      logInvitationLinks(contestId, links);
       return PilotInvitations(
-        links: {
-          for (final invitation in answer.invitations)
-            invitation.participationId.value: invitation.link,
-        },
-        sendUnavailableReason: !answer.canIssue
-            ? answer.cannotIssueReason
-            : answer.unreproducibleParticipationIds.isEmpty
+        links: links,
+        sendUnavailableReason: answer.canIssue
             ? null
-            : unreproducibleReason,
+            : answer.cannotIssueReason,
+        sendUnavailable:
+            answer.canIssue && answer.unreproducibleParticipationIds.isNotEmpty
+            ? SendUnavailable.linksUnreproducible
+            : null,
       );
     } on ApiHttpError catch (error) {
       switch (error.statusCode) {
         case 404:
           return const PilotInvitations(synchronized: false);
         case 401:
-          return const PilotInvitations(sendUnavailableReason: signInReason);
+          return const PilotInvitations(
+            sendUnavailable: SendUnavailable.signIn,
+          );
         case 409 when error.error?.code == 'invitations_not_available':
           return const PilotInvitations(
-            sendUnavailableReason: notAvailableReason,
+            sendUnavailable: SendUnavailable.serverIssuesNone,
           );
       }
       return const PilotInvitations(loadFailed: true);

@@ -2368,4 +2368,184 @@ class AppLocalizationsEn extends AppLocalizations {
   String importedChipTooltip(String date) {
     return 'Imported from GliderScore on $date';
   }
+
+  @override
+  String get pilotCardsSendTitle => 'Send invitations?';
+
+  @override
+  String get pilotCardsSendBody =>
+      'QR codes will be created for these pilots, and each of these cards will carry one. Nobody is emailed: print the cards to hand them out.';
+
+  @override
+  String pilotCardsQrCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count QR codes',
+      one: '1 QR code',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pilotCardsSendCountNote =>
+      ' — one per pilot, the same on every reprint.';
+
+  @override
+  String get pilotCardsCancel => 'Cancel';
+
+  @override
+  String get pilotCardsSendConfirm => 'Send invitations';
+
+  @override
+  String get pilotCardsReminderTitle =>
+      'Some cards will print without QR codes.';
+
+  @override
+  String pilotCardsReminderNone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'None of these $count cards have',
+      one: 'This card has',
+    );
+    return '$_temp0 a QR code yet. Pilots without one can’t scan to enter scores.';
+  }
+
+  @override
+  String pilotCardsReminderSome(int missing, int selected) {
+    String _temp0 = intl.Intl.pluralLogic(
+      selected,
+      locale: localeName,
+      other: '$selected cards',
+      one: '1 card',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      missing,
+      locale: localeName,
+      other: 'don’t',
+      one: 'doesn’t',
+    );
+    return '$missing of $_temp0 $_temp1 have a QR code yet. Pilots without one can’t scan to enter scores.';
+  }
+
+  @override
+  String get pilotCardsReminderUnsynced =>
+      'This contest hasn’t synchronized, so QR codes can’t be made yet.';
+
+  @override
+  String get pilotCardsReminderOffline =>
+      'You’re offline, so invitations can’t be sent now. QR codes already issued still print.';
+
+  @override
+  String get pilotCardsReminderSend => 'Send invitations and print';
+
+  @override
+  String get pilotCardsReminderWithout => 'Print without QR codes';
+
+  @override
+  String get pilotCardsUnavailableSignIn => 'Sign in to send invitations.';
+
+  @override
+  String get pilotCardsUnavailableServer =>
+      'This server doesn’t issue invitations, so QR codes can’t be made.';
+
+  @override
+  String get pilotCardsUnavailableLinks =>
+      'Some invitations can’t be shown as QR codes because the server’s invitation secret changed after they were issued.';
+
+  @override
+  String get pilotCardsUnavailableVersion =>
+      'Sending invitations isn’t available in this version of the app yet.';
+
+  @override
+  String get pilotCardsSendingLead => 'Creating QR codes.';
+
+  @override
+  String pilotCardsSendingText(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count QR codes',
+      one: '1 QR code',
+    );
+    return 'Creating $_temp0. Print is paused until the codes are ready; you can keep changing options.';
+  }
+
+  @override
+  String get pilotCardsFailedLead => 'QR codes could not be created.';
+
+  @override
+  String get pilotCardsFailedText =>
+      'No QR codes were added. Check the connection and try again, or print without QR codes.';
+
+  @override
+  String get pilotCardsRetry => 'Retry';
+
+  @override
+  String get pilotCardsNotLoadedLead => 'QR codes were created.';
+
+  @override
+  String get pilotCardsNotLoadedText =>
+      'The QR codes could not be loaded, so the cards do not show them yet. No need to create them again: they already exist.';
+
+  @override
+  String get pilotCardsLoadCodes => 'Load QR codes';
+
+  @override
+  String get pilotCardsSentLead => 'QR codes created.';
+
+  @override
+  String get pilotCardsSentText =>
+      'The cards now carry them. Nothing was emailed.';
+
+  @override
+  String get pilotCardsDismiss => 'Dismiss';
+
+  @override
+  String get pilotCardsLoadFailedLead => 'QR codes could not be loaded.';
+
+  @override
+  String get pilotCardsLoadFailedText =>
+      'The cards print without QR codes until they load. Check the connection and retry.';
+
+  @override
+  String get pilotCardsUnsyncedLead => 'No QR codes yet.';
+
+  @override
+  String get pilotCardsUnsyncedText =>
+      'This contest was organized offline and hasn’t synchronized. Sync it first to create QR codes. Cards print without them.';
+
+  @override
+  String get pilotCardsOfflineLead => 'Offline.';
+
+  @override
+  String get pilotCardsOfflineText =>
+      'Connect to send invitations. QR codes already issued still print.';
+
+  @override
+  String get pilotCardsMissingLead => 'No QR code.';
+
+  @override
+  String get pilotCardsMissingAll =>
+      'Some cards have no QR code. Send invitations to add them.';
+
+  @override
+  String pilotCardsMissingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cards have',
+      one: '1 card has',
+    );
+    return '$_temp0 no QR code. Send invitations to add them.';
+  }
+
+  @override
+  String pilotCardsMissingReason(String reason) {
+    return '$reason You can still print without QR codes.';
+  }
+
+  @override
+  String get pilotCardsSendAction => 'Send invitations';
 }

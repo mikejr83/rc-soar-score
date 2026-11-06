@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:soar_score_contest/services/reports/pilot_cards/pilot_invitations.dart';
 import 'package:soar_score_contest/widgets/matrix/pilot_row_tile.dart';
+import 'package:soar_score_contest/widgets/reports/pilot_cards/qr_code_view.dart';
 
 import '../support/configuration_fields.dart';
 import '../support/interact.dart';
 import '../support/launch_app.dart';
 import '../support/open_demo_contest.dart';
 import '../support/pump_until_gone.dart';
+import '../support/stub_invitations.dart';
 import 'journey.dart';
 
 Finder _key(String key) => find.byKey(ValueKey(key));
@@ -386,7 +389,64 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       await pumpUntilFound(tester, find.text('Reports are built from'));
     }),
   );
+  await journey.step(
+    'Reports: Send invitations adds a QR code per pilot and a reprint '
+    'shows the same codes',
+    () => inContest(() async {
+      // The hosted server issues invitations; the journey runs without it,
+      // so a stand-in with the same behavior takes its place for this step.
+      final original = PilotInvitationSources.current;
+      final stub = StubPilotInvitationSource();
+      PilotInvitationSources.current = stub;
+      try {
+        await _openReports(tester);
+        await tapVisible(tester, _key('report-open-cards'));
+        await pumpUntilFound(tester, _key('cards-summary'));
+
+        // Nobody has an invitation: no codes, and the banner offers to send.
+        expect(find.byType(QrCodeView), findsNothing);
+        await pumpUntilFound(tester, _key('cards-banner-missing'));
+
+        // Sending has its own confirmation, which says nothing is emailed.
+        await tapVisible(tester, _key('cards-banner-send'));
+        await pumpUntilFound(tester, _key('cards-send-dialog'));
+        expect(find.textContaining('Nobody is emailed'), findsOneWidget);
+        await tapVisible(tester, _key('cards-send-confirm'));
+        await pumpUntilFound(tester, _key('cards-banner-sent'));
+        expect(stub.issuingSends, 1);
+
+        final codes = _qrLinks(tester);
+        expect(codes, isNotEmpty);
+        expect(codes.toSet(), hasLength(codes.length), reason: 'one per pilot');
+        expect(
+          codes,
+          everyElement(startsWith('https://score.example.test/invitations/')),
+        );
+
+        // Leave and reopen: the same codes, and nothing new is issued.
+        await tapVisible(tester, _key('viewer-back'));
+        await pumpUntilFound(tester, find.text('Reports are built from'));
+        await tapVisible(tester, _key('report-open-cards'));
+        await pumpUntilFound(tester, _key('cards-summary'));
+        await pumpUntilFound(tester, find.byType(QrCodeView));
+        expect(_qrLinks(tester), codes);
+        expect(find.byKey(const ValueKey('cards-banner-send')), findsNothing);
+        expect(stub.issuingSends, 1);
+
+        await tapVisible(tester, _key('viewer-back'));
+        await pumpUntilFound(tester, find.text('Reports are built from'));
+      } finally {
+        PilotInvitationSources.current = original;
+      }
+    }),
+  );
 }
+
+/// The link each QR code on the open cards encodes, in card order.
+List<String> _qrLinks(WidgetTester tester) => [
+  for (final view in tester.widgetList<QrCodeView>(find.byType(QrCodeView)))
+    view.data,
+];
 
 Future<void> _openReports(WidgetTester tester) async {
   await tapRail(tester, 'Reports');

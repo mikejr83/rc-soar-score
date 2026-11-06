@@ -3273,6 +3273,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Imported from GliderScore on {date}'**
   String importedChipTooltip(String date);
+
+  /// Title of the dialog that confirms creating the QR codes on the pilot cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations?'**
+  String get pilotCardsSendTitle;
+
+  /// Body of the confirmation before QR codes are created. Issuing never emails.
+  ///
+  /// In en, this message translates to:
+  /// **'QR codes will be created for these pilots, and each of these cards will carry one. Nobody is emailed: print the cards to hand them out.'**
+  String get pilotCardsSendBody;
+
+  /// How many QR codes will be created.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 QR code} other{{count} QR codes}}'**
+  String pilotCardsQrCount(int count);
+
+  /// Follows the QR code count in the confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **' — one per pilot, the same on every reprint.'**
+  String get pilotCardsSendCountNote;
+
+  /// Cancel button of the pilot cards dialogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get pilotCardsCancel;
+
+  /// Confirm button that creates the QR codes on the pilot cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations'**
+  String get pilotCardsSendConfirm;
+
+  /// Title of the reminder shown before printing cards that have no QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'Some cards will print without QR codes.'**
+  String get pilotCardsReminderTitle;
+
+  /// Reminder body when none of the selected cards has a QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This card has} other{None of these {count} cards have}} a QR code yet. Pilots without one can’t scan to enter scores.'**
+  String pilotCardsReminderNone(int count);
+
+  /// Reminder body when some of the selected cards have no QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'{missing} of {selected, plural, =1{1 card} other{{selected} cards}} {missing, plural, =1{doesn’t} other{don’t}} have a QR code yet. Pilots without one can’t scan to enter scores.'**
+  String pilotCardsReminderSome(int missing, int selected);
+
+  /// Reason beside the print reminder when the contest was organized offline and has not synchronized.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest hasn’t synchronized, so QR codes can’t be made yet.'**
+  String get pilotCardsReminderUnsynced;
+
+  /// Reason beside the print reminder when the device is offline.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re offline, so invitations can’t be sent now. QR codes already issued still print.'**
+  String get pilotCardsReminderOffline;
+
+  /// Button in the print reminder that creates the QR codes, then prints.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations and print'**
+  String get pilotCardsReminderSend;
+
+  /// Button in the print reminder that prints the cards as they are.
+  ///
+  /// In en, this message translates to:
+  /// **'Print without QR codes'**
+  String get pilotCardsReminderWithout;
+
+  /// Reason invitations cannot be sent: nobody is signed in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to send invitations.'**
+  String get pilotCardsUnavailableSignIn;
+
+  /// Reason invitations cannot be sent: the server issues none.
+  ///
+  /// In en, this message translates to:
+  /// **'This server doesn’t issue invitations, so QR codes can’t be made.'**
+  String get pilotCardsUnavailableServer;
+
+  /// Reason invitations cannot be sent: existing links cannot be reproduced.
+  ///
+  /// In en, this message translates to:
+  /// **'Some invitations can’t be shown as QR codes because the server’s invitation secret changed after they were issued.'**
+  String get pilotCardsUnavailableLinks;
+
+  /// Reason invitations cannot be sent: this build has no invitation support.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending invitations isn’t available in this version of the app yet.'**
+  String get pilotCardsUnavailableVersion;
+
+  /// Lead of the banner while QR codes are being created.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating QR codes.'**
+  String get pilotCardsSendingLead;
+
+  /// Text of the banner while QR codes are being created.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating {count, plural, =1{1 QR code} other{{count} QR codes}}. Print is paused until the codes are ready; you can keep changing options.'**
+  String pilotCardsSendingText(int count);
+
+  /// Lead of the banner after creating QR codes failed.
+  ///
+  /// In en, this message translates to:
+  /// **'QR codes could not be created.'**
+  String get pilotCardsFailedLead;
+
+  /// Text of the banner after creating QR codes failed.
+  ///
+  /// In en, this message translates to:
+  /// **'No QR codes were added. Check the connection and try again, or print without QR codes.'**
+  String get pilotCardsFailedText;
+
+  /// Retry button on the pilot cards banners.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get pilotCardsRetry;
+
+  /// Lead of the banner when the codes were created but could not be loaded back.
+  ///
+  /// In en, this message translates to:
+  /// **'QR codes were created.'**
+  String get pilotCardsNotLoadedLead;
+
+  /// Text of the banner when the codes were created but could not be loaded back.
+  ///
+  /// In en, this message translates to:
+  /// **'The QR codes could not be loaded, so the cards do not show them yet. No need to create them again: they already exist.'**
+  String get pilotCardsNotLoadedText;
+
+  /// Button that loads the QR codes again.
+  ///
+  /// In en, this message translates to:
+  /// **'Load QR codes'**
+  String get pilotCardsLoadCodes;
+
+  /// Lead of the banner after the QR codes were created.
+  ///
+  /// In en, this message translates to:
+  /// **'QR codes created.'**
+  String get pilotCardsSentLead;
+
+  /// Text of the banner after the QR codes were created.
+  ///
+  /// In en, this message translates to:
+  /// **'The cards now carry them. Nothing was emailed.'**
+  String get pilotCardsSentText;
+
+  /// Dismiss button on the QR codes created banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get pilotCardsDismiss;
+
+  /// Lead of the banner when the invitations could not be read.
+  ///
+  /// In en, this message translates to:
+  /// **'QR codes could not be loaded.'**
+  String get pilotCardsLoadFailedLead;
+
+  /// Text of the banner when the invitations could not be read.
+  ///
+  /// In en, this message translates to:
+  /// **'The cards print without QR codes until they load. Check the connection and retry.'**
+  String get pilotCardsLoadFailedText;
+
+  /// Lead of the banner for a contest that has not synchronized.
+  ///
+  /// In en, this message translates to:
+  /// **'No QR codes yet.'**
+  String get pilotCardsUnsyncedLead;
+
+  /// Text of the banner for a contest that has not synchronized.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest was organized offline and hasn’t synchronized. Sync it first to create QR codes. Cards print without them.'**
+  String get pilotCardsUnsyncedText;
+
+  /// Lead of the banner when the device is offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline.'**
+  String get pilotCardsOfflineLead;
+
+  /// Text of the banner when the device is offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to send invitations. QR codes already issued still print.'**
+  String get pilotCardsOfflineText;
+
+  /// Lead of the banner for cards that have no QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'No QR code.'**
+  String get pilotCardsMissingLead;
+
+  /// Banner text when no selected card has a QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'Some cards have no QR code. Send invitations to add them.'**
+  String get pilotCardsMissingAll;
+
+  /// Banner text when some selected cards have no QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 card has} other{{count} cards have}} no QR code. Send invitations to add them.'**
+  String pilotCardsMissingCount(int count);
+
+  /// Added to the banner text when invitations cannot be sent, with the reason.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason} You can still print without QR codes.'**
+  String pilotCardsMissingReason(String reason);
+
+  /// Button on the banner that creates the QR codes.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations'**
+  String get pilotCardsSendAction;
 }
 
 class _AppLocalizationsDelegate

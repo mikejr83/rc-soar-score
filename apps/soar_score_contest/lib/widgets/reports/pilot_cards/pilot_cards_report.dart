@@ -130,7 +130,7 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
     PilotInvitations invitations;
     try {
       invitations = await invitationSource.read(
-        request.client,
+        request.publicationClient,
         request.contestId,
       );
     } on Object {
@@ -144,7 +144,7 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
         settings: page.settings,
         invitations: PilotInvitationSession(
           source: invitationSource,
-          client: request.client,
+          client: request.publicationClient,
           contestId: request.contestId,
           initial: invitations,
         ),
@@ -284,6 +284,7 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
       subtitle: contestLine,
       pages: pages.isEmpty ? const [SizedBox.shrink()] : pages,
       banners: invitationBanners(
+        l10n: context.l10n,
         session: session,
         selected: selected,
         missing: missing,
