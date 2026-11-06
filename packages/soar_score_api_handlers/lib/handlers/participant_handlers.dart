@@ -12,6 +12,7 @@ import '../middleware/failure_rate_limiter.dart';
 import '../middleware/request_id.dart';
 import 'health_handler.dart';
 import 'participant_score_handlers.dart';
+import 'participant_views.dart';
 import 'request_body.dart';
 
 final _logger = Logger('ParticipantHandlers');
@@ -29,8 +30,16 @@ final _logger = Logger('ParticipantHandlers');
 /// - `GET /session` is the session's own context, behind the guest session
 ///   layer: the call the app makes to check a stored session.
 ///
-/// Routes that read or change a pilot's data (#787) sit behind
-/// `guestSessionAuth` too and read `requireParticipant`. With [service] null
+/// - `GET /overview` is the pilot's overview: their flight in every round,
+///   its score state and the next round to score (a
+///   [ParticipantOverviewDto]).
+/// - `GET /rounds/{round}/entry` is the entry context of the pilot's flight
+///   in round number `{round}` (a [ParticipantEntryContextDto]); 404
+///   `not_found` for a round the pilot has no flight in.
+///
+/// Routes that read or change a pilot's data sit behind `guestSessionAuth`
+/// too and read `requireParticipant`: they answer for the session's own
+/// participation only, and take no pilot or contest id from the request. With [service] null
 /// (a server without an invitation secret, or the embedded instance) every
 /// route answers 409 `invitations_not_available`.
 Handler buildParticipantHandler(
@@ -92,11 +101,34 @@ Handler buildParticipantHandler(
   final session = Router()
     ..get('/session', (Request request) async {
       final access = requireParticipant(request).access;
-      final context = await _context(repository, access);
+      final context = await participantContext(repository, access);
       return jsonResponse({
         'contest': context.contest.toJson(),
         'participant': context.participant.toJson(),
       }).change(headers: {'cache-control': 'no-store'});
+    })
+    ..get('/overview', (Request request) async {
+      final access = requireParticipant(request).access;
+      final overview = await participantOverview(repository, access);
+      return jsonResponse(overview.toJson())
+          .change(headers: {'cache-control': 'no-store'});
+    })
+    ..get('/rounds/<round>/entry', (Request request, String round) async {
+      final access = requireParticipant(request).access;
+      final ordinal = int.tryParse(round);
+      final entry = ordinal == null
+          ? null
+          : await participantEntryContext(repository, access, ordinal);
+      if (entry == null) {
+        return errorResponse(
+          404,
+          'not_found',
+          'No such round.',
+          requestId: requestIdOf(request),
+        );
+      }
+      return jsonResponse(entry.toJson())
+          .change(headers: {'cache-control': 'no-store'});
     });
 
   addParticipantScoreRoutes(session, repository, clock: clock);
@@ -142,7 +174,7 @@ Future<ResolveInvitationResponse> _resolution(
   Repository repository,
   InvitationResolution resolution,
 ) async {
-  final context = await _context(repository, resolution.access);
+  final context = await participantContext(repository, resolution.access);
   return ResolveInvitationResponse(
     sessionToken: resolution.sessionToken,
     sessionExpiresAt: resolution.sessionExpiresAt,
@@ -150,63 +182,3 @@ Future<ResolveInvitationResponse> _resolution(
     participant: context.participant,
   );
 }
-
-Future<({ParticipantContestDto contest, ParticipantLinkDto participant})>
-_context(Repository repository, ParticipantAccess access) async {
-  final profile = await repository.participantProfileRepository.findById(
-    access.participation.participantProfileId,
-  );
-  final contest = access.contest;
-  final revision = await repository.contestConfigurationRevisionRepository
-      .latestForContest(contest.id);
-  final disciplineProfile = revision == null
-      ? null
-      : await repository.disciplineProfileRepository.findById(
-          revision.disciplineProfileId,
-        );
-  final matrix = await repository.matrixRevisionRepository.latestForContest(
-    contest.id,
-  );
-  final rounds = matrix == null
-      ? const <Round>[]
-      : await repository.roundRepository.listForRevision(matrix.id);
-  final scoring = access.readOnly
-      ? 'read_only'
-      : contest.scoringAccess == ScoringAccess.open &&
-            contest.adminLock == AdminLock.unlocked
-      ? 'open'
-      : 'closed';
-  return (
-    contest: ParticipantContestDto(
-      contestId: contest.id,
-      name: contest.name,
-      disciplineType: _disciplineText[disciplineProfile?.profile.type] ?? '',
-      lifecycle: switch (contest.lifecycleState) {
-        LifecycleState.completed => 'Completed',
-        LifecycleState.running => 'Running',
-        _ => 'Ready',
-      },
-      scoringAccess: scoring,
-      roundCount: rounds.length,
-      timeZone: contest.timezone,
-    ),
-    participant: ParticipantLinkDto(
-      participationId: access.participation.id,
-      pilotName: [
-        profile?.firstName,
-        profile?.lastName,
-      ].whereType<String>().join(' '),
-      pilotNumber: access.participation.participantNumber,
-      role: 'pilot',
-    ),
-  );
-}
-
-const _disciplineText = {
-  DisciplineType.ales: 'ALES',
-  DisciplineType.thermalDuration: 'ThermalDuration',
-  DisciplineType.f3j: 'F3J',
-  DisciplineType.f5j: 'F5J',
-  DisciplineType.f3l: 'F3L',
-  DisciplineType.f3k: 'F3K',
-};

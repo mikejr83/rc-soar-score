@@ -159,6 +159,28 @@ void _tests(Backend backend) {
       );
     });
 
+    test('reads the newest attempt of several placeholders at once', () async {
+      final other = placeholders.firstWhere((p) => p.id != open.id);
+      final older = attemptAt(open);
+      final newer = attemptAt(open);
+      final elsewhere = attemptAt(other);
+      for (final attempt in [older, newer, elsewhere]) {
+        await repo.append(attempt, metadata: metadata());
+      }
+
+      final latest = await repo.latestForPlaceholders([open.id, other.id]);
+      expect(latest[open.id], newer);
+      expect(latest[other.id], elsewhere);
+      expect(await repo.latestForPlaceholders(const []), isEmpty);
+      final byId = await repo.findByIds([
+        older.id,
+        elsewhere.id,
+        core.Id.create(),
+      ]);
+      expect(byId.keys, {older.id, elsewhere.id});
+      expect(byId[older.id], older);
+    });
+
     test('latestForPlaceholder is null without attempts', () async {
       expect(await repo.latestForPlaceholder(open.id), isNull);
       expect(await repo.listForPlaceholder(open.id), isEmpty);
@@ -248,6 +270,14 @@ void _tests(Backend backend) {
       ]);
       expect(await repo.currentForPlaceholder(placeholder.id), correction);
       expect(await repo.currentForPlaceholder(open.id), isNull);
+
+      final batch = await repo.currentForPlaceholders([
+        placeholder.id,
+        open.id,
+      ]);
+      expect(batch.keys, {placeholder.id});
+      expect(batch[placeholder.id], correction);
+      expect(await repo.currentForPlaceholders(const []), isEmpty);
     });
 
     test(

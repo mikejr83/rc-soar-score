@@ -54,6 +54,39 @@ void main() {
     expect(jsonDecode(seen.body), containsPair('credential', 'abc'));
   });
 
+  test('a cookie session has no token in the body', () async {
+    final client = clientFor(
+      (_) => fixture('resolve_invitation_response_cookie'),
+    );
+    final answer = await client.resolveInvitation(
+      const ResolveInvitationRequest(credential: 'abc'),
+    );
+    expect(answer.sessionToken, isNull);
+    expect(answer.sessionExpiresAt, DateTime.utc(2026, 11, 8, 23));
+  });
+
+  test(
+    'default headers go on every request, and endGuestSession POSTs',
+    () async {
+      final client = ApiClient(
+        baseUrl: baseUrl,
+        defaultHeaders: const {'X-Requested-With': 'soar-score-self-score'},
+        httpClient: MockClient((request) async {
+          seen = request;
+          return http.Response('', 204);
+        }),
+      );
+      addTearDown(client.close);
+
+      await client.endGuestSession();
+
+      expect(seen.method, 'POST');
+      expect(seen.url.path, '/api/v1/self-scoring/session/end');
+      expect(seen.headers['X-Requested-With'], 'soar-score-self-score');
+      expect(seen.headers['accept'], 'application/json');
+    },
+  );
+
   test('participant reads send the session token', () async {
     final client = clientFor(
       (request) => switch (request.url.path) {

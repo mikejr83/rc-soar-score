@@ -121,6 +121,7 @@ extension ParticipantScoresService on ScoresService {
       sourceDevice: sourceDevice,
       clientMutationId: clientMutationId,
       baseScoreRevision: 0,
+      acceptedAt: now,
     );
     final placeholder = ScorePlaceholder(
       id: slot.placeholder.id,
@@ -155,7 +156,7 @@ extension ParticipantScoresService on ScoresService {
       round: round,
       components: components,
       revision: 1,
-      enteredAt: _attemptTime(attempt),
+      enteredAt: attempt.acceptedAt,
       calculated: calculated,
       authority: Authority.participant,
       nextRound: (await _nextParticipantRound(access, round)).after,
@@ -241,7 +242,7 @@ extension ParticipantScoresService on ScoresService {
       round: slot.round,
       components: earlier.rawComponents,
       revision: 1,
-      enteredAt: _attemptTime(earlier),
+      enteredAt: earlier.acceptedAt,
       calculated: await _calculate(context, earlier.rawComponents),
       authority: Authority.participant,
       replayed: true,
@@ -275,19 +276,9 @@ extension ParticipantScoresService on ScoresService {
       round: round,
       components: attempt.rawComponents,
       revision: slot.placeholder.scoreRevision,
-      enteredAt: _attemptTime(attempt),
+      enteredAt: attempt.acceptedAt,
       calculated: await _calculate(context, attempt.rawComponents),
       authority: attempt.authority,
-    );
-  }
-
-  /// When [attempt] was accepted: the time its UUIDv7 id was made, which the
-  /// service sets when it accepts the attempt.
-  DateTime _attemptTime(ScoreAttempt attempt) {
-    final hex = attempt.id.value.replaceAll('-', '').substring(0, 12);
-    return DateTime.fromMillisecondsSinceEpoch(
-      int.parse(hex, radix: 16),
-      isUtc: true,
     );
   }
 

@@ -114,7 +114,7 @@ ResolveInvitationResponse _$ResolveInvitationResponseFromJson(
   json,
   ($checkedConvert) {
     final val = ResolveInvitationResponse(
-      sessionToken: $checkedConvert('session_token', (v) => v as String),
+      sessionToken: $checkedConvert('session_token', (v) => v as String?),
       sessionExpiresAt: $checkedConvert(
         'session_expires_at',
         (v) => DateTime.parse(v as String),

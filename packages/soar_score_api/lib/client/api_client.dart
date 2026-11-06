@@ -83,6 +83,7 @@ class ApiClient {
     required this.baseUrl,
     http.Client? httpClient,
     this.tokenProvider,
+    this.defaultHeaders = const {},
   }) : _httpClient = httpClient ?? http.Client();
 
   /// Base URI of the target server, e.g. `Uri.parse('https://api.example.com')`.
@@ -91,6 +92,10 @@ class ApiClient {
 
   /// Optional bearer-token provider; `null` means no token is ever sent.
   final TokenProvider? tokenProvider;
+
+  /// Headers added to every request, such as `X-Requested-With`, which the
+  /// server wants on cookie-authenticated writes.
+  final Map<String, String> defaultHeaders;
 
   final http.Client _httpClient;
 
@@ -128,6 +133,13 @@ class ApiClient {
       uri,
       ResolveInvitationResponse.fromJson,
     );
+  }
+
+  /// `POST /api/v1/self-scoring/session/end` — ends the guest session and
+  /// clears its cookie. Works with a dead cookie. Needs the CSRF header (see
+  /// [defaultHeaders]).
+  Future<void> endGuestSession() async {
+    await _send('POST', _resolve('/api/v1/self-scoring/session/end'));
   }
 
   /// `GET /api/v1/self-scoring/overview` — the signed-in participant's
@@ -1510,7 +1522,10 @@ class ApiClient {
     Map<String, dynamic>? body,
     bool authenticated = true,
   }) async {
-    final headers = <String, String>{'accept': 'application/json'};
+    final headers = <String, String>{
+      ...defaultHeaders,
+      'accept': 'application/json',
+    };
     final token = authenticated ? await tokenProvider?.call() : null;
     if (token != null) {
       headers['authorization'] = 'Bearer $token';

@@ -114,18 +114,20 @@ class ParticipantLinkDto {
 )
 class ResolveInvitationResponse {
   const ResolveInvitationResponse({
-    required this.sessionToken,
     required this.sessionExpiresAt,
     required this.contest,
     required this.participant,
+    this.sessionToken,
   });
 
   factory ResolveInvitationResponse.fromJson(Map<String, dynamic> json) =>
       _$ResolveInvitationResponseFromJson(json);
 
-  /// The bearer token for every later participant call. The server still
-  /// checks the invitation, lifecycle and scoring access on each use.
-  final String sessionToken;
+  /// The bearer token for later participant calls, for clients that do not
+  /// use cookies. Null when the server put the session in an HttpOnly cookie,
+  /// which it does for a request that sent `X-Requested-With`. The server
+  /// still checks the invitation, lifecycle and scoring access on each use.
+  final String? sessionToken;
   final DateTime sessionExpiresAt;
   final ParticipantContestDto contest;
   final ParticipantLinkDto participant;

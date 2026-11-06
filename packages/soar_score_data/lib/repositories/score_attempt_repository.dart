@@ -39,6 +39,29 @@ class ScoreAttemptRepository extends DriftRepository
   }
 
   @override
+  Future<Map<core.Id, core.ScoreAttempt>> latestForPlaceholders(
+    Iterable<core.Id> scorePlaceholderIds,
+  ) async {
+    final attempts = await _store.whereIdIn(
+      'score_placeholder_id',
+      scorePlaceholderIds,
+    );
+    // Ids are time-ordered (UUIDv7), as in listForPlaceholder.
+    attempts.sort((a, b) => a.id.value.compareTo(b.id.value));
+    return {
+      for (final attempt in attempts) attempt.scorePlaceholderId: attempt,
+    };
+  }
+
+  @override
+  Future<Map<core.Id, core.ScoreAttempt>> findByIds(
+    Iterable<core.Id> ids,
+  ) async => {
+    for (final attempt in await _store.whereIdIn('id', ids))
+      attempt.id: attempt,
+  };
+
+  @override
   Future<core.ScoreAttempt> append(
     core.ScoreAttempt attempt, {
     required core.MutationMetadata metadata,

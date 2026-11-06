@@ -63,6 +63,13 @@ class StubOfficialScoreRepository implements OfficialScoreRepository {
       (await listForPlaceholder(scorePlaceholderId)).lastOrNull;
 
   @override
+  Future<Map<Id, OfficialScore>> currentForPlaceholders(
+    Iterable<Id> scorePlaceholderIds,
+  ) async => {
+    for (final id in scorePlaceholderIds) id: ?await currentForPlaceholder(id),
+  };
+
+  @override
   Future<RecordedScore> recordEntry(
     RecordedScore entry, {
     required MutationMetadata metadata,
