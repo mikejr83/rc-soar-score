@@ -322,11 +322,13 @@ void main() {
       // First the embedded server acts as the Local account (no contests),
       // then the claim re-points it at the signed-in account (with them).
       var signedIn = false;
-      final client = _client((_) async => _json({
-        'contests': signedIn
-            ? [_contest('Signed In Open').toJson()]
-            : <Object>[],
-      }));
+      final client = _client(
+        (_) async => _json({
+          'contests': signedIn
+              ? [_contest('Signed In Open').toJson()]
+              : <Object>[],
+        }),
+      );
       final account = _MutableUiAccount('local-account');
       account.addListener(() {
         if (account.id == 'signed-in-account') signedIn = true;
