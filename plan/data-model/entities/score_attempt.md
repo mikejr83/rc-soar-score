@@ -17,20 +17,21 @@
 
 ## Fields/Properties
 
-| Field                  | Type   | Required     | Default | Description                                                                                                                                                              |
-| ---------------------- | ------ | ------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `id`                   | UUIDv7 | Yes          | -       | Stable identity                                                                                                                                                          |
-| `contest_id`           | UUIDv7 | Yes          | -       | FK Contest (denormalized; must match the placeholder's contest)                                                                                                          |
-| `score_placeholder_id` | UUIDv7 | Yes          | -       | FK ScorePlaceholder                                                                                                                                                      |
-| `config_revision_id`   | UUIDv7 | Yes          | -       | FK ContestConfigurationRevision the client held when the entry was accepted ("entered under"). Informational: calculation always uses the current configuration revision |
-| `matrix_revision_id`   | UUIDv7 | Yes          | -       | FK MatrixRevision the client held when the entry was accepted                                                                                                            |
-| `raw_components`       | JSON   | Yes          | -       | Raw submitted components preserving original units                                                                                                                       |
-| `actor_id`             | UUIDv7 | Yes          | -       | FK; identifies person/authority who submitted                                                                                                                            |
-| `authority`            | enum   | Yes          | -       | `Director`, `Participant`, `Helper`, `System`, or `Administrator`. A local operator acts as `Director`                                                                   |
-| `invitation_id`        | UUIDv7 | No           | -       | FK Invitation under which the entry was submitted                                                                                                                        |
-| `source_device`        | string | No           | -       | Device/browser used                                                                                                                                                      |
-| `client_mutation_id`   | string | Yes (unique) | -       | Client-side dedup key                                                                                                                                                    |
-| `base_score_revision`  | int    | Yes          | -       | Score revision this attempt was based on                                                                                                                                 |
+| Field                  | Type      | Required     | Default | Description                                                                                                                                                              |
+| ---------------------- | --------- | ------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`                   | UUIDv7    | Yes          | -       | Stable identity                                                                                                                                                          |
+| `contest_id`           | UUIDv7    | Yes          | -       | FK Contest (denormalized; must match the placeholder's contest)                                                                                                          |
+| `score_placeholder_id` | UUIDv7    | Yes          | -       | FK ScorePlaceholder                                                                                                                                                      |
+| `config_revision_id`   | UUIDv7    | Yes          | -       | FK ContestConfigurationRevision the client held when the entry was accepted ("entered under"). Informational: calculation always uses the current configuration revision |
+| `matrix_revision_id`   | UUIDv7    | Yes          | -       | FK MatrixRevision the client held when the entry was accepted                                                                                                            |
+| `raw_components`       | JSON      | Yes          | -       | Raw submitted components preserving original units                                                                                                                       |
+| `actor_id`             | UUIDv7    | Yes          | -       | FK; identifies person/authority who submitted                                                                                                                            |
+| `authority`            | enum      | Yes          | -       | `Director`, `Participant`, `Helper`, `System`, or `Administrator`. A local operator acts as `Director`                                                                   |
+| `invitation_id`        | UUIDv7    | No           | -       | FK Invitation under which the entry was submitted                                                                                                                        |
+| `source_device`        | string    | No           | -       | Device/browser used                                                                                                                                                      |
+| `client_mutation_id`   | string    | Yes (unique) | -       | Client-side dedup key                                                                                                                                                    |
+| `base_score_revision`  | int       | Yes          | -       | Score revision this attempt was based on                                                                                                                                 |
+| `accepted_at`          | timestamp | Yes          | -       | Server time at which the attempt was accepted and stored, from the service clock and never from the client. The time shown as when a score was entered                   |
 
 ## Invariants and Constraints
 

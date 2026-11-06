@@ -189,6 +189,7 @@ void _tests(Backend backend) {
           authority: core.Authority.director,
           clientMutationId: 'direct',
           baseScoreRevision: 0,
+          acceptedAt: DateTime.utc(2026, 10, 17, 15),
         );
         final entry = core.RecordedScore(
           attempt: attempt,
@@ -437,6 +438,7 @@ void _tests(Backend backend) {
           authority: core.Authority.participant,
           clientMutationId: 'participant-1',
           baseScoreRevision: 0,
+          acceptedAt: DateTime.utc(2026, 10, 17, 15),
         );
         await repository.scoreAttemptRepository.append(lost, metadata: meta());
 
@@ -473,6 +475,7 @@ void _tests(Backend backend) {
           authority: core.Authority.participant,
           clientMutationId: 'participant-2',
           baseScoreRevision: 0,
+          acceptedAt: DateTime.utc(2026, 10, 17, 15),
         );
         await repository.scoreAttemptRepository.recordAttempt(
           attempt,

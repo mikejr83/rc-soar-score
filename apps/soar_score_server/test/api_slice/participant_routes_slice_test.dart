@@ -456,6 +456,7 @@ void _tests(SliceBackend backend) {
       core.Id.parse(_contestId),
     ))!;
     final now = DateTime.now().toUtc();
+    final accepted = DateTime.utc(2026, 11, 6, 14, 30);
     final metadata = core.MutationMetadata(
       clientMutationId: 'p-1',
       authority: core.Authority.participant,
@@ -474,6 +475,7 @@ void _tests(SliceBackend backend) {
         authority: core.Authority.participant,
         clientMutationId: 'p-1',
         baseScoreRevision: 0,
+        acceptedAt: accepted,
       ),
       metadata: metadata,
     );
@@ -498,6 +500,9 @@ void _tests(SliceBackend backend) {
     final first = (body['rounds']! as List).first as Map;
     expect(first['state'], 'submitted');
     expect(first['entered_by'], 'Pilot1 Rivera');
+    // A preliminary score has no official score, so its time is the
+    // attempt's server time.
+    expect(DateTime.parse(first['entered_at']! as String), accepted);
     expect(first['is_next_to_score'], isFalse);
   });
 }

@@ -279,7 +279,7 @@ Future<_PilotFlights> _pilotFlights(
           Authority.helper => 'Helper',
           _ => 'Director',
         },
-        enteredAt: official?.setAt,
+        enteredAt: attempt?.acceptedAt ?? official?.setAt,
       ),
     );
   }
