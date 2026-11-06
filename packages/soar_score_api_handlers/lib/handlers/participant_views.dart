@@ -190,26 +190,57 @@ ParticipantAccessDto _accessOf(ParticipantAccess access) {
   return const ParticipantAccessDto(code: 'open');
 }
 
-/// The pilot's flight in each current round of the current matrix.
+/// The pilot's flight in each current round of the current matrix, by the
+/// round it is credited to.
+///
+/// A late add can be flown in a later round and credited to an earlier one,
+/// and a re-flight is scored in the round it replaces, so a flight belongs
+/// to its `creditedRoundId`, as in the results. The group and lane are
+/// where it is flown. When a round has several live flights of the pilot,
+/// the highest flight sequence is the one that counts.
 Future<_PilotFlights> _pilotFlights(
   Repository repository,
   ParticipantAccess access,
 ) async {
   final matrix = await _CurrentRounds.load(repository, access.contestId);
   final participation = access.participation;
+  final scheduled = {for (final round in matrix.rounds) round.id};
+  final byCredited = <Id, MatrixAssignment>{};
+  for (final assignment
+      in await repository.matrixAssignmentRepository.listForParticipation(
+        participation.id,
+      )) {
+    if (assignment.isSuperseded ||
+        !scheduled.contains(assignment.scheduledRoundId)) {
+      continue;
+    }
+    final best = byCredited[assignment.creditedRoundId];
+    if (best == null || assignment.flightSequence >= best.flightSequence) {
+      byCredited[assignment.creditedRoundId] = assignment;
+    }
+  }
+  final placeholders = {
+    for (final placeholder
+        in await repository.scorePlaceholderRepository.listForParticipation(
+          participation.id,
+        ))
+      placeholder.assignmentId: placeholder,
+  };
+  final profile = await repository.participantProfileRepository.findById(
+    participation.participantProfileId,
+  );
+  final pilotName = [
+    profile?.firstName,
+    profile?.lastName,
+  ].whereType<String>().join(' ');
+
   final flights = <_Flight>[];
   for (final round in matrix.rounds) {
-    final live = await repository.matrixAssignmentRepository.listLiveForRound(
-      round.id,
-    );
-    final mine =
-        live.where((a) => a.contestParticipationId == participation.id).toList()
-          ..sort((a, b) => a.flightSequence.compareTo(b.flightSequence));
-    if (mine.isEmpty) continue;
-    final assignment = mine.last;
-    final placeholder = await repository.scorePlaceholderRepository
-        .findForAssignment(assignment.id);
-    final groups = matrix.groups[round.id] ?? const <RoundGroup>[];
+    final assignment = byCredited[round.id];
+    if (assignment == null) continue;
+    final placeholder = placeholders[assignment.id];
+    final groups =
+        matrix.groups[assignment.scheduledRoundId] ?? const <RoundGroup>[];
     final groupLocked = groups.any(
       (g) => g.groupNumber == assignment.group && g.isLocked,
     );
@@ -235,9 +266,11 @@ Future<_PilotFlights> _pilotFlights(
         state: participation.hasRetiredBy(round.ordinal)
             ? ParticipantScoreState.retired
             : _stateOf(placeholder, groupLocked: groupLocked),
+        // The pilot's own entry carries their name, which the app shows as
+        // "you"; anyone else is named by role, never by account.
         enteredBy: switch (attempt?.authority) {
           null => null,
-          Authority.participant => 'Pilot',
+          Authority.participant => pilotName,
           Authority.helper => 'Helper',
           _ => 'Director',
         },

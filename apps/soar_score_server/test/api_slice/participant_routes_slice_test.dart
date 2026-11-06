@@ -11,7 +11,7 @@ import 'slice_client.dart';
 
 const _contestId = '019c0000-0000-7000-8000-000000000020';
 const _secret = 'a-test-secret-that-is-at-least-32-bytes-long';
-const _pilots = 4;
+const _pilots = 5;
 
 String _profileId(int n) => '019c0000-0000-7000-8000-0000000001${_two(n)}';
 String _participationId(int n) =>
@@ -110,6 +110,23 @@ void _tests(SliceBackend backend) {
         'rounds': 3,
         'groups_per_round': 2,
         'random_seed': 7,
+      },
+    );
+    // A pilot who joins after the draw, for the late-add cases.
+    await api.expectOk(
+      'POST',
+      '/participants',
+      status: 201,
+      body: {'id': _profileId(6), 'first_name': 'Late', 'last_name': 'Joiner'},
+    );
+    await api.expectOk(
+      'POST',
+      '/contests/$_contestId/participations',
+      status: 201,
+      body: {
+        'id': _participationId(6),
+        'participant_profile_id': _profileId(6),
+        'role_id': core.SystemRoles.pilotId.value,
       },
     );
     rounds = (matrix['rounds']! as List).cast<Map<String, Object?>>();
@@ -359,5 +376,128 @@ void _tests(SliceBackend backend) {
       ),
     );
     expect(response.statusCode, 401);
+  });
+
+  /// Late pilot 6 flies in round 2 for the round they missed, round 1.
+  Future<Map<String, Object?>> lateAddInRound2CreditedToRound1() async {
+    final inRound2 = assignments
+        .where((a) => a['scheduled_round_id'] == rounds[1]['id'])
+        .toList();
+    final counts = <Object?, int>{};
+    for (final a in inRound2) {
+      counts[a['group']] = (counts[a['group']] ?? 0) + 1;
+    }
+    final open = counts.entries.firstWhere((e) => e.value < 3).key;
+    final body = await api.expectOk(
+      'POST',
+      '/contests/$_contestId/matrix/late-adds',
+      status: 201,
+      body: {
+        'id': '019c0000-0000-7000-8000-000000000801',
+        'contest_participation_id': _participationId(6),
+        'scheduled_round_id': rounds[1]['id'],
+        'credited_round_id': rounds[0]['id'],
+        'group': open,
+        'reason': 'Joined late',
+      },
+    );
+    return (body['assignments']! as List)
+        .cast<Map<String, Object?>>()
+        .firstWhere(
+          (a) => a['contest_participation_id'] == _participationId(6),
+        );
+  }
+
+  test('a late add flown in round 2 is the pilot\'s round 1', () async {
+    final added = await lateAddInRound2CreditedToRound1();
+    final token = await sessionFor(6);
+    final (_, body) = await call('/overview', token: token);
+    final list = (body['rounds']! as List).cast<Map<String, Object?>>();
+    expect(list, hasLength(1));
+    expect(list.single['round'], 1);
+    expect(list.single['assignment_id'], added['id']);
+    expect(list.single['is_next_to_score'], isTrue);
+
+    final (entryStatus, entry) = await call('/rounds/1/entry', token: token);
+    expect(entryStatus, 200, reason: '$entry');
+    expect(entry['assignment_id'], added['id']);
+    // Round 2 is where it is flown, not what it counts for.
+    expect((await call('/rounds/2/entry', token: token)).$1, 404);
+
+    await openScoring();
+    await api.expectOk(
+      'POST',
+      '/contests/$_contestId/assignments/${added['id']}/scores',
+      status: 201,
+      body: {
+        'client_mutation_id': 'late-1',
+        'base_score_revision': 0,
+        'components': {
+          'time_flown': 500,
+          'launch_height': 100,
+          'landing': 'points_50',
+        },
+      },
+    );
+    final (_, scored) = await call('/overview', token: token);
+    final after = (scored['rounds']! as List).cast<Map<String, Object?>>();
+    expect(after.single['state'], 'official');
+    expect(after.single['is_next_to_score'], isFalse);
+  });
+
+  test('a pilot\'s own submission is attributed to their name', () async {
+    final token = await sessionFor(1);
+    final slot = assignmentOf(1, 1);
+    final placeholder = (await repository.scorePlaceholderRepository
+        .findForAssignment(core.Id.parse(slot['id']! as String)))!;
+    final config = (await repository.contestConfigurationRevisionRepository
+        .latestForContest(core.Id.parse(_contestId)))!;
+    final matrix = (await repository.matrixRevisionRepository.latestForContest(
+      core.Id.parse(_contestId),
+    ))!;
+    final now = DateTime.now().toUtc();
+    final metadata = core.MutationMetadata(
+      clientMutationId: 'p-1',
+      authority: core.Authority.participant,
+      clientTime: now,
+      actorId: api.director,
+    );
+    await repository.scoreAttemptRepository.append(
+      core.ScoreAttempt(
+        id: core.Id.create(),
+        contestId: core.Id.parse(_contestId),
+        scorePlaceholderId: placeholder.id,
+        configRevisionId: config.id,
+        matrixRevisionId: matrix.id,
+        rawComponents: const {'time_flown': 500, 'launch_height': 100},
+        actorId: api.director,
+        authority: core.Authority.participant,
+        clientMutationId: 'p-1',
+        baseScoreRevision: 0,
+      ),
+      metadata: metadata,
+    );
+    await repository.scorePlaceholderRepository.save(
+      core.ScorePlaceholder(
+        id: placeholder.id,
+        contestId: placeholder.contestId,
+        contestParticipationId: placeholder.contestParticipationId,
+        assignmentId: placeholder.assignmentId,
+        state: core.ScorePlaceholderState.submitted,
+        scoreRevision: 1,
+        revision: placeholder.revision,
+      ),
+      metadata: core.MutationMetadata(
+        clientMutationId: 'p-2',
+        authority: core.Authority.participant,
+        clientTime: now,
+        actorId: api.director,
+      ),
+    );
+    final (_, body) = await call('/overview', token: token);
+    final first = (body['rounds']! as List).first as Map;
+    expect(first['state'], 'submitted');
+    expect(first['entered_by'], 'Pilot1 Rivera');
+    expect(first['is_next_to_score'], isFalse);
   });
 }
