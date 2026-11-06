@@ -294,6 +294,33 @@ void _tests(SliceBackend backend) {
     expect(attempts, hasLength(1));
   });
 
+  test('a replay keeps next_round and survives a redraw', () async {
+    final (_, first) = await submit(1);
+    expect(first['next_round'], 2);
+    await api.expectOk(
+      'POST',
+      '/contests/$_contestId/matrix/redraws',
+      status: 201,
+      body: {
+        'id': '019c0000-0000-7000-8000-000000000503',
+        'first_round': 2,
+        'rounds': 2,
+        'groups_per_round': 1,
+        'random_seed': 11,
+        'base_matrix_revision': matrixRevision,
+      },
+    );
+    // The draw changed, so a new submission with the old revision is stale,
+    // but the accepted one still replays, with the same score and next round.
+    final (status, again) = await submit(1);
+    expect(status, 200, reason: '$again');
+    expect(again['score'], first['score']);
+    expect(again['next_round'], 2);
+    final (stale, staleBody) = await submit(2, mutation: 'm-2');
+    expect(stale, 409);
+    expect(staleBody['code'], 'stale_matrix');
+  });
+
   test('a request id reused with other data is a mutation_conflict', () async {
     await submit(1);
     final (status, body) = await submit(

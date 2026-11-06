@@ -34,13 +34,16 @@ extension ParticipantScoresService on ScoresService {
   }) async {
     final contest = await _requireContest(access.contestId);
     final context = await _configuration(contest);
-    final slot = await _participantSlot(access, round);
 
+    // A repeat is answered from the stored attempt, before the current
+    // matrix is looked at: a redraw since the first request must not turn an
+    // accepted submission into a failure.
     final earlier = await repository.scoreAttemptRepository
         .findByClientMutationId(contest.id, clientMutationId);
     if (earlier != null) {
-      return _participantReplay(context, slot, earlier, components);
+      return _participantReplay(access, round, context, earlier, components);
     }
+    final slot = await _participantSlot(access, round);
 
     final revision = await repository.matrixRevisionRepository.findById(
       slot.assignment.matrixRevisionId,
@@ -159,7 +162,7 @@ extension ParticipantScoresService on ScoresService {
       final winner = await repository.scoreAttemptRepository
           .findByClientMutationId(contest.id, clientMutationId);
       if (winner == null) rethrow;
-      return _participantReplay(context, slot, winner, components);
+      return _participantReplay(access, round, context, winner, components);
     } on StaleRevisionError {
       // A concurrent request stored a score for the slot first.
       final current = await repository.scorePlaceholderRepository
@@ -246,14 +249,37 @@ extension ParticipantScoresService on ScoresService {
     return _NextRound(earlier, after);
   }
 
-  /// The first answer to a mutation id that was stored before.
+  /// The first answer to a mutation id that was stored before, worked out
+  /// from the stored attempt: it must be this pilot's own submission for
+  /// [round] with the same components, else the id was reused
+  /// (`mutation_conflict`). The next round is worked out from the pilot's
+  /// scores now.
   Future<ParticipantSubmission> _participantReplay(
+    ParticipantAccess access,
+    int round,
     _Configuration context,
-    _Slot slot,
     ScoreAttempt earlier,
     Map<String, Object?> components,
   ) async {
-    if (earlier.scorePlaceholderId != slot.placeholder.id ||
+    final placeholder = await repository.scorePlaceholderRepository.findById(
+      earlier.scorePlaceholderId,
+    );
+    final assignment = placeholder == null
+        ? null
+        : await repository.matrixAssignmentRepository.findById(
+            placeholder.assignmentId,
+          );
+    final scheduled = assignment == null
+        ? null
+        : await repository.roundRepository.findById(
+            assignment.scheduledRoundId,
+          );
+    if (placeholder == null ||
+        assignment == null ||
+        scheduled == null ||
+        earlier.contestId != access.contestId ||
+        placeholder.contestParticipationId != access.participationId ||
+        scheduled.ordinal != round ||
         earlier.authority != Authority.participant ||
         !_sameComponents(earlier.rawComponents, components)) {
       throw ParticipantSubmissionRefusal(
@@ -263,13 +289,14 @@ extension ParticipantScoresService on ScoresService {
       );
     }
     return ParticipantSubmission(
-      assignmentId: slot.assignment.id,
-      round: slot.round,
+      assignmentId: assignment.id,
+      round: round,
       components: earlier.rawComponents,
       revision: 1,
       enteredAt: earlier.acceptedAt,
       calculated: await _calculate(context, earlier.rawComponents),
       authority: Authority.participant,
+      nextRound: (await _nextParticipantRound(access, round)).after,
       replayed: true,
     );
   }
