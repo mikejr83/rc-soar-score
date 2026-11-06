@@ -12,6 +12,7 @@ import '../middleware/failure_rate_limiter.dart';
 import '../middleware/request_id.dart';
 import 'health_handler.dart';
 import 'participant_score_handlers.dart';
+import 'participant_results_views.dart';
 import 'participant_views.dart';
 import 'request_body.dart';
 
@@ -36,6 +37,14 @@ final _logger = Logger('ParticipantHandlers');
 /// - `GET /rounds/{round}/entry` is the entry context of the pilot's flight
 ///   in round number `{round}` (a [ParticipantEntryContextDto]); 404
 ///   `not_found` for a round the pilot has no flight in.
+/// - `GET /rounds/{round}/group-results` is the pilot's group in that round
+///   (a [ParticipantGroupResultsDto]), calculated from official scores and
+///   pilots' submitted attempts; 404 `not_found` like the entry route.
+/// - `GET /results?round={n}` is the overall individual standings (a
+///   [ParticipantOverallResultsDto]), held at the director's hidden-through
+///   round while results are hidden; 404 `not_found` for a round without
+///   scores. Pilot-entered scores are preliminary and appear only here and
+///   in the group results, never in stored or published results.
 ///
 /// Routes that read or change a pilot's data sit behind `guestSessionAuth`
 /// too and read `requireParticipant`: they answer for the session's own
@@ -128,6 +137,50 @@ Handler buildParticipantHandler(
         );
       }
       return jsonResponse(entry.toJson())
+          .change(headers: {'cache-control': 'no-store'});
+    });
+
+  session
+    ..get('/rounds/<round>/group-results', (
+      Request request,
+      String round,
+    ) async {
+      final access = requireParticipant(request).access;
+      final ordinal = int.tryParse(round);
+      final group = ordinal == null
+          ? null
+          : await participantGroupResults(repository, access, ordinal);
+      if (group == null) {
+        return errorResponse(
+          404,
+          'not_found',
+          'No such round.',
+          requestId: requestIdOf(request),
+        );
+      }
+      return jsonResponse(group.toJson())
+          .change(headers: {'cache-control': 'no-store'});
+    })
+    ..get('/results', (Request request) async {
+      final access = requireParticipant(request).access;
+      final param = request.url.queryParameters['round'];
+      final asOf = param == null ? null : int.tryParse(param);
+      final results = param != null && asOf == null
+          ? null
+          : await participantOverallResults(
+              repository,
+              access,
+              asOfRound: asOf,
+            );
+      if (results == null) {
+        return errorResponse(
+          404,
+          'not_found',
+          'No results for that round.',
+          requestId: requestIdOf(request),
+        );
+      }
+      return jsonResponse(results.toJson())
           .change(headers: {'cache-control': 'no-store'});
     });
 

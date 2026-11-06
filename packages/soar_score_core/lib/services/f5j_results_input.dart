@@ -5,6 +5,7 @@ import '../models/matrix/matrix_assignment.dart';
 import '../models/matrix/round.dart';
 import '../models/participants/contest_participation.dart';
 import '../models/scores/official_score.dart';
+import '../models/scores/score_attempt.dart';
 import '../models/scores/score_placeholder.dart';
 import '../repositories/repository.dart';
 import '../scoring/recalculation/f5j_contest_input.dart';
@@ -12,18 +13,38 @@ import '../scoring/standings/team_entry.dart';
 import 'landing_bonus.dart';
 
 /// One scored flight of the current matrix, with the rows it came from.
+///
+/// A flight is scored by its official score, or, only when the input is
+/// built with participant attempts, by the pilot's newest submitted attempt
+/// (a preliminary score).
 class ScoredSlot {
   const ScoredSlot({
     required this.round,
     required this.assignment,
     required this.placeholder,
-    required this.officialScore,
-  });
+    this.officialScore,
+    this.attempt,
+  }) : assert(
+         (officialScore == null) != (attempt == null),
+         'a scored flight has an official score or a preliminary attempt',
+       );
 
   final Round round;
   final MatrixAssignment assignment;
   final ScorePlaceholder placeholder;
-  final OfficialScore officialScore;
+
+  /// Null when the flight is scored by [attempt] only.
+  final OfficialScore? officialScore;
+
+  /// The attempt a preliminary score comes from; null for an official one.
+  final ScoreAttempt? attempt;
+
+  /// True when no official score exists and the flight counts on a pilot's
+  /// submitted attempt.
+  bool get isPreliminary => officialScore == null;
+
+  Map<String, Object?> get components =>
+      officialScore?.components ?? attempt!.rawComponents;
 
   int get group => assignment.group;
 }
@@ -44,6 +65,12 @@ class F5jResultsInput {
        incompleteGroups = Set.unmodifiable(incompleteGroups);
 
   /// Reads the contest's current matrix and scores.
+  ///
+  /// With [includePreliminaryAttempts] a flight without an official score is
+  /// counted from its newest submitted attempt and flagged preliminary
+  /// ([ScoredSlot.isPreliminary]). Nothing built that way may be stored: it
+  /// exists for the pilot's own views, while official results read official
+  /// scores only.
   static Future<F5jResultsInput> build(
     Repository repository, {
     required Id contestId,
@@ -51,6 +78,7 @@ class F5jResultsInput {
     required List<Round> rounds,
     required List<ContestParticipation> participations,
     required bool teamsEnabled,
+    bool includePreliminaryAttempts = false,
   }) async {
     final byId = {for (final p in participations) p.id: p};
     final placeholders = {
@@ -69,6 +97,24 @@ class F5jResultsInput {
       }
       return officials[placeholderId] = await repository.officialScoreRepository
           .currentForPlaceholder(placeholderId);
+    }
+
+    // Newest submitted attempt of each placeholder that has no official
+    // score, in one read.
+    var attempts = const <Id, ScoreAttempt>{};
+    if (includePreliminaryAttempts) {
+      attempts = await repository.scoreAttemptRepository.latestForPlaceholders([
+        for (final placeholder in placeholders.values)
+          if (placeholder.scoreRevision != 0) placeholder.id,
+      ]);
+    }
+    Future<({OfficialScore? official, ScoreAttempt? attempt})?> scoreOf(
+      ScorePlaceholder placeholder,
+    ) async {
+      final official = await officialOf(placeholder.id);
+      if (official != null) return (official: official, attempt: null);
+      final attempt = attempts[placeholder.id];
+      return attempt == null ? null : (official: null, attempt: attempt);
     }
 
     final scored = <ScoredSlot>[];
@@ -90,7 +136,7 @@ class F5jResultsInput {
       for (final assignment in live) {
         if (assignment.assignmentType != AssignmentType.reflight) continue;
         final placeholder = placeholders[assignment.id];
-        if (placeholder == null || await officialOf(placeholder.id) == null) {
+        if (placeholder == null || await scoreOf(placeholder) == null) {
           continue;
         }
         final best = counted[assignment.contestParticipationId];
@@ -111,10 +157,8 @@ class F5jResultsInput {
         if (participation == null || !participation.isPilot) continue;
         final retired = participation.hasRetiredBy(round.ordinal);
         final placeholder = placeholders[assignment.id];
-        final official = placeholder == null
-            ? null
-            : await officialOf(placeholder.id);
-        if (official == null) {
+        final score = placeholder == null ? null : await scoreOf(placeholder);
+        if (score == null) {
           if (!retired) {
             incompleteRounds.add(round.ordinal);
             incompleteGroups.add((round.ordinal, assignment.group));
@@ -126,19 +170,21 @@ class F5jResultsInput {
             round: round,
             assignment: assignment,
             placeholder: placeholder!,
-            officialScore: official,
+            officialScore: score.official,
+            attempt: score.attempt,
           ),
         );
+        final components = scored.last.components;
         groups
             .putIfAbsent(assignment.group, () => [])
             .add(
               F5jFlightEntry(
                 pilotId: participation.id.value,
-                components: official.components,
+                components: components,
                 landingBonus: await resolveLandingBonus(
                   repository,
                   revision,
-                  official.components,
+                  components,
                 ),
                 retired: retired,
               ),
