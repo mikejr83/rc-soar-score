@@ -84,9 +84,14 @@ class ReportDataRequest {
     required this.contestId,
     required this.facts,
     required this.filters,
-  });
+    ApiClient? publicationClient,
+  }) : publicationClient = publicationClient ?? client;
 
   final ApiClient client;
+
+  /// The client for what only the hosted server knows (invitations): the
+  /// remote client on the native build, [client] on the web.
+  final ApiClient publicationClient;
   final Id contestId;
   final ReportsFacts facts;
 

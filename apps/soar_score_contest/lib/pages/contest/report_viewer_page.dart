@@ -112,6 +112,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
     }
     final controller = ReportViewerController(
       client: apiClientOf(context),
+      publicationClient: publicationClientOf(context),
       contestId: id,
       spec: definition,
       defaultPaper: PaperSize.forLocale(

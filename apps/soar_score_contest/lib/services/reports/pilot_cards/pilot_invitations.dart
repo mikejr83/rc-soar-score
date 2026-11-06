@@ -63,29 +63,6 @@ class UnavailablePilotInvitationSource implements PilotInvitationSource {
       Future.error(StateError(reason));
 }
 
-/// A placeholder from before the invitations API (#589): every pilot of the contest gets
-/// the same QR code, which opens the project's web site, so the cards can be
-/// seen and printed with a code. It is not an invitation: scanning it does not
-/// open a pilot's scoring page, and nothing can be sent.
-class PlaceholderPilotInvitationSource implements PilotInvitationSource {
-  const PlaceholderPilotInvitationSource();
-
-  static const link = 'https://score.rcsoarscore.com';
-
-  @override
-  Future<PilotInvitations> read(ApiClient client, Id contestId) async {
-    final participations = await client.participations(contestId);
-    return PilotInvitations(
-      links: {for (final p in participations) p.id.value: link},
-      sendUnavailableReason: UnavailablePilotInvitationSource.reason,
-    );
-  }
-
-  @override
-  Future<void> send(ApiClient client, Id contestId, List<Id> participations) =>
-      Future.error(StateError(UnavailablePilotInvitationSource.reason));
-}
-
 /// The invitations API of the server the client talks to (#589):
 /// `GET`/`POST /contests/{id}/invitations`. Issuing sends no email.
 ///

@@ -43,6 +43,7 @@ class ViewerNotice {
 class ReportViewerController extends ChangeNotifier {
   ReportViewerController({
     required this.client,
+    this.publicationClient,
     required this.contestId,
     required this.spec,
     required this.defaultPaper,
@@ -54,6 +55,10 @@ class ReportViewerController extends ChangeNotifier {
   }) : _params = initial;
 
   final ApiClient? client;
+
+  /// The client for the hosted server's own data (invitations), or `null` to
+  /// use [client].
+  final ApiClient? publicationClient;
 
   /// `null` when the route's id is not an id.
   final Id? contestId;
@@ -423,6 +428,7 @@ class ReportViewerController extends ChangeNotifier {
       final data = await spec.loadData(
         ReportDataRequest(
           client: api,
+          publicationClient: publicationClient,
           contestId: id,
           facts: facts,
           filters: filters,
