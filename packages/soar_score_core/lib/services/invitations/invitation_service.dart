@@ -125,21 +125,42 @@ class InvitationService {
     final id = _newId();
     final revision = all.isEmpty ? 1 : all.last.invitationRevision + 1;
     final credential = codec.credentialFor(id, revision);
-    final invitation = await repository.invitationRepository.save(
-      Invitation(
-        id: id,
-        contestId: contestId,
-        contestParticipationId: participationId,
-        type: type,
-        protectedCredential: codec.protect(credential),
-        invitationRevision: revision,
-        audience: InvitationAudience.pilot,
-        issuedBy: issuedBy,
-        issuedAt: now,
-        replacesInvitationId: null,
-        clientMutationId: clientMutationId,
-      ),
-    );
+    final Invitation invitation;
+    try {
+      invitation = await repository.invitationRepository.save(
+        Invitation(
+          id: id,
+          contestId: contestId,
+          contestParticipationId: participationId,
+          type: type,
+          protectedCredential: codec.protect(credential),
+          invitationRevision: revision,
+          audience: InvitationAudience.pilot,
+          issuedBy: issuedBy,
+          issuedAt: now,
+          replacesInvitationId: null,
+          clientMutationId: clientMutationId,
+        ),
+      );
+    } on Object {
+      // A concurrent request may have issued first: the database refuses a
+      // second active invitation, a repeated revision and a repeated request
+      // id. Whoever won is the answer; anything else is a real failure.
+      final winner =
+          await repository.invitationRepository.findByClientMutationId(
+            contestId: contestId,
+            clientMutationId: clientMutationId,
+          ) ??
+          await repository.invitationRepository.findActiveForParticipation(
+            participationId,
+          );
+      if (winner == null ||
+          winner.id == id ||
+          winner.contestParticipationId != participationId) {
+        rethrow;
+      }
+      return _issued(winner, created: false);
+    }
     await _audit(
       invitation,
       AuditAction.invitationIssued,
@@ -201,7 +222,9 @@ class InvitationService {
     }
 
     var invitation = stored;
-    final guestId = stored.redeemedByAccountId ?? await _newGuest(checked, now);
+    final guestId =
+        stored.redeemedByAccountId ??
+        await _guestFor(stored.id, checked.participation, now);
     invitation = await repository.invitationRepository.save(
       Invitation(
         id: stored.id,
@@ -373,22 +396,23 @@ class InvitationService {
     );
   }
 
-  Future<Id> _newGuest(
-    ({
-      ContestParticipation participation,
-      Contest contest,
-      bool readOnly,
-      DateTime? expiry,
-    })
-    checked,
+  /// The guest account of [invitationId], made if it is not there yet.
+  ///
+  /// Its id comes from the invitation (see [InvitationCodec.guestAccountIdFor]),
+  /// so concurrent first opens all make and agree on the same account.
+  Future<Id> _guestFor(
+    Id invitationId,
+    ContestParticipation participation,
     DateTime now,
   ) async {
+    final id = codec.guestAccountIdFor(invitationId);
+    if (await repository.accountRepository.findById(id) != null) return id;
     final profile = await repository.participantProfileRepository.findById(
-      checked.participation.participantProfileId,
+      participation.participantProfileId,
     );
-    final guest = await repository.accountRepository.save(
+    await repository.accountRepository.save(
       Account(
-        id: _newId(),
+        id: id,
         firstName: profile?.firstName ?? 'Guest',
         lastName: profile?.lastName ?? 'Pilot',
         kind: AccountKind.guest,
@@ -396,7 +420,7 @@ class InvitationService {
         updatedAt: now,
       ),
     );
-    return guest.id;
+    return id;
   }
 
   Future<void> _audit(

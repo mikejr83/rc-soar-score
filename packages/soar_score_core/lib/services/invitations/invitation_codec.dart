@@ -75,6 +75,26 @@ class InvitationCodec {
     'sha256:${sha256.convert(utf8.encode('soar-score:credential:$credential'))}',
   );
 
+  /// The id of the guest account of invitation [invitationId].
+  ///
+  /// Derived, not random, so that two first opens of one link at the same
+  /// moment make the same account and agree on it, instead of racing to
+  /// create two. A valid UUIDv7 shape, unguessable without the secret.
+  Id guestAccountIdFor(Id invitationId) {
+    final bytes = Hmac(
+      sha256,
+      _credentialKey,
+    ).convert(utf8.encode('guest:${invitationId.value}')).bytes.sublist(0, 16);
+    bytes[6] = (bytes[6] & 0x0f) | 0x70;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    final hex = [for (final b in bytes) b.toRadixString(16).padLeft(2, '0')]
+        .join();
+    return Id.parse(
+      '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-'
+      '${hex.substring(16, 20)}-${hex.substring(20)}',
+    );
+  }
+
   /// Whether [credential] is the one stored as [stored], compared in
   /// constant time.
   bool matches(String credential, ProtectedCredential stored) =>

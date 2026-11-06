@@ -171,6 +171,62 @@ void _tests(SliceBackend backend) {
     expect(blake.credential, isNot(first.credential));
   });
 
+  test('concurrent issues agree on one link and never fail', () async {
+    await configureAndAddPilots();
+    final sameMutation = await Future.wait([
+      for (var i = 0; i < 5; i++) issue(),
+    ]);
+    final differentMutations = await Future.wait([
+      for (var i = 0; i < 5; i++) issue(_otherParticipationId, 'other-$i'),
+    ]);
+    for (final results in [sameMutation, differentMutations]) {
+      expect({for (final r in results) r.credential}, hasLength(1));
+      expect({for (final r in results) r.invitation.id}, hasLength(1));
+      expect(results.where((r) => r.created), hasLength(1));
+    }
+    final all = await repository.invitationRepository.listForContest(
+      core.Id.parse(_contestId),
+    );
+    expect(all, hasLength(2));
+    expect(all.where((i) => i.isActive), hasLength(2));
+  });
+
+  test('concurrent first opens make one guest and valid sessions', () async {
+    await configureAndAddPilots();
+    final issued = await issue();
+    final resolutions = await Future.wait([
+      for (var i = 0; i < 6; i++) service.resolve(issued.credential),
+    ]);
+    expect({
+      for (final r in resolutions) r.access.guestAccountId,
+    }, hasLength(1));
+    final stored = (await repository.invitationRepository.findById(
+      issued.invitation.id,
+    ))!;
+    expect(stored.redeemedByAccountId, resolutions.first.access.guestAccountId);
+    for (final r in resolutions) {
+      final access = await service.authorize(r.sessionToken);
+      expect(access.guestAccountId, stored.redeemedByAccountId);
+    }
+  });
+
+  test('no audit event carries a credential or its hash', () async {
+    await configureAndAddPilots();
+    final issued = await issue();
+    await resolve(issued.credential);
+    await resolve('${issued.credential.split('.').first}.${'A' * 32}');
+    final stored = (await repository.invitationRepository.findById(
+      issued.invitation.id,
+    ))!;
+    final events = await repository.auditEventRepository.listForContest(
+      core.Id.parse(_contestId),
+    );
+    final text = jsonEncode([for (final e in events) e.toJson()]);
+    expect(text, isNot(contains(issued.credential)));
+    expect(text, isNot(contains(issued.credential.split('.').last)));
+    expect(text, isNot(contains(stored.protectedCredential.value)));
+  });
+
   test('the raw credential is never stored', () async {
     await configureAndAddPilots();
     final issued = await issue();

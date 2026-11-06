@@ -42,6 +42,17 @@ void main() {
     expect(codec.idOf(''), isNull);
   });
 
+  test('the guest account id is stable, valid and per invitation', () {
+    final guest = codec.guestAccountIdFor(id);
+    expect(codec.guestAccountIdFor(id), guest);
+    expect(codec.guestAccountIdFor(Id.create()), isNot(guest));
+    expect(
+      InvitationCodec.fromText('y' * 40).guestAccountIdFor(id),
+      isNot(guest),
+    );
+    expect(Id.parse(guest.value), guest);
+  });
+
   group('sessions', () {
     test('round trip', () {
       final token = codec.signSession({'a': 1, 'b': 'two'});
