@@ -291,6 +291,26 @@ flutter run -d chrome
 In VS Code, `.vscode/launch.json` already has launch configurations for the
 server and each app (the contest web app is pinned to `127.0.0.1:8091`).
 
+### Testing QR codes and invitation links locally
+
+The compound **Server + Contest (Windows) + Self-scoring (Web)** starts all
+three so a printed QR code can be scanned end to end:
+
+- The server config sets a fixed development `INVITATION_SECRET`, so links and
+  QR codes issued in one run still open after a restart. The secret is public
+  in this repository: never use it for a deployed server.
+- The server builds each link from `SELF_SCORING_BASE_URL`, which the launch
+  config points at the local self-scoring app, `http://localhost:8092`. The
+  contest app only shows the link the server gives it, so pointing it elsewhere
+  is a server setting, not an app setting.
+- The contest app talks to the local server (`http://localhost:8080` is the
+  default for `SOAR_SCORE_API_BASE_URL`), so sign in and let the contest
+  synchronize before using Send invitations on the Pilot Scoring Cards.
+- The self-scoring app runs on `localhost`, not `127.0.0.1`, to be the same
+  site as the API: its guest session is a `SameSite=Lax` cookie. The server's
+  `CORS_ALLOWED_ORIGINS` includes it. To scan a code with a phone, set
+  `SELF_SCORING_BASE_URL` to an address the phone can reach instead.
+
 ## 6. Verify your setup
 
 ```bash
