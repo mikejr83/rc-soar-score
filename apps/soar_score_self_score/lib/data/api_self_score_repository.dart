@@ -138,6 +138,14 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       );
     } on ApiHttpError catch (error) {
       final refusal = error.participantError;
+      // A 401 ends the session whatever the body says.
+      if (error.statusCode == 401 &&
+          refusal?.code != ParticipantErrorCodes.sessionInvalid) {
+        return const ScoreRejected(
+          code: ParticipantErrorCodes.sessionInvalid,
+          message: '',
+        );
+      }
       final transient =
           error.statusCode >= 500 ||
           error.statusCode == 408 ||
