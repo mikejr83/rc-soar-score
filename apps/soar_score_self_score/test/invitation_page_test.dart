@@ -152,6 +152,56 @@ void main() {
     expect(find.text('Next to score'), findsOneWidget);
   });
 
+  group('a guest session fixes the contest and pilot', () {
+    Future<MemoryGuestSessionStore> signedIn(WidgetTester tester) async {
+      final store = MemoryGuestSessionStore()
+        ..write(
+          GuestSession(
+            contestId: 'spring-open',
+            contestName: 'Spring Open',
+            pilotId: '12',
+            pilotName: 'Jane Smith',
+            token: 'sample-token',
+            expiresAt: DateTime.utc(2099),
+          ),
+        );
+      await _pump(tester, store: store);
+      return store;
+    }
+
+    String path() => router.routeInformationProvider.value.uri.path;
+
+    testWidgets('another contest sends the guest to their own', (tester) async {
+      await signedIn(tester);
+      for (final address in [
+        '/contests/other/results',
+        '/contests/other/team',
+        '/contests/other/pilots/12',
+        '/contests/other/pilots/12/rounds/4',
+      ]) {
+        router.go(address);
+        await tester.pumpAndSettle();
+        expect(path(), '/contests/spring-open/pilots/12', reason: address);
+      }
+    });
+
+    testWidgets('another pilot sends the guest to their own page', (
+      tester,
+    ) async {
+      await signedIn(tester);
+      router.go('/contests/spring-open/pilots/99');
+      await tester.pumpAndSettle();
+      expect(path(), '/contests/spring-open/pilots/12');
+    });
+
+    testWidgets('their own contest pages stay where they are', (tester) async {
+      await signedIn(tester);
+      router.go('/contests/spring-open/results');
+      await tester.pumpAndSettle();
+      expect(path(), '/contests/spring-open/results');
+    });
+  });
+
   group('StringSlotGuestSessionStore', () {
     test('keeps and clears a session', () {
       final slot = _MapSlot();

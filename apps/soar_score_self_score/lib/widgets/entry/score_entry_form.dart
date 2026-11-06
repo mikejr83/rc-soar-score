@@ -69,6 +69,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
   /// The server's own calculation, once it accepted the score.
   String? _flightScore;
   bool _alreadyThere = false;
+  ScoreDetails? _details;
 
   /// Why the server refused the last send, in words for the pilot.
   String? _rejection;
@@ -270,10 +271,10 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
       );
       if (!mounted) return;
       switch (result) {
-        case ScoreAccepted(:final flightScore):
-          _accept(flightScore, alreadyThere: false);
-        case ScoreAlreadySubmitted(:final flightScore):
-          _accept(flightScore, alreadyThere: true);
+        case ScoreAccepted(:final flightScore, :final details):
+          _accept(flightScore, details, alreadyThere: false);
+        case ScoreAlreadySubmitted(:final flightScore, :final details):
+          _accept(flightScore, details, alreadyThere: true);
         case ScoreRejected(:final code):
           // The server ended the session: drop it so nothing routes from it.
           if (code == 'session_invalid') sessions.clear();
@@ -309,11 +310,16 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
     }
   }
 
-  void _accept(String? flightScore, {required bool alreadyThere}) {
+  void _accept(
+    String? flightScore,
+    ScoreDetails? details, {
+    required bool alreadyThere,
+  }) {
     setState(() {
       _phase = _Phase.accepted;
       _pending = null;
       _flightScore = flightScore;
+      _details = details;
       _alreadyThere = alreadyThere;
       _rejection = null;
     });
@@ -327,9 +333,25 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
           ? l10n.scoreAlreadyThere
           : l10n.scoreAlreadyThereWith(score);
     }
-    return score == null
-        ? l10n.scoreAcceptedNoValue
-        : l10n.scoreAcceptedLine(score);
+    if (score == null) return l10n.scoreAcceptedNoValue;
+    // Only an official score is called official; until then it is the
+    // server's calculation and can still change.
+    return _details?.official ?? false
+        ? l10n.scoreAcceptedLine(score)
+        : l10n.scoreCalculatedLine(score);
+  }
+
+  /// The numbers the server kept with the score, one per line.
+  List<String> _detailLines(AppLocalizations l10n) {
+    final details = _details;
+    if (details == null) return const [];
+    return [
+      if (details.rawScore case final value?) l10n.scoreRawLine(value),
+      if (details.roundScore case final value?) l10n.scoreRoundLine(value),
+      if (details.cumulativePenalty case final value?)
+        l10n.scorePenaltyLine(value),
+      if (details.enteredBy case final name?) l10n.scoreEnteredByLine(name),
+    ];
   }
 
   String _rejectionText(ScoreRejected rejected) {
@@ -584,6 +606,8 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
+                    for (final line in _detailLines(l10n))
+                      Text(line, style: theme.textTheme.bodyMedium),
                   ],
                 ],
                 const SizedBox(height: 8),

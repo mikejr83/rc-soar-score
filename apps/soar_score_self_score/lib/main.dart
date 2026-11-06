@@ -48,7 +48,7 @@ void main() {
   const useSampleData = bool.fromEnvironment('SOAR_SCORE_SAMPLE_DATA');
   final SelfScoreRepository repository = useSampleData
       ? const SampleSelfScoreRepository()
-      : ApiSelfScoreRepository(client);
+      : ApiSelfScoreRepository(client, sessions);
 
   runApp(
     ApiClientInherited(
