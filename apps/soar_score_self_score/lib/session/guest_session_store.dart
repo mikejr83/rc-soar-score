@@ -46,9 +46,14 @@ class StringSlotGuestSessionStore implements GuestSessionStore {
     try {
       final raw = _slot.read();
       if (raw == null) return null;
-      final session = GuestSession.fromJson(
-        (jsonDecode(raw) as Map).cast<String, Object?>(),
-      );
+      final json = (jsonDecode(raw) as Map).cast<String, Object?>();
+      if (json['token'] != null) {
+        // Written before the session moved into a cookie: it holds a
+        // credential. Drop it, and the pilot opens their link again.
+        _slot.clear();
+        return null;
+      }
+      final session = GuestSession.fromJson(json);
       if (session.isExpired(_now())) {
         // The server would refuse it: do not route from it.
         _slot.clear();
@@ -64,7 +69,9 @@ class StringSlotGuestSessionStore implements GuestSessionStore {
   @override
   void write(GuestSession session) {
     try {
-      _slot.write(jsonEncode(session.toJson()));
+      // Only display data is kept in browser storage, never a credential.
+      final stored = session.toJson()..remove('token');
+      _slot.write(jsonEncode(stored));
     } on Object {
       // Storage can be blocked, for example in a private window. The session
       // still works until the page closes.

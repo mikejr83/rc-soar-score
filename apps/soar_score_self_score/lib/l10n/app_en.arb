@@ -216,5 +216,9 @@
   "scoringCompleted": "Contest completed",
   "@scoringCompleted": {
     "description": "The contest is over."
+  },
+  "endSession": "End session",
+  "@endSession": {
+    "description": "Tooltip of the button that ends the guest session and returns to the start page."
   }
 }

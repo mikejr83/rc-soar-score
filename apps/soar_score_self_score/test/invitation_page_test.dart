@@ -234,10 +234,23 @@ void main() {
         expiresAt: DateTime.utc(2099),
       );
       store.write(session);
-      expect(store.read()?.token, 't');
       expect(store.read()?.pilotName, 'Pat');
+      // A credential never goes into browser storage.
+      expect(slot.value, isNot(contains('"token"')));
+      expect(store.read()?.token, isNull);
       store.clear();
       expect(store.read(), isNull);
+    });
+
+    test('a session saved with a token before the cookie is dropped', () {
+      final slot = _MapSlot()
+        ..value =
+            '{"contestId":"c","contestName":"C","pilotId":"p","pilotName":"P",'
+            '"token":"old-secret","role":"pilot",'
+            '"expiresAt":"2099-01-01T00:00:00.000Z"}';
+      final store = StringSlotGuestSessionStore(slot);
+      expect(store.read(), isNull);
+      expect(slot.value, isNull);
     });
 
     test('a damaged slot reads as no session', () {
