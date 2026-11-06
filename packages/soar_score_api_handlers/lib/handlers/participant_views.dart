@@ -341,7 +341,7 @@ class _Flight {
   final DateTime? enteredAt;
 
   Id get assignmentId => assignment.id;
-  String get group => _groupLabel(assignment.group - 1);
+  String get group => participantGroupLabel(assignment.group - 1);
   int? get lane => assignment.lane;
   int get scoreRevision => placeholder?.scoreRevision ?? 0;
 
@@ -360,7 +360,7 @@ class _Flight {
 }
 
 /// A, B, … Z, AA, AB, …: the group letters the pilot cards print.
-String _groupLabel(int index) {
+String participantGroupLabel(int index) {
   var n = index;
   var label = '';
   do {
