@@ -11,6 +11,7 @@ import '../middleware/error_mapping.dart';
 import '../middleware/failure_rate_limiter.dart';
 import '../middleware/request_id.dart';
 import 'health_handler.dart';
+import 'participant_score_handlers.dart';
 import 'participant_views.dart';
 import 'request_body.dart';
 
@@ -129,6 +130,8 @@ Handler buildParticipantHandler(
       return jsonResponse(entry.toJson())
           .change(headers: {'cache-control': 'no-store'});
     });
+
+  addParticipantScoreRoutes(session, repository, clock: clock);
 
   // Ends the session in this browser: removes the cookie. Needs no valid
   // session (a dead cookie must be removable); a cookie write still has to

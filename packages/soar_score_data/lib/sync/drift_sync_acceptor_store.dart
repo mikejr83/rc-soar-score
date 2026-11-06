@@ -30,14 +30,14 @@ class DriftSyncAcceptorStore implements core.SyncAcceptorStore {
     try {
       return await _db.transaction(() => body(tx));
     } on Object catch (error) {
-      throw _asConstraintError(error) ?? error;
+      throw asConstraintError(error) ?? error;
     }
   }
 }
 
 /// [error] as a [core.SyncConstraintError] when it is a broken unique or
 /// foreign-key rule on either backend, else null.
-core.SyncConstraintError? _asConstraintError(Object error) {
+core.SyncConstraintError? asConstraintError(Object error) {
   if (error is core.SyncConstraintError) return error;
   final text = '$error'.toLowerCase();
   if (text.contains('unique constraint') ||

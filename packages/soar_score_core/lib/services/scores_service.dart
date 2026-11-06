@@ -8,6 +8,7 @@ import '../enums/score_placeholder_state.dart';
 import '../errors/contest_state_error.dart';
 import '../errors/entity_not_found_error.dart';
 import '../errors/scoring_validation_error.dart';
+import '../errors/sync_constraint_error.dart';
 import '../models/contest/contest.dart';
 import '../models/contest/contest_configuration_revision.dart';
 import '../models/id.dart';
@@ -21,15 +22,19 @@ import '../repositories/recorded_score.dart';
 import '../repositories/repository.dart';
 import '../repositories/stale_revision_error.dart';
 import '../scoring/f5j/f5j_profile.dart';
+import '../scoring/profile/scoring_issue.dart';
 import 'bulk_score_entry.dart';
 import 'calculated_flight.dart';
 import 'contest_scores.dart';
+import 'invitations/participant_access.dart';
+import 'participant_submission.dart';
 import 'landing_bonus.dart';
 import 'score_correction_audit.dart';
 import 'score_entry_result.dart';
 import 'score_history.dart';
 
 part 'scores_service_bulk.dart';
+part 'scores_service_participant.dart';
 
 final _logger = Logger('ScoresService');
 
@@ -256,6 +261,9 @@ class ScoresService {
     required Id actorId,
     required MutationMetadata metadata,
     required bool moveContest,
+    Authority authority = Authority.director,
+    Id? invitationId,
+    String? sourceDevice,
   }) async {
     final contestId = contest.id;
     final earlier = await repository.scoreAttemptRepository
@@ -299,7 +307,9 @@ class ScoresService {
       matrixRevisionId: slot.assignment.matrixRevisionId,
       rawComponents: components,
       actorId: actorId,
-      authority: Authority.director,
+      authority: authority,
+      invitationId: invitationId,
+      sourceDevice: sourceDevice,
       clientMutationId: clientMutationId,
       baseScoreRevision: baseScoreRevision,
       acceptedAt: now,
