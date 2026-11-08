@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../data/score_changes.dart';
 import '../../data/self_score_repository.dart';
 import '../../data/self_score_scope.dart';
 import '../../l10n/app_localizations.dart';
@@ -333,6 +334,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
       _alreadyThere = alreadyThere;
       _rejection = null;
     });
+    scoreChanges.value++;
   }
 
   /// What the server made of the score, in its own numbers.
@@ -650,9 +652,12 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
           ),
         ] else ...[
           const SizedBox(height: 16),
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(48),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(56),
+              textStyle: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
             onPressed: () => context.go(
               groupResultsPath(
@@ -661,7 +666,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
                 '${widget.data.round}',
               ),
             ),
-            child: const Text('See group results'),
+            child: Text(l10n.seeGroupResults),
           ),
         ],
       ],

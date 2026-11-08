@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_self_score/data/sample_data.dart';
 import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
+import 'package:soar_score_self_score/data/score_changes.dart';
 import 'package:soar_score_self_score/data/self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_scope.dart';
 import 'package:soar_score_self_score/l10n/app_localizations.dart';
@@ -94,6 +95,7 @@ void main() {
   testWidgets('an accepted score is read-only and shows the server value', (
     tester,
   ) async {
+    final before = scoreChanges.value;
     final repository = _ScriptedRepository([
       const ScoreAccepted(flightScore: '962.5', nextRound: 5),
     ]);
@@ -105,6 +107,11 @@ void main() {
     expect(find.text('Score: 962.5'), findsOneWidget);
     expect(find.text('Submit score'), findsNothing);
     expect(find.text('See group results'), findsOneWidget);
+    expect(
+      find.widgetWithText(FilledButton, 'See group results'),
+      findsOneWidget,
+    );
+    expect(scoreChanges.value, before + 1);
     final sent = repository.sent.single;
     expect(sent.round, 4);
     expect(sent.matrixRevision, 3);
