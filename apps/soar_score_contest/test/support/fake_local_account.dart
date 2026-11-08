@@ -10,6 +10,7 @@ class FakeLocalAccount implements core.LocalAccountRepository {
 
   core.Id? id;
   final reassigned = <core.Id>[];
+  final subjects = <String?>[];
   Object? reassignError;
   var storedPreferences = core.AccountPreferences();
 
@@ -27,12 +28,21 @@ class FakeLocalAccount implements core.LocalAccountRepository {
   Future<core.Id> ensure() async => id ??= core.Id.create();
 
   @override
-  Future<void> reassignTo(core.Id accountId) async {
+  Future<void> reassignTo(core.Id accountId, {String? subject}) async {
     await reassignGate?.future;
     final error = reassignError;
     if (error != null) throw error;
     reassigned.add(accountId);
+    subjects.add(subject);
   }
+
+  @override
+  Future<core.Id?> linkedAccount() async =>
+      reassigned.isEmpty ? null : reassigned.last;
+
+  @override
+  Future<String?> linkedSubject() async =>
+      subjects.isEmpty ? null : subjects.last;
 
   @override
   Future<core.AccountPreferences> preferences() async => storedPreferences;

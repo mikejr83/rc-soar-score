@@ -12,6 +12,7 @@ void main() {
       'lib/platform/engine_app_sync.dart',
       'lib/platform/native_sync.dart',
       'lib/platform/native_bootstrap.dart',
+      'lib/platform/profile_bound_sync.dart',
     };
     // Windows lists paths with backslashes.
     String posix(File file) => file.path.replaceAll(r'\', '/');

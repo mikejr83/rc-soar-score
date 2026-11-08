@@ -38,6 +38,12 @@ class LocalAccountClaimer {
     required this._onClaimed,
     required this._onSignedOut,
     required this._onProblem,
+    this._onAccountMismatch,
+    this._onSignedIn,
+    this._onClaimPostponed,
+    this._onClaimStarting,
+    this._onClaimRecorded,
+    this._onClaimFinished,
     this._getPreferences,
     this._putPreferences,
     this._onPreferencesChanged,
@@ -56,6 +62,33 @@ class LocalAccountClaimer {
   final Future<void> Function(core.Id accountId, int session) _onClaimed;
   final void Function() _onSignedOut;
   final void Function(SyncProblem? problem) _onProblem;
+
+  /// Called with the sign-in's number when the service says the Local data was
+  /// claimed into another account, so the app can stop serving it to this one.
+  final void Function(int session)? _onAccountMismatch;
+
+  /// Called, before any claim is tried, each time a signed-in session starts
+  /// or is seen again (sign-in, restore at start-up, the service becoming
+  /// reachable) with its identity provider id, so the app can close the
+  /// claimed data to a user it does not belong to.
+  final void Function(String? subject)? _onSignedIn;
+
+  /// Called when a claim could not be sent because the service was not
+  /// reachable, so the app can say the data is still unchecked.
+  final void Function()? _onClaimPostponed;
+
+  /// Called right after the Local data was re-pointed to the account, with no
+  /// await in between and whatever the sign-in did meanwhile, so the app's
+  /// view of who owns the data matches the database.
+  final void Function(core.Id accountId, String? subject)? _onClaimRecorded;
+
+  /// Called just before the Local data is re-pointed to [accountId]; answers
+  /// whether that brackets a change, which [_onClaimFinished] then ends. Lets
+  /// the app stop work that began before the data moves.
+  final bool Function(core.Id accountId, String? subject)? _onClaimStarting;
+
+  /// Ends what [_onClaimStarting] began, whatever the re-pointing did.
+  final void Function()? _onClaimFinished;
 
   /// Reads and stores the signed-in account's preferences on the service.
   /// Both null (the default) skips carrying preferences over.
@@ -87,6 +120,7 @@ class LocalAccountClaimer {
   void _authChanged() {
     if (_stopped) return;
     if (_auth.isSignedIn) {
+      _onSignedIn?.call(_auth.subject);
       unawaited(run());
     } else {
       _onSignedOut();
@@ -110,6 +144,8 @@ class LocalAccountClaimer {
 
   Future<void> _claimOnce(int session) async {
     if (!_epoch.isCurrent(session) || _stopped) return;
+    // Read with the epoch check, so it names the sign-in that claims.
+    final subject = _auth.subject;
     final local = await _local.find();
     if (local == null || !_epoch.isCurrent(session) || _stopped) return;
     final core.Id accountId;
@@ -124,10 +160,16 @@ class LocalAccountClaimer {
       return;
     } on ApiNetworkError {
       _logger.fine('Claim postponed: the service is not reachable');
+      if (_epoch.isCurrent(session) && !_stopped) _onClaimPostponed?.call();
       return;
     } on ApiHttpError catch (error) {
       _logger.warning('The service refused the claim: ${error.statusCode}');
       if (!_epoch.isCurrent(session) || _stopped) return;
+      if (error.statusCode == 409 && error.error?.code == 'already_claimed') {
+        _onAccountMismatch?.call(session);
+        _onProblem(SyncProblem.accountMismatch);
+        return;
+      }
       _onProblem(_problemFor(error.statusCode));
       return;
     } on ApiException catch (error) {
@@ -143,13 +185,17 @@ class LocalAccountClaimer {
     // that still is theirs. Once stopped the database may be closing: the
     // next start repeats the claim.
     if (_stopped) return;
+    final bracketed = _onClaimStarting?.call(accountId, subject) ?? false;
     try {
-      await _local.reassignTo(accountId);
+      await _local.reassignTo(accountId, subject: subject);
+      _onClaimRecorded?.call(accountId, subject);
     } on Object catch (error, stack) {
       _logger.warning('Re-pointing the Local data failed', error, stack);
       if (!_epoch.isCurrent(session) || _stopped) return;
       _onProblem(SyncProblem.accountClaimBlocked);
       return;
+    } finally {
+      if (bracketed) _onClaimFinished?.call();
     }
     if (!_epoch.isCurrent(session) || _stopped) return;
     _onProblem(null);

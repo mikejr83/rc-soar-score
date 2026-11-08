@@ -12,6 +12,7 @@ import 'acting_account.dart';
 import 'engine_app_sync.dart';
 import 'inspection_owner_guard.dart';
 import 'installation_id_file.dart';
+import 'profile_bound_sync.dart';
 
 final _logger = Logger('NativeSync');
 
@@ -168,24 +169,36 @@ class NativeSync {
     }
 
     final api = ApiClientSyncGateway(remote);
+    // With a sign-in, what a sync stores is bound to the profile and sign-in
+    // its exchange was made under (see SyncProfileBinding).
+    final binding = acting == null ? null : SyncProfileBinding(acting);
+    final DriftSyncStore driftStore = DriftSyncStore(database);
+    final applier = DriftReplicatedChangeApplier(
+      database,
+      EntityStores.forDatabase(database),
+    );
+    final gateway = acting == null
+        ? InspectionGuardedSyncGateway(
+            api,
+            ownerOf: ownerOf,
+            isInspectionOwner: inspection.isInspection,
+          )
+        : AccountBoundSyncGateway(
+            api,
+            acting: acting,
+            ownerOf: ownerOf,
+            isInspectionOwner: inspection.isInspection,
+          );
     final engine = SyncEngine(
-      store: DriftSyncStore(database),
-      applier: DriftReplicatedChangeApplier(
-        database,
-        EntityStores.forDatabase(database),
-      ),
-      gateway: acting == null
-          ? InspectionGuardedSyncGateway(
-              api,
-              ownerOf: ownerOf,
-              isInspectionOwner: inspection.isInspection,
-            )
-          : AccountBoundSyncGateway(
-              api,
-              acting: acting,
-              ownerOf: ownerOf,
-              isInspectionOwner: inspection.isInspection,
-            ),
+      store: binding == null
+          ? driftStore
+          : ProfileBoundSyncStore(driftStore, binding),
+      applier: binding == null
+          ? applier
+          : ProfileBoundChangeApplier(applier, binding),
+      gateway: binding == null
+          ? gateway
+          : ProfileBoundSyncGateway(gateway, binding, ownerOf),
       config: SyncEngineConfig(
         installationId: installationId,
         label: io.Platform.localHostname,

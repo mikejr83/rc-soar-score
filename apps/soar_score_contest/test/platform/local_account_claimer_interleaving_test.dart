@@ -156,7 +156,7 @@ void main() {
         reason: 'the app never acts as A for B\'s sign-in',
       );
       expect(requests, ['token-A', 'token-B']);
-      expect(problems.last, SyncProblem.accountClaimFailed);
+      expect(problems.last, SyncProblem.accountMismatch);
       expect(claimed, isEmpty, reason: 'B owns nothing on this installation');
     });
 
@@ -218,7 +218,7 @@ void main() {
       epoch = AuthEpoch(auth);
       claimer = newClaimer()..start();
       await claimer.run();
-      expect(problems.last, SyncProblem.accountClaimFailed);
+      expect(problems.last, SyncProblem.accountMismatch);
       expect(localAccount.reassigned, isEmpty, reason: 'not B\'s to take');
       expect(claimed, isEmpty);
 

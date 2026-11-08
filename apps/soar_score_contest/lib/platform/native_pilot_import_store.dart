@@ -17,16 +17,20 @@ class NativePilotImportStore implements PilotImportStore {
   final DateTime Function() clock;
 
   @override
-  Future<List<core.ParticipantProfile>> existing() => _server
-      .repository
-      .participantProfileRepository
-      .listForOwner(_server.actingAccountId);
+  Future<List<core.ParticipantProfile>> existing() =>
+      _server.runProfileOperation(
+        () => _server.repository.participantProfileRepository.listForOwner(
+          _server.actingAccountId,
+        ),
+      );
 
   @override
   Future<core.PilotImportOutcome> apply(
     List<core.PilotImportSelection> selections, {
     required Map<core.Id, int> reviewedRevisions,
-  }) {
+  }) => _server.runProfileOperation(() {
+    // The owner is read once, inside the operation: a change of owner while
+    // it runs stops its writes instead of splitting them between two.
     final acting = _server.actingAccountId;
     return core.PilotImportService(
       _server.repository.participantProfileRepository,
@@ -40,5 +44,5 @@ class NativePilotImportStore implements PilotImportStore {
         clientTime: clock().toUtc(),
       ),
     );
-  }
+  });
 }

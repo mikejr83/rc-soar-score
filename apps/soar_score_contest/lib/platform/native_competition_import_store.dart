@@ -49,22 +49,26 @@ class NativeCompetitionImportStore extends NativePilotImportStore
     required core.Id operationId,
     required String fingerprint,
     required List<core.ProfileStampEntry> entries,
-  }) => _server.repository.contestImportRepository.stampProfiles(
-    core.ProfileStampPlan(
-      owner: _owner,
-      importOperationId: operationId,
-      fileFingerprint: fingerprint,
-      toolVersion: toolVersion,
-      entries: entries,
+  }) => _server.runProfileOperation(
+    () => _server.repository.contestImportRepository.stampProfiles(
+      core.ProfileStampPlan(
+        owner: _owner,
+        importOperationId: operationId,
+        fileFingerprint: fingerprint,
+        toolVersion: toolVersion,
+        entries: entries,
+      ),
+      metadata: _metadata('stamps'),
     ),
-    metadata: _metadata('stamps'),
   );
 
   @override
   Future<core.RestoreTarget> restoreTarget(core.RestoreIdentity identity) =>
-      _server.repository.contestImportRepository.restoreTarget(
-        _owner,
-        identity,
+      _server.runProfileOperation(
+        () => _server.repository.contestImportRepository.restoreTarget(
+          _owner,
+          identity,
+        ),
       );
 
   @override
@@ -76,27 +80,31 @@ class NativeCompetitionImportStore extends NativePilotImportStore
     required bool completed,
     required bool confirmedReplace,
     core.Id? updateContestId,
-  }) => _server.repository.contestImportRepository.importRestore(
-    core.RestoreImportPlan(
-      plan: plan,
-      profileIds: profileIds,
-      owner: _owner,
-      timezone: timeZone ?? TimeZones.device(),
-      importOperationId: operationId,
-      fileFingerprint: fingerprint,
-      toolVersion: toolVersion,
-      completed: completed,
-      confirmedReplace: confirmedReplace,
-      updateContestId: updateContestId,
+  }) => _server.runProfileOperation(
+    () => _server.repository.contestImportRepository.importRestore(
+      core.RestoreImportPlan(
+        plan: plan,
+        profileIds: profileIds,
+        owner: _owner,
+        timezone: timeZone ?? TimeZones.device(),
+        importOperationId: operationId,
+        fileFingerprint: fingerprint,
+        toolVersion: toolVersion,
+        completed: completed,
+        confirmedReplace: confirmedReplace,
+        updateContestId: updateContestId,
+      ),
+      metadata: _metadata('restore'),
     ),
-    metadata: _metadata('restore'),
   );
 
   @override
-  Future<core.ImportedContestNote?> noteFor(core.Id contestId) async =>
-      core.ImportedContestNote.fromStamps(
-        await _server.repository.importProvenanceRepository.listForContest(
-          contestId,
-        ),
-      );
+  Future<core.ImportedContestNote?> noteFor(core.Id contestId) =>
+      _server.runProfileOperation(() async {
+        return core.ImportedContestNote.fromStamps(
+          await _server.repository.importProvenanceRepository.listForContest(
+            contestId,
+          ),
+        );
+      });
 }
