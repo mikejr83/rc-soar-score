@@ -42,7 +42,7 @@ class EntryContext {
     'late_landing',
     'motor_restart',
     'out_of_bounds',
-    'no_altitude',
+    'no_altitude_recorded',
     'flight_penalty',
   };
 

@@ -301,6 +301,9 @@ void main() {
     final entry = await _repository(_fixtures).entryContext('c', 'p', 2);
     expect(entry.pilotNumber, 7);
     expect(entry.formSupported, isTrue);
+    // The fixture carries every field the server sends for F5J, so a renamed
+    // key makes the form refuse the flight.
+    expect(entry.fieldKeys, contains('no_altitude_recorded'));
     expect(entry.pilotName, 'Alex Rivera');
     expect(entry.group, 'B');
     expect(entry.lane, isNull);
