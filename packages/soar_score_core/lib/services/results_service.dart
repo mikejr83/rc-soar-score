@@ -230,7 +230,7 @@ class ResultsService {
             id: _newId(),
             contestId: contestId,
             scorePlaceholderId: slot.placeholder.id,
-            officialScoreId: slot.officialScore.id,
+            officialScoreId: slot.officialScore!.id,
             contestParticipationId: slot.assignment.contestParticipationId,
             creditedRoundId: slot.assignment.creditedRoundId,
             outcome: flight.flight.outcome,
@@ -332,15 +332,21 @@ class ResultsService {
   /// The engine's options: the discipline settings plus the core settings
   /// that shape the group score.
   Map<String, Object?> _engineOptions(ContestConfigurationRevision revision) =>
-      {
-        for (final key in const [
-          'group_score_mode',
-          'rounding_mode',
-          'decimal_places',
-        ])
-          if (revision.config.core[key] != null) key: revision.config.core[key],
-        ...revision.config.discipline,
-      };
+      engineOptions(revision);
+
+  /// The engine's options for [revision]; shared with the participant views,
+  /// which calculate the same way.
+  static Map<String, Object?> engineOptions(
+    ContestConfigurationRevision revision,
+  ) => {
+    for (final key in const [
+      'group_score_mode',
+      'rounding_mode',
+      'decimal_places',
+    ])
+      if (revision.config.core[key] != null) key: revision.config.core[key],
+    ...revision.config.discipline,
+  };
 
   Future<void> _requireF5j(ContestConfigurationRevision revision) async {
     final profile = await repository.disciplineProfileRepository.findById(
