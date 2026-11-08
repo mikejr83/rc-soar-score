@@ -56,9 +56,9 @@ void main() {
     },
   );
 
-  test('logs no link unless a developer opts in', () async {
+  test('never writes an invitation link to a log', () async {
     final records = <LogRecord>[];
-    final sub = Logger('PilotInvitations').onRecord.listen(records.add);
+    final sub = Logger.root.onRecord.listen(records.add);
     addTearDown(sub.cancel);
     Logger.root.level = Level.ALL;
     final client = clientFor(
@@ -75,9 +75,6 @@ void main() {
       ),
     );
     await source.read(client, contest);
-    // A link is a bearer credential: without
-    // --dart-define=SOAR_SCORE_LOG_INVITATION_LINKS=true nothing carries one.
-    expect(logInvitationLinksEnabled, isFalse);
     expect(records.map((r) => r.message).join('\n'), isNot(contains('abc')));
   });
 

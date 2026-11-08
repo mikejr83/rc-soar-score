@@ -1,17 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
-
-final _logger = Logger('PilotInvitations');
-
-/// Set `--dart-define=SOAR_SCORE_LOG_INVITATION_LINKS=true` to have a debug or
-/// profile build write each full invitation link to the log (the VS Code
-/// launch configurations for local testing do). A link is a bearer credential,
-/// so it is off by default and a release build never logs one.
-const bool logInvitationLinksEnabled = bool.fromEnvironment(
-  'SOAR_SCORE_LOG_INVITATION_LINKS',
-);
 
 /// Whether [participation] can have an invitation: a pilot who still flies.
 /// The workspace and the Participants list share this rule, so neither issues
@@ -19,25 +8,6 @@ const bool logInvitationLinksEnabled = bool.fromEnvironment(
 bool canHaveInvitation(ContestParticipation participation) =>
     participation.roleType == RoleType.pilot &&
     participation.retiredAtRound == null;
-
-/// Logs the invitations read for [contestId]: the participation ids only, or
-/// with the links when [logInvitationLinksEnabled] is set in a non-release
-/// build, so a developer can copy one from the console.
-void logInvitationLinks(Id contestId, Map<String, String> links) {
-  if (kReleaseMode || links.isEmpty) return;
-  if (!logInvitationLinksEnabled) {
-    _logger.fine(
-      'Contest ${contestId.value} has invitations for '
-      '${links.length} participations.',
-    );
-    return;
-  }
-  final lines = [for (final e in links.entries) '  ${e.key}: ${e.value}'];
-  _logger.info(
-    'Invitation links of contest ${contestId.value} (opted in, development '
-    'builds only):\n${lines.join('\n')}',
-  );
-}
 
 /// The invitations a contest has issued, as the cards need them: for each
 /// pilot that has one, the link its QR code carries.
@@ -141,7 +111,6 @@ class ApiPilotInvitationSource implements PilotInvitationSource {
         for (final invitation in answer.invitations)
           invitation.participationId.value: invitation.link,
       };
-      logInvitationLinks(contestId, links);
       return PilotInvitations(
         links: links,
         sendUnavailableReason: answer.canIssue

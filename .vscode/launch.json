@@ -61,9 +61,7 @@
       "cwd": "apps/soar_score_contest",
       "args": [
         "-d",
-        "windows",
-        "--dart-define",
-        "SOAR_SCORE_LOG_INVITATION_LINKS=true"
+        "windows"
       ],
       "console": "debugConsole"
     },
