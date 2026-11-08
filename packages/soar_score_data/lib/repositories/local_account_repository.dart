@@ -42,8 +42,8 @@ class LocalAccountRepository implements core.LocalAccountRepository {
 
   @override
   Future<core.Id?> linkedAccount() async {
-    final value = (await _db.select(_db.localAccount).getSingleOrNull())
-        ?.linkedAccountId;
+    final value =
+        (await _db.select(_db.localAccount).getSingleOrNull())?.linkedAccountId;
     return value == null ? null : core.Id.parse(value);
   }
 

@@ -36,6 +36,22 @@ class ActingAccount extends ChangeNotifier {
     return true;
   }
 
+  /// Whether the signed-in account is not the one this computer's data belongs
+  /// to, so the data is not served (see `profileMismatchGuard`).
+  bool get profileMismatch => _server.profileMismatch;
+
+  /// The service refused sign-in [epoch]'s claim as another account's data:
+  /// stops serving the data, unless that sign-in is no longer the current one.
+  /// Returns whether it did. Signing out, or signing in as the owning account,
+  /// ends it.
+  bool markProfileMismatch({required int epoch}) {
+    if (!_epoch.isCurrent(epoch)) return false;
+    _server.markProfileMismatch();
+    _boundEpoch = -1;
+    notifyListeners();
+    return true;
+  }
+
   void actAsLocal() {
     _server.actAsLocal();
     _boundEpoch = -1;

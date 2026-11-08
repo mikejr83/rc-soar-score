@@ -12,6 +12,7 @@ import 'package:soar_score_data/soar_score_data.dart';
 import '../platform/inspection_owner_guard.dart';
 import 'embedded_guard.dart';
 import 'owner_scoped_principal.dart';
+import 'profile_mismatch_guard.dart';
 
 final _logger = Logger('EmbeddedServer');
 
@@ -52,6 +53,7 @@ class EmbeddedServer {
   late core.Id _localAccountId;
   late core.Id _actingAccountId;
   core.Id? _linkedAccountId;
+  bool _profileMismatch = false;
 
   /// Which owner ids belong to contests imported for inspection. Shared with
   /// the sync engine, so both decide from the same answers.
@@ -82,11 +84,25 @@ class EmbeddedServer {
   void actAs(core.Id accountId) {
     _actingAccountId = accountId;
     _linkedAccountId = accountId;
+    _profileMismatch = false;
   }
+
+  /// Whether a different account than the one this installation's data was
+  /// claimed into is signed in. While true the API refuses every request but
+  /// `GET /health` (see [profileMismatchGuard]).
+  bool get profileMismatch => _profileMismatch;
+
+  /// The service refused the signed-in account's claim because the data is
+  /// another account's: stop serving that data until the director signs out or
+  /// signs in as the owning account.
+  void markProfileMismatch() => _profileMismatch = true;
 
   /// Signed out: acts as the account the data was last claimed into, so the
   /// director still sees it, or as the Local account if it was never claimed.
-  void actAsLocal() => _actingAccountId = _linkedAccountId ?? _localAccountId;
+  void actAsLocal() {
+    _actingAccountId = _linkedAccountId ?? _localAccountId;
+    _profileMismatch = false;
+  }
 
   Future<void> initializeDatabase() async {
     final dbPath = File(_databasePath);
@@ -102,9 +118,8 @@ class EmbeddedServer {
       _localAccountId = await LocalAccountRepository(_database).ensure();
       // A claimed installation owns its data as the account, so it starts as
       // that account even offline; the sign-in only decides what is synced.
-      _linkedAccountId = await LocalAccountRepository(
-        _database,
-      ).linkedAccount();
+      _linkedAccountId = await LocalAccountRepository(_database)
+          .linkedAccount();
       _actingAccountId = _linkedAccountId ?? _localAccountId;
       if (seedDemo) {
         _logger.finer('Seeding demo data');
@@ -139,6 +154,7 @@ class EmbeddedServer {
     final guarded = Pipeline()
         .addMiddleware(_inFlight.middleware)
         .addMiddleware(embeddedGuard(secret: secret, port: () => port))
+        .addMiddleware(profileMismatchGuard(mismatched: () => _profileMismatch))
         .addHandler(handler);
     _server = await shelf_io.serve(guarded, InternetAddress.loopbackIPv4, 0);
   }

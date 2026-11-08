@@ -32,6 +32,13 @@ enum SyncProblem {
         'Rename the duplicate on this device, then sign in again. Nothing on '
         'this device was changed or lost.',
   ),
+  accountMismatch(
+    'Different account',
+    'The data on this computer belongs to another account, so it is not '
+        'shown while you are signed in as someone else. Sign out and sign in '
+        'as that account, or use a different Windows user. Nothing on this '
+        'device was changed or lost.',
+  ),
   accountClaimFailed(
     'Account not linked',
     'Your offline data could not be linked to your account. Nothing on this '

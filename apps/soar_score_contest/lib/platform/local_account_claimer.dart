@@ -38,6 +38,7 @@ class LocalAccountClaimer {
     required this._onClaimed,
     required this._onSignedOut,
     required this._onProblem,
+    this._onAccountMismatch,
     this._getPreferences,
     this._putPreferences,
     this._onPreferencesChanged,
@@ -56,6 +57,10 @@ class LocalAccountClaimer {
   final Future<void> Function(core.Id accountId, int session) _onClaimed;
   final void Function() _onSignedOut;
   final void Function(SyncProblem? problem) _onProblem;
+
+  /// Called with the sign-in's number when the service says the Local data was
+  /// claimed into another account, so the app can stop serving it to this one.
+  final void Function(int session)? _onAccountMismatch;
 
   /// Reads and stores the signed-in account's preferences on the service.
   /// Both null (the default) skips carrying preferences over.
@@ -128,6 +133,11 @@ class LocalAccountClaimer {
     } on ApiHttpError catch (error) {
       _logger.warning('The service refused the claim: ${error.statusCode}');
       if (!_epoch.isCurrent(session) || _stopped) return;
+      if (error.statusCode == 409 && error.error?.code == 'already_claimed') {
+        _onAccountMismatch?.call(session);
+        _onProblem(SyncProblem.accountMismatch);
+        return;
+      }
       _onProblem(_problemFor(error.statusCode));
       return;
     } on ApiException catch (error) {

@@ -250,6 +250,8 @@ class NativeBootstrap extends AppBootstrap {
       },
       onSignedOut: acting.actAsLocal,
       onProblem: sync.appSync.claimProblemChanged,
+      onAccountMismatch: (session) =>
+          acting.markProfileMismatch(epoch: session),
       getPreferences: remote.getAccountPreferences,
       putPreferences: remote.updateAccountPreferences,
       onPreferencesChanged: preferences.changed,
