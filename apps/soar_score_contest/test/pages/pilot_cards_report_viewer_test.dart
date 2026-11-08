@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/connectivity_provider.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/contest/report_viewer_page.dart';
 import 'package:soar_score_contest/services/reports/pilot_cards/pilot_invitations.dart';
@@ -14,6 +15,7 @@ import 'package:soar_score_contest/widgets/reports/pilot_cards/pilot_card_view.d
 import 'package:soar_score_contest/widgets/reports/pilot_cards/qr_code_view.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../support/fake_app_connectivity.dart';
 import '../support/matrix_test_support.dart';
 import '../support/next_step_widget_support.dart';
 import '../support/stand_in_report.dart';
@@ -77,6 +79,8 @@ Future<void> _pump(
   ContestScores Function(CurrentMatrix matrix)? scores,
   ReportPrinter printer = const NotWiredReportPrinter(),
   ApiClient? publicationClient,
+  Map<int, int> retired = const {},
+  FakeAppConnectivity? connectivity,
 }) async {
   final matrix = drawnMatrix(lanes: lanes);
   final server = WorkspaceServer(
@@ -84,6 +88,7 @@ Future<void> _pump(
     matrix: matrix,
     scores: scores?.call(matrix) ?? scoresFor(matrix, const {}),
   );
+  server.inner.retirements.addAll(retired);
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -101,18 +106,21 @@ Future<void> _pump(
               : server.handle(request),
         ),
       ),
-      child: _withPublicationClient(
-        publicationClient,
-        MaterialApp(
-          locale: const Locale('en', 'US'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: ReportViewerPage(
-            printer: printer,
-            contestId: matrixContestId,
-            report: ReportKind.cards,
-            params: params,
-            pollInterval: null,
+      child: _withConnectivity(
+        connectivity,
+        _withPublicationClient(
+          publicationClient,
+          MaterialApp(
+            locale: const Locale('en', 'US'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: ReportViewerPage(
+              printer: printer,
+              contestId: matrixContestId,
+              report: ReportKind.cards,
+              params: params,
+              pollInterval: null,
+            ),
           ),
         ),
       ),
@@ -120,6 +128,11 @@ Future<void> _pump(
   );
   await tester.pumpAndSettle();
 }
+
+Widget _withConnectivity(FakeAppConnectivity? monitor, Widget child) =>
+    monitor == null
+    ? child
+    : AppConnectivityInherited(monitor: monitor, child: child);
 
 Widget _withPublicationClient(ApiClient? client, Widget child) => client == null
     ? child
@@ -304,6 +317,57 @@ void main() {
       find.textContaining('No QR code.', findRichText: true),
       findsNothing,
     );
+  });
+
+  testWidgets(
+    'a connection lost while confirming sends nothing from the cards',
+    (tester) async {
+      final source = _FakeInvitations();
+      PilotInvitationSources.current = source;
+      final connectivity = FakeAppConnectivity();
+      await _pump(tester, connectivity: connectivity);
+
+      await tester.tap(find.byKey(const ValueKey('cards-banner-send')));
+      await tester.pumpAndSettle();
+      connectivity
+        ..internetStatus = ConnectivityStatus.unavailable
+        ..notifyListeners();
+      await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+      await tester.pumpAndSettle();
+
+      expect(source.sends, 0);
+      expect(
+        find.text('You’re offline, so invitations can’t be sent now.'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets('a retired pilot’s card prints but is never sent an invitation', (
+    tester,
+  ) async {
+    final source = _FakeInvitations();
+    PilotInvitationSources.current = source;
+    await _pump(
+      tester,
+      retired: {4: 2},
+      params: const ReportViewParams(filters: {'ret': '1'}),
+    );
+
+    // Four cards (the retired pilot's included), three that can have a code.
+    expect(find.byType(PilotCardView), findsNWidgets(4));
+    expect(
+      find.textContaining('Some cards have no QR code. Send invitations'),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('cards-banner-send')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('3 QR codes'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(source.lastSent, hasLength(3));
+    expect(find.byType(QrCodeView), findsNWidgets(3));
   });
 
   testWidgets(

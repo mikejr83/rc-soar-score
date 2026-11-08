@@ -3651,6 +3651,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You’re offline, so invitations can’t be sent now.'**
   String get invitationsOffline;
+
+  /// Reason invitations cannot be sent: the internet is up but the server is unreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'The server can’t be reached, so invitations can’t be sent now.'**
+  String get invitationsServerUnreachable;
 }
 
 class _AppLocalizationsDelegate

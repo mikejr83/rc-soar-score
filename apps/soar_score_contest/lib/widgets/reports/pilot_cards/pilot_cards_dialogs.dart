@@ -3,81 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/reports/pilot_cards/pilot_invitations.dart';
 import '../../../services/reports/report_pilot.dart';
+import '../../invitations/send_invitations_flow.dart';
 import '../viewer/report_definition.dart';
 import '../viewer/viewer_banner.dart';
 
 /// What the director chose in the print reminder.
 enum _Reminder { sendAndPrint, printWithout, cancel }
-
-/// Why invitations cannot be sent, in words: the app's own reason, else the
-/// server's, else `null` when they can be sent.
-String? sendUnavailableText(
-  AppLocalizations l10n,
-  PilotInvitations invitations,
-) => switch (invitations.sendUnavailable) {
-  SendUnavailable.signIn => l10n.pilotCardsUnavailableSignIn,
-  SendUnavailable.serverIssuesNone => l10n.pilotCardsUnavailableServer,
-  SendUnavailable.linksUnreproducible => l10n.pilotCardsUnavailableLinks,
-  SendUnavailable.notInThisVersion => l10n.pilotCardsUnavailableVersion,
-  null => invitations.sendUnavailableReason,
-};
-
-/// Asks to send invitations for [count] pilots. Answers whether to go on. Sending is
-/// its own confirmation. It creates the QR codes and links only; nobody is
-/// emailed.
-Future<bool> confirmSendInvitations(BuildContext context, int count) async {
-  final ok = await showDialog<bool>(
-    context: context,
-    builder: (context) {
-      final l10n = AppLocalizations.of(context);
-      return AlertDialog(
-        key: const ValueKey('cards-send-dialog'),
-        icon: const Icon(Icons.campaign),
-        title: Text(l10n.pilotCardsSendTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 12,
-          children: [
-            Text(l10n.pilotCardsSendBody),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 10,
-              children: [
-                const Icon(Icons.qr_code_2, size: 20),
-                Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: l10n.pilotCardsQrCount(count),
-                          style: const TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                        TextSpan(text: l10n.pilotCardsSendCountNote),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.pilotCardsCancel),
-          ),
-          FilledButton(
-            key: const ValueKey('cards-send-confirm'),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.pilotCardsSendConfirm),
-          ),
-        ],
-      );
-    },
-  );
-  return ok ?? false;
-}
 
 /// The reminder before the system print dialog when some cards have no QR
 /// code. It is a reminder, never a block: printing without QR codes stays
@@ -160,11 +91,10 @@ Future<bool> remindAboutMissingQr({
     case _Reminder.printWithout:
       return true;
     case _Reminder.sendAndPrint:
-      if (!context.mounted ||
-          !await confirmSendInvitations(context, missing.length)) {
-        return false;
-      }
-      return session.send([for (final p in missing) p.participationId]);
+      if (!context.mounted) return false;
+      return sendInvitationsGuarded(context, session, [
+        for (final p in missing) p.participationId,
+      ], announce: false);
     case _Reminder.cancel:
     case null:
       return false;
@@ -322,7 +252,7 @@ Future<void> _send(
   PilotInvitationSession session,
   List<ReportPilot> missing,
 ) async {
-  if (await confirmSendInvitations(context, missing.length)) {
-    await session.send([for (final p in missing) p.participationId]);
-  }
+  await sendInvitationsGuarded(context, session, [
+    for (final p in missing) p.participationId,
+  ], announce: false);
 }

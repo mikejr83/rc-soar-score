@@ -124,7 +124,7 @@ class _InvitationsSectionState extends State<InvitationsSection> {
         : invitationsUnavailableText(
             l10n,
             session.invitations,
-            online: invitationsOnline(context),
+            unreachable: invitationsUnreachableText(context, l10n),
           );
     final String text;
     if (_loading) {
@@ -192,7 +192,7 @@ class _InvitationsSectionState extends State<InvitationsSection> {
                     key: const ValueKey('workspace-invitations-send'),
                     onPressed: canSend
                         ? () async {
-                            await sendInvitationsWithConfirmation(
+                            await sendInvitationsGuarded(
                               context,
                               session,
                               missing,

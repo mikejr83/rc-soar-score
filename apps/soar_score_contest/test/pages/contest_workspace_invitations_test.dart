@@ -210,4 +210,67 @@ void main() {
     );
     expect(source.sent, isEmpty);
   });
+
+  testWidgets('an unreachable server turns sending off with its own reason', (
+    tester,
+  ) async {
+    final source = _Source();
+    PilotInvitationSources.current = source;
+    final connectivity = FakeAppConnectivity();
+    await _pump(
+      tester,
+      MatrixServer(configuration: matrixConfiguration()),
+      connectivity: connectivity,
+    );
+
+    // The internet is up, the server is not.
+    connectivity
+      ..apiStatus = ConnectivityStatus.unavailable
+      ..notifyListeners();
+    await tester.pumpAndSettle();
+
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.byKey(const ValueKey('workspace-invitations-send')),
+          )
+          .onPressed,
+      isNull,
+    );
+    expect(
+      find.text(
+        'The server can’t be reached, so invitations can’t be sent now.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a connection lost while confirming sends nothing', (
+    tester,
+  ) async {
+    final source = _Source();
+    PilotInvitationSources.current = source;
+    final connectivity = FakeAppConnectivity();
+    await _pump(
+      tester,
+      MatrixServer(configuration: matrixConfiguration()),
+      connectivity: connectivity,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('workspace-invitations-send')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('cards-send-dialog')), findsOneWidget);
+    // The connection drops while the director decides.
+    connectivity
+      ..internetStatus = ConnectivityStatus.unavailable
+      ..notifyListeners();
+    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(source.sent, isEmpty);
+    expect(
+      find.text('You’re offline, so invitations can’t be sent now.'),
+      findsWidgets,
+    );
+  });
 }

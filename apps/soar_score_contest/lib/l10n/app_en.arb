@@ -2524,5 +2524,7 @@
   "invitationsCopyFailed": "The link could not be copied.",
   "@invitationsCopyFailed": {"description": "Snack bar when copying an invitation link to the clipboard failed."},
   "invitationsOffline": "You’re offline, so invitations can’t be sent now.",
-  "@invitationsOffline": {"description": "Reason invitations cannot be sent: the device is offline."}
+  "@invitationsOffline": {"description": "Reason invitations cannot be sent: the device is offline."},
+  "invitationsServerUnreachable": "The server can’t be reached, so invitations can’t be sent now.",
+  "@invitationsServerUnreachable": {"description": "Reason invitations cannot be sent: the internet is up but the server is unreachable."}
 }

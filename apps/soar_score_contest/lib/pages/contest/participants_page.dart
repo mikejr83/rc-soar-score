@@ -123,7 +123,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   Future<void> _sendInvitations(List<Id> missing) async {
     final session = _invitations;
     if (session == null) return;
-    await sendInvitationsWithConfirmation(context, session, missing);
+    await sendInvitationsGuarded(context, session, missing);
   }
 
   /// What the Invitations menu offers for the selection now.
@@ -147,7 +147,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     final unavailable = invitationsUnavailableText(
       l10n,
       session.invitations,
-      online: invitationsOnline(context),
+      unreachable: invitationsUnreachableText(context, l10n),
     );
     final sendReason =
         unavailable ??
