@@ -19,6 +19,12 @@ class LocalAccount extends Table {
   TextColumn get preferredTimeZone => text().nullable()();
   TextColumn get preferredLocale => text().nullable()();
 
+  /// The registered account this installation's data was last claimed into
+  /// (see `LocalAccountRepository.reassignTo`); null until a claim. Kept so the
+  /// installation keeps acting as that account when it starts offline or the
+  /// director signs out.
+  TextColumn get linkedAccountId => text().nullable()();
+
   TextColumn get createdAt => text()();
 
   @override

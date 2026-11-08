@@ -51,6 +51,7 @@ class EmbeddedServer {
   late core.Repository _repository;
   late core.Id _localAccountId;
   late core.Id _actingAccountId;
+  core.Id? _linkedAccountId;
 
   /// Which owner ids belong to contests imported for inspection. Shared with
   /// the sync engine, so both decide from the same answers.
@@ -78,10 +79,14 @@ class EmbeddedServer {
 
   /// Acts as the signed-in [accountId] from now on, so new contests and
   /// roles belong to it from the start and sync at once.
-  void actAs(core.Id accountId) => _actingAccountId = accountId;
+  void actAs(core.Id accountId) {
+    _actingAccountId = accountId;
+    _linkedAccountId = accountId;
+  }
 
-  /// Acts as the installation's Local account again (signed out).
-  void actAsLocal() => _actingAccountId = _localAccountId;
+  /// Signed out: acts as the account the data was last claimed into, so the
+  /// director still sees it, or as the Local account if it was never claimed.
+  void actAsLocal() => _actingAccountId = _linkedAccountId ?? _localAccountId;
 
   Future<void> initializeDatabase() async {
     final dbPath = File(_databasePath);
@@ -95,7 +100,12 @@ class EmbeddedServer {
     try {
       await SystemDataSeeder(_database).seed();
       _localAccountId = await LocalAccountRepository(_database).ensure();
-      _actingAccountId = _localAccountId;
+      // A claimed installation owns its data as the account, so it starts as
+      // that account even offline; the sign-in only decides what is synced.
+      _linkedAccountId = await LocalAccountRepository(
+        _database,
+      ).linkedAccount();
+      _actingAccountId = _linkedAccountId ?? _localAccountId;
       if (seedDemo) {
         _logger.finer('Seeding demo data');
         await DemoDataSeeder(

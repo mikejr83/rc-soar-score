@@ -26,6 +26,16 @@ void _tests(Backend backend) {
     expect(await accounts.find(), isNull);
   });
 
+  test('remembers the account it was last reassigned to', skip: skip, () async {
+    await accounts.ensure();
+    expect(await accounts.linkedAccount(), isNull);
+
+    final account = core.Id.create();
+    await accounts.reassignTo(account);
+
+    expect(await accounts.linkedAccount(), account);
+  });
+
   test('creates one UUIDv7 id on first run and keeps it', skip: skip, () async {
     final id = await accounts.ensure();
 

@@ -35,6 +35,10 @@ class FakeLocalAccount implements core.LocalAccountRepository {
   }
 
   @override
+  Future<core.Id?> linkedAccount() async =>
+      reassigned.isEmpty ? null : reassigned.last;
+
+  @override
   Future<core.AccountPreferences> preferences() async => storedPreferences;
 
   @override

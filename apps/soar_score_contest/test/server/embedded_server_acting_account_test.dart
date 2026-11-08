@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/server/embedded_server.dart';
 import 'package:soar_score_core/soar_score_core.dart' show Contest, Id;
+import 'package:soar_score_data/soar_score_data.dart'
+    show LocalAccountRepository;
 
 void main() {
   late Directory tempDir;
@@ -56,10 +58,29 @@ void main() {
 
     server.actAsLocal();
     final signedOut = await createContest('After sign-out');
-    expect(signedOut.ownerAccountId, server.localAccountId);
-    expect(server.actingAccountId, server.localAccountId);
+    // The data was claimed into the account, so sign-out keeps showing it.
+    expect(signedOut.ownerAccountId, account);
+    expect(server.actingAccountId, account);
 
     server.actAs(account);
     expect((await createContest('Again')).ownerAccountId, account);
+  });
+
+  test('a claimed installation acts as the account when it restarts', () async {
+    final account = Id.create();
+    await createContest('Offline work');
+    await LocalAccountRepository(server.database).reassignTo(account);
+    final dbPath = '${tempDir.path}${Platform.pathSeparator}soar_score.db';
+    client.close();
+    await server.close();
+
+    server = await startEmbeddedServer(dbPath);
+    client = ApiClient(
+      baseUrl: server.baseUrl,
+      tokenProvider: () async => server.secret,
+    );
+
+    expect(server.actingAccountId, account);
+    expect((await client.contests()).map((c) => c.name), ['Offline work']);
   });
 }

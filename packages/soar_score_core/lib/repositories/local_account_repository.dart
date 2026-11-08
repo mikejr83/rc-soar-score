@@ -19,12 +19,19 @@ abstract interface class LocalAccountRepository {
   /// ownership of contests and director data, the actors of writes already
   /// made, and the owner and payload of mutations still waiting to be sent.
   ///
+  /// Also records [accountId] as the [linkedAccount].
+  ///
   /// All or nothing, and idempotent: a second call finds nothing left to
   /// change. The Local account id itself is kept, so the claim can be
   /// repeated and late records that still carry it can be recognised. Throws
   /// [StateError] before the first run created the Local account and
   /// [ArgumentError] when [accountId] is the Local account id.
   Future<void> reassignTo(Id accountId);
+
+  /// The account this installation's data was last re-pointed to by
+  /// [reassignTo], or null before any claim. The installation keeps acting as
+  /// it when offline and after sign-out.
+  Future<Id?> linkedAccount();
 
   /// The preferences chosen on this installation; empty before any choice.
   Future<AccountPreferences> preferences();

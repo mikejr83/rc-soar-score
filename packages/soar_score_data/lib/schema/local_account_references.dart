@@ -45,4 +45,5 @@ const accountColumnsNotReassigned = <String, String>{
   'discipline_profiles.created_by': 'system data, authored by the system',
   'discipline_profiles.updated_by': 'system data, authored by the system',
   'local_account.account_id': 'the Local account id itself, kept as the alias',
+  'local_account.linked_account_id': 'the target of the re-pointing, set by it',
 };
