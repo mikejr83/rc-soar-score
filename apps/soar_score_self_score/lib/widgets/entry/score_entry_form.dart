@@ -226,11 +226,8 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
     });
   }
 
-  static final _random = Random();
-
   String _newMutationId() =>
-      'entry-${widget.pilotId}-${widget.data.round}-'
-      '${DateTime.now().microsecondsSinceEpoch}-${_random.nextInt(1 << 32)}';
+      newEntryMutationId(widget.pilotId, widget.data.round);
 
   void _submit() {
     if (!_canSubmit) return;
@@ -671,3 +668,14 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
     );
   }
 }
+
+final _random = Random();
+
+/// A fresh id for one submit attempt.
+///
+/// The random bound is written as a literal: `1 << 32` is 0 in a browser
+/// build, where shifts are 32-bit, and `nextInt(0)` throws there.
+@visibleForTesting
+String newEntryMutationId(String pilotId, int round, {Random? random}) =>
+    'entry-$pilotId-$round-${DateTime.now().microsecondsSinceEpoch}-'
+    '${(random ?? _random).nextInt(0x100000000)}';
