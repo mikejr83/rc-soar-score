@@ -245,7 +245,9 @@ class NativeBootstrap extends AppBootstrap {
       local: LocalAccountRepository(server.database),
       claim: remote.claimLocalAccount,
       onSignedIn: acting.signedIn,
+      onClaimStarting: acting.claimStarting,
       onClaimRecorded: acting.claimRecorded,
+      onClaimFinished: acting.claimFinished,
       onClaimPostponed: () {
         if (acting.profileAccess == ProfileAccess.unverified) {
           sync.appSync.claimProblemChanged(SyncProblem.accountUnverified);

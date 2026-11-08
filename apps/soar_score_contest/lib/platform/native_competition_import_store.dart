@@ -49,9 +49,8 @@ class NativeCompetitionImportStore extends NativePilotImportStore
     required core.Id operationId,
     required String fingerprint,
     required List<core.ProfileStampEntry> entries,
-  }) {
-    _server.assertProfileUsable();
-    return _server.repository.contestImportRepository.stampProfiles(
+  }) => _server.runProfileOperation(
+    () => _server.repository.contestImportRepository.stampProfiles(
       core.ProfileStampPlan(
         owner: _owner,
         importOperationId: operationId,
@@ -60,17 +59,17 @@ class NativeCompetitionImportStore extends NativePilotImportStore
         entries: entries,
       ),
       metadata: _metadata('stamps'),
-    );
-  }
+    ),
+  );
 
   @override
-  Future<core.RestoreTarget> restoreTarget(core.RestoreIdentity identity) {
-    _server.assertProfileUsable();
-    return _server.repository.contestImportRepository.restoreTarget(
-      _owner,
-      identity,
-    );
-  }
+  Future<core.RestoreTarget> restoreTarget(core.RestoreIdentity identity) =>
+      _server.runProfileOperation(
+        () => _server.repository.contestImportRepository.restoreTarget(
+          _owner,
+          identity,
+        ),
+      );
 
   @override
   Future<core.RestoreImportResult> importRestore({
@@ -81,9 +80,8 @@ class NativeCompetitionImportStore extends NativePilotImportStore
     required bool completed,
     required bool confirmedReplace,
     core.Id? updateContestId,
-  }) {
-    _server.assertProfileUsable();
-    return _server.repository.contestImportRepository.importRestore(
+  }) => _server.runProfileOperation(
+    () => _server.repository.contestImportRepository.importRestore(
       core.RestoreImportPlan(
         plan: plan,
         profileIds: profileIds,
@@ -97,16 +95,16 @@ class NativeCompetitionImportStore extends NativePilotImportStore
         updateContestId: updateContestId,
       ),
       metadata: _metadata('restore'),
-    );
-  }
+    ),
+  );
 
   @override
-  Future<core.ImportedContestNote?> noteFor(core.Id contestId) async {
-    _server.assertProfileUsable();
-    return core.ImportedContestNote.fromStamps(
-      await _server.repository.importProvenanceRepository.listForContest(
-        contestId,
-      ),
-    );
-  }
+  Future<core.ImportedContestNote?> noteFor(core.Id contestId) =>
+      _server.runProfileOperation(() async {
+        return core.ImportedContestNote.fromStamps(
+          await _server.repository.importProvenanceRepository.listForContest(
+            contestId,
+          ),
+        );
+      });
 }

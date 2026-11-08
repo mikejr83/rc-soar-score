@@ -42,10 +42,10 @@ void main() {
 
   test('another account is not served the claimed account data', () async {
     // 1. A claims the installation and works.
-    await app.createContest('A before the claim');
     await app.claimer.run();
     expect(app.acting.id, accountA);
-    await app.createContest('A after the claim');
+    await app.createContest('A first');
+    await app.createContest('A second');
     expect(await app.client.contests(), hasLength(2));
 
     // 2. A signs out: A's data is still shown.

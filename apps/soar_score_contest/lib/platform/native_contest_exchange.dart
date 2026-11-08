@@ -92,16 +92,16 @@ class NativeContestExchange implements ContestExchange {
   });
 
   @override
-  Future<Set<core.Id>> inspectionContests() async {
-    _server.assertProfileUsable();
-    final owners = await _server.inspectionOwners.owners();
-    if (owners.isEmpty) return {};
-    final contests = await _server.repository.contestRepository.getAll();
-    return {
-      for (final contest in contests)
-        if (owners.contains(contest.ownerAccountId)) contest.id,
-    };
-  }
+  Future<Set<core.Id>> inspectionContests() =>
+      _server.runProfileOperation(() async {
+        final owners = await _server.inspectionOwners.owners();
+        if (owners.isEmpty) return <core.Id>{};
+        final contests = await _server.repository.contestRepository.getAll();
+        return {
+          for (final contest in contests)
+            if (owners.contains(contest.ownerAccountId)) contest.id,
+        };
+      });
 
   ImportTarget get _target {
     final acting = _server.actingAccountId;
@@ -129,8 +129,7 @@ class NativeContestExchange implements ContestExchange {
 
   Future<T> _guard<T>(Future<T> Function() body) async {
     try {
-      _server.assertProfileUsable();
-      return await body();
+      return await _server.runProfileOperation(body);
     } on ProfileUnavailableError catch (e) {
       throw ExchangeFailure(e.message);
     } on ExchangeException catch (e) {

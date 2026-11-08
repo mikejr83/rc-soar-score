@@ -185,10 +185,14 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
 SoarScoreDatabase createLocalDatabase(
   File dbFilePath, {
   bool inBackground = true,
+  QueryInterceptor? interceptor,
 }) {
-  final executor = inBackground
+  final native = inBackground
       ? NativeDatabase.createInBackground(dbFilePath, enableMigrations: true)
       : NativeDatabase(dbFilePath, enableMigrations: true);
+  final executor = interceptor == null
+      ? native
+      : native.interceptWith(interceptor);
   return SoarScoreDatabase(executor, profile: DatabaseProfile.native);
 }
 

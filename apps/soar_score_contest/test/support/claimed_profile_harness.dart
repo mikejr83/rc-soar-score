@@ -91,7 +91,9 @@ class ClaimedProfileHarness {
       ),
       claim: (request) => claim(request),
       onSignedIn: acting.signedIn,
+      onClaimStarting: acting.claimStarting,
       onClaimRecorded: acting.claimRecorded,
+      onClaimFinished: acting.claimFinished,
       onClaimPostponed: () {
         if (acting.profileAccess == ProfileAccess.unverified) {
           problems.add(SyncProblem.accountUnverified);

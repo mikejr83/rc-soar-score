@@ -51,6 +51,15 @@ class ActingAccount extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// The Local data is about to be re-pointed to [accountId]: work begun
+  /// earlier is stopped before it stores anything, and new work waits. Returns
+  /// whether it brackets a change, which [claimFinished] then ends.
+  bool claimStarting(core.Id accountId, String? subject) =>
+      _server.beginClaim(accountId, subject);
+
+  /// Ends what [claimStarting] began.
+  void claimFinished() => _server.endClaim();
+
   /// A claim by [subject] committed, for whichever sign-in made it: the data
   /// belongs to [accountId] from now on. Only ownership changes; acting as the
   /// account (and any sync lease) still waits for [actAs] under a sign-in that

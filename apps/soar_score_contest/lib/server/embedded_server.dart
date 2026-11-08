@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:logging/logging.dart';
-import 'package:shelf/shelf.dart' show Pipeline;
+import 'package:shelf/shelf.dart' show Pipeline, Response;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
@@ -58,6 +59,16 @@ class EmbeddedServer {
   bool _signedIn = false;
   String? _signedSubject;
   ProfileAccess _profileAccess = ProfileAccess.verified;
+  int _claimsInFlight = 0;
+  int _generation = 0;
+  List<Object?> _stateSnapshot = const [];
+
+  /// Runs inside an operation, between its last write and its commit: lets a
+  /// test change the profile at that exact moment. Never set in the app.
+  @visibleForTesting
+  Future<void> Function()? beforeCommitHook;
+
+  static final Object _operationKey = Object();
 
   /// Which owner ids belong to contests imported for inspection. Shared with
   /// the sync engine, so both decide from the same answers.
@@ -89,21 +100,89 @@ class EmbeddedServer {
     _actingAccountId = accountId;
     _linkedAccountId = accountId;
     _profileAccess = ProfileAccess.verified;
+    _settle();
   }
 
   /// Whether the claimed account's data may be served now.
-  ProfileAccess get profileAccess => _profileAccess;
+  ProfileAccess get profileAccess =>
+      _claimsInFlight > 0 ? ProfileAccess.linking : _profileAccess;
 
   /// Whether the service refused the signed-in account's claim.
   bool get profileMismatch => _profileAccess == ProfileAccess.mismatched;
 
   /// Throws [ProfileUnavailableError] unless the claimed account's data may be
-  /// served. Every path that reads or writes it without going through the
-  /// HTTP API calls this first.
+  /// served now. A start-time check only: work that reads or writes the
+  /// database goes through [runProfileOperation], which also checks again
+  /// before anything is stored.
   void assertProfileUsable() {
-    if (_profileAccess != ProfileAccess.verified) {
-      throw ProfileUnavailableError(_profileAccess);
+    if (profileAccess != ProfileAccess.verified) {
+      throw ProfileUnavailableError(profileAccess);
     }
+  }
+
+  /// Runs [body] as one operation on the profile: refused at once unless the
+  /// data may be served, stopped before any statement or commit that would
+  /// store something after the profile changed, and its result dropped (the
+  /// error is thrown instead) if the profile changed before it finished, so a
+  /// read cannot hand data over after a transition.
+  ///
+  /// "Changed" means a sign-in that is not the owner's, a mismatch, a claim
+  /// moving the data, or a different acting account; a repeated notification
+  /// that changes nothing does not count.
+  Future<T> runProfileOperation<T>(Future<T> Function() body) async {
+    assertProfileUsable();
+    final operation = _ProfileOperation(this, _generation);
+    final result = await runZoned(body, zoneValues: {_operationKey: operation});
+    operation.verify();
+    return result;
+  }
+
+  /// The operation the running code belongs to, if any.
+  _ProfileOperation? get _currentOperation =>
+      Zone.current[_operationKey] as _ProfileOperation?;
+
+  /// Called before a write statement or a commit issued by the running code.
+  Future<void> _guardWrite({required bool commit}) async {
+    final operation = _currentOperation;
+    if (operation == null) return;
+    if (commit) await beforeCommitHook?.call();
+    operation.verify();
+  }
+
+  /// Ownership or access changed: operations begun earlier are stale.
+  void _settle() {
+    final now = <Object?>[
+      _profileAccess,
+      _actingAccountId,
+      _linkedAccountId,
+      _linkedSubject,
+      _claimsInFlight > 0,
+    ];
+    var same = now.length == _stateSnapshot.length;
+    for (var i = 0; same && i < now.length; i++) {
+      same = now[i] == _stateSnapshot[i];
+    }
+    if (!same) _generation++;
+    _stateSnapshot = now;
+  }
+
+  /// The data is about to be re-pointed to [accountId], claimed by [subject].
+  /// Returns whether it brackets a change, which the caller must close with
+  /// [endClaim]: re-pointing what is already the account's moves nothing and
+  /// does not disturb running operations.
+  bool beginClaim(core.Id accountId, String? subject) {
+    if (_linkedAccountId == accountId && _linkedSubject == subject) {
+      return false;
+    }
+    _claimsInFlight++;
+    _settle();
+    return true;
+  }
+
+  /// Ends what [beginClaim] began, whether the re-pointing worked or not.
+  void endClaim() {
+    if (_claimsInFlight > 0) _claimsInFlight--;
+    _settle();
   }
 
   /// A user signed in (or was restored) with identity [subject]. The claimed
@@ -113,6 +192,7 @@ class EmbeddedServer {
     _signedIn = true;
     _signedSubject = subject;
     _profileAccess = _accessForSignedIn();
+    _settle();
   }
 
   ProfileAccess _accessForSignedIn() =>
@@ -140,12 +220,16 @@ class EmbeddedServer {
         : _profileAccess == ProfileAccess.mismatched
         ? ProfileAccess.mismatched
         : _accessForSignedIn();
+    _settle();
   }
 
   /// The service refused the signed-in account's claim because the data is
   /// another account's: stop serving that data until the director signs out or
   /// signs in as the owning account.
-  void markProfileMismatch() => _profileAccess = ProfileAccess.mismatched;
+  void markProfileMismatch() {
+    _profileAccess = ProfileAccess.mismatched;
+    _settle();
+  }
 
   /// Signed out: acts as the account the data was last claimed into, so the
   /// director still sees it, or as the Local account if it was never claimed.
@@ -154,13 +238,20 @@ class EmbeddedServer {
     _signedSubject = null;
     _actingAccountId = _linkedAccountId ?? _localAccountId;
     _profileAccess = ProfileAccess.verified;
+    _settle();
   }
 
   Future<void> initializeDatabase() async {
     final dbPath = File(_databasePath);
     _logger.finer('Using database path: ${dbPath.path}');
     await dbPath.parent.create(recursive: true);
-    _database = createLocalDatabase(dbPath);
+    _database = createLocalDatabase(
+      dbPath,
+      interceptor: WriteGuardInterceptor(
+        beforeWrite: () => _guardWrite(commit: false),
+        beforeCommit: () => _guardWrite(commit: true),
+      ),
+    );
     // First launch installs the shipped system data so a director who has
     // never synchronized can create and score contests offline. A failure
     // closes the database and reaches the startup failure page, so the app
@@ -180,6 +271,7 @@ class EmbeddedServer {
       _profileAccess = _linkedAccountId == null
           ? ProfileAccess.verified
           : ProfileAccess.unverified;
+      _settle();
       if (seedDemo) {
         _logger.finer('Seeding demo data');
         await DemoDataSeeder(
@@ -213,7 +305,9 @@ class EmbeddedServer {
     final guarded = Pipeline()
         .addMiddleware(_inFlight.middleware)
         .addMiddleware(embeddedGuard(secret: secret, port: () => port))
-        .addMiddleware(profileMismatchGuard(access: () => _profileAccess))
+        .addMiddleware(
+          profileMismatchGuard(runOperation: runProfileOperation<Response>),
+        )
         .addHandler(handler);
     _server = await shelf_io.serve(guarded, InternetAddress.loopbackIPv4, 0);
   }
@@ -275,4 +369,27 @@ Future<EmbeddedServer> startEmbeddedServer(
   await server.initializeDatabase();
   await server.initialize();
   return server;
+}
+
+/// One operation on the claimed profile: remembers the profile's generation
+/// when it began and says whether it still holds.
+class _ProfileOperation {
+  _ProfileOperation(this._server, this._generation);
+
+  final EmbeddedServer _server;
+  final int _generation;
+
+  /// Throws [ProfileUnavailableError] unless the profile is as it was when the
+  /// operation began and its data may still be served.
+  void verify() {
+    if (_server._claimsInFlight > 0) {
+      throw const ProfileUnavailableError(ProfileAccess.linking);
+    }
+    if (_server._profileAccess != ProfileAccess.verified) {
+      throw ProfileUnavailableError(_server._profileAccess);
+    }
+    if (_server._generation != _generation) {
+      throw const ProfileUnavailableError.changed();
+    }
+  }
 }

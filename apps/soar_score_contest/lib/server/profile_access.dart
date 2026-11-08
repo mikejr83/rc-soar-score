@@ -12,13 +12,18 @@ enum ProfileAccess {
 
   /// The service refused the signed-in account's claim: the data is another
   /// account's.
-  mismatched;
+  mismatched,
+
+  /// The data is being re-pointed to the account that claimed it. Lasts for
+  /// the length of one database transaction.
+  linking;
 
   /// The error code of a request refused in this state.
   String get errorCode => switch (this) {
     verified => 'profile_verified',
     unverified => profileUnverifiedCode,
     mismatched => profileAccountMismatchCode,
+    linking => profileLinkingCode,
   };
 
   /// Text fit to show the director.
@@ -31,6 +36,8 @@ enum ProfileAccess {
     mismatched =>
       "This computer holds another account's data. Sign in as that "
           'account, or use a different Windows user.',
+    linking =>
+      'Your data is being linked to your account. Try again in a moment.',
   };
 }
 
@@ -42,17 +49,41 @@ const String profileAccountMismatchCode = 'profile_account_mismatch';
 /// yet been checked against the data's owner.
 const String profileUnverifiedCode = 'profile_unverified';
 
+/// The error code of a request refused while the data is being linked.
+const String profileLinkingCode = 'profile_linking';
+
+/// The error code of an operation stopped because the profile changed while
+/// it ran. Nothing of it was stored.
+const String profileChangedCode = 'profile_changed';
+
 /// An operation was refused because the profile's data may not be served to
 /// the signed-in account (see [ProfileAccess]). Nothing was read or written.
 class ProfileUnavailableError implements Exception {
-  const ProfileUnavailableError(this.access);
+  const ProfileUnavailableError(ProfileAccess this.access)
+    : code = null,
+      _message = null;
 
-  final ProfileAccess access;
+  /// The profile changed (a claim, a sign-in, a mismatch) after the operation
+  /// began, so it was stopped before anything was stored.
+  const ProfileUnavailableError.changed()
+    : access = null,
+      code = profileChangedCode,
+      _message =
+          'The account changed while this was running, so nothing was saved. '
+          'Try again.';
 
-  String get code => access.errorCode;
+  /// The state that refused the operation; null when the profile changed
+  /// while it ran.
+  final ProfileAccess? access;
 
-  String get message => access.message;
+  final String? code;
+
+  final String? _message;
+
+  String get errorCode => code ?? access!.errorCode;
+
+  String get message => _message ?? access!.message;
 
   @override
-  String toString() => 'ProfileUnavailableError($code): $message';
+  String toString() => 'ProfileUnavailableError($errorCode): $message';
 }
