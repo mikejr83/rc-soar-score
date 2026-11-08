@@ -7,6 +7,7 @@ import '../../services/workspace/workspace_section.dart';
 String workspaceSectionLabel(WorkspaceSection section) => switch (section) {
   WorkspaceSection.nextStep => 'Next step',
   WorkspaceSection.checklist => 'Setup checklist',
+  WorkspaceSection.invitations => 'Pilot invitations',
   WorkspaceSection.attention => 'Needs attention',
   WorkspaceSection.progress => 'Round progress',
   WorkspaceSection.controls => 'Contest controls',

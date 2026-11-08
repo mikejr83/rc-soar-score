@@ -198,6 +198,27 @@ class PilotInvitationSession extends ChangeNotifier {
            ? InvitationPhase.loadFailed
            : InvitationPhase.idle;
 
+  /// Reads the invitations of [contestId] and starts a session on them. A read
+  /// that fails starts the session in [InvitationPhase.loadFailed].
+  static Future<PilotInvitationSession> open({
+    required PilotInvitationSource source,
+    required ApiClient client,
+    required Id contestId,
+  }) async {
+    PilotInvitations initial;
+    try {
+      initial = await source.read(client, contestId);
+    } on Object {
+      initial = const PilotInvitations(loadFailed: true);
+    }
+    return PilotInvitationSession(
+      source: source,
+      client: client,
+      contestId: contestId,
+      initial: initial,
+    );
+  }
+
   final PilotInvitationSource source;
   final ApiClient client;
   final Id contestId;

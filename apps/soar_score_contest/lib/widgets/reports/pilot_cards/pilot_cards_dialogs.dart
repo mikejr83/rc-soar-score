@@ -22,13 +22,10 @@ String? sendUnavailableText(
   null => invitations.sendUnavailableReason,
 };
 
-/// Asks to send invitations to [pilots]. Answers whether to go on. Sending is
+/// Asks to send invitations for [count] pilots. Answers whether to go on. Sending is
 /// its own confirmation. It creates the QR codes and links only; nobody is
 /// emailed.
-Future<bool> confirmSendInvitations(
-  BuildContext context,
-  List<ReportPilot> pilots,
-) async {
+Future<bool> confirmSendInvitations(BuildContext context, int count) async {
   final ok = await showDialog<bool>(
     context: context,
     builder: (context) {
@@ -53,7 +50,7 @@ Future<bool> confirmSendInvitations(
                     TextSpan(
                       children: [
                         TextSpan(
-                          text: l10n.pilotCardsQrCount(pilots.length),
+                          text: l10n.pilotCardsQrCount(count),
                           style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
                         TextSpan(text: l10n.pilotCardsSendCountNote),
@@ -163,7 +160,8 @@ Future<bool> remindAboutMissingQr({
     case _Reminder.printWithout:
       return true;
     case _Reminder.sendAndPrint:
-      if (!context.mounted || !await confirmSendInvitations(context, missing)) {
+      if (!context.mounted ||
+          !await confirmSendInvitations(context, missing.length)) {
         return false;
       }
       return session.send([for (final p in missing) p.participationId]);
@@ -324,7 +322,7 @@ Future<void> _send(
   PilotInvitationSession session,
   List<ReportPilot> missing,
 ) async {
-  if (await confirmSendInvitations(context, missing)) {
+  if (await confirmSendInvitations(context, missing.length)) {
     await session.send([for (final p in missing) p.participationId]);
   }
 }

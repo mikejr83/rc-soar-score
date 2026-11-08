@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../api_client_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../router.dart';
+import '../../services/reports/pilot_cards/pilot_invitations.dart';
+import '../../widgets/invitations/send_invitations_flow.dart';
 import '../../services/contest_participants/participants_controller.dart';
 import '../../services/contest_participants/participants_row_styles.dart';
 import '../../services/contest_participants/stored_participant.dart';
@@ -57,6 +61,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   final CellFocusRegistry _focus = CellFocusRegistry();
   final ScrollController _scroll = ScrollController();
   String? _shownMessage;
+  PilotInvitationSession? _invitations;
 
   @override
   void didChangeDependencies() {
@@ -77,10 +82,112 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
       hasChanges: () => _controller?.hasUnsaved ?? false,
     );
     _controller!.load();
+    _openInvitations(id);
+  }
+
+  /// Reads the contest's invitations in the background: the Invitations menu
+  /// stays off until they are known.
+  Future<void> _openInvitations(Id id) async {
+    final publication = publicationClientOf(context);
+    if (publication == null) return;
+    final session = await PilotInvitationSession.open(
+      source: PilotInvitationSources.current,
+      client: publication,
+      contestId: id,
+    );
+    if (!mounted) {
+      session.dispose();
+      return;
+    }
+    setState(() => _invitations = session..addListener(_changed));
+  }
+
+  /// The selected pilots' participation ids, and which have no invitation.
+  List<Id> _selectedPilots(ParticipantsController c) => [
+    for (final row in c.rows)
+      if (c.selection.contains(row.rowId) && row.isPilot) row.participation.id,
+  ];
+
+  Future<void> _sendInvitations(List<Id> missing) async {
+    final session = _invitations;
+    if (session == null) return;
+    await sendInvitationsWithConfirmation(context, session, missing);
+  }
+
+  /// What the Invitations menu offers for the selection now.
+  ({VoidCallback? send, VoidCallback? copy, String? reason, int count})
+  _invitationMenu(ParticipantsController c) {
+    final l10n = AppLocalizations.of(context);
+    final session = _invitations;
+    if (session == null || session.phase == InvitationPhase.loadFailed) {
+      return (
+        send: null,
+        copy: null,
+        reason: l10n.invitationsNotReady,
+        count: 0,
+      );
+    }
+    final pilots = _selectedPilots(c);
+    final missing = [
+      for (final id in pilots)
+        if (!session.has(id)) id,
+    ];
+    final unavailable = invitationsUnavailableText(l10n, session.invitations);
+    final sendReason =
+        unavailable ??
+        (c.selection.isEmpty
+            ? l10n.invitationsSelectPilots
+            : pilots.isEmpty
+            ? l10n.invitationsOnlyPilots
+            : missing.isEmpty
+            ? l10n.invitationsAllHaveLinks
+            : null);
+    final link = pilots.length == 1
+        ? session.invitations.linkOf(pilots.single)
+        : null;
+    final copyReason = pilots.length != 1
+        ? l10n.invitationsSelectOne
+        : link == null
+        ? l10n.invitationsNoLinkYet
+        : null;
+    final canSend = sendReason == null && !session.sending;
+    final reasons = [?sendReason, ?copyReason];
+    return (
+      send: canSend ? () => _sendInvitations(missing) : null,
+      copy: link == null ? null : () => _copyLink(link),
+      reason: reasons.isEmpty ? null : reasons.join(' '),
+      count: missing.length,
+    );
+  }
+
+  Future<void> _copyLink(String link) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
+    var copied = true;
+    try {
+      await Clipboard.setData(ClipboardData(text: link))
+          .timeout(const Duration(seconds: 3));
+    } on Object {
+      // A browser can refuse clipboard access, or never answer.
+      copied = false;
+    }
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          key: const ValueKey('invitations-snackbar'),
+          content: Text(
+            copied ? l10n.invitationsLinkCopied : l10n.invitationsCopyFailed,
+          ),
+        ),
+      );
   }
 
   @override
   void dispose() {
+    _invitations
+      ?..removeListener(_changed)
+      ..dispose();
     widget.guard?.detach(_confirmLeave);
     _controller?.dispose();
     _focus.dispose();
@@ -364,6 +471,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
         label: 'Loading the participants',
       );
     }
+    final invitationMenu = _invitationMenu(c);
     final ids = {for (final row in c.rows) row.rowId};
     _focus.retain(ids);
     final visible = c.visibleRows;
@@ -440,6 +548,10 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                       onAddNew: _addNew,
                       onAddProfile: _addProfile,
                       onRemove: _removeSelected,
+                      onSendInvitations: invitationMenu.send,
+                      onCopyLink: invitationMenu.copy,
+                      invitationsReason: invitationMenu.reason,
+                      sendCount: invitationMenu.count,
                     ),
                     const SizedBox(height: 16),
                     Column(

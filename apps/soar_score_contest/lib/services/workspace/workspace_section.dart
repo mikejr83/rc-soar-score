@@ -2,6 +2,7 @@
 enum WorkspaceSection {
   nextStep('next-step'),
   checklist('checklist'),
+  invitations('invitations'),
   attention('attention'),
   progress('progress'),
   controls('controls'),
