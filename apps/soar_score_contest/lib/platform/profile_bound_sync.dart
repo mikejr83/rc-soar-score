@@ -23,7 +23,9 @@ class SyncProfileBinding {
 
   final ActingAccount _acting;
 
-  /// The pin of the exchange in progress. The engine runs one sync at a time.
+  /// The pin of the exchange in progress. Only the gateway calls that the
+  /// engine queues one after another (exchanges and system data, which are
+  /// followed by local writes) set it; see [ProfileBoundSyncGateway].
   SyncPin? _pin;
 
   /// Pins the exchange about to be sent for the data of [owner]. [generation]
@@ -95,15 +97,15 @@ class ProfileBoundSyncGateway implements SyncGateway {
     );
   }
 
+  /// Not pinned: the decision writes nothing locally, and the engine does not
+  /// queue it behind the syncs, so pinning here would replace the pin of a
+  /// sync in progress. The sync that stores its answer pins its own exchange.
   @override
   Future<SyncMutationResult> resolveConflict(
     core.Id conflictId,
     ResolveConflictRequest request, {
     required core.SyncScopeKey scope,
-  }) async {
-    await _pinScope(scope);
-    return _inner.resolveConflict(conflictId, request, scope: scope);
-  }
+  }) => _inner.resolveConflict(conflictId, request, scope: scope);
 }
 
 /// A [ReplicatedChangeApplier] whose every change is written pinned.

@@ -128,6 +128,38 @@ void main() {
     await expectRefusedAndUnmoved();
   });
 
+  test('a conflict decision does not replace the pin of a sync', () async {
+    final gateway = ProfileBoundSyncGateway(
+      _HeldGateway(Future.value()),
+      binding,
+      (_) async => accountA,
+    );
+    // A sync's exchange is sent, and the profile changes while it answers.
+    await expectLater(
+      gateway.exchange(_request(accountA)),
+      throwsA(isA<ApiNetworkError>()),
+    );
+    // A mismatch that ended again: the profile looks as it did, but it
+    // changed in between, so only the generation tells the exchange apart.
+    server.markProfileMismatch();
+    server.actAsLocal();
+
+    // A decision starts meanwhile; it must not re-pin to the new state.
+    await expectLater(
+      gateway.resolveConflict(
+        core.Id.create(),
+        const ResolveConflictRequest(
+          clientMutationId: 'c',
+          choice: core.ConflictResolutionChoice.keptAccepted,
+        ),
+        scope: scope,
+      ),
+      throwsA(isA<ApiNetworkError>()),
+    );
+
+    await expectRefusedAndUnmoved();
+  });
+
   test('the next exchange after a refusal stores normally', () async {
     sendExchange();
     acting.signedIn('auth0|b');
@@ -186,6 +218,16 @@ class _HeldGateway implements SyncGateway {
       requestUri: Uri.parse('http://hosted.invalid/'),
     );
   }
+
+  @override
+  Future<SyncMutationResult> resolveConflict(
+    core.Id conflictId,
+    ResolveConflictRequest request, {
+    required core.SyncScopeKey scope,
+  }) async => throw ApiNetworkError(
+    'lost',
+    requestUri: Uri.parse('http://hosted.invalid/'),
+  );
 
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
