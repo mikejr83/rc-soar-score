@@ -199,8 +199,15 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
     final invitations = session.invitations;
     bool hasQr(ReportPilot pilot) =>
         invitations.synchronized && invitations.has(pilot.participationId);
-    final missing = [
+    // A retired pilot gets no invitation (`canHaveInvitation`), but their
+    // card still prints, with the link they already have. Only the pilots who
+    // can have one are counted, offered or sent invitations.
+    final invitable = [
       for (final pilot in selected)
+        if (!pilot.isRetired) pilot,
+    ];
+    final missing = [
+      for (final pilot in invitable)
         if (!hasQr(pilot)) pilot,
     ];
 
@@ -286,7 +293,7 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
       banners: invitationBanners(
         l10n: context.l10n,
         session: session,
-        selected: selected,
+        selected: invitable,
         missing: missing,
         online: context.online,
       ),
@@ -296,13 +303,13 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
         if (session.sending || session.phase == InvitationPhase.sentNotLoaded) {
           return false;
         }
-        if (missing.isEmpty || selected.isEmpty) {
+        if (missing.isEmpty || invitable.isEmpty) {
           return true;
         }
         return remindAboutMissingQr(
           context: buildContext,
           session: session,
-          selected: selected,
+          selected: invitable,
           missing: missing,
           online: context.online,
         );

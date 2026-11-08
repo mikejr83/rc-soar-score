@@ -42,6 +42,7 @@ class WorkspaceLayoutPlan {
         main = [
           WorkspaceSection.nextStep,
           WorkspaceSection.checklist,
+          WorkspaceSection.invitations,
           if (hasMatrix) WorkspaceSection.progress,
           WorkspaceSection.activity,
         ];
@@ -55,6 +56,7 @@ class WorkspaceLayoutPlan {
       case LifecycleState.running:
         main = const [
           WorkspaceSection.nextStep,
+          WorkspaceSection.invitations,
           WorkspaceSection.attention,
           WorkspaceSection.progress,
           WorkspaceSection.activity,

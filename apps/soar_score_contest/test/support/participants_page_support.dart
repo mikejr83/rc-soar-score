@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/connectivity_provider.dart';
+import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/contest/participants_page.dart';
 import 'package:soar_score_contest/router.dart';
@@ -56,6 +58,7 @@ class ParticipantsServer {
     },
     this.withScores = false,
     int pilots = 4,
+    this.retiredPilot,
   }) : contest = matrixContest(state: state, lock: lock) {
     for (var n = 1; n <= _people.length; n++) {
       if (n <= 4 && n > pilots) continue;
@@ -79,6 +82,9 @@ class ParticipantsServer {
   final bool drawn;
   final Map<String, Object?> options;
   final bool withScores;
+
+  /// The person (1 to 4) who retired at round 2, or `null`.
+  final int? retiredPilot;
 
   final List<ContestParticipation> _participations = [];
   final List<TeamMembership> _memberships = [];
@@ -174,6 +180,7 @@ class ParticipantsServer {
           ? classification
           : null,
       participantNumber: drawn && pilot ? n : null,
+      retiredAtRound: n == retiredPilot ? 2 : null,
       scoringUuid: ScoringUuid.create(),
     );
   }
@@ -568,6 +575,7 @@ Future<void> pumpParticipantsPage(
   ParticipantsServer server, {
   Size size = const Size(1280, 1000),
   UnsavedChangesGuard? guard,
+  AppConnectivity? connectivity,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -599,17 +607,21 @@ Future<void> pumpParticipantsPage(
     ],
   );
   addTearDown(router.dispose);
+  Widget app = MaterialApp.router(
+    routerConfig: router,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+  );
+  if (connectivity != null) {
+    app = AppConnectivityInherited(monitor: connectivity, child: app);
+  }
   await tester.pumpWidget(
     ApiClientInherited(
       client: ApiClient(
         baseUrl: Uri.parse('http://localhost'),
         httpClient: MockClient(server.handle),
       ),
-      child: MaterialApp.router(
-        routerConfig: router,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-      ),
+      child: app,
     ),
   );
   await tester.pumpAndSettle();

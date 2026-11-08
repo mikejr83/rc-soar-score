@@ -440,6 +440,53 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       }
     }),
   );
+  await journey.step(
+    'Workspace and Participants: invitations are sent from the workspace '
+    'card, and one pilot’s link is copied',
+    () async {
+      // The stand-in goes in before the contest opens: the workspace card
+      // reads the invitations once, when its page is built.
+      final original = PilotInvitationSources.current;
+      final stub = StubPilotInvitationSource();
+      PilotInvitationSources.current = stub;
+      try {
+        await inContest(() async {
+          // The card sits under the setup checklist.
+          await tapRail(tester, 'Workspace');
+          await pumpUntilFound(tester, _key('workspace-invitations-send'));
+          expect(_key('setup-checklist-card'), findsOneWidget);
+          await tapVisible(tester, _key('workspace-invitations-send'));
+          await pumpUntilFound(tester, _key('cards-send-dialog'));
+          expect(find.textContaining('Nobody is emailed'), findsWidgets);
+          await tapVisible(tester, _key('cards-send-confirm'));
+          await pumpUntilFound(tester, _key('invitations-snackbar'));
+          expect(stub.issuingSends, 1);
+          await pumpUntilFound(tester, find.textContaining('a QR code. Print'));
+
+          // The Participants list copies the link of one selected pilot.
+          await tapRail(tester, 'Participants');
+          await pumpUntilFound(tester, _key('invitations-menu'));
+          final pilot = data.roster.first;
+          final pilotName = '${pilot.first} ${pilot.last}';
+          await pumpUntilFound(tester, find.text(pilotName));
+          await tapVisible(
+            tester,
+            find.byWidgetPredicate(
+              (w) => w is Checkbox && w.semanticLabel == 'Select $pilotName',
+            ),
+          );
+          await tapVisible(tester, _key('invitations-menu'));
+          await tapVisible(tester, _key('invitations-copy'));
+          // A headless browser may refuse clipboard access; the app then says
+          // so ("The link could not be copied.") instead of failing silently.
+          await pumpUntilFound(tester, find.textContaining('copied'));
+          expect(stub.issuingSends, 1);
+        });
+      } finally {
+        PilotInvitationSources.current = original;
+      }
+    },
+  );
 }
 
 /// The link each QR code on the open cards encodes, in card order.

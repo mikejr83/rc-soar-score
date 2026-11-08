@@ -56,9 +56,9 @@ void main() {
     },
   );
 
-  test('logs each link so a developer can copy one from the console', () async {
+  test('never writes an invitation link to a log', () async {
     final records = <LogRecord>[];
-    final sub = Logger('PilotInvitations').onRecord.listen(records.add);
+    final sub = Logger.root.onRecord.listen(records.add);
     addTearDown(sub.cancel);
     Logger.root.level = Level.ALL;
     final client = clientFor(
@@ -75,11 +75,26 @@ void main() {
       ),
     );
     await source.read(client, contest);
-    expect(records, hasLength(1));
-    expect(
-      records.single.message,
-      contains('${lee.value}: https://s.example/i/abc'),
+    expect(records.map((r) => r.message).join('\n'), isNot(contains('abc')));
+  });
+
+  test('only a pilot who still flies can have an invitation', () {
+    ContestParticipation participation({
+      RoleType role = RoleType.pilot,
+      int? retiredAtRound,
+    }) => ContestParticipation(
+      id: lee,
+      contestId: contest,
+      participantProfileId: lee,
+      roleId: SystemRoles.pilotId,
+      roleName: 'Pilot',
+      roleType: role,
+      retiredAtRound: retiredAtRound,
+      scoringUuid: ScoringUuid.create(),
     );
+    expect(canHaveInvitation(participation()), isTrue);
+    expect(canHaveInvitation(participation(retiredAtRound: 2)), isFalse);
+    expect(canHaveInvitation(participation(role: RoleType.nonFlier)), isFalse);
   });
 
   test('a contest the server does not have is not synchronized', () async {

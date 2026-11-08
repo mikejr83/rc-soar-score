@@ -1,21 +1,13 @@
 import 'package:flutter/foundation.dart';
-import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
-final _logger = Logger('PilotInvitations');
-
-/// Writes each invitation link to the log, so a developer can copy one from
-/// the console and open it. A link opens a pilot's scoring page, so this is for
-/// debug and profile builds only and a release build logs nothing.
-void logInvitationLinks(Id contestId, Map<String, String> links) {
-  if (kReleaseMode || links.isEmpty) return;
-  final lines = [for (final e in links.entries) '  ${e.key}: ${e.value}'];
-  _logger.info(
-    'Invitation links of contest ${contestId.value} (development builds only):'
-    '\n${lines.join('\n')}',
-  );
-}
+/// Whether [participation] can have an invitation: a pilot who still flies.
+/// The workspace and the Participants list share this rule, so neither issues
+/// or shows a link for a retired pilot or a non-flying participant.
+bool canHaveInvitation(ContestParticipation participation) =>
+    participation.roleType == RoleType.pilot &&
+    participation.retiredAtRound == null;
 
 /// The invitations a contest has issued, as the cards need them: for each
 /// pilot that has one, the link its QR code carries.
@@ -119,7 +111,6 @@ class ApiPilotInvitationSource implements PilotInvitationSource {
         for (final invitation in answer.invitations)
           invitation.participationId.value: invitation.link,
       };
-      logInvitationLinks(contestId, links);
       return PilotInvitations(
         links: links,
         sendUnavailableReason: answer.canIssue
@@ -197,6 +188,27 @@ class PilotInvitationSession extends ChangeNotifier {
        _phase = initial.loadFailed
            ? InvitationPhase.loadFailed
            : InvitationPhase.idle;
+
+  /// Reads the invitations of [contestId] and starts a session on them. A read
+  /// that fails starts the session in [InvitationPhase.loadFailed].
+  static Future<PilotInvitationSession> open({
+    required PilotInvitationSource source,
+    required ApiClient client,
+    required Id contestId,
+  }) async {
+    PilotInvitations initial;
+    try {
+      initial = await source.read(client, contestId);
+    } on Object {
+      initial = const PilotInvitations(loadFailed: true);
+    }
+    return PilotInvitationSession(
+      source: source,
+      client: client,
+      contestId: contestId,
+      initial: initial,
+    );
+  }
 
   final PilotInvitationSource source;
   final ApiClient client;

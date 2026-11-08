@@ -2406,10 +2406,10 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'None of these $count cards have',
-      one: 'This card has',
+      other: 'None of these $count cards have a QR code yet.',
+      one: 'This card doesn’t have a QR code yet.',
     );
-    return '$_temp0 a QR code yet. Pilots without one can’t scan to enter scores.';
+    return '$_temp0 Pilots without one can’t scan to enter scores.';
   }
 
   @override
@@ -2548,4 +2548,115 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pilotCardsSendAction => 'Send invitations';
+
+  @override
+  String get invitationsSectionTitle => 'Pilot invitations';
+
+  @override
+  String get invitationsLoading => 'Loading invitations…';
+
+  @override
+  String get invitationsLoadFailed =>
+      'The invitations could not be loaded. Check the connection and retry.';
+
+  @override
+  String get invitationsNoPilots =>
+      'Add pilots to the contest to send invitations.';
+
+  @override
+  String invitationsCoverage(int have, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total pilots have',
+      one: '1 pilot has',
+    );
+    return '$have of $_temp0 a QR code. Sending creates the rest. Nobody is emailed.';
+  }
+
+  @override
+  String invitationsCoverageAll(int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'All $total pilots have',
+      one: 'The pilot has',
+    );
+    return '$_temp0 a QR code. Print the pilot cards to hand them out.';
+  }
+
+  @override
+  String get invitationsOpenCards => 'Open pilot cards';
+
+  @override
+  String invitationsSendMissing(int count) {
+    return 'Send invitations ($count)';
+  }
+
+  @override
+  String invitationsSentSnack(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count invitations created',
+      one: '1 invitation created',
+    );
+    return '$_temp0. Nobody was emailed.';
+  }
+
+  @override
+  String get invitationsSentNotLoadedSnack =>
+      'The invitations were created, but could not be loaded back. Reload the page to see them.';
+
+  @override
+  String get invitationsSendFailedSnack =>
+      'The invitations could not be created. Nothing was sent. Try again.';
+
+  @override
+  String get invitationsMenu => 'Invitations';
+
+  @override
+  String get invitationsMenuSend => 'Send invitations';
+
+  @override
+  String invitationsMenuSendCount(int count) {
+    return 'Send invitations ($count)';
+  }
+
+  @override
+  String get invitationsMenuCopy => 'Copy link';
+
+  @override
+  String get invitationsLinkCopied => 'Link copied.';
+
+  @override
+  String get invitationsSelectPilots => 'Select pilots to send invitations.';
+
+  @override
+  String get invitationsSelectOne => 'Select one pilot to copy a link.';
+
+  @override
+  String get invitationsAllHaveLinks =>
+      'The selected pilots already have an invitation.';
+
+  @override
+  String get invitationsNoLinkYet =>
+      'This pilot has no invitation yet. Send one first.';
+
+  @override
+  String get invitationsOnlyPilots => 'Only pilots get invitations.';
+
+  @override
+  String get invitationsNotReady => 'Invitations are still loading.';
+
+  @override
+  String get invitationsCopyFailed => 'The link could not be copied.';
+
+  @override
+  String get invitationsOffline =>
+      'You’re offline, so invitations can’t be sent now.';
+
+  @override
+  String get invitationsServerUnreachable =>
+      'The server can’t be reached, so invitations can’t be sent now.';
 }

@@ -10,6 +10,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../../api_client_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../connectivity_provider.dart';
+import '../../widgets/invitations/send_invitations_flow.dart';
 import '../../local_ui_store_provider.dart';
 import '../../router.dart';
 import '../../ui_account_provider.dart';
@@ -208,9 +209,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         preview: controller.preview,
         data: controller.data,
         l10n: Localizations.of<AppLocalizations>(context, AppLocalizations),
-        online:
-            appConnectivityOf(context)?.internetStatus !=
-            ConnectivityStatus.unavailable,
+        online: invitationsReachable(context),
       ),
     );
   }

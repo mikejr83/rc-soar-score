@@ -3319,7 +3319,7 @@ abstract class AppLocalizations {
   /// Reminder body when none of the selected cards has a QR code.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{This card has} other{None of these {count} cards have}} a QR code yet. Pilots without one can’t scan to enter scores.'**
+  /// **'{count, plural, =1{This card doesn’t have a QR code yet.} other{None of these {count} cards have a QR code yet.}} Pilots without one can’t scan to enter scores.'**
   String pilotCardsReminderNone(int count);
 
   /// Reminder body when some of the selected cards have no QR code.
@@ -3507,6 +3507,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send invitations'**
   String get pilotCardsSendAction;
+
+  /// Title of the workspace card that sends pilot invitations.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot invitations'**
+  String get invitationsSectionTitle;
+
+  /// Shown while the workspace invitations card loads.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading invitations…'**
+  String get invitationsLoading;
+
+  /// Shown when the workspace invitations card could not load.
+  ///
+  /// In en, this message translates to:
+  /// **'The invitations could not be loaded. Check the connection and retry.'**
+  String get invitationsLoadFailed;
+
+  /// Workspace invitations card text when the contest has no pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Add pilots to the contest to send invitations.'**
+  String get invitationsNoPilots;
+
+  /// Workspace invitations card text when some pilots have no invitation.
+  ///
+  /// In en, this message translates to:
+  /// **'{have} of {total, plural, =1{1 pilot has} other{{total} pilots have}} a QR code. Sending creates the rest. Nobody is emailed.'**
+  String invitationsCoverage(int have, int total);
+
+  /// Workspace invitations card text when every pilot has an invitation.
+  ///
+  /// In en, this message translates to:
+  /// **'{total, plural, =1{The pilot has} other{All {total} pilots have}} a QR code. Print the pilot cards to hand them out.'**
+  String invitationsCoverageAll(int total);
+
+  /// Button on the workspace invitations card that opens the pilot cards report.
+  ///
+  /// In en, this message translates to:
+  /// **'Open pilot cards'**
+  String get invitationsOpenCards;
+
+  /// Workspace button that sends invitations to the pilots who have none.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations ({count})'**
+  String invitationsSendMissing(int count);
+
+  /// Snack bar after invitations were created.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 invitation created} other{{count} invitations created}}. Nobody was emailed.'**
+  String invitationsSentSnack(int count);
+
+  /// Snack bar after invitations were created but could not be read back.
+  ///
+  /// In en, this message translates to:
+  /// **'The invitations were created, but could not be loaded back. Reload the page to see them.'**
+  String get invitationsSentNotLoadedSnack;
+
+  /// Snack bar after creating invitations failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The invitations could not be created. Nothing was sent. Try again.'**
+  String get invitationsSendFailedSnack;
+
+  /// Participants toolbar button that opens the invitations menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations'**
+  String get invitationsMenu;
+
+  /// Participants invitations menu item that creates invitations for the selected pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations'**
+  String get invitationsMenuSend;
+
+  /// Participants invitations menu item with the number of selected pilots that have none.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations ({count})'**
+  String invitationsMenuSendCount(int count);
+
+  /// Participants invitations menu item that copies one pilot's link.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get invitationsMenuCopy;
+
+  /// Snack bar after a pilot's invitation link was copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied.'**
+  String get invitationsLinkCopied;
+
+  /// Reason the invitations menu cannot send: nothing selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Select pilots to send invitations.'**
+  String get invitationsSelectPilots;
+
+  /// Reason the copy link item is off: not exactly one pilot selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Select one pilot to copy a link.'**
+  String get invitationsSelectOne;
+
+  /// Reason sending is off: every selected pilot has an invitation.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected pilots already have an invitation.'**
+  String get invitationsAllHaveLinks;
+
+  /// Reason the copy link item is off: the pilot has no invitation.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot has no invitation yet. Send one first.'**
+  String get invitationsNoLinkYet;
+
+  /// Reason the invitations menu is off: the selection holds no pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Only pilots get invitations.'**
+  String get invitationsOnlyPilots;
+
+  /// Reason the invitations menu is off until the invitations were read.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations are still loading.'**
+  String get invitationsNotReady;
+
+  /// Snack bar when copying an invitation link to the clipboard failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The link could not be copied.'**
+  String get invitationsCopyFailed;
+
+  /// Reason invitations cannot be sent: the device is offline.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re offline, so invitations can’t be sent now.'**
+  String get invitationsOffline;
+
+  /// Reason invitations cannot be sent: the internet is up but the server is unreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'The server can’t be reached, so invitations can’t be sent now.'**
+  String get invitationsServerUnreachable;
 }
 
 class _AppLocalizationsDelegate
