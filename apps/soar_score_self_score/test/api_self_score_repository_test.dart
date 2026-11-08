@@ -7,6 +7,7 @@ import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_self_score/data/api_self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_repository.dart';
+import 'package:soar_score_self_score/models/entry_context.dart';
 import 'package:soar_score_self_score/models/group_result_row.dart';
 import 'package:soar_score_self_score/models/guest_session.dart';
 import 'package:soar_score_self_score/models/pilot_overview.dart';
@@ -303,7 +304,7 @@ void main() {
     expect(entry.formSupported, isTrue);
     // The fixture carries every field the server sends for F5J, so a renamed
     // key makes the form refuse the flight.
-    expect(entry.fieldKeys, contains('no_altitude_recorded'));
+    expect(entry.fieldKeys, containsAll(EntryContext.knownFieldKeys));
     expect(entry.pilotName, 'Alex Rivera');
     expect(entry.group, 'B');
     expect(entry.lane, isNull);

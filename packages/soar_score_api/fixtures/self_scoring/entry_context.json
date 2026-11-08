@@ -2,11 +2,11 @@
 "fields":[
 {"key":"time_flown","label":"Time flown","type":"seconds","required":true,"unit":"seconds","precision":1,"min":0,"max":900,"options":[],"depends_on":{}},
 {"key":"launch_height","label":"Launch height","type":"integer","required":true,"unit":"metres","precision":0,"min":0,"max":200,"options":[],"depends_on":{}},
-{"key":"landing","label":"Landing","type":"landing","required":true,"unit":null,"precision":null,"min":null,"max":null,"options":[],"depends_on":{"disabled_when":{"late_landing":true}}},
+{"key":"landing","label":"Landing","type":"landing","required":true,"unit":null,"precision":null,"min":null,"max":null,"options":[],"depends_on":{}},
 {"key":"late_landing","label":"Late Landing","type":"boolean","required":false,"unit":null,"precision":null,"min":null,"max":null,"options":[],"depends_on":{}},
+{"key":"motor_restart","label":"Motor restart","type":"boolean","required":false,"unit":null,"precision":null,"min":null,"max":null,"options":[],"depends_on":{}},
 {"key":"out_of_bounds","label":"Out of Bounds","type":"boolean","required":false,"unit":null,"precision":null,"min":null,"max":null,"options":[],"depends_on":{}},
 {"key":"no_altitude_recorded","label":"No Altitude Recorded","type":"boolean","required":false,"unit":null,"precision":null,"min":null,"max":null,"options":[],"depends_on":{}},
-{"key":"motor_restart","label":"Motor restart","type":"boolean","required":false,"unit":null,"precision":null,"min":null,"max":null,"options":[],"depends_on":{}},
 {"key":"flight_penalty","label":"Flight penalty","type":"integer","required":false,"unit":"points","precision":0,"min":0,"max":null,"options":[],"depends_on":{}}],
 "landing_table":[
 {"id":"good_50","label":"Good","points":50,"description":"Within 1 m"},
