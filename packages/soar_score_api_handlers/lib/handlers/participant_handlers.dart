@@ -163,9 +163,11 @@ Handler buildParticipantHandler(
     })
     ..get('/results', (Request request) async {
       final access = requireParticipant(request).access;
-      final param = request.url.queryParameters['round'];
+      final params = request.url.queryParametersAll['round'] ?? const [];
+      final param = params.length == 1 ? params.single : null;
       final asOf = param == null ? null : int.tryParse(param);
-      final results = param != null && asOf == null
+      // A malformed or repeated round is not a round.
+      final results = params.length > 1 || (param != null && asOf == null)
           ? null
           : await participantOverallResults(
               repository,

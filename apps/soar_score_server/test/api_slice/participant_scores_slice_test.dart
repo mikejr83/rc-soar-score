@@ -622,6 +622,110 @@ void _tests(SliceBackend backend) {
       expect((await get('/results?round=x')).$1, 404);
     });
 
+    test(
+      'a scored original with an unscored re-flight stays in its group',
+      () async {
+        await submit(1);
+        final original = assignments.singleWhere(
+          (a) =>
+              a['scheduled_round_id'] == rounds[0]['id'] &&
+              a['contest_participation_id'] == _participationId(1),
+        );
+        final source = (await repository.matrixAssignmentRepository.findById(
+          core.Id.parse(original['id']! as String),
+        ))!;
+        final config = (await repository.contestConfigurationRevisionRepository
+            .latestForContest(core.Id.parse(_contestId)))!;
+        final now = DateTime.utc(2026, 10, 17, 16);
+        final metadata = core.MutationMetadata(
+          clientMutationId: 'rf-1',
+          authority: core.Authority.director,
+          clientTime: now,
+          actorId: api.director,
+        );
+        final reFlight = await repository.reFlightRepository.save(
+          core.ReFlight(
+            id: core.Id.create(),
+            contestId: source.contestId,
+            creditedRoundId: source.scheduledRoundId,
+            sourceRoundId: source.scheduledRoundId,
+            sourceGroup: source.group,
+            type: core.ReFlightType.moveToGroup,
+            sequence: 1,
+            status: core.ReFlightStatus.readyToFly,
+            reason: 'Interference',
+            scheduledRoundId: source.scheduledRoundId,
+            flownGroup: 2,
+            configRevisionId: config.id,
+            createdBy: api.director,
+            createdAt: now,
+            groupFinalizedBy: api.director,
+            groupFinalizedAt: now,
+          ),
+          metadata: metadata.forPart('rf'),
+        );
+        await repository.matrixAssignmentRepository.append(
+          core.MatrixAssignment(
+            id: core.Id.create(),
+            contestId: source.contestId,
+            matrixRevisionId: source.matrixRevisionId,
+            contestParticipationId: source.contestParticipationId,
+            scheduledRoundId: source.scheduledRoundId,
+            creditedRoundId: source.creditedRoundId,
+            group: 2,
+            flightSequence: 2,
+            assignmentType: core.AssignmentType.reflight,
+            sourceAssignmentId: source.id,
+            reFlightId: reFlight.id,
+            actorId: api.director,
+            reason: 'Interference',
+            createdAt: now,
+          ),
+          metadata: metadata.forPart('rfa'),
+        );
+
+        final (status, body) = await get('/rounds/1/group-results');
+        expect(status, 200, reason: '$body');
+        expect(body['group'], 'A');
+        final byName = {for (final r in rowsOf(body)) r['pilot_name']: r};
+        expect(byName, hasLength(3));
+        expect(byName['P1 X']!['state'], 'submitted');
+        expect(byName['P1 X']!['time_flown_seconds'], 540);
+      },
+    );
+
+    test(
+      'a hidden-through round beyond the scored rounds is clamped',
+      () async {
+        await submit(1);
+        final contestRepository = repository.contestRepository;
+        final contest = (await contestRepository.findById(
+          core.Id.parse(_contestId),
+        ))!;
+        await contestRepository.save(
+          contest.copyWithState(
+            hideResultsThroughRound: 3,
+            updatedAt: DateTime.utc(2026, 10, 17, 16),
+          ),
+          metadata: core.MutationMetadata(
+            clientMutationId: 'hide-3',
+            authority: core.Authority.director,
+            clientTime: DateTime.utc(2026, 10, 17, 16),
+            actorId: api.director,
+          ),
+        );
+        final (_, body) = await get('/results');
+        expect(body['as_of_round'], 1);
+        expect(body['held_at_round'], 1);
+      },
+    );
+
+    test('a repeated round parameter is not found', () async {
+      await submit(1);
+      expect((await get('/results?round=1&round=1')).$1, 404);
+      expect((await get('/results?round=1')).$1, 200);
+    });
+
     test('results need the guest session', () async {
       final response = await handler(
         Request(

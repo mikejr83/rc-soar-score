@@ -25,16 +25,29 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
       .firstOrNull;
   if (round == null) return null;
 
-  // One live flight per pilot, the highest flight sequence, as the results
-  // count them.
+  final slots = {
+    for (final slot in calculation.input.scored)
+      if (slot.round.ordinal == roundOrdinal)
+        slot.assignment.contestParticipationId: slot,
+  };
+
+  // One flight per pilot: the one the results count (the scored original or
+  // the scored re-flight), else the highest flight sequence. A scored
+  // original beside a later unscored re-flight stays in its own group.
   final byPilot = <Id, MatrixAssignment>{};
   for (final assignment
       in await repository.matrixAssignmentRepository.listLiveForRound(
         round.id,
       )) {
-    final best = byPilot[assignment.contestParticipationId];
+    final pilot = assignment.contestParticipationId;
+    if (slots[pilot]?.assignment.id == assignment.id) {
+      byPilot[pilot] = assignment;
+      continue;
+    }
+    if (slots.containsKey(pilot)) continue;
+    final best = byPilot[pilot];
     if (best == null || assignment.flightSequence >= best.flightSequence) {
-      byPilot[assignment.contestParticipationId] = assignment;
+      byPilot[pilot] = assignment;
     }
   }
   final mine = byPilot[access.participation.id];
@@ -46,11 +59,6 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
           access.contestId,
         ))
       p.id: p,
-  };
-  final slots = {
-    for (final slot in calculation.input.scored)
-      if (slot.round.ordinal == roundOrdinal)
-        slot.assignment.contestParticipationId: slot,
   };
   final flights = {
     for (final flight in calculation.recalculation?.flights ?? const [])
@@ -163,7 +171,7 @@ Future<ParticipantOverallResultsDto?> participantOverallResults(
     return ParticipantOverallResultsDto(
       asOfRound: 0,
       latestRound: latest,
-      heldAtRound: held,
+      heldAtRound: null,
       preliminary: true,
       standings: const [],
     );
@@ -207,7 +215,9 @@ Future<ParticipantOverallResultsDto?> participantOverallResults(
   return ParticipantOverallResultsDto(
     asOfRound: round,
     latestRound: latest,
-    heldAtRound: held,
+    // The round actually shown: a hidden-through round beyond the last
+    // scored round is clamped to it.
+    heldAtRound: held == null ? null : (held < latest ? held : latest),
     preliminary:
         standing.ranking.isPreliminary || calculation.isPreliminaryAsOf(round),
     yourPlace: you?.place,
