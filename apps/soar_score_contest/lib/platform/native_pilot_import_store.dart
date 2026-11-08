@@ -17,16 +17,19 @@ class NativePilotImportStore implements PilotImportStore {
   final DateTime Function() clock;
 
   @override
-  Future<List<core.ParticipantProfile>> existing() => _server
-      .repository
-      .participantProfileRepository
-      .listForOwner(_server.actingAccountId);
+  Future<List<core.ParticipantProfile>> existing() async {
+    _server.assertProfileUsable();
+    return _server.repository.participantProfileRepository.listForOwner(
+      _server.actingAccountId,
+    );
+  }
 
   @override
   Future<core.PilotImportOutcome> apply(
     List<core.PilotImportSelection> selections, {
     required Map<core.Id, int> reviewedRevisions,
   }) {
+    _server.assertProfileUsable();
     final acting = _server.actingAccountId;
     return core.PilotImportService(
       _server.repository.participantProfileRepository,

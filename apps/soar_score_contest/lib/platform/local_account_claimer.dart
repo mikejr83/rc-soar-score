@@ -39,6 +39,8 @@ class LocalAccountClaimer {
     required this._onSignedOut,
     required this._onProblem,
     this._onAccountMismatch,
+    this._onSignedIn,
+    this._onClaimPostponed,
     this._getPreferences,
     this._putPreferences,
     this._onPreferencesChanged,
@@ -61,6 +63,16 @@ class LocalAccountClaimer {
   /// Called with the sign-in's number when the service says the Local data was
   /// claimed into another account, so the app can stop serving it to this one.
   final void Function(int session)? _onAccountMismatch;
+
+  /// Called, before any claim is tried, each time a signed-in session starts
+  /// or is seen again (sign-in, restore at start-up, the service becoming
+  /// reachable) with its identity provider id, so the app can close the
+  /// claimed data to a user it does not belong to.
+  final void Function(String? subject)? _onSignedIn;
+
+  /// Called when a claim could not be sent because the service was not
+  /// reachable, so the app can say the data is still unchecked.
+  final void Function()? _onClaimPostponed;
 
   /// Reads and stores the signed-in account's preferences on the service.
   /// Both null (the default) skips carrying preferences over.
@@ -92,6 +104,7 @@ class LocalAccountClaimer {
   void _authChanged() {
     if (_stopped) return;
     if (_auth.isSignedIn) {
+      _onSignedIn?.call(_auth.subject);
       unawaited(run());
     } else {
       _onSignedOut();
@@ -115,6 +128,8 @@ class LocalAccountClaimer {
 
   Future<void> _claimOnce(int session) async {
     if (!_epoch.isCurrent(session) || _stopped) return;
+    // Read with the epoch check, so it names the sign-in that claims.
+    final subject = _auth.subject;
     final local = await _local.find();
     if (local == null || !_epoch.isCurrent(session) || _stopped) return;
     final core.Id accountId;
@@ -129,6 +144,7 @@ class LocalAccountClaimer {
       return;
     } on ApiNetworkError {
       _logger.fine('Claim postponed: the service is not reachable');
+      if (_epoch.isCurrent(session) && !_stopped) _onClaimPostponed?.call();
       return;
     } on ApiHttpError catch (error) {
       _logger.warning('The service refused the claim: ${error.statusCode}');
@@ -154,7 +170,7 @@ class LocalAccountClaimer {
     // next start repeats the claim.
     if (_stopped) return;
     try {
-      await _local.reassignTo(accountId);
+      await _local.reassignTo(accountId, subject: subject);
     } on Object catch (error, stack) {
       _logger.warning('Re-pointing the Local data failed', error, stack);
       if (!_epoch.isCurrent(session) || _stopped) return;

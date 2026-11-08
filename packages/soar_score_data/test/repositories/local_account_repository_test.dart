@@ -36,6 +36,15 @@ void _tests(Backend backend) {
     expect(await accounts.linkedAccount(), account);
   });
 
+  test('remembers the sign-in that claimed', skip: skip, () async {
+    await accounts.ensure();
+    expect(await accounts.linkedSubject(), isNull);
+
+    await accounts.reassignTo(core.Id.create(), subject: 'auth0|abc');
+
+    expect(await accounts.linkedSubject(), 'auth0|abc');
+  });
+
   test('creates one UUIDv7 id on first run and keeps it', skip: skip, () async {
     final id = await accounts.ensure();
 

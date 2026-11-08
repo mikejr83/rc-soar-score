@@ -15,6 +15,8 @@ import 'package:soar_score_contest/platform/web_bootstrap.dart';
 import '../auth/auth_session.dart';
 import '../auth/auth_session_factory.dart';
 import '../server/embedded_server.dart';
+import '../server/profile_access.dart';
+import '../services/sync/sync_problem.dart';
 import '../services/exchange/contest_exchange.dart';
 import '../services/competition_import/competition_import.dart';
 import '../services/pilot_import/pilot_import.dart';
@@ -242,7 +244,14 @@ class NativeBootstrap extends AppBootstrap {
       epoch: epoch,
       local: LocalAccountRepository(server.database),
       claim: remote.claimLocalAccount,
+      onSignedIn: acting.signedIn,
+      onClaimPostponed: () {
+        if (acting.profileAccess == ProfileAccess.unverified) {
+          sync.appSync.claimProblemChanged(SyncProblem.accountUnverified);
+        }
+      },
       onClaimed: (accountId, session) async {
+        await acting.claimRecorded();
         // New offline data is the account's from now on and syncs at once,
         // but only if the sign-in the claim was made under is still the one.
         if (!acting.actAs(accountId, epoch: session)) return;

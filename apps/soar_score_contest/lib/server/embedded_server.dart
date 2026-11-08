@@ -12,6 +12,7 @@ import 'package:soar_score_data/soar_score_data.dart';
 import '../platform/inspection_owner_guard.dart';
 import 'embedded_guard.dart';
 import 'owner_scoped_principal.dart';
+import 'profile_access.dart';
 import 'profile_mismatch_guard.dart';
 
 final _logger = Logger('EmbeddedServer');
@@ -53,7 +54,8 @@ class EmbeddedServer {
   late core.Id _localAccountId;
   late core.Id _actingAccountId;
   core.Id? _linkedAccountId;
-  bool _profileMismatch = false;
+  String? _linkedSubject;
+  ProfileAccess _profileAccess = ProfileAccess.verified;
 
   /// Which owner ids belong to contests imported for inspection. Shared with
   /// the sync engine, so both decide from the same answers.
@@ -84,24 +86,50 @@ class EmbeddedServer {
   void actAs(core.Id accountId) {
     _actingAccountId = accountId;
     _linkedAccountId = accountId;
-    _profileMismatch = false;
+    _profileAccess = ProfileAccess.verified;
   }
 
-  /// Whether a different account than the one this installation's data was
-  /// claimed into is signed in. While true the API refuses every request but
-  /// `GET /health` (see [profileMismatchGuard]).
-  bool get profileMismatch => _profileMismatch;
+  /// Whether the claimed account's data may be served now.
+  ProfileAccess get profileAccess => _profileAccess;
+
+  /// Whether the service refused the signed-in account's claim.
+  bool get profileMismatch => _profileAccess == ProfileAccess.mismatched;
+
+  /// Throws [ProfileUnavailableError] unless the claimed account's data may be
+  /// served. Every path that reads or writes it without going through the
+  /// HTTP API calls this first.
+  void assertProfileUsable() {
+    if (_profileAccess != ProfileAccess.verified) {
+      throw ProfileUnavailableError(_profileAccess);
+    }
+  }
+
+  /// A user signed in (or was restored) with identity [subject]. The claimed
+  /// data is served only when [subject] is the one that claimed it; otherwise
+  /// it stays closed until the claim is checked, or the user signs out.
+  void profileSignedIn(String? subject) {
+    _profileAccess =
+        _linkedAccountId == null ||
+            (subject != null && subject == _linkedSubject)
+        ? ProfileAccess.verified
+        : ProfileAccess.unverified;
+  }
+
+  /// Reads the claim's identity again, after a claim recorded it.
+  Future<void> reloadLinkedSubject() async {
+    _linkedSubject = await LocalAccountRepository(_database).linkedSubject();
+  }
 
   /// The service refused the signed-in account's claim because the data is
   /// another account's: stop serving that data until the director signs out or
   /// signs in as the owning account.
-  void markProfileMismatch() => _profileMismatch = true;
+  void markProfileMismatch() => _profileAccess = ProfileAccess.mismatched;
 
   /// Signed out: acts as the account the data was last claimed into, so the
   /// director still sees it, or as the Local account if it was never claimed.
   void actAsLocal() {
     _actingAccountId = _linkedAccountId ?? _localAccountId;
-    _profileMismatch = false;
+    _profileAccess = ProfileAccess.verified;
   }
 
   Future<void> initializeDatabase() async {
@@ -120,7 +148,14 @@ class EmbeddedServer {
       // that account even offline; the sign-in only decides what is synced.
       _linkedAccountId = await LocalAccountRepository(_database)
           .linkedAccount();
+      _linkedSubject = await LocalAccountRepository(_database).linkedSubject();
       _actingAccountId = _linkedAccountId ?? _localAccountId;
+      // A claimed profile stays closed until the app has compared the
+      // restored sign-in (or its absence) with the claim: see
+      // [profileSignedIn] and [actAsLocal].
+      _profileAccess = _linkedAccountId == null
+          ? ProfileAccess.verified
+          : ProfileAccess.unverified;
       if (seedDemo) {
         _logger.finer('Seeding demo data');
         await DemoDataSeeder(
@@ -154,7 +189,7 @@ class EmbeddedServer {
     final guarded = Pipeline()
         .addMiddleware(_inFlight.middleware)
         .addMiddleware(embeddedGuard(secret: secret, port: () => port))
-        .addMiddleware(profileMismatchGuard(mismatched: () => _profileMismatch))
+        .addMiddleware(profileMismatchGuard(access: () => _profileAccess))
         .addHandler(handler);
     _server = await shelf_io.serve(guarded, InternetAddress.loopbackIPv4, 0);
   }

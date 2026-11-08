@@ -48,6 +48,10 @@ class LocalAccountRepository implements core.LocalAccountRepository {
   }
 
   @override
+  Future<String?> linkedSubject() async =>
+      (await _db.select(_db.localAccount).getSingleOrNull())?.linkedSubject;
+
+  @override
   Future<core.AccountPreferences> preferences() async {
     final row = await _db.select(_db.localAccount).getSingleOrNull();
     return core.AccountPreferences(
@@ -73,7 +77,10 @@ class LocalAccountRepository implements core.LocalAccountRepository {
   }
 
   @override
-  Future<void> reassignTo(core.Id accountId) => _db.transaction(() async {
+  Future<void> reassignTo(
+    core.Id accountId, {
+    String? subject,
+  }) => _db.transaction(() async {
     final local = await find();
     if (local == null) {
       throw StateError('the Local account has not been created yet');
@@ -86,7 +93,10 @@ class LocalAccountRepository implements core.LocalAccountRepository {
       );
     }
     await (_db.update(_db.localAccount)..where((t) => t.slot.equals(1))).write(
-      LocalAccountCompanion(linkedAccountId: Value(accountId.value)),
+      LocalAccountCompanion(
+        linkedAccountId: Value(accountId.value),
+        linkedSubject: Value(subject),
+      ),
     );
     for (final MapEntry(key: table, value: columns)
         in localAccountReferences.entries) {

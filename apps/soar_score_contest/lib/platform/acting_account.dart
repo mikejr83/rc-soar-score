@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../server/embedded_server.dart';
+import '../server/profile_access.dart';
 import 'auth_epoch.dart';
 
 /// Which account the app acts as, tied to the sign-in that made it so.
@@ -39,6 +40,19 @@ class ActingAccount extends ChangeNotifier {
   /// Whether the signed-in account is not the one this computer's data belongs
   /// to, so the data is not served (see `profileMismatchGuard`).
   bool get profileMismatch => _server.profileMismatch;
+
+  /// Whether the claimed data may be served now.
+  ProfileAccess get profileAccess => _server.profileAccess;
+
+  /// A user signed in or was restored: the claimed data is served only when
+  /// their identity [subject] is the one that claimed it.
+  void signedIn(String? subject) {
+    _server.profileSignedIn(subject);
+    notifyListeners();
+  }
+
+  /// A claim recorded its identity: read it before acting as the account.
+  Future<void> claimRecorded() => _server.reloadLinkedSubject();
 
   /// The service refused sign-in [epoch]'s claim as another account's data:
   /// stops serving the data, unless that sign-in is no longer the current one.

@@ -5,6 +5,7 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 
 import '../server/embedded_server.dart';
+import '../server/profile_access.dart';
 import '../services/exchange/contest_exchange.dart';
 
 /// Exports and imports contests of the embedded server's database.
@@ -92,6 +93,7 @@ class NativeContestExchange implements ContestExchange {
 
   @override
   Future<Set<core.Id>> inspectionContests() async {
+    _server.assertProfileUsable();
     final owners = await _server.inspectionOwners.owners();
     if (owners.isEmpty) return {};
     final contests = await _server.repository.contestRepository.getAll();
@@ -127,7 +129,10 @@ class NativeContestExchange implements ContestExchange {
 
   Future<T> _guard<T>(Future<T> Function() body) async {
     try {
+      _server.assertProfileUsable();
       return await body();
+    } on ProfileUnavailableError catch (e) {
+      throw ExchangeFailure(e.message);
     } on ExchangeException catch (e) {
       throw ExchangeFailure(e.message);
     } on FormatException catch (e) {

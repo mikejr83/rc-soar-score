@@ -25,6 +25,12 @@ class LocalAccount extends Table {
   /// director signs out.
   TextColumn get linkedAccountId => text().nullable()();
 
+  /// The identity provider's stable id (Auth0 `sub`) of the sign-in that
+  /// claimed the data; null until a claim. The app compares it with the
+  /// signed-in user before serving the linked account's data, so a different
+  /// sign-in cannot reach it, even offline.
+  TextColumn get linkedSubject => text().nullable()();
+
   TextColumn get createdAt => text()();
 
   @override

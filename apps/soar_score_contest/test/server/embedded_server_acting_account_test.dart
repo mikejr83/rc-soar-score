@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/server/embedded_server.dart';
+import 'package:soar_score_contest/server/profile_access.dart';
 import 'package:soar_score_core/soar_score_core.dart' show Contest, Id;
 import 'package:soar_score_data/soar_score_data.dart'
     show LocalAccountRepository;
@@ -81,6 +82,10 @@ void main() {
     );
 
     expect(server.actingAccountId, account);
+    // Closed until the app has compared the sign-in with the claim; here
+    // nobody is signed in, so the stored data is shown.
+    expect(server.profileAccess, ProfileAccess.unverified);
+    server.actAsLocal();
     expect((await client.contests()).map((c) => c.name), ['Offline work']);
   });
 }

@@ -37729,6 +37729,17 @@ class $LocalAccountTable extends LocalAccount
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _linkedSubjectMeta = const VerificationMeta(
+    'linkedSubject',
+  );
+  @override
+  late final GeneratedColumn<String> linkedSubject = GeneratedColumn<String>(
+    'linked_subject',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -37747,6 +37758,7 @@ class $LocalAccountTable extends LocalAccount
     preferredTimeZone,
     preferredLocale,
     linkedAccountId,
+    linkedSubject,
     createdAt,
   ];
   @override
@@ -37802,6 +37814,15 @@ class $LocalAccountTable extends LocalAccount
         ),
       );
     }
+    if (data.containsKey('linked_subject')) {
+      context.handle(
+        _linkedSubjectMeta,
+        linkedSubject.isAcceptableOrUnknown(
+          data['linked_subject']!,
+          _linkedSubjectMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -37839,6 +37860,10 @@ class $LocalAccountTable extends LocalAccount
         DriftSqlType.string,
         data['${effectivePrefix}linked_account_id'],
       ),
+      linkedSubject: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}linked_subject'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}created_at'],
@@ -37870,6 +37895,12 @@ class LocalAccountData extends DataClass
   /// installation keeps acting as that account when it starts offline or the
   /// director signs out.
   final String? linkedAccountId;
+
+  /// The identity provider's stable id (Auth0 `sub`) of the sign-in that
+  /// claimed the data; null until a claim. The app compares it with the
+  /// signed-in user before serving the linked account's data, so a different
+  /// sign-in cannot reach it, even offline.
+  final String? linkedSubject;
   final String createdAt;
   const LocalAccountData({
     required this.slot,
@@ -37877,6 +37908,7 @@ class LocalAccountData extends DataClass
     this.preferredTimeZone,
     this.preferredLocale,
     this.linkedAccountId,
+    this.linkedSubject,
     required this.createdAt,
   });
   @override
@@ -37892,6 +37924,9 @@ class LocalAccountData extends DataClass
     }
     if (!nullToAbsent || linkedAccountId != null) {
       map['linked_account_id'] = Variable<String>(linkedAccountId);
+    }
+    if (!nullToAbsent || linkedSubject != null) {
+      map['linked_subject'] = Variable<String>(linkedSubject);
     }
     map['created_at'] = Variable<String>(createdAt);
     return map;
@@ -37910,6 +37945,9 @@ class LocalAccountData extends DataClass
       linkedAccountId: linkedAccountId == null && nullToAbsent
           ? const Value.absent()
           : Value(linkedAccountId),
+      linkedSubject: linkedSubject == null && nullToAbsent
+          ? const Value.absent()
+          : Value(linkedSubject),
       createdAt: Value(createdAt),
     );
   }
@@ -37927,6 +37965,7 @@ class LocalAccountData extends DataClass
       ),
       preferredLocale: serializer.fromJson<String?>(json['preferredLocale']),
       linkedAccountId: serializer.fromJson<String?>(json['linkedAccountId']),
+      linkedSubject: serializer.fromJson<String?>(json['linkedSubject']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
     );
   }
@@ -37939,6 +37978,7 @@ class LocalAccountData extends DataClass
       'preferredTimeZone': serializer.toJson<String?>(preferredTimeZone),
       'preferredLocale': serializer.toJson<String?>(preferredLocale),
       'linkedAccountId': serializer.toJson<String?>(linkedAccountId),
+      'linkedSubject': serializer.toJson<String?>(linkedSubject),
       'createdAt': serializer.toJson<String>(createdAt),
     };
   }
@@ -37949,6 +37989,7 @@ class LocalAccountData extends DataClass
     Value<String?> preferredTimeZone = const Value.absent(),
     Value<String?> preferredLocale = const Value.absent(),
     Value<String?> linkedAccountId = const Value.absent(),
+    Value<String?> linkedSubject = const Value.absent(),
     String? createdAt,
   }) => LocalAccountData(
     slot: slot ?? this.slot,
@@ -37962,6 +38003,9 @@ class LocalAccountData extends DataClass
     linkedAccountId: linkedAccountId.present
         ? linkedAccountId.value
         : this.linkedAccountId,
+    linkedSubject: linkedSubject.present
+        ? linkedSubject.value
+        : this.linkedSubject,
     createdAt: createdAt ?? this.createdAt,
   );
   LocalAccountData copyWithCompanion(LocalAccountCompanion data) {
@@ -37977,6 +38021,9 @@ class LocalAccountData extends DataClass
       linkedAccountId: data.linkedAccountId.present
           ? data.linkedAccountId.value
           : this.linkedAccountId,
+      linkedSubject: data.linkedSubject.present
+          ? data.linkedSubject.value
+          : this.linkedSubject,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -37989,6 +38036,7 @@ class LocalAccountData extends DataClass
           ..write('preferredTimeZone: $preferredTimeZone, ')
           ..write('preferredLocale: $preferredLocale, ')
           ..write('linkedAccountId: $linkedAccountId, ')
+          ..write('linkedSubject: $linkedSubject, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -38001,6 +38049,7 @@ class LocalAccountData extends DataClass
     preferredTimeZone,
     preferredLocale,
     linkedAccountId,
+    linkedSubject,
     createdAt,
   );
   @override
@@ -38012,6 +38061,7 @@ class LocalAccountData extends DataClass
           other.preferredTimeZone == this.preferredTimeZone &&
           other.preferredLocale == this.preferredLocale &&
           other.linkedAccountId == this.linkedAccountId &&
+          other.linkedSubject == this.linkedSubject &&
           other.createdAt == this.createdAt);
 }
 
@@ -38021,6 +38071,7 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
   final Value<String?> preferredTimeZone;
   final Value<String?> preferredLocale;
   final Value<String?> linkedAccountId;
+  final Value<String?> linkedSubject;
   final Value<String> createdAt;
   const LocalAccountCompanion({
     this.slot = const Value.absent(),
@@ -38028,6 +38079,7 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
     this.preferredTimeZone = const Value.absent(),
     this.preferredLocale = const Value.absent(),
     this.linkedAccountId = const Value.absent(),
+    this.linkedSubject = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   LocalAccountCompanion.insert({
@@ -38036,6 +38088,7 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
     this.preferredTimeZone = const Value.absent(),
     this.preferredLocale = const Value.absent(),
     this.linkedAccountId = const Value.absent(),
+    this.linkedSubject = const Value.absent(),
     required String createdAt,
   }) : accountId = Value(accountId),
        createdAt = Value(createdAt);
@@ -38045,6 +38098,7 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
     Expression<String>? preferredTimeZone,
     Expression<String>? preferredLocale,
     Expression<String>? linkedAccountId,
+    Expression<String>? linkedSubject,
     Expression<String>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -38053,6 +38107,7 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
       if (preferredTimeZone != null) 'preferred_time_zone': preferredTimeZone,
       if (preferredLocale != null) 'preferred_locale': preferredLocale,
       if (linkedAccountId != null) 'linked_account_id': linkedAccountId,
+      if (linkedSubject != null) 'linked_subject': linkedSubject,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -38063,6 +38118,7 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
     Value<String?>? preferredTimeZone,
     Value<String?>? preferredLocale,
     Value<String?>? linkedAccountId,
+    Value<String?>? linkedSubject,
     Value<String>? createdAt,
   }) {
     return LocalAccountCompanion(
@@ -38071,6 +38127,7 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
       preferredTimeZone: preferredTimeZone ?? this.preferredTimeZone,
       preferredLocale: preferredLocale ?? this.preferredLocale,
       linkedAccountId: linkedAccountId ?? this.linkedAccountId,
+      linkedSubject: linkedSubject ?? this.linkedSubject,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -38093,6 +38150,9 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
     if (linkedAccountId.present) {
       map['linked_account_id'] = Variable<String>(linkedAccountId.value);
     }
+    if (linkedSubject.present) {
+      map['linked_subject'] = Variable<String>(linkedSubject.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<String>(createdAt.value);
     }
@@ -38107,6 +38167,7 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
           ..write('preferredTimeZone: $preferredTimeZone, ')
           ..write('preferredLocale: $preferredLocale, ')
           ..write('linkedAccountId: $linkedAccountId, ')
+          ..write('linkedSubject: $linkedSubject, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -75092,6 +75153,7 @@ typedef $$LocalAccountTableCreateCompanionBuilder =
       Value<String?> preferredTimeZone,
       Value<String?> preferredLocale,
       Value<String?> linkedAccountId,
+      Value<String?> linkedSubject,
       required String createdAt,
     });
 typedef $$LocalAccountTableUpdateCompanionBuilder =
@@ -75101,6 +75163,7 @@ typedef $$LocalAccountTableUpdateCompanionBuilder =
       Value<String?> preferredTimeZone,
       Value<String?> preferredLocale,
       Value<String?> linkedAccountId,
+      Value<String?> linkedSubject,
       Value<String> createdAt,
     });
 
@@ -75135,6 +75198,11 @@ class $$LocalAccountTableFilterComposer
 
   ColumnFilters<String> get linkedAccountId => $composableBuilder(
     column: $table.linkedAccountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linkedSubject => $composableBuilder(
+    column: $table.linkedSubject,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -75178,6 +75246,11 @@ class $$LocalAccountTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get linkedSubject => $composableBuilder(
+    column: $table.linkedSubject,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -75211,6 +75284,11 @@ class $$LocalAccountTableAnnotationComposer
 
   GeneratedColumn<String> get linkedAccountId => $composableBuilder(
     column: $table.linkedAccountId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get linkedSubject => $composableBuilder(
+    column: $table.linkedSubject,
     builder: (column) => column,
   );
 
@@ -75260,6 +75338,7 @@ class $$LocalAccountTableTableManager
                 Value<String?> preferredTimeZone = const Value.absent(),
                 Value<String?> preferredLocale = const Value.absent(),
                 Value<String?> linkedAccountId = const Value.absent(),
+                Value<String?> linkedSubject = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
               }) => LocalAccountCompanion(
                 slot: slot,
@@ -75267,6 +75346,7 @@ class $$LocalAccountTableTableManager
                 preferredTimeZone: preferredTimeZone,
                 preferredLocale: preferredLocale,
                 linkedAccountId: linkedAccountId,
+                linkedSubject: linkedSubject,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -75276,6 +75356,7 @@ class $$LocalAccountTableTableManager
                 Value<String?> preferredTimeZone = const Value.absent(),
                 Value<String?> preferredLocale = const Value.absent(),
                 Value<String?> linkedAccountId = const Value.absent(),
+                Value<String?> linkedSubject = const Value.absent(),
                 required String createdAt,
               }) => LocalAccountCompanion.insert(
                 slot: slot,
@@ -75283,6 +75364,7 @@ class $$LocalAccountTableTableManager
                 preferredTimeZone: preferredTimeZone,
                 preferredLocale: preferredLocale,
                 linkedAccountId: linkedAccountId,
+                linkedSubject: linkedSubject,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0
