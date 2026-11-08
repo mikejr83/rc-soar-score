@@ -113,7 +113,9 @@ void main() {
   }
 
   test('a restored B session offline: every operation refuses', () async {
+    app.claim = (_) async => throw unreachableError();
     await app.restart(subject: 'auth0|b');
+    await app.claimer.run();
     expect(app.acting.profileAccess, ProfileAccess.unverified);
 
     await expectEverythingRefused(ProfileAccess.unverified);

@@ -245,13 +245,13 @@ class NativeBootstrap extends AppBootstrap {
       local: LocalAccountRepository(server.database),
       claim: remote.claimLocalAccount,
       onSignedIn: acting.signedIn,
+      onClaimRecorded: acting.claimRecorded,
       onClaimPostponed: () {
         if (acting.profileAccess == ProfileAccess.unverified) {
           sync.appSync.claimProblemChanged(SyncProblem.accountUnverified);
         }
       },
       onClaimed: (accountId, session) async {
-        await acting.claimRecorded();
         // New offline data is the account's from now on and syncs at once,
         // but only if the sign-in the claim was made under is still the one.
         if (!acting.actAs(accountId, epoch: session)) return;

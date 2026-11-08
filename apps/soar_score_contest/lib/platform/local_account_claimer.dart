@@ -41,6 +41,7 @@ class LocalAccountClaimer {
     this._onAccountMismatch,
     this._onSignedIn,
     this._onClaimPostponed,
+    this._onClaimRecorded,
     this._getPreferences,
     this._putPreferences,
     this._onPreferencesChanged,
@@ -73,6 +74,11 @@ class LocalAccountClaimer {
   /// Called when a claim could not be sent because the service was not
   /// reachable, so the app can say the data is still unchecked.
   final void Function()? _onClaimPostponed;
+
+  /// Called right after the Local data was re-pointed to the account, with no
+  /// await in between and whatever the sign-in did meanwhile, so the app's
+  /// view of who owns the data matches the database.
+  final void Function(core.Id accountId, String? subject)? _onClaimRecorded;
 
   /// Reads and stores the signed-in account's preferences on the service.
   /// Both null (the default) skips carrying preferences over.
@@ -171,6 +177,7 @@ class LocalAccountClaimer {
     if (_stopped) return;
     try {
       await _local.reassignTo(accountId, subject: subject);
+      _onClaimRecorded?.call(accountId, subject);
     } on Object catch (error, stack) {
       _logger.warning('Re-pointing the Local data failed', error, stack);
       if (!_epoch.isCurrent(session) || _stopped) return;

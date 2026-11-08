@@ -55,6 +55,8 @@ class EmbeddedServer {
   late core.Id _actingAccountId;
   core.Id? _linkedAccountId;
   String? _linkedSubject;
+  bool _signedIn = false;
+  String? _signedSubject;
   ProfileAccess _profileAccess = ProfileAccess.verified;
 
   /// Which owner ids belong to contests imported for inspection. Shared with
@@ -108,16 +110,36 @@ class EmbeddedServer {
   /// data is served only when [subject] is the one that claimed it; otherwise
   /// it stays closed until the claim is checked, or the user signs out.
   void profileSignedIn(String? subject) {
-    _profileAccess =
-        _linkedAccountId == null ||
-            (subject != null && subject == _linkedSubject)
-        ? ProfileAccess.verified
-        : ProfileAccess.unverified;
+    _signedIn = true;
+    _signedSubject = subject;
+    _profileAccess = _accessForSignedIn();
   }
 
-  /// Reads the claim's identity again, after a claim recorded it.
-  Future<void> reloadLinkedSubject() async {
-    _linkedSubject = await LocalAccountRepository(_database).linkedSubject();
+  ProfileAccess _accessForSignedIn() =>
+      _linkedAccountId == null ||
+          (_signedSubject != null && _signedSubject == _linkedSubject)
+      ? ProfileAccess.verified
+      : ProfileAccess.unverified;
+
+  /// A claim by [subject] committed: this installation's data now belongs to
+  /// [accountId]. Synchronous, and called right after the data was re-pointed
+  /// whatever the sign-in has done since, so memory never lags the database.
+  ///
+  /// The server then acts as the account, as it does after sign-out, so no
+  /// request ever acts as the Local account over rows the account owns. That
+  /// grants no sync lease: sending still waits for [actAs] under a sign-in
+  /// that is still current. Who may see the data is decided here as at any
+  /// sign-in: a user other than the claimant is closed out (`mismatched`
+  /// stays so) until their own claim is checked.
+  void recordClaim(core.Id accountId, String? subject) {
+    _linkedAccountId = accountId;
+    _linkedSubject = subject;
+    _actingAccountId = accountId;
+    _profileAccess = !_signedIn
+        ? ProfileAccess.verified
+        : _profileAccess == ProfileAccess.mismatched
+        ? ProfileAccess.mismatched
+        : _accessForSignedIn();
   }
 
   /// The service refused the signed-in account's claim because the data is
@@ -128,6 +150,8 @@ class EmbeddedServer {
   /// Signed out: acts as the account the data was last claimed into, so the
   /// director still sees it, or as the Local account if it was never claimed.
   void actAsLocal() {
+    _signedIn = false;
+    _signedSubject = null;
     _actingAccountId = _linkedAccountId ?? _localAccountId;
     _profileAccess = ProfileAccess.verified;
   }

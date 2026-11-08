@@ -51,8 +51,14 @@ class ActingAccount extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// A claim recorded its identity: read it before acting as the account.
-  Future<void> claimRecorded() => _server.reloadLinkedSubject();
+  /// A claim by [subject] committed, for whichever sign-in made it: the data
+  /// belongs to [accountId] from now on. Only ownership changes; acting as the
+  /// account (and any sync lease) still waits for [actAs] under a sign-in that
+  /// is still current.
+  void claimRecorded(core.Id accountId, String? subject) {
+    _server.recordClaim(accountId, subject);
+    notifyListeners();
+  }
 
   /// The service refused sign-in [epoch]'s claim as another account's data:
   /// stops serving the data, unless that sign-in is no longer the current one.

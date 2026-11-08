@@ -48,6 +48,10 @@ class ClaimedProfileHarness {
   late LocalAccountClaimer claimer;
   final problems = <SyncProblem?>[];
 
+  /// Runs after the Local data was re-pointed (and committed) but before the
+  /// claimer carries on, so a test can sign out at that exact moment.
+  Future<void> Function()? afterReassign;
+
   static Future<ClaimedProfileHarness> open(
     Directory directory, {
     required String? subject,
@@ -81,16 +85,19 @@ class ClaimedProfileHarness {
     claimer = LocalAccountClaimer(
       auth: auth,
       epoch: epoch,
-      local: LocalAccountRepository(server.database),
+      local: _HookedLocalAccount(
+        LocalAccountRepository(server.database),
+        () => afterReassign,
+      ),
       claim: (request) => claim(request),
       onSignedIn: acting.signedIn,
+      onClaimRecorded: acting.claimRecorded,
       onClaimPostponed: () {
         if (acting.profileAccess == ProfileAccess.unverified) {
           problems.add(SyncProblem.accountUnverified);
         }
       },
       onClaimed: (id, session) async {
-        await acting.claimRecorded();
         acting.actAs(id, epoch: session);
       },
       onSignedOut: acting.actAsLocal,
@@ -146,3 +153,37 @@ ApiNetworkError unreachableError() => ApiNetworkError(
   'offline',
   requestUri: Uri.parse('http://hosted.invalid/api/v1/account/local-claims'),
 );
+
+/// The data layer's Local account repository that lets a test act between the
+/// re-pointing and what follows it.
+class _HookedLocalAccount implements core.LocalAccountRepository {
+  _HookedLocalAccount(this._inner, this._hook);
+
+  final LocalAccountRepository _inner;
+  final Future<void> Function()? Function() _hook;
+
+  @override
+  Future<void> reassignTo(core.Id accountId, {String? subject}) async {
+    await _inner.reassignTo(accountId, subject: subject);
+    await _hook()?.call();
+  }
+
+  @override
+  Future<core.Id?> find() => _inner.find();
+
+  @override
+  Future<core.Id> ensure() => _inner.ensure();
+
+  @override
+  Future<core.Id?> linkedAccount() => _inner.linkedAccount();
+
+  @override
+  Future<String?> linkedSubject() => _inner.linkedSubject();
+
+  @override
+  Future<core.AccountPreferences> preferences() => _inner.preferences();
+
+  @override
+  Future<void> savePreferences(core.AccountPreferences preferences) =>
+      _inner.savePreferences(preferences);
+}
