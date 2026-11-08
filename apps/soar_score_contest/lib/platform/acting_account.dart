@@ -4,6 +4,7 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 import '../server/embedded_server.dart';
 import '../server/profile_access.dart';
 import 'auth_epoch.dart';
+import 'sync_pin.dart';
 
 /// Which account the app acts as, tied to the sign-in that made it so.
 ///
@@ -97,4 +98,24 @@ class ActingAccount extends ChangeNotifier {
       isAccount && _epoch.isCurrent(_boundEpoch) ? _boundEpoch : null;
 
   AuthEpoch get epoch => _epoch;
+
+  /// The profile's state now (see `EmbeddedServer.profileGeneration`).
+  int get profileGeneration => _server.profileGeneration;
+
+  /// Runs [write] as an operation pinned to what a sync exchange depended on:
+  /// the database refuses its statements and commit once the profile changed
+  /// or the sign-in the exchange was sent under is no longer the one in
+  /// force for its data.
+  Future<T> runPinned<T>(SyncPin pin, Future<T> Function() write) =>
+      _server.runPinnedOperation(
+        write,
+        generation: pin.generation,
+        stillValid: () {
+          final owner = pin.owner;
+          final now = owner == null ? lease() : leaseFor(owner);
+          if (now == null || now != pin.lease) {
+            throw const ProfileUnavailableError.changed();
+          }
+        },
+      );
 }

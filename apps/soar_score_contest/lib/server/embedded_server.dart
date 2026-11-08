@@ -137,6 +137,24 @@ class EmbeddedServer {
     return result;
   }
 
+  /// What the profile's state is now, to pin work that spans several awaits
+  /// (see [runPinnedOperation]).
+  int get profileGeneration => _generation;
+
+  /// Runs [body] as an operation pinned to [generation], read earlier by the
+  /// caller: refused at once, and its writes and commits refused later, once
+  /// the profile has changed since, or [stillValid] throws. Unlike
+  /// [runProfileOperation] it does not judge the result, because [body] is a
+  /// write and the commit is where it is stopped.
+  Future<T> runPinnedOperation<T>(
+    Future<T> Function() body, {
+    required int generation,
+    void Function()? stillValid,
+  }) {
+    final operation = _ProfileOperation(this, generation, stillValid)..verify();
+    return runZoned(body, zoneValues: {_operationKey: operation});
+  }
+
   /// The operation the running code belongs to, if any.
   _ProfileOperation? get _currentOperation =>
       Zone.current[_operationKey] as _ProfileOperation?;
@@ -374,10 +392,11 @@ Future<EmbeddedServer> startEmbeddedServer(
 /// One operation on the claimed profile: remembers the profile's generation
 /// when it began and says whether it still holds.
 class _ProfileOperation {
-  _ProfileOperation(this._server, this._generation);
+  _ProfileOperation(this._server, this._generation, [this._stillValid]);
 
   final EmbeddedServer _server;
   final int _generation;
+  final void Function()? _stillValid;
 
   /// Throws [ProfileUnavailableError] unless the profile is as it was when the
   /// operation began and its data may still be served.
@@ -391,5 +410,6 @@ class _ProfileOperation {
     if (_server._generation != _generation) {
       throw const ProfileUnavailableError.changed();
     }
+    _stillValid?.call();
   }
 }
