@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../../api_client_provider.dart';
+import '../../../connectivity_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../router.dart';
 import '../../../services/reports/pilot_cards/pilot_invitations.dart';
@@ -28,6 +29,9 @@ class _InvitationsSectionState extends State<InvitationsSection> {
   bool _failed = false;
   bool _started = false;
 
+  /// Counts the loads started; a result of an earlier one is dropped.
+  int _generation = 0;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -48,6 +52,7 @@ class _InvitationsSectionState extends State<InvitationsSection> {
   }
 
   Future<void> _load() async {
+    final generation = ++_generation;
     final client = apiClientOf(context);
     final publication = publicationClientOf(context);
     if (client == null || publication == null) {
@@ -68,7 +73,7 @@ class _InvitationsSectionState extends State<InvitationsSection> {
         client: publication,
         contestId: widget.contest.id,
       );
-      if (!mounted) {
+      if (!mounted || generation != _generation) {
         session.dispose();
         return;
       }
@@ -77,14 +82,14 @@ class _InvitationsSectionState extends State<InvitationsSection> {
       setState(() {
         _pilots = [
           for (final p in participations)
-            if (p.roleType == RoleType.pilot && p.retiredAtRound == null) p.id,
+            if (canHaveInvitation(p)) p.id,
         ];
         _session = session..addListener(_changed);
         _loading = false;
         _failed = session.phase == InvitationPhase.loadFailed;
       });
     } on Object {
-      if (!mounted) return;
+      if (!mounted || generation != _generation) return;
       setState(() {
         _loading = false;
         _failed = true;
@@ -94,6 +99,17 @@ class _InvitationsSectionState extends State<InvitationsSection> {
 
   @override
   Widget build(BuildContext context) {
+    // Connectivity is read again whenever it changes, so the button goes off
+    // with the reason instead of failing a request.
+    final monitor = appConnectivityOf(context);
+    if (monitor == null) return _card(context);
+    return ListenableBuilder(
+      listenable: monitor,
+      builder: (context, _) => _card(context),
+    );
+  }
+
+  Widget _card(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final session = _session;
@@ -105,7 +121,11 @@ class _InvitationsSectionState extends State<InvitationsSection> {
           ];
     final reason = session == null
         ? null
-        : invitationsUnavailableText(l10n, session.invitations);
+        : invitationsUnavailableText(
+            l10n,
+            session.invitations,
+            online: invitationsOnline(context),
+          );
     final String text;
     if (_loading) {
       text = l10n.invitationsLoading;

@@ -5,15 +5,37 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 final _logger = Logger('PilotInvitations');
 
-/// Writes each invitation link to the log, so a developer can copy one from
-/// the console and open it. A link opens a pilot's scoring page, so this is for
-/// debug and profile builds only and a release build logs nothing.
+/// Set `--dart-define=SOAR_SCORE_LOG_INVITATION_LINKS=true` to have a debug or
+/// profile build write each full invitation link to the log (the VS Code
+/// launch configurations for local testing do). A link is a bearer credential,
+/// so it is off by default and a release build never logs one.
+const bool logInvitationLinksEnabled = bool.fromEnvironment(
+  'SOAR_SCORE_LOG_INVITATION_LINKS',
+);
+
+/// Whether [participation] can have an invitation: a pilot who still flies.
+/// The workspace and the Participants list share this rule, so neither issues
+/// or shows a link for a retired pilot or a non-flying participant.
+bool canHaveInvitation(ContestParticipation participation) =>
+    participation.roleType == RoleType.pilot &&
+    participation.retiredAtRound == null;
+
+/// Logs the invitations read for [contestId]: the participation ids only, or
+/// with the links when [logInvitationLinksEnabled] is set in a non-release
+/// build, so a developer can copy one from the console.
 void logInvitationLinks(Id contestId, Map<String, String> links) {
   if (kReleaseMode || links.isEmpty) return;
+  if (!logInvitationLinksEnabled) {
+    _logger.fine(
+      'Contest ${contestId.value} has invitations for '
+      '${links.length} participations.',
+    );
+    return;
+  }
   final lines = [for (final e in links.entries) '  ${e.key}: ${e.value}'];
   _logger.info(
-    'Invitation links of contest ${contestId.value} (development builds only):'
-    '\n${lines.join('\n')}',
+    'Invitation links of contest ${contestId.value} (opted in, development '
+    'builds only):\n${lines.join('\n')}',
   );
 }
 

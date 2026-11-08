@@ -135,8 +135,21 @@ class ParticipantsToolbar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (c.readOnly)
-          search
+        if (c.readOnly && narrow) ...[
+          // A completed contest changes nothing, but its links stay valid and
+          // can still be copied.
+          search,
+          const SizedBox(height: 12),
+          Wrap(spacing: 12, runSpacing: 12, children: [invitations]),
+        ] else if (c.readOnly)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: search),
+              const SizedBox(width: 12),
+              invitations,
+            ],
+          )
         else if (narrow) ...[
           search,
           const SizedBox(height: 12),

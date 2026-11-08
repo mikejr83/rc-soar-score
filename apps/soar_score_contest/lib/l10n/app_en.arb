@@ -2522,5 +2522,7 @@
   "invitationsNotReady": "Invitations are still loading.",
   "@invitationsNotReady": {"description": "Reason the invitations menu is off until the invitations were read."},
   "invitationsCopyFailed": "The link could not be copied.",
-  "@invitationsCopyFailed": {"description": "Snack bar when copying an invitation link to the clipboard failed."}
+  "@invitationsCopyFailed": {"description": "Snack bar when copying an invitation link to the clipboard failed."},
+  "invitationsOffline": "You’re offline, so invitations can’t be sent now.",
+  "@invitationsOffline": {"description": "Reason invitations cannot be sent: the device is offline."}
 }

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../api_client_provider.dart';
+import '../../connectivity_provider.dart';
+import '../../services/connectivity/app_connectivity.dart';
 import '../../l10n/app_localizations.dart';
 import '../../router.dart';
 import '../../services/reports/pilot_cards/pilot_invitations.dart';
@@ -62,10 +64,18 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   final ScrollController _scroll = ScrollController();
   String? _shownMessage;
   PilotInvitationSession? _invitations;
+  AppConnectivity? _monitor;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // The Invitations menu follows connectivity, so it goes off when the
+    // network is lost instead of failing a request.
+    final monitor = appConnectivityOf(context);
+    if (!identical(monitor, _monitor)) {
+      _monitor?.removeListener(_changed);
+      _monitor = monitor?..addListener(_changed);
+    }
     if (_controller != null) return;
     final client = apiClientOf(context);
     if (client == null) return;
@@ -105,7 +115,9 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   /// The selected pilots' participation ids, and which have no invitation.
   List<Id> _selectedPilots(ParticipantsController c) => [
     for (final row in c.rows)
-      if (c.selection.contains(row.rowId) && row.isPilot) row.participation.id,
+      if (c.selection.contains(row.rowId) &&
+          canHaveInvitation(row.participation))
+        row.participation.id,
   ];
 
   Future<void> _sendInvitations(List<Id> missing) async {
@@ -132,7 +144,11 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
       for (final id in pilots)
         if (!session.has(id)) id,
     ];
-    final unavailable = invitationsUnavailableText(l10n, session.invitations);
+    final unavailable = invitationsUnavailableText(
+      l10n,
+      session.invitations,
+      online: invitationsOnline(context),
+    );
     final sendReason =
         unavailable ??
         (c.selection.isEmpty
@@ -142,10 +158,10 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
             : missing.isEmpty
             ? l10n.invitationsAllHaveLinks
             : null);
-    final link = pilots.length == 1
-        ? session.invitations.linkOf(pilots.single)
-        : null;
-    final copyReason = pilots.length != 1
+    // Copy needs exactly one selected row, and it must be a pilot.
+    final oneRow = c.selection.length == 1 && pilots.length == 1;
+    final link = oneRow ? session.invitations.linkOf(pilots.single) : null;
+    final copyReason = !oneRow
         ? l10n.invitationsSelectOne
         : link == null
         ? l10n.invitationsNoLinkYet
@@ -161,8 +177,6 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   }
 
   Future<void> _copyLink(String link) async {
-    final messenger = ScaffoldMessenger.of(context);
-    final l10n = AppLocalizations.of(context);
     var copied = true;
     try {
       await Clipboard.setData(ClipboardData(text: link))
@@ -171,7 +185,10 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
       // A browser can refuse clipboard access, or never answer.
       copied = false;
     }
-    messenger
+    // The page may have been left while the clipboard answered.
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
@@ -185,6 +202,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
 
   @override
   void dispose() {
+    _monitor?.removeListener(_changed);
     _invitations
       ?..removeListener(_changed)
       ..dispose();
@@ -674,7 +692,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                 ParticipantCard(
                   editing: editing,
                   participant: row,
-                  selectable: !c.readOnly,
+                  selectable: true,
                 ),
                 const SizedBox(height: 8),
               ],
@@ -686,7 +704,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
           key: const ValueKey('participants-table'),
           editing: editing,
           rows: visible,
-          selectable: !c.readOnly,
+          selectable: true,
           onToggleAll: () => c.toggleAll(visible.map((r) => r.rowId)),
         ),
     ];

@@ -3645,6 +3645,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The link could not be copied.'**
   String get invitationsCopyFailed;
+
+  /// Reason invitations cannot be sent: the device is offline.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re offline, so invitations can’t be sent now.'**
+  String get invitationsOffline;
 }
 
 class _AppLocalizationsDelegate

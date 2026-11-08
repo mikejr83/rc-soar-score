@@ -2651,4 +2651,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invitationsCopyFailed => 'The link could not be copied.';
+
+  @override
+  String get invitationsOffline =>
+      'You’re offline, so invitations can’t be sent now.';
 }

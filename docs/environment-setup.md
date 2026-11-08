@@ -306,6 +306,12 @@ three so a printed QR code can be scanned end to end:
 - The contest app talks to the local server (`http://localhost:8080` is the
   default for `SOAR_SCORE_API_BASE_URL`), so sign in and let the contest
   synchronize before using Send invitations on the Pilot Scoring Cards.
+- The Windows contest launch config sets
+  `--dart-define=SOAR_SCORE_LOG_INVITATION_LINKS=true`, so a debug build
+  writes each full invitation link to the debug console (logger
+  `PilotInvitations`) and you can paste one into the self-scoring app. A link is
+  a bearer credential: without that define only counts are logged, and a
+  release build never logs a link.
 - The self-scoring app runs on `localhost`, not `127.0.0.1`, to be the same
   site as the API: its guest session is a `SameSite=Lax` cookie. The server's
   `CORS_ALLOWED_ORIGINS` includes it. To scan a code with a phone, set
