@@ -18,9 +18,15 @@ class RowProblem {
 /// Holds the raw text of each field, so a rejected value stays on screen
 /// until it is corrected. [components] gives the request body of the save.
 class ScoreRowDraft extends ChangeNotifier {
-  ScoreRowDraft({required this.settings, Map<String, Object?> saved = const {}})
-    : _baseline = Map.of(saved) {
-    _load(saved);
+  /// [saved] is what the draft is compared to; [shown] (default [saved]) is
+  /// what the fields start with. They differ for a waiting pilot submission,
+  /// which fills the form without being saved.
+  ScoreRowDraft({
+    required this.settings,
+    Map<String, Object?> saved = const {},
+    Map<String, Object?>? shown,
+  }) : _baseline = Map.of(saved) {
+    _load(shown ?? saved);
   }
 
   final ScoreEntrySettings settings;
@@ -62,10 +68,11 @@ class ScoreRowDraft extends ChangeNotifier {
     zeroConfirmed = false;
   }
 
-  /// Replaces the draft with [saved], after a save or a reload.
-  void resetTo(Map<String, Object?> saved) {
+  /// Replaces the draft with [saved], after a save or a reload. [shown]
+  /// fills the fields instead when it is given (see the constructor).
+  void resetTo(Map<String, Object?> saved, {Map<String, Object?>? shown}) {
     _baseline = Map.of(saved);
-    _load(saved);
+    _load(shown ?? saved);
     notifyListeners();
   }
 

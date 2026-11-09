@@ -152,6 +152,7 @@ class ScoringController extends ChangeNotifier {
     final draft = ScoreRowDraft(
       settings: data!.settings,
       saved: row.savedComponents,
+      shown: row.formComponents,
     )..addListener(notifyListeners);
     return _drafts[row.id] = draft;
   }
@@ -200,7 +201,7 @@ class ScoringController extends ChangeNotifier {
 
   void discardAll() {
     for (final row in rows) {
-      _drafts[row.id]?.resetTo(row.savedComponents);
+      _drafts[row.id]?.resetTo(row.savedComponents, shown: row.formComponents);
     }
     _drafts.clear();
     _saves.clear();
@@ -211,7 +212,7 @@ class ScoringController extends ChangeNotifier {
 
   /// Puts one row back to what is saved.
   void revert(ScoringRow row) {
-    _drafts[row.id]?.resetTo(row.savedComponents);
+    _drafts[row.id]?.resetTo(row.savedComponents, shown: row.formComponents);
     _saves.remove(row.id);
     _theirs.remove(row.id);
     _clearRemovalReason(row.id);
@@ -552,7 +553,10 @@ class ScoringController extends ChangeNotifier {
   /// Drops the typed values and shows the newer revision.
   void takeTheirs(ScoringRow row) {
     final fresh = rows.firstWhere((r) => r.id == row.id, orElse: () => row);
-    _drafts[row.id]?.resetTo(fresh.savedComponents);
+    _drafts[row.id]?.resetTo(
+      fresh.savedComponents,
+      shown: fresh.formComponents,
+    );
     _saves.remove(row.id);
     _theirs.remove(row.id);
     _clearRemovalReason(row.id);
@@ -566,7 +570,15 @@ class ScoringController extends ChangeNotifier {
       data = loaded;
       loadError = null;
       for (final row in rows) {
-        _drafts[row.id]?.rebase(row.savedComponents);
+        final draft = _drafts[row.id];
+        if (draft == null) continue;
+        // An untouched form follows the reload (a pilot may have submitted
+        // since); what the director typed stays.
+        if (draft.isDirty) {
+          draft.rebase(row.savedComponents);
+        } else {
+          draft.resetTo(row.savedComponents, shown: row.formComponents);
+        }
       }
       _saves.clear();
       // A reload that shows the penalty already removed settles the row.
@@ -651,7 +663,7 @@ class ScoringController extends ChangeNotifier {
         retiredAtRound: retiredAtRound,
       ),
     );
-    _drafts[row.id]?.resetTo(row.savedComponents);
+    _drafts[row.id]?.resetTo(row.savedComponents, shown: row.formComponents);
     _saves.remove(row.id);
     await refresh();
     // refresh() does not touch the notice, so it shows after the reload.
