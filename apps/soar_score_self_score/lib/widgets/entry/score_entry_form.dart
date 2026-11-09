@@ -94,6 +94,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
         widget.data.round,
       );
       _phase = _Phase.accepted;
+      if (widget.data.submittedScore case final stored?) _showStored(stored);
       return;
     }
     final draft = context.scoreDrafts.read(
@@ -119,6 +120,27 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
       _phase = _Phase.sending;
       WidgetsBinding.instance.addPostFrameCallback((_) => _send());
     }
+  }
+
+  /// Fills the read-only form with the score the server holds.
+  void _showStored(SubmittedScore stored) {
+    final c = stored.components;
+    final seconds = c['time_flown'];
+    final height = c['launch_height'];
+    final penalty = c['flight_penalty'];
+    if (seconds is num) _time.text = FlightTimeInput.typed(seconds.toDouble());
+    if (height is num) _height.text = '${height.round()}';
+    if (penalty is num) _penalty.text = '${penalty.round()}';
+    _lateLanding = c['late_landing'] == true;
+    _motorRestart = c['motor_restart'] == true;
+    _outOfBounds = c['out_of_bounds'] == true;
+    _noAltitude = c['no_altitude_recorded'] == true;
+    _landing = [
+      for (final option in widget.data.landingTable)
+        if (option.id == c['landing']) option,
+    ].firstOrNull;
+    _flightScore = stored.flightScore;
+    _details = stored.details;
   }
 
   /// [setState] that also keeps the draft on this phone.
@@ -596,7 +618,8 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                if (widget.data.alreadySubmitted)
+                if (widget.data.alreadySubmitted &&
+                    widget.data.submittedScore == null)
                   Text(
                     l10n.scoreExistingReadOnly,
                     style: theme.textTheme.titleMedium,

@@ -325,6 +325,35 @@ void main() {
     expect(entry.landingTable.map((l) => l.label), ['Good', 'Fair', 'Off']);
   });
 
+  test('a stored score comes back with the entry context', () async {
+    final body = jsonDecode(_fixture('entry_context')) as Map<String, dynamic>;
+    expect(
+      (await _repository(_fixtures).entryContext('c', 'p', 2)).submittedScore,
+      isNull,
+    );
+    body['state'] = 'submitted';
+    body['submitted_score'] = {
+      'assignment_id': body['assignment_id'],
+      'round': 2,
+      'state': 'submitted',
+      'revision': 1,
+      'components': {'time_flown': 390.4, 'launch_height': 45},
+      'entered_by': 'Alex Rivera',
+      'entered_at': '2026-11-08T22:00:00Z',
+      'flight_score': 912.5,
+      'raw_score': 912.5,
+      'round_score': 912.5,
+      'cumulative_penalty': null,
+      'validation_messages': [],
+    };
+    final entry = await _repository((_) => _json(jsonEncode(body)))
+        .entryContext('c', 'p', 2);
+    expect(entry.alreadySubmitted, isTrue);
+    expect(entry.submittedScore!.components['time_flown'], 390.4);
+    expect(entry.submittedScore!.flightScore, '912.5');
+    expect(entry.submittedScore!.details!.enteredBy, 'Alex Rivera');
+  });
+
   test('group results show zero, estimate and own rows', () async {
     final group = await _repository(_fixtures).groupResults('c', 'p', 1);
     expect(group.group, 'A');

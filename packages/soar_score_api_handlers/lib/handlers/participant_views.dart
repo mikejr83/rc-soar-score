@@ -133,7 +133,13 @@ Future<ParticipantEntryContextDto?> participantEntryContext(
       : await repository.landingTableRepository.findById(
           revision.landingTableId!,
         );
+  final hasScore =
+      flight.state != ParticipantScoreState.notEntered &&
+      flight.state != ParticipantScoreState.draft;
   return ParticipantEntryContextDto(
+    submittedScore: hasScore
+        ? await _submittedScore(repository, access, flight)
+        : null,
     assignmentId: flight.assignmentId,
     round: flight.ordinal,
     roundCount: flights.roundCount,
@@ -162,6 +168,47 @@ Future<ParticipantEntryContextDto?> participantEntryContext(
           points: result.pointValue,
         ),
     ],
+  );
+}
+
+/// What the flight's score holds, so the entry form can show it read-only.
+/// Calculated on read with the group results, because a pilot's own score is
+/// preliminary and not stored as a result. Null when the calculation has no
+/// score for the flight (a retired or locked flight with nothing entered).
+Future<ParticipantScoreDto?> _submittedScore(
+  Repository repository,
+  ParticipantAccess access,
+  _Flight flight,
+) async {
+  final calculation = await PreliminaryResultsService(repository)
+      .calculate(access.contestId);
+  final slot = calculation.input.scored
+      .where(
+        (s) =>
+            s.round.ordinal == flight.ordinal &&
+            s.assignment.contestParticipationId == access.participation.id,
+      )
+      .firstOrNull;
+  if (slot == null) return null;
+  final result = (calculation.recalculation?.flights ?? const [])
+      .where(
+        (f) =>
+            f.round == flight.ordinal &&
+            f.pilotId == access.participation.id.value,
+      )
+      .firstOrNull;
+  return ParticipantScoreDto(
+    assignmentId: flight.assignmentId,
+    round: flight.ordinal,
+    state: flight.state,
+    revision: flight.scoreRevision,
+    components: slot.components,
+    enteredBy: flight.enteredBy ?? '',
+    enteredAt:
+        flight.enteredAt ?? DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
+    flightScore: result?.group.groupScore,
+    rawScore: result?.flight.rawScore,
+    roundScore: result?.group.groupScore,
   );
 }
 

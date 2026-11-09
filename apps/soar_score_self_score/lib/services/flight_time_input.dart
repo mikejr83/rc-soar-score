@@ -38,6 +38,15 @@ class FlightTimeInput {
     return FlightTimeInput._(minutes * 60 + secs + tenths / 10, null);
   }
 
+  /// The digits a pilot would type for [seconds]: `630.4` for 6:30.4. The
+  /// inverse of [parse], for filling the field with a stored time.
+  static String typed(double seconds) {
+    final total = (seconds * 10).round();
+    final whole = (total ~/ 600) * 100 + (total % 600) ~/ 10;
+    final tenths = total % 10;
+    return tenths == 0 ? '$whole' : '$whole.$tenths';
+  }
+
   /// `6:30.4`, or `6:30` when there are no tenths.
   static String format(double seconds) {
     final total = (seconds * 10).round();
