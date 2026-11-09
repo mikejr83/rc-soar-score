@@ -67,8 +67,12 @@ try {
     }
     foreach ($file in $testFiles) {
         $log = New-TemporaryFile
+        # The server is force-killed below, so its own cleanup of a temporary
+        # database never runs: give it a disposable path here and delete that.
+        $dbDir = Join-Path ([IO.Path]::GetTempPath()) ("soar_score_e2e_" + [guid]::NewGuid().ToString('N'))
+        New-Item -ItemType Directory -Path $dbDir | Out-Null
         $server = Start-Process dart `
-            -ArgumentList 'run', 'tool/e2e_server.dart', '--port', $port, '--profile', 'server' `
+            -ArgumentList 'run', 'tool/e2e_server.dart', '--port', $port, '--profile', 'server', '--database', (Join-Path $dbDir 'e2e.db') `
             -WorkingDirectory (Join-Path $root 'apps\soar_score_server') `
             -RedirectStandardOutput $log -PassThru -WindowStyle Hidden
         try {
@@ -101,6 +105,12 @@ try {
         finally {
             # dart run starts a child process; kill the whole tree.
             taskkill /F /T /PID $server.Id | Out-Null
+            # A killed process can hold the file for a moment: retry.
+            for ($i = 0; $i -lt 10 -and (Test-Path $dbDir); $i++) {
+                Remove-Item -Recurse -Force $dbDir -ErrorAction SilentlyContinue
+                if (Test-Path $dbDir) { Start-Sleep -Milliseconds 500 }
+            }
+            Remove-Item -Force $log -ErrorAction SilentlyContinue
         }
     }
 }
