@@ -157,15 +157,27 @@ class ScoringController extends ChangeNotifier {
     return _drafts[row.id] = draft;
   }
 
-  /// Rows whose pilot submission the director discarded or reverted: their
-  /// form shows what is saved, not the submission, until a new one arrives.
-  final Set<Id> _prefillDismissed = {};
+  /// The pilot submission (attempt id) the director discarded or reverted, by
+  /// row: the form shows what is saved instead of that submission. A different
+  /// attempt, which means a newer submission, fills the form again.
+  final Map<Id, Id> _prefillDismissed = {};
+
+  void _dismissPrefill(ScoringRow row) {
+    final attempt = row.slot?.pendingAttempt;
+    if (row.hasPendingSubmission && attempt != null) {
+      _prefillDismissed[row.id] = attempt.id;
+    }
+  }
 
   /// What [row]'s form starts with.
-  Map<String, Object?> _shown(ScoringRow row) =>
-      _prefillDismissed.contains(row.id)
-      ? row.savedComponents
-      : row.formComponents;
+  Map<String, Object?> _shown(ScoringRow row) {
+    final dismissed = _prefillDismissed[row.id];
+    if (dismissed != null && dismissed == row.slot?.pendingAttempt?.id) {
+      return row.savedComponents;
+    }
+    _prefillDismissed.remove(row.id);
+    return row.formComponents;
+  }
 
   RowSave saveOf(Id id) => _saves[id] ?? RowSave.idle;
 
@@ -210,9 +222,7 @@ class ScoringController extends ChangeNotifier {
   }
 
   void discardAll() {
-    for (final row in rows) {
-      if (row.hasPendingSubmission) _prefillDismissed.add(row.id);
-    }
+    rows.forEach(_dismissPrefill);
     _drafts.clear();
     _saves.clear();
     _theirs.clear();
@@ -222,7 +232,7 @@ class ScoringController extends ChangeNotifier {
 
   /// Puts one row back to what is saved.
   void revert(ScoringRow row) {
-    if (row.hasPendingSubmission) _prefillDismissed.add(row.id);
+    _dismissPrefill(row);
     _drafts[row.id]?.resetTo(row.savedComponents, shown: _shown(row));
     _saves.remove(row.id);
     _theirs.remove(row.id);

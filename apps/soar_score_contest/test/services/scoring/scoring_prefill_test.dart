@@ -44,6 +44,26 @@ void main() {
     expect(c.draftOf(_row(c, 1)).heightText, '130');
   });
 
+  test(
+    'a dismissed submission stays hidden until a newer one arrives',
+    () async {
+      final server = ScoringServer()..seedPendingSubmission(first, a);
+      final c = await _open(server);
+      expect(c.draftOf(_row(c, 1)).timeText, '9:00');
+      c.revert(_row(c, 1));
+
+      await c.refresh();
+      expect(c.draftOf(_row(c, 1)).timeText, '');
+      expect(c.dirtyCount, 0);
+
+      server.seedPendingSubmission(first, b);
+      await c.refresh();
+
+      expect(c.draftOf(_row(c, 1)).timeText, '8:20');
+      expect(c.dirtyCount, 1);
+    },
+  );
+
   test('what the director typed survives a later submission', () async {
     final server = ScoringServer()..seedPendingSubmission(first, a);
     final c = await _open(server);
