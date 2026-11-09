@@ -6,6 +6,7 @@ import '../schema/database_profile.dart';
 import 'assignment_markers.dart';
 import 'entity_stores.dart';
 import 'mutation_payload.dart';
+import 'scope_sequence.dart';
 import 'sql_placeholders.dart';
 import 'table_mapper.dart';
 
@@ -388,17 +389,11 @@ class _Context implements core.WriteContext {
     final contestId = scope.contestId;
     final column = contestId != null ? 'contest_id' : 'owner_account_id';
     final id = (contestId ?? scope.ownerAccountId!).value;
-    final row = await _uow._db
-        .customSelect(
-          portableSql(
-            _uow._db,
-            'SELECT MAX(sequence) AS highest FROM mutation_records '
-            'WHERE $column = ?',
-          ),
-          variables: [Variable<String>(id)],
-          readsFrom: {_uow._db.mutationRecords},
-        )
-        .getSingle();
-    return (row.read<int?>('highest') ?? 0) + 1;
+    final highest = await highestScopeSequence(
+      _uow._db,
+      column: column,
+      scopeId: id,
+    );
+    return highest + 1;
   }
 }

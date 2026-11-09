@@ -60,6 +60,15 @@ scripts/hosted-smoke.sh https://api.rcsoarscore.com          # bash
 ./scripts/hosted-smoke.ps1 -BaseUrl https://api.rcsoarscore.com  # PowerShell
 ```
 
+### Hosted writes made before the sequence fix
+
+A write the service makes itself (a pilot's submitted score, or any other
+hosted API write) joins the contest's sync log as `Accepted` with the next
+sequence. Rows written by an earlier version stay `Pending` with no sequence,
+and installations never pull them; redeploying does not repair them. Have the
+pilot resubmit, or delete the stuck entry and enter it again. There is no
+backfill.
+
 ## Idle behaviour
 
 During alpha the machine stops when idle and starts on the next request, so

@@ -82,6 +82,9 @@ class Installation {
   final SoarScoreDatabase db;
   final EntityStores stores;
   final String? _databaseName;
+
+  /// The PostgreSQL database's name, so a test can open a second connection.
+  String? get databaseName => _databaseName;
   final Future<void> Function()? _dropDatabase;
   late final DriftUnitOfWork unitOfWork;
   late final DriftReplicatedChangeApplier applier;

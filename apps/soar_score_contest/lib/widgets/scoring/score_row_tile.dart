@@ -737,7 +737,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _label(context, 'Indicators', labels),
-          if (widget.row.hasSubmission) ...[
+          if (widget.row.hasPendingSubmission) ...[
             const Tooltip(
               message:
                   'A pilot or helper submitted values. The submission is '

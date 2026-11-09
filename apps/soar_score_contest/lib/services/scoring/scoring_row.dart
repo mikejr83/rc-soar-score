@@ -60,12 +60,16 @@ class ScoringRow {
   int get baseRevision => slot?.placeholder.scoreRevision ?? 0;
 
   /// The pilot's preliminary values while a submission waits, else empty.
-  Map<String, Object?> get pendingComponents => hasSubmission
+  Map<String, Object?> get pendingComponents => hasPendingSubmission
       ? slot?.pendingAttempt?.rawComponents ?? const {}
       : const {};
 
-  bool get hasSubmission =>
-      slot?.placeholder.state == ScorePlaceholderState.submitted;
+  /// Whether a pilot or helper submission waits for the director: the slot is
+  /// `Submitted` or `InReview`. An official score ends the wait.
+  bool get hasPendingSubmission => switch (slot?.placeholder.state) {
+    ScorePlaceholderState.submitted || ScorePlaceholderState.inReview => true,
+    _ => false,
+  };
 
   bool get isLocked => locked || (slot?.placeholder.isLocked ?? false);
 
