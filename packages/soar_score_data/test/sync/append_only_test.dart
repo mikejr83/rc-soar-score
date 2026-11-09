@@ -45,7 +45,9 @@ void _tests(Backend backend) {
           .getSingle();
       expect(row.read<String>('entity_type'), 'ScoreAttempt');
       expect(row.read<int?>('base_revision'), isNull);
-      expect(row.read<String>('outcome'), 'Pending');
+      // This database has the server profile, where a direct write is
+      // already accepted and takes the scope's next sequence.
+      expect(row.read<String>('outcome'), 'Accepted');
     });
 
     test('refuses a second write of the same id and keeps nothing', () async {

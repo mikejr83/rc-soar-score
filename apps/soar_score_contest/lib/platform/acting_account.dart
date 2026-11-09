@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../server/embedded_server.dart';
+import '../server/profile_access.dart';
 import 'auth_epoch.dart';
+import 'sync_pin.dart';
 
 /// Which account the app acts as, tied to the sign-in that made it so.
 ///
@@ -36,6 +38,50 @@ class ActingAccount extends ChangeNotifier {
     return true;
   }
 
+  /// Whether the signed-in account is not the one this computer's data belongs
+  /// to, so the data is not served (see `profileMismatchGuard`).
+  bool get profileMismatch => _server.profileMismatch;
+
+  /// Whether the claimed data may be served now.
+  ProfileAccess get profileAccess => _server.profileAccess;
+
+  /// A user signed in or was restored: the claimed data is served only when
+  /// their identity [subject] is the one that claimed it.
+  void signedIn(String? subject) {
+    _server.profileSignedIn(subject);
+    notifyListeners();
+  }
+
+  /// The Local data is about to be re-pointed to [accountId]: work begun
+  /// earlier is stopped before it stores anything, and new work waits. Returns
+  /// whether it brackets a change, which [claimFinished] then ends.
+  bool claimStarting(core.Id accountId, String? subject) =>
+      _server.beginClaim(accountId, subject);
+
+  /// Ends what [claimStarting] began.
+  void claimFinished() => _server.endClaim();
+
+  /// A claim by [subject] committed, for whichever sign-in made it: the data
+  /// belongs to [accountId] from now on. Only ownership changes; acting as the
+  /// account (and any sync lease) still waits for [actAs] under a sign-in that
+  /// is still current.
+  void claimRecorded(core.Id accountId, String? subject) {
+    _server.recordClaim(accountId, subject);
+    notifyListeners();
+  }
+
+  /// The service refused sign-in [epoch]'s claim as another account's data:
+  /// stops serving the data, unless that sign-in is no longer the current one.
+  /// Returns whether it did. Signing out, or signing in as the owning account,
+  /// ends it.
+  bool markProfileMismatch({required int epoch}) {
+    if (!_epoch.isCurrent(epoch)) return false;
+    _server.markProfileMismatch();
+    _boundEpoch = -1;
+    notifyListeners();
+    return true;
+  }
+
   void actAsLocal() {
     _server.actAsLocal();
     _boundEpoch = -1;
@@ -52,4 +98,24 @@ class ActingAccount extends ChangeNotifier {
       isAccount && _epoch.isCurrent(_boundEpoch) ? _boundEpoch : null;
 
   AuthEpoch get epoch => _epoch;
+
+  /// The profile's state now (see `EmbeddedServer.profileGeneration`).
+  int get profileGeneration => _server.profileGeneration;
+
+  /// Runs [write] as an operation pinned to what a sync exchange depended on:
+  /// the database refuses its statements and commit once the profile changed
+  /// or the sign-in the exchange was sent under is no longer the one in
+  /// force for its data.
+  Future<T> runPinned<T>(SyncPin pin, Future<T> Function() write) =>
+      _server.runPinnedOperation(
+        write,
+        generation: pin.generation,
+        stillValid: () {
+          final owner = pin.owner;
+          final now = owner == null ? lease() : leaseFor(owner);
+          if (now == null || now != pin.lease) {
+            throw const ProfileUnavailableError.changed();
+          }
+        },
+      );
 }

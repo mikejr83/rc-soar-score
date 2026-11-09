@@ -1,0 +1,11 @@
+{
+  // Cloudflare Worker that serves the built web app (see docs/deploying.md).
+  // Invitation links are plain paths such as /invitations/{credential}, so any
+  // path that is not a file must load index.html.
+  "name": "rc-soar-score-self-score",
+  "compatibility_date": "2026-10-25",
+  "assets": {
+    "directory": "./build/web",
+    "not_found_handling": "single-page-application"
+  }
+}

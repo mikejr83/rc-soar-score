@@ -125,10 +125,17 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
   Future<ReportLoad<PilotCardsData>> loadData(ReportDataRequest request) async {
     final page = await ScoringPageData.load(request.client, request.contestId);
     final invitationSource = source ?? PilotInvitationSources.current;
-    final invitations = await invitationSource.read(
-      request.client,
-      request.contestId,
-    );
+    // A failed read must not stop the cards from printing: they print without
+    // QR codes, with a banner to retry.
+    PilotInvitations invitations;
+    try {
+      invitations = await invitationSource.read(
+        request.publicationClient,
+        request.contestId,
+      );
+    } on Object {
+      invitations = const PilotInvitations(loadFailed: true);
+    }
     return ReportLoaded(
       PilotCardsData.of(
         page: page.base,
@@ -137,7 +144,7 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
         settings: page.settings,
         invitations: PilotInvitationSession(
           source: invitationSource,
-          client: request.client,
+          client: request.publicationClient,
           contestId: request.contestId,
           initial: invitations,
         ),
@@ -192,8 +199,15 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
     final invitations = session.invitations;
     bool hasQr(ReportPilot pilot) =>
         invitations.synchronized && invitations.has(pilot.participationId);
-    final missing = [
+    // A retired pilot gets no invitation (`canHaveInvitation`), but their
+    // card still prints, with the link they already have. Only the pilots who
+    // can have one are counted, offered or sent invitations.
+    final invitable = [
       for (final pilot in selected)
+        if (!pilot.isRetired) pilot,
+    ];
+    final missing = [
+      for (final pilot in invitable)
         if (!hasQr(pilot)) pilot,
     ];
 
@@ -277,8 +291,9 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
       subtitle: contestLine,
       pages: pages.isEmpty ? const [SizedBox.shrink()] : pages,
       banners: invitationBanners(
+        l10n: context.l10n,
         session: session,
-        selected: selected,
+        selected: invitable,
         missing: missing,
         online: context.online,
       ),
@@ -288,13 +303,13 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
         if (session.sending || session.phase == InvitationPhase.sentNotLoaded) {
           return false;
         }
-        if (missing.isEmpty || selected.isEmpty) {
+        if (missing.isEmpty || invitable.isEmpty) {
           return true;
         }
         return remindAboutMissingQr(
           context: buildContext,
           session: session,
-          selected: selected,
+          selected: invitable,
           missing: missing,
           online: context.online,
         );

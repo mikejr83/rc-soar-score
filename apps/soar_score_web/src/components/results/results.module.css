@@ -139,6 +139,7 @@
   grid-template-areas:
     "date status"
     "name name"
+    "discipline discipline"
     "venue venue";
   gap: 2px 12px;
   padding: 14px 16px;
@@ -162,6 +163,11 @@
   font-size: 18px;
   line-height: 1.2;
 }
+.rowDiscipline {
+  grid-area: discipline;
+  color: var(--text-muted);
+  font-size: 14px;
+}
 .rowVenue {
   grid-area: venue;
   color: var(--text-muted);
@@ -173,12 +179,13 @@
 }
 @media (min-width: 840px) {
   .row {
-    grid-template-columns: 120px 3fr 2fr auto;
-    grid-template-areas: "date name venue status";
+    grid-template-columns: 120px 2fr 1fr 2fr auto;
+    grid-template-areas: "date name discipline venue status";
     align-items: center;
     gap: 16px;
   }
   .rowDate,
+  .rowDiscipline,
   .rowVenue {
     font-size: 15px;
   }

@@ -1,10 +1,21 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../data/score_changes.dart';
+import '../../data/self_score_repository.dart';
+import '../../data/self_score_scope.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/entry_context.dart';
 import '../../models/landing_result.dart';
+import '../../models/score_submission.dart';
 import '../../router.dart';
 import '../../services/flight_time_input.dart';
+import '../../services/score_components.dart';
+import '../../session/guest_session_scope.dart';
+import '../../session/score_draft_store.dart';
 import '../landing_control.dart';
 import '../status_chip.dart';
 import 'entry_number_field.dart';
@@ -28,6 +39,21 @@ class ScoreEntryForm extends StatefulWidget {
   State<ScoreEntryForm> createState() => _ScoreEntryFormState();
 }
 
+/// Where the flight's score is in its way to the server.
+enum _Phase {
+  /// The pilot is typing.
+  editing,
+
+  /// Sent, no answer yet.
+  sending,
+
+  /// The server could not be reached. The score is kept and sent again.
+  queued,
+
+  /// The server has the score; the form is read-only.
+  accepted,
+}
+
 class _ScoreEntryFormState extends State<ScoreEntryForm> {
   final _time = TextEditingController();
   final _height = TextEditingController();
@@ -38,10 +64,114 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
   bool _motorRestart = false;
   bool _outOfBounds = false;
   bool _noAltitude = false;
-  bool _submitted = false;
+  _Phase _phase = _Phase.editing;
+  PendingSubmission? _pending;
+
+  /// The server's own calculation, once it accepted the score.
+  String? _flightScore;
+  bool _alreadyThere = false;
+  ScoreDetails? _details;
+
+  /// Why the server refused the last send, in words for the pilot.
+  String? _rejection;
+  Set<String> _rejectedFields = const {};
+  Timer? _retryTimer;
+  bool _restored = false;
+
+  bool get _submitted => _phase == _Phase.accepted;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_restored) return;
+    _restored = true;
+    if (widget.data.alreadySubmitted) {
+      // The server has a score, so any draft left from an earlier send that
+      // it did answer is stale.
+      context.scoreDrafts.clear(
+        widget.contestId,
+        widget.pilotId,
+        widget.data.round,
+      );
+      _phase = _Phase.accepted;
+      if (widget.data.submittedScore case final stored?) _showStored(stored);
+      return;
+    }
+    final draft = context.scoreDrafts.read(
+      widget.contestId,
+      widget.pilotId,
+      widget.data.round,
+    );
+    if (draft == null) return;
+    _time.text = draft.time;
+    _height.text = draft.height;
+    _penalty.text = draft.penalty;
+    _lateLanding = draft.lateLanding;
+    _motorRestart = draft.motorRestart && widget.data.allowsMotorRestart;
+    _outOfBounds = draft.outOfBounds;
+    _noAltitude = draft.noAltitude;
+    _landing = [
+      for (final option in widget.data.landingTable)
+        if (option.id == draft.landingId) option,
+    ].firstOrNull;
+    _pending = draft.pending;
+    if (_pending != null) {
+      // The last send never got an answer: send it again with the same id.
+      _phase = _Phase.sending;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _send());
+    }
+  }
+
+  /// Fills the read-only form with the score the server holds.
+  void _showStored(SubmittedScore stored) {
+    final c = stored.components;
+    final seconds = c['time_flown'];
+    final height = c['launch_height'];
+    final penalty = c['flight_penalty'];
+    if (seconds is num) _time.text = FlightTimeInput.typed(seconds.toDouble());
+    if (height is num) _height.text = '${height.round()}';
+    if (penalty is num) _penalty.text = '${penalty.round()}';
+    _lateLanding = c['late_landing'] == true;
+    _motorRestart = c['motor_restart'] == true;
+    _outOfBounds = c['out_of_bounds'] == true;
+    _noAltitude = c['no_altitude_recorded'] == true;
+    _landing = [
+      for (final option in widget.data.landingTable)
+        if (option.id == c['landing']) option,
+    ].firstOrNull;
+    _flightScore = stored.flightScore;
+    _details = stored.details;
+  }
+
+  /// [setState] that also keeps the draft on this phone.
+  void _update(VoidCallback change) {
+    setState(change);
+    _saveDraft();
+  }
+
+  void _saveDraft() {
+    if (_submitted) return;
+    context.scoreDrafts.write(
+      widget.contestId,
+      widget.pilotId,
+      widget.data.round,
+      ScoreDraft(
+        time: _time.text,
+        height: _height.text,
+        penalty: _penalty.text,
+        landingId: _landing?.id,
+        lateLanding: _lateLanding,
+        motorRestart: _motorRestart,
+        outOfBounds: _outOfBounds,
+        noAltitude: _noAltitude,
+        pending: _pending,
+      ),
+    );
+  }
 
   @override
   void dispose() {
+    _retryTimer?.cancel();
     _time.dispose();
     _height.dispose();
     _penalty.dispose();
@@ -70,7 +200,9 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
       : null;
 
   bool get _canSubmit {
-    if (_submitted || _penaltyValue == null || _penaltyError != null) {
+    if (_phase != _Phase.editing ||
+        _penaltyValue == null ||
+        _penaltyError != null) {
       return false;
     }
     if (_zeroed) return true;
@@ -105,7 +237,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
   ].join(', ');
 
   void _setZeroing({bool? outOfBounds, bool? motorRestart, bool? noAltitude}) {
-    setState(() {
+    _update(() {
       _outOfBounds = outOfBounds ?? _outOfBounds;
       _motorRestart = motorRestart ?? _motorRestart;
       _noAltitude = noAltitude ?? _noAltitude;
@@ -117,9 +249,155 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
     });
   }
 
+  String _newMutationId() =>
+      newEntryMutationId(widget.pilotId, widget.data.round);
+
   void _submit() {
     if (!_canSubmit) return;
-    setState(() => _submitted = true);
+    // One id per attempt; a retry reuses it so the server never stores the
+    // score twice.
+    _pending = PendingSubmission(
+      mutationId: _newMutationId(),
+      matrixRevision: widget.data.matrixRevision,
+    );
+    _rejection = null;
+    _rejectedFields = const {};
+    _update(() => _phase = _Phase.sending);
+    _send();
+  }
+
+  Map<String, Object?> get _components => buildF5jComponents(
+    seconds: _timeInput.seconds,
+    height: _heightValue,
+    landingId: _landing?.id,
+    lateLanding: _lateLanding,
+    motorRestart: _motorRestart,
+    outOfBounds: _outOfBounds,
+    noAltitude: _noAltitude,
+    penalty: _penaltyValue,
+  );
+
+  Future<void> _send() async {
+    final pending = _pending;
+    if (pending == null) return;
+    _retryTimer?.cancel();
+    final repository = context.repository;
+    final drafts = context.scoreDrafts;
+    final sessions = context.guestSessions;
+    final components = _components;
+    try {
+      final result = await repository.submitScore(
+        ScoreSubmission(
+          contestId: widget.contestId,
+          pilotId: widget.pilotId,
+          round: widget.data.round,
+          matrixRevision: pending.matrixRevision,
+          clientMutationId: pending.mutationId,
+          components: components,
+        ),
+      );
+      if (!mounted) return;
+      switch (result) {
+        case ScoreAccepted(:final flightScore, :final details):
+          _accept(flightScore, details, alreadyThere: false);
+        case ScoreAlreadySubmitted(:final flightScore, :final details):
+          _accept(flightScore, details, alreadyThere: true);
+        case ScoreRejected(:final code):
+          // The server ended the session: drop it so nothing routes from it.
+          if (code == 'session_invalid') {
+            sessions.clear();
+            // The draft stays stored; opening the link again restores it.
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) context.go(homePath);
+            });
+          }
+          // Nothing was stored. The next try is a new attempt with a new id.
+          setState(() {
+            _pending = null;
+            _phase = _Phase.editing;
+            _rejection = _rejectionText(result);
+            _rejectedFields = result.fields.toSet();
+          });
+          _saveDraft();
+      }
+      if (_submitted) {
+        drafts.clear(widget.contestId, widget.pilotId, widget.data.round);
+      }
+    } on SelfScoreOfflineException {
+      if (!mounted) return;
+      setState(() => _phase = _Phase.queued);
+      _retryTimer = Timer(const Duration(seconds: 10), () {
+        if (mounted && _phase == _Phase.queued) {
+          setState(() => _phase = _Phase.sending);
+          _send();
+        }
+      });
+    } on SelfScoreLoadException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _pending = null;
+        _phase = _Phase.editing;
+        _rejection = error.message;
+      });
+      _saveDraft();
+    }
+  }
+
+  void _accept(
+    String? flightScore,
+    ScoreDetails? details, {
+    required bool alreadyThere,
+  }) {
+    setState(() {
+      _phase = _Phase.accepted;
+      _pending = null;
+      _flightScore = flightScore;
+      _details = details;
+      _alreadyThere = alreadyThere;
+      _rejection = null;
+    });
+    scoreChanges.value++;
+  }
+
+  /// What the server made of the score, in its own numbers.
+  String _acceptedLine(AppLocalizations l10n) {
+    final score = _flightScore;
+    if (_alreadyThere) {
+      return score == null
+          ? l10n.scoreAlreadyThere
+          : l10n.scoreAlreadyThereWith(score);
+    }
+    if (score == null) return l10n.scoreAcceptedNoValue;
+    // Only an official score is called official; until then it is the
+    // server's calculation and can still change.
+    return _details?.official ?? false
+        ? l10n.scoreAcceptedLine(score)
+        : l10n.scoreCalculatedLine(score);
+  }
+
+  /// The numbers the server kept with the score, one per line.
+  List<String> _detailLines(AppLocalizations l10n) {
+    final details = _details;
+    if (details == null) return const [];
+    return [
+      if (details.rawScore case final value?) l10n.scoreRawLine(value),
+      if (details.roundScore case final value?) l10n.scoreRoundLine(value),
+      if (details.cumulativePenalty case final value?)
+        l10n.scorePenaltyLine(value),
+      if (details.enteredBy case final name?) l10n.scoreEnteredByLine(name),
+    ];
+  }
+
+  String _rejectionText(ScoreRejected rejected) {
+    final l10n = AppLocalizations.of(context);
+    return switch (rejected.code) {
+      'validation_failed' => l10n.scoreRejectedValidation,
+      'scoring_closed' => l10n.scoreRejectedClosed,
+      'out_of_order' => l10n.scoreRejectedOutOfOrder,
+      'stale_matrix' => l10n.scoreRejectedStaleDraw,
+      'session_invalid' => l10n.scoreRejectedSession,
+      _ => l10n.scoreRejectedOther,
+    };
   }
 
   String? get _landingReason {
@@ -137,7 +415,8 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
     final scheme = theme.colorScheme;
     final timeError = _timeInput.error;
     final timeSeconds = _timeInput.seconds;
-    final editable = !_submitted;
+    final l10n = AppLocalizations.of(context);
+    final editable = _phase == _Phase.editing;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -171,13 +450,80 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
           ),
           const SizedBox(height: 16),
         ],
+        if (_rejection case final message?) ...[
+          Semantics(
+            liveRegion: true,
+            child: Card(
+              color: scheme.errorContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.error_outline, color: scheme.onErrorContainer),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        message,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: scheme.onErrorContainer,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+        if (_phase == _Phase.queued) ...[
+          Semantics(
+            liveRegion: true,
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.scoreQueuedTitle,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      l10n.scoreQueuedBody,
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 10),
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                      ),
+                      onPressed: () {
+                        _update(() => _phase = _Phase.sending);
+                        _send();
+                      },
+                      child: Text(l10n.scoreRetryNow),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
         EntryNumberField(
           label: 'Time flown',
           controller: _time,
           enabled: editable && !_zeroed,
           allowDecimal: true,
-          onChanged: (_) => setState(() {}),
-          errorText: timeError,
+          onChanged: (_) => _update(() {}),
+          errorText:
+              timeError ??
+              (_rejectedFields.contains('time_flown') ? ' ' : null),
           hint: timeSeconds == null
               ? 'Type 630 for 6:30. Type 630.4 for 6:30.4.'
               : 'Reads as ${FlightTimeInput.format(timeSeconds)}.',
@@ -187,8 +533,10 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
           label: 'Launch height (m)',
           controller: _height,
           enabled: editable && !_zeroed,
-          onChanged: (_) => setState(() {}),
-          errorText: _heightError,
+          onChanged: (_) => _update(() {}),
+          errorText:
+              _heightError ??
+              (_rejectedFields.contains('launch_height') ? ' ' : null),
           hint: _zeroed
               ? 'The flight scores zero, so no height is needed.'
               : 'Whole metres. Zero is not valid.',
@@ -204,15 +552,17 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
         LandingControl(
           table: widget.data.landingTable,
           selected: _landing,
-          disabledReason: !editable ? 'Submitted.' : _landingReason,
-          onChanged: (value) => setState(() => _landing = value),
+          disabledReason: !editable
+              ? (_submitted ? 'Submitted.' : 'Waiting to send.')
+              : _landingReason,
+          onChanged: (value) => _update(() => _landing = value),
         ),
         const SizedBox(height: 18),
         EntryToggleRow(
           label: 'Late landing',
           value: _lateLanding,
           onChanged: editable && !_zeroed
-              ? (value) => setState(() {
+              ? (value) => _update(() {
                   _lateLanding = value;
                   if (value) _landing = null;
                 })
@@ -248,7 +598,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
           label: 'Flight penalty (points)',
           controller: _penalty,
           enabled: editable,
-          onChanged: (_) => setState(() {}),
+          onChanged: (_) => _update(() {}),
           errorText: _penaltyError,
           hint:
               'For an infraction on this flight, such as flying outside '
@@ -268,13 +618,33 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  _summary,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                if (widget.data.alreadySubmitted &&
+                    widget.data.submittedScore == null)
+                  Text(
+                    l10n.scoreExistingReadOnly,
+                    style: theme.textTheme.titleMedium,
+                  )
+                else ...[
+                  Text(
+                    _summary,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
-                ),
+                  if (_submitted) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      _acceptedLine(l10n),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                    for (final line in _detailLines(l10n))
+                      Text(line, style: theme.textTheme.bodyMedium),
+                  ],
+                ],
                 const SizedBox(height: 8),
                 Text(
                   _submitted
@@ -299,13 +669,18 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
               ),
             ),
             onPressed: _canSubmit ? _submit : null,
-            child: const Text('Submit score'),
+            child: Text(
+              _phase == _Phase.editing ? 'Submit score' : l10n.scoreSending,
+            ),
           ),
         ] else ...[
           const SizedBox(height: 16),
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(48),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(56),
+              textStyle: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
             onPressed: () => context.go(
               groupResultsPath(
@@ -314,10 +689,21 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
                 '${widget.data.round}',
               ),
             ),
-            child: const Text('See group results'),
+            child: Text(l10n.seeGroupResults),
           ),
         ],
       ],
     );
   }
 }
+
+final _random = Random();
+
+/// A fresh id for one submit attempt.
+///
+/// The random bound is written as a literal: `1 << 32` is 0 in a browser
+/// build, where shifts are 32-bit, and `nextInt(0)` throws there.
+@visibleForTesting
+String newEntryMutationId(String pilotId, int round, {Random? random}) =>
+    'entry-$pilotId-$round-${DateTime.now().microsecondsSinceEpoch}-'
+    '${(random ?? _random).nextInt(0x100000000)}';

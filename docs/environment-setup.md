@@ -152,19 +152,21 @@ tenant it accepts tokens from. It exits at startup, listing every problem, if
 The server loads variables from the process environment and from a `.env` file
 (`.env` and `.env.*` are git-ignored; never commit them).
 
-| Variable               | Default         | Purpose                                                                                                                                                        |
-| ---------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`         | none            | Optional connection URL, `postgresql://user:password@host:port/db?sslmode=...`. Wins over the `POSTGRES_*` variables. A missing `sslmode` means `require` TLS. |
-| `POSTGRES_PASSWORD`    | none (required) | Database password, when no `DATABASE_URL` is set. Unset means "not configured".                                                                                |
-| `POSTGRES_HOST`        | `localhost`     | Database host, when no `DATABASE_URL` is set.                                                                                                                  |
-| `POSTGRES_PORT`        | `5432`          | Database port, when no `DATABASE_URL` is set.                                                                                                                  |
-| `POSTGRES_DB`          | `rc_soar_score` | Database name, when no `DATABASE_URL` is set.                                                                                                                  |
-| `POSTGRES_USER`        | `postgres`      | Database user, when no `DATABASE_URL` is set.                                                                                                                  |
-| `POSTGRES_SSLMODE`     | `disable`       | One of `disable`, `require`, `verifyFull`, when no `DATABASE_URL` is set.                                                                                      |
-| `PORT`                 | `8080`          | HTTP port the server listens on.                                                                                                                               |
-| `AUTH0_DOMAIN`         | none (required) | Auth0 tenant host name, no scheme (`tenant.us.auth0.com`).                                                                                                     |
-| `API_AUDIENCE`         | none (required) | Expected JWT audience (`https://soar-score.com/server`).                                                                                                       |
-| `CORS_ALLOWED_ORIGINS` | none            | Comma-separated browser origins allowed to call the API, e.g. `http://127.0.0.1:8091`. Empty adds no CORS headers.                                             |
+| Variable                | Default                         | Purpose                                                                                                                                                                                |
+| ----------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`          | none                            | Optional connection URL, `postgresql://user:password@host:port/db?sslmode=...`. Wins over the `POSTGRES_*` variables. A missing `sslmode` means `require` TLS.                         |
+| `POSTGRES_PASSWORD`     | none (required)                 | Database password, when no `DATABASE_URL` is set. Unset means "not configured".                                                                                                        |
+| `POSTGRES_HOST`         | `localhost`                     | Database host, when no `DATABASE_URL` is set.                                                                                                                                          |
+| `POSTGRES_PORT`         | `5432`                          | Database port, when no `DATABASE_URL` is set.                                                                                                                                          |
+| `POSTGRES_DB`           | `rc_soar_score`                 | Database name, when no `DATABASE_URL` is set.                                                                                                                                          |
+| `POSTGRES_USER`         | `postgres`                      | Database user, when no `DATABASE_URL` is set.                                                                                                                                          |
+| `POSTGRES_SSLMODE`      | `disable`                       | One of `disable`, `require`, `verifyFull`, when no `DATABASE_URL` is set.                                                                                                              |
+| `PORT`                  | `8080`                          | HTTP port the server listens on.                                                                                                                                                       |
+| `AUTH0_DOMAIN`          | none (required)                 | Auth0 tenant host name, no scheme (`tenant.us.auth0.com`).                                                                                                                             |
+| `API_AUDIENCE`          | none (required)                 | Expected JWT audience (`https://soar-score.com/server`).                                                                                                                               |
+| `CORS_ALLOWED_ORIGINS`  | none                            | Comma-separated browser origins allowed to call the API, e.g. `http://127.0.0.1:8091`. Empty adds no CORS headers.                                                                     |
+| `INVITATION_SECRET`     | none                            | At least 32 characters. Signs invitation links and guest sessions. Without it the self-scoring routes answer 409 `invitations_not_available`. Changing it ends every link.             |
+| `SELF_SCORING_BASE_URL` | `https://score.rcsoarscore.com` | The self-scoring site the director's invitation links and QR codes point at (`{base}/invitations/{credential}`). `http(s)://host[:port]`, no path. Set it for a local or staging site. |
 
 A minimal local `.env` at the repo root:
 
@@ -288,6 +290,29 @@ flutter run -d chrome
 
 In VS Code, `.vscode/launch.json` already has launch configurations for the
 server and each app (the contest web app is pinned to `127.0.0.1:8091`).
+
+### Testing QR codes and invitation links locally
+
+The compound **Server + Contest (Windows) + Self-scoring (Web)** starts all
+three so a printed QR code can be scanned end to end:
+
+- The server config sets a fixed development `INVITATION_SECRET`, so links and
+  QR codes issued in one run still open after a restart. The secret is public
+  in this repository: never use it for a deployed server.
+- The server builds each link from `SELF_SCORING_BASE_URL`, which the launch
+  config points at the local self-scoring app, `http://localhost:8092`. The
+  contest app only shows the link the server gives it, so pointing it elsewhere
+  is a server setting, not an app setting.
+- The contest app talks to the local server (`http://localhost:8080` is the
+  default for `SOAR_SCORE_API_BASE_URL`), so sign in and let the contest
+  synchronize before using Send invitations on the Pilot Scoring Cards.
+- To open a link yourself, select one pilot on the Participants page and use
+  Invitations, then Copy link, and paste it into the self-scoring app. The app
+  never writes an invitation link to a log: a link is a bearer credential.
+- The self-scoring app runs on `localhost`, not `127.0.0.1`, to be the same
+  site as the API: its guest session is a `SameSite=Lax` cookie. The server's
+  `CORS_ALLOWED_ORIGINS` includes it. To scan a code with a phone, set
+  `SELF_SCORING_BASE_URL` to an address the phone can reach instead.
 
 ## 6. Verify your setup
 

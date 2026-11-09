@@ -34,6 +34,11 @@ describe("contest list rules", () => {
       summary({ name: "V", start: now, host: "Club", city: "Dayton", state: "OH", country: "USA" }).venue,
     ).toBe("Club, Dayton, OH, USA");
   });
+
+  test("the discipline comes from the summary, empty when it carries none", () => {
+    expect(summary({ name: "D", start: now, discipline: "F5J" }).discipline).toBe("F5J");
+    expect(summary({ name: "D", start: now }).discipline).toBe("");
+  });
 });
 
 describe("filters", () => {

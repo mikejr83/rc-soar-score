@@ -2,6 +2,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_self_score/services/flight_time_input.dart';
 
 void main() {
+  test('typed is the inverse of parse', () {
+    for (final seconds in [0.0, 59.0, 390.4, 600.0, 1800.0, 725.3]) {
+      expect(
+        FlightTimeInput.parse(FlightTimeInput.typed(seconds)).seconds,
+        seconds,
+      );
+    }
+    expect(FlightTimeInput.typed(390.4), '630.4');
+    expect(FlightTimeInput.typed(600), '1000');
+  });
+
   test('reads compact minutes and seconds', () {
     expect(FlightTimeInput.parse('630').seconds, 390);
     expect(FlightTimeInput.parse('630.4').seconds, 390.4);

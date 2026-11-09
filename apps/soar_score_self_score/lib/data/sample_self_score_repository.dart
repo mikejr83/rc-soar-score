@@ -1,9 +1,11 @@
 import '../models/contests_view.dart';
 import '../models/entry_context.dart';
 import '../models/group_results.dart';
+import '../models/guest_session.dart';
 import '../models/landing_result.dart';
 import '../models/pilot_overview.dart';
 import '../models/results_view.dart';
+import '../models/score_submission.dart';
 import '../models/team_overview.dart';
 import '../models/team_pilot.dart';
 import 'sample_data.dart';
@@ -24,6 +26,30 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
     if (contestId != SampleData.contestId) {
       throw const SelfScoreLoadException('This contest could not be found.');
     }
+  }
+
+  /// The credential the sample contest's pilot link carries.
+  static const sampleCredential = 'sample-link';
+
+  @override
+  Future<GuestSession> acceptInvitation(String credential) async {
+    if (credential != sampleCredential) {
+      throw const InvalidInvitationException();
+    }
+    return GuestSession(
+      contestId: SampleData.contestId,
+      contestName: SampleData.contestName,
+      pilotId: '12',
+      pilotName: SampleData.pilotName,
+      token: 'sample-token',
+      expiresAt: DateTime.utc(2099),
+    );
+  }
+
+  @override
+  Future<SubmitResult> submitScore(ScoreSubmission submission) async {
+    _requireContest(submission.contestId);
+    return const ScoreAccepted(flightScore: '863');
   }
 
   @override

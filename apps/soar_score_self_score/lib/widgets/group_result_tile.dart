@@ -83,7 +83,9 @@ class GroupResultTile extends StatelessWidget {
                       )
                     else
                       Text(
-                        'Pilot ${row.pilotNumber}',
+                        row.pilotNumber == null
+                            ? ''
+                            : 'Pilot ${row.pilotNumber}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: muted,
                         ),

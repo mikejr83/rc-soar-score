@@ -44,14 +44,23 @@ class PublicationPageData extends Equatable {
 
   /// Loads the contest, its saved options and its publication. A failed
   /// publication read is [PublicationFacts.unknown], not an error.
-  static Future<PublicationPageData> load(ApiClient client, Id id) async {
+  ///
+  /// The contest and its options come from [client], the app's own data. The
+  /// publication and its history come from [publicationClient], the hosted
+  /// server on native; it defaults to [client].
+  static Future<PublicationPageData> load(
+    ApiClient client,
+    Id id, {
+    ApiClient? publicationClient,
+  }) async {
+    final remote = publicationClient ?? client;
     final contest = await client.contest(id);
     final (policyRead, publication) = await (
       _policy(client, id),
-      PublicationFactsLoader.load(client, id),
+      PublicationFactsLoader.load(remote, id),
     ).wait;
     final (history, historyFailed) = publication.isPublished
-        ? await _history(client, id)
+        ? await _history(remote, id)
         : (const <PublicationHistoryEntryDto>[], false);
     return PublicationPageData(
       contest: contest,

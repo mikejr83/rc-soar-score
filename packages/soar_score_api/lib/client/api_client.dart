@@ -12,6 +12,7 @@ import '../dto/audit_event_dto.dart';
 import '../dto/claim_local_account_request.dart';
 import '../dto/contest_action_request.dart';
 import '../dto/contest_archive_dto.dart';
+import '../dto/contest_invitations_dto.dart';
 import '../dto/create_contest_request.dart';
 import '../dto/create_landing_table_request.dart';
 import '../dto/create_participant_request.dart';
@@ -27,6 +28,11 @@ import '../dto/local_account_claim_dto.dart';
 import '../dto/late_add_request.dart';
 import '../dto/matrix_revision_summary.dart';
 import '../dto/move_assignment_request.dart';
+import '../dto/participant_entry_dto.dart';
+import '../dto/participant_invitation_dto.dart';
+import '../dto/participant_overview_dto.dart';
+import '../dto/participant_results_dto.dart';
+import '../dto/participant_submit_dto.dart';
 import '../dto/public_publication_dto.dart';
 import '../dto/public_publication_summary_dto.dart';
 import '../dto/publication_history_entry_dto.dart';
@@ -78,6 +84,7 @@ class ApiClient {
     required this.baseUrl,
     http.Client? httpClient,
     this.tokenProvider,
+    this.defaultHeaders = const {},
   }) : _httpClient = httpClient ?? http.Client();
 
   /// Base URI of the target server, e.g. `Uri.parse('https://api.example.com')`.
@@ -86,6 +93,10 @@ class ApiClient {
 
   /// Optional bearer-token provider; `null` means no token is ever sent.
   final TokenProvider? tokenProvider;
+
+  /// Headers added to every request, such as `X-Requested-With`, which the
+  /// server wants on cookie-authenticated writes.
+  final Map<String, String> defaultHeaders;
 
   final http.Client _httpClient;
 
@@ -100,6 +111,106 @@ class ApiClient {
     final uri = _resolve('/health');
     final response = await _send('GET', uri);
     return _decode<HealthDto>(response, uri, HealthDto.fromJson);
+  }
+
+  /// `POST /api/v1/self-scoring/invitations/resolve` — trades the credential
+  /// of an invitation link for a guest session. Public: no token is sent, so
+  /// an old session cannot get in the way.
+  ///
+  /// An unknown, expired or replaced credential is an [ApiHttpError] whose
+  /// [ApiHttpError.participantError] has code `invalid_invitation`.
+  Future<ResolveInvitationResponse> resolveInvitation(
+    ResolveInvitationRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/self-scoring/invitations/resolve');
+    final response = await _send(
+      'POST',
+      uri,
+      body: request.toJson(),
+      authenticated: false,
+    );
+    return _decode<ResolveInvitationResponse>(
+      response,
+      uri,
+      ResolveInvitationResponse.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/self-scoring/session/end` — ends the guest session and
+  /// clears its cookie. Works with a dead cookie. Needs the CSRF header (see
+  /// [defaultHeaders]).
+  Future<void> endGuestSession() async {
+    await _send('POST', _resolve('/api/v1/self-scoring/session/end'));
+  }
+
+  /// `GET /api/v1/self-scoring/overview` — the signed-in participant's
+  /// rounds, groups and score states. Needs the guest session token.
+  Future<ParticipantOverviewDto> participantOverview() async {
+    final uri = _resolve('/api/v1/self-scoring/overview');
+    final response = await _send('GET', uri);
+    return _decode<ParticipantOverviewDto>(
+      response,
+      uri,
+      ParticipantOverviewDto.fromJson,
+    );
+  }
+
+  /// `GET /api/v1/self-scoring/rounds/{round}/entry` — what the entry form
+  /// for [round] needs: the draw, the fields and the landing table.
+  Future<ParticipantEntryContextDto> participantEntryContext(int round) async {
+    final uri = _resolve('/api/v1/self-scoring/rounds/$round/entry');
+    final response = await _send('GET', uri);
+    return _decode<ParticipantEntryContextDto>(
+      response,
+      uri,
+      ParticipantEntryContextDto.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/self-scoring/rounds/{round}/scores` — submits the score
+  /// for [round]. Repeating the same `client_mutation_id` returns the first
+  /// answer. A refusal is an [ApiHttpError] whose
+  /// [ApiHttpError.participantError] says why (`score_already_submitted`,
+  /// `validation_failed`, `scoring_closed`, ...).
+  Future<SubmitParticipantScoreResponse> submitParticipantScore(
+    int round,
+    SubmitParticipantScoreRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/self-scoring/rounds/$round/scores');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<SubmitParticipantScoreResponse>(
+      response,
+      uri,
+      SubmitParticipantScoreResponse.fromJson,
+    );
+  }
+
+  /// `GET /api/v1/self-scoring/rounds/{round}/group-results` — the group the
+  /// participant flew in for [round].
+  Future<ParticipantGroupResultsDto> participantGroupResults(int round) async {
+    final uri = _resolve('/api/v1/self-scoring/rounds/$round/group-results');
+    final response = await _send('GET', uri);
+    return _decode<ParticipantGroupResultsDto>(
+      response,
+      uri,
+      ParticipantGroupResultsDto.fromJson,
+    );
+  }
+
+  /// `GET /api/v1/self-scoring/results?round={n}` — overall individual
+  /// standings as of [asOfRound], or the latest round when null.
+  Future<ParticipantOverallResultsDto> participantOverallResults({
+    int? asOfRound,
+  }) async {
+    final uri = _resolve(
+      '/api/v1/self-scoring/results',
+    ).replace(queryParameters: {if (asOfRound != null) 'round': '$asOfRound'});
+    final response = await _send('GET', uri);
+    return _decode<ParticipantOverallResultsDto>(
+      response,
+      uri,
+      ParticipantOverallResultsDto.fromJson,
+    );
   }
 
   /// `GET /api/v1/contests` — the contests stored on the target server.
@@ -447,6 +558,37 @@ class ApiClient {
         for (final item in json['participations'] as List<dynamic>)
           ContestParticipation.fromJson(item as Map<String, dynamic>),
       ],
+    );
+  }
+
+  /// `GET /api/v1/contests/{id}/invitations` — the participations of contest
+  /// [id] that have an active invitation, with the link each one's QR code
+  /// carries, and whether the contest may issue more now. The hosted server
+  /// answers 404 for a contest it has not synchronized.
+  Future<ContestInvitationsDto> contestInvitations(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/invitations');
+    final response = await _send('GET', uri);
+    return _decode<ContestInvitationsDto>(
+      response,
+      uri,
+      ContestInvitationsDto.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/contests/{id}/invitations` — issues an invitation for each
+  /// participation in [request] that has none. Sends no email. Pilots that
+  /// already have one keep it, so repeating changes nothing. All or nothing:
+  /// a request that cannot complete is an error and issues nothing.
+  Future<IssueInvitationsResponse> issueInvitations(
+    Id id,
+    IssueInvitationsRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/invitations');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<IssueInvitationsResponse>(
+      response,
+      uri,
+      IssueInvitationsResponse.fromJson,
     );
   }
 
@@ -1402,15 +1544,21 @@ class ApiClient {
   /// Sends a [method] request for the absolute [uri], with [body] as JSON
   /// when given, and returns its 2xx [http.Response].
   ///
+  /// [authenticated] false leaves the token off, for public routes.
+  ///
   /// Throws [ApiHttpError] for non-2xx responses and [ApiNetworkError] for
   /// transport failures.
   Future<http.Response> _send(
     String method,
     Uri uri, {
     Map<String, dynamic>? body,
+    bool authenticated = true,
   }) async {
-    final headers = <String, String>{'accept': 'application/json'};
-    final token = await tokenProvider?.call();
+    final headers = <String, String>{
+      ...defaultHeaders,
+      'accept': 'application/json',
+    };
+    final token = authenticated ? await tokenProvider?.call() : null;
     if (token != null) {
       headers['authorization'] = 'Bearer $token';
     }

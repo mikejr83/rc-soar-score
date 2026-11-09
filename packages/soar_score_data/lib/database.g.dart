@@ -28436,6 +28436,17 @@ class $ScoreAttemptsTable extends ScoreAttempts
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _acceptedAtMeta = const VerificationMeta(
+    'acceptedAt',
+  );
+  @override
+  late final GeneratedColumn<String> acceptedAt = GeneratedColumn<String>(
+    'accepted_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -28450,6 +28461,7 @@ class $ScoreAttemptsTable extends ScoreAttempts
     sourceDevice,
     clientMutationId,
     baseScoreRevision,
+    acceptedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -28576,6 +28588,14 @@ class $ScoreAttemptsTable extends ScoreAttempts
     } else if (isInserting) {
       context.missing(_baseScoreRevisionMeta);
     }
+    if (data.containsKey('accepted_at')) {
+      context.handle(
+        _acceptedAtMeta,
+        acceptedAt.isAcceptableOrUnknown(data['accepted_at']!, _acceptedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_acceptedAtMeta);
+    }
     return context;
   }
 
@@ -28637,6 +28657,10 @@ class $ScoreAttemptsTable extends ScoreAttempts
         DriftSqlType.int,
         data['${effectivePrefix}base_score_revision'],
       )!,
+      acceptedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}accepted_at'],
+      )!,
     );
   }
 
@@ -28660,6 +28684,7 @@ class ScoreAttemptData extends DataClass
   final String? sourceDevice;
   final String clientMutationId;
   final int baseScoreRevision;
+  final String acceptedAt;
   const ScoreAttemptData({
     required this.id,
     required this.contestId,
@@ -28673,6 +28698,7 @@ class ScoreAttemptData extends DataClass
     this.sourceDevice,
     required this.clientMutationId,
     required this.baseScoreRevision,
+    required this.acceptedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -28693,6 +28719,7 @@ class ScoreAttemptData extends DataClass
     }
     map['client_mutation_id'] = Variable<String>(clientMutationId);
     map['base_score_revision'] = Variable<int>(baseScoreRevision);
+    map['accepted_at'] = Variable<String>(acceptedAt);
     return map;
   }
 
@@ -28714,6 +28741,7 @@ class ScoreAttemptData extends DataClass
           : Value(sourceDevice),
       clientMutationId: Value(clientMutationId),
       baseScoreRevision: Value(baseScoreRevision),
+      acceptedAt: Value(acceptedAt),
     );
   }
 
@@ -28737,6 +28765,7 @@ class ScoreAttemptData extends DataClass
       sourceDevice: serializer.fromJson<String?>(json['sourceDevice']),
       clientMutationId: serializer.fromJson<String>(json['clientMutationId']),
       baseScoreRevision: serializer.fromJson<int>(json['baseScoreRevision']),
+      acceptedAt: serializer.fromJson<String>(json['acceptedAt']),
     );
   }
   @override
@@ -28755,6 +28784,7 @@ class ScoreAttemptData extends DataClass
       'sourceDevice': serializer.toJson<String?>(sourceDevice),
       'clientMutationId': serializer.toJson<String>(clientMutationId),
       'baseScoreRevision': serializer.toJson<int>(baseScoreRevision),
+      'acceptedAt': serializer.toJson<String>(acceptedAt),
     };
   }
 
@@ -28771,6 +28801,7 @@ class ScoreAttemptData extends DataClass
     Value<String?> sourceDevice = const Value.absent(),
     String? clientMutationId,
     int? baseScoreRevision,
+    String? acceptedAt,
   }) => ScoreAttemptData(
     id: id ?? this.id,
     contestId: contestId ?? this.contestId,
@@ -28784,6 +28815,7 @@ class ScoreAttemptData extends DataClass
     sourceDevice: sourceDevice.present ? sourceDevice.value : this.sourceDevice,
     clientMutationId: clientMutationId ?? this.clientMutationId,
     baseScoreRevision: baseScoreRevision ?? this.baseScoreRevision,
+    acceptedAt: acceptedAt ?? this.acceptedAt,
   );
   ScoreAttemptData copyWithCompanion(ScoreAttemptsCompanion data) {
     return ScoreAttemptData(
@@ -28815,6 +28847,9 @@ class ScoreAttemptData extends DataClass
       baseScoreRevision: data.baseScoreRevision.present
           ? data.baseScoreRevision.value
           : this.baseScoreRevision,
+      acceptedAt: data.acceptedAt.present
+          ? data.acceptedAt.value
+          : this.acceptedAt,
     );
   }
 
@@ -28832,7 +28867,8 @@ class ScoreAttemptData extends DataClass
           ..write('invitationId: $invitationId, ')
           ..write('sourceDevice: $sourceDevice, ')
           ..write('clientMutationId: $clientMutationId, ')
-          ..write('baseScoreRevision: $baseScoreRevision')
+          ..write('baseScoreRevision: $baseScoreRevision, ')
+          ..write('acceptedAt: $acceptedAt')
           ..write(')'))
         .toString();
   }
@@ -28851,6 +28887,7 @@ class ScoreAttemptData extends DataClass
     sourceDevice,
     clientMutationId,
     baseScoreRevision,
+    acceptedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -28867,7 +28904,8 @@ class ScoreAttemptData extends DataClass
           other.invitationId == this.invitationId &&
           other.sourceDevice == this.sourceDevice &&
           other.clientMutationId == this.clientMutationId &&
-          other.baseScoreRevision == this.baseScoreRevision);
+          other.baseScoreRevision == this.baseScoreRevision &&
+          other.acceptedAt == this.acceptedAt);
 }
 
 class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
@@ -28883,6 +28921,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
   final Value<String?> sourceDevice;
   final Value<String> clientMutationId;
   final Value<int> baseScoreRevision;
+  final Value<String> acceptedAt;
   final Value<int> rowid;
   const ScoreAttemptsCompanion({
     this.id = const Value.absent(),
@@ -28897,6 +28936,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
     this.sourceDevice = const Value.absent(),
     this.clientMutationId = const Value.absent(),
     this.baseScoreRevision = const Value.absent(),
+    this.acceptedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ScoreAttemptsCompanion.insert({
@@ -28912,6 +28952,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
     this.sourceDevice = const Value.absent(),
     required String clientMutationId,
     required int baseScoreRevision,
+    required String acceptedAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        contestId = Value(contestId),
@@ -28922,7 +28963,8 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
        actorId = Value(actorId),
        authority = Value(authority),
        clientMutationId = Value(clientMutationId),
-       baseScoreRevision = Value(baseScoreRevision);
+       baseScoreRevision = Value(baseScoreRevision),
+       acceptedAt = Value(acceptedAt);
   static Insertable<ScoreAttemptData> custom({
     Expression<String>? id,
     Expression<String>? contestId,
@@ -28936,6 +28978,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
     Expression<String>? sourceDevice,
     Expression<String>? clientMutationId,
     Expression<int>? baseScoreRevision,
+    Expression<String>? acceptedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -28952,6 +28995,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
       if (sourceDevice != null) 'source_device': sourceDevice,
       if (clientMutationId != null) 'client_mutation_id': clientMutationId,
       if (baseScoreRevision != null) 'base_score_revision': baseScoreRevision,
+      if (acceptedAt != null) 'accepted_at': acceptedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -28969,6 +29013,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
     Value<String?>? sourceDevice,
     Value<String>? clientMutationId,
     Value<int>? baseScoreRevision,
+    Value<String>? acceptedAt,
     Value<int>? rowid,
   }) {
     return ScoreAttemptsCompanion(
@@ -28984,6 +29029,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
       sourceDevice: sourceDevice ?? this.sourceDevice,
       clientMutationId: clientMutationId ?? this.clientMutationId,
       baseScoreRevision: baseScoreRevision ?? this.baseScoreRevision,
+      acceptedAt: acceptedAt ?? this.acceptedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -29027,6 +29073,9 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
     if (baseScoreRevision.present) {
       map['base_score_revision'] = Variable<int>(baseScoreRevision.value);
     }
+    if (acceptedAt.present) {
+      map['accepted_at'] = Variable<String>(acceptedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -29048,6 +29097,7 @@ class ScoreAttemptsCompanion extends UpdateCompanion<ScoreAttemptData> {
           ..write('sourceDevice: $sourceDevice, ')
           ..write('clientMutationId: $clientMutationId, ')
           ..write('baseScoreRevision: $baseScoreRevision, ')
+          ..write('acceptedAt: $acceptedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -37668,6 +37718,28 @@ class $LocalAccountTable extends LocalAccount
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _linkedAccountIdMeta = const VerificationMeta(
+    'linkedAccountId',
+  );
+  @override
+  late final GeneratedColumn<String> linkedAccountId = GeneratedColumn<String>(
+    'linked_account_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _linkedSubjectMeta = const VerificationMeta(
+    'linkedSubject',
+  );
+  @override
+  late final GeneratedColumn<String> linkedSubject = GeneratedColumn<String>(
+    'linked_subject',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -37685,6 +37757,8 @@ class $LocalAccountTable extends LocalAccount
     accountId,
     preferredTimeZone,
     preferredLocale,
+    linkedAccountId,
+    linkedSubject,
     createdAt,
   ];
   @override
@@ -37731,6 +37805,24 @@ class $LocalAccountTable extends LocalAccount
         ),
       );
     }
+    if (data.containsKey('linked_account_id')) {
+      context.handle(
+        _linkedAccountIdMeta,
+        linkedAccountId.isAcceptableOrUnknown(
+          data['linked_account_id']!,
+          _linkedAccountIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('linked_subject')) {
+      context.handle(
+        _linkedSubjectMeta,
+        linkedSubject.isAcceptableOrUnknown(
+          data['linked_subject']!,
+          _linkedSubjectMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -37764,6 +37856,14 @@ class $LocalAccountTable extends LocalAccount
         DriftSqlType.string,
         data['${effectivePrefix}preferred_locale'],
       ),
+      linkedAccountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}linked_account_id'],
+      ),
+      linkedSubject: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}linked_subject'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}created_at'],
@@ -37789,12 +37889,26 @@ class LocalAccountData extends DataClass
   /// null until chosen.
   final String? preferredTimeZone;
   final String? preferredLocale;
+
+  /// The registered account this installation's data was last claimed into
+  /// (see `LocalAccountRepository.reassignTo`); null until a claim. Kept so the
+  /// installation keeps acting as that account when it starts offline or the
+  /// director signs out.
+  final String? linkedAccountId;
+
+  /// The identity provider's stable id (Auth0 `sub`) of the sign-in that
+  /// claimed the data; null until a claim. The app compares it with the
+  /// signed-in user before serving the linked account's data, so a different
+  /// sign-in cannot reach it, even offline.
+  final String? linkedSubject;
   final String createdAt;
   const LocalAccountData({
     required this.slot,
     required this.accountId,
     this.preferredTimeZone,
     this.preferredLocale,
+    this.linkedAccountId,
+    this.linkedSubject,
     required this.createdAt,
   });
   @override
@@ -37807,6 +37921,12 @@ class LocalAccountData extends DataClass
     }
     if (!nullToAbsent || preferredLocale != null) {
       map['preferred_locale'] = Variable<String>(preferredLocale);
+    }
+    if (!nullToAbsent || linkedAccountId != null) {
+      map['linked_account_id'] = Variable<String>(linkedAccountId);
+    }
+    if (!nullToAbsent || linkedSubject != null) {
+      map['linked_subject'] = Variable<String>(linkedSubject);
     }
     map['created_at'] = Variable<String>(createdAt);
     return map;
@@ -37822,6 +37942,12 @@ class LocalAccountData extends DataClass
       preferredLocale: preferredLocale == null && nullToAbsent
           ? const Value.absent()
           : Value(preferredLocale),
+      linkedAccountId: linkedAccountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(linkedAccountId),
+      linkedSubject: linkedSubject == null && nullToAbsent
+          ? const Value.absent()
+          : Value(linkedSubject),
       createdAt: Value(createdAt),
     );
   }
@@ -37838,6 +37964,8 @@ class LocalAccountData extends DataClass
         json['preferredTimeZone'],
       ),
       preferredLocale: serializer.fromJson<String?>(json['preferredLocale']),
+      linkedAccountId: serializer.fromJson<String?>(json['linkedAccountId']),
+      linkedSubject: serializer.fromJson<String?>(json['linkedSubject']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
     );
   }
@@ -37849,6 +37977,8 @@ class LocalAccountData extends DataClass
       'accountId': serializer.toJson<String>(accountId),
       'preferredTimeZone': serializer.toJson<String?>(preferredTimeZone),
       'preferredLocale': serializer.toJson<String?>(preferredLocale),
+      'linkedAccountId': serializer.toJson<String?>(linkedAccountId),
+      'linkedSubject': serializer.toJson<String?>(linkedSubject),
       'createdAt': serializer.toJson<String>(createdAt),
     };
   }
@@ -37858,6 +37988,8 @@ class LocalAccountData extends DataClass
     String? accountId,
     Value<String?> preferredTimeZone = const Value.absent(),
     Value<String?> preferredLocale = const Value.absent(),
+    Value<String?> linkedAccountId = const Value.absent(),
+    Value<String?> linkedSubject = const Value.absent(),
     String? createdAt,
   }) => LocalAccountData(
     slot: slot ?? this.slot,
@@ -37868,6 +38000,12 @@ class LocalAccountData extends DataClass
     preferredLocale: preferredLocale.present
         ? preferredLocale.value
         : this.preferredLocale,
+    linkedAccountId: linkedAccountId.present
+        ? linkedAccountId.value
+        : this.linkedAccountId,
+    linkedSubject: linkedSubject.present
+        ? linkedSubject.value
+        : this.linkedSubject,
     createdAt: createdAt ?? this.createdAt,
   );
   LocalAccountData copyWithCompanion(LocalAccountCompanion data) {
@@ -37880,6 +38018,12 @@ class LocalAccountData extends DataClass
       preferredLocale: data.preferredLocale.present
           ? data.preferredLocale.value
           : this.preferredLocale,
+      linkedAccountId: data.linkedAccountId.present
+          ? data.linkedAccountId.value
+          : this.linkedAccountId,
+      linkedSubject: data.linkedSubject.present
+          ? data.linkedSubject.value
+          : this.linkedSubject,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -37891,6 +38035,8 @@ class LocalAccountData extends DataClass
           ..write('accountId: $accountId, ')
           ..write('preferredTimeZone: $preferredTimeZone, ')
           ..write('preferredLocale: $preferredLocale, ')
+          ..write('linkedAccountId: $linkedAccountId, ')
+          ..write('linkedSubject: $linkedSubject, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -37902,6 +38048,8 @@ class LocalAccountData extends DataClass
     accountId,
     preferredTimeZone,
     preferredLocale,
+    linkedAccountId,
+    linkedSubject,
     createdAt,
   );
   @override
@@ -37912,6 +38060,8 @@ class LocalAccountData extends DataClass
           other.accountId == this.accountId &&
           other.preferredTimeZone == this.preferredTimeZone &&
           other.preferredLocale == this.preferredLocale &&
+          other.linkedAccountId == this.linkedAccountId &&
+          other.linkedSubject == this.linkedSubject &&
           other.createdAt == this.createdAt);
 }
 
@@ -37920,12 +38070,16 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
   final Value<String> accountId;
   final Value<String?> preferredTimeZone;
   final Value<String?> preferredLocale;
+  final Value<String?> linkedAccountId;
+  final Value<String?> linkedSubject;
   final Value<String> createdAt;
   const LocalAccountCompanion({
     this.slot = const Value.absent(),
     this.accountId = const Value.absent(),
     this.preferredTimeZone = const Value.absent(),
     this.preferredLocale = const Value.absent(),
+    this.linkedAccountId = const Value.absent(),
+    this.linkedSubject = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   LocalAccountCompanion.insert({
@@ -37933,6 +38087,8 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
     required String accountId,
     this.preferredTimeZone = const Value.absent(),
     this.preferredLocale = const Value.absent(),
+    this.linkedAccountId = const Value.absent(),
+    this.linkedSubject = const Value.absent(),
     required String createdAt,
   }) : accountId = Value(accountId),
        createdAt = Value(createdAt);
@@ -37941,6 +38097,8 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
     Expression<String>? accountId,
     Expression<String>? preferredTimeZone,
     Expression<String>? preferredLocale,
+    Expression<String>? linkedAccountId,
+    Expression<String>? linkedSubject,
     Expression<String>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -37948,6 +38106,8 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
       if (accountId != null) 'account_id': accountId,
       if (preferredTimeZone != null) 'preferred_time_zone': preferredTimeZone,
       if (preferredLocale != null) 'preferred_locale': preferredLocale,
+      if (linkedAccountId != null) 'linked_account_id': linkedAccountId,
+      if (linkedSubject != null) 'linked_subject': linkedSubject,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -37957,6 +38117,8 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
     Value<String>? accountId,
     Value<String?>? preferredTimeZone,
     Value<String?>? preferredLocale,
+    Value<String?>? linkedAccountId,
+    Value<String?>? linkedSubject,
     Value<String>? createdAt,
   }) {
     return LocalAccountCompanion(
@@ -37964,6 +38126,8 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
       accountId: accountId ?? this.accountId,
       preferredTimeZone: preferredTimeZone ?? this.preferredTimeZone,
       preferredLocale: preferredLocale ?? this.preferredLocale,
+      linkedAccountId: linkedAccountId ?? this.linkedAccountId,
+      linkedSubject: linkedSubject ?? this.linkedSubject,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -37983,6 +38147,12 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
     if (preferredLocale.present) {
       map['preferred_locale'] = Variable<String>(preferredLocale.value);
     }
+    if (linkedAccountId.present) {
+      map['linked_account_id'] = Variable<String>(linkedAccountId.value);
+    }
+    if (linkedSubject.present) {
+      map['linked_subject'] = Variable<String>(linkedSubject.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<String>(createdAt.value);
     }
@@ -37996,6 +38166,8 @@ class LocalAccountCompanion extends UpdateCompanion<LocalAccountData> {
           ..write('accountId: $accountId, ')
           ..write('preferredTimeZone: $preferredTimeZone, ')
           ..write('preferredLocale: $preferredLocale, ')
+          ..write('linkedAccountId: $linkedAccountId, ')
+          ..write('linkedSubject: $linkedSubject, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -67898,6 +68070,7 @@ typedef $$ScoreAttemptsTableCreateCompanionBuilder =
       Value<String?> sourceDevice,
       required String clientMutationId,
       required int baseScoreRevision,
+      required String acceptedAt,
       Value<int> rowid,
     });
 typedef $$ScoreAttemptsTableUpdateCompanionBuilder =
@@ -67914,6 +68087,7 @@ typedef $$ScoreAttemptsTableUpdateCompanionBuilder =
       Value<String?> sourceDevice,
       Value<String> clientMutationId,
       Value<int> baseScoreRevision,
+      Value<String> acceptedAt,
       Value<int> rowid,
     });
 
@@ -68092,6 +68266,11 @@ class $$ScoreAttemptsTableFilterComposer
 
   ColumnFilters<int> get baseScoreRevision => $composableBuilder(
     column: $table.baseScoreRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get acceptedAt => $composableBuilder(
+    column: $table.acceptedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -68288,6 +68467,11 @@ class $$ScoreAttemptsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get acceptedAt => $composableBuilder(
+    column: $table.acceptedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ContestsTableOrderingComposer get contestId {
     final $$ContestsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -68422,6 +68606,11 @@ class $$ScoreAttemptsTableAnnotationComposer
 
   GeneratedColumn<int> get baseScoreRevision => $composableBuilder(
     column: $table.baseScoreRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get acceptedAt => $composableBuilder(
+    column: $table.acceptedAt,
     builder: (column) => column,
   );
 
@@ -68619,6 +68808,7 @@ class $$ScoreAttemptsTableTableManager
                 Value<String?> sourceDevice = const Value.absent(),
                 Value<String> clientMutationId = const Value.absent(),
                 Value<int> baseScoreRevision = const Value.absent(),
+                Value<String> acceptedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ScoreAttemptsCompanion(
                 id: id,
@@ -68633,6 +68823,7 @@ class $$ScoreAttemptsTableTableManager
                 sourceDevice: sourceDevice,
                 clientMutationId: clientMutationId,
                 baseScoreRevision: baseScoreRevision,
+                acceptedAt: acceptedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -68649,6 +68840,7 @@ class $$ScoreAttemptsTableTableManager
                 Value<String?> sourceDevice = const Value.absent(),
                 required String clientMutationId,
                 required int baseScoreRevision,
+                required String acceptedAt,
                 Value<int> rowid = const Value.absent(),
               }) => ScoreAttemptsCompanion.insert(
                 id: id,
@@ -68663,6 +68855,7 @@ class $$ScoreAttemptsTableTableManager
                 sourceDevice: sourceDevice,
                 clientMutationId: clientMutationId,
                 baseScoreRevision: baseScoreRevision,
+                acceptedAt: acceptedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -74959,6 +75152,8 @@ typedef $$LocalAccountTableCreateCompanionBuilder =
       required String accountId,
       Value<String?> preferredTimeZone,
       Value<String?> preferredLocale,
+      Value<String?> linkedAccountId,
+      Value<String?> linkedSubject,
       required String createdAt,
     });
 typedef $$LocalAccountTableUpdateCompanionBuilder =
@@ -74967,6 +75162,8 @@ typedef $$LocalAccountTableUpdateCompanionBuilder =
       Value<String> accountId,
       Value<String?> preferredTimeZone,
       Value<String?> preferredLocale,
+      Value<String?> linkedAccountId,
+      Value<String?> linkedSubject,
       Value<String> createdAt,
     });
 
@@ -74996,6 +75193,16 @@ class $$LocalAccountTableFilterComposer
 
   ColumnFilters<String> get preferredLocale => $composableBuilder(
     column: $table.preferredLocale,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linkedAccountId => $composableBuilder(
+    column: $table.linkedAccountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linkedSubject => $composableBuilder(
+    column: $table.linkedSubject,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -75034,6 +75241,16 @@ class $$LocalAccountTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get linkedAccountId => $composableBuilder(
+    column: $table.linkedAccountId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get linkedSubject => $composableBuilder(
+    column: $table.linkedSubject,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -75062,6 +75279,16 @@ class $$LocalAccountTableAnnotationComposer
 
   GeneratedColumn<String> get preferredLocale => $composableBuilder(
     column: $table.preferredLocale,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get linkedAccountId => $composableBuilder(
+    column: $table.linkedAccountId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get linkedSubject => $composableBuilder(
+    column: $table.linkedSubject,
     builder: (column) => column,
   );
 
@@ -75110,12 +75337,16 @@ class $$LocalAccountTableTableManager
                 Value<String> accountId = const Value.absent(),
                 Value<String?> preferredTimeZone = const Value.absent(),
                 Value<String?> preferredLocale = const Value.absent(),
+                Value<String?> linkedAccountId = const Value.absent(),
+                Value<String?> linkedSubject = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
               }) => LocalAccountCompanion(
                 slot: slot,
                 accountId: accountId,
                 preferredTimeZone: preferredTimeZone,
                 preferredLocale: preferredLocale,
+                linkedAccountId: linkedAccountId,
+                linkedSubject: linkedSubject,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -75124,12 +75355,16 @@ class $$LocalAccountTableTableManager
                 required String accountId,
                 Value<String?> preferredTimeZone = const Value.absent(),
                 Value<String?> preferredLocale = const Value.absent(),
+                Value<String?> linkedAccountId = const Value.absent(),
+                Value<String?> linkedSubject = const Value.absent(),
                 required String createdAt,
               }) => LocalAccountCompanion.insert(
                 slot: slot,
                 accountId: accountId,
                 preferredTimeZone: preferredTimeZone,
                 preferredLocale: preferredLocale,
+                linkedAccountId: linkedAccountId,
+                linkedSubject: linkedSubject,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0

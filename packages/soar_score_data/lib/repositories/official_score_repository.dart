@@ -33,6 +33,24 @@ class OfficialScoreRepository extends DriftRepository
   }
 
   @override
+  Future<Map<core.Id, core.OfficialScore>> currentForPlaceholders(
+    Iterable<core.Id> scorePlaceholderIds,
+  ) async {
+    final scores = await _store.whereIdIn(
+      'score_placeholder_id',
+      scorePlaceholderIds,
+    );
+    final current = <core.Id, core.OfficialScore>{};
+    for (final score in scores) {
+      final best = current[score.scorePlaceholderId];
+      if (best == null || score.scoreRevision > best.scoreRevision) {
+        current[score.scorePlaceholderId] = score;
+      }
+    }
+    return current;
+  }
+
+  @override
   Future<Map<core.Id, DateTime>> latestSetAtForContests(
     Iterable<core.Id> contestIds,
   ) => latestTimestampByContest(

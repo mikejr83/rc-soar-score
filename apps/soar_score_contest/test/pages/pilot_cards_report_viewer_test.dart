@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/connectivity_provider.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/contest/report_viewer_page.dart';
 import 'package:soar_score_contest/services/reports/pilot_cards/pilot_invitations.dart';
 import 'package:soar_score_contest/services/reports/report_kind.dart';
@@ -13,6 +15,7 @@ import 'package:soar_score_contest/widgets/reports/pilot_cards/pilot_card_view.d
 import 'package:soar_score_contest/widgets/reports/pilot_cards/qr_code_view.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../support/fake_app_connectivity.dart';
 import '../support/matrix_test_support.dart';
 import '../support/next_step_widget_support.dart';
 import '../support/stand_in_report.dart';
@@ -25,6 +28,7 @@ class _FakeInvitations implements PilotInvitationSource {
     Set<String>? invited,
     this.fail = false,
     this.failRead = false,
+    this.failReadAlways = false,
   }) : _invited = {...?invited};
 
   final Set<String> _invited;
@@ -32,12 +36,18 @@ class _FakeInvitations implements PilotInvitationSource {
 
   /// Reading fails after the send worked.
   bool failRead;
+
+  /// Reading always fails.
+  bool failReadAlways;
   int sends = 0;
+  ApiClient? readWith;
+  ApiClient? sentWith;
   List<Id> lastSent = const [];
 
   @override
   Future<PilotInvitations> read(ApiClient client, Id contestId) async {
-    if (failRead && sends > 0) {
+    readWith = client;
+    if (failReadAlways || (failRead && sends > 0)) {
       throw StateError('read failed');
     }
     return PilotInvitations(
@@ -52,6 +62,7 @@ class _FakeInvitations implements PilotInvitationSource {
     List<Id> participations,
   ) async {
     sends++;
+    sentWith = client;
     lastSent = participations;
     if (fail) {
       throw StateError('no network');
@@ -67,6 +78,9 @@ Future<void> _pump(
   Size size = const Size(1280, 1000),
   ContestScores Function(CurrentMatrix matrix)? scores,
   ReportPrinter printer = const NotWiredReportPrinter(),
+  ApiClient? publicationClient,
+  Map<int, int> retired = const {},
+  FakeAppConnectivity? connectivity,
 }) async {
   final matrix = drawnMatrix(lanes: lanes);
   final server = WorkspaceServer(
@@ -74,6 +88,7 @@ Future<void> _pump(
     matrix: matrix,
     scores: scores?.call(matrix) ?? scoresFor(matrix, const {}),
   );
+  server.inner.retirements.addAll(retired);
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -91,20 +106,37 @@ Future<void> _pump(
               : server.handle(request),
         ),
       ),
-      child: MaterialApp(
-        locale: const Locale('en', 'US'),
-        home: ReportViewerPage(
-          printer: printer,
-          contestId: matrixContestId,
-          report: ReportKind.cards,
-          params: params,
-          pollInterval: null,
+      child: _withConnectivity(
+        connectivity,
+        _withPublicationClient(
+          publicationClient,
+          MaterialApp(
+            locale: const Locale('en', 'US'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: ReportViewerPage(
+              printer: printer,
+              contestId: matrixContestId,
+              report: ReportKind.cards,
+              params: params,
+              pollInterval: null,
+            ),
+          ),
         ),
       ),
     ),
   );
   await tester.pumpAndSettle();
 }
+
+Widget _withConnectivity(FakeAppConnectivity? monitor, Widget child) =>
+    monitor == null
+    ? child
+    : AppConnectivityInherited(monitor: monitor, child: child);
+
+Widget _withPublicationClient(ApiClient? client, Widget child) => client == null
+    ? child
+    : PublicationClientInherited(client: client, child: child);
 
 String marginChoice(WidgetTester tester) => tester
     .widget<RadioGroup<String>>(
@@ -123,7 +155,7 @@ void main() {
   });
 
   tearDown(() {
-    PilotInvitationSources.current = const PlaceholderPilotInvitationSource();
+    PilotInvitationSources.current = const ApiPilotInvitationSource();
   });
 
   testWidgets('prints a card per pilot, by last name, with the draw rows', (
@@ -268,6 +300,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Send invitations?'), findsOneWidget);
     expect(find.textContaining('4 QR codes'), findsOneWidget);
+    // Issuing sends no email, so the dialog and the result must not say so.
+    expect(find.textContaining('Nobody is emailed'), findsOneWidget);
+    expect(find.textContaining('also emailed'), findsNothing);
     await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
     await tester.pumpAndSettle();
 
@@ -275,13 +310,64 @@ void main() {
     expect(source.lastSent, hasLength(4));
     expect(find.byType(QrCodeView), findsNWidgets(4));
     expect(
-      find.textContaining('Invitations sent.', findRichText: true),
+      find.textContaining('QR codes created.', findRichText: true),
       findsOneWidget,
     );
     expect(
       find.textContaining('No QR code.', findRichText: true),
       findsNothing,
     );
+  });
+
+  testWidgets(
+    'a connection lost while confirming sends nothing from the cards',
+    (tester) async {
+      final source = _FakeInvitations();
+      PilotInvitationSources.current = source;
+      final connectivity = FakeAppConnectivity();
+      await _pump(tester, connectivity: connectivity);
+
+      await tester.tap(find.byKey(const ValueKey('cards-banner-send')));
+      await tester.pumpAndSettle();
+      connectivity
+        ..internetStatus = ConnectivityStatus.unavailable
+        ..notifyListeners();
+      await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+      await tester.pumpAndSettle();
+
+      expect(source.sends, 0);
+      expect(
+        find.text('You’re offline, so invitations can’t be sent now.'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets('a retired pilot’s card prints but is never sent an invitation', (
+    tester,
+  ) async {
+    final source = _FakeInvitations();
+    PilotInvitationSources.current = source;
+    await _pump(
+      tester,
+      retired: {4: 2},
+      params: const ReportViewParams(filters: {'ret': '1'}),
+    );
+
+    // Four cards (the retired pilot's included), three that can have a code.
+    expect(find.byType(PilotCardView), findsNWidgets(4));
+    expect(
+      find.textContaining('Some cards have no QR code. Send invitations'),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('cards-banner-send')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('3 QR codes'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(source.lastSent, hasLength(3));
+    expect(find.byType(QrCodeView), findsNWidgets(3));
   });
 
   testWidgets(
@@ -298,11 +384,11 @@ void main() {
 
       expect(source.sends, 1);
       expect(
-        find.textContaining('Invitations were sent.', findRichText: true),
+        find.textContaining('QR codes were created.', findRichText: true),
         findsOneWidget,
       );
       expect(
-        find.textContaining('could not be sent', findRichText: true),
+        find.textContaining('could not be created', findRichText: true),
         findsNothing,
       );
       // Nothing offers to send again; the director can load the codes.
@@ -317,6 +403,40 @@ void main() {
       expect(find.byType(QrCodeView), findsNWidgets(4));
     },
   );
+
+  testWidgets('cards still print when the invitations cannot be read', (
+    tester,
+  ) async {
+    final source = _FakeInvitations(failReadAlways: true);
+    PilotInvitationSources.current = source;
+    final printer = FakeReportPrinter(ReportPrintResult.sent);
+    await _pump(tester, printer: printer);
+
+    expect(find.byType(QrCodeView), findsNothing);
+    expect(
+      find.byKey(const ValueKey('cards-banner-load-failed')),
+      findsOneWidget,
+    );
+    expect(find.text('Scan to enter scores'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('viewer-print')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('cards-reminder-dialog')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('cards-reminder-without')));
+    await tester.pumpAndSettle();
+    expect(printer.printed, isNotEmpty);
+
+    source.failReadAlways = false;
+    await tester.tap(find.byKey(const ValueKey('cards-banner-load-retry')));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('cards-banner-load-failed')),
+      findsNothing,
+    );
+    // Read now, nobody has an invitation yet: the usual banner.
+    expect(find.byKey(const ValueKey('cards-banner-missing')), findsOneWidget);
+  });
 
   testWidgets('printing waits for the codes after a send that was not read', (
     tester,
@@ -349,7 +469,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('Invitations could not be sent.', findRichText: true),
+      find.textContaining('QR codes could not be created.', findRichText: true),
       findsOneWidget,
     );
     expect(find.byType(QrCodeView), findsNothing);
@@ -362,18 +482,42 @@ void main() {
     expect(find.byType(QrCodeView), findsNWidgets(4));
   });
 
-  testWidgets('the placeholder source gives every pilot the project link', (
+  testWidgets(
+    'invitations are read and issued through the publication client',
+    (tester) async {
+      final hosted = ApiClient(
+        baseUrl: Uri.parse('http://hosted.example'),
+        httpClient: MockClient((_) async => http.Response('{}', 500)),
+      );
+      final source = _FakeInvitations();
+      PilotInvitationSources.current = source;
+      await _pump(tester, publicationClient: hosted);
+
+      expect(source.readWith, same(hosted));
+      await tester.tap(find.byKey(const ValueKey('cards-banner-send')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+      await tester.pumpAndSettle();
+      expect(source.sentWith, same(hosted));
+    },
+  );
+
+  testWidgets('each card carries its own pilot\u2019s link, never the site', (
     tester,
   ) async {
-    PilotInvitationSources.current = const PlaceholderPilotInvitationSource();
+    final all = workspaceData(matrix: drawnMatrix()).participations
+        .map((p) => p.id.value)
+        .toSet();
+    PilotInvitationSources.current = _FakeInvitations(invited: all);
     await _pump(tester);
 
     expect(find.byType(QrCodeView), findsNWidgets(4));
-    final links = {
+    final links = [
       for (final view in tester.widgetList<QrCodeView>(find.byType(QrCodeView)))
         view.data,
-    };
-    expect(links, {'https://score.rcsoarscore.com'});
+    ];
+    expect(links.toSet(), hasLength(4));
+    expect(links, everyElement(isNot('https://score.rcsoarscore.com')));
     expect(
       find.textContaining('No QR code.', findRichText: true),
       findsNothing,
@@ -531,7 +675,11 @@ void main() {
     });
 
     testWidgets('only the typed pages are sent to the printer', (tester) async {
-      PilotInvitationSources.current = const PlaceholderPilotInvitationSource();
+      PilotInvitationSources.current = _FakeInvitations(
+        invited: workspaceData(matrix: drawnMatrix()).participations
+            .map((p) => p.id.value)
+            .toSet(),
+      );
       final printer = FakeReportPrinter(ReportPrintResult.sent);
       await _pump(
         tester,
@@ -622,7 +770,7 @@ void main() {
       expect(printer.printed, isEmpty);
       expect(
         find.textContaining(
-          'Invitations could not be sent.',
+          'QR codes could not be created.',
           findRichText: true,
         ),
         findsOneWidget,

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/test-postgres.sh
-# Starts a throwaway PostgreSQL container, runs the data package tests against
-# it (the SQLite and PostgreSQL groups), and removes the container, even when
+# Starts a throwaway PostgreSQL container, runs the data package tests and the
+# server's API slice tests against it (the SQLite and PostgreSQL groups), and removes the container, even when
 # the tests fail. Needs Docker. Run from anywhere; exit code is the tests'.
 #
 #   ./scripts/test-postgres.sh
@@ -57,6 +57,7 @@ fi
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(dirname "$script_dir")"
 data_package="$repo_root/packages/soar_score_data"
+server_app="$repo_root/apps/soar_score_server"
 container="soar-pg-test-$$"
 password='dev'
 
@@ -121,8 +122,18 @@ POSTGRES_HOST='localhost'
 POSTGRES_PORT="$port"
 export POSTGRES_PASSWORD POSTGRES_HOST POSTGRES_PORT
 
+failed=false
+
 echo '==> dart test (packages/soar_score_data)'
-if (cd "$data_package" && dart test "${test_args[@]}"); then
+(cd "$data_package" && dart test "${test_args[@]}") || failed=true
+
+# The server's API slice tests (invitations and others) run on SQLite and
+# PostgreSQL; without POSTGRES_PASSWORD their PostgreSQL group is skipped.
+# Extra dart test args apply to the data package only.
+echo '==> dart test test/api_slice (apps/soar_score_server)'
+(cd "$server_app" && dart test test/api_slice) || failed=true
+
+if [ "$failed" = 'false' ]; then
   echo ''
   echo 'postgres tests PASSED'
   exit 0

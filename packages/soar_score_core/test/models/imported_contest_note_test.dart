@@ -29,20 +29,19 @@ void main() {
     expect(ImportedContestNote.fromStamps([]), isNull);
   });
 
-  test('a contest stamp alone means no draw was imported', () {
+  test('a contest stamp gives the time of the import and lanes', () {
     final note = ImportedContestNote.fromStamps([
       _stamp(ImportProvenance.contestEntityType),
     ])!;
-    expect(note.drawImported, isFalse);
     expect(note.importedAt, DateTime.utc(2026, 11, 4));
+    expect(note.lanesKept, isTrue);
   });
 
-  test('a revision stamp means the draw came from GliderScore', () {
+  test('a revision stamp with no positions keeps the lanes', () {
     final note = ImportedContestNote.fromStamps([
       _stamp(ImportProvenance.contestEntityType),
       _stamp(ImportProvenance.matrixRevisionEntityType, values: {}),
     ])!;
-    expect(note.drawImported, isTrue);
     expect(note.lanesKept, isTrue);
   });
 

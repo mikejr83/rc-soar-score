@@ -28,6 +28,9 @@ ScoreAttempt _$ScoreAttemptFromJson(Map<String, dynamic> json) => ScoreAttempt(
   sourceDevice: json['source_device'] as String?,
   clientMutationId: json['client_mutation_id'] as String,
   baseScoreRevision: (json['base_score_revision'] as num).toInt(),
+  acceptedAt: const UtcTimestampConverter().fromJson(
+    json['accepted_at'] as String,
+  ),
 );
 
 Map<String, dynamic> _$ScoreAttemptToJson(
@@ -50,6 +53,7 @@ Map<String, dynamic> _$ScoreAttemptToJson(
   'source_device': instance.sourceDevice,
   'client_mutation_id': instance.clientMutationId,
   'base_score_revision': instance.baseScoreRevision,
+  'accepted_at': const UtcTimestampConverter().toJson(instance.acceptedAt),
 };
 
 const _$AuthorityEnumMap = {

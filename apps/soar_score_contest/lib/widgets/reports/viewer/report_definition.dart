@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_localizations_en.dart';
 import '../../../services/reports/report_availability.dart';
 import '../../../services/reports/reports_facts.dart';
 import '../../../services/reports/result_status.dart';
@@ -48,7 +50,7 @@ class ReportControlsContext {
 
 /// What a report builds its pages from.
 class ReportPageContext {
-  const ReportPageContext({
+  ReportPageContext({
     required this.facts,
     required this.filters,
     required this.setup,
@@ -56,7 +58,14 @@ class ReportPageContext {
     required this.preview,
     this.data,
     this.online = true,
-  });
+    AppLocalizations? l10n,
+  }) : l10n = l10n ?? _fallbackL10n;
+
+  static final AppLocalizations _fallbackL10n = AppLocalizationsEn();
+
+  /// The app's strings in the language the sheet is built for, for the words a
+  /// report puts outside the paper (banners).
+  final AppLocalizations l10n;
 
   final ReportsFacts facts;
 

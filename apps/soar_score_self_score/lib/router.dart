@@ -1,16 +1,24 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'pages/contests_page.dart';
 import 'pages/group_results_page.dart';
 import 'pages/home_page.dart';
+import 'pages/invitation_page.dart';
 import 'pages/pilot_overview_page.dart';
 import 'pages/results_page.dart';
 import 'pages/score_entry_page.dart';
 import 'pages/team_page.dart';
+import 'session/guest_session_scope.dart';
 
 /// Routes follow `plan/ui/participant-scoring/participant-scoring.md`.
 const homePath = '/';
 const contestsPath = '/contests';
+
+/// The address an invitation link carries. Matches `/invitations/{credential}`
+/// in the participant-scoring spec.
+String invitationPath(String credential) =>
+    '/invitations/${Uri.encodeComponent(credential)}';
 
 String contestPath(String contestId) => '/contests/$contestId';
 String teamPath(String contestId) => '/contests/$contestId/team';
@@ -30,17 +38,41 @@ final router = GoRouter(
   routes: [
     GoRoute(path: homePath, builder: (context, state) => const HomePage()),
     GoRoute(
+      path: '/invitations/:credential',
+      // Keyed by the credential: the page keeps the answer for the link it
+      // opened with, so another link must build a new page, not reuse it.
+      builder: (context, state) {
+        final credential = state.pathParameters['credential']!;
+        return InvitationPage(
+          key: ValueKey(credential),
+          credential: credential,
+        );
+      },
+    ),
+    GoRoute(
       path: contestsPath,
       builder: (context, state) => const ContestsPage(),
       routes: [
-        // The contest entry route sends a helper to the team overview and a
-        // pilot to their pilot overview. Pilot overview is not built yet, so
-        // every participant goes to the team overview for now.
+        // The contest entry route sends a pilot to their pilot overview. A
+        // guest session names the pilot; everyone else goes to the team
+        // overview until accounts and helpers exist.
         GoRoute(
           path: ':contestId',
           redirect: (context, state) {
+            final contestId = state.pathParameters['contestId']!;
+            final session = context.guestSessions.read();
+            // A guest belongs to one contest. Any page of another contest,
+            // at any depth, goes to their own. The server checks the token on
+            // every read as well; this keeps a hand-edited address from
+            // showing another contest's page shell.
+            if (session != null && session.contestId != contestId) {
+              return contestPath(session.contestId);
+            }
             if (state.uri.pathSegments.length > 2) return null;
-            return teamPath(state.pathParameters['contestId']!);
+            if (session != null && session.role == 'pilot') {
+              return pilotPath(contestId, session.pilotId);
+            }
+            return teamPath(contestId);
           },
           routes: [
             GoRoute(
@@ -59,6 +91,23 @@ final router = GoRouter(
             ),
             GoRoute(
               path: 'pilots/:pilotId',
+              // A guest sees only their own pilot. The server checks the token
+              // on every read; this keeps a hand-edited address from showing
+              // another pilot's page shell.
+              redirect: (context, state) {
+                final session = context.guestSessions.read();
+                final contestId = state.pathParameters['contestId']!;
+                final pilotId = state.pathParameters['pilotId']!;
+                // Only pilot sessions exist in the first field release. Any
+                // other role has no pilot page and goes through contest entry.
+                if (session != null && session.role != 'pilot') {
+                  return contestPath(contestId);
+                }
+                if (session != null && session.pilotId != pilotId) {
+                  return pilotPath(contestId, session.pilotId);
+                }
+                return null;
+              },
               builder: (context, state) => PilotOverviewPage(
                 contestId: state.pathParameters['contestId']!,
                 pilotId: state.pathParameters['pilotId']!,

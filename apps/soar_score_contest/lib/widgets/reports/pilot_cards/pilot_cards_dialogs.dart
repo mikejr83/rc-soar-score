@@ -1,79 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/reports/pilot_cards/pilot_invitations.dart';
 import '../../../services/reports/report_pilot.dart';
+import '../../invitations/send_invitations_flow.dart';
 import '../viewer/report_definition.dart';
 import '../viewer/viewer_banner.dart';
 
 /// What the director chose in the print reminder.
 enum _Reminder { sendAndPrint, printWithout, cancel }
-
-/// Plural helper for the dialogs' counts.
-String _count(int n, String noun) => '$n $noun${n == 1 ? '' : 's'}';
-
-/// Asks to send invitations to [pilots]. Answers whether to go on. Sending is
-/// its own confirmation because it emails people and cannot be taken back.
-Future<bool> confirmSendInvitations(
-  BuildContext context,
-  List<ReportPilot> pilots,
-) async {
-  final ok = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      key: const ValueKey('cards-send-dialog'),
-      icon: const Icon(Icons.campaign),
-      title: const Text('Send invitations?'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 12,
-        children: [
-          const Text(
-            'Invitations will be sent to participants, and each of these '
-            'cards will carry a QR code.',
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 10,
-            children: [
-              const Icon(Icons.qr_code_2, size: 20),
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: _count(pilots.length, 'QR code'),
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      const TextSpan(
-                        text:
-                            ' — one per pilot, the same on every reprint. '
-                            'Pilots with an email address are also emailed '
-                            'their link.',
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          key: const ValueKey('cards-send-confirm'),
-          onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Send invitations'),
-        ),
-      ],
-    ),
-  );
-  return ok ?? false;
-}
 
 /// The reminder before the system print dialog when some cards have no QR
 /// code. It is a reminder, never a block: printing without QR codes stays
@@ -85,74 +20,81 @@ Future<bool> remindAboutMissingQr({
   required List<ReportPilot> missing,
   required bool online,
 }) async {
+  final l10nOuter = AppLocalizations.of(context);
   final unavailable = !session.invitations.synchronized
-      ? 'This contest hasn’t synchronized, so QR codes can’t be made yet.'
+      ? l10nOuter.pilotCardsReminderUnsynced
       : !online
-      ? 'You’re offline, so invitations can’t be sent now. QR codes already '
-            'issued still print.'
-      : session.invitations.sendUnavailableReason;
+      ? l10nOuter.pilotCardsReminderOffline
+      : sendUnavailableText(l10nOuter, session.invitations);
   final answer = await showDialog<_Reminder>(
     context: context,
-    builder: (context) => AlertDialog(
-      key: const ValueKey('cards-reminder-dialog'),
-      icon: const Icon(Icons.qr_code_2),
-      title: const Text('Some cards will print without QR codes.'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 12,
-        children: [
-          Text(
-            '${missing.length == selected.length ? 'None of these ${_count(selected.length, 'card')}' : '${missing.length} of ${_count(selected.length, 'card')}'} '
-            '${missing.length == 1 && selected.length == 1 ? 'has' : 'have'} a '
-            'QR code yet. Pilots without one can’t scan to enter scores.',
-          ),
-          if (unavailable != null)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 8,
-              children: [
-                const Icon(Icons.block, size: 18),
-                Expanded(
-                  child: Text(
-                    unavailable,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ],
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+      return AlertDialog(
+        key: const ValueKey('cards-reminder-dialog'),
+        icon: const Icon(Icons.qr_code_2),
+        title: Text(l10n.pilotCardsReminderTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 12,
+          children: [
+            Text(
+              missing.length == selected.length
+                  ? l10n.pilotCardsReminderNone(selected.length)
+                  : l10n.pilotCardsReminderSome(
+                      missing.length,
+                      selected.length,
+                    ),
             ),
-        ],
-      ),
-      actionsOverflowDirection: VerticalDirection.down,
-      actionsOverflowAlignment: OverflowBarAlignment.end,
-      actions: [
-        if (unavailable == null)
-          FilledButton(
-            key: const ValueKey('cards-reminder-send'),
-            onPressed: () => Navigator.of(context).pop(_Reminder.sendAndPrint),
-            child: const Text('Send invitations and print'),
+            if (unavailable != null)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 8,
+                children: [
+                  const Icon(Icons.block, size: 18),
+                  Expanded(
+                    child: Text(
+                      unavailable,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+        actionsOverflowDirection: VerticalDirection.down,
+        actionsOverflowAlignment: OverflowBarAlignment.end,
+        actions: [
+          if (unavailable == null)
+            FilledButton(
+              key: const ValueKey('cards-reminder-send'),
+              onPressed: () =>
+                  Navigator.of(context).pop(_Reminder.sendAndPrint),
+              child: Text(l10n.pilotCardsReminderSend),
+            ),
+          OutlinedButton(
+            key: const ValueKey('cards-reminder-without'),
+            onPressed: () => Navigator.of(context).pop(_Reminder.printWithout),
+            child: Text(l10n.pilotCardsReminderWithout),
           ),
-        OutlinedButton(
-          key: const ValueKey('cards-reminder-without'),
-          onPressed: () => Navigator.of(context).pop(_Reminder.printWithout),
-          child: const Text('Print without QR codes'),
-        ),
-        TextButton(
-          key: const ValueKey('cards-reminder-cancel'),
-          onPressed: () => Navigator.of(context).pop(_Reminder.cancel),
-          child: const Text('Cancel'),
-        ),
-      ],
-    ),
+          TextButton(
+            key: const ValueKey('cards-reminder-cancel'),
+            onPressed: () => Navigator.of(context).pop(_Reminder.cancel),
+            child: Text(l10n.pilotCardsCancel),
+          ),
+        ],
+      );
+    },
   );
   switch (answer) {
     case _Reminder.printWithout:
       return true;
     case _Reminder.sendAndPrint:
-      if (!context.mounted || !await confirmSendInvitations(context, missing)) {
-        return false;
-      }
-      return session.send([for (final p in missing) p.participationId]);
+      if (!context.mounted) return false;
+      return sendInvitationsGuarded(context, session, [
+        for (final p in missing) p.participationId,
+      ], announce: false);
     case _Reminder.cancel:
     case null:
       return false;
@@ -161,6 +103,7 @@ Future<bool> remindAboutMissingQr({
 
 /// The banners the invitations add above the cards, for the report document.
 List<ReportBanner> invitationBanners({
+  required AppLocalizations l10n,
   required PilotInvitationSession session,
   required List<ReportPilot> selected,
   required List<ReportPilot> missing,
@@ -173,10 +116,8 @@ List<ReportBanner> invitationBanners({
         ReportBanner(
           kind: ViewerBannerKind.neutral,
           icon: Icons.hourglass_top,
-          lead: 'Sending invitations.',
-          text:
-              'Issuing ${_count(missing.length, 'QR code')}. Print is paused '
-              'until the codes are ready; you can keep changing options.',
+          lead: l10n.pilotCardsSendingLead,
+          text: l10n.pilotCardsSendingText(missing.length),
           busy: true,
           key: const ValueKey('cards-banner-sending'),
         ),
@@ -186,13 +127,11 @@ List<ReportBanner> invitationBanners({
         ReportBanner(
           kind: ViewerBannerKind.error,
           icon: Icons.error,
-          lead: 'Invitations could not be sent.',
-          text:
-              'No QR codes were added and nothing was sent. Check the '
-              'connection and try again, or print without QR codes.',
+          lead: l10n.pilotCardsFailedLead,
+          text: l10n.pilotCardsFailedText,
           actions: [
             ReportBannerAction(
-              'Retry',
+              l10n.pilotCardsRetry,
               (context) => _send(context, session, missing),
               filled: true,
               key: const ValueKey('cards-banner-retry'),
@@ -206,13 +145,11 @@ List<ReportBanner> invitationBanners({
         ReportBanner(
           kind: ViewerBannerKind.info,
           icon: Icons.sync_problem,
-          lead: 'Invitations were sent.',
-          text:
-              'The QR codes could not be loaded, so the cards do not show them '
-              'yet. Don’t send again: the invitations are already out.',
+          lead: l10n.pilotCardsNotLoadedLead,
+          text: l10n.pilotCardsNotLoadedText,
           actions: [
             ReportBannerAction(
-              'Load QR codes',
+              l10n.pilotCardsLoadCodes,
               (_) => session.reload(),
               filled: true,
               key: const ValueKey('cards-banner-reload'),
@@ -226,16 +163,34 @@ List<ReportBanner> invitationBanners({
         ReportBanner(
           kind: ViewerBannerKind.official,
           icon: Icons.check_circle,
-          lead: 'Invitations sent.',
-          text: 'QR codes added.',
+          lead: l10n.pilotCardsSentLead,
+          text: l10n.pilotCardsSentText,
           actions: [
             ReportBannerAction(
-              'Dismiss',
+              l10n.pilotCardsDismiss,
               (_) => session.dismissSent(),
               key: const ValueKey('cards-banner-dismiss'),
             ),
           ],
           key: const ValueKey('cards-banner-sent'),
+        ),
+      ];
+    case InvitationPhase.loadFailed:
+      return [
+        ReportBanner(
+          kind: ViewerBannerKind.error,
+          icon: Icons.sync_problem,
+          lead: l10n.pilotCardsLoadFailedLead,
+          text: l10n.pilotCardsLoadFailedText,
+          actions: [
+            ReportBannerAction(
+              l10n.pilotCardsRetry,
+              (_) => session.reload(),
+              filled: true,
+              key: const ValueKey('cards-banner-load-retry'),
+            ),
+          ],
+          key: const ValueKey('cards-banner-load-failed'),
         ),
       ];
     case InvitationPhase.idle:
@@ -245,48 +200,43 @@ List<ReportBanner> invitationBanners({
   if (missing.isEmpty || selected.isEmpty) {
     return const [];
   }
-  final some = missing.length == selected.length
-      ? 'Some cards have'
-      : missing.length == 1
-      ? '1 card has'
-      : '${missing.length} cards have';
   if (!invitations.synchronized) {
-    return const [
+    return [
       ReportBanner(
         kind: ViewerBannerKind.neutral,
         icon: Icons.cloud_off,
-        lead: 'No QR codes yet.',
-        text:
-            'This contest was organized offline and hasn’t synchronized. '
-            'Sync it first to create QR codes. Cards print without them.',
-        key: ValueKey('cards-banner-unsynced'),
+        lead: l10n.pilotCardsUnsyncedLead,
+        text: l10n.pilotCardsUnsyncedText,
+        key: const ValueKey('cards-banner-unsynced'),
       ),
     ];
   }
   if (!online) {
-    return const [
+    return [
       ReportBanner(
         kind: ViewerBannerKind.neutral,
         icon: Icons.cloud_off,
-        lead: 'Offline.',
-        text:
-            'Connect to send invitations. QR codes already issued still print.',
-        key: ValueKey('cards-banner-offline'),
+        lead: l10n.pilotCardsOfflineLead,
+        text: l10n.pilotCardsOfflineText,
+        key: const ValueKey('cards-banner-offline'),
       ),
     ];
   }
-  final reason = invitations.sendUnavailableReason;
+  final reason = sendUnavailableText(l10n, invitations);
+  final what = missing.length == selected.length
+      ? l10n.pilotCardsMissingAll
+      : l10n.pilotCardsMissingCount(missing.length);
   return [
     ReportBanner(
       kind: ViewerBannerKind.neutral,
       icon: Icons.qr_code_2,
-      lead: 'No QR code.',
-      text:
-          '$some no QR code. Send invitations to add them.'
-          '${reason == null ? '' : ' $reason You can still print without QR codes.'}',
+      lead: l10n.pilotCardsMissingLead,
+      text: reason == null
+          ? what
+          : '$what ${l10n.pilotCardsMissingReason(reason)}',
       actions: [
         ReportBannerAction(
-          'Send invitations',
+          l10n.pilotCardsSendAction,
           reason == null ? (context) => _send(context, session, missing) : null,
           filled: true,
           key: const ValueKey('cards-banner-send'),
@@ -302,7 +252,7 @@ Future<void> _send(
   PilotInvitationSession session,
   List<ReportPilot> missing,
 ) async {
-  if (await confirmSendInvitations(context, missing)) {
-    await session.send([for (final p in missing) p.participationId]);
-  }
+  await sendInvitationsGuarded(context, session, [
+    for (final p in missing) p.participationId,
+  ], announce: false);
 }

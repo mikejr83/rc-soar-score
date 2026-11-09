@@ -1,10 +1,18 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:drift/native.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
+import 'package:soar_score_core/soar_score_core.dart'
+    show Account, AccountKind, Id, InvitationCodec, InvitationService;
 import 'package:soar_score_data/soar_score_data.dart';
+
+/// The secret the E2E server signs invitation links with. Public on purpose:
+/// this server is never deployed.
+const e2eInvitationSecret = 'e2e-invitation-secret-at-least-32-bytes-long';
 
 /// The API server the web end-to-end tests run against.
 ///
@@ -14,6 +22,13 @@ import 'package:soar_score_data/soar_score_data.dart';
 /// demo data, and allows cross-origin calls so the browser build can reach it.
 ///
 ///     dart run tool/e2e_server.dart [--port 8080] [--database <file>]
+///         [--profile native|server]
+///
+/// `--profile native` (the default) is the contest app's installation
+/// database with the demo data. `--profile server` is the hosted server's
+/// profile with only the system data and one director account: the self
+/// scoring app's journey (`scripts/e2e-score.sh`) needs it, because invitations
+/// exist only on the hosted server.
 ///
 /// Without `--database` it uses a new temporary file, deleted on exit. It
 /// prints `E2E_SERVER_READY <port>` once it listens; `scripts/e2e` waits for
@@ -26,6 +41,13 @@ import 'package:soar_score_data/soar_score_data.dart';
 /// HEAD and OPTIONS) answer 503 once, so a journey can check what the app
 /// does when a save fails and then succeeds on Retry. Test-only, like the
 /// rest of this server.
+///
+/// Invitations (the self-scoring app's links and guest sessions) are on, signed
+/// with the fixed [e2eInvitationSecret]. `POST /__e2e/advance-clock?hours=N`
+/// moves the invitation service's clock forward by N hours, so a journey can
+/// reach the end of the 24 hours a completed contest's links stay open
+/// without waiting. It moves only that clock (link expiry and guest sessions),
+/// not stored timestamps. Test-only, like the rest of this server.
 Future<void> main(List<String> args) async {
   final port = int.parse(_option(args, '--port') ?? '8080');
   final given = _option(args, '--database');
@@ -35,16 +57,42 @@ Future<void> main(List<String> args) async {
   final file = File(given ?? '${directory!.path}/soar_score_e2e.db');
   if (given != null && file.existsSync()) file.deleteSync();
 
-  final database = createLocalDatabase(file);
+  final serverProfile = (_option(args, '--profile') ?? 'native') == 'server';
+  final database = serverProfile
+      ? SoarScoreDatabase(
+          NativeDatabase(file, enableMigrations: true),
+          profile: DatabaseProfile.server,
+        )
+      : createLocalDatabase(file);
   await SystemDataSeeder(database).seed();
-  final localAccountId = await LocalAccountRepository(database).ensure();
   final repository = Repository(database);
-  await DemoDataSeeder(repository, localAccountId: localAccountId).seed();
+  final Id localAccountId;
+  if (serverProfile) {
+    localAccountId = Id.create();
+    final now = DateTime.now().toUtc();
+    await repository.accountRepository.save(
+      Account(
+        id: localAccountId,
+        firstName: 'Dana',
+        lastName: 'Director',
+        kind: AccountKind.registered,
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+  } else {
+    localAccountId = await LocalAccountRepository(database).ensure();
+    await DemoDataSeeder(repository, localAccountId: localAccountId).seed();
+  }
 
-  final handler = const Pipeline()
+  final clock = _AdvanceableClock();
+  final inFlight = InFlightRequests();
+  final handler = Pipeline()
+      .addMiddleware(inFlight.middleware)
       .addMiddleware(_cors())
       .addMiddleware(_journeyLog())
       .addMiddleware(_failNextWrite())
+      .addMiddleware(_advanceClock(clock))
       .addHandler(
         buildApiHandler(
           name: 'soar_score_e2e',
@@ -52,6 +100,15 @@ Future<void> main(List<String> args) async {
           version: '0.0.0',
           schemaRevision: database.schemaVersion,
           repository: repository,
+          // Only the service gets the advanceable clock: link and guest
+          // session expiry are enforced inside it. The participant handler
+          // keeps the real clock, which only sets the cookie's Max-Age at
+          // resolve time; do not hand it this clock.
+          invitations: InvitationService(
+            repository,
+            InvitationCodec.fromText(e2eInvitationSecret),
+            clock: clock.now,
+          ),
           authMiddleware: fixedPrincipal(Principal(accountId: localAccountId)),
           // Draws are held a few seconds so a journey can see their progress
           // and cancel one.
@@ -65,7 +122,15 @@ Future<void> main(List<String> args) async {
   );
 
   Future<void> stop(ProcessSignal _) async {
-    await server.close(force: true);
+    // Refuse new requests, let the running ones answer, and only then close
+    // the database under them; force is the fallback for a stuck connection.
+    final graceful = server.close();
+    await inFlight.drain();
+    try {
+      await graceful.timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      await server.close(force: true);
+    }
     await database.close();
     if (directory != null) await directory.delete(recursive: true);
     exit(0);
@@ -81,24 +146,31 @@ String? _option(List<String> args, String name) {
   return i >= 0 && i + 1 < args.length ? args[i + 1] : null;
 }
 
-const _corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+/// Answers cross-origin calls from whatever origin the test app is served on.
+/// The self-scoring app sends its guest cookie (`withCredentials`), and a
+/// browser refuses a wildcard `Access-Control-Allow-Origin` for such a call, so
+/// the request's own origin and headers are echoed and credentials allowed.
+Map<String, String> _corsHeaders(Request request) => {
+  'Access-Control-Allow-Origin': request.headers['origin'] ?? '*',
+  'Access-Control-Allow-Credentials': 'true',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': '*',
+  'Access-Control-Allow-Headers':
+      request.headers['access-control-request-headers'] ?? '*',
+  'Vary': 'Origin',
 };
 
 Middleware _cors() =>
     (inner) => (request) async {
       if (request.method == 'OPTIONS') {
-        return Response.ok('', headers: _corsHeaders);
+        return Response.ok('', headers: _corsHeaders(request));
       }
       final response = await inner(request);
-      return response.change(headers: _corsHeaders);
+      return response.change(headers: _corsHeaders(request));
     };
 
 /// `POST /__e2e/log` prints its body as a line starting `[E2E]`, so a journey
 /// that runs in the browser (and prints nothing live) can show its progress
-/// in this server's output; `scripts/e2e.sh` echoes those lines.
+/// in this server's output; `scripts/e2e-contest.sh` echoes those lines.
 Middleware _journeyLog() =>
     (inner) => (request) async {
       if (request.method == 'POST' && request.url.path == '__e2e/log') {
@@ -134,3 +206,28 @@ Middleware _failNextWrite() {
     return inner(request);
   };
 }
+
+/// The invitation service's clock: real time plus whatever
+/// `POST /__e2e/advance-clock` has added.
+class _AdvanceableClock {
+  Duration _offset = Duration.zero;
+
+  DateTime now() => DateTime.now().toUtc().add(_offset);
+
+  void advance(Duration by) => _offset += by;
+}
+
+/// See `POST /__e2e/advance-clock` in the library comment.
+Middleware _advanceClock(_AdvanceableClock clock) =>
+    (inner) => (request) async {
+      if (request.method == 'POST' &&
+          request.url.path == '__e2e/advance-clock') {
+        final hours = int.tryParse(request.url.queryParameters['hours'] ?? '');
+        if (hours == null || hours < 0) {
+          return Response.badRequest(body: 'Pass ?hours=<whole hours>.');
+        }
+        clock.advance(Duration(hours: hours));
+        return Response.ok('The invitation clock is now ${clock.now()}.');
+      }
+      return inner(request);
+    };

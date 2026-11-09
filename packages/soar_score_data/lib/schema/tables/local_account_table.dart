@@ -19,6 +19,18 @@ class LocalAccount extends Table {
   TextColumn get preferredTimeZone => text().nullable()();
   TextColumn get preferredLocale => text().nullable()();
 
+  /// The registered account this installation's data was last claimed into
+  /// (see `LocalAccountRepository.reassignTo`); null until a claim. Kept so the
+  /// installation keeps acting as that account when it starts offline or the
+  /// director signs out.
+  TextColumn get linkedAccountId => text().nullable()();
+
+  /// The identity provider's stable id (Auth0 `sub`) of the sign-in that
+  /// claimed the data; null until a claim. The app compares it with the
+  /// signed-in user before serving the linked account's data, so a different
+  /// sign-in cannot reach it, even offline.
+  TextColumn get linkedSubject => text().nullable()();
+
   TextColumn get createdAt => text()();
 
   @override

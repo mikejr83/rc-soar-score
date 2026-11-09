@@ -4,7 +4,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 import 'pilot_import_fakes.dart';
 
 /// A GliderScore snapshot with two importable F5J competitions that share a
-/// pilot, one F3J (skipped) and one F5J nobody flies in (blocked).
+/// pilot (each with two rounds of scores), one F3J (skipped) and one F5J
+/// nobody flies in (blocked).
 GliderScoreImportResult competitionsSnapshot() {
   Map<String, Object?> comp(int no, String name, String cls) => {
     'CompNo': no,
@@ -31,7 +32,28 @@ GliderScoreImportResult competitionsSnapshot() {
       {'PilotNo': 3, 'FirstName': 'Cy', 'LastName': 'Young'},
     ],
     'Dur': [
-      for (final no in [1, 2, 4]) {'CompNo': no, 'durTargetTime': 600},
+      for (final no in [1, 2, 4])
+        {'CompNo': no, 'durTargetTime': 600, 'durGroupsPerRound': 1},
+    ],
+    'Scores': [
+      for (final no in [1, 2])
+        for (var round = 1; round <= 2; round++)
+          for (final pilot in no == 1 ? [1, 2] : [1])
+            {
+              'CompNo': no,
+              'TaskNo': 1,
+              'RoundNo': round,
+              'GroupNo': 1,
+              'ReFlightNo': 0,
+              'PilotNo': pilot,
+              'SeqNo': pilot,
+              'OriginalRoundNo': round,
+              'Updated': 'True',
+              'Time1Mins': 900,
+              'FlightScoreDeduction': 100,
+              'Landing': 50,
+              'RawScore': 590,
+            },
     ],
   };
   return GliderScoreImportResult(
@@ -49,53 +71,29 @@ GliderScoreImportResult competitionsSnapshot() {
   );
 }
 
-/// [competitionsSnapshot] with the drawn flights of "Spring Open" (competition
-/// 1): two rounds, one group of two pilots each.
-GliderScoreImportResult competitionsSnapshotWithDraw() {
-  final base = competitionsSnapshot();
-  final rows = [
-    for (var round = 1; round <= 2; round++)
-      for (final pilot in [1, 2])
-        {
-          'CompNo': 1,
-          'TaskNo': 1,
-          'RoundNo': round,
-          'GroupNo': 1,
-          'ReFlightNo': 0,
-          'PilotNo': pilot,
-          'SeqNo': pilot,
-          'OriginalRoundNo': round,
-          'Updated': 'False',
-        },
-  ];
-  return GliderScoreImportResult(
-    id: base.id,
-    sourceDbFile: base.sourceDbFile,
-    tables: [
-      ...base.tables,
-      GliderScoreTable(
-        name: 'Scores',
-        rows: rows,
-        rowCount: rows.length,
-        rowCapExceeded: false,
-      ),
-    ],
-  );
-}
-
-/// The phase B contest of competition [compNo], as the store reports it.
-DrawImportTarget stampedTarget(
-  int compNo, {
-  String fingerprint = 'sha256:fake',
-  bool hasMatrix = false,
+/// What a competition would meet when it was imported before: the contest an
+/// earlier import made.
+RestoreTarget earlierImport({
+  RestoreTargetKind kind = RestoreTargetKind.same,
   Id? contestId,
-}) => DrawImportTarget(
-  sourceCompNo: compNo,
-  fileFingerprint: 'sha256:fake',
+  String name = 'Spring Open',
+  ContestChanges changes = const ContestChanges(),
+  bool published = false,
+  bool synced = false,
+  String? storedHash,
+  bool? storedCompleted,
+}) => RestoreTarget(
+  kind: kind,
   contestId: contestId ?? Id.create(),
-  stampedFingerprint: fingerprint,
-  hasMatrix: hasMatrix,
-  participantPilotNos: const {1, 2},
+  contestName: name,
+  sourceName: name,
+  sourceDate: '2026-06-14',
+  importedAt: DateTime.utc(2026, 6, 20),
+  storedHash: storedHash,
+  storedCompleted: storedCompleted,
+  published: published,
+  synced: synced,
+  changes: changes,
 );
 
 /// A [CompetitionImportStore] that records what it was asked to write.
@@ -104,53 +102,18 @@ class FakeCompetitionImportStore extends FakePilotImportStore
   FakeCompetitionImportStore(super.profiles);
 
   final stamped = <List<ProfileStampEntry>>[];
-  final imported = <(int compNo, Map<int, Id> profiles)>[];
 
-  /// What [importCompetition] answers for a competition, when not the usual.
-  final answers = <int, CompetitionImportResult>{};
+  /// Each restore asked for, in order.
+  final restored = <RestoreCall>[];
 
-  /// Competitions whose import throws instead of answering.
+  /// What [importRestore] answers for a competition, when not the usual.
+  final answers = <int, RestoreImportResult>{};
+
+  /// Competitions whose restore throws instead of answering.
   final throwsFor = <int>{};
 
-  /// The contest each competition already has, when it has one.
-  final drawTargets = <int, DrawImportTarget>{};
-
-  /// What [importDraw] answers for a competition, when not the usual.
-  final drawAnswers = <int, DrawImportResult>{};
-
-  /// The draws that were asked for, by competition number.
-  final drawn = <(int compNo, Id contestId)>[];
-
-  @override
-  Future<DrawImportTarget> drawTarget({
-    required int compNo,
-    required String fingerprint,
-  }) async =>
-      drawTargets[compNo] ??
-      DrawImportTarget(
-        sourceCompNo: compNo,
-        fileFingerprint: fingerprint,
-        stamped: false,
-      );
-
-  @override
-  Future<DrawImportResult> importDraw({
-    required DrawImportDraft draft,
-    required Id contestId,
-    required Id operationId,
-    required String fingerprint,
-  }) async {
-    final no = draft.sourceCompNo;
-    drawn.add((no, contestId));
-    return drawAnswers[no] ??
-        DrawImported(
-          no,
-          contestId: contestId,
-          revisionCount: draft.revisions.length,
-          roundCount: draft.roundCount,
-          assignmentCount: draft.assignmentCount,
-        );
-  }
+  /// What an earlier import left, by competition number.
+  final targets = <int, RestoreTarget>{};
 
   /// The note each contest shows, when it has one.
   final notes = <Id, ImportedContestNote>{};
@@ -169,24 +132,59 @@ class FakeCompetitionImportStore extends FakePilotImportStore
   }) async => stamped.add(entries);
 
   @override
-  Future<CompetitionImportResult> importCompetition({
-    required ContestImportDraft draft,
+  Future<RestoreTarget> restoreTarget(RestoreIdentity identity) async =>
+      targets[identity.compNo] ?? const RestoreTarget.none();
+
+  @override
+  Future<RestoreImportResult> importRestore({
+    required RestorePlan plan,
     required Map<int, Id> profileIds,
     required Id operationId,
     required String fingerprint,
+    required bool completed,
+    required bool confirmedReplace,
+    Id? updateContestId,
   }) async {
-    final no = draft.sourceCompNo;
+    final no = plan.sourceCompNo;
     if (throwsFor.contains(no)) throw StateError('disk full');
-    imported.add((no, profileIds));
+    restored.add(
+      RestoreCall(
+        no,
+        profileIds,
+        completed: completed,
+        confirmedReplace: confirmedReplace,
+        updateContestId: updateContestId,
+      ),
+    );
     return answers[no] ??
-        CompetitionImported(
+        CompetitionRestored(
           no,
-          contestId: Id.create(),
-          participationCount: draft.participants.length,
+          contestId: targets[no]?.contestId ?? Id.create(),
+          updated: targets[no] != null,
+          participationCount: plan.contest.participants.length,
+          flightCount: plan.flights.length,
+          finalState: plan.finalState(completed: completed),
           skippedParticipants: [
-            for (final p in draft.participants)
+            for (final p in plan.contest.participants)
               if (!profileIds.containsKey(p.sourcePilotNo)) p.sourcePilotNo,
           ],
         );
   }
+}
+
+/// One restore the fake store was asked for.
+class RestoreCall {
+  const RestoreCall(
+    this.compNo,
+    this.profiles, {
+    required this.completed,
+    required this.confirmedReplace,
+    this.updateContestId,
+  });
+
+  final int compNo;
+  final Map<int, Id> profiles;
+  final bool completed;
+  final bool confirmedReplace;
+  final Id? updateContestId;
 }

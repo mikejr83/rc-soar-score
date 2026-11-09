@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/contest_participants/participants_controller.dart';
 import '../../services/participants/participant_candidate.dart';
 import '../participants/participant_search_field.dart';
@@ -16,6 +17,10 @@ class ParticipantsToolbar extends StatelessWidget {
     required this.onAddNew,
     required this.onAddProfile,
     required this.onRemove,
+    this.onSendInvitations,
+    this.onCopyLink,
+    this.invitationsReason,
+    this.sendCount = 0,
   });
 
   final ParticipantsController controller;
@@ -23,6 +28,19 @@ class ParticipantsToolbar extends StatelessWidget {
   final VoidCallback onAddNew;
   final ValueChanged<ParticipantProfile> onAddProfile;
   final VoidCallback onRemove;
+
+  /// Sends invitations for the selected pilots that have none; `null` when
+  /// that is not possible now ([invitationsReason] says why).
+  final VoidCallback? onSendInvitations;
+
+  /// Copies the one selected pilot's link; `null` when not possible now.
+  final VoidCallback? onCopyLink;
+
+  /// Why sending is off, in words, or `null`.
+  final String? invitationsReason;
+
+  /// How many selected pilots would get an invitation.
+  final int sendCount;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +92,39 @@ class ParticipantsToolbar extends StatelessWidget {
         label: Text(selected == 0 ? 'Remove' : 'Remove $selected'),
       ),
     );
+    final l10n = AppLocalizations.of(context);
+    final invitations = SizedBox(
+      height: 56,
+      child: MenuAnchor(
+        menuChildren: [
+          MenuItemButton(
+            key: const ValueKey('invitations-send'),
+            leadingIcon: const Icon(Icons.campaign),
+            onPressed: onSendInvitations,
+            child: Text(
+              sendCount > 0
+                  ? l10n.invitationsMenuSendCount(sendCount)
+                  : l10n.invitationsMenuSend,
+            ),
+          ),
+          MenuItemButton(
+            key: const ValueKey('invitations-copy'),
+            leadingIcon: const Icon(Icons.link),
+            onPressed: onCopyLink,
+            child: Text(l10n.invitationsMenuCopy),
+          ),
+        ],
+        builder: (context, menu, _) => Tooltip(
+          message: invitationsReason ?? '',
+          child: OutlinedButton.icon(
+            key: const ValueKey('invitations-menu'),
+            onPressed: () => menu.isOpen ? menu.close() : menu.open(),
+            icon: const Icon(Icons.qr_code_2),
+            label: Text(l10n.invitationsMenu),
+          ),
+        ),
+      ),
+    );
     final reason = !c.canEdit
         ? null
         : c.selectionHasFlights
@@ -84,12 +135,29 @@ class ParticipantsToolbar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (c.readOnly)
-          search
+        if (c.readOnly && narrow) ...[
+          // A completed contest changes nothing, but its links stay valid and
+          // can still be copied.
+          search,
+          const SizedBox(height: 12),
+          Wrap(spacing: 12, runSpacing: 12, children: [invitations]),
+        ] else if (c.readOnly)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: search),
+              const SizedBox(width: 12),
+              invitations,
+            ],
+          )
         else if (narrow) ...[
           search,
           const SizedBox(height: 12),
-          Wrap(spacing: 12, runSpacing: 12, children: [add, remove]),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [add, invitations, remove],
+          ),
         ] else
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,6 +165,8 @@ class ParticipantsToolbar extends StatelessWidget {
               Expanded(child: search),
               const SizedBox(width: 12),
               add,
+              const SizedBox(width: 12),
+              invitations,
               const SizedBox(width: 12),
               remove,
             ],

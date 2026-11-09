@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
+import '../sync/drift_sync_acceptor_store.dart' show asConstraintError;
 import 'drift_repository.dart';
 
 /// Score attempts in the database; append-only.
@@ -39,6 +40,29 @@ class ScoreAttemptRepository extends DriftRepository
   }
 
   @override
+  Future<Map<core.Id, core.ScoreAttempt>> latestForPlaceholders(
+    Iterable<core.Id> scorePlaceholderIds,
+  ) async {
+    final attempts = await _store.whereIdIn(
+      'score_placeholder_id',
+      scorePlaceholderIds,
+    );
+    // Ids are time-ordered (UUIDv7), as in listForPlaceholder.
+    attempts.sort((a, b) => a.id.value.compareTo(b.id.value));
+    return {
+      for (final attempt in attempts) attempt.scorePlaceholderId: attempt,
+    };
+  }
+
+  @override
+  Future<Map<core.Id, core.ScoreAttempt>> findByIds(
+    Iterable<core.Id> ids,
+  ) async => {
+    for (final attempt in await _store.whereIdIn('id', ids))
+      attempt.id: attempt,
+  };
+
+  @override
   Future<core.ScoreAttempt> append(
     core.ScoreAttempt attempt, {
     required core.MutationMetadata metadata,
@@ -49,18 +73,37 @@ class ScoreAttemptRepository extends DriftRepository
   Future<core.ScoreAttempt> recordAttempt(
     core.ScoreAttempt attempt,
     core.ScorePlaceholder placeholder, {
+    core.Contest? contest,
     required core.MutationMetadata metadata,
   }) {
     if (placeholder.id != attempt.scorePlaceholderId) {
       throw ArgumentError('the placeholder is not the attempt\'s');
     }
-    return unitOfWork.run((context) async {
-      await context.append(attempt, metadata: metadata);
-      await context.save(
-        placeholder,
-        metadata: metadata.forPart(placeholder.id.value),
-      );
-      return attempt;
-    });
+    return _translated(
+      () => unitOfWork.run((context) async {
+        await context.append(attempt, metadata: metadata);
+        await context.save(
+          placeholder,
+          metadata: metadata.forPart(placeholder.id.value),
+        );
+        if (contest != null) {
+          await context.save(
+            contest,
+            metadata: metadata.forPart(contest.id.value),
+          );
+        }
+        return attempt;
+      }),
+    );
+  }
+
+  /// Runs [body], turning a broken unique rule (two requests with one client
+  /// mutation id) into a `SyncConstraintError` the service can answer.
+  Future<T> _translated<T>(Future<T> Function() body) async {
+    try {
+      return await body();
+    } on Object catch (error) {
+      throw asConstraintError(error) ?? error;
+    }
   }
 }

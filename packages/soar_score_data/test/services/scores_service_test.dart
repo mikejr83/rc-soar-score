@@ -189,6 +189,7 @@ void _tests(Backend backend) {
           authority: core.Authority.director,
           clientMutationId: 'direct',
           baseScoreRevision: 0,
+          acceptedAt: DateTime.utc(2026, 10, 17, 15),
         );
         final entry = core.RecordedScore(
           attempt: attempt,
@@ -437,6 +438,7 @@ void _tests(Backend backend) {
           authority: core.Authority.participant,
           clientMutationId: 'participant-1',
           baseScoreRevision: 0,
+          acceptedAt: DateTime.utc(2026, 10, 17, 15),
         );
         await repository.scoreAttemptRepository.append(lost, metadata: meta());
 
@@ -473,6 +475,7 @@ void _tests(Backend backend) {
           authority: core.Authority.participant,
           clientMutationId: 'participant-2',
           baseScoreRevision: 0,
+          acceptedAt: DateTime.utc(2026, 10, 17, 15),
         );
         await repository.scoreAttemptRepository.recordAttempt(
           attempt,
@@ -491,6 +494,19 @@ void _tests(Backend backend) {
         final history = (await service.history(contestId, slot)).entries;
 
         expect(history.map((e) => e.outcome), [ScoreHistoryOutcome.pending]);
+
+        // The scoring screen gets the preliminary values with the slot.
+        final listed = (await service.list(contestId)).slots
+            .singleWhere((s) => s.placeholder.id == placeholder.id);
+        expect(listed.officialScore, isNull);
+        expect(listed.pendingAttempt?.id, attempt.id);
+
+        // The director's entry makes it official and ends the pending state.
+        await enter(slot, reason: 'Confirmed with the pilot');
+        final after = (await service.list(contestId)).slots
+            .singleWhere((s) => s.placeholder.id == placeholder.id);
+        expect(after.officialScore, isNotNull);
+        expect(after.pendingAttempt, isNull);
       });
 
       test('refuses an unknown slot', () async {

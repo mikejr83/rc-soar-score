@@ -2222,6 +2222,36 @@ abstract class AppLocalizations {
   /// **'Unknown'**
   String get publicationStateUnknown;
 
+  /// Current publication state when nobody is signed in, so the hosted server cannot be asked.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in required'**
+  String get publicationStateSignIn;
+
+  /// Reason publishing is disabled while nobody is signed in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to publish. Publishing goes through the hosted server.'**
+  String get publicationSignInReason;
+
+  /// Shown when publishing was refused because nobody is signed in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to publish this contest.'**
+  String get publicationFailSignIn;
+
+  /// Shown when the server refused a publication call although the director was signed in.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sign-in expired. Sign in again to publish this contest.'**
+  String get publicationFailSignInExpired;
+
+  /// Shown when the hosted server does not know the contest because it has not synced.
+  ///
+  /// In en, this message translates to:
+  /// **'The server does not have this contest yet. Wait for it to sync, then publish again.'**
+  String get publicationFailNotSynced;
+
   /// Current publication state when the server does not publish contests.
   ///
   /// In en, this message translates to:
@@ -2781,7 +2811,7 @@ abstract class AppLocalizations {
   /// Introduction above the list of competitions found in a GliderScore file.
   ///
   /// In en, this message translates to:
-  /// **'Choose the competitions to import. Each becomes a contest with its settings and participants. The draw and the scores are not imported with it, but a competition you imported before can have its draw added.'**
+  /// **'Choose the competitions to import. Each becomes a contest with its settings, participants, draw and scores, as GliderScore last held them. Importing the same competition again replaces what was imported before.'**
   String get competitionImportIntro;
 
   /// Shown when none of the competitions in the file can be imported.
@@ -2813,12 +2843,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Teams are named Team 1, Team 2 and so on, because GliderScore has no team names. You can rename them afterwards.'**
   String get competitionImportWarningTeamNames;
-
-  /// Note on a competition that has retired pilots.
-  ///
-  /// In en, this message translates to:
-  /// **'Retired pilots stay active, because a retirement belongs to a round and there is no draw yet.'**
-  String get competitionImportWarningRetired;
 
   /// Note on a competition that has other import warnings.
   ///
@@ -2910,12 +2934,6 @@ abstract class AppLocalizations {
   /// **'{added} participants will be added and {updated} updated.'**
   String competitionImportSummaryPilots(int added, int updated);
 
-  /// Reminder of what the competition import leaves out.
-  ///
-  /// In en, this message translates to:
-  /// **'Not imported: the draw, rounds, flights and scores.'**
-  String get competitionImportNotImported;
-
   /// Button that writes the chosen competitions.
   ///
   /// In en, this message translates to:
@@ -2928,23 +2946,11 @@ abstract class AppLocalizations {
   /// **'Importing…'**
   String get competitionImportSaving;
 
-  /// Result line for a competition that became a contest.
-  ///
-  /// In en, this message translates to:
-  /// **'{name}: imported.'**
-  String competitionImportResultImported(String name);
-
   /// Note under an imported competition about participants that were left out.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 participant was left out because no pilot was chosen for them.} other{{count} participants were left out because no pilot was chosen for them.}}'**
   String competitionImportResultSkippedPilots(int count);
-
-  /// Result line for a competition that was imported before.
-  ///
-  /// In en, this message translates to:
-  /// **'{name}: already imported on {date}. Nothing was changed.'**
-  String competitionImportResultAlready(String name, String date);
 
   /// Result line for a competition that could not be imported.
   ///
@@ -2994,6 +3000,12 @@ abstract class AppLocalizations {
   /// **'A participant you chose is no longer in your list.'**
   String get competitionImportFailProfileMissing;
 
+  /// Why a competition could not be imported: pilots of the draw were skipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots who flew or were drawn were not chosen in the pilot step (GliderScore pilot numbers {pilots}). Import again and add them.'**
+  String competitionImportFailDrawParticipant(String pilots);
+
   /// Why a competition could not be imported: any other reason.
   ///
   /// In en, this message translates to:
@@ -3006,155 +3018,231 @@ abstract class AppLocalizations {
   /// **'The import failed: {error}'**
   String competitionImportFailed(String error);
 
-  /// Title of the choice that adds the draw of a competition imported before to its contest.
+  /// Number of scored flights a competition has.
   ///
   /// In en, this message translates to:
-  /// **'Add the draw'**
-  String get competitionImportDrawTitle;
+  /// **'{count, plural, =0{no scored flights} =1{1 scored flight} other{{count} scored flights}}'**
+  String competitionImportRowFlights(int count);
 
-  /// Explains what adding the draw of an imported competition does.
+  /// Checkbox on a chosen competition: finish the contest.
   ///
   /// In en, this message translates to:
-  /// **'Imported before. Adding the draw gives the contest its rounds, groups and every pilot\'s place, and makes it Ready. Every flight waits for a score.'**
-  String get competitionImportDrawIntro;
+  /// **'Mark the contest Completed'**
+  String get competitionImportCompleted;
 
-  /// Counts under the choice to add a draw: rounds, groups per round and pilots.
+  /// Explains the Completed checkbox.
   ///
   /// In en, this message translates to:
-  /// **'{rounds, plural, =1{1 round} other{{rounds} rounds}} · {groups, plural, =1{1 group per round} other{{groups} groups per round}} · {pilots, plural, =1{1 pilot} other{{pilots} pilots}}'**
-  String competitionImportDrawDetails(int rounds, int groups, int pilots);
+  /// **'Closes the contest: rounds are locked and rounds that were not flown are cancelled. Leave it off to carry on scoring in Soar Score.'**
+  String get competitionImportCompletedHint;
 
-  /// Note on a draw that is added to a contest.
+  /// Note on a competition with retired pilots.
   ///
   /// In en, this message translates to:
-  /// **'The draw is kept as GliderScore drew it. It cannot be reproduced from a seed, but rounds without scores can be redrawn like any other.'**
-  String get competitionImportDrawNoteHistory;
+  /// **'{count, plural, =1{1 pilot is marked retired. The round they retired from is taken from their last score.} other{{count} pilots are marked retired. The round they retired from is taken from their last score.}}'**
+  String competitionImportWarningRetirement(int count);
 
-  /// Note on a draw whose groups differ from the competition setting.
+  /// Note on a competition with re-flights.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{In 1 round the groups per round setting differs from the groups drawn. The groups as drawn are used.} other{In {count} rounds the groups per round setting differs from the groups drawn. The groups as drawn are used.}}'**
-  String competitionImportDrawWarningGroups(int count);
+  /// **'{count, plural, =1{1 re-flight is imported as an extra group after the regular groups of its round.} other{{count} re-flights are imported as extra groups after the regular groups of their rounds.}}'**
+  String competitionImportWarningReflights(int count);
 
-  /// Note on a draw with uneven group sizes.
+  /// Note on motor restarts kept.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{In 1 round the group sizes are not an even split. They are imported as drawn.} other{In {count} rounds the group sizes are not an even split. They are imported as drawn.}}'**
-  String competitionImportDrawWarningSizes(int count);
+  /// **'{count, plural, =1{1 flight has a motor restart that GliderScore did not count. Its score is kept.} other{{count} flights have a motor restart that GliderScore did not count. Their scores are kept.}}'**
+  String competitionImportWarningRestart(int count);
 
-  /// Note on a draw with more pilots in a group than lanes.
+  /// Note on rounds only partly flown.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 place is beyond the lane count of the competition and gets the next lane.} other{{count} places are beyond the lane count of the competition and get the next lanes.}}'**
-  String competitionImportDrawWarningLanes(int count);
+  /// **'{count, plural, =1{1 round has flights without a score.} other{{count} rounds have flights without a score.}}'**
+  String competitionImportWarningUnflown(int count);
 
-  /// Note on a draw with other warnings.
+  /// Note on flights with nothing recorded.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 more note about the order of pilots in a group.} other{{count} more notes about the order of pilots in groups.}}'**
-  String competitionImportDrawWarningOther(int count);
+  /// **'{count, plural, =1{1 flight has no time, landing or penalty and is imported as a zero.} other{{count} flights have no time, landing or penalty and are imported as zeros.}}'**
+  String competitionImportWarningZero(int count);
 
-  /// Why a draw cannot be added: the file changed.
+  /// Note on landing values that match no table entry.
   ///
   /// In en, this message translates to:
-  /// **'This contest was imported from a different version of the file, so its pilots may no longer line up. Delete the contest and import the competition again to add its draw.'**
-  String get competitionImportDrawReasonFingerprint;
+  /// **'{count, plural, =1{1 landing value is not in the landing table and is left out.} other{{count} landing values are not in the landing table and are left out.}}'**
+  String competitionImportWarningLanding(int count);
 
-  /// Why a draw cannot be added: the contest has a draw.
+  /// Shown on a competition that was imported before.
   ///
   /// In en, this message translates to:
-  /// **'The contest already has a draw.'**
-  String get competitionImportDrawReasonDrawn;
+  /// **'Imported before as \"{name}\". Importing replaces that contest and keeps its place in your list.'**
+  String competitionImportTargetReplaces(String name);
 
-  /// Why a draw cannot be added: the contest has scores.
+  /// Shown on a competition already up to date.
   ///
   /// In en, this message translates to:
-  /// **'The contest already has scores.'**
-  String get competitionImportDrawReasonScores;
+  /// **'Imported before, and the file has not changed. Nothing will be written.'**
+  String get competitionImportTargetUnchanged;
 
-  /// Why a draw cannot be added: the file holds none.
+  /// Shown when the contest was changed after the import.
   ///
   /// In en, this message translates to:
-  /// **'This competition has no drawn flights.'**
-  String get competitionImportDrawReasonNoDraw;
+  /// **'Changed in Soar Score since: {scores, plural, =0{no scores entered} =1{1 score entered} other{{scores} scores entered}}. Importing replaces them.'**
+  String competitionImportTargetChanges(int scores);
 
-  /// Why a draw cannot be added: a pilot is missing from the contest.
+  /// Shown when a replace is refused because the contest synced.
   ///
   /// In en, this message translates to:
-  /// **'A pilot in the draw is not a participant of the contest.'**
-  String get competitionImportDrawReasonPilot;
+  /// **'This contest has been sent to the server and cannot be replaced yet. Delete it to import the competition again.'**
+  String get competitionImportTargetSynced;
 
-  /// Why a draw cannot be added: a flight was moved.
+  /// Shown when a replace is refused because the results are published.
+  ///
+  /// In en, this message translates to:
+  /// **'Its results are published. Unpublish them before importing again.'**
+  String get competitionImportTargetPublished;
+
+  /// Shown on a competition without an id whose number matches an earlier import.
+  ///
+  /// In en, this message translates to:
+  /// **'A contest imported from competition number {number} exists: \"{name}\", {date}. This competition has no id to tell whether it is the same one.'**
+  String competitionImportTargetNumberMatch(
+    int number,
+    String name,
+    String date,
+  );
+
+  /// Switch on the number-match note.
+  ///
+  /// In en, this message translates to:
+  /// **'It is the same competition: replace \"{name}\"'**
+  String competitionImportTargetSame(String name);
+
+  /// Summary: contests replaced.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 contest will be replaced.} other{{count} contests will be replaced.}}'**
+  String competitionImportSummaryReplaced(int count);
+
+  /// Summary: contests with nothing to write.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 contest is already up to date.} other{{count} contests are already up to date.}}'**
+  String competitionImportSummaryUnchanged(int count);
+
+  /// Summary: scored flights.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No scored flights will be imported.} =1{1 scored flight will be imported.} other{{count} scored flights will be imported.}}'**
+  String competitionImportSummaryFlights(int count);
+
+  /// Summary: contests completed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 contest will be marked Completed.} other{{count} contests will be marked Completed.}}'**
+  String competitionImportSummaryCompleted(int count);
+
+  /// Summary: explains the check.
+  ///
+  /// In en, this message translates to:
+  /// **'Soar Score recalculates every flight and compares it with GliderScore\'s score. If one differs, nothing of that competition is kept.'**
+  String get competitionImportSummaryCheck;
+
+  /// Checkbox before replacing changed contests.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand that what I changed in these contests after the last import is replaced.'**
+  String get competitionImportConfirmReplace;
+
+  /// Result line for a competition imported.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: imported. {flights, plural, =0{No scored flights.} =1{1 scored flight.} other{{flights} scored flights.}}'**
+  String competitionImportResultRestored(String name, int flights);
+
+  /// Result line for a competition that replaced an earlier import.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: replaced with the file\'s content. {flights, plural, =0{No scored flights.} =1{1 scored flight.} other{{flights} scored flights.}}'**
+  String competitionImportResultReplaced(String name, int flights);
+
+  /// Result line for a competition with nothing to write.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: already up to date. Nothing was changed.'**
+  String competitionImportResultUnchanged(String name);
+
+  /// Result line for a refused competition.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: not imported. {reason}'**
+  String competitionImportResultRefused(String name, String reason);
+
+  /// Result: the check against GliderScore failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Soar Score could not reproduce GliderScore\'s scores for {count, plural, =1{1 flight} other{{count} flights}}, so nothing of this competition was kept. First: {flights}.'**
+  String competitionImportFailComparison(int count, String flights);
+
+  /// One flight named in a failed check.
+  ///
+  /// In en, this message translates to:
+  /// **'round {round}, group {group}, pilot {pilot}'**
+  String competitionImportMismatchFlight(int round, int group, int pilot);
+
+  /// Reason: a partial re-flight.
+  ///
+  /// In en, this message translates to:
+  /// **'This competition has a re-flight that does not cover a whole group. Those cannot be imported.'**
+  String get competitionImportReasonReflights;
+
+  /// Reason: flights cannot be represented.
+  ///
+  /// In en, this message translates to:
+  /// **'Some scores cannot be turned into Soar Score scores: {detail}'**
+  String competitionImportReasonFlights(String detail);
+
+  /// Reason: scores table missing.
+  ///
+  /// In en, this message translates to:
+  /// **'The scores of this competition are not in the file.'**
+  String get competitionImportReasonNoScores;
+
+  /// Reason: credit moved.
   ///
   /// In en, this message translates to:
   /// **'A flight was moved to another round in GliderScore. Moved flights cannot be imported.'**
-  String get competitionImportDrawReasonMoved;
+  String get competitionImportReasonMoved;
 
-  /// Why a draw cannot be added: the rounds do not line up.
+  /// Reason: draw not importable.
   ///
   /// In en, this message translates to:
   /// **'The rounds or flights of this competition are not in a form that can be imported.'**
-  String get competitionImportDrawReasonRounds;
+  String get competitionImportReasonRounds;
 
-  /// Why a draw cannot be added: any other reason.
+  /// Refusal: synced.
   ///
   /// In en, this message translates to:
-  /// **'The draw of this competition cannot be added.'**
-  String get competitionImportDrawReasonOther;
+  /// **'This contest has been sent to the server and cannot be replaced yet.'**
+  String get competitionImportRefuseSynced;
 
-  /// Why a draw was not added: the contest is locked.
+  /// Refusal: published.
   ///
   /// In en, this message translates to:
-  /// **'The contest is locked. Unlock it, then try again.'**
-  String get competitionImportDrawFailLocked;
+  /// **'Its results are published. Unpublish them first.'**
+  String get competitionImportRefusePublished;
 
-  /// Summary line: number of draws the import adds.
+  /// Refusal: needs confirmation.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{The draw of 1 contest will be added.} other{The draws of {count} contests will be added.}}'**
-  String competitionImportSummaryDraws(int count);
+  /// **'The contest was changed in Soar Score. Confirm the replace and try again.'**
+  String get competitionImportRefuseConfirm;
 
-  /// Reminder of what adding a draw leaves out.
+  /// Refusal: not restorable.
   ///
   /// In en, this message translates to:
-  /// **'Not imported with the draw: flights and scores.'**
-  String get competitionImportDrawNotImported;
-
-  /// Result line for a draw that was added to a contest.
-  ///
-  /// In en, this message translates to:
-  /// **'{name}: the draw was added. {rounds, plural, =1{1 round} other{{rounds} rounds}} and {places, plural, =1{1 place} other{{places} places}}. The contest is Ready.'**
-  String competitionImportResultDrawAdded(String name, int rounds, int places);
-
-  /// Result line for a draw that could not be added.
-  ///
-  /// In en, this message translates to:
-  /// **'{name}: the draw was not added. {reason}'**
-  String competitionImportResultDrawFailed(String name, String reason);
-
-  /// Dry-run note: the competition has a lane count, so lanes follow the order in the group.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{Lanes: 1 lane. Each pilot\'s lane follows their place in the group.} other{Lanes: {count} lanes. Each pilot\'s lane follows their place in the group.}}'**
-  String competitionImportDrawLanes(int count);
-
-  /// Dry-run note: the competition has no lanes.
-  ///
-  /// In en, this message translates to:
-  /// **'No lanes: the competition has none, so the order in each group is kept but no lane is set.'**
-  String get competitionImportDrawNoLanes;
-
-  /// Dry-run note: trailing rounds without a scored flight.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{The last round has no scores yet. It may not have been flown.} other{The last {count} rounds have no scores yet. They may not have been flown.}}'**
-  String competitionImportDrawUnflown(int count);
-
-  /// Dry-run note: the draw has no scored flight at all.
-  ///
-  /// In en, this message translates to:
-  /// **'No round has scores yet.'**
-  String get competitionImportDrawNoScores;
+  /// **'The contest to replace is not one made by an import.'**
+  String get competitionImportRefuseNotRestorable;
 
   /// Title of the banner on a contest that was imported from GliderScore.
   ///
@@ -3162,29 +3250,17 @@ abstract class AppLocalizations {
   /// **'Imported from GliderScore on {date}'**
   String importedContestNoteTitle(String date);
 
-  /// Banner text: what an imported contest does not carry.
+  /// Banner text: what an imported contest holds and what importing again does.
   ///
   /// In en, this message translates to:
-  /// **'Scores, penalties, re-flights and retirements were not imported. Scoring starts from here.'**
+  /// **'The draw, scores, re-flights and retirements are as GliderScore held them when the file was made. Importing the competition again replaces them.'**
   String get importedContestNoteBody;
-
-  /// Banner text on an imported contest that holds GliderScore's draw.
-  ///
-  /// In en, this message translates to:
-  /// **'The draw is a copy of GliderScore\'s draw at the time of the import.'**
-  String get importedContestNoteDraw;
 
   /// Banner text on an imported draw without lanes.
   ///
   /// In en, this message translates to:
   /// **'GliderScore used no lanes, so none are set.'**
   String get importedContestNoteNoLanes;
-
-  /// Banner text on an imported contest without a draw.
-  ///
-  /// In en, this message translates to:
-  /// **'The draw was not imported. Build it as for any contest.'**
-  String get importedContestNoteNoDraw;
 
   /// Chip on the detail of a contest that was imported from GliderScore.
   ///
@@ -3197,6 +3273,390 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Imported from GliderScore on {date}'**
   String importedChipTooltip(String date);
+
+  /// Title of the dialog that confirms creating the QR codes on the pilot cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations?'**
+  String get pilotCardsSendTitle;
+
+  /// Body of the confirmation before QR codes are created. Issuing never emails.
+  ///
+  /// In en, this message translates to:
+  /// **'QR codes will be created for these pilots, and each of these cards will carry one. Nobody is emailed: print the cards to hand them out.'**
+  String get pilotCardsSendBody;
+
+  /// How many QR codes will be created.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 QR code} other{{count} QR codes}}'**
+  String pilotCardsQrCount(int count);
+
+  /// Follows the QR code count in the confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **' — one per pilot, the same on every reprint.'**
+  String get pilotCardsSendCountNote;
+
+  /// Cancel button of the pilot cards dialogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get pilotCardsCancel;
+
+  /// Confirm button that creates the QR codes on the pilot cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations'**
+  String get pilotCardsSendConfirm;
+
+  /// Title of the reminder shown before printing cards that have no QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'Some cards will print without QR codes.'**
+  String get pilotCardsReminderTitle;
+
+  /// Reminder body when none of the selected cards has a QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This card doesn’t have a QR code yet.} other{None of these {count} cards have a QR code yet.}} Pilots without one can’t scan to enter scores.'**
+  String pilotCardsReminderNone(int count);
+
+  /// Reminder body when some of the selected cards have no QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'{missing} of {selected, plural, =1{1 card} other{{selected} cards}} {missing, plural, =1{doesn’t} other{don’t}} have a QR code yet. Pilots without one can’t scan to enter scores.'**
+  String pilotCardsReminderSome(int missing, int selected);
+
+  /// Reason beside the print reminder when the contest was organized offline and has not synchronized.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest hasn’t synchronized, so QR codes can’t be made yet.'**
+  String get pilotCardsReminderUnsynced;
+
+  /// Reason beside the print reminder when the device is offline.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re offline, so invitations can’t be sent now. QR codes already issued still print.'**
+  String get pilotCardsReminderOffline;
+
+  /// Button in the print reminder that creates the QR codes, then prints.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations and print'**
+  String get pilotCardsReminderSend;
+
+  /// Button in the print reminder that prints the cards as they are.
+  ///
+  /// In en, this message translates to:
+  /// **'Print without QR codes'**
+  String get pilotCardsReminderWithout;
+
+  /// Reason invitations cannot be sent: nobody is signed in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to send invitations.'**
+  String get pilotCardsUnavailableSignIn;
+
+  /// Reason invitations cannot be sent: the server issues none.
+  ///
+  /// In en, this message translates to:
+  /// **'This server doesn’t issue invitations, so QR codes can’t be made.'**
+  String get pilotCardsUnavailableServer;
+
+  /// Reason invitations cannot be sent: existing links cannot be reproduced.
+  ///
+  /// In en, this message translates to:
+  /// **'Some invitations can’t be shown as QR codes because the server’s invitation secret changed after they were issued.'**
+  String get pilotCardsUnavailableLinks;
+
+  /// Reason invitations cannot be sent: this build has no invitation support.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending invitations isn’t available in this version of the app yet.'**
+  String get pilotCardsUnavailableVersion;
+
+  /// Lead of the banner while QR codes are being created.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating QR codes.'**
+  String get pilotCardsSendingLead;
+
+  /// Text of the banner while QR codes are being created.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating {count, plural, =1{1 QR code} other{{count} QR codes}}. Print is paused until the codes are ready; you can keep changing options.'**
+  String pilotCardsSendingText(int count);
+
+  /// Lead of the banner after creating QR codes failed.
+  ///
+  /// In en, this message translates to:
+  /// **'QR codes could not be created.'**
+  String get pilotCardsFailedLead;
+
+  /// Text of the banner after creating QR codes failed.
+  ///
+  /// In en, this message translates to:
+  /// **'No QR codes were added. Check the connection and try again, or print without QR codes.'**
+  String get pilotCardsFailedText;
+
+  /// Retry button on the pilot cards banners.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get pilotCardsRetry;
+
+  /// Lead of the banner when the codes were created but could not be loaded back.
+  ///
+  /// In en, this message translates to:
+  /// **'QR codes were created.'**
+  String get pilotCardsNotLoadedLead;
+
+  /// Text of the banner when the codes were created but could not be loaded back.
+  ///
+  /// In en, this message translates to:
+  /// **'The QR codes could not be loaded, so the cards do not show them yet. No need to create them again: they already exist.'**
+  String get pilotCardsNotLoadedText;
+
+  /// Button that loads the QR codes again.
+  ///
+  /// In en, this message translates to:
+  /// **'Load QR codes'**
+  String get pilotCardsLoadCodes;
+
+  /// Lead of the banner after the QR codes were created.
+  ///
+  /// In en, this message translates to:
+  /// **'QR codes created.'**
+  String get pilotCardsSentLead;
+
+  /// Text of the banner after the QR codes were created.
+  ///
+  /// In en, this message translates to:
+  /// **'The cards now carry them. Nothing was emailed.'**
+  String get pilotCardsSentText;
+
+  /// Dismiss button on the QR codes created banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get pilotCardsDismiss;
+
+  /// Lead of the banner when the invitations could not be read.
+  ///
+  /// In en, this message translates to:
+  /// **'QR codes could not be loaded.'**
+  String get pilotCardsLoadFailedLead;
+
+  /// Text of the banner when the invitations could not be read.
+  ///
+  /// In en, this message translates to:
+  /// **'The cards print without QR codes until they load. Check the connection and retry.'**
+  String get pilotCardsLoadFailedText;
+
+  /// Lead of the banner for a contest that has not synchronized.
+  ///
+  /// In en, this message translates to:
+  /// **'No QR codes yet.'**
+  String get pilotCardsUnsyncedLead;
+
+  /// Text of the banner for a contest that has not synchronized.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest was organized offline and hasn’t synchronized. Sync it first to create QR codes. Cards print without them.'**
+  String get pilotCardsUnsyncedText;
+
+  /// Lead of the banner when the device is offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline.'**
+  String get pilotCardsOfflineLead;
+
+  /// Text of the banner when the device is offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to send invitations. QR codes already issued still print.'**
+  String get pilotCardsOfflineText;
+
+  /// Lead of the banner for cards that have no QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'No QR code.'**
+  String get pilotCardsMissingLead;
+
+  /// Banner text when no selected card has a QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'Some cards have no QR code. Send invitations to add them.'**
+  String get pilotCardsMissingAll;
+
+  /// Banner text when some selected cards have no QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 card has} other{{count} cards have}} no QR code. Send invitations to add them.'**
+  String pilotCardsMissingCount(int count);
+
+  /// Added to the banner text when invitations cannot be sent, with the reason.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason} You can still print without QR codes.'**
+  String pilotCardsMissingReason(String reason);
+
+  /// Button on the banner that creates the QR codes.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations'**
+  String get pilotCardsSendAction;
+
+  /// Title of the workspace card that sends pilot invitations.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot invitations'**
+  String get invitationsSectionTitle;
+
+  /// Shown while the workspace invitations card loads.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading invitations…'**
+  String get invitationsLoading;
+
+  /// Shown when the workspace invitations card could not load.
+  ///
+  /// In en, this message translates to:
+  /// **'The invitations could not be loaded. Check the connection and retry.'**
+  String get invitationsLoadFailed;
+
+  /// Workspace invitations card text when the contest has no pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Add pilots to the contest to send invitations.'**
+  String get invitationsNoPilots;
+
+  /// Workspace invitations card text when some pilots have no invitation.
+  ///
+  /// In en, this message translates to:
+  /// **'{have} of {total, plural, =1{1 pilot has} other{{total} pilots have}} a QR code. Sending creates the rest. Nobody is emailed.'**
+  String invitationsCoverage(int have, int total);
+
+  /// Workspace invitations card text when every pilot has an invitation.
+  ///
+  /// In en, this message translates to:
+  /// **'{total, plural, =1{The pilot has} other{All {total} pilots have}} a QR code. Print the pilot cards to hand them out.'**
+  String invitationsCoverageAll(int total);
+
+  /// Button on the workspace invitations card that opens the pilot cards report.
+  ///
+  /// In en, this message translates to:
+  /// **'Open pilot cards'**
+  String get invitationsOpenCards;
+
+  /// Workspace button that sends invitations to the pilots who have none.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations ({count})'**
+  String invitationsSendMissing(int count);
+
+  /// Snack bar after invitations were created.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 invitation created} other{{count} invitations created}}. Nobody was emailed.'**
+  String invitationsSentSnack(int count);
+
+  /// Snack bar after invitations were created but could not be read back.
+  ///
+  /// In en, this message translates to:
+  /// **'The invitations were created, but could not be loaded back. Reload the page to see them.'**
+  String get invitationsSentNotLoadedSnack;
+
+  /// Snack bar after creating invitations failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The invitations could not be created. Nothing was sent. Try again.'**
+  String get invitationsSendFailedSnack;
+
+  /// Participants toolbar button that opens the invitations menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations'**
+  String get invitationsMenu;
+
+  /// Participants invitations menu item that creates invitations for the selected pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations'**
+  String get invitationsMenuSend;
+
+  /// Participants invitations menu item with the number of selected pilots that have none.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitations ({count})'**
+  String invitationsMenuSendCount(int count);
+
+  /// Participants invitations menu item that copies one pilot's link.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get invitationsMenuCopy;
+
+  /// Snack bar after a pilot's invitation link was copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied.'**
+  String get invitationsLinkCopied;
+
+  /// Reason the invitations menu cannot send: nothing selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Select pilots to send invitations.'**
+  String get invitationsSelectPilots;
+
+  /// Reason the copy link item is off: not exactly one pilot selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Select one pilot to copy a link.'**
+  String get invitationsSelectOne;
+
+  /// Reason sending is off: every selected pilot has an invitation.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected pilots already have an invitation.'**
+  String get invitationsAllHaveLinks;
+
+  /// Reason the copy link item is off: the pilot has no invitation.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot has no invitation yet. Send one first.'**
+  String get invitationsNoLinkYet;
+
+  /// Reason the invitations menu is off: the selection holds no pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Only pilots get invitations.'**
+  String get invitationsOnlyPilots;
+
+  /// Reason the invitations menu is off until the invitations were read.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations are still loading.'**
+  String get invitationsNotReady;
+
+  /// Snack bar when copying an invitation link to the clipboard failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The link could not be copied.'**
+  String get invitationsCopyFailed;
+
+  /// Reason invitations cannot be sent: the device is offline.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re offline, so invitations can’t be sent now.'**
+  String get invitationsOffline;
+
+  /// Reason invitations cannot be sent: the internet is up but the server is unreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'The server can’t be reached, so invitations can’t be sent now.'**
+  String get invitationsServerUnreachable;
 }
 
 class _AppLocalizationsDelegate

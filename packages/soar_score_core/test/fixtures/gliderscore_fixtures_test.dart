@@ -103,6 +103,12 @@ void main() {
       'comps_missing_columns.json',
       'draws_reference.json',
       'draws_edge_cases.json',
+      'scores_reference.json',
+      'scores_edge_cases.json',
+      'reimport_v1.json',
+      'reimport_v2.json',
+      'reimport_v1_copy.json',
+      'reimport_no_compid.json',
     ];
 
     // Every column a competition snapshot may carry, with the pattern every
@@ -143,6 +149,11 @@ void main() {
       'DBParams.Property': RegExp(r'^DBVersion$'),
       'DBParams.PRValue': RegExp(r'^\d+\.\d+$'),
       'Scores.Updated': RegExp(r'^(True|False)$'),
+      'LndgNames.Name': RegExp(
+        r'^(None|FAI 15 Metre Tape|F3J Enter Dist|F3J Enter Points|'
+        r'F3J Enter Pts to 2m|F5J Enter Distance|ALES Landing|F3J Enter Cms|'
+        r'F5B Enter Distance|F5J Enter Points|FAI 15m Points|Example Table)$',
+      ),
     };
     // Columns that hold numbers and flags only, per table.
     const numericKeys = <String, Set<String>>{
@@ -168,6 +179,8 @@ void main() {
         'NormalisedScore', 'Penalty', 'OriginalRoundNo', 'ScoresChecked',
         'LandingOver75m', 'Helper', 'Laps', 'F5JMotorReStarted', //
       },
+      'LndgNames': {'LndgNo'},
+      'LndgPoints': {'LndgNo', 'Distance', 'Points'},
       'Roles': {},
       'DBParams': {},
       'Dur': {
@@ -282,6 +295,12 @@ void main() {
       'comps_missing_columns.json',
       'draws_reference.json',
       'draws_edge_cases.json',
+      'scores_reference.json',
+      'scores_edge_cases.json',
+      'reimport_v1.json',
+      'reimport_v2.json',
+      'reimport_v1_copy.json',
+      'reimport_no_compid.json',
     ]) {
       test('$file refers only to pilots it carries', () {
         final t = tables(file);
@@ -387,6 +406,189 @@ void main() {
         final scores = tables('draws_edge_cases.json')['Scores']!;
         final moved = scores.where((r) => r['OriginalRoundNo'] != r['RoundNo']);
         expect(moved, hasLength(1));
+      });
+    });
+
+    group('score fixtures (phase D, #768)', () {
+      bool scored(Map<String, Object?> r) => r['Updated'] == 'True';
+      num n(Map<String, Object?> r, String k) => (r[k] as num?) ?? 0;
+
+      test('the size ceiling holds for all snapshots together', () {
+        const ceiling = 900 * 1024;
+        var total = 0;
+        for (final f in Directory('test/fixtures/gliderscore').listSync()) {
+          if (f is File && f.path.endsWith('.json')) {
+            total += f.lengthSync();
+          }
+        }
+        expect(total, lessThan(ceiling));
+      });
+
+      test('the reference holds the scenarios of the score plan', () {
+        final t = tables('scores_reference.json');
+        final scores = t['Scores']!;
+        final dur = {for (final d in t['Dur']!) d['CompNo']! as int: d};
+        final comps = {for (final c in t['Comps']!) c['CompNo']! as int: c};
+        expect(comps.keys.toSet(), {16, 19, 29, 35});
+
+        // Motor restart option 1 (35), 2 (29) and NULL (16, with a flagged
+        // flight that kept its score).
+        expect(dur[35]!, containsPair('F5JMotorRestartOption', 1));
+        expect(dur[29]!, containsPair('F5JMotorRestartOption', 2));
+        expect(dur[16]!.containsKey('F5JMotorRestartOption'), isFalse);
+        Iterable<Map<String, Object?>> restarted(int comp) => scores.where(
+          (r) => r['CompNo'] == comp && n(r, 'F5JMotorReStarted') == 1,
+        );
+        for (final comp in [35, 29]) {
+          expect(restarted(comp), isNotEmpty);
+          expect(restarted(comp).every((r) => n(r, 'RawScore') == 0), isTrue);
+        }
+        expect(restarted(16).any((r) => n(r, 'RawScore') > 0), isTrue);
+
+        // A floored zero: a time and a launch height, and a raw score of 0.
+        expect(
+          scores.where(
+            (r) =>
+                r['CompNo'] == 29 &&
+                scored(r) &&
+                n(r, 'Time1Mins') > 0 &&
+                n(r, 'FlightScoreDeduction') > 0 &&
+                n(r, 'RawScore') == 0,
+          ),
+          isNotEmpty,
+        );
+        // All-zero flights marked as entered.
+        expect(
+          scores.where(
+            (r) =>
+                scored(r) &&
+                n(r, 'Time1Mins') == 0 &&
+                n(r, 'Landing') == 0 &&
+                n(r, 'FlightScoreDeduction') == 0 &&
+                n(r, 'F5JMotorReStarted') == 0,
+          ),
+          isNotEmpty,
+        );
+        // A retired pilot with unflown later rounds (35) and a last round
+        // that is entirely unflown.
+        expect(
+          t['CompPilots']!.where((r) => r['CompNo'] == 35 && r['Retired'] == 1),
+          isNotEmpty,
+        );
+        final lastRound35 = scores
+            .where((r) => r['CompNo'] == 35)
+            .map((r) => r['RoundNo']! as int)
+            .reduce((a, b) => a > b ? a : b);
+        expect(
+          scores.where(
+            (r) =>
+                r['CompNo'] == 35 && r['RoundNo'] == lastRound35 && scored(r),
+          ),
+          isEmpty,
+        );
+        // A flown round with unscored flights (16, 19, 35).
+        for (final comp in [16, 19, 35]) {
+          final byRound = <Object?, Set<bool>>{};
+          for (final r in scores.where((r) => r['CompNo'] == comp)) {
+            (byRound[r['RoundNo']] ??= {}).add(scored(r));
+          }
+          expect(
+            byRound.values.where((v) => v.length == 2),
+            isNotEmpty,
+            reason: 'comp $comp has a partly flown round',
+          );
+        }
+        for (final comp in [16, 19, 29, 35]) {
+          expect(comps[comp]!['CompID'], 'FIXTURE$comp');
+        }
+        // The landing table the competitions use is carried.
+        expect({for (final r in t['LndgNames']!) r['LndgNo']}, {9});
+        expect(t['LndgPoints']!.length, 10);
+      });
+
+      test('the edge cases hold a partial match, a custom table, a subset '
+          're-flight and overlapping tasks', () {
+        final t = tables('scores_edge_cases.json');
+        final scores = t['Scores']!;
+        final table9 = {
+          for (final r in t['LndgPoints']!)
+            if (r['LndgNo'] == 9) r['Distance'],
+        };
+        final landings9301 = {
+          for (final r in scores)
+            if (r['CompNo'] == 9301) r['Landing'],
+        };
+        expect(landings9301.difference(table9), {7});
+        expect(
+          t['Dur']!.firstWhere((d) => d['CompNo'] == 9302),
+          containsPair('durLndg', 11),
+        );
+        expect({for (final r in t['LndgNames']!) r['LndgNo']}, {5, 9, 11});
+        expect(
+          t['Dur']!.firstWhere((d) => d['CompNo'] == 9305),
+          containsPair('durLndg', 5),
+        );
+        expect(
+          t['CompPilots']!.where(
+            (r) => r['CompNo'] == 9302 && r['Retired'] == 1,
+          ),
+          hasLength(1),
+        );
+        final reflights = scores.where(
+          (r) => r['CompNo'] == 9303 && r['ReFlightNo'] == 1,
+        );
+        expect(reflights, hasLength(2));
+        expect(
+          scores.where((r) => r['CompNo'] == 9303 && r['ReFlightNo'] == 0),
+          hasLength(4),
+        );
+        final rounds = {
+          for (final task in [1, 2])
+            task: {
+              for (final r in scores)
+                if (r['CompNo'] == 9304 && r['TaskNo'] == task) r['RoundNo'],
+            },
+        };
+        expect(rounds[1]!.intersection(rounds[2]!), isNotEmpty);
+      });
+
+      test('the re-import files differ the way the plan says', () {
+        final v1 = tables('reimport_v1.json');
+        final v2 = tables('reimport_v2.json');
+        final copy = tables('reimport_v1_copy.json');
+        // The copy is the same content from another file.
+        expect(copy, equals(v1));
+        // A database before 2019 has no CompID.
+        final noId = tables('reimport_no_compid.json');
+        expect(noId['Comps']!.single.containsKey('CompID'), isFalse);
+        expect(v1['Comps']!.single['CompID'], 'FIXTURE19');
+        expect(noId['Scores'], equals(v1['Scores']));
+        expect(
+          _load('reimport_v1_copy.json')['id'],
+          isNot(_load('reimport_v1.json')['id']),
+        );
+        expect(
+          _load('reimport_v1_copy.json')['sourceDbFile'],
+          isNot(_load('reimport_v1.json')['sourceDbFile']),
+        );
+        // Everything of the early file has the same identity as the later.
+        expect(v1['Comps'], equals(v2['Comps']));
+        // Round 3 is drawn but unscored early, scored later.
+        bool round3Scored(Map<String, List<Map<String, Object?>>> t) =>
+            t['Scores']!.any((r) => r['RoundNo'] == 3 && scored(r));
+        expect(round3Scored(v1), isFalse);
+        expect(round3Scored(v2), isTrue);
+        // One pilot is added in the later file.
+        expect(v2['CompPilots']!.length, v1['CompPilots']!.length + 1);
+        // One landing changed (50 to 45) with the raw score lowered by 5.
+        Map<String, Object?> changed(
+          Map<String, List<Map<String, Object?>>> t,
+        ) => t['Scores']!.firstWhere(
+          (r) => r['RoundNo'] == 1 && r['PilotNo'] == 109,
+        );
+        expect(changed(v1)['Landing'], 50);
+        expect(changed(v2)['Landing'], 45);
+        expect(n(changed(v1), 'RawScore') - n(changed(v2), 'RawScore'), 5);
       });
     });
 

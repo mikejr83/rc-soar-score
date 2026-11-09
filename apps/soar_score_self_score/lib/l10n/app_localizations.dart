@@ -129,6 +129,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not open the link. Check your network connection and try again.'**
   String get linkOpenFailed;
+
+  /// Spoken label while the invitation link is checked.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening your link'**
+  String get invitationOpening;
+
+  /// Heading on the invitation page once the link is checked. The name is the pilot the link belongs to.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {name}'**
+  String invitationHeading(String name);
+
+  /// Explains what the invitation link does. Placeholder is the contest name.
+  ///
+  /// In en, this message translates to:
+  /// **'You are scoring for {contest}. Continue as a guest to enter your scores. You can come back through the same link at any time.'**
+  String invitationBody(String contest);
+
+  /// Primary button on the invitation page.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as guest'**
+  String get continueAsGuest;
+
+  /// Button on the invitation page. Not connected yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get signInButton;
+
+  /// Button on the invitation page. Not connected yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get createAccountButton;
+
+  /// Shown under the Sign in and Create account buttons while they are not connected.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts are coming soon. For now, continue as a guest.'**
+  String get accountsComingSoon;
+
+  /// Heading when an invitation link is unknown, expired or replaced.
+  ///
+  /// In en, this message translates to:
+  /// **'This link does not work'**
+  String get invalidLinkTitle;
+
+  /// Tells the person what to do about a link that does not work. Does not say why, on purpose.
+  ///
+  /// In en, this message translates to:
+  /// **'The link may have expired or been replaced. Ask your contest director for your link.'**
+  String get invalidLinkBody;
+
+  /// Shown when the server could not be reached while checking an invitation link.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open your link. Check your network connection and try again.'**
+  String get invitationLoadFailed;
+
+  /// Shown on the Submit button while the score is on its way.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending your score'**
+  String get scoreSending;
+
+  /// Heading when a score could not reach the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent yet'**
+  String get scoreQueuedTitle;
+
+  /// Explains a score that has not reached the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Your score is saved on this phone and is not official yet. It will send again when the connection is back. You can also try now.'**
+  String get scoreQueuedBody;
+
+  /// Button that sends a waiting score again.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again now'**
+  String get scoreRetryNow;
+
+  /// Shown after the server accepted the score. The score is the server's calculation.
+  ///
+  /// In en, this message translates to:
+  /// **'Official score: {score}'**
+  String scoreAcceptedLine(String score);
+
+  /// Shown after the server accepted the score, before it is official. The score is the server's calculation.
+  ///
+  /// In en, this message translates to:
+  /// **'Score: {score}'**
+  String scoreCalculatedLine(String score);
+
+  /// The flight's score before normalising, from the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw score: {score}'**
+  String scoreRawLine(String score);
+
+  /// The pilot's score for the round, from the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Round score: {score}'**
+  String scoreRoundLine(String score);
+
+  /// The penalty points counted against the pilot so far, from the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty so far: {score}'**
+  String scorePenaltyLine(String score);
+
+  /// Who entered the stored score.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered by {name}'**
+  String scoreEnteredByLine(String name);
+
+  /// Shown after the server accepted the score but gave no calculated value.
+  ///
+  /// In en, this message translates to:
+  /// **'Your score was received.'**
+  String get scoreAcceptedNoValue;
+
+  /// Shown when the server already had a score for the flight.
+  ///
+  /// In en, this message translates to:
+  /// **'This flight already has a score. The stored score stands.'**
+  String get scoreAlreadyThere;
+
+  /// Shown when the server already had a score for the flight. The score is the stored one.
+  ///
+  /// In en, this message translates to:
+  /// **'This flight already has a score: {score}. The stored score stands.'**
+  String scoreAlreadyThereWith(String score);
+
+  /// Tooltip of the back button on the pilot overview, which goes to the team overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to pilots'**
+  String get backToPilots;
+
+  /// Button shown after a score is submitted; opens the results of the pilot's group for that round.
+  ///
+  /// In en, this message translates to:
+  /// **'See group results'**
+  String get seeGroupResults;
+
+  /// Shown when the entry form opens for a flight that is already scored.
+  ///
+  /// In en, this message translates to:
+  /// **'This flight already has a score, so it is read-only. See the group results for the score.'**
+  String get scoreExistingReadOnly;
+
+  /// Shown when the server refused the values.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your entries. The score was not sent.'**
+  String get scoreRejectedValidation;
+
+  /// Shown when the contest or round no longer takes scores.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring is closed for this flight. Ask your contest director.'**
+  String get scoreRejectedClosed;
+
+  /// Shown when an earlier round has no score yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Score the earlier round first.'**
+  String get scoreRejectedOutOfOrder;
+
+  /// Shown when the draw changed after the form was opened.
+  ///
+  /// In en, this message translates to:
+  /// **'The draw changed. Go back to your rounds and open this round again.'**
+  String get scoreRejectedStaleDraw;
+
+  /// Shown when the guest session is no longer valid.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has ended. Open your invitation link again.'**
+  String get scoreRejectedSession;
+
+  /// Shown for any other refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'The score was not accepted. Ask your contest director.'**
+  String get scoreRejectedOther;
+
+  /// Heading when an invitation link is valid but for a role this release does not support.
+  ///
+  /// In en, this message translates to:
+  /// **'This link is not for scoring yet'**
+  String get unsupportedRoleTitle;
+
+  /// Explains a link for a role (such as a helper) that the app does not support yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Your link works, but this version of the app only supports pilots entering their own scores. Ask your contest director.'**
+  String get unsupportedRoleBody;
+
+  /// Button on a page whose session ended. Goes to the start page, where the person opens their link again.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to start'**
+  String get backToStart;
+
+  /// The contest is taking scores.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring open'**
+  String get scoringOpen;
+
+  /// Scoring has not opened.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring not open yet'**
+  String get scoringNotStarted;
+
+  /// The contest is not taking scores now.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring closed'**
+  String get scoringClosed;
+
+  /// The contest is over.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest completed'**
+  String get scoringCompleted;
+
+  /// Tooltip of the button that ends the guest session and returns to the start page.
+  ///
+  /// In en, this message translates to:
+  /// **'End session'**
+  String get endSession;
 }
 
 class _AppLocalizationsDelegate

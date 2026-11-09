@@ -177,8 +177,22 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
   );
 }
 
-SoarScoreDatabase createLocalDatabase(File dbFilePath) {
-  final executor = NativeDatabase(dbFilePath, enableMigrations: true);
+/// Opens the local SQLite database at [dbFilePath].
+///
+/// SQLite runs on a background isolate, so the SQL and row decoding of a
+/// large write (an import, a sync pull or push) never stall the UI isolate.
+/// Pass `inBackground: false` to run it on the calling isolate.
+SoarScoreDatabase createLocalDatabase(
+  File dbFilePath, {
+  bool inBackground = true,
+  QueryInterceptor? interceptor,
+}) {
+  final native = inBackground
+      ? NativeDatabase.createInBackground(dbFilePath, enableMigrations: true)
+      : NativeDatabase(dbFilePath, enableMigrations: true);
+  final executor = interceptor == null
+      ? native
+      : native.interceptWith(interceptor);
   return SoarScoreDatabase(executor, profile: DatabaseProfile.native);
 }
 

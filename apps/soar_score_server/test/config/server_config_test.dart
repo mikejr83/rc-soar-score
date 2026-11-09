@@ -26,6 +26,43 @@ void main() {
       expect(config.apiAudience, 'https://soar-score.com/server');
     });
 
+    test('INVITATION_SECRET is optional and needs 32 characters', () {
+      expect(ServerConfig.parse(minimal).invitationSecret, isNull);
+      final ok = ServerConfig.parse({
+        ...minimal,
+        'INVITATION_SECRET': 'k' * 32,
+      });
+      expect(ok.invitationSecret, 'k' * 32);
+      expect(
+        () => ServerConfig.parse({...minimal, 'INVITATION_SECRET': 'short'}),
+        throwsA(
+          isA<ConfigException>().having(
+            (e) => e.toString(),
+            'message',
+            allOf(contains('INVITATION_SECRET'), isNot(contains('short'))),
+          ),
+        ),
+      );
+    });
+
+    test('SELF_SCORING_BASE_URL is an http(s) origin and optional', () {
+      expect(ServerConfig.parse(minimal).selfScoringBaseUrl, isNull);
+      expect(
+        ServerConfig.parse({
+          ...minimal,
+          'SELF_SCORING_BASE_URL': 'https://score.example',
+        }).selfScoringBaseUrl,
+        'https://score.example',
+      );
+      for (final bad in ['score.example', 'ftp://x', 'https://x/path?q=1']) {
+        expect(
+          () => ServerConfig.parse({...minimal, 'SELF_SCORING_BASE_URL': bad}),
+          throwsA(isA<ConfigException>()),
+          reason: bad,
+        );
+      }
+    });
+
     test('accepts a connection URL in place of the discrete variables', () {
       final config = ServerConfig.parse({
         'DATABASE_URL': 'postgresql://urluser:urlpw@ep-db.us-east-2.aws.neon.tech/neondb?sslmode=verify-full',

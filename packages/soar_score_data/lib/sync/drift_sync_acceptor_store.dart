@@ -6,6 +6,7 @@ import '../schema/table_group.dart';
 import '../schema/tables/conflict_records_table.dart';
 import 'assignment_markers.dart';
 import 'entity_stores.dart';
+import 'scope_sequence.dart';
 import 'sql_placeholders.dart';
 import 'table_mapper.dart';
 
@@ -30,14 +31,14 @@ class DriftSyncAcceptorStore implements core.SyncAcceptorStore {
     try {
       return await _db.transaction(() => body(tx));
     } on Object catch (error) {
-      throw _asConstraintError(error) ?? error;
+      throw asConstraintError(error) ?? error;
     }
   }
 }
 
 /// [error] as a [core.SyncConstraintError] when it is a broken unique or
 /// foreign-key rule on either backend, else null.
-core.SyncConstraintError? _asConstraintError(Object error) {
+core.SyncConstraintError? asConstraintError(Object error) {
   if (error is core.SyncConstraintError) return error;
   final text = '$error'.toLowerCase();
   if (text.contains('unique constraint') ||
@@ -263,18 +264,7 @@ class _DriftSyncAcceptorTransaction implements core.SyncAcceptorTransaction {
   @override
   Future<int> highestSequence(core.SyncScopeKey scope) async {
     final (column, id) = _scopeColumn(scope);
-    final row = await _db
-        .customSelect(
-          portableSql(
-            _db,
-            'SELECT MAX(sequence) AS highest FROM mutation_records '
-            'WHERE $column = ?',
-          ),
-          variables: [Variable<String>(id)],
-          readsFrom: {_db.mutationRecords},
-        )
-        .getSingle();
-    return row.read<int?>('highest') ?? 0;
+    return highestScopeSequence(_db, column: column, scopeId: id);
   }
 
   @override

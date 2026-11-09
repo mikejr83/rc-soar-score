@@ -1,14 +1,14 @@
-# scripts/e2e.ps1
+# scripts/e2e-contest.ps1
 # Runs the contest app's end-to-end tests (Flutter integration_test) against
 # the real app on the demo database, which is recreated for every run.
 # Not part of CI (Actions has no credits); run it locally while testing.
 #
-#   .\scripts\e2e.ps1                      # Windows desktop
-#   .\scripts\e2e.ps1 -Name journey        # only tests whose name matches
-#   .\scripts\e2e.ps1 -File save_failure_retry_test.dart -Name 'Retry saves'
+#   .\scripts\e2e-contest.ps1                      # Windows desktop
+#   .\scripts\e2e-contest.ps1 -Name journey        # only tests whose name matches
+#   .\scripts\e2e-contest.ps1 -File save_failure_retry_test.dart -Name 'Retry saves'
 #                                               # one journey in one test file
-#   .\scripts\e2e.ps1 -Device web          # headless Chrome against the E2E server
-#   .\scripts\e2e.ps1 -Device <device>     # another `flutter test -d` device
+#   .\scripts\e2e-contest.ps1 -Device web          # headless Chrome against the E2E server
+#   .\scripts\e2e-contest.ps1 -Device <device>     # another `flutter test -d` device
 #
 # The web mode needs Chrome and a matching chromedriver. Run
 # .\scripts\e2e-setup.ps1 once to install both into .e2e-tools\ (git-ignored),

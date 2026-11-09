@@ -7,6 +7,7 @@ import '../models/imports/contest_import_draft.dart';
 import '../models/imports/glider_score_import_result.dart';
 import '../models/imports/pilot_import_draft.dart';
 import 'glider_score_pilot_mapper.dart';
+import 'glider_score_score_mapping.dart';
 
 /// The class-specific part of the competition mapping.
 ///
@@ -26,6 +27,10 @@ abstract class ClassMapper {
   /// The discipline settings of the first configuration revision, from the
   /// class configuration row (`Dur` for F5J).
   DisciplineMapping mapDiscipline(Map<String, Object?> configRow);
+
+  /// The restore of the class's scores, or null when only the contest and
+  /// the draw can be imported.
+  ClassScoreMapper? get scoreMapper => null;
 }
 
 /// What a [ClassMapper] read from a class configuration row.
@@ -59,6 +64,9 @@ class F5jClassMapper extends ClassMapper {
 
   @override
   String get disciplineType => 'F5J';
+
+  @override
+  ClassScoreMapper get scoreMapper => const F5jScoreMapper();
 
   @override
   DisciplineMapping mapDiscipline(Map<String, Object?> row) {
@@ -336,6 +344,7 @@ class GliderScoreContestMapper {
       status: status == 'skipped'
           ? ContestImportStatus.skipped
           : ContestImportStatus.blocked,
+      sourceCompId: text(row['CompID']),
       reason: reason,
       reasonDetail: detail,
       name: name,
@@ -532,6 +541,7 @@ class GliderScoreContestMapper {
       sourceCompNo: no,
       sourceClass: sourceClass,
       status: ContestImportStatus.importable,
+      sourceCompId: text(row['CompID']),
       name: name,
       host: host,
       startDate: startDate,

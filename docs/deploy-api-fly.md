@@ -11,13 +11,14 @@ enough. No secret lives in the repository: `DATABASE_URL` is a Fly secret.
 
 ## Environment variables
 
-| Variable                          | Where      | Value                                                                        |
-| --------------------------------- | ---------- | ---------------------------------------------------------------------------- |
-| `DATABASE_URL`                    | Fly secret | Neon **direct** (not pooled) connection string; it ends in `sslmode=require` |
-| `AUTH0_DOMAIN`                    | `fly.toml` | `login.rcsoarscore.com` (the token issuer; not the `dev-...` tenant name)    |
-| `API_AUDIENCE`                    | `fly.toml` | `https://soar-score.com/server`                                              |
-| `CORS_ALLOWED_ORIGINS`            | `fly.toml` | app, score and public site origins                                           |
-| `PORT`, `LOG_LEVEL`, `LOG_FORMAT` | `fly.toml` | `8080`, `INFO`, `json`                                                       |
+| Variable                          | Where      | Value                                                                                                                                                         |
+| --------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                    | Fly secret | Neon **direct** (not pooled) connection string; it ends in `sslmode=require`                                                                                  |
+| `INVITATION_SECRET`               | Fly secret | 32+ random characters (`openssl rand -base64 48`); signs invitation links and guest sessions. Set it once: changing it ends every printed QR code and session |
+| `AUTH0_DOMAIN`                    | `fly.toml` | `login.rcsoarscore.com` (the token issuer; not the `dev-...` tenant name)                                                                                     |
+| `API_AUDIENCE`                    | `fly.toml` | `https://soar-score.com/server`                                                                                                                               |
+| `CORS_ALLOWED_ORIGINS`            | `fly.toml` | app, score and public site origins                                                                                                                            |
+| `PORT`, `LOG_LEVEL`, `LOG_FORMAT` | `fly.toml` | `8080`, `INFO`, `json`                                                                                                                                        |
 
 The full list is in `apps/soar_score_server/lib/config/server_config.dart`.
 
@@ -58,6 +59,15 @@ fly logs --app rc-soar-score-api      # look for "Database open and migrated."
 scripts/hosted-smoke.sh https://api.rcsoarscore.com          # bash
 ./scripts/hosted-smoke.ps1 -BaseUrl https://api.rcsoarscore.com  # PowerShell
 ```
+
+### Hosted writes made before the sequence fix
+
+A write the service makes itself (a pilot's submitted score, or any other
+hosted API write) joins the contest's sync log as `Accepted` with the next
+sequence. Rows written by an earlier version stay `Pending` with no sequence,
+and installations never pull them; redeploying does not repair them. Have the
+pilot resubmit, or delete the stuck entry and enter it again. There is no
+backfill.
 
 ## Idle behaviour
 

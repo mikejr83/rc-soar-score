@@ -23,5 +23,210 @@
   "linkOpenFailed": "Could not open the link. Check your network connection and try again.",
   "@linkOpenFailed": {
     "description": "Snackbar when a link to the public site could not be opened."
+  },
+  "invitationOpening": "Opening your link",
+  "@invitationOpening": {
+    "description": "Spoken label while the invitation link is checked."
+  },
+  "invitationHeading": "Hello, {name}",
+  "@invitationHeading": {
+    "description": "Heading on the invitation page once the link is checked. The name is the pilot the link belongs to.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "invitationBody": "You are scoring for {contest}. Continue as a guest to enter your scores. You can come back through the same link at any time.",
+  "@invitationBody": {
+    "description": "Explains what the invitation link does. Placeholder is the contest name.",
+    "placeholders": {
+      "contest": {
+        "type": "String"
+      }
+    }
+  },
+  "continueAsGuest": "Continue as guest",
+  "@continueAsGuest": {
+    "description": "Primary button on the invitation page."
+  },
+  "signInButton": "Sign in",
+  "@signInButton": {
+    "description": "Button on the invitation page. Not connected yet."
+  },
+  "createAccountButton": "Create account",
+  "@createAccountButton": {
+    "description": "Button on the invitation page. Not connected yet."
+  },
+  "accountsComingSoon": "Accounts are coming soon. For now, continue as a guest.",
+  "@accountsComingSoon": {
+    "description": "Shown under the Sign in and Create account buttons while they are not connected."
+  },
+  "invalidLinkTitle": "This link does not work",
+  "@invalidLinkTitle": {
+    "description": "Heading when an invitation link is unknown, expired or replaced."
+  },
+  "invalidLinkBody": "The link may have expired or been replaced. Ask your contest director for your link.",
+  "@invalidLinkBody": {
+    "description": "Tells the person what to do about a link that does not work. Does not say why, on purpose."
+  },
+  "invitationLoadFailed": "Could not open your link. Check your network connection and try again.",
+  "@invitationLoadFailed": {
+    "description": "Shown when the server could not be reached while checking an invitation link."
+  },
+  "scoreSending": "Sending your score",
+  "@scoreSending": {
+    "description": "Shown on the Submit button while the score is on its way."
+  },
+  "scoreQueuedTitle": "Not sent yet",
+  "@scoreQueuedTitle": {
+    "description": "Heading when a score could not reach the server."
+  },
+  "scoreQueuedBody": "Your score is saved on this phone and is not official yet. It will send again when the connection is back. You can also try now.",
+  "@scoreQueuedBody": {
+    "description": "Explains a score that has not reached the server."
+  },
+  "scoreRetryNow": "Try again now",
+  "@scoreRetryNow": {
+    "description": "Button that sends a waiting score again."
+  },
+  "scoreAcceptedLine": "Official score: {score}",
+  "@scoreAcceptedLine": {
+    "description": "Shown after the server accepted the score. The score is the server's calculation.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "scoreCalculatedLine": "Score: {score}",
+  "@scoreCalculatedLine": {
+    "description": "Shown after the server accepted the score, before it is official. The score is the server's calculation.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "scoreRawLine": "Raw score: {score}",
+  "@scoreRawLine": {
+    "description": "The flight's score before normalising, from the server.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "scoreRoundLine": "Round score: {score}",
+  "@scoreRoundLine": {
+    "description": "The pilot's score for the round, from the server.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "scorePenaltyLine": "Penalty so far: {score}",
+  "@scorePenaltyLine": {
+    "description": "The penalty points counted against the pilot so far, from the server.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "scoreEnteredByLine": "Entered by {name}",
+  "@scoreEnteredByLine": {
+    "description": "Who entered the stored score.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scoreAcceptedNoValue": "Your score was received.",
+  "@scoreAcceptedNoValue": {
+    "description": "Shown after the server accepted the score but gave no calculated value."
+  },
+  "scoreAlreadyThere": "This flight already has a score. The stored score stands.",
+  "@scoreAlreadyThere": {
+    "description": "Shown when the server already had a score for the flight."
+  },
+  "scoreAlreadyThereWith": "This flight already has a score: {score}. The stored score stands.",
+  "@scoreAlreadyThereWith": {
+    "description": "Shown when the server already had a score for the flight. The score is the stored one.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "backToPilots": "Back to pilots",
+  "@backToPilots": {
+    "description": "Tooltip of the back button on the pilot overview, which goes to the team overview."
+  },
+  "seeGroupResults": "See group results",
+  "@seeGroupResults": {
+    "description": "Button shown after a score is submitted; opens the results of the pilot's group for that round."
+  },
+  "scoreExistingReadOnly": "This flight already has a score, so it is read-only. See the group results for the score.",
+  "@scoreExistingReadOnly": {
+    "description": "Shown when the entry form opens for a flight that is already scored."
+  },
+  "scoreRejectedValidation": "Check your entries. The score was not sent.",
+  "@scoreRejectedValidation": {
+    "description": "Shown when the server refused the values."
+  },
+  "scoreRejectedClosed": "Scoring is closed for this flight. Ask your contest director.",
+  "@scoreRejectedClosed": {
+    "description": "Shown when the contest or round no longer takes scores."
+  },
+  "scoreRejectedOutOfOrder": "Score the earlier round first.",
+  "@scoreRejectedOutOfOrder": {
+    "description": "Shown when an earlier round has no score yet."
+  },
+  "scoreRejectedStaleDraw": "The draw changed. Go back to your rounds and open this round again.",
+  "@scoreRejectedStaleDraw": {
+    "description": "Shown when the draw changed after the form was opened."
+  },
+  "scoreRejectedSession": "Your session has ended. Open your invitation link again.",
+  "@scoreRejectedSession": {
+    "description": "Shown when the guest session is no longer valid."
+  },
+  "scoreRejectedOther": "The score was not accepted. Ask your contest director.",
+  "@scoreRejectedOther": {
+    "description": "Shown for any other refusal."
+  },
+  "unsupportedRoleTitle": "This link is not for scoring yet",
+  "@unsupportedRoleTitle": {
+    "description": "Heading when an invitation link is valid but for a role this release does not support."
+  },
+  "unsupportedRoleBody": "Your link works, but this version of the app only supports pilots entering their own scores. Ask your contest director.",
+  "@unsupportedRoleBody": {
+    "description": "Explains a link for a role (such as a helper) that the app does not support yet."
+  },
+  "backToStart": "Back to start",
+  "@backToStart": {
+    "description": "Button on a page whose session ended. Goes to the start page, where the person opens their link again."
+  },
+  "scoringOpen": "Scoring open",
+  "@scoringOpen": {
+    "description": "The contest is taking scores."
+  },
+  "scoringNotStarted": "Scoring not open yet",
+  "@scoringNotStarted": {
+    "description": "Scoring has not opened."
+  },
+  "scoringClosed": "Scoring closed",
+  "@scoringClosed": {
+    "description": "The contest is not taking scores now."
+  },
+  "scoringCompleted": "Contest completed",
+  "@scoringCompleted": {
+    "description": "The contest is over."
+  },
+  "endSession": "End session",
+  "@endSession": {
+    "description": "Tooltip of the button that ends the guest session and returns to the start page."
   }
 }

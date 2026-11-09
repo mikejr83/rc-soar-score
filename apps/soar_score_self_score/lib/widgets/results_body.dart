@@ -149,19 +149,22 @@ class _ResultsBodyState extends State<ResultsBody> {
           ),
         ],
         const SizedBox(height: 16),
-        SegmentedButton<bool>(
-          showSelectedIcon: false,
-          style: SegmentedButton.styleFrom(
-            minimumSize: const Size.fromHeight(48),
+        // Team standings only show when the contest has teams.
+        if (snapshot.teams.isNotEmpty) ...[
+          SegmentedButton<bool>(
+            showSelectedIcon: false,
+            style: SegmentedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+            segments: const [
+              ButtonSegment(value: false, label: Text('Pilots')),
+              ButtonSegment(value: true, label: Text('Teams')),
+            ],
+            selected: {_teams},
+            onSelectionChanged: (value) => setState(() => _teams = value.first),
           ),
-          segments: const [
-            ButtonSegment(value: false, label: Text('Pilots')),
-            ButtonSegment(value: true, label: Text('Teams')),
-          ],
-          selected: {_teams},
-          onSelectionChanged: (value) => setState(() => _teams = value.first),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
+        ],
         Text(
           '${_teams ? 'Overall, teams' : 'Overall, pilots'}'
           '${isLatest ? '' : ', as of round $round'}',

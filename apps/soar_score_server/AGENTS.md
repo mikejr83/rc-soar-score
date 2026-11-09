@@ -31,3 +31,7 @@ Thin executable that wires dependencies, starts the shelf_io server, and exposes
 - Server verifies JWKS from `AUTH0_DOMAIN` (public)
 - Valid audience: `https://soar-score.com/server` (the API identifier in Auth0; set as `API_AUDIENCE`)
 - No Auth0 roles or scopes: authorization comes from backend relationships (ownership, invitations), see `plan/architecture-requirements/data/accounts.md`
+
+## Guest sessions
+
+`/api/v1/self-scoring/*` is mounted before `/api/v1`, so it skips the Auth0 layer and answers to its own guest session (`guestSessionAuth`, a `ParticipantPrincipal`). `INVITATION_SECRET` turns it on; without it the routes answer 409 `invitations_not_available`. The director's side is `GET`/`POST /api/v1/contests/{id}/invitations` (`invitation_handlers.dart`): list the active links, issue for the listed pilots, never email (#790); links are built from `SELF_SCORING_BASE_URL`. The slice test `test/api_slice/invitations_slice_test.dart` runs it on SQLite and PostgreSQL.

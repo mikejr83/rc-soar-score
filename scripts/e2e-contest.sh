@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# scripts/e2e.sh
+# scripts/e2e-contest.sh
 # Runs the contest app's end-to-end tests (Flutter integration_test) against
 # the real app on the demo data, which is recreated for every run.
 # Not part of CI (Actions has no credits); run it locally or from an agent.
 #
-#   ./scripts/e2e.sh                 # Windows desktop (default on Windows)
-#   ./scripts/e2e.sh -d web          # headless Chrome against the E2E server
-#   ./scripts/e2e.sh -d <device>     # any other `flutter test -d` device
-#   ./scripts/e2e.sh -f save_failure_retry_test.dart -- --name 'Retry saves'
-#   ./scripts/e2e.sh -- --name journey   # extra args go to flutter test/drive
+#   ./scripts/e2e-contest.sh                 # Windows desktop (default on Windows)
+#   ./scripts/e2e-contest.sh -d web          # headless Chrome against the E2E server
+#   ./scripts/e2e-contest.sh -d <device>     # any other `flutter test -d` device
+#   ./scripts/e2e-contest.sh -f save_failure_retry_test.dart -- --name 'Retry saves'
+#   ./scripts/e2e-contest.sh -- --name journey   # extra args go to flutter test/drive
 #
 # The web mode needs Chrome and a matching chromedriver. Run
 # ./scripts/e2e-setup.sh once to install both into .e2e-tools/ (git-ignored),

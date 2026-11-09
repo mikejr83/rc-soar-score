@@ -176,11 +176,40 @@ class ScoringServer {
   }
 
   final Set<Id> _submitted = {};
+  final Set<Id> _inReview = {};
+
+  /// The newest waiting submission of the slot, as the service lists it.
+  ScoreAttempt? _pendingAttempt(Id assignmentId) {
+    // Kept even after an official score, so a test can prove the row's own
+    // gate hides stale values (the service itself drops it).
+    if (!_submitted.contains(assignmentId)) return null;
+    final entry = (_history[assignmentId] ?? const []).lastWhere(
+      (e) => e.outcome == ScoreHistoryOutcome.pending,
+    );
+    return ScoreAttempt(
+      id: entry.attemptId,
+      contestId: contestId,
+      scorePlaceholderId: _placeholderId(assignmentId),
+      configRevisionId: _sid('000d', 1),
+      matrixRevisionId: _sid('000e', 1),
+      rawComponents: entry.components,
+      actorId: _setBy,
+      authority: Authority.participant,
+      clientMutationId: 'seeded-pending',
+      baseScoreRevision: 0,
+      acceptedAt: DateTime.utc(2026, 10, 17, 15),
+    );
+  }
 
   /// A participant's submission waiting for the director: the slot is
   /// Submitted, with no official score.
-  void seedPendingSubmission(Id assignmentId, Map<String, Object?> components) {
+  void seedPendingSubmission(
+    Id assignmentId,
+    Map<String, Object?> components, {
+    bool inReview = false,
+  }) {
     _submitted.add(assignmentId);
+    if (inReview) _inReview.add(assignmentId);
     (_history[assignmentId] ??= []).add(
       ScoreHistoryEntry(
         attemptId: _sid('000c', 99),
@@ -278,6 +307,8 @@ class ScoringServer {
       assignmentId: assignmentId,
       state: score != null
           ? ScorePlaceholderState.official
+          : _inReview.contains(assignmentId)
+          ? ScorePlaceholderState.inReview
           : _submitted.contains(assignmentId)
           ? ScorePlaceholderState.submitted
           : ScorePlaceholderState.notEntered,
@@ -355,6 +386,7 @@ class ScoringServer {
             {
               'placeholder': _placeholder(assignment.id).toJson(),
               'official_score': _score[assignment.id]?.toJson(),
+              'pending_attempt': _pendingAttempt(assignment.id)?.toJson(),
             },
         ],
         'rounds': const <Object>[],

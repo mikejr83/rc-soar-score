@@ -19,6 +19,7 @@ ScoreAttempt make({
   authority: authority,
   clientMutationId: mutationId,
   baseScoreRevision: base,
+  acceptedAt: DateTime.utc(2026, 10, 17, 15, 10),
 );
 
 void main() {

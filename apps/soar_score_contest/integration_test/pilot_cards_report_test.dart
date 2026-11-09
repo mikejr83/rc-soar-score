@@ -33,8 +33,8 @@ void main() {
     );
 
     // Without invitations no card has a QR code, which is what the print
-    // reminder below is about. (The app's own source is a placeholder that
-    // gives every card a code to the project's web site.)
+    // reminder below is about. (The app's own source asks the hosted server,
+    // which this journey does not have.)
     final source = PilotInvitationSources.current;
     addTearDown(() => PilotInvitationSources.current = source);
     PilotInvitationSources.current = const UnavailablePilotInvitationSource();

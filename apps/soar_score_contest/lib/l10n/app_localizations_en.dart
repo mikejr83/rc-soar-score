@@ -1528,6 +1528,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publicationStateUnknown => 'Unknown';
 
   @override
+  String get publicationStateSignIn => 'Sign in required';
+
+  @override
+  String get publicationSignInReason =>
+      'Sign in to publish. Publishing goes through the hosted server.';
+
+  @override
+  String get publicationFailSignIn => 'Sign in to publish this contest.';
+
+  @override
+  String get publicationFailSignInExpired =>
+      'Your sign-in expired. Sign in again to publish this contest.';
+
+  @override
+  String get publicationFailNotSynced =>
+      'The server does not have this contest yet. Wait for it to sync, then publish again.';
+
+  @override
   String get publicationStateUnavailable => 'Not available';
 
   @override
@@ -1893,7 +1911,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get competitionImportIntro =>
-      'Choose the competitions to import. Each becomes a contest with its settings and participants. The draw and the scores are not imported with it, but a competition you imported before can have its draw added.';
+      'Choose the competitions to import. Each becomes a contest with its settings, participants, draw and scores, as GliderScore last held them. Importing the same competition again replaces what was imported before.';
 
   @override
   String get competitionImportNothingImportable =>
@@ -1919,10 +1937,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get competitionImportWarningTeamNames =>
       'Teams are named Team 1, Team 2 and so on, because GliderScore has no team names. You can rename them afterwards.';
-
-  @override
-  String get competitionImportWarningRetired =>
-      'Retired pilots stay active, because a retirement belongs to a round and there is no draw yet.';
 
   @override
   String competitionImportWarningOther(int count) {
@@ -1998,19 +2012,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get competitionImportNotImported =>
-      'Not imported: the draw, rounds, flights and scores.';
-
-  @override
   String get competitionImportConfirm => 'Import';
 
   @override
   String get competitionImportSaving => 'Importing…';
-
-  @override
-  String competitionImportResultImported(String name) {
-    return '$name: imported.';
-  }
 
   @override
   String competitionImportResultSkippedPilots(int count) {
@@ -2022,11 +2027,6 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 participant was left out because no pilot was chosen for them.',
     );
     return '$_temp0';
-  }
-
-  @override
-  String competitionImportResultAlready(String name, String date) {
-    return '$name: already imported on $date. Nothing was changed.';
   }
 
   @override
@@ -2061,6 +2061,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'A participant you chose is no longer in your list.';
 
   @override
+  String competitionImportFailDrawParticipant(String pilots) {
+    return 'Pilots who flew or were drawn were not chosen in the pilot step (GliderScore pilot numbers $pilots). Import again and add them.';
+  }
+
+  @override
   String get competitionImportFailOther =>
       'Something went wrong and nothing of this competition was kept.';
 
@@ -2070,190 +2075,278 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get competitionImportDrawTitle => 'Add the draw';
-
-  @override
-  String get competitionImportDrawIntro =>
-      'Imported before. Adding the draw gives the contest its rounds, groups and every pilot\'s place, and makes it Ready. Every flight waits for a score.';
-
-  @override
-  String competitionImportDrawDetails(int rounds, int groups, int pilots) {
+  String competitionImportRowFlights(int count) {
     String _temp0 = intl.Intl.pluralLogic(
-      rounds,
+      count,
       locale: localeName,
-      other: '$rounds rounds',
-      one: '1 round',
+      other: '$count scored flights',
+      one: '1 scored flight',
+      zero: 'no scored flights',
     );
-    String _temp1 = intl.Intl.pluralLogic(
-      groups,
-      locale: localeName,
-      other: '$groups groups per round',
-      one: '1 group per round',
-    );
-    String _temp2 = intl.Intl.pluralLogic(
-      pilots,
-      locale: localeName,
-      other: '$pilots pilots',
-      one: '1 pilot',
-    );
-    return '$_temp0 · $_temp1 · $_temp2';
+    return '$_temp0';
   }
 
   @override
-  String get competitionImportDrawNoteHistory =>
-      'The draw is kept as GliderScore drew it. It cannot be reproduced from a seed, but rounds without scores can be redrawn like any other.';
+  String get competitionImportCompleted => 'Mark the contest Completed';
 
   @override
-  String competitionImportDrawWarningGroups(int count) {
+  String get competitionImportCompletedHint =>
+      'Closes the contest: rounds are locked and rounds that were not flown are cancelled. Leave it off to carry on scoring in Soar Score.';
+
+  @override
+  String competitionImportWarningRetirement(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other:
-          'In $count rounds the groups per round setting differs from the groups drawn. The groups as drawn are used.',
-      one: 'In 1 round the groups per round setting differs from the groups drawn. The groups as drawn are used.',
+          '$count pilots are marked retired. The round they retired from is taken from their last score.',
+      one: '1 pilot is marked retired. The round they retired from is taken from their last score.',
     );
     return '$_temp0';
   }
 
   @override
-  String competitionImportDrawWarningSizes(int count) {
+  String competitionImportWarningReflights(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other:
-          'In $count rounds the group sizes are not an even split. They are imported as drawn.',
-      one: 'In 1 round the group sizes are not an even split. They are imported as drawn.',
+          '$count re-flights are imported as extra groups after the regular groups of their rounds.',
+      one: '1 re-flight is imported as an extra group after the regular groups of its round.',
     );
     return '$_temp0';
   }
 
   @override
-  String competitionImportDrawWarningLanes(int count) {
+  String competitionImportWarningRestart(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other:
-          '$count places are beyond the lane count of the competition and get the next lanes.',
-      one: '1 place is beyond the lane count of the competition and gets the next lane.',
+          '$count flights have a motor restart that GliderScore did not count. Their scores are kept.',
+      one: '1 flight has a motor restart that GliderScore did not count. Its score is kept.',
     );
     return '$_temp0';
   }
 
   @override
-  String competitionImportDrawWarningOther(int count) {
+  String competitionImportWarningUnflown(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count more notes about the order of pilots in groups.',
-      one: '1 more note about the order of pilots in a group.',
+      other: '$count rounds have flights without a score.',
+      one: '1 round has flights without a score.',
     );
     return '$_temp0';
   }
 
   @override
-  String get competitionImportDrawReasonFingerprint =>
-      'This contest was imported from a different version of the file, so its pilots may no longer line up. Delete the contest and import the competition again to add its draw.';
+  String competitionImportWarningZero(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count flights have no time, landing or penalty and are imported as zeros.',
+      one:
+          '1 flight has no time, landing or penalty and is imported as a zero.',
+    );
+    return '$_temp0';
+  }
 
   @override
-  String get competitionImportDrawReasonDrawn =>
-      'The contest already has a draw.';
+  String competitionImportWarningLanding(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count landing values are not in the landing table and are left out.',
+      one: '1 landing value is not in the landing table and is left out.',
+    );
+    return '$_temp0';
+  }
 
   @override
-  String get competitionImportDrawReasonScores =>
-      'The contest already has scores.';
+  String competitionImportTargetReplaces(String name) {
+    return 'Imported before as \"$name\". Importing replaces that contest and keeps its place in your list.';
+  }
 
   @override
-  String get competitionImportDrawReasonNoDraw =>
-      'This competition has no drawn flights.';
+  String get competitionImportTargetUnchanged =>
+      'Imported before, and the file has not changed. Nothing will be written.';
 
   @override
-  String get competitionImportDrawReasonPilot =>
-      'A pilot in the draw is not a participant of the contest.';
+  String competitionImportTargetChanges(int scores) {
+    String _temp0 = intl.Intl.pluralLogic(
+      scores,
+      locale: localeName,
+      other: '$scores scores entered',
+      one: '1 score entered',
+      zero: 'no scores entered',
+    );
+    return 'Changed in Soar Score since: $_temp0. Importing replaces them.';
+  }
 
   @override
-  String get competitionImportDrawReasonMoved =>
+  String get competitionImportTargetSynced =>
+      'This contest has been sent to the server and cannot be replaced yet. Delete it to import the competition again.';
+
+  @override
+  String get competitionImportTargetPublished =>
+      'Its results are published. Unpublish them before importing again.';
+
+  @override
+  String competitionImportTargetNumberMatch(
+    int number,
+    String name,
+    String date,
+  ) {
+    return 'A contest imported from competition number $number exists: \"$name\", $date. This competition has no id to tell whether it is the same one.';
+  }
+
+  @override
+  String competitionImportTargetSame(String name) {
+    return 'It is the same competition: replace \"$name\"';
+  }
+
+  @override
+  String competitionImportSummaryReplaced(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contests will be replaced.',
+      one: '1 contest will be replaced.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String competitionImportSummaryUnchanged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contests are already up to date.',
+      one: '1 contest is already up to date.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String competitionImportSummaryFlights(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count scored flights will be imported.',
+      one: '1 scored flight will be imported.',
+      zero: 'No scored flights will be imported.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String competitionImportSummaryCompleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count contests will be marked Completed.',
+      one: '1 contest will be marked Completed.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get competitionImportSummaryCheck =>
+      'Soar Score recalculates every flight and compares it with GliderScore\'s score. If one differs, nothing of that competition is kept.';
+
+  @override
+  String get competitionImportConfirmReplace =>
+      'I understand that what I changed in these contests after the last import is replaced.';
+
+  @override
+  String competitionImportResultRestored(String name, int flights) {
+    String _temp0 = intl.Intl.pluralLogic(
+      flights,
+      locale: localeName,
+      other: '$flights scored flights.',
+      one: '1 scored flight.',
+      zero: 'No scored flights.',
+    );
+    return '$name: imported. $_temp0';
+  }
+
+  @override
+  String competitionImportResultReplaced(String name, int flights) {
+    String _temp0 = intl.Intl.pluralLogic(
+      flights,
+      locale: localeName,
+      other: '$flights scored flights.',
+      one: '1 scored flight.',
+      zero: 'No scored flights.',
+    );
+    return '$name: replaced with the file\'s content. $_temp0';
+  }
+
+  @override
+  String competitionImportResultUnchanged(String name) {
+    return '$name: already up to date. Nothing was changed.';
+  }
+
+  @override
+  String competitionImportResultRefused(String name, String reason) {
+    return '$name: not imported. $reason';
+  }
+
+  @override
+  String competitionImportFailComparison(int count, String flights) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count flights',
+      one: '1 flight',
+    );
+    return 'Soar Score could not reproduce GliderScore\'s scores for $_temp0, so nothing of this competition was kept. First: $flights.';
+  }
+
+  @override
+  String competitionImportMismatchFlight(int round, int group, int pilot) {
+    return 'round $round, group $group, pilot $pilot';
+  }
+
+  @override
+  String get competitionImportReasonReflights =>
+      'This competition has a re-flight that does not cover a whole group. Those cannot be imported.';
+
+  @override
+  String competitionImportReasonFlights(String detail) {
+    return 'Some scores cannot be turned into Soar Score scores: $detail';
+  }
+
+  @override
+  String get competitionImportReasonNoScores =>
+      'The scores of this competition are not in the file.';
+
+  @override
+  String get competitionImportReasonMoved =>
       'A flight was moved to another round in GliderScore. Moved flights cannot be imported.';
 
   @override
-  String get competitionImportDrawReasonRounds =>
+  String get competitionImportReasonRounds =>
       'The rounds or flights of this competition are not in a form that can be imported.';
 
   @override
-  String get competitionImportDrawReasonOther =>
-      'The draw of this competition cannot be added.';
+  String get competitionImportRefuseSynced =>
+      'This contest has been sent to the server and cannot be replaced yet.';
 
   @override
-  String get competitionImportDrawFailLocked =>
-      'The contest is locked. Unlock it, then try again.';
+  String get competitionImportRefusePublished =>
+      'Its results are published. Unpublish them first.';
 
   @override
-  String competitionImportSummaryDraws(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'The draws of $count contests will be added.',
-      one: 'The draw of 1 contest will be added.',
-    );
-    return '$_temp0';
-  }
+  String get competitionImportRefuseConfirm =>
+      'The contest was changed in Soar Score. Confirm the replace and try again.';
 
   @override
-  String get competitionImportDrawNotImported =>
-      'Not imported with the draw: flights and scores.';
-
-  @override
-  String competitionImportResultDrawAdded(String name, int rounds, int places) {
-    String _temp0 = intl.Intl.pluralLogic(
-      rounds,
-      locale: localeName,
-      other: '$rounds rounds',
-      one: '1 round',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      places,
-      locale: localeName,
-      other: '$places places',
-      one: '1 place',
-    );
-    return '$name: the draw was added. $_temp0 and $_temp1. The contest is Ready.';
-  }
-
-  @override
-  String competitionImportResultDrawFailed(String name, String reason) {
-    return '$name: the draw was not added. $reason';
-  }
-
-  @override
-  String competitionImportDrawLanes(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'Lanes: $count lanes. Each pilot\'s lane follows their place in the group.',
-      one:
-          'Lanes: 1 lane. Each pilot\'s lane follows their place in the group.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get competitionImportDrawNoLanes =>
-      'No lanes: the competition has none, so the order in each group is kept but no lane is set.';
-
-  @override
-  String competitionImportDrawUnflown(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'The last $count rounds have no scores yet. They may not have been flown.',
-      one: 'The last round has no scores yet. It may not have been flown.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get competitionImportDrawNoScores => 'No round has scores yet.';
+  String get competitionImportRefuseNotRestorable =>
+      'The contest to replace is not one made by an import.';
 
   @override
   String importedContestNoteTitle(String date) {
@@ -2262,19 +2355,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importedContestNoteBody =>
-      'Scores, penalties, re-flights and retirements were not imported. Scoring starts from here.';
-
-  @override
-  String get importedContestNoteDraw =>
-      'The draw is a copy of GliderScore\'s draw at the time of the import.';
+      'The draw, scores, re-flights and retirements are as GliderScore held them when the file was made. Importing the competition again replaces them.';
 
   @override
   String get importedContestNoteNoLanes =>
       'GliderScore used no lanes, so none are set.';
-
-  @override
-  String get importedContestNoteNoDraw =>
-      'The draw was not imported. Build it as for any contest.';
 
   @override
   String get importedChipLabel => 'Imported from GliderScore';
@@ -2283,4 +2368,295 @@ class AppLocalizationsEn extends AppLocalizations {
   String importedChipTooltip(String date) {
     return 'Imported from GliderScore on $date';
   }
+
+  @override
+  String get pilotCardsSendTitle => 'Send invitations?';
+
+  @override
+  String get pilotCardsSendBody =>
+      'QR codes will be created for these pilots, and each of these cards will carry one. Nobody is emailed: print the cards to hand them out.';
+
+  @override
+  String pilotCardsQrCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count QR codes',
+      one: '1 QR code',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pilotCardsSendCountNote =>
+      ' — one per pilot, the same on every reprint.';
+
+  @override
+  String get pilotCardsCancel => 'Cancel';
+
+  @override
+  String get pilotCardsSendConfirm => 'Send invitations';
+
+  @override
+  String get pilotCardsReminderTitle =>
+      'Some cards will print without QR codes.';
+
+  @override
+  String pilotCardsReminderNone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'None of these $count cards have a QR code yet.',
+      one: 'This card doesn’t have a QR code yet.',
+    );
+    return '$_temp0 Pilots without one can’t scan to enter scores.';
+  }
+
+  @override
+  String pilotCardsReminderSome(int missing, int selected) {
+    String _temp0 = intl.Intl.pluralLogic(
+      selected,
+      locale: localeName,
+      other: '$selected cards',
+      one: '1 card',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      missing,
+      locale: localeName,
+      other: 'don’t',
+      one: 'doesn’t',
+    );
+    return '$missing of $_temp0 $_temp1 have a QR code yet. Pilots without one can’t scan to enter scores.';
+  }
+
+  @override
+  String get pilotCardsReminderUnsynced =>
+      'This contest hasn’t synchronized, so QR codes can’t be made yet.';
+
+  @override
+  String get pilotCardsReminderOffline =>
+      'You’re offline, so invitations can’t be sent now. QR codes already issued still print.';
+
+  @override
+  String get pilotCardsReminderSend => 'Send invitations and print';
+
+  @override
+  String get pilotCardsReminderWithout => 'Print without QR codes';
+
+  @override
+  String get pilotCardsUnavailableSignIn => 'Sign in to send invitations.';
+
+  @override
+  String get pilotCardsUnavailableServer =>
+      'This server doesn’t issue invitations, so QR codes can’t be made.';
+
+  @override
+  String get pilotCardsUnavailableLinks =>
+      'Some invitations can’t be shown as QR codes because the server’s invitation secret changed after they were issued.';
+
+  @override
+  String get pilotCardsUnavailableVersion =>
+      'Sending invitations isn’t available in this version of the app yet.';
+
+  @override
+  String get pilotCardsSendingLead => 'Creating QR codes.';
+
+  @override
+  String pilotCardsSendingText(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count QR codes',
+      one: '1 QR code',
+    );
+    return 'Creating $_temp0. Print is paused until the codes are ready; you can keep changing options.';
+  }
+
+  @override
+  String get pilotCardsFailedLead => 'QR codes could not be created.';
+
+  @override
+  String get pilotCardsFailedText =>
+      'No QR codes were added. Check the connection and try again, or print without QR codes.';
+
+  @override
+  String get pilotCardsRetry => 'Retry';
+
+  @override
+  String get pilotCardsNotLoadedLead => 'QR codes were created.';
+
+  @override
+  String get pilotCardsNotLoadedText =>
+      'The QR codes could not be loaded, so the cards do not show them yet. No need to create them again: they already exist.';
+
+  @override
+  String get pilotCardsLoadCodes => 'Load QR codes';
+
+  @override
+  String get pilotCardsSentLead => 'QR codes created.';
+
+  @override
+  String get pilotCardsSentText =>
+      'The cards now carry them. Nothing was emailed.';
+
+  @override
+  String get pilotCardsDismiss => 'Dismiss';
+
+  @override
+  String get pilotCardsLoadFailedLead => 'QR codes could not be loaded.';
+
+  @override
+  String get pilotCardsLoadFailedText =>
+      'The cards print without QR codes until they load. Check the connection and retry.';
+
+  @override
+  String get pilotCardsUnsyncedLead => 'No QR codes yet.';
+
+  @override
+  String get pilotCardsUnsyncedText =>
+      'This contest was organized offline and hasn’t synchronized. Sync it first to create QR codes. Cards print without them.';
+
+  @override
+  String get pilotCardsOfflineLead => 'Offline.';
+
+  @override
+  String get pilotCardsOfflineText =>
+      'Connect to send invitations. QR codes already issued still print.';
+
+  @override
+  String get pilotCardsMissingLead => 'No QR code.';
+
+  @override
+  String get pilotCardsMissingAll =>
+      'Some cards have no QR code. Send invitations to add them.';
+
+  @override
+  String pilotCardsMissingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cards have',
+      one: '1 card has',
+    );
+    return '$_temp0 no QR code. Send invitations to add them.';
+  }
+
+  @override
+  String pilotCardsMissingReason(String reason) {
+    return '$reason You can still print without QR codes.';
+  }
+
+  @override
+  String get pilotCardsSendAction => 'Send invitations';
+
+  @override
+  String get invitationsSectionTitle => 'Pilot invitations';
+
+  @override
+  String get invitationsLoading => 'Loading invitations…';
+
+  @override
+  String get invitationsLoadFailed =>
+      'The invitations could not be loaded. Check the connection and retry.';
+
+  @override
+  String get invitationsNoPilots =>
+      'Add pilots to the contest to send invitations.';
+
+  @override
+  String invitationsCoverage(int have, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total pilots have',
+      one: '1 pilot has',
+    );
+    return '$have of $_temp0 a QR code. Sending creates the rest. Nobody is emailed.';
+  }
+
+  @override
+  String invitationsCoverageAll(int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'All $total pilots have',
+      one: 'The pilot has',
+    );
+    return '$_temp0 a QR code. Print the pilot cards to hand them out.';
+  }
+
+  @override
+  String get invitationsOpenCards => 'Open pilot cards';
+
+  @override
+  String invitationsSendMissing(int count) {
+    return 'Send invitations ($count)';
+  }
+
+  @override
+  String invitationsSentSnack(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count invitations created',
+      one: '1 invitation created',
+    );
+    return '$_temp0. Nobody was emailed.';
+  }
+
+  @override
+  String get invitationsSentNotLoadedSnack =>
+      'The invitations were created, but could not be loaded back. Reload the page to see them.';
+
+  @override
+  String get invitationsSendFailedSnack =>
+      'The invitations could not be created. Nothing was sent. Try again.';
+
+  @override
+  String get invitationsMenu => 'Invitations';
+
+  @override
+  String get invitationsMenuSend => 'Send invitations';
+
+  @override
+  String invitationsMenuSendCount(int count) {
+    return 'Send invitations ($count)';
+  }
+
+  @override
+  String get invitationsMenuCopy => 'Copy link';
+
+  @override
+  String get invitationsLinkCopied => 'Link copied.';
+
+  @override
+  String get invitationsSelectPilots => 'Select pilots to send invitations.';
+
+  @override
+  String get invitationsSelectOne => 'Select one pilot to copy a link.';
+
+  @override
+  String get invitationsAllHaveLinks =>
+      'The selected pilots already have an invitation.';
+
+  @override
+  String get invitationsNoLinkYet =>
+      'This pilot has no invitation yet. Send one first.';
+
+  @override
+  String get invitationsOnlyPilots => 'Only pilots get invitations.';
+
+  @override
+  String get invitationsNotReady => 'Invitations are still loading.';
+
+  @override
+  String get invitationsCopyFailed => 'The link could not be copied.';
+
+  @override
+  String get invitationsOffline =>
+      'You’re offline, so invitations can’t be sent now.';
+
+  @override
+  String get invitationsServerUnreachable =>
+      'The server can’t be reached, so invitations can’t be sent now.';
 }

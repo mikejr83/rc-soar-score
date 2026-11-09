@@ -57,6 +57,30 @@ class EntityStore<T extends Object> {
       _decode(json),
   ];
 
+  /// The entities whose [column] is one of [values], in [orderBy] order.
+  ///
+  /// [column] is a column name from the schema, never user input. Long
+  /// lists are read in chunks to stay under the database's variable limit.
+  Future<List<T>> whereIdIn(
+    String column,
+    Iterable<core.Id> values, {
+    String? orderBy,
+  }) async {
+    final ids = values.toSet().toList();
+    final found = <T>[];
+    for (var start = 0; start < ids.length; start += 400) {
+      final chunk = ids.skip(start).take(400).toList();
+      final marks = List.filled(chunk.length, '?').join(', ');
+      found.addAll([
+        for (final json in await _mapper.where('$column IN ($marks)', [
+          for (final id in chunk) Variable<String>(id.value),
+        ]))
+          _decode(json),
+      ]);
+    }
+    return found;
+  }
+
   /// The entities whose text [column] equals [value], in [orderBy] order.
   ///
   /// [column] is a column name from the schema, never user input.

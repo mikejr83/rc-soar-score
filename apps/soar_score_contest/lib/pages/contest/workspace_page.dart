@@ -23,6 +23,7 @@ import '../../widgets/contest_scope.dart';
 import '../../widgets/workspace/activity/recent_activity_section.dart';
 import '../../widgets/workspace/attention/attention_section.dart';
 import '../../widgets/workspace/checklist/setup_checklist_section.dart';
+import '../../widgets/workspace/invitations/invitations_section.dart';
 import '../../widgets/workspace/controls/archive_control_card.dart';
 import '../../widgets/workspace/controls/publication_control_card.dart';
 import '../../widgets/workspace/controls/results_control_card.dart';
@@ -265,6 +266,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     WorkspaceFactsLoader.load(
       client,
       contest,
+      publicationClient: publicationClientOf(context),
       isOffline: offline,
       actingAccountId: uiAccountIdOf(context),
     ).then(
@@ -464,6 +466,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       clock: widget.clock,
     ),
     WorkspaceSection.checklist => SetupChecklistSection(contest: contest),
+    WorkspaceSection.invitations => InvitationsSection(contest: contest),
     WorkspaceSection.attention => AttentionSection(contest: contest),
     WorkspaceSection.progress => ProgressSection(contest: contest),
     WorkspaceSection.facts => WorkspaceFactsDetails(contest: contest),

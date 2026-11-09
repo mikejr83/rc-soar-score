@@ -33,6 +33,9 @@ class PublicationActionsRow extends StatefulWidget {
     PublicationFacts publication, {
     required bool isOffline,
   }) {
+    if (publication.needsSignIn) {
+      return l10n.publicationSignInReason;
+    }
     if (!publication.isKnown) {
       return l10n.publicationUnknownReason;
     }

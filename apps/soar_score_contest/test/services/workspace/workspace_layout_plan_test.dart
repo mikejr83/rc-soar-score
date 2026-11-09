@@ -6,6 +6,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 const _ns = WorkspaceSection.nextStep;
 const _ck = WorkspaceSection.checklist;
+const _iv = WorkspaceSection.invitations;
 const _at = WorkspaceSection.attention;
 const _pr = WorkspaceSection.progress;
 const _ct = WorkspaceSection.controls;
@@ -30,10 +31,10 @@ void main() {
       LifecycleState.ready,
     ]) {
       test('${l.name} without matrix', () {
-        expect(_plan(l).main, [_ns, _ck, _ac]);
+        expect(_plan(l).main, [_ns, _ck, _iv, _ac]);
       });
       test('${l.name} with matrix', () {
-        expect(_plan(l, matrix: true).main, [_ns, _ck, _pr, _ac]);
+        expect(_plan(l, matrix: true).main, [_ns, _ck, _iv, _pr, _ac]);
       });
     }
 
@@ -42,6 +43,7 @@ void main() {
         for (final a in [false, true]) {
           expect(_plan(LifecycleState.running, matrix: m, attention: a).main, [
             _ns,
+            _iv,
             _at,
             _pr,
             _ac,
@@ -65,6 +67,21 @@ void main() {
         final p = _plan(l, matrix: true, attention: true);
         expect([...p.main, ...p.side, ...p.single], isNot(contains(_ck)));
       }
+    });
+
+    test('invitations sit right under the checklist while setting up', () {
+      for (final l in [
+        LifecycleState.created,
+        LifecycleState.configuring,
+        LifecycleState.ready,
+      ]) {
+        final main = _plan(l).main;
+        expect(main.indexOf(_iv), main.indexOf(_ck) + 1);
+      }
+    });
+
+    test('invitations are absent once completed', () {
+      expect(_plan(LifecycleState.completed).single, isNot(contains(_iv)));
     });
 
     test('progress is absent before running without a matrix', () {
@@ -99,6 +116,7 @@ void main() {
     test('running single order matches design frame 1h', () {
       expect(_plan(LifecycleState.running).single, [
         _ns,
+        _iv,
         _at,
         _pr,
         _ct,
@@ -161,7 +179,7 @@ void main() {
   });
 
   test('ids are unique and stable', () {
-    expect(WorkspaceSection.values.map((s) => s.id).toSet().length, 7);
+    expect(WorkspaceSection.values.map((s) => s.id).toSet().length, 8);
     expect(WorkspaceControl.values.map((s) => s.id).toSet().length, 6);
     expect(WorkspaceControl.lifecycle.id, 'lifecycle');
     expect(WorkspaceSection.nextStep.id, 'next-step');

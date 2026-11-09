@@ -52,9 +52,11 @@ class ImportProvenance extends Equatable implements Synchronizable {
     }
     if (sourceValues != null &&
         stampedEntityType != contestEntityType &&
-        stampedEntityType != matrixRevisionEntityType) {
+        stampedEntityType != matrixRevisionEntityType &&
+        stampedEntityType != contestScoresEntityType) {
       throw ArgumentError(
-        'only a Contest or MatrixRevision row carries source_values',
+        'only a Contest, MatrixRevision or ContestScores row carries '
+        'source_values',
       );
     }
     if (!entityTypes.contains(stampedEntityType)) {
@@ -73,6 +75,7 @@ class ImportProvenance extends Equatable implements Synchronizable {
     }
     final expectedKeys = switch (stampedEntityType) {
       contestEntityType => const {'comp_no'},
+      contestScoresEntityType => const {'comp_no'},
       participationEntityType => const {'comp_no', 'pilot_no'},
       matrixRevisionEntityType => const {'comp_no', 'task_no'},
       _ => const {'pilot_no'},
@@ -86,17 +89,11 @@ class ImportProvenance extends Equatable implements Synchronizable {
       );
     }
     final key = dedupeKey;
-    if (key != null &&
-        key !=
-            ProvenanceKeys.contestDedupeKey(
-              sourceSystem: sourceSystem,
-              fileFingerprint: fileFingerprint,
-              compNo: this.sourceKeys['comp_no']! as int,
-            )) {
+    if (key != null && !key.startsWith('$sourceSystem:')) {
       throw ArgumentError.value(
         key,
         'dedupeKey',
-        'must be <source_system>:<file_fingerprint>:<comp_no>',
+        'must be <source_system>:<competition identity>',
       );
     }
     if (stampedEntityType == profileEntityType) {
@@ -152,6 +149,10 @@ class ImportProvenance extends Equatable implements Synchronizable {
   /// imported revision, with the competition and task as keys.
   static const matrixRevisionEntityType = 'MatrixRevision';
 
+  /// The scores restored into a contest: one row per contest, with the
+  /// number of flights, the landing table and the content hash.
+  static const contestScoresEntityType = 'ContestScores';
+
   /// The `stamped_entity_type` of a profile row, the only one with no
   /// contest.
   static const profileEntityType = 'ParticipantProfile';
@@ -165,6 +166,7 @@ class ImportProvenance extends Equatable implements Synchronizable {
     contestEntityType,
     participationEntityType,
     matrixRevisionEntityType,
+    contestScoresEntityType,
     profileEntityType,
   };
 
@@ -270,6 +272,14 @@ abstract final class ProvenanceKeys {
   }
 
   /// The contest dedupe key.
+  /// The dedupe key of a restored contest: the source system and the
+  /// competition's identity (`CompID`, else number, name and date), never the
+  /// file, so a changed copy of the file finds the same contest.
+  static String identityDedupeKey({
+    required String sourceSystem,
+    required String identity,
+  }) => '$sourceSystem:$identity';
+
   static String contestDedupeKey({
     required String sourceSystem,
     required String fileFingerprint,

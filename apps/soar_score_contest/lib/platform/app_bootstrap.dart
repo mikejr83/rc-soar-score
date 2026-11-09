@@ -26,6 +26,11 @@ abstract class AppBootstrap {
 
   ApiClient get remoteApiClient;
 
+  /// The client that publishes contests. Only the hosted server publishes, so
+  /// the native build answers [remoteApiClient]; the web build has just the
+  /// one client.
+  ApiClient get publicationApiClient => apiClient;
+
   /// Where UI-only state (theme, hidden panels, drafts) is kept, or `null`
   /// when the bootstrap has none (tests).
   LocalUiStore? get localUiStore => null;

@@ -34,10 +34,16 @@ class ScoreEntryPage extends StatelessWidget {
       appBar: (context, data) => SelfScoreAppBar(
         title: data == null
             ? 'Score entry'
+            : data.pilotNumber == null
+            ? data.pilotName
             : '${data.pilotName}, pilot ${data.pilotNumber}',
         contextLine: data == null
             ? null
-            : 'Round ${data.round} · Group ${data.group} · Lane ${data.lane}',
+            : [
+                'Round ${data.round}',
+                'Group ${data.group}',
+                if (data.lane != null) 'Lane ${data.lane}',
+              ].join(' · '),
         onBack: () => context.go(pilotPath(contestId, pilotId)),
         backLabel: 'Back to pilot overview',
         actions: data == null
@@ -61,12 +67,32 @@ class ScoreEntryPage extends StatelessWidget {
         showAccount: false,
       ),
       // The form keeps its own state, so a new flight gets a new form.
-      builder: (context, data) => ScoreEntryForm(
-        key: ValueKey((contestId, pilotId, roundId)),
-        contestId: contestId,
-        pilotId: pilotId,
-        data: data,
-      ),
+      builder: (context, data) => !data.formSupported
+          ? const _UnsupportedFlight()
+          : ScoreEntryForm(
+              key: ValueKey((contestId, pilotId, roundId)),
+              contestId: contestId,
+              pilotId: pilotId,
+              data: data,
+            ),
     );
   }
+}
+
+/// Shown when the server asks for scores this form cannot enter yet.
+class _UnsupportedFlight extends StatelessWidget {
+  const _UnsupportedFlight();
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Text(
+        'This kind of flight cannot be scored here yet. Give your score to '
+        'the contest director.',
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.bodyLarge,
+      ),
+    ),
+  );
 }

@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:integration_test/integration_test.dart';
 
 /// `--dart-define=E2E_STOP_AFTER=<phase number>` (or the `E2E_STOP_AFTER`
-/// environment variable of `scripts/e2e.sh` / `e2e.ps1`) ends the journey
+/// environment variable of `scripts/e2e-contest.sh` / `e2e-contest.ps1`) ends the journey
 /// after that phase, so work on one phase does not wait for the later ones.
 const String _apiBase = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
 

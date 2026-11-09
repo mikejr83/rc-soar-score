@@ -27,6 +27,14 @@ class StubScoreAttemptRepository implements ScoreAttemptRepository {
       ];
 
   @override
+  Future<Map<Id, ScoreAttempt>> latestForPlaceholders(
+    Iterable<Id> scorePlaceholderIds,
+  ) async => {
+    for (final id in scorePlaceholderIds)
+      id: ?(await listForPlaceholder(id)).lastOrNull,
+  };
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not stubbed');
 }
@@ -61,6 +69,13 @@ class StubOfficialScoreRepository implements OfficialScoreRepository {
   @override
   Future<OfficialScore?> currentForPlaceholder(Id scorePlaceholderId) async =>
       (await listForPlaceholder(scorePlaceholderId)).lastOrNull;
+
+  @override
+  Future<Map<Id, OfficialScore>> currentForPlaceholders(
+    Iterable<Id> scorePlaceholderIds,
+  ) async => {
+    for (final id in scorePlaceholderIds) id: ?await currentForPlaceholder(id),
+  };
 
   @override
   Future<RecordedScore> recordEntry(

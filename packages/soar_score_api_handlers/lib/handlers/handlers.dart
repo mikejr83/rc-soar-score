@@ -12,7 +12,11 @@ import 'package:soar_score_api_handlers/handlers/contests_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/landing_table_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/matrix_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/models_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/invitation_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/participant_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participants_handlers.dart';
+import 'package:soar_score_api_handlers/middleware/failure_rate_limiter.dart';
+import 'package:soar_score_core/soar_score_core.dart' show InvitationService;
 import 'package:soar_score_api_handlers/handlers/participations_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/roles_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/public_publication_handlers.dart';
@@ -25,7 +29,12 @@ import 'package:soar_score_core/services/recalculation/recalculation_service.dar
 import 'package:soar_score_core/import/glider_score_import_runner.dart';
 import 'package:soar_score_api_handlers/handlers/import_handlers.dart';
 
-({Handler healthHandler, Handler apiHandler, Handler publicHandler})
+({
+  Handler healthHandler,
+  Handler apiHandler,
+  Handler publicHandler,
+  Handler participantHandler,
+})
 createHandlers(
   String name,
   String displayName,
@@ -36,6 +45,10 @@ createHandlers(
   SyncVersions? syncVersions,
   GliderScoreImportRunner? gliderScoreImport,
   DrawRunner? drawRunner,
+  InvitationService? invitations,
+  FailureRateLimiter? invitationRateLimiter,
+  Set<String> corsAllowedOrigins = const {},
+  String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
 }) {
   final router = Router()
     ..get(
@@ -48,6 +61,12 @@ createHandlers(
   addConfigurationRoutes(router, repository, recalculation: recalculation);
   addLandingTableRoutes(router, repository);
   addParticipantRoutes(router, repository);
+  addInvitationRoutes(
+    router,
+    repository,
+    service: invitations,
+    selfScoringBaseUrl: selfScoringBaseUrl,
+  );
   addModelRoutes(router, repository);
   addRoleRoutes(router, repository);
   addParticipationRoutes(router, repository, recalculation: recalculation);
@@ -71,11 +90,18 @@ createHandlers(
     router,
     repository,
     versions: syncVersions ?? const SyncVersions.exactly(1),
+    recalculation: recalculation,
   );
 
   return (
     healthHandler: createHealthHandler(name, displayName, version, repository),
     apiHandler: router.call,
     publicHandler: buildPublicHandler(repository, enabled: publishingEnabled),
+    participantHandler: buildParticipantHandler(
+      repository,
+      service: invitations,
+      limiter: invitationRateLimiter,
+      allowedOrigins: corsAllowedOrigins,
+    ),
   );
 }
