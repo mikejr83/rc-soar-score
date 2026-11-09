@@ -18,13 +18,24 @@ class RowProblem {
 /// Holds the raw text of each field, so a rejected value stays on screen
 /// until it is corrected. [components] gives the request body of the save.
 class ScoreRowDraft extends ChangeNotifier {
-  ScoreRowDraft({required this.settings, Map<String, Object?> saved = const {}})
-    : _baseline = Map.of(saved) {
-    _load(saved);
+  /// [saved] is what the draft is compared to; [shown] (default [saved]) is
+  /// what the fields start with. They differ for a waiting pilot submission,
+  /// which fills the form without being saved.
+  ScoreRowDraft({
+    required this.settings,
+    Map<String, Object?> saved = const {},
+    Map<String, Object?>? shown,
+  }) : _baseline = Map.of(saved) {
+    _load(shown ?? saved);
+    _markPrefill(saved, shown);
   }
 
   final ScoreEntrySettings settings;
   Map<String, Object?> _baseline;
+
+  /// What the fields held right after they were filled from a waiting pilot
+  /// submission (differing from the saved score), or null when they were not.
+  Map<String, Object?>? _prefill;
 
   String timeText = '';
   String heightText = '';
@@ -62,16 +73,29 @@ class ScoreRowDraft extends ChangeNotifier {
     zeroConfirmed = false;
   }
 
-  /// Replaces the draft with [saved], after a save or a reload.
-  void resetTo(Map<String, Object?> saved) {
+  /// Replaces the draft with [saved], after a save or a reload. [shown]
+  /// fills the fields instead when it is given (see the constructor).
+  void resetTo(Map<String, Object?> saved, {Map<String, Object?>? shown}) {
     _baseline = Map.of(saved);
-    _load(saved);
+    _load(shown ?? saved);
+    _markPrefill(saved, shown);
     notifyListeners();
   }
+
+  void _markPrefill(Map<String, Object?> saved, Map<String, Object?>? shown) {
+    _prefill = shown != null && !_same(shown, saved) ? components : null;
+  }
+
+  /// Whether the fields still hold exactly what a pilot submission filled
+  /// in: the director has not changed anything since. Such a form can be
+  /// replaced by a newer submission; once edited it is never overwritten.
+  bool get isUntouchedPrefill =>
+      _prefill != null && _same(components, _prefill!);
 
   /// Keeps what was typed and makes [saved] the baseline it is compared to.
   void rebase(Map<String, Object?> saved) {
     _baseline = Map.of(saved);
+    _prefill = null;
     notifyListeners();
   }
 

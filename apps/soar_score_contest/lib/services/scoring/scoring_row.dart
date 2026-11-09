@@ -64,6 +64,11 @@ class ScoringRow {
       ? slot?.pendingAttempt?.rawComponents ?? const {}
       : const {};
 
+  /// What the entry form starts with: the official score, else the pilot's
+  /// waiting submission so the director can check it and save it.
+  Map<String, Object?> get formComponents =>
+      savedComponents.isNotEmpty ? savedComponents : pendingComponents;
+
   /// Whether a pilot or helper submission waits for the director: the slot is
   /// `Submitted` or `InReview`. An official score ends the wait.
   bool get hasPendingSubmission => switch (slot?.placeholder.state) {

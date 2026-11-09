@@ -212,7 +212,7 @@ class ScoringServer {
     if (inReview) _inReview.add(assignmentId);
     (_history[assignmentId] ??= []).add(
       ScoreHistoryEntry(
-        attemptId: _sid('000c', 99),
+        attemptId: _sid('000c', 100 + (_history[assignmentId]?.length ?? 0)),
         outcome: ScoreHistoryOutcome.pending,
         components: components,
         actorId: _setBy,

@@ -156,7 +156,9 @@ void main() {
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
     // The submission still waits for a decision, so it is not "Retired".
-    expect(find.text('Submitted'), findsOneWidget);
+    // The pilot's values fill the form, so the status reads Unsaved and the
+    // Pilot entry indicator marks where they came from.
+    expect(find.text('Pilot entry'), findsOneWidget);
     expect(find.text('Retired'), findsNothing);
   });
 
