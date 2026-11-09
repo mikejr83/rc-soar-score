@@ -38,6 +38,14 @@ Future<String> phase5Director(
           find.textContaining('already has a score'),
         );
         expect(find.textContaining('stored score stands'), findsOneWidget);
+        // The stored score is still the director's 8:20, read fresh.
+        await openPath(
+          tester,
+          groupResultsPath(contest.id, secondPilotId, '1'),
+        );
+        await pumpUntilFound(tester, find.text('(you)'));
+        expect(find.textContaining('8:20'), findsWidgets);
+        expect(find.textContaining('9:00'), findsNothing);
       },
     );
     await journey.step('The overview shows the director\'s entry', () async {

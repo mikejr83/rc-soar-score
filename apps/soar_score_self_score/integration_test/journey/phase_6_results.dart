@@ -51,6 +51,21 @@ Future<void> phase6Results(
       await openPath(tester, group);
       await pumpUntilFound(tester, find.text('(you)'));
       expect(find.text(mate), findsOneWidget);
+      // A score changed now shows in the group while the hold stays on.
+      await contest.scoreAsDirector(
+        mate,
+        1,
+        timeFlown: 480,
+        baseRevision: 1,
+        mutation: 'director-change',
+      );
+      await openPath(tester, pilotPath(contest.id, pilotId));
+      await openPath(tester, resultsPath(contest.id, asOfRound: 1));
+      await pumpUntilFound(tester, find.textContaining('Standings are held'));
+      await openPath(tester, group);
+      await pumpUntilFound(tester, find.text('(you)'));
+      expect(find.textContaining('8:00'), findsWidgets);
+      expect(find.textContaining('7:00'), findsNothing);
     });
     await journey.step('Showing results again lifts the hold', () async {
       await contest.action('showResults');

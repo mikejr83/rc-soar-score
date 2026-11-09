@@ -118,6 +118,17 @@ void main() {
       expect(result.fields, ['time_flown', 'landing']);
     });
 
+    test('a closed contest in the director envelope is a refusal', () async {
+      final result = await _repository(
+        (_) => _json(
+          '{"error":{"code":"scoring_closed","message":"completed"}}',
+          409,
+        ),
+      ).submitScore(_submission);
+      expect(result, isA<ScoreRejected>());
+      expect((result as ScoreRejected).code, 'scoring_closed');
+    });
+
     test('a 401 with no body ends the session instead of queueing', () async {
       for (final body in ['', '<html>']) {
         final result = await _repository((_) => _json(body, 401))
