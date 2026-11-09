@@ -52,6 +52,11 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
   Only a feature outside the lifecycle gets its own standalone `*_test.dart`,
   and the PR says why in one line. The allowed standalone files are listed in
   `apps/soar_score_contest/AGENTS.md`.
+- The self-scoring app has its own E2E journey, in
+  `apps/soar_score_self_score/integration_test/`, run with
+  `scripts/e2e-score.sh` (or `scripts/e2e-score.ps1`); same rule: a change to
+  its pages, flows or widget labels extends the matching phase in the same PR.
+  See `apps/soar_score_self_score/AGENTS.md`.
 
 ## Code Style & Linting
 
