@@ -296,6 +296,47 @@ void _tests(SliceBackend backend) {
     },
   );
 
+  test(
+    'a director score comes back on the entry context like the group',
+    () async {
+      final token = await sessionFor(1);
+      await openScoring();
+      await directorScores(1, 1, 'entry-1');
+
+      final (_, entry) = await call('/rounds/1/entry', token: token);
+      final (_, group) = await call('/rounds/1/group-results', token: token);
+      final score = entry['submitted_score']! as Map;
+      expect(entry['state'], 'official');
+      expect(score['state'], 'official');
+      expect(score['assignment_id'], assignmentOf(1, 1)['id']);
+      expect(score['assignment_id'], entry['assignment_id']);
+      expect(score['entered_by'], 'Director');
+      expect(score['components'], {
+        'time_flown': 550,
+        'launch_height': 100,
+        'landing': 'points_50',
+      });
+      // The same flight and score as the pilot's own row in the group.
+      final mine = (group['rows']! as List)
+          .cast<Map<String, Object?>>()
+          .singleWhere((row) => row['is_you'] == true);
+      expect(mine['time_flown_seconds'], 550);
+      expect(score['flight_score'], isNotNull);
+      expect(score['flight_score'], mine['flight_score']);
+      // Rounds without a score stay empty, and other pilots' scores never show.
+      expect(
+        ((await call('/rounds/2/entry', token: token)).$2)['submitted_score'],
+        isNull,
+      );
+      await directorScores(2, 1, 'entry-2');
+      final (_, other) = await call('/rounds/1/entry', token: token);
+      expect(
+        ((other['submitted_score']! as Map)['assignment_id']),
+        assignmentOf(1, 1)['id'],
+      );
+    },
+  );
+
   test('the entry context carries the form, landing table and rules', () async {
     final token = await sessionFor(1);
     final (status, body) = await call('/rounds/2/entry', token: token);
@@ -476,6 +517,11 @@ void _tests(SliceBackend backend) {
         },
       },
     );
+    // The score of the late add comes back on its own flight.
+    final (_, lateEntry) = await call('/rounds/1/entry', token: token);
+    final lateScore = lateEntry['submitted_score']! as Map;
+    expect(lateScore['assignment_id'], added['id']);
+    expect((lateScore['components']! as Map)['time_flown'], 500);
     final (_, scored) = await call('/overview', token: token);
     final after = (scored['rounds']! as List).cast<Map<String, Object?>>();
     expect(after.single['state'], 'official');
