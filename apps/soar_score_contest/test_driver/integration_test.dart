@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:integration_test/integration_test_driver_extended.dart';
 
 /// Driver for `flutter drive` runs of `integration_test/` on the web
-/// (`scripts/e2e.sh -d web`); the Windows runs use `flutter test`.
+/// (`scripts/e2e-contest.sh -d web`); the Windows runs use `flutter test`.
 ///
 /// Screenshots a journey takes on failure (`Journey`) are saved in
 /// `build/e2e-screenshots/`.

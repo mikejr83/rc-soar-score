@@ -40,11 +40,11 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
 - Run with: `melos test` or directly with `dart test` / `flutter test`
 - End-to-end (E2E) tests for the contest app live in
   `apps/soar_score_contest/integration_test/` and run only locally with
-  `scripts/e2e.ps1` (or `scripts/e2e.sh`; `-d web` / `-Device web` runs them in headless Chrome against a token-free test server, see `apps/soar_score_contest/AGENTS.md`). CI never runs them: `melos test`
+  `scripts/e2e-contest.ps1` (or `scripts/e2e-contest.sh`; `-d web` / `-Device web` runs them in headless Chrome against a token-free test server, see `apps/soar_score_contest/AGENTS.md`). CI never runs them: `melos test`
   runs `test/` only. See `apps/soar_score_contest/AGENTS.md`.
 - **Keep the E2E tests current.** After any change to the contest app's pages,
   routes, widget keys, visible labels, flows or demo data, run
-  `scripts/e2e.ps1` (or `scripts/e2e.sh -d web`) and fix or extend the
+  `scripts/e2e-contest.ps1` (or `scripts/e2e-contest.sh -d web`) and fix or extend the
   journeys the change affects, in the same PR. The contest lifecycle journey
   (`contest_lifecycle_journey_test.dart`, phases in
   `apps/soar_score_contest/integration_test/journey/`) covers a contest from
@@ -52,6 +52,11 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
   Only a feature outside the lifecycle gets its own standalone `*_test.dart`,
   and the PR says why in one line. The allowed standalone files are listed in
   `apps/soar_score_contest/AGENTS.md`.
+- The self-scoring app has its own E2E journey, in
+  `apps/soar_score_self_score/integration_test/`, run with
+  `scripts/e2e-score.sh` (or `scripts/e2e-score.ps1`); same rule: a change to
+  its pages, flows or widget labels extends the matching phase in the same PR.
+  See `apps/soar_score_self_score/AGENTS.md`.
 
 ## Code Style & Linting
 

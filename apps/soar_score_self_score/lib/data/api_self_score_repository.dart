@@ -187,12 +187,15 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   }
 
   @override
-  Future<ContestsView> contests() => throw const SelfScoreLoadException(
+  // `async`, so the error reaches the page as a failed future. A plain `=>
+  // throw` threw while the page built, which crashed the contests page that
+  // sits under every pilot page in the router's stack.
+  Future<ContestsView> contests() async => throw const SelfScoreLoadException(
     'Signing in is coming soon. Use the link from your contest director.',
   );
 
   @override
-  Future<TeamOverview> teamOverview(String contestId) =>
+  Future<TeamOverview> teamOverview(String contestId) async =>
       throw const SelfScoreLoadException(
         'The team overview is coming soon. Use the link from your contest '
         'director.',

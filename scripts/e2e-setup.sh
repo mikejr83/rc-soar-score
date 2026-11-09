@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # scripts/e2e-setup.sh
 # Installs Chrome and a matching chromedriver (both from Chrome for Testing)
-# into .e2e-tools/ at the repo root, which git ignores. scripts/e2e.sh -d web
-# and scripts/e2e.ps1 -Device web find them there, so no PATH or environment
+# into .e2e-tools/ at the repo root, which git ignores. scripts/e2e-contest.sh -d web
+# and scripts/e2e-contest.ps1 -Device web find them there, so no PATH or environment
 # setup is needed.
 #
 #   ./scripts/e2e-setup.sh                 # latest Stable, unless already installed

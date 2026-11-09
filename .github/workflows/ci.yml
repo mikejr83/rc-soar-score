@@ -115,7 +115,7 @@ jobs:
       - name: Test
         # Runs test/ in every project. The contest app's integration_test/
         # E2E journeys are not run here (they need the Windows desktop app);
-        # run them locally with scripts/e2e.ps1.
+        # run them locally with scripts/e2e-contest.ps1.
         run: melos test -c 3
 
       - name: Data package and server slice tests against PostgreSQL
