@@ -298,23 +298,23 @@ flutter test
 The contest app's journeys live in `apps/soar_score_contest/integration_test/`. They run locally or from an agent, never in CI. Every test file starts from freshly seeded demo data.
 
 ```bash
-./scripts/e2e.sh                                  # Windows desktop (default)
-./scripts/e2e.sh -d web                           # headless Chrome (any OS)
-./scripts/e2e.sh -d web -f save_failure_retry_test.dart  # one test file
+./scripts/e2e-contest.sh                                  # Windows desktop (default)
+./scripts/e2e-contest.sh -d web                           # headless Chrome (any OS)
+./scripts/e2e-contest.sh -d web -f save_failure_retry_test.dart  # one test file
 ```
 
-On PowerShell use `.\scripts\e2e.ps1`, with `-Device web` and `-File <name>`. On Windows desktop you can also add `-Name '<test name>'` (or `-- --name '<test name>'` for the shell script) to run one journey of a file; the web mode runs whole files, since `flutter drive` has no name filter.
+On PowerShell use `.\scripts\e2e-contest.ps1`, with `-Device web` and `-File <name>`. On Windows desktop you can also add `-Name '<test name>'` (or `-- --name '<test name>'` for the shell script) to run one journey of a file; the web mode runs whole files, since `flutter drive` has no name filter.
 
 The web mode builds the app with an always-signed-in session and runs it against `apps/soar_score_server/tool/e2e_server.dart`, a test-only API server on demo data that skips token checks. The scripts start and stop that server for each test file; it must never be deployed. The Windows mode needs the Windows desktop toolchain and a display. The web mode needs only Chrome and chromedriver, as follows.
 
 **Set up Chrome and chromedriver (web mode)**
 
-Run the setup script once. It downloads Chrome for Testing and the chromedriver of the same version (about 220 MB) into `.e2e-tools/` at the repo root, which git ignores, and does nothing if they are already there. Nothing is installed system-wide and no `PATH` change is needed: `e2e.sh -d web` and `e2e.ps1 -Device web` look in that folder first.
+Run the setup script once. It downloads Chrome for Testing and the chromedriver of the same version (about 220 MB) into `.e2e-tools/` at the repo root, which git ignores, and does nothing if they are already there. Nothing is installed system-wide and no `PATH` change is needed: `e2e-contest.sh -d web` and `e2e-contest.ps1 -Device web` look in that folder first.
 
 ```bash
 ./scripts/e2e-setup.sh               # PowerShell: .\scripts\e2e-setup.ps1
 ./scripts/e2e-setup.sh --dry-run     # show what it would download
-./scripts/e2e.sh -d web -f contest_lifecycle_journey_test.dart
+./scripts/e2e-contest.sh -d web -f contest_lifecycle_journey_test.dart
 ```
 
 `--channel Beta` (or `-Channel`) and `--version <x.y.z.w>` (or `-Version`) pick another Chrome for Testing build. Re-run the script to update; old versions stay in `.e2e-tools/` until you delete it. On Linux, Chrome also needs its system libraries (on Debian or Ubuntu: `sudo apt-get install -y libnss3 libatk-bridge2.0-0 libgtk-3-0 libgbm1 libasound2`).

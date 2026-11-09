@@ -209,6 +209,6 @@ guest-session endpoints are a separate work item.
 - Slice tests (`apps/soar_score_server/test/api_slice/`): a second account
   against the same real database (SQLite + Postgres profiles) — create as A,
   denied as B. This is the cross-tenant regression net.
-- E2E (`scripts/e2e.ps1`, incl. `-d web`): the embedded flows, including the
+- E2E (`scripts/e2e-contest.ps1`, incl. `-d web`): the embedded flows, including the
   imported-for-inspection contest list, must pass unchanged.
 - Gate: `melos analyze` clean, `melos test` green.

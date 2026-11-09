@@ -109,7 +109,7 @@ Middleware _cors() =>
 
 /// `POST /__e2e/log` prints its body as a line starting `[E2E]`, so a journey
 /// that runs in the browser (and prints nothing live) can show its progress
-/// in this server's output; `scripts/e2e.sh` echoes those lines.
+/// in this server's output; `scripts/e2e-contest.sh` echoes those lines.
 Middleware _journeyLog() =>
     (inner) => (request) async {
       if (request.method == 'POST' && request.url.path == '__e2e/log') {

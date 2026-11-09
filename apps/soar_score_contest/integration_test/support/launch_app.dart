@@ -5,7 +5,7 @@ import 'package:soar_score_contest/main.dart' as app;
 /// Starts the real app (embedded server, SQLite, router) and returns once the
 /// first frames are pumped. Use [pumpUntilFound] to wait for a screen.
 ///
-/// Run through `scripts/e2e.ps1` or `scripts/e2e.sh`, which build with
+/// Run through `scripts/e2e-contest.ps1` or `scripts/e2e-contest.sh`, which build with
 /// `SOAR_SCORE_DEMO=true` and `SOAR_SCORE_DEMO_RESET=true`. The app then uses
 /// `soar_score_demo.db`, recreated with the demo data for every run, so the
 /// real database is never touched.
