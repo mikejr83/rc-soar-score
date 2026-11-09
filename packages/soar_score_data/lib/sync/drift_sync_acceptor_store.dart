@@ -6,6 +6,7 @@ import '../schema/table_group.dart';
 import '../schema/tables/conflict_records_table.dart';
 import 'assignment_markers.dart';
 import 'entity_stores.dart';
+import 'scope_sequence.dart';
 import 'sql_placeholders.dart';
 import 'table_mapper.dart';
 
@@ -263,18 +264,7 @@ class _DriftSyncAcceptorTransaction implements core.SyncAcceptorTransaction {
   @override
   Future<int> highestSequence(core.SyncScopeKey scope) async {
     final (column, id) = _scopeColumn(scope);
-    final row = await _db
-        .customSelect(
-          portableSql(
-            _db,
-            'SELECT MAX(sequence) AS highest FROM mutation_records '
-            'WHERE $column = ?',
-          ),
-          variables: [Variable<String>(id)],
-          readsFrom: {_db.mutationRecords},
-        )
-        .getSingle();
-    return row.read<int?>('highest') ?? 0;
+    return highestScopeSequence(_db, column: column, scopeId: id);
   }
 
   @override

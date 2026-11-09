@@ -2,9 +2,11 @@ import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../database.dart';
+import '../schema/database_profile.dart';
 import 'assignment_markers.dart';
 import 'entity_stores.dart';
 import 'mutation_payload.dart';
+import 'scope_sequence.dart';
 import 'sql_placeholders.dart';
 import 'table_mapper.dart';
 
@@ -351,6 +353,11 @@ class _Context implements core.WriteContext {
           ? core.ContestScopeKey(contestId)
           : core.DirectorScopeKey(ownerId!),
     );
+    // On the service a direct write is already decided: it joins the scope's
+    // log as accepted with the next sequence, so every installation pulls it.
+    // On an installation it is a pending mutation in the outbox.
+    final accepted = _uow._db.profile == DatabaseProfile.server;
+    final sequence = accepted ? await _nextSequence(scope) : null;
     final record = core.MutationRecord(
       id: _uow._newId(),
       contestId: scope.contestId,
@@ -366,7 +373,27 @@ class _Context implements core.WriteContext {
       clientTime: metadata.clientTime,
       payload: payload,
       dependsOnMutationId: metadata.dependsOnMutationId,
+      sequence: sequence,
+      outcome: accepted
+          ? core.MutationOutcome.accepted
+          : core.MutationOutcome.pending,
+      serverAcceptanceTime: accepted ? _uow._clock() : null,
     );
     await _uow._mutations.upsert(record.toJson());
+  }
+
+  /// The next sequence of [scope]'s log, inside the running transaction.
+  Future<int> _nextSequence(
+    ({core.Id? contestId, core.Id? ownerAccountId}) scope,
+  ) async {
+    final contestId = scope.contestId;
+    final column = contestId != null ? 'contest_id' : 'owner_account_id';
+    final id = (contestId ?? scope.ownerAccountId!).value;
+    final highest = await highestScopeSequence(
+      _uow._db,
+      column: column,
+      scopeId: id,
+    );
+    return highest + 1;
   }
 }

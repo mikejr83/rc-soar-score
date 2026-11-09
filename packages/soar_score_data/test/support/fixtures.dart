@@ -31,9 +31,9 @@ class Installation {
 
   /// Opens a fresh database on [backend].
   ///
-  /// SQLite uses the native profile unless [profile] says otherwise; a test
-  /// that needs the backend-only tables passes [DatabaseProfile.server], so it
-  /// runs the same schema on SQLite as on PostgreSQL.
+  /// Both backends use the native profile unless [profile] says otherwise; a
+  /// test that needs the backend-only tables passes [DatabaseProfile.server],
+  /// so it runs the same schema on SQLite as on PostgreSQL.
   static Future<Installation> open(
     Backend backend, {
     DatabaseProfile? profile,
@@ -63,7 +63,7 @@ class Installation {
         await admin.execute('CREATE DATABASE "$name"');
         final db = SoarScoreDatabase(
           config.named(name).toPgDatabase(),
-          profile: DatabaseProfile.server,
+          profile: profile ?? DatabaseProfile.native,
         );
         return Installation._(
           backend,
@@ -82,6 +82,9 @@ class Installation {
   final SoarScoreDatabase db;
   final EntityStores stores;
   final String? _databaseName;
+
+  /// The PostgreSQL database's name, so a test can open a second connection.
+  String? get databaseName => _databaseName;
   final Future<void> Function()? _dropDatabase;
   late final DriftUnitOfWork unitOfWork;
   late final DriftReplicatedChangeApplier applier;

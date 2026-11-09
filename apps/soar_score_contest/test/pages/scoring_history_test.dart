@@ -83,6 +83,47 @@ void main() {
     expect(find.text('Not adopted'), findsNothing);
   });
 
+  testWidgets('shows the pilot values of a waiting submission', (tester) async {
+    final server = ScoringServer();
+    server.seedPendingSubmission(scoringAssignmentId(1, 1), {
+      'time_flown': 600,
+      'launch_height': 120,
+    });
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    expect(find.text('time flown: 600, launch height: 120'), findsOneWidget);
+  });
+
+  testWidgets('shows the pilot values of a submission in review too', (
+    tester,
+  ) async {
+    final server = ScoringServer();
+    server.seedPendingSubmission(scoringAssignmentId(1, 1), {
+      'time_flown': 600,
+      'launch_height': 120,
+    }, inReview: true);
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    expect(find.text('Pilot entry'), findsOneWidget);
+    expect(find.text('time flown: 600, launch height: 120'), findsOneWidget);
+  });
+
+  testWidgets('an official score hides the pilot values', (tester) async {
+    final server = ScoringServer();
+    server.seedPendingSubmission(scoringAssignmentId(1, 1), {
+      'time_flown': 600,
+      'launch_height': 120,
+    });
+    server.seedScore(scoringAssignmentId(1, 1), {
+      'time_flown': 590,
+      'launch_height': 110,
+    });
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    expect(find.text('Pilot entry'), findsNothing);
+    expect(find.text('time flown: 600, launch height: 120'), findsNothing);
+  });
+
   testWidgets('says so when nothing was entered', (tester) async {
     await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
 

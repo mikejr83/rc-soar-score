@@ -737,7 +737,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _label(context, 'Indicators', labels),
-          if (widget.row.hasSubmission)
+          if (widget.row.hasPendingSubmission) ...[
             const Tooltip(
               message:
                   'A pilot or helper submitted values. The submission is '
@@ -747,8 +747,19 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
                 label: 'Pilot entry',
                 dense: true,
               ),
-            )
-          else
+            ),
+            if (widget.row.pendingComponents.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  widget.row.pendingComponents.entries
+                      .map((e) => '${e.key.replaceAll('_', ' ')}: ${e.value}')
+                      .join(', '),
+                  key: const ValueKey('pilot-entry-values'),
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+          ] else
             Text(
               '–',
               style: theme.textTheme.bodyMedium?.copyWith(
