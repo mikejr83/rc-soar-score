@@ -51,18 +51,14 @@ Future<void> phase3Entry(
     await journey.step('The overview shows the round as submitted', () async {
       final pilot = contest.pilotNames.first;
       // Leave and come back, so the page asks the API again.
-      await openPath(tester, pilotPath(contest.id, pilotId), via: null);
+      await openPath(tester, pilotPath(contest.id, pilotId));
       await pumpUntilFound(tester, find.text('2 rounds'));
       expect(find.text('Submitted'), findsWidgets);
       expect(find.text('Next to score'), findsOneWidget);
       expect(find.textContaining(pilot), findsWidgets);
     });
     await journey.step('The stored entry is read-only when reopened', () async {
-      await openPath(
-        tester,
-        scoreEntryPath(contest.id, pilotId, '1'),
-        via: null,
-      );
+      await openPath(tester, scoreEntryPath(contest.id, pilotId, '1'));
       await pumpUntilFound(tester, find.text('Time flown'));
       // The stored values come back from the server, and nothing can be sent.
       final time = tester.widget<TextField>(

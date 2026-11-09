@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'pages/contests_page.dart';
@@ -38,8 +39,15 @@ final router = GoRouter(
     GoRoute(path: homePath, builder: (context, state) => const HomePage()),
     GoRoute(
       path: '/invitations/:credential',
-      builder: (context, state) =>
-          InvitationPage(credential: state.pathParameters['credential']!),
+      // Keyed by the credential: the page keeps the answer for the link it
+      // opened with, so another link must build a new page, not reuse it.
+      builder: (context, state) {
+        final credential = state.pathParameters['credential']!;
+        return InvitationPage(
+          key: ValueKey(credential),
+          credential: credential,
+        );
+      },
     ),
     GoRoute(
       path: contestsPath,

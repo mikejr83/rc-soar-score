@@ -5,23 +5,8 @@ import '../support/director_api.dart';
 import '../support/launch_app.dart';
 import 'journey.dart';
 
-/// Opens [path] the way a followed link does. The test cannot reload the
-/// browser, so it goes through the home page first: the invitation page keeps
-/// the answer for the credential it opened with, and a real link is a fresh
-/// page load.
-///
-/// Pass `via: null` for an ordinary page. Pass [via] when a guest session exists: the home page of a signed-in
-/// visitor asks for contests, which the app cannot list yet (see #812), so the
-/// bounce goes through a page of the session instead.
-Future<void> openPath(
-  WidgetTester tester,
-  String path, {
-  String? via = homePath,
-}) async {
-  if (via != null) {
-    router.go(via);
-    await tester.pump(const Duration(milliseconds: 300));
-  }
+/// Opens [path] the way a followed link does.
+Future<void> openPath(WidgetTester tester, String path) async {
   router.go(path);
   await tester.pump(const Duration(milliseconds: 300));
 }
@@ -58,11 +43,7 @@ Future<String> phase2Invitation(
       expect(find.text('Enter'), findsOneWidget);
     });
     await journey.step('The same link works again', () async {
-      await openPath(
-        tester,
-        invitationPath(contest.credentialOf(pilot)),
-        via: pilotPath(contest.id, pilotId),
-      );
+      await openPath(tester, invitationPath(contest.credentialOf(pilot)));
       await pumpUntilFound(tester, find.text('Hello, $pilot'));
       await tapVisible(tester, find.text('Continue as guest'));
       await pumpUntilFound(tester, find.text('2 rounds'));
