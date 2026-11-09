@@ -13,6 +13,7 @@ participantContext(Repository repository, ParticipantAccess access) async {
     access.participation.participantProfileId,
   );
   final contest = access.contest;
+  final teamName = await _teamNameOf(repository, access);
   final matrix = await _CurrentRounds.load(repository, contest.id);
   final revision = await repository.contestConfigurationRevisionRepository
       .latestForContest(contest.id);
@@ -49,8 +50,24 @@ participantContext(Repository repository, ParticipantAccess access) async {
       ].whereType<String>().join(' '),
       pilotNumber: access.participation.participantNumber,
       role: 'pilot',
+      teamName: teamName,
     ),
   );
+}
+
+/// The name of the team the pilot is on, or null when they are on none.
+Future<String?> _teamNameOf(
+  Repository repository,
+  ParticipantAccess access,
+) async {
+  final memberships = await repository.teamMembershipRepository.listForContest(
+    access.contest.id,
+  );
+  final membership = memberships
+      .where((m) => m.contestParticipationId == access.participation.id)
+      .firstOrNull;
+  if (membership == null) return null;
+  return (await repository.teamRepository.findById(membership.teamId))?.name;
 }
 
 /// The pilot's overview: their own flight in every current round, the score

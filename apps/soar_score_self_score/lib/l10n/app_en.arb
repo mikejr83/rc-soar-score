@@ -161,6 +161,14 @@
       }
     }
   },
+  "backToPilots": "Back to pilots",
+  "@backToPilots": {
+    "description": "Tooltip of the back button on the pilot overview, which goes to the team overview."
+  },
+  "seeGroupResults": "See group results",
+  "@seeGroupResults": {
+    "description": "Button shown after a score is submitted; opens the results of the pilot's group for that round."
+  },
   "scoreExistingReadOnly": "This flight already has a score, so it is read-only. See the group results for the score.",
   "@scoreExistingReadOnly": {
     "description": "Shown when the entry form opens for a flight that is already scored."

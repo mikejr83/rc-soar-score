@@ -268,6 +268,18 @@ abstract class AppLocalizations {
   /// **'This flight already has a score: {score}. The stored score stands.'**
   String scoreAlreadyThereWith(String score);
 
+  /// Tooltip of the back button on the pilot overview, which goes to the team overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to pilots'**
+  String get backToPilots;
+
+  /// Button shown after a score is submitted; opens the results of the pilot's group for that round.
+  ///
+  /// In en, this message translates to:
+  /// **'See group results'**
+  String get seeGroupResults;
+
   /// Shown when the entry form opens for a flight that is already scored.
   ///
   /// In en, this message translates to:

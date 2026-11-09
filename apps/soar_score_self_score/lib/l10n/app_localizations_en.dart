@@ -121,6 +121,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get backToPilots => 'Back to pilots';
+
+  @override
+  String get seeGroupResults => 'See group results';
+
+  @override
   String get scoreExistingReadOnly =>
       'This flight already has a score, so it is read-only. See the group results for the score.';
 
