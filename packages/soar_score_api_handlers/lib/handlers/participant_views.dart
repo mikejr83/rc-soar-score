@@ -133,7 +133,13 @@ Future<ParticipantEntryContextDto?> participantEntryContext(
       : await repository.landingTableRepository.findById(
           revision.landingTableId!,
         );
+  final hasScore =
+      flight.state != ParticipantScoreState.notEntered &&
+      flight.state != ParticipantScoreState.draft;
   return ParticipantEntryContextDto(
+    submittedScore: hasScore
+        ? await _submittedScore(repository, access, flight)
+        : null,
     assignmentId: flight.assignmentId,
     round: flight.ordinal,
     roundCount: flights.roundCount,
@@ -162,6 +168,49 @@ Future<ParticipantEntryContextDto?> participantEntryContext(
           points: result.pointValue,
         ),
     ],
+  );
+}
+
+/// What the flight's score holds, so the entry form can show it read-only.
+///
+/// The stored components come from the flight's own score, so a flight the
+/// results do not count (a late add credited to another round) still shows
+/// what was entered. The calculated numbers come from the preliminary
+/// results, the same as the group results, and are null when the results do
+/// not count the flight.
+Future<ParticipantScoreDto?> _submittedScore(
+  Repository repository,
+  ParticipantAccess access,
+  _Flight flight,
+) async {
+  final components = flight.components;
+  if (components == null) return null;
+  final calculation = await PreliminaryResultsService(repository)
+      .calculate(access.contestId);
+  final slot = calculation.input.scored
+      .where((s) => s.assignment.id == flight.assignmentId)
+      .firstOrNull;
+  final result = slot == null
+      ? null
+      : (calculation.recalculation?.flights ?? const [])
+            .where(
+              (f) =>
+                  f.round == slot.round.ordinal &&
+                  f.pilotId == access.participation.id.value,
+            )
+            .firstOrNull;
+  return ParticipantScoreDto(
+    assignmentId: flight.assignmentId,
+    round: flight.ordinal,
+    state: flight.state,
+    revision: flight.scoreRevision,
+    components: components,
+    enteredBy: flight.enteredBy ?? '',
+    enteredAt:
+        flight.enteredAt ?? DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
+    flightScore: result?.group.groupScore,
+    rawScore: result?.flight.rawScore,
+    roundScore: result?.group.groupScore,
   );
 }
 
@@ -297,6 +346,7 @@ Future<_PilotFlights> _pilotFlights(
           _ => 'Director',
         },
         enteredAt: attempt?.acceptedAt ?? official?.setAt,
+        components: official?.components ?? attempt?.rawComponents,
       ),
     );
   }
@@ -348,6 +398,7 @@ class _Flight {
     required this.state,
     required this.enteredBy,
     required this.enteredAt,
+    required this.components,
   });
 
   final int ordinal;
@@ -356,6 +407,9 @@ class _Flight {
   final ParticipantScoreState state;
   final String? enteredBy;
   final DateTime? enteredAt;
+
+  /// The stored components of the score the flight has, null without one.
+  final Map<String, Object?>? components;
 
   Id get assignmentId => assignment.id;
   String get group => participantGroupLabel(assignment.group - 1);

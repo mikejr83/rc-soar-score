@@ -127,6 +127,12 @@ ParticipantEntryContextDto _$ParticipantEntryContextDtoFromJson(
         'allows_motor_restart',
         (v) => v as bool? ?? true,
       ),
+      submittedScore: $checkedConvert(
+        'submitted_score',
+        (v) => v == null
+            ? null
+            : ParticipantScoreDto.fromJson(v as Map<String, dynamic>),
+      ),
     );
     return val;
   },
@@ -139,6 +145,7 @@ ParticipantEntryContextDto _$ParticipantEntryContextDtoFromJson(
     'rulesVersion': 'rules_version',
     'landingTable': 'landing_table',
     'allowsMotorRestart': 'allows_motor_restart',
+    'submittedScore': 'submitted_score',
   },
 );
 
@@ -158,6 +165,7 @@ Map<String, dynamic> _$ParticipantEntryContextDtoToJson(
   'fields': instance.fields,
   'landing_table': instance.landingTable,
   'allows_motor_restart': instance.allowsMotorRestart,
+  'submitted_score': instance.submittedScore,
 };
 
 const _$ParticipantScoreStateEnumMap = {

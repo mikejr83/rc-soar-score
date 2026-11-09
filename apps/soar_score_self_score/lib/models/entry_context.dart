@@ -1,4 +1,5 @@
 import 'landing_result.dart';
+import 'score_submission.dart';
 
 /// What the entry form needs to know about the flight it is scoring.
 class EntryContext {
@@ -15,6 +16,7 @@ class EntryContext {
     this.allowsMotorRestart = true,
     this.matrixRevision = 0,
     this.alreadySubmitted = false,
+    this.submittedScore,
   });
 
   final String pilotName;
@@ -62,4 +64,24 @@ class EntryContext {
 
   /// A score already exists for this flight, so the form opens read-only.
   final bool alreadySubmitted;
+
+  /// What was entered for this flight, when the server sent it.
+  final SubmittedScore? submittedScore;
+}
+
+/// The score a flight already has, as the server stored it, so the form can
+/// show what was entered.
+class SubmittedScore {
+  const SubmittedScore({
+    required this.components,
+    this.flightScore,
+    this.details,
+  });
+
+  /// The stored components, such as `time_flown` and `landing`.
+  final Map<String, Object?> components;
+
+  /// The server's calculation, formatted.
+  final String? flightScore;
+  final ScoreDetails? details;
 }

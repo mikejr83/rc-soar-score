@@ -18,10 +18,15 @@ import 'package:soar_score_self_score/session/score_draft_store.dart';
 
 /// Answers each send with the next queued answer and records what was sent.
 class _ScriptedRepository extends SampleSelfScoreRepository {
-  _ScriptedRepository(this.answers, {this.alreadySubmitted = false});
+  _ScriptedRepository(
+    this.answers, {
+    this.alreadySubmitted = false,
+    this.stored,
+  });
 
   final List<Object> answers;
   final bool alreadySubmitted;
+  final SubmittedScore? stored;
   final sent = <ScoreSubmission>[];
 
   @override
@@ -41,6 +46,7 @@ class _ScriptedRepository extends SampleSelfScoreRepository {
       landingTable: base.landingTable,
       matrixRevision: 3,
       alreadySubmitted: alreadySubmitted,
+      submittedScore: stored,
     );
   }
 
@@ -300,6 +306,53 @@ void main() {
 
     expect(find.text('Submitted'), findsOneWidget);
     expect(find.text('Submit score'), findsNothing);
+    expect(
+      tester.widget<TextField>(find.byType(TextField).at(0)).enabled,
+      false,
+    );
+  });
+
+  testWidgets('a scored flight shows what was entered, read-only', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      _ScriptedRepository(
+        [],
+        alreadySubmitted: true,
+        stored: const SubmittedScore(
+          components: {
+            'time_flown': 390.4,
+            'launch_height': 45,
+            'landing': 'good',
+            'flight_penalty': 10,
+          },
+          flightScore: '962.5',
+          details: ScoreDetails(enteredBy: 'Jane Smith'),
+        ),
+      ),
+    );
+
+    expect(
+      tester.widget<TextField>(find.byType(TextField).at(0)).controller!.text,
+      '630.4',
+    );
+    expect(
+      tester.widget<TextField>(find.byType(TextField).at(1)).controller!.text,
+      '45',
+    );
+    expect(
+      tester.widget<TextField>(find.byType(TextField).at(2)).controller!.text,
+      '10',
+    );
+    expect(
+      find.text('6:30.4 · 45 m · landing 50 · Penalty entered'),
+      findsOneWidget,
+    );
+    expect(find.text('Score: 962.5'), findsOneWidget);
+    expect(find.text('Entered by Jane Smith'), findsOneWidget);
+    expect(find.text('Submit score'), findsNothing);
+    expect(find.text('See group results'), findsOneWidget);
     expect(
       tester.widget<TextField>(find.byType(TextField).at(0)).enabled,
       false,

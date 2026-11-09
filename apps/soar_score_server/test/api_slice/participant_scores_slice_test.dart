@@ -218,6 +218,36 @@ void _tests(SliceBackend backend) {
     },
   );
 
+  test('the entry context carries the submitted score back', () async {
+    Future<Map<String, Object?>> entry(int round) async {
+      final response = await handler(
+        Request(
+          'GET',
+          Uri.parse('http://localhost/api/v1/self-scoring/rounds/$round/entry'),
+          headers: {'authorization': 'Bearer $token'},
+        ),
+      );
+      expect(response.statusCode, 200);
+      return jsonDecode(await response.readAsString()) as Map<String, Object?>;
+    }
+
+    expect((await entry(1))['submitted_score'], isNull);
+
+    final (status, body) = await submit(1);
+    expect(status, 201, reason: '$body');
+
+    final again = await entry(1);
+    expect(again['state'], 'submitted');
+    final score = again['submitted_score']! as Map;
+    expect(score['components'], _goodScore);
+    expect(score['state'], 'submitted');
+    expect(score['round'], 1);
+    expect(score['entered_by'], 'P1 X');
+    expect(score['flight_score'], isA<num>());
+    // The next round has no score yet.
+    expect((await entry(2))['submitted_score'], isNull);
+  });
+
   test('a submission stays out of the official scores', () async {
     await submit(1);
     final scores = await api.expectOk('GET', '/contests/$_contestId/scores');

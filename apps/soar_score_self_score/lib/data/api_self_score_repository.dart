@@ -298,6 +298,16 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
         ParticipantScoreState.draft => false,
         _ => true,
       },
+      submittedScore: switch (entry.submittedScore) {
+        null => null,
+        final score => SubmittedScore(
+          components: score.components,
+          flightScore: score.flightScore == null
+              ? null
+              : ScoreFormat.score(score.flightScore!),
+          details: _details(score),
+        ),
+      },
     );
   });
 

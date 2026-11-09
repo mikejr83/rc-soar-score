@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'participant_overview_dto.dart';
+import 'participant_submit_dto.dart';
 
 part 'participant_entry_dto.g.dart';
 
@@ -117,6 +118,7 @@ class ParticipantEntryContextDto {
     required this.fields,
     required this.landingTable,
     this.allowsMotorRestart = true,
+    this.submittedScore,
   });
 
   factory ParticipantEntryContextDto.fromJson(Map<String, dynamic> json) =>
@@ -140,6 +142,10 @@ class ParticipantEntryContextDto {
   final List<ScoreFieldDto> fields;
   final List<LandingOptionDto> landingTable;
   final bool allowsMotorRestart;
+
+  /// The score the flight already has, so the form can show what was
+  /// entered. Null while the flight has no score.
+  final ParticipantScoreDto? submittedScore;
 
   Map<String, dynamic> toJson() => _$ParticipantEntryContextDtoToJson(this);
 }
