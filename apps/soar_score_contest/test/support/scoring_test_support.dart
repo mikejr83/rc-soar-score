@@ -177,6 +177,29 @@ class ScoringServer {
 
   final Set<Id> _submitted = {};
 
+  /// The newest waiting submission of the slot, as the service lists it.
+  ScoreAttempt? _pendingAttempt(Id assignmentId) {
+    if (!_submitted.contains(assignmentId) || _score[assignmentId] != null) {
+      return null;
+    }
+    final entry = (_history[assignmentId] ?? const []).lastWhere(
+      (e) => e.outcome == ScoreHistoryOutcome.pending,
+    );
+    return ScoreAttempt(
+      id: entry.attemptId,
+      contestId: contestId,
+      scorePlaceholderId: _placeholderId(assignmentId),
+      configRevisionId: _sid('000d', 1),
+      matrixRevisionId: _sid('000e', 1),
+      rawComponents: entry.components,
+      actorId: _setBy,
+      authority: Authority.participant,
+      clientMutationId: 'seeded-pending',
+      baseScoreRevision: 0,
+      acceptedAt: DateTime.utc(2026, 10, 17, 15),
+    );
+  }
+
   /// A participant's submission waiting for the director: the slot is
   /// Submitted, with no official score.
   void seedPendingSubmission(Id assignmentId, Map<String, Object?> components) {
@@ -355,6 +378,7 @@ class ScoringServer {
             {
               'placeholder': _placeholder(assignment.id).toJson(),
               'official_score': _score[assignment.id]?.toJson(),
+              'pending_attempt': _pendingAttempt(assignment.id)?.toJson(),
             },
         ],
         'rounds': const <Object>[],

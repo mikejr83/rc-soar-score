@@ -494,6 +494,12 @@ void _tests(Backend backend) {
         final history = (await service.history(contestId, slot)).entries;
 
         expect(history.map((e) => e.outcome), [ScoreHistoryOutcome.pending]);
+
+        // The scoring screen gets the preliminary values with the slot.
+        final listed = (await service.list(contestId)).slots
+            .singleWhere((s) => s.placeholder.id == placeholder.id);
+        expect(listed.officialScore, isNull);
+        expect(listed.pendingAttempt?.id, attempt.id);
       });
 
       test('refuses an unknown slot', () async {

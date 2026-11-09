@@ -83,6 +83,17 @@ void main() {
     expect(find.text('Not adopted'), findsNothing);
   });
 
+  testWidgets('shows the pilot values of a waiting submission', (tester) async {
+    final server = ScoringServer();
+    server.seedPendingSubmission(scoringAssignmentId(1, 1), {
+      'time_flown': 600,
+      'launch_height': 120,
+    });
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    expect(find.text('time flown: 600, launch height: 120'), findsOneWidget);
+  });
+
   testWidgets('says so when nothing was entered', (tester) async {
     await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
 

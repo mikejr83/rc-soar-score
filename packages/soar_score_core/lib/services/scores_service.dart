@@ -96,6 +96,13 @@ class ScoresService {
 
     // The slots of a pilot who retired stay in the list; the counts leave out
     // the ones nobody can fill (see RoundProgress.count).
+    final pending = await repository.scoreAttemptRepository
+        .latestForPlaceholders([
+          for (final placeholder in placeholders.values)
+            if (placeholder.state == ScorePlaceholderState.submitted ||
+                placeholder.state == ScorePlaceholderState.inReview)
+              placeholder.id,
+        ]);
     final slots = <ScoreSlot>[];
     final progress = <RoundProgress>[];
     for (final round in rounds) {
@@ -118,6 +125,7 @@ class ScoresService {
             placeholder: placeholder,
             officialScore: await repository.officialScoreRepository
                 .currentForPlaceholder(placeholder.id),
+            pendingAttempt: pending[placeholder.id],
           ),
         );
       }
