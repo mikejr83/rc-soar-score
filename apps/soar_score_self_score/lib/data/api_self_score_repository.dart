@@ -195,7 +195,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   );
 
   @override
-  Future<TeamOverview> teamOverview(String contestId) =>
+  Future<TeamOverview> teamOverview(String contestId) async =>
       throw const SelfScoreLoadException(
         'The team overview is coming soon. Use the link from your contest '
         'director.',

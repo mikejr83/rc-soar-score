@@ -100,6 +100,10 @@ Future<void> main(List<String> args) async {
           version: '0.0.0',
           schemaRevision: database.schemaVersion,
           repository: repository,
+          // Only the service gets the advanceable clock: link and guest
+          // session expiry are enforced inside it. The participant handler
+          // keeps the real clock, which only sets the cookie's Max-Age at
+          // resolve time; do not hand it this clock.
           invitations: InvitationService(
             repository,
             InvitationCodec.fromText(e2eInvitationSecret),
