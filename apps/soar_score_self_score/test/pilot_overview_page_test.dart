@@ -46,6 +46,8 @@ Future<void> _pump(WidgetTester tester, _CountingRepository repository) async {
 }
 
 void main() {
+  setUp(() => scoreChanges.value = 0);
+
   testWidgets('a pilot on a team can go back to the team', (tester) async {
     await _pump(tester, _CountingRepository());
     expect(find.byTooltip('Back to pilots'), findsOneWidget);

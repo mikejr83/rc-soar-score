@@ -230,6 +230,43 @@ void _tests(SliceBackend backend) {
   });
 
   test(
+    'the overview names the pilot\'s team, and none when they have none',
+    () async {
+      final (_, alone) = await call('/overview', token: await sessionFor(1));
+      expect((alone['participant']! as Map)['team_name'], isNull);
+
+      core.MutationMetadata metadata(String id) => core.MutationMetadata(
+        clientMutationId: id,
+        authority: core.Authority.director,
+        clientTime: DateTime.utc(2026, 10, 17, 16),
+        actorId: api.director,
+      );
+      final teams = core.TeamsService(repository);
+      final team = await teams.createTeam(
+        core.Id.parse(_contestId),
+        id: core.Id.parse('019c0000-0000-7000-8000-0000000000a1'),
+        name: 'Front Range Flyers',
+        metadata: metadata('team-1'),
+      );
+      await teams.addMember(
+        core.Id.parse(_contestId),
+        id: core.Id.parse('019c0000-0000-7000-8000-0000000000a2'),
+        teamId: team.id,
+        participationId: core.Id.parse(_participationId(1)),
+        metadata: metadata('member-1'),
+      );
+
+      final (_, onTeam) = await call('/overview', token: await sessionFor(1));
+      expect(
+        (onTeam['participant']! as Map)['team_name'],
+        'Front Range Flyers',
+      );
+      final (_, other) = await call('/overview', token: await sessionFor(2));
+      expect((other['participant']! as Map)['team_name'], isNull);
+    },
+  );
+
+  test(
     'the next target follows the scored rounds; reopening is stable',
     () async {
       final token = await sessionFor(1);

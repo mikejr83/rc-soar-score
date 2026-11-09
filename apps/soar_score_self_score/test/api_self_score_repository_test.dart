@@ -211,6 +211,19 @@ void main() {
     expect(overview.nextRound, 2);
   });
 
+  test('the overview carries the team the server names, or none', () async {
+    final body =
+        jsonDecode(_fixture('participant_overview')) as Map<String, dynamic>;
+    expect(
+      (await _repository(_fixtures).pilotOverview('c', 'p')).teamName,
+      isNull,
+    );
+    (body['participant'] as Map<String, dynamic>)['team_name'] = 'Flyers';
+    final overview = await _repository((_) => _json(jsonEncode(body)))
+        .pilotOverview('c', 'p');
+    expect(overview.teamName, 'Flyers');
+  });
+
   test('closed scoring locks only rounds with no score', () async {
     final body =
         jsonDecode(_fixture('participant_overview')) as Map<String, dynamic>;
