@@ -6,9 +6,11 @@ import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
 import 'package:soar_score_self_score/data/score_changes.dart';
 import 'package:soar_score_self_score/data/self_score_scope.dart';
 import 'package:soar_score_self_score/l10n/app_localizations.dart';
+import 'package:soar_score_self_score/models/entry_context.dart';
 import 'package:soar_score_self_score/models/pilot_overview.dart';
 import 'package:soar_score_self_score/models/pilot_round.dart';
 import 'package:soar_score_self_score/models/score_submission.dart';
+import 'package:soar_score_self_score/pages/group_results_page.dart';
 import 'package:soar_score_self_score/pages/pilot_overview_page.dart';
 import 'package:soar_score_self_score/pages/score_entry_page.dart';
 import 'package:soar_score_self_score/router.dart';
@@ -25,6 +27,27 @@ class _Repository extends SampleSelfScoreRepository {
   Future<SubmitResult> submitScore(ScoreSubmission submission) async {
     accepted = true;
     return const ScoreAccepted(flightScore: '962.5');
+  }
+
+  /// Like the server: once the score is in, the flight opens read-only.
+  @override
+  Future<EntryContext> entryContext(
+    String contestId,
+    String pilotId,
+    int round,
+  ) async {
+    final base = await super.entryContext(contestId, pilotId, round);
+    return EntryContext(
+      pilotName: base.pilotName,
+      pilotNumber: base.pilotNumber,
+      round: base.round,
+      roundCount: base.roundCount,
+      group: base.group,
+      lane: base.lane,
+      landingTable: base.landingTable,
+      matrixRevision: base.matrixRevision,
+      alreadySubmitted: accepted && round == 4,
+    );
   }
 
   @override
@@ -53,7 +76,7 @@ class _Repository extends SampleSelfScoreRepository {
   }
 }
 
-/// The app's nested routes, with a stub for the group results page.
+/// The app's nested routes, as in `router.dart`.
 GoRouter _router() => GoRouter(
   initialLocation: pilotPath(SampleData.contestId, '12'),
   routes: [
@@ -74,14 +97,10 @@ GoRouter _router() => GoRouter(
           routes: [
             GoRoute(
               path: 'group',
-              builder: (context, state) => Scaffold(
-                body: Center(
-                  child: TextButton(
-                    onPressed: () =>
-                        context.go(pilotPath(SampleData.contestId, '12')),
-                    child: const Text('Group stub back'),
-                  ),
-                ),
+              builder: (context, state) => GroupResultsPage(
+                contestId: state.pathParameters['contestId']!,
+                pilotId: state.pathParameters['pilotId']!,
+                roundId: state.pathParameters['roundId']!,
               ),
             ),
           ],
@@ -128,21 +147,28 @@ Future<_Repository> _submitRoundFour(WidgetTester tester) async {
 void main() {
   setUp(() => scoreChanges.value = 0);
 
-  testWidgets('See group results, then back, shows the round submitted', (
-    tester,
-  ) async {
-    final repository = await _submitRoundFour(tester);
+  testWidgets(
+    'See group results, back, and back again shows the round submitted',
+    (tester) async {
+      final repository = await _submitRoundFour(tester);
 
-    await tester.tap(find.text('See group results'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Group stub back'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('See group results'));
+      await tester.pumpAndSettle();
+      expect(find.byType(GroupResultsPage), findsOneWidget);
 
-    expect(find.text('Enter'), findsNothing);
-    expect(find.text('Submitted'), findsWidgets);
-    // The first load, and one reload when the score was accepted.
-    expect(repository.overviewLoads, 2);
-  });
+      // The group page's own back returns to the submitted entry form.
+      await tester.tap(find.byTooltip('Back to score entry'));
+      await tester.pumpAndSettle();
+      expect(find.text('See group results'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Back to pilot overview'));
+      await tester.pumpAndSettle();
+      expect(find.text('Enter'), findsNothing);
+      expect(find.text('Submitted'), findsWidgets);
+      // The first load, and one reload when the score was accepted.
+      expect(repository.overviewLoads, 2);
+    },
+  );
 
   testWidgets('All rounds from the entry page shows the round submitted', (
     tester,
