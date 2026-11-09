@@ -216,7 +216,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       access: switch (dto.access.code) {
         'open' => ScoringAccess.open,
         'not_open' || 'not_started' => ScoringAccess.notStarted,
-        'completed' => ScoringAccess.completed,
+        'contest_completed' => ScoringAccess.completed,
         // Any other refusal is closed to the pilot.
         _ => ScoringAccess.closed,
       },

@@ -5,6 +5,7 @@ import 'package:soar_score_self_score/router.dart';
 import '../support/director_api.dart';
 import '../support/launch_app.dart';
 import 'journey.dart';
+import '../support/entry_form.dart';
 import 'phase_2_invitation.dart';
 
 /// Phase 3: the pilot enters round 1 and the score survives leaving the page.
@@ -34,7 +35,7 @@ Future<void> phase3Entry(
       await tester.enterText(await fieldFor(tester, 'Time flown'), '900');
       await tester.enterText(await fieldFor(tester, 'Launch height (m)'), '45');
       await tester.pump(const Duration(milliseconds: 300));
-      await _chooseLanding(tester);
+      await chooseLanding(tester);
     });
     await journey.step(
       'Submit shows the score the server calculated',
@@ -70,31 +71,4 @@ Future<void> phase3Entry(
       expect(find.text('Submit score'), findsNothing);
     });
   });
-}
-
-/// Picks the first landing, whether the table is a short sheet or a search.
-Future<void> _chooseLanding(WidgetTester tester) async {
-  final sheet = find.text('Choose landing');
-  if (sheet.evaluate().isNotEmpty) {
-    await tapVisible(tester, sheet);
-    await tester.pumpAndSettle(const Duration(milliseconds: 200));
-    // A sheet row is a tile with the result's label and points.
-    await tester.tap(
-      find
-          .descendant(
-            of: find.byType(DraggableScrollableSheet),
-            matching: find.byType(InkWell),
-          )
-          .at(1),
-    );
-    await tester.pump(const Duration(milliseconds: 300));
-    return;
-  }
-  // A long table is a search field: the third text field, after time and
-  // height. Typing shows matches as tiles.
-  await scrollTo(tester, find.byType(TextField).at(2));
-  await tester.enterText(find.byType(TextField).at(2), '50');
-  await tester.pump(const Duration(milliseconds: 300));
-  await tester.tap(find.byType(ListTile).first);
-  await tester.pump(const Duration(milliseconds: 300));
 }

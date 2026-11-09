@@ -242,6 +242,15 @@ void main() {
     );
   });
 
+  test('a completed contest is read as completed, not as closed', () async {
+    final body =
+        jsonDecode(_fixture('participant_overview')) as Map<String, dynamic>;
+    body['access'] = {'code': 'contest_completed', 'message': 'raw words'};
+    final overview = await _repository((_) => _json(jsonEncode(body)))
+        .pilotOverview('c', 'p');
+    expect(overview.access, ScoringAccess.completed);
+  });
+
   test('pages after the overview do not fetch the overview again', () async {
     final repository = _repository(_fixtures);
     await repository.entryContext('c', 'p', 2);
