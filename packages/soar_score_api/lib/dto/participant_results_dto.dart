@@ -20,6 +20,7 @@ class ParticipantGroupRowDto {
     this.timeFlownSeconds,
     this.launchHeight,
     this.landing,
+    this.landingPoints,
     this.flightScore,
     this.rawScore,
     this.roundScore,
@@ -40,6 +41,10 @@ class ParticipantGroupRowDto {
   final int? timeFlownSeconds;
   final num? launchHeight;
   final String? landing;
+
+  /// The points the landing table awards for [landing]; null when there is no
+  /// landing or the contest has no landing table.
+  final int? landingPoints;
 
   /// The calculated normalised flight score.
   final num? flightScore;

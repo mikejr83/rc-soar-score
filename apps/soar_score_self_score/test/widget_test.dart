@@ -16,19 +16,19 @@ void main() {
 
     // Accounts come in a future release, so the buttons stay disabled.
     expect(
-      tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Sign in'))
+      tester
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Sign in'))
           .onPressed,
       isNull,
     );
     expect(
-      tester.widget<OutlinedButton>(
-        find.widgetWithText(OutlinedButton, 'Sign up'),
-      ).onPressed,
+      tester
+          .widget<OutlinedButton>(
+            find.widgetWithText(OutlinedButton, 'Sign up'),
+          )
+          .onPressed,
       isNull,
     );
-    expect(
-      find.textContaining('coming in a future release'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('coming in a future release'), findsOneWidget);
   });
 }

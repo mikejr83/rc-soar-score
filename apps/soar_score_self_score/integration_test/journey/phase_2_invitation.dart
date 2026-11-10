@@ -23,29 +23,28 @@ Future<String> phase2Invitation(
   final pilot = contest.pilotNames.first;
   var pilotId = '';
   await journey.phase(2, 'Open the invitation link', () async {
-    await journey.step(
-      'The landing page defers sign in and sign up',
-      () async {
-        await openPath(tester, '/');
-        await pumpUntilFound(tester, find.text('Score your flights at the field'));
-        expect(
-          tester.widget<FilledButton>(
-            find.widgetWithText(FilledButton, 'Sign in'),
-          ).onPressed,
-          isNull,
-        );
-        expect(
-          tester.widget<OutlinedButton>(
-            find.widgetWithText(OutlinedButton, 'Sign up'),
-          ).onPressed,
-          isNull,
-        );
-        expect(
-          find.textContaining('coming in a future release'),
-          findsOneWidget,
-        );
-      },
-    );
+    await journey.step('The landing page defers sign in and sign up', () async {
+      await openPath(tester, '/');
+      await pumpUntilFound(
+        tester,
+        find.text('Score your flights at the field'),
+      );
+      expect(
+        tester
+            .widget<FilledButton>(find.widgetWithText(FilledButton, 'Sign in'))
+            .onPressed,
+        isNull,
+      );
+      expect(
+        tester
+            .widget<OutlinedButton>(
+              find.widgetWithText(OutlinedButton, 'Sign up'),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(find.textContaining('coming in a future release'), findsOneWidget);
+    });
     await journey.step('A link that does not exist is refused', () async {
       await openPath(tester, invitationPath('not-a-real-credential'));
       await pumpUntilFound(tester, find.text('This link does not work'));

@@ -5,15 +5,24 @@ import '../models/group_result_row.dart';
 import 'status_chip.dart';
 
 /// The widths of the group-results columns, shared by the header row and each
-/// [GroupResultTile] so the columns line up.
-class GroupResultColumns {
-  const GroupResultColumns();
-
+/// [GroupResultTile] so the columns line up. The table is fixed-width and
+/// scrolls sideways on a narrow screen.
+abstract final class GroupResultColumns {
+  /// The pilot name, "(you)", chip and note.
+  static const double name = 132;
   static const double time = 56;
   static const double height = 44;
-  static const double landing = 64;
-  static const double raw = 52;
+
+  /// The landing points: at most three digits, e.g. `100`.
+  static const double landing = 40;
+  static const double raw = 56;
   static const double score = 48;
+
+  /// Space between the name and the first column.
+  static const double gap = 8;
+
+  /// The full table width, for tests.
+  static double get all => name + gap + time + height + landing + raw + score;
 }
 
 /// One pilot's flight in the group results: name and number, a reason chip
@@ -49,8 +58,7 @@ class GroupResultTile extends StatelessWidget {
       ),
     };
     final note = switch (row.kind) {
-      GroupRowKind.scored =>
-        row.isEstimate ? 'This score is an estimate.' : null,
+      GroupRowKind.scored => null,
       GroupRowKind.zero => 'Time, height and landing are zeroed.',
       GroupRowKind.noScore => 'Not in the standings for this round.',
       GroupRowKind.pendingReview => 'The review keeps the original entry.',
@@ -71,7 +79,8 @@ class GroupResultTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
+          SizedBox(
+            width: GroupResultColumns.name,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -118,14 +127,18 @@ class GroupResultTile extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: GroupResultColumns.gap),
           _Cell(GroupResultColumns.time, row.time, numbers),
           _Cell(
             GroupResultColumns.height,
             row.height == null ? null : '${row.height} m',
             numbers,
           ),
-          _Cell(GroupResultColumns.landing, row.landing, numbers),
+          _Cell(
+            GroupResultColumns.landing,
+            row.landing == null ? null : '${row.landing}',
+            numbers,
+          ),
           _Cell(GroupResultColumns.raw, row.rawScore, numbers),
           _Cell(GroupResultColumns.score, row.score, numbers),
         ],
@@ -146,11 +159,7 @@ class _Cell extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width,
-      child: Text(
-        value ?? '–',
-        textAlign: TextAlign.right,
-        style: style,
-      ),
+      child: Text(value ?? '–', textAlign: TextAlign.right, style: style),
     );
   }
 }

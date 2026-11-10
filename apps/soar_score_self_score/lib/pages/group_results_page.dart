@@ -61,26 +61,29 @@ class GroupResultsPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const StatusChip(
                         label: 'Preliminary',
                         icon: Icons.pending_outlined,
                       ),
-                      Text(
-                        'Updates as scores come in',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: muted,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Updates as scores come in',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: muted,
+                          ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
-                    Text(
-                      'Each column is part of the flight score, so you can '
-                      'compare how the group flew. A dash means no value yet.',
-                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                    ),
+                  Text(
+                    'Time, height and landing are the values entered for each '
+                    'flight. Raw is the score before normalising; Score is the '
+                    'flight score that counts. A dash means no value yet.',
+                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                  ),
                 ],
               ),
             ),
@@ -109,19 +112,33 @@ class GroupResultsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(child: Text('Pilot and flight', style: labelStyle)),
-              const SizedBox(width: 8),
-              _heading('Time', GroupResultColumns.time, labelStyle),
-              _heading('Height', GroupResultColumns.height, labelStyle),
-              _heading('Landing', GroupResultColumns.landing, labelStyle),
-              _heading('Raw', GroupResultColumns.raw, labelStyle),
-              _heading('Score', GroupResultColumns.score, labelStyle),
-            ],
+          // The table scrolls sideways on a narrow screen so the columns stay
+          // aligned; it sits still on a wide one.
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    SizedBox(
+                      width: GroupResultColumns.name,
+                      child: Text('Pilot and flight', style: labelStyle),
+                    ),
+                    const SizedBox(width: GroupResultColumns.gap),
+                    _heading('Time', GroupResultColumns.time, labelStyle),
+                    _heading('Height', GroupResultColumns.height, labelStyle),
+                    _heading('Landing', GroupResultColumns.landing, labelStyle),
+                    _heading('Raw', GroupResultColumns.raw, labelStyle),
+                    _heading('Score', GroupResultColumns.score, labelStyle),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                for (final row in data.rows) GroupResultTile(row: row),
+              ],
+            ),
           ),
-          const SizedBox(height: 6),
-          for (final row in data.rows) GroupResultTile(row: row),
           const SizedBox(height: 16),
           Text(
             'Scores are preliminary. The director can change them until '
@@ -135,11 +152,7 @@ class GroupResultsPage extends StatelessWidget {
 }
 
 /// One heading over a column, matching the width its cells use.
-Widget _heading(
-  String label,
-  double width,
-  TextStyle? style,
-) {
+Widget _heading(String label, double width, TextStyle? style) {
   return SizedBox(
     width: width,
     child: Text(label, textAlign: TextAlign.right, style: style),

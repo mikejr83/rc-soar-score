@@ -27,7 +27,6 @@ class GroupResultRow {
     this.rawScore,
     this.score,
     this.zeroReason,
-    this.isEstimate = false,
     this.isYou = false,
   });
 
@@ -41,8 +40,8 @@ class GroupResultRow {
   /// Launch height in whole metres; null when there is none.
   final int? height;
 
-  /// The landing's label, such as `Good`; null when there is none.
-  final String? landing;
+  /// The points the landing table awarded; null when there is none.
+  final int? landing;
 
   /// The flight score before normalising, formatted; null when there is none.
   final String? rawScore;
@@ -50,9 +49,6 @@ class GroupResultRow {
   /// The calculated flight score, formatted; null when there is none.
   final String? score;
   final String? zeroReason;
-
-  /// True when the score is a missing-score estimate, not an entered one.
-  final bool isEstimate;
 
   final bool isYou;
 }
