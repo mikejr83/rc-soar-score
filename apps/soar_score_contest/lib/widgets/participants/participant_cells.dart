@@ -128,7 +128,8 @@ class ParticipantCells {
         initialValue: known ? participant.roleId : null,
         focusNode: _node(ParticipantColumn.role),
         isExpanded: true,
-        isDense: true,
+        // Not dense: a dense button is ~text height, which sits shorter than
+        // the class and team text fields in the same row.
         decoration: InputDecoration(
           isDense: true,
           constraints: BoxConstraints.tightFor(height: height),

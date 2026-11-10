@@ -48,6 +48,9 @@ class ParticipantCard extends StatelessWidget {
     );
 
     final fields = <Widget>[
+      // The number leads, like the table's first column.
+      if (editing.rules.has(ParticipantOption.pilotNumbers))
+        labelled('Pilot no.', cells.number(context)),
       for (final option in ParticipantCells.columnsFor(editing))
         ...switch (option) {
           ParticipantOption.roles => [labelled('Role', cells.role(context))],
@@ -59,9 +62,8 @@ class ParticipantCard extends StatelessWidget {
             ),
           ],
           ParticipantOption.teams => [labelled('Team', cells.team(context))],
-          ParticipantOption.pilotNumbers => [
-            labelled('Pilot no.', cells.number(context)),
-          ],
+          // The number field already leads the card.
+          ParticipantOption.pilotNumbers => const [],
           ParticipantOption.models => [
             labelled('Models', cells.modelsCell(context)),
           ],

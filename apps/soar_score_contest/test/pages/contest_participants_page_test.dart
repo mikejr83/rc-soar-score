@@ -41,6 +41,59 @@ void main() {
     expect(find.text('1 · provisional'), findsOneWidget);
   });
 
+  testWidgets('the pilot number leads the row, before the name', (
+    tester,
+  ) async {
+    await pumpParticipantsPage(tester, ParticipantsServer());
+
+    expect(
+      tester.getCenter(find.text('1 · provisional')).dx,
+      lessThan(tester.getCenter(find.text('Ann Lee')).dx),
+    );
+  });
+
+  testWidgets('a healthy row shows Ready, a non-flier Non-flying', (
+    tester,
+  ) async {
+    await pumpParticipantsPage(tester, ParticipantsServer());
+
+    expect(
+      find.descendant(
+        of: _row(1),
+        matching: find.text('Ready'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: _row(5),
+        matching: find.text('Non-flying'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the role dropdown is the same height as the class field', (
+    tester,
+  ) async {
+    await pumpParticipantsPage(tester, ParticipantsServer());
+
+    final role = find.descendant(
+      of: find.byKey(ValueKey('role-${personParticipationId(1).value}')),
+      matching: find.byType(InputDecorator),
+    );
+    final cls = find.descendant(
+      of: find.byKey(ValueKey('class-${personParticipationId(1).value}')),
+      matching: find.byType(InputDecorator),
+    );
+    // Both sit in the same row and share the cell height; a dense dropdown
+    // would be ~8 px shorter.
+    expect(
+      tester.getRect(role).height,
+      moreOrLessEquals(tester.getRect(cls).height, epsilon: 1.0),
+    );
+  });
+
   testWidgets('after the draw the allocated number shows and Has flights marks '
       'a scored pilot', (tester) async {
     await pumpParticipantsPage(
