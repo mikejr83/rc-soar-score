@@ -118,6 +118,17 @@ void main() {
       expect(result.fields, ['time_flown', 'landing']);
     });
 
+    test('a closed contest in the director envelope is a refusal', () async {
+      final result = await _repository(
+        (_) => _json(
+          '{"error":{"code":"scoring_closed","message":"completed"}}',
+          409,
+        ),
+      ).submitScore(_submission);
+      expect(result, isA<ScoreRejected>());
+      expect((result as ScoreRejected).code, 'scoring_closed');
+    });
+
     test('a 401 with no body ends the session instead of queueing', () async {
       for (final body in ['', '<html>']) {
         final result = await _repository((_) => _json(body, 401))
@@ -240,6 +251,15 @@ void main() {
       overview.rounds.last.unavailableReason,
       'Scoring is closed for this contest.',
     );
+  });
+
+  test('a completed contest is read as completed, not as closed', () async {
+    final body =
+        jsonDecode(_fixture('participant_overview')) as Map<String, dynamic>;
+    body['access'] = {'code': 'contest_completed', 'message': 'raw words'};
+    final overview = await _repository((_) => _json(jsonEncode(body)))
+        .pilotOverview('c', 'p');
+    expect(overview.access, ScoringAccess.completed);
   });
 
   test('pages after the overview do not fetch the overview again', () async {

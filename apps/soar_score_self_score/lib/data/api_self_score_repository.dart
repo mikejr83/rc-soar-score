@@ -150,6 +150,16 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
           error.statusCode >= 500 ||
           error.statusCode == 408 ||
           error.statusCode == 429;
+      // The director routes' envelope (`{"error": {"code": ...}}`) carries
+      // the contest-state refusals, such as `scoring_closed` once the contest
+      // is completed. That is a refusal, not a lost connection: queuing it
+      // would retry a score that can never be accepted.
+      final envelopeCode = refusal == null && !transient
+          ? _codeOf(error)
+          : null;
+      if (envelopeCode != null) {
+        return ScoreRejected(code: envelopeCode, message: '');
+      }
       if (refusal == null || transient) {
         throw const SelfScoreOfflineException(_unreachable);
       }
@@ -216,7 +226,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       access: switch (dto.access.code) {
         'open' => ScoringAccess.open,
         'not_open' || 'not_started' => ScoringAccess.notStarted,
-        'completed' => ScoringAccess.completed,
+        'contest_completed' => ScoringAccess.completed,
         // Any other refusal is closed to the pilot.
         _ => ScoringAccess.closed,
       },

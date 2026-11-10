@@ -349,11 +349,11 @@ The scripts exit at once when chromedriver is missing or does not answer on port
 
 ### End-to-End Tests (Self-Scoring App)
 
-The self-scoring app's journey lives in `apps/soar_score_self_score/integration_test/`: a pilot opens an invitation link, enters a round and sees the score. It runs the real web build in headless Chrome against `apps/soar_score_server/tool/e2e_server.dart --profile server` (a test-only server with invitations on; never deploy it) and is local only, like the contest app's. Set up Chrome and chromedriver as above first.
+The self-scoring app's journey lives in `apps/soar_score_self_score/integration_test/`: a pilot opens an invitation link, enters a round, sees the group and overall results, the director scores and hides results, the pilot ends the session, and finally the contest is completed and the link expires after 24 hours (eight phases). It runs the real web build in headless Chrome against `apps/soar_score_server/tool/e2e_server.dart --profile server` (a test-only server with invitations on; never deploy it) and is local only, like the contest app's. Set up Chrome and chromedriver as above first.
 
 ```bash
 ./scripts/e2e-score.sh                                  # PowerShell: .\scripts\e2e-score.ps1
-E2E_STOP_AFTER=3 ./scripts/e2e-score.sh                 # end after phase 3
+E2E_STOP_AFTER=3 ./scripts/e2e-score.sh                 # end after phase 3 (about 40 s; the whole journey about 100 s)
 ./scripts/e2e-score.sh -- --dart-define=E2E_SCREENSHOTS=steps
 ```
 
