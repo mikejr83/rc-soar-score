@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -9,6 +11,7 @@ import '../../../router.dart';
 import '../../../services/reports/pilot_cards/pilot_invitations.dart';
 import '../../../services/reports/report_kind.dart';
 import '../../invitations/send_invitations_flow.dart';
+import '../../sync/reload_on_sync.dart';
 
 /// The workspace card under the setup checklist that sends pilot invitations:
 /// the same send as the pilot cards report, without opening it. Issuing never
@@ -62,10 +65,13 @@ class _InvitationsSectionState extends State<InvitationsSection> {
       });
       return;
     }
-    setState(() {
-      _loading = true;
-      _failed = false;
-    });
+    // A reload with a card already showing keeps it on screen.
+    if (_session == null) {
+      setState(() {
+        _loading = true;
+        _failed = false;
+      });
+    }
     try {
       final participations = await client.participations(widget.contest.id);
       final session = await PilotInvitationSession.open(
@@ -102,10 +108,17 @@ class _InvitationsSectionState extends State<InvitationsSection> {
     // Connectivity is read again whenever it changes, so the button goes off
     // with the reason instead of failing a request.
     final monitor = appConnectivityOf(context);
-    if (monitor == null) return _card(context);
-    return ListenableBuilder(
-      listenable: monitor,
-      builder: (context, _) => _card(context),
+    // A sync can change whether invitations may be sent (the contest reaches
+    // the server) and who has a link, so the card reads them again.
+    return ReloadOnSync(
+      scope: ContestScopeKey(widget.contest.id),
+      onSynced: () => unawaited(_load()),
+      child: monitor == null
+          ? Builder(builder: _card)
+          : ListenableBuilder(
+              listenable: monitor,
+              builder: (context, _) => _card(context),
+            ),
     );
   }
 
