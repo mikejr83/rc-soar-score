@@ -255,6 +255,14 @@
   "@copyInvitationLink": {
     "description": "Tooltip of the title bar button on the pilot overview that copies the pilot's invitation link."
   },
+  "invitationLinkCopied": "Invitation link copied",
+  "@invitationLinkCopied": {
+    "description": "Shown after the pilot's invitation link was copied to the clipboard."
+  },
+  "invitationLinkCopyFailed": "Couldn't copy the invitation link. Check your connection and try again.",
+  "@invitationLinkCopyFailed": {
+    "description": "Shown when the pilot's invitation link could not be fetched to copy."
+  },
   "currentResults": "Results",
   "@currentResults": {
     "description": "Primary button at the bottom of the pilot overview that opens the contest results."

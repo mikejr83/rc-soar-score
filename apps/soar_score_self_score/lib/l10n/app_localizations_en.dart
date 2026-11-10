@@ -204,6 +204,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copyInvitationLink => 'Copy invitation link';
 
   @override
+  String get invitationLinkCopied => 'Invitation link copied';
+
+  @override
+  String get invitationLinkCopyFailed =>
+      'Couldn\'t copy the invitation link. Check your connection and try again.';
+
+  @override
   String get currentResults => 'Results';
 
   @override

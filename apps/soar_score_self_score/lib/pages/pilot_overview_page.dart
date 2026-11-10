@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../data/score_changes.dart';
+import '../data/self_score_repository.dart';
 import '../data/self_score_scope.dart';
 import '../l10n/app_localizations.dart';
 import '../models/pilot_overview.dart';
@@ -51,6 +53,23 @@ class PilotOverviewPage extends StatelessWidget {
     }
   }
 
+  /// Copies the pilot's own invitation link. The server rebuilds it for the
+  /// session, so the link is never kept in the browser.
+  Future<void> _copyInvitationLink(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final repository = context.repository;
+    String message;
+    try {
+      final link = await repository.invitationLink();
+      await Clipboard.setData(ClipboardData(text: link));
+      message = l10n.invitationLinkCopied;
+    } on SelfScoreLoadException {
+      message = l10n.invitationLinkCopyFailed;
+    }
+    messenger.showSnackBar(SnackBar(content: Text(message)));
+  }
+
   void _notYet(BuildContext context, String message) =>
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(message)));
@@ -87,10 +106,7 @@ class PilotOverviewPage extends StatelessWidget {
             IconButton(
               tooltip: l10n.copyInvitationLink,
               icon: const Icon(Icons.link),
-              onPressed: () => _notYet(
-                context,
-                'Invitation links arrive with the invitations feature (#141).',
-              ),
+              onPressed: () => _copyInvitationLink(context),
             ),
             const EndSessionButton(),
           ],

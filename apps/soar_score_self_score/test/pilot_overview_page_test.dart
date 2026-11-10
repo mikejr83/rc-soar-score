@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_self_score/data/sample_data.dart';
 import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
 import 'package:soar_score_self_score/data/score_changes.dart';
+import 'package:soar_score_self_score/data/self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_scope.dart';
 import 'package:soar_score_self_score/l10n/app_localizations.dart';
 import 'package:soar_score_self_score/models/pilot_overview.dart';
@@ -14,6 +16,13 @@ class _CountingRepository extends SampleSelfScoreRepository {
 
   final bool team;
   int loads = 0;
+  bool linkFails = false;
+
+  @override
+  Future<String> invitationLink() async {
+    if (linkFails) throw const SelfScoreLoadException('offline');
+    return 'https://score.example/invitations/abc';
+  }
 
   @override
   Future<PilotOverview> pilotOverview(String contestId, String pilotId) async {
@@ -91,5 +100,47 @@ void main() {
   testWidgets('Copy invitation link is a title bar action', (tester) async {
     await _pump(tester, _CountingRepository());
     expect(find.byTooltip('Copy invitation link'), findsOneWidget);
+  });
+
+  testWidgets('the invitation link button copies the pilot\'s link', (
+    tester,
+  ) async {
+    String? copied;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map)['text'] as String?;
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+    await _pump(tester, _CountingRepository());
+
+    await tester.tap(find.byTooltip('Copy invitation link'));
+    await tester.pumpAndSettle();
+
+    expect(copied, 'https://score.example/invitations/abc');
+    expect(find.text('Invitation link copied'), findsOneWidget);
+  });
+
+  testWidgets('a failed fetch says so and copies nothing', (tester) async {
+    final repository = _CountingRepository()..linkFails = true;
+    await _pump(tester, repository);
+
+    await tester.tap(find.byTooltip('Copy invitation link'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining("Couldn't copy the invitation link"),
+      findsOneWidget,
+    );
+    expect(find.text('Invitation link copied'), findsNothing);
   });
 }

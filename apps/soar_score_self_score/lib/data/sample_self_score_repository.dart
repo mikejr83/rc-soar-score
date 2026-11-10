@@ -122,6 +122,10 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
   }
 
   @override
+  Future<String> invitationLink() async =>
+      'https://score.rcsoarscore.com/invitations/sample';
+
+  @override
   Future<PilotOverview> pilotOverview(String contestId, String pilotId) async {
     _requireContest(contestId);
     return PilotOverview(

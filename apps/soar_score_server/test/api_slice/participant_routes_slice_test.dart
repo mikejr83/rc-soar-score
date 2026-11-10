@@ -198,6 +198,27 @@ void _tests(SliceBackend backend) {
     },
   );
 
+  test('a pilot can read their own invitation link, and only theirs', () async {
+    final issued = await service.issue(
+      contestId: core.Id.parse(_contestId),
+      participationId: core.Id.parse(_participationId(1)),
+      issuedBy: api.director,
+      clientMutationId: 'issue-link-1',
+    );
+    final token = (await service.resolve(issued.credential)).sessionToken;
+
+    final (status, body) = await call('/invitation-link', token: token);
+    expect(status, 200, reason: '$body');
+    expect(
+      body['link'],
+      'https://score.rcsoarscore.com/invitations/${issued.credential}',
+    );
+    expect(body['participation_id'], _participationId(1));
+
+    final (noSession, _) = await call('/invitation-link');
+    expect(noSession, 401);
+  });
+
   test('the overview lists the pilot\'s own rounds and the next one', () async {
     final token = await sessionFor(1);
     final (status, body) = await call('/overview', token: token);

@@ -212,6 +212,10 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       );
 
   @override
+  Future<String> invitationLink() =>
+      _read(() async => (await _client.participantInvitationLink()).link);
+
+  @override
   Future<PilotOverview> pilotOverview(String contestId, String pilotId) =>
       _read(() async => _overview(await _client.participantOverview()));
 

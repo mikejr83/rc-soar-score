@@ -412,6 +412,18 @@ abstract class AppLocalizations {
   /// **'Copy invitation link'**
   String get copyInvitationLink;
 
+  /// Shown after the pilot's invitation link was copied to the clipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation link copied'**
+  String get invitationLinkCopied;
+
+  /// Shown when the pilot's invitation link could not be fetched to copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t copy the invitation link. Check your connection and try again.'**
+  String get invitationLinkCopyFailed;
+
   /// Primary button at the bottom of the pilot overview that opens the contest results.
   ///
   /// In en, this message translates to:

@@ -11,6 +11,7 @@ import '../middleware/error_mapping.dart';
 import '../middleware/failure_rate_limiter.dart';
 import '../middleware/request_id.dart';
 import 'health_handler.dart';
+import 'invitation_handlers.dart' show defaultSelfScoringBaseUrl;
 import 'participant_score_handlers.dart';
 import 'participant_results_views.dart';
 import 'participant_views.dart';
@@ -30,6 +31,9 @@ final _logger = Logger('ParticipantHandlers');
 /// - `POST /session/end` removes the session cookie (204).
 /// - `GET /session` is the session's own context, behind the guest session
 ///   layer: the call the app makes to check a stored session.
+///
+/// - `GET /invitation-link` is the session's own invitation link (a
+///   [ContestInvitationDto]), so the pilot can copy it to another device.
 ///
 /// - `GET /overview` is the pilot's overview: their flight in every round,
 ///   its score state and the next round to score (a
@@ -57,6 +61,7 @@ Handler buildParticipantHandler(
   FailureRateLimiter? limiter,
   Set<String> allowedOrigins = const {},
   DateTime Function()? clock,
+  String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
 }) {
   final now = clock ?? DateTime.now;
   final rateLimiter = limiter ?? FailureRateLimiter();
@@ -115,6 +120,19 @@ Handler buildParticipantHandler(
         'contest': context.contest.toJson(),
         'participant': context.participant.toJson(),
       }).change(headers: {'cache-control': 'no-store'});
+    })
+    ..get('/invitation-link', (Request request) async {
+      final access = requireParticipant(request).access;
+      final credential = requireService().credentialForAccess(access);
+      final base = selfScoringBaseUrl.replaceAll(RegExp(r'/+$'), '');
+      // The link is the pilot's own bearer credential: sent only to the
+      // session that holds it, never cached, never logged.
+      return jsonResponse(
+        ContestInvitationDto(
+          participationId: access.participationId,
+          link: '$base/invitations/$credential',
+        ).toJson(),
+      ).change(headers: {'cache-control': 'no-store'});
     })
     ..get('/overview', (Request request) async {
       final access = requireParticipant(request).access;

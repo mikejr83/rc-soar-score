@@ -65,6 +65,14 @@ Future<String> phase2Invitation(
       expect(find.text('Next to score'), findsOneWidget);
       expect(find.text('Enter'), findsOneWidget);
     });
+    await journey.step(
+      'The pilot can copy their own invitation link',
+      () async {
+        await tester.tap(find.byTooltip('Copy invitation link'));
+        await pumpUntilFound(tester, find.text('Invitation link copied'));
+        await tester.pump(const Duration(seconds: 5));
+      },
+    );
     await journey.step('The same link works again', () async {
       await openPath(tester, invitationPath(contest.credentialOf(pilot)));
       await pumpUntilFound(tester, find.text('Hello, $pilot'));
