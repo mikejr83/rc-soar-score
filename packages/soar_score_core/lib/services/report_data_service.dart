@@ -98,15 +98,26 @@ class ReportDataService {
     );
   }
 
-  /// The stored standing as of the asked round; `null` when none is stored.
+  /// The stored standing as of the asked round; `null` when the round exists
+  /// but no standing is stored for it yet. A round the contest does not have
+  /// (0, or beyond the draw) is an [ArgumentError], a 400 as on
+  /// `/results?asOfRound=N`.
   Future<ContestResults?> _standing(Id id, ReportInclude want) async {
     final asOf = want.asOfRound;
     if (asOf == null) {
       return null;
     }
+    final ordinals = {
+      for (final round in await _repository.roundRepository.listForContest(id))
+        if (round.isCurrent) round.ordinal,
+    };
+    if (!ordinals.contains(asOf)) {
+      throw ArgumentError.value(asOf, 'asOfRound', 'no such round');
+    }
     try {
       return await _results.read(id, asOfRound: asOf);
     } on ArgumentError {
+      // A real round with no stored standing as of it yet.
       return null;
     }
   }

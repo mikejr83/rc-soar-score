@@ -229,6 +229,14 @@ void _tests(SliceBackend backend) {
       '/contests/$_contestId/report-data?include=standings&asOfRound=3',
     );
     expect(none['results'], isNull);
+    // A round the contest does not have is a 400, not "no standing".
+    for (final asOf in [0, 9]) {
+      final invalid = await api.send(
+        'GET',
+        '/contests/$_contestId/report-data?include=standings&asOfRound=$asOf',
+      );
+      expect(invalid.status, 400, reason: 'asOfRound=$asOf');
+    }
     // A round that does not exist is refused like the per-round read.
     final bad = await api.send(
       'GET',
