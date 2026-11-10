@@ -25,6 +25,7 @@ import '../../widgets/configuration/save_confirm_dialog.dart';
 import '../../widgets/configuration/section_nav.dart';
 import '../../widgets/page_states/page_states.dart';
 import '../../widgets/unsaved_changes_guard.dart';
+import '../../widgets/sync/reload_on_sync.dart';
 
 /// The configuration of one contest (`plan/ui/contest-administration/
 /// contest-workspace.md`): the contest details and every option in sections
@@ -389,7 +390,15 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
   void _goToMatrix() => context.go(contestMatrixPath(widget.contestId));
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<ConfigurationData>(
+  Widget build(BuildContext context) => ReloadOnSync.contest(
+    contestId: widget.contestId,
+    onSynced: () {
+      if (!(_draft?.dirty ?? false) && !_saving) _retry();
+    },
+    child: _loaded(context),
+  );
+
+  Widget _loaded(BuildContext context) => FutureBuilder<ConfigurationData>(
     future: _loading,
     builder: (context, snapshot) {
       if (snapshot.hasError) {

@@ -7,6 +7,7 @@ import '../connectivity_provider.dart';
 import '../ui_account_provider.dart';
 import '../services/workspace/shell_round_item.dart';
 import '../services/workspace/workspace_facts_loader.dart';
+import 'sync/reload_on_sync.dart';
 
 final Logger _logger = Logger('ShellRoundLoader');
 
@@ -102,7 +103,17 @@ class _ShellRoundLoaderState extends State<ShellRoundLoader> {
     );
   }
 
+  // A sync can move the round on (a score arrived), so the entry reads the
+  // facts again. The old entry stays until the new one is ready.
+  void _onSynced() {
+    _loadedFor = null;
+    setState(_ensure);
+  }
+
   @override
-  Widget build(BuildContext context) =>
-      widget.builder(context, _item, _refreshing);
+  Widget build(BuildContext context) => ReloadOnSync(
+    scope: ContestScopeKey(widget.contest.id),
+    onSynced: _onSynced,
+    child: widget.builder(context, _item, _refreshing),
+  );
 }

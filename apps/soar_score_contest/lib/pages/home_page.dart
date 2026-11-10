@@ -18,6 +18,7 @@ import '../widgets/exchange/contest_exchange_dialogs.dart';
 import '../widgets/master_detail.dart';
 import '../widgets/new_contest/create_contest_entry.dart';
 import '../widgets/page_states/page_states.dart';
+import '../widgets/sync/reload_on_sync.dart';
 
 /// The main page ("Contests"): the contests the app's API holds, as a list
 /// beside the selected contest's detail (one pane at a time when narrow).
@@ -182,7 +183,10 @@ class _HomePageState extends State<HomePage> {
   void _open(Contest contest) => context.go(contestOpenPath(contest));
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<List<Contest>>(
+  Widget build(BuildContext context) =>
+      ReloadOnSync.account(onSynced: _retry, child: _content(context));
+
+  Widget _content(BuildContext context) => FutureBuilder<List<Contest>>(
     future: _contests,
     builder: (context, snapshot) {
       final l10n = AppLocalizations.of(context);

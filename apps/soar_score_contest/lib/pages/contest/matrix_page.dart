@@ -22,6 +22,7 @@ import '../../widgets/matrix/draw_form_panel.dart';
 import '../../widgets/matrix/matrix_drawn_view.dart';
 import '../../widgets/matrix/move_pilot_dialog.dart';
 import '../../widgets/page_states/page_states.dart';
+import '../../widgets/sync/reload_on_sync.dart';
 
 /// The matrix of one contest (`plan/ui/contest-administration/matrix.md`):
 /// the first-draw form until a matrix exists, then the grid with its
@@ -651,7 +652,15 @@ class _MatrixPageState extends State<MatrixPage> {
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<MatrixPageData>(
+  Widget build(BuildContext context) => ReloadOnSync.contest(
+    contestId: widget.contestId,
+    onSynced: () {
+      if (_form == null && !_busy) _retry();
+    },
+    child: _content(context),
+  );
+
+  Widget _content(BuildContext context) => FutureBuilder<MatrixPageData>(
     future: _loading,
     builder: (context, snapshot) {
       final error = snapshot.error;

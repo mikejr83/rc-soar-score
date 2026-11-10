@@ -12,6 +12,7 @@ import '../widgets/page_states/page_states.dart';
 import '../widgets/pilot_import/pilot_import_dialog.dart';
 import '../widgets/participant_detail_pane.dart';
 import '../widgets/participant_list_pane.dart';
+import '../widgets/sync/reload_on_sync.dart';
 
 /// The director's reusable participant list and detail (system scope,
 /// `plan/ui/contest-administration/participant-data.md`).
@@ -137,53 +138,57 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<List<ParticipantProfile>>(
-    future: _participants,
-    builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        return loadFailedView(
-          snapshot.error!,
-          title: 'Participants could not be loaded.',
-          onRetry: _reload,
-        );
-      }
-      final all = snapshot.data;
-      if (all == null) {
-        return const PageStateView.loading(label: 'Loading participants');
-      }
-      if (all.isEmpty) {
-        return _withImport(
-          const PageStateView.empty(title: 'No participants yet.'),
-        );
-      }
-      // The first participant is selected until one is chosen (or when the
-      // chosen one is gone).
-      final selected = all.firstWhere(
-        (profile) => profile.id == _selectedId,
-        orElse: () => all.first,
+  Widget build(BuildContext context) =>
+      ReloadOnSync.account(onSynced: _reload, child: _content(context));
+
+  Widget _content(BuildContext context) =>
+      FutureBuilder<List<ParticipantProfile>>(
+        future: _participants,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return loadFailedView(
+              snapshot.error!,
+              title: 'Participants could not be loaded.',
+              onRetry: _reload,
+            );
+          }
+          final all = snapshot.data;
+          if (all == null) {
+            return const PageStateView.loading(label: 'Loading participants');
+          }
+          if (all.isEmpty) {
+            return _withImport(
+              const PageStateView.empty(title: 'No participants yet.'),
+            );
+          }
+          // The first participant is selected until one is chosen (or when the
+          // chosen one is gone).
+          final selected = all.firstWhere(
+            (profile) => profile.id == _selectedId,
+            orElse: () => all.first,
+          );
+          return _withImport(
+            MasterDetail(
+              showDetail: _showDetail,
+              list: (context, wide) => ParticipantListPane(
+                participants: all,
+                search: _search,
+                onSearch: (value) => setState(() => _search = value),
+                selectedId: selected.id,
+                highlight: wide,
+                onSelect: (profile) => setState(() {
+                  _selectedId = profile.id;
+                  _showDetail = true;
+                }),
+              ),
+              detail: (context, wide) => ParticipantDetailPane(
+                profile: selected,
+                onBack: wide ? null : () => setState(() => _showDetail = false),
+                onEdit: () => context.go(participantPath(selected.id.value)),
+                onDelete: () => _delete(selected),
+              ),
+            ),
+          );
+        },
       );
-      return _withImport(
-        MasterDetail(
-          showDetail: _showDetail,
-          list: (context, wide) => ParticipantListPane(
-            participants: all,
-            search: _search,
-            onSearch: (value) => setState(() => _search = value),
-            selectedId: selected.id,
-            highlight: wide,
-            onSelect: (profile) => setState(() {
-              _selectedId = profile.id;
-              _showDetail = true;
-            }),
-          ),
-          detail: (context, wide) => ParticipantDetailPane(
-            profile: selected,
-            onBack: wide ? null : () => setState(() => _showDetail = false),
-            onEdit: () => context.go(participantPath(selected.id.value)),
-            onDelete: () => _delete(selected),
-          ),
-        ),
-      );
-    },
-  );
 }

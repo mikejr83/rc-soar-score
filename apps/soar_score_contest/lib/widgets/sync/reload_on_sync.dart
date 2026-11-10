@@ -18,12 +18,45 @@ import '../../services/sync/app_sync.dart';
 class ReloadOnSync extends StatefulWidget {
   const ReloadOnSync({
     super.key,
-    required this.scope,
+    required SyncScopeKey this.scope,
     required this.onSynced,
     required this.child,
   });
 
-  final SyncScopeKey scope;
+  /// Watches the signed-in account's own data scope (contest list,
+  /// participants, roles, landing tables). Nothing fires while nobody is
+  /// signed in.
+  const ReloadOnSync.account({
+    super.key,
+    required this.onSynced,
+    required this.child,
+  }) : scope = null;
+
+  /// Watches the contest with the route id [contestId]. An id that does not
+  /// parse leaves [child] as it is: the page shows its own not-found state.
+  static Widget contest({
+    Key? key,
+    required String contestId,
+    required VoidCallback onSynced,
+    required Widget child,
+  }) {
+    final Id id;
+    try {
+      id = Id.parse(contestId);
+    } on ArgumentError {
+      return child;
+    }
+    return ReloadOnSync(
+      key: key,
+      scope: ContestScopeKey(id),
+      onSynced: onSynced,
+      child: child,
+    );
+  }
+
+  /// The contest scope to watch for the contest's own pages; [account] for
+  /// the pages of the signed-in account.
+  final SyncScopeKey? scope;
 
   final VoidCallback onSynced;
 
@@ -47,7 +80,7 @@ class _ReloadOnSyncState extends State<ReloadOnSync> {
     _subscription = null;
     _sync = sync;
     if (!sync.available) return;
-    _seen = sync.state.of(widget.scope)?.lastSyncedAt;
+    _seen = _lastSynced(sync);
     _subscription = sync.states.listen((_) => _check());
   }
 
@@ -56,13 +89,20 @@ class _ReloadOnSyncState extends State<ReloadOnSync> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.scope != widget.scope) {
       // A different contest: what it last synced is not news.
-      _seen = _sync?.state.of(widget.scope)?.lastSyncedAt;
+      final sync = _sync;
+      _seen = sync == null ? null : _lastSynced(sync);
     }
+  }
+
+  DateTime? _lastSynced(AppSync sync) {
+    final scope = widget.scope ?? sync.accountScope;
+    return scope == null ? null : sync.state.of(scope)?.lastSyncedAt;
   }
 
   void _check() {
     if (!mounted) return;
-    final synced = _sync?.state.of(widget.scope)?.lastSyncedAt;
+    final sync = _sync;
+    final synced = sync == null ? null : _lastSynced(sync);
     if (synced == null || synced == _seen) return;
     _seen = synced;
     widget.onSynced();

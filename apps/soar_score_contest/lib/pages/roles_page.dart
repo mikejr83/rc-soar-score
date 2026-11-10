@@ -11,6 +11,7 @@ import '../widgets/page_states/page_states.dart';
 import '../widgets/roles/role_detail_pane.dart';
 import '../widgets/roles/role_list_pane.dart';
 import '../widgets/roles/role_name_dialog.dart';
+import '../widgets/sync/reload_on_sync.dart';
 
 /// The director's roles: the system roles and their own non-flier roles
 /// (system scope, `plan/ui/contest-administration/main-page.md`).
@@ -189,7 +190,10 @@ class _RolesPageState extends State<RolesPage> {
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<List<Role>>(
+  Widget build(BuildContext context) =>
+      ReloadOnSync.account(onSynced: _reload, child: _content(context));
+
+  Widget _content(BuildContext context) => FutureBuilder<List<Role>>(
     future: _roles,
     builder: (context, snapshot) {
       if (snapshot.hasError) {
