@@ -68,6 +68,13 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
 
       await tapVisible(tester, _key('publication-open-page'));
       await pumpUntilFound(tester, _key('publication-page-state'));
+      expect(
+        find.descendant(
+          of: _key('publication-page-card'),
+          matching: _key('publication-page-state'),
+        ),
+        findsOneWidget,
+      );
       expect(_key('publication-page-no-copy'), findsOneWidget);
       expect(_key('publication-page-reason'), findsOneWidget);
       expect(

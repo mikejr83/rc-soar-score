@@ -87,21 +87,31 @@ class _ContestPublicationPageState extends State<ContestPublicationPage> {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 720),
-              child: error != null
-                  ? _Failed(onRetry: _reload)
-                  : data == null
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
-                  : _Ready(
-                      data: data,
-                      isOffline: offline,
-                      onChanged: _reload,
-                      l10n: l10n,
-                    ),
+              child: Card(
+                key: const ValueKey('publication-page-card'),
+                margin: EdgeInsets.zero,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: error != null
+                        ? _Failed(onRetry: _reload)
+                        : data == null
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(32),
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        : _Ready(
+                            data: data,
+                            isOffline: offline,
+                            onChanged: _reload,
+                            l10n: l10n,
+                          ),
+                  ),
+                ),
+              ),
             ),
           ),
         );
