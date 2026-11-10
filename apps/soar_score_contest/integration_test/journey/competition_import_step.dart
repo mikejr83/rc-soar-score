@@ -232,7 +232,16 @@ Future<void> importCompetitionsFromGliderScore(
     findsOneWidget,
   );
   await tapVisible(tester, _key('competition-import-row-1'));
-  // A round is only partly flown, so Completed starts off.
+  // The unscored round is a trailing unflown one, not a partly flown one, so
+  // every flown round is scored and Completed starts on. Untick it so the
+  // contest stays open.
+  expect(
+    tester
+        .widget<CheckboxListTile>(_key('competition-import-completed-1'))
+        .value,
+    isTrue,
+  );
+  await tapVisible(tester, _key('competition-import-completed-1'));
   expect(
     tester
         .widget<CheckboxListTile>(_key('competition-import-completed-1'))
