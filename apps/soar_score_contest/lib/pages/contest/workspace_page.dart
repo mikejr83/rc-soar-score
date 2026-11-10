@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -20,6 +22,7 @@ import '../../services/workspace/workspace_page_state.dart';
 import '../../services/workspace/workspace_section.dart';
 import '../../widgets/api_error_text.dart';
 import '../../widgets/contest_scope.dart';
+import '../../widgets/sync/reload_on_sync.dart';
 import '../../widgets/workspace/activity/recent_activity_section.dart';
 import '../../widgets/workspace/attention/attention_section.dart';
 import '../../widgets/workspace/checklist/setup_checklist_section.dart';
@@ -186,6 +189,22 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       }
       _reloadFacts();
     });
+  }
+
+  /// A sync finished: the contest and the facts behind the sections may have
+  /// changed. Both reload quietly, so the page stays on screen. A failed reload
+  /// leaves what is shown as it was.
+  Future<void> _onSynced() async {
+    await _refresh();
+    if (!mounted) {
+      return;
+    }
+    final contest = _shown;
+    if (contest == null) {
+      return;
+    }
+    _factsFor = null;
+    _ensureFacts(contest);
   }
 
   void _reportStale(String what) {
@@ -404,52 +423,56 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       hasMatrix: facts?.hasMatrix ?? false,
       hasAttentionItems: facts != null && NeedsAttention.of(facts).hasItems,
     );
-    return WorkspaceScope(
-      refresh: () async {
-        await _refresh();
-      },
-      announce: _announce,
-      readOnly: readOnly,
-      facts: facts,
-      factsFailed: _factsFailed,
-      reloadFacts: _reloadFacts,
-      reportStale: _reportStale,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // The unavailable banner (server unreachable, local copy shown)
-          // has no source until the local store lands (#319), so it is not
-          // wired here; it must not fake a local copy.
-          WorkspaceBanners(
-            offline: offline,
-            staleChange: _staleWhat,
-            onRefresh: _tryAgain,
-            // Facts load after the first frame of a contest, so the note of
-            // the last one must not show in that frame.
-            importNote: _importNoteFor == contest.id ? _importNote : null,
-          ),
-          Expanded(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                WorkspaceFrame(
-                  plan: plan,
-                  scrollController: _scroll,
-                  sectionBuilder: (section) => WorkspaceSectionSlot(
-                    section: section,
-                    readOnly: readOnly,
-                    child: _content(section, contest, plan, readOnly),
-                  ),
-                ),
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  child: WorkspaceLiveRegion(message: _announcement),
-                ),
-              ],
+    return ReloadOnSync(
+      scope: ContestScopeKey(contest.id),
+      onSynced: () => unawaited(_onSynced()),
+      child: WorkspaceScope(
+        refresh: () async {
+          await _refresh();
+        },
+        announce: _announce,
+        readOnly: readOnly,
+        facts: facts,
+        factsFailed: _factsFailed,
+        reloadFacts: _reloadFacts,
+        reportStale: _reportStale,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // The unavailable banner (server unreachable, local copy shown)
+            // has no source until the local store lands (#319), so it is not
+            // wired here; it must not fake a local copy.
+            WorkspaceBanners(
+              offline: offline,
+              staleChange: _staleWhat,
+              onRefresh: _tryAgain,
+              // Facts load after the first frame of a contest, so the note of
+              // the last one must not show in that frame.
+              importNote: _importNoteFor == contest.id ? _importNote : null,
             ),
-          ),
-        ],
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  WorkspaceFrame(
+                    plan: plan,
+                    scrollController: _scroll,
+                    sectionBuilder: (section) => WorkspaceSectionSlot(
+                      section: section,
+                      readOnly: readOnly,
+                      child: _content(section, contest, plan, readOnly),
+                    ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    child: WorkspaceLiveRegion(message: _announcement),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
