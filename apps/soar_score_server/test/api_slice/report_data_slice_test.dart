@@ -229,6 +229,21 @@ void _tests(SliceBackend backend) {
       '/contests/$_contestId/report-data?include=standings&asOfRound=3',
     );
     expect(none['results'], isNull);
+    // A stored standing outlives a redraw that replaces its round (here the
+    // round is cancelled, so it is no longer current): `/results` still reads
+    // it, and so does report-data, instead of calling the round invalid.
+    await api.database.customStatement(
+      "UPDATE rounds SET status = 'Cancelled' WHERE ordinal = 2",
+    );
+    final outlived = await api.expectOk(
+      'GET',
+      '/contests/$_contestId/report-data?include=standings&asOfRound=2',
+    );
+    expect(
+      outlived['results'],
+      await api.expectOk('GET', '/contests/$_contestId/results?asOfRound=2'),
+    );
+    expect(outlived['results'], isNotNull);
     // A round the contest does not have is a 400, not "no standing".
     for (final asOf in [0, 9]) {
       final invalid = await api.send(

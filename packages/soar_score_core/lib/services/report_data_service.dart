@@ -98,27 +98,33 @@ class ReportDataService {
     );
   }
 
-  /// The stored standing as of the asked round; `null` when the round exists
-  /// but no standing is stored for it yet. A round the contest does not have
-  /// (0, or beyond the draw) is an [ArgumentError], a 400 as on
-  /// `/results?asOfRound=N`.
+  /// The stored standing as of the asked round, exactly as `/results` reads
+  /// it (stored standings are by round ordinal, so one can outlive a redraw
+  /// and is then stale). `null` when the round is one the contest has had but
+  /// has no stored standing; a round it never had (0, or past every round
+  /// ever drawn) is an [ArgumentError], a 400 as on `/results?asOfRound=N`.
   Future<ContestResults?> _standing(Id id, ReportInclude want) async {
     final asOf = want.asOfRound;
     if (asOf == null) {
       return null;
     }
-    final ordinals = {
-      for (final round in await _repository.roundRepository.listForContest(id))
-        if (round.isCurrent) round.ordinal,
-    };
-    if (!ordinals.contains(asOf)) {
-      throw ArgumentError.value(asOf, 'asOfRound', 'no such round');
-    }
     try {
       return await _results.read(id, asOfRound: asOf);
     } on ArgumentError {
-      // A real round with no stored standing as of it yet.
-      return null;
+      final ordinals = [
+        for (final round in await _repository.roundRepository.listForContest(
+          id,
+        ))
+          round.ordinal,
+      ];
+      final known =
+          ordinals.isNotEmpty &&
+          asOf >= 1 &&
+          asOf <= ordinals.reduce((a, b) => a > b ? a : b);
+      if (known) {
+        return null;
+      }
+      rethrow;
     }
   }
 
