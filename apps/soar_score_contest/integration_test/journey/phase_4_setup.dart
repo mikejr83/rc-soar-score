@@ -240,7 +240,7 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
           (w) => w is Checkbox && w.semanticLabel == 'Select $name',
         ),
       );
-      await tapVisible(tester, _key('remove-participants'));
+      await tapVisible(tester, _key('bulk-remove'));
       await pumpUntilFound(tester, _key('confirm-remove-draw'));
       expect(
         find.textContaining('Their places in it are removed too'),
