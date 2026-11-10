@@ -13,6 +13,7 @@ class SelfScoreAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backLabel = 'Back',
     this.actions = const [],
     this.showAccount = true,
+    this.onCopyInvitationLink,
     super.key,
   });
 
@@ -24,6 +25,9 @@ class SelfScoreAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String backLabel;
   final List<Widget> actions;
   final bool showAccount;
+
+  /// Adds "Copy invitation link" to the More menu when set.
+  final VoidCallback? onCopyInvitationLink;
 
   @override
   Size get preferredSize => const Size.fromHeight(57);
@@ -87,7 +91,7 @@ class SelfScoreAppBar extends StatelessWidget implements PreferredSizeWidget {
                     onPressed: () {},
                     icon: const Icon(Icons.account_circle_outlined),
                   ),
-                const LicencesMenuButton(),
+                LicencesMenuButton(onCopyInvitationLink: onCopyInvitationLink),
               ],
             ),
           ),

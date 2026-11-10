@@ -250,5 +250,17 @@
         "type": "String"
       }
     }
+  },
+  "copyInvitationLink": "Copy invitation link",
+  "@copyInvitationLink": {
+    "description": "More menu entry on the pilot overview that copies the pilot's invitation link."
+  },
+  "currentResults": "Results",
+  "@currentResults": {
+    "description": "Primary button at the bottom of the pilot overview that opens the contest results."
+  },
+  "retirePilot": "Retire pilot",
+  "@retirePilot": {
+    "description": "Button at the bottom of the pilot overview that starts retiring the pilot."
   }
 }

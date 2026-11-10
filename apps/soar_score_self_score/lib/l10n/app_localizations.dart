@@ -405,6 +405,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t refresh; last updated {time}'**
   String resultsRefreshFailed(String time);
+
+  /// More menu entry on the pilot overview that copies the pilot's invitation link.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy invitation link'**
+  String get copyInvitationLink;
+
+  /// Primary button at the bottom of the pilot overview that opens the contest results.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get currentResults;
+
+  /// Button at the bottom of the pilot overview that starts retiring the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire pilot'**
+  String get retirePilot;
 }
 
 class _AppLocalizationsDelegate

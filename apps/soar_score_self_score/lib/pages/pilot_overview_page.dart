@@ -84,6 +84,10 @@ class PilotOverviewPage extends StatelessWidget {
           backLabel: l10n.backToPilots,
           actions: const [ConnectionIndicator(), EndSessionButton()],
           showAccount: false,
+          onCopyInvitationLink: () => _notYet(
+            context,
+            'Invitation links arrive with the invitations feature (#141).',
+          ),
         ),
         builder: (context, data) => ListView(
           padding: const EdgeInsets.all(16),
@@ -121,43 +125,24 @@ class PilotOverviewPage extends StatelessWidget {
               const SizedBox(height: 8),
             ],
             const Divider(height: 32),
+            FilledButton.icon(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(44),
+              ),
+              onPressed: () => context.push(resultsPath(contestId)),
+              icon: const Icon(Icons.leaderboard_outlined, size: 20),
+              label: Text(l10n.currentResults),
+            ),
+            const SizedBox(height: 8),
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(44),
-                side: BorderSide(
-                  color: theme.colorScheme.onSurface,
-                  width: 1.5,
-                ),
-              ),
-              onPressed: () => _notYet(
-                context,
-                'Invitation links arrive with the invitations feature (#141).',
-              ),
-              icon: const Icon(Icons.link, size: 20),
-              label: const Text('Copy invitation link'),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              style: TextButton.styleFrom(
-                minimumSize: const Size.fromHeight(44),
-                alignment: Alignment.centerLeft,
-                foregroundColor: theme.colorScheme.primary,
-              ),
-              onPressed: () => context.push(resultsPath(contestId)),
-              child: const Text('Current results'),
-            ),
-            const SizedBox(height: 8),
-            TextButton.icon(
-              style: TextButton.styleFrom(
-                minimumSize: const Size.fromHeight(44),
-                foregroundColor: theme.colorScheme.onSurface,
+                foregroundColor: theme.colorScheme.error,
+                side: BorderSide(color: theme.colorScheme.error),
               ),
               onPressed: () => _confirmRetire(context, data.pilotName),
               icon: const Icon(Icons.person_off_outlined, size: 20),
-              label: const Text(
-                'Retire pilot',
-                style: TextStyle(decoration: TextDecoration.underline),
-              ),
+              label: Text(l10n.retirePilot),
             ),
           ],
         ),

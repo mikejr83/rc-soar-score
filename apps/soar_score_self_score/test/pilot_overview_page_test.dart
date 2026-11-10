@@ -70,4 +70,28 @@ void main() {
 
     expect(repository.loads, 2);
   });
+
+  testWidgets('the bottom actions are buttons, results first', (tester) async {
+    await _pump(tester, _CountingRepository());
+    final results = find.widgetWithText(FilledButton, 'Results');
+    final retire = find.widgetWithText(OutlinedButton, 'Retire pilot');
+    expect(results, findsOneWidget);
+    expect(retire, findsOneWidget);
+    expect(
+      find.descendant(of: results, matching: find.byType(Icon)),
+      findsOneWidget,
+    );
+    expect(
+      tester.getTopLeft(results).dy < tester.getTopLeft(retire).dy,
+      isTrue,
+    );
+    expect(find.text('Copy invitation link'), findsNothing);
+  });
+
+  testWidgets('Copy invitation link is in the More menu', (tester) async {
+    await _pump(tester, _CountingRepository());
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    expect(find.text('Copy invitation link'), findsOneWidget);
+  });
 }

@@ -199,4 +199,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String resultsRefreshFailed(String time) {
     return 'Couldn\'t refresh; last updated $time';
   }
+
+  @override
+  String get copyInvitationLink => 'Copy invitation link';
+
+  @override
+  String get currentResults => 'Results';
+
+  @override
+  String get retirePilot => 'Retire pilot';
 }
