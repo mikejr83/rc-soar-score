@@ -8,17 +8,17 @@ import '../support/pilot_session.dart';
 import 'journey.dart';
 import 'phase_2_invitation.dart';
 
-/// Phase 8: the contest is completed. The link keeps working for 24 hours,
+/// Phase 7: the contest is completed. The link keeps working for 24 hours,
 /// read-only, then the session and the link both stop. The last phase: the
 /// E2E server's invitation clock cannot be set back.
-Future<void> phase8Completion(
+Future<void> phase7Completion(
   WidgetTester tester,
   Journey journey,
   SeededContest contest,
   String pilotId,
 ) async {
   final pilot = contest.pilotNames[0];
-  await journey.phase(8, 'Completion and link expiry', () async {
+  await journey.phase(7, 'Completion and link expiry', () async {
     await journey.step('A completed contest takes no more scores', () async {
       await contest.action('complete');
       final state = await contest.api.call('GET', '/contests/${contest.id}');
