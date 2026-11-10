@@ -23,6 +23,17 @@ class MatrixPageData {
            membership.contestParticipationId: membership.teamId,
        };
 
+  /// The page data read from a report-data response that carries the facts.
+  factory MatrixPageData.fromReportData(ReportData data) => MatrixPageData(
+    contest: data.contest,
+    configuration: data.configuration,
+    participations: data.participations!,
+    profiles: data.participants!,
+    teams: data.teams!,
+    memberships: data.teamMemberships!,
+    matrix: data.matrix!,
+  );
+
   /// Teams show only when the contest has them configured.
   static bool _teamsEnabled(
     ContestConfigurationRevision? configuration,

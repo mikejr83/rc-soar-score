@@ -2,6 +2,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
+import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_api_handlers/handlers/write_metadata.dart';
@@ -12,6 +13,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///
 /// - `GET /participants` and `GET /participants/{id}` read the caller's
 ///   profiles
+/// - `GET /contests/{id}/participants` reads only the profiles of the
+///   people in one contest (the director's, like the other contest reads)
 /// - `POST /participants` creates a profile owned by the request's principal
 /// - `PUT /participants/{id}` replaces its details
 /// - `DELETE /participants/{id}` deletes a profile that is in no contest
@@ -27,6 +30,15 @@ void addParticipantRoutes(Router router, Repository repository) {
     final profiles = [
       for (final owner in principal.visibleOwners) ...await service.list(owner),
     ];
+    return jsonResponse(<String, dynamic>{
+      'participants': [for (final profile in profiles) profile.toJson()],
+    });
+  });
+
+  router.get('/contests/<id>/participants', (Request request, String id) async {
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final profiles = await service.listForContest(contestId);
     return jsonResponse(<String, dynamic>{
       'participants': [for (final profile in profiles) profile.toJson()],
     });

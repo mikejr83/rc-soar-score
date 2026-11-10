@@ -148,6 +148,14 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
       );
       await pumpUntilFound(tester, find.text('Raw'));
 
+      // Flight details come in the same one-call report read as the
+      // standings (`report-data`): the entered flight times show as m:ss.
+      await tapVisible(
+        tester,
+        find.widgetWithText(CheckboxListTile, 'Flight details'),
+      );
+      await pumpUntilFound(tester, find.textContaining(RegExp(r'\d+:\d{2}')));
+
       await tapVisible(tester, _key('viewer-back'));
       await pumpUntilFound(tester, find.text('Reports are built from'));
     }),

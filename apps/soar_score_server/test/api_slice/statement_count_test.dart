@@ -150,6 +150,41 @@ void _size(
       within(round, _budgetStored, 'GET results/rounds/1');
     });
 
+    test('the contest\'s participants and the report data', () async {
+      late Map<String, Object?> participantsBody;
+      final participants = await counted('GET contest participants', () async {
+        participantsBody = await get(
+          participantHandler,
+          '/api/v1/contests/${contestId.value}/participants',
+        );
+      });
+      expect(participantsBody['participants'], hasLength(pilots));
+      within(participants, _budgetContestParticipants, 'contest participants');
+
+      late Map<String, Object?> factsBody;
+      final facts = await counted('GET report-data (facts)', () async {
+        factsBody = await get(
+          participantHandler,
+          '/api/v1/contests/${contestId.value}/report-data',
+        );
+      });
+      expect(factsBody['participants'], hasLength(pilots));
+      within(facts, _budgetReportFacts(rounds), 'report data facts');
+
+      final every = [for (var r = 1; r <= rounds; r++) r];
+      late Map<String, Object?> standingsBody;
+      final standings = await counted('GET report-data (standings)', () async {
+        standingsBody = await get(
+          participantHandler,
+          '/api/v1/contests/${contestId.value}/report-data'
+          '?include=standings,scores&asOfRound=$rounds&rounds=${every.join(',')}',
+        );
+      });
+      expect(standingsBody['round_results'], hasLength(rounds));
+      expect(standingsBody['participants'], isNull);
+      within(standings, _budgetReportStandings(rounds), 'report standings');
+    });
+
     test('the pilot\'s group and overall results', () async {
       final issued = await invitations.issue(
         contestId: contestId,
@@ -188,6 +223,14 @@ void _size(
 int _budgetScores(int rounds) => rounds + 12;
 const _budgetStored = 14;
 int _budgetPilotResults(int rounds) => rounds + 28;
+const _budgetContestParticipants = 6;
+// Measured 2026-11-10 (xtra-large 100x8 / large 50x15): contest participants
+// 4; report data facts 36 / 50 (the 8 reads of the old reports page, plus the
+// per-round work of the scores and matrix reads); standings with scores
+// 105 / 182. The standings read still repeats each round's reads once per
+// round, as the separate per-round endpoint does (#841 narrows that).
+int _budgetReportFacts(int rounds) => rounds + 38;
+int _budgetReportStandings(int rounds) => rounds * 12 + 20;
 
 /// Creates the contest, its [pilots] and the draw through the API, then
 /// writes the scores straight to the tables. Returns the first pilot's
