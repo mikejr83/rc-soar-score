@@ -70,7 +70,12 @@ Future<RunningServer> startServer(
   InternetAddress? address,
   AuthMiddleware? authMiddleware,
 }) async {
-  final db = database ?? createPostgresDatabase(config.postgres);
+  final db =
+      database ??
+      createPostgresDatabase(
+        config.postgres,
+        logStatementDurations: config.logStatementDurations,
+      );
   try {
     await db.doWhenOpened((_) {});
     _logger.info('Database open and migrated.');

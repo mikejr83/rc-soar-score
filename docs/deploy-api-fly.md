@@ -20,6 +20,7 @@ enough. No secret lives in the repository: `DATABASE_URL` is a Fly secret.
 | `API_AUDIENCE`                    | `fly.toml` | `https://soar-score.com/server`                                                                                                                               |
 | `CORS_ALLOWED_ORIGINS`            | `fly.toml` | app, score and public site origins                                                                                                                            |
 | `PORT`, `LOG_LEVEL`, `LOG_FORMAT` | `fly.toml` | `8080`, `INFO`, `json`                                                                                                                                        |
+| `LOG_DB_STATEMENT_DURATIONS`      | Fly secret (optional) | off. `true` logs every database statement's duration while you measure (see [Measuring statement durations](#measuring-statement-durations))                                  |
 
 The full list is in `apps/soar_score_server/lib/config/server_config.dart`.
 
@@ -94,6 +95,36 @@ public in this repository: never set it on the deployed app.
 
 The `POSTGRES_*` variables are the alternative to `DATABASE_URL` for local
 databases and are not used on Fly.
+
+### Measuring statement durations
+
+To see what each database statement really costs from the Fly machine to Neon,
+turn on the opt-in log. It is off unless you set the variable, and logging is
+the only thing it changes.
+
+```sh
+fly secrets set LOG_DB_STATEMENT_DURATIONS=true -a rc-soar-score-api    # on (restarts the machine)
+fly secrets unset LOG_DB_STATEMENT_DURATIONS -a rc-soar-score-api       # off again
+```
+
+(A secret is only the easy way to set a variable without a deploy; the value is
+not confidential.)
+
+Then read the lines with `fly logs -a rc-soar-score-api`. Each statement is one
+line from the `db.statements` logger at INFO (so `LOG_LEVEL` must be `INFO` or
+lower):
+
+```
+select 11.8ms args=2 SELECT "t"."id" AS "t.id", ... FROM "contests" "t" WHERE "t"."id" = $1 ...
+```
+
+Only the SQL text (cut at 200 characters, quoted literals blanked) and the
+number of arguments are logged. Argument values, which can hold invitation
+links, names and e-mail addresses, are never logged. The time is per statement
+and can include waiting behind another statement on the single connection; time a
+transaction waits to start is not measured. Remove the variable when done:
+every statement adds a log line, which is noisy and costs a little CPU on a
+256 MB machine.
 
 ### Not read by the API
 

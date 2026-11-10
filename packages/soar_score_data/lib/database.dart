@@ -62,6 +62,7 @@ import 'schema/tables/team_memberships_table.dart';
 import 'schema/tables/teams_table.dart';
 import 'schema/tables/tombstones_table.dart';
 import 'schema/table_groups.dart';
+import 'timing/statement_timing_interceptor.dart';
 
 part 'database.g.dart';
 
@@ -201,9 +202,18 @@ SoarScoreDatabase createInMemoryDatabase() {
   return SoarScoreDatabase(executor, profile: DatabaseProfile.native);
 }
 
-SoarScoreDatabase createPostgresDatabase(PostgresConfig config) {
+/// Opens the PostgreSQL database for [config].
+///
+/// With [logStatementDurations] every statement's duration is logged by a
+/// [StatementTimingInterceptor] (SQL text and argument count only, never
+/// values).
+SoarScoreDatabase createPostgresDatabase(
+  PostgresConfig config, {
+  bool logStatementDurations = false,
+}) {
+  final pg = config.toPgDatabase();
   return SoarScoreDatabase(
-    config.toPgDatabase(),
+    logStatementDurations ? pg.interceptWith(StatementTimingInterceptor()) : pg,
     profile: DatabaseProfile.server,
   );
 }

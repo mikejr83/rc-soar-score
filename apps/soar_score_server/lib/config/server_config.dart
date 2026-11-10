@@ -19,6 +19,7 @@ import 'package:soar_score_core/config/log_format.dart';
 /// | `CORS_ALLOWED_ORIGINS` | comma-separated browser origins allowed to call the API, such as `http://127.0.0.1:8091` | none |
 /// | `INVITATION_SECRET` | at least 32 characters; signs invitation links and guest sessions. Without it the participant routes answer 409 `invitations_not_available`. Changing it ends every link and session | none |
 /// | `SELF_SCORING_BASE_URL` | the self-scoring site invitation links point at, an `https://` URL (or `http://` for local use) with no path | `https://score.rcsoarscore.com` |
+/// | `LOG_DB_STATEMENT_DURATIONS` | `true` logs one line per database statement with its duration, SQL text and argument count (never values); `false` or unset is off | off |
 /// | `DATABASE_URL` | a `postgresql://` connection URL (authority with password, database in the path, `sslmode` optional) | none — the URL wins over the discrete variables |
 /// | `POSTGRES_PASSWORD` | database password, when no `DATABASE_URL` is set | required |
 /// | `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_SSLMODE` | database connection, when no `DATABASE_URL` is set | see [PostgresConfig] |
@@ -33,6 +34,7 @@ class ServerConfig {
     this.corsAllowedOrigins = const {},
     this.invitationSecret,
     this.selfScoringBaseUrl,
+    this.logStatementDurations = false,
   });
 
   /// The variables [ServerConfig.parse] reads.
@@ -45,6 +47,7 @@ class ServerConfig {
     'CORS_ALLOWED_ORIGINS',
     'INVITATION_SECRET',
     'SELF_SCORING_BASE_URL',
+    'LOG_DB_STATEMENT_DURATIONS',
     'DATABASE_URL',
     'POSTGRES_PASSWORD',
     'POSTGRES_HOST',
@@ -74,6 +77,9 @@ class ServerConfig {
   /// The self-scoring site invitation links point at, or null for the
   /// default.
   final String? selfScoringBaseUrl;
+
+  /// Whether each database statement's duration is logged (off by default).
+  final bool logStatementDurations;
 
   /// Parses [environment].
   ///
@@ -184,6 +190,22 @@ class ServerConfig {
       }
     }
 
+    var logStatementDurations = false;
+    final rawDurations = value('LOG_DB_STATEMENT_DURATIONS');
+    if (rawDurations != null) {
+      switch (rawDurations.toLowerCase()) {
+        case 'true':
+          logStatementDurations = true;
+        case 'false':
+          break;
+        default:
+          problems.add(
+            'LOG_DB_STATEMENT_DURATIONS must be true or false, '
+            'got "$rawDurations".',
+          );
+      }
+    }
+
     final rawDbUrl = value('DATABASE_URL');
     var databaseConfigured = rawDbUrl != null;
     if (databaseConfigured) {
@@ -230,6 +252,7 @@ class ServerConfig {
       corsAllowedOrigins: origins,
       invitationSecret: secret,
       selfScoringBaseUrl: selfScoring,
+      logStatementDurations: logStatementDurations,
     );
   }
 
