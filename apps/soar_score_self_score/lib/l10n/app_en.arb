@@ -1,8 +1,16 @@
 {
   "@@locale": "en",
-  "moreMenuTooltip": "More",
-  "@moreMenuTooltip": {
-    "description": "Tooltip of the app bar button that opens the menu with legal and licence links."
+  "appInfoLink": "Application info",
+  "@appInfoLink": {
+    "description": "Tooltip of the app bar button and text of the footer link that open the Application info page."
+  },
+  "appInfoTitle": "Application info",
+  "@appInfoTitle": {
+    "description": "Title of the page that lists the licences, the Privacy Policy and the Terms."
+  },
+  "backLabel": "Back",
+  "@backLabel": {
+    "description": "Tooltip of the back button on the Application info page."
   },
   "openSourceLicencesLink": "Open source licences",
   "@openSourceLicencesLink": {

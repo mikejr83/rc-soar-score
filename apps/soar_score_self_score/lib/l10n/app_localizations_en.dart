@@ -10,7 +10,13 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get moreMenuTooltip => 'More';
+  String get appInfoLink => 'Application info';
+
+  @override
+  String get appInfoTitle => 'Application info';
+
+  @override
+  String get backLabel => 'Back';
 
   @override
   String get openSourceLicencesLink => 'Open source licences';
