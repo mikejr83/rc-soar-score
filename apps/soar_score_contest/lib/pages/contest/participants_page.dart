@@ -59,6 +59,14 @@ class ContestParticipantsPage extends StatefulWidget {
       _ContestParticipantsPageState();
 }
 
+typedef _InvitationActions = ({
+  VoidCallback? send,
+  VoidCallback? copy,
+  String? sendReason,
+  String? copyReason,
+  int count,
+});
+
 class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   ParticipantsController? _controller;
   final CellFocusRegistry _focus = CellFocusRegistry();
@@ -119,20 +127,28 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     await sendInvitationsGuarded(context, session, missing);
   }
 
-  /// What the Invitations menu offers for the selection now.
-  ({VoidCallback? send, VoidCallback? copy, String? reason}) _invitationMenu(
-    ParticipantsController c,
-    Set<String> rowIds,
-  ) {
+  /// What the invitation actions offer for [targets] now. A row menu passes
+  /// its one row; the selection bar passes every selected row.
+  _InvitationActions _invitationMenu(
+    List<StoredParticipant> targets, {
+    required bool forRow,
+    required bool saving,
+  }) {
     final l10n = AppLocalizations.of(context);
     final session = _invitations;
     if (session == null || session.phase == InvitationPhase.loadFailed) {
-      return (send: null, copy: null, reason: l10n.invitationsNotReady);
+      final reason = l10n.invitationsNotReady;
+      return (
+        send: null,
+        copy: null,
+        sendReason: reason,
+        copyReason: reason,
+        count: 0,
+      );
     }
     final pilots = [
-      for (final row in c.rows)
-        if (rowIds.contains(row.rowId) && canHaveInvitation(row.participation))
-          row.participation.id,
+      for (final row in targets)
+        if (canHaveInvitation(row.participation)) row.participation.id,
     ];
     final missing = [
       for (final id in pilots)
@@ -145,27 +161,30 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     );
     final sendReason =
         unavailable ??
-        (rowIds.isEmpty
+        (targets.isEmpty
             ? l10n.invitationsSelectPilots
             : pilots.isEmpty
             ? l10n.invitationsOnlyPilots
             : missing.isEmpty
-            ? l10n.invitationsAllHaveLinks
+            ? (forRow
+                  ? l10n.participantInvitationExists
+                  : l10n.invitationsAllHaveLinks)
             : null);
-    // Copy needs exactly one selected row, and it must be a pilot.
-    final oneRow = rowIds.length == 1 && pilots.length == 1;
+    // Copy needs exactly one row, and it must be a pilot.
+    final oneRow = targets.length == 1 && pilots.length == 1;
     final link = oneRow ? session.invitations.linkOf(pilots.single) : null;
     final copyReason = !oneRow
-        ? l10n.invitationsSelectOne
+        ? (forRow ? l10n.invitationsOnlyPilots : l10n.invitationsSelectOne)
         : link == null
         ? l10n.invitationsNoLinkYet
         : null;
-    final canSend = sendReason == null && !session.sending && !c.saving;
-    final reasons = [?sendReason, if (rowIds.length == 1) ?copyReason];
+    final canSend = sendReason == null && !session.sending && !saving;
     return (
       send: canSend ? () => _sendInvitations(missing) : null,
       copy: link == null ? null : () => _copyLink(link),
-      reason: reasons.isEmpty ? null : reasons.join(' '),
+      sendReason: sendReason,
+      copyReason: copyReason,
+      count: missing.length,
     );
   }
 
@@ -601,21 +620,45 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     context.go(path);
   }
 
-  Widget _actions(
-    ParticipantsController c,
-    Set<String> rowIds, {
-    StoredParticipant? row,
-  }) {
-    final invitation = _invitationMenu(c, rowIds);
+  /// The selection bar's invitation actions for every selected row.
+  Widget _selectionActions(ParticipantsController c) {
+    final targets = [
+      for (final row in c.rows)
+        if (c.selection.contains(row.rowId)) row,
+    ];
+    final invitation = _invitationMenu(
+      targets,
+      forRow: false,
+      saving: c.saving,
+    );
     return ParticipantActions(
-      rowId: row?.rowId,
-      count: rowIds.length,
+      count: targets.length,
+      sendCount: invitation.count,
       onSend: invitation.send,
       onCopy: invitation.copy,
-      reason: invitation.reason,
-      onRemove: row != null && c.canEdit && !c.saving && !c.hasFlights(row)
-          ? () => _removeParticipants(rowIds)
-          : null,
+      sendReason: invitation.sendReason,
+      copyReason: targets.length == 1 ? invitation.copyReason : null,
+    );
+  }
+
+  /// One row's three-dot menu; it never reads or changes the selection.
+  Widget _rowActions(ParticipantsController c, StoredParticipant row) {
+    final l10n = AppLocalizations.of(context);
+    final invitation = _invitationMenu([row], forRow: true, saving: c.saving);
+    final canRemove = c.canEdit && !c.saving && !c.hasFlights(row);
+    return ParticipantActions(
+      rowId: row.rowId,
+      count: 1,
+      onSend: invitation.send,
+      onCopy: invitation.copy,
+      sendReason: invitation.sendReason,
+      copyReason: invitation.copyReason,
+      onRemove: canRemove ? () => _removeParticipants({row.rowId}) : null,
+      removeReason: canRemove
+          ? null
+          : c.hasFlights(row)
+          ? l10n.participantRemoveHasFlights
+          : l10n.participantRemoveUnavailable,
     );
   }
 
@@ -654,6 +697,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
         ),
       ];
     }
+    final byId = {for (final row in visible) row.rowId: row};
     return [
       if (c.selection.isNotEmpty) ...[
         BulkEditBar(
@@ -661,7 +705,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
           count: c.selection.length,
           onClear: c.clearSelection,
           showRemove: !c.readOnly,
-          actions: [_actions(c, Set.of(c.selection))],
+          actions: [_selectionActions(c)],
           onRemove: c.canEdit && !c.saving && !c.selectionHasFlights
               ? _removeSelected
               : null,
@@ -708,7 +752,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                   editing: editing,
                   participant: row,
                   selectable: true,
-                  actions: _actions(c, {row.rowId}, row: row),
+                  actions: _rowActions(c, row),
                 ),
                 const SizedBox(height: 8),
               ],
@@ -722,8 +766,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
           rows: visible,
           selectable: true,
           onToggleAll: () => c.toggleAll(visible.map((r) => r.rowId)),
-          actionsOf: (row) =>
-              _actions(c, {row.rowId}, row: row as StoredParticipant),
+          actionsOf: (row) => _rowActions(c, byId[row.rowId]!),
         ),
     ];
   }

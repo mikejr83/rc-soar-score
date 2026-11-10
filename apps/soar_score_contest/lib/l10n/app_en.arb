@@ -2505,8 +2505,6 @@
   "@invitationsMenuSend": {"description": "Participants invitations menu item that creates invitations for the selected pilots."},
   "invitationsMenuSendCount": "Send invitations ({count})",
   "@invitationsMenuSendCount": {"description": "Participants invitations menu item with the number of selected pilots that have none.", "placeholders": {"count": {"type": "int"}}},
-  "invitationsMenuCopy": "Copy link",
-  "@invitationsMenuCopy": {"description": "Participants invitations menu item that copies one pilot's link."},
   "invitationsLinkCopied": "Link copied.",
   "@invitationsLinkCopied": {"description": "Snack bar after a pilot's invitation link was copied."},
   "invitationsSelectPilots": "Select pilots to send invitations.",
@@ -2534,5 +2532,11 @@
   "participantActionCopy": "Copy invitation URL",
   "@participantActionCopy": {"description": "Participant menu action that copies one pilot’s invitation URL."},
   "participantActions": "Participant actions",
-  "@participantActions": {"description": "Tooltip for the participant row three-dot menu."}
+  "@participantActions": {"description": "Tooltip for the participant row three-dot menu."},
+  "participantInvitationExists": "This pilot already has an invitation.",
+  "@participantInvitationExists": {"description": "Reason Send invitation is off in a participant row menu: the pilot already has one."},
+  "participantRemoveHasFlights": "Pilots with flights can’t be removed.",
+  "@participantRemoveHasFlights": {"description": "Reason Remove is off in a participant row menu: the pilot has flights."},
+  "participantRemoveUnavailable": "Participants can’t be removed from this contest now.",
+  "@participantRemoveUnavailable": {"description": "Reason Remove is off in a participant row menu: the contest is locked, completed or saving."}
 }

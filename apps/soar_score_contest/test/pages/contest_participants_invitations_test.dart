@@ -43,7 +43,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('invitations-menu')), findsNothing);
-    expect(find.text('Send invitations'), findsOneWidget);
+    expect(find.text('Send invitations (2)'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('invitations-send')));
     await tester.pumpAndSettle();
     expect(find.text('Send invitations?'), findsOneWidget);

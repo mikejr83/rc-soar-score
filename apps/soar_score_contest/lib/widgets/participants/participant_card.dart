@@ -126,12 +126,20 @@ class ParticipantCard extends StatelessWidget {
                     children: [
                       cells.nameBlock(context),
                       cells.emailCell(context, prefix: true),
+                      // With the menu button beside it, the status drops
+                      // under the name so a phone keeps room for both.
+                      if (actions != null) ...[
+                        const SizedBox(height: 4),
+                        cells.status(context),
+                      ],
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                cells.status(context),
-                ?actions,
+                if (actions == null) ...[
+                  const SizedBox(width: 8),
+                  cells.status(context),
+                ] else
+                  actions!,
               ],
             ),
             if (fields.isNotEmpty) ...[

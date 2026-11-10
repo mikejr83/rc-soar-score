@@ -279,4 +279,84 @@ void main() {
       [personParticipationId(2)],
     ]);
   });
+
+  testWidgets('a completed contest bar has invitations but no remove', (
+    tester,
+  ) async {
+    PilotInvitationSources.current = FakePilotInvitationSource();
+    await pumpParticipantsPage(
+      tester,
+      ParticipantsServer(state: LifecycleState.completed, drawn: true),
+    );
+    await tester.tap(_check(1));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('participants-bulk-bar')), findsOneWidget);
+    expect(find.byKey(const ValueKey('invitations-menu')), findsOneWidget);
+    expect(find.byKey(const ValueKey('bulk-remove')), findsNothing);
+  });
+
+  testWidgets('a disabled row Remove says why', (tester) async {
+    final l10n = AppLocalizationsEn();
+    PilotInvitationSources.current = FakePilotInvitationSource();
+    await pumpParticipantsPage(
+      tester,
+      ParticipantsServer(
+        state: LifecycleState.running,
+        drawn: true,
+        withScores: true,
+      ),
+    );
+    await openRow(tester, 1);
+    expect(find.byTooltip(l10n.participantRemoveHasFlights), findsOneWidget);
+    await tester.tap(rowAction('actions', 1));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(const SizedBox());
+    await pumpParticipantsPage(
+      tester,
+      ParticipantsServer(lock: AdminLock.locked),
+    );
+    await openRow(tester, 1);
+    expect(find.byTooltip(l10n.participantRemoveUnavailable), findsOneWidget);
+  });
+
+  testWidgets('removing a selected row leaves other selections alone', (
+    tester,
+  ) async {
+    final server = ParticipantsServer();
+    await pumpParticipantsPage(tester, server);
+    await tester.tap(_check(1));
+    await tester.tap(_check(2));
+    await tester.pumpAndSettle();
+    await openRow(tester, 1);
+    await tester.tap(rowAction('remove', 1));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('confirm-remove')));
+    await tester.pumpAndSettle();
+    expect(server.removals, [personParticipationId(1)]);
+    expect(tester.widget<Checkbox>(_check(2)).value, isTrue);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('participants-bulk-bar')),
+        matching: find.text('1 selected'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a narrow card keeps its name beside the actions menu', (
+    tester,
+  ) async {
+    PilotInvitationSources.current = FakePilotInvitationSource();
+    await pumpParticipantsPage(
+      tester,
+      ParticipantsServer(
+        state: LifecycleState.running,
+        drawn: true,
+        withScores: true,
+      ),
+      size: const Size(360, 1400),
+    );
+    expect(rowAction('actions', 1), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
