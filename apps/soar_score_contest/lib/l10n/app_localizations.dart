@@ -668,6 +668,96 @@ abstract class AppLocalizations {
   /// **'OK'**
   String get storageDetailClose;
 
+  /// Status bar sync entry before the engine has looked at the scope.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get syncStatusChecking;
+
+  /// Status bar sync entry while a sync runs.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncStatusSyncing;
+
+  /// Status bar sync entry for data with no account behind it.
+  ///
+  /// In en, this message translates to:
+  /// **'Local only'**
+  String get syncStatusLocalOnly;
+
+  /// Status bar sync entry before the first sync.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced yet'**
+  String get syncStatusNotSynced;
+
+  /// Status bar sync entry when the last sync worked and nothing needs the director.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync successful'**
+  String get syncStatusSuccessful;
+
+  /// Status bar sync entry when changes made here wait to be sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes pending'**
+  String get syncStatusPending;
+
+  /// Status bar sync entry when the last sync attempt failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get syncStatusFailed;
+
+  /// Status bar sync entry when a conflict waits for a decision.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync conflicts'**
+  String get syncStatusConflicts;
+
+  /// Status bar sync entry when the service refused changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes refused'**
+  String get syncStatusRefused;
+
+  /// Tooltip line of the status bar sync entry: when the scope last synced.
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced {time}'**
+  String syncTooltipLastSynced(String time);
+
+  /// Tooltip line of the status bar sync entry: changes not yet sent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change waiting to be sent} other{{count} changes waiting to be sent}}'**
+  String syncTooltipPending(int count);
+
+  /// Tooltip line of the status bar sync entry: refused changes and conflicts.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change needs your attention} other{{count} changes need your attention}}'**
+  String syncTooltipAttention(int count);
+
+  /// Tooltip line of the status bar sync entry for data with no account behind it.
+  ///
+  /// In en, this message translates to:
+  /// **'This data is only on this device and is not backed up.'**
+  String get syncTooltipLocalOnly;
+
+  /// Tooltip line of the status bar sync entry: what a click does.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to sync now'**
+  String get syncTooltipAction;
+
+  /// Screen reader label of the status bar sync entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync: {status}'**
+  String syncSemanticsLabel(String status);
+
   /// Title of the warning shown before an action that would lose changes that have not reached the service.
   ///
   /// In en, this message translates to:

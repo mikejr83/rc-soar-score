@@ -46,10 +46,13 @@ void main() {
     );
     expect(sync, findsNothing);
 
-    // Inside a contest the bar tells the sync status and opens its details.
+    // Inside a contest the bar tells the sync status in a few words and a
+    // click syncs now; the details page is the rail's Sync destination.
     await openContest(tester, _contest);
     await pumpUntilFound(tester, sync);
     await tapVisible(tester, sync);
+    expect(find.byKey(const ValueKey('sync-details-card')), findsNothing);
+    await tapRail(tester, 'Sync');
     await pumpUntilFound(
       tester,
       find.byKey(const ValueKey('sync-details-card')),
