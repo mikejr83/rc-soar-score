@@ -499,6 +499,48 @@
   "@storageDetailClose": {
     "description": "Button that closes the storage detail dialog."
   },
+  "syncStatusChecking": "Checking…",
+  "@syncStatusChecking": {"description": "Status bar sync entry before the engine has looked at the scope."},
+  "syncStatusSyncing": "Syncing…",
+  "@syncStatusSyncing": {"description": "Status bar sync entry while a sync runs."},
+  "syncStatusLocalOnly": "Local only",
+  "@syncStatusLocalOnly": {"description": "Status bar sync entry for data with no account behind it."},
+  "syncStatusNotSynced": "Not synced yet",
+  "@syncStatusNotSynced": {"description": "Status bar sync entry before the first sync."},
+  "syncStatusSuccessful": "Sync successful",
+  "@syncStatusSuccessful": {"description": "Status bar sync entry when the last sync worked and nothing needs the director."},
+  "syncStatusPending": "Changes pending",
+  "@syncStatusPending": {"description": "Status bar sync entry when changes made here wait to be sent."},
+  "syncStatusFailed": "Sync failed",
+  "@syncStatusFailed": {"description": "Status bar sync entry when the last sync attempt failed."},
+  "syncStatusConflicts": "Sync conflicts",
+  "@syncStatusConflicts": {"description": "Status bar sync entry when a conflict waits for a decision."},
+  "syncStatusRefused": "Changes refused",
+  "@syncStatusRefused": {"description": "Status bar sync entry when the service refused changes."},
+  "syncTooltipLastSynced": "Last synced {time}",
+  "@syncTooltipLastSynced": {
+    "description": "Tooltip line of the status bar sync entry: when the scope last synced.",
+    "placeholders": {"time": {"type": "String"}}
+  },
+  "syncTooltipPending": "{count, plural, =1{1 change waiting to be sent} other{{count} changes waiting to be sent}}",
+  "@syncTooltipPending": {
+    "description": "Tooltip line of the status bar sync entry: changes not yet sent.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "syncTooltipAttention": "{count, plural, =1{1 change needs your attention} other{{count} changes need your attention}}",
+  "@syncTooltipAttention": {
+    "description": "Tooltip line of the status bar sync entry: refused changes and conflicts.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "syncTooltipLocalOnly": "This data is only on this device and is not backed up.",
+  "@syncTooltipLocalOnly": {"description": "Tooltip line of the status bar sync entry for data with no account behind it."},
+  "syncTooltipAction": "Click to sync now",
+  "@syncTooltipAction": {"description": "Tooltip line of the status bar sync entry: what a click does."},
+  "syncSemanticsLabel": "Sync: {status}",
+  "@syncSemanticsLabel": {
+    "description": "Screen reader label of the status bar sync entry.",
+    "placeholders": {"status": {"type": "String"}}
+  },
   "unsyncedWarningTitle": "Changes have not synced",
   "@unsyncedWarningTitle": {
     "description": "Title of the warning shown before an action that would lose changes that have not reached the service."

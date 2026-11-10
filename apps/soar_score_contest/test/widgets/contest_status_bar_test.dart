@@ -130,9 +130,7 @@ void _syncAndStorage() {
     expect(find.text('Local storage · Available'), findsOneWidget);
   });
 
-  testWidgets('shows the contest\'s pending changes and last sync in the bar', (
-    tester,
-  ) async {
+  testWidgets('shows the contest\'s sync status in the bar', (tester) async {
     final contest = _contest();
     final sync = FakeAppSync(
       state: AppSyncState(
@@ -150,11 +148,10 @@ void _syncAndStorage() {
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('contest-status-bar')),
-        matching: find.textContaining('3 pending'),
+        matching: find.text('Changes pending'),
       ),
       findsOneWidget,
     );
-    expect(find.textContaining('Synced '), findsOneWidget);
   });
 
   testWidgets('says Local only for a contest with no account', (tester) async {
@@ -249,7 +246,8 @@ void _constrained() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Local storage · Available'), findsOneWidget);
-      expect(find.textContaining('12 pending'), findsOneWidget);
+      expect(find.text('Sync conflicts'), findsNothing);
+      expect(find.text('Changes refused'), findsOneWidget);
     });
   }
 }
