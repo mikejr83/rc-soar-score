@@ -100,15 +100,17 @@ void main() {
     expect(find.text('time flown: 600, launch height: 120'), findsNothing);
     final slotValue = slot.value;
     expect(
-      tester.widget<TextField>(
-        find.byKey(ValueKey('score-time-$slotValue')),
-      ).controller!.text,
+      tester
+          .widget<TextField>(find.byKey(ValueKey('score-time-$slotValue')))
+          .controller!
+          .text,
       '10:00',
     );
     expect(
-      tester.widget<TextField>(
-        find.byKey(ValueKey('score-height-$slotValue')),
-      ).controller!.text,
+      tester
+          .widget<TextField>(find.byKey(ValueKey('score-height-$slotValue')))
+          .controller!
+          .text,
       '120',
     );
   });
@@ -116,25 +118,26 @@ void main() {
   testWidgets('a submission in review fills the form too', (tester) async {
     final server = ScoringServer();
     final slot = scoringAssignmentId(1, 1);
-    server.seedPendingSubmission(
-      slot,
-      {'time_flown': 600, 'launch_height': 120},
-      inReview: true,
-    );
+    server.seedPendingSubmission(slot, {
+      'time_flown': 600,
+      'launch_height': 120,
+    }, inReview: true);
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
     expect(find.text('Pilot entry'), findsOneWidget);
     expect(find.text('time flown: 600, launch height: 120'), findsNothing);
     expect(
-      tester.widget<TextField>(
-        find.byKey(ValueKey('score-time-${slot.value}')),
-      ).controller!.text,
+      tester
+          .widget<TextField>(find.byKey(ValueKey('score-time-${slot.value}')))
+          .controller!
+          .text,
       '10:00',
     );
     expect(
-      tester.widget<TextField>(
-        find.byKey(ValueKey('score-height-${slot.value}')),
-      ).controller!.text,
+      tester
+          .widget<TextField>(find.byKey(ValueKey('score-height-${slot.value}')))
+          .controller!
+          .text,
       '120',
     );
   });

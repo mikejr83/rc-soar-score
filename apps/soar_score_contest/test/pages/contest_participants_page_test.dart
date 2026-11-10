@@ -58,17 +58,11 @@ void main() {
     await pumpParticipantsPage(tester, ParticipantsServer());
 
     expect(
-      find.descendant(
-        of: _row(1),
-        matching: find.text('Ready'),
-      ),
+      find.descendant(of: _row(1), matching: find.text('Ready')),
       findsOneWidget,
     );
     expect(
-      find.descendant(
-        of: _row(5),
-        matching: find.text('Non-flying'),
-      ),
+      find.descendant(of: _row(5), matching: find.text('Non-flying')),
       findsOneWidget,
     );
   });
