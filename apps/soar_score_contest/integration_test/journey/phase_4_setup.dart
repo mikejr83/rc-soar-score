@@ -465,7 +465,9 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
 
           // The Participants list copies the link of one selected pilot.
           await tapRail(tester, 'Participants');
-          await pumpUntilFound(tester, _key('invitations-menu'));
+          await pumpUntilFound(tester, _key('participants-table'));
+          expect(_key('invitations-menu'), findsNothing);
+          expect(_key('remove-participants'), findsNothing);
           final pilot = data.roster.first;
           final pilotName = '${pilot.first} ${pilot.last}';
           await pumpUntilFound(tester, find.text(pilotName));
@@ -479,6 +481,25 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
           await tapVisible(tester, _key('invitations-copy'));
           // A headless browser may refuse clipboard access; the app then says
           // so ("The link could not be copied.") instead of failing silently.
+          await pumpUntilFound(tester, find.textContaining('copied'));
+          expect(stub.issuingSends, 1);
+          // A row menu exposes the same link without altering the selection.
+          final row = find
+              .ancestor(
+                of: find.text(pilotName),
+                matching: find.byWidgetPredicate(
+                  (w) =>
+                      w.key is ValueKey<String> &&
+                      (w.key as ValueKey<String>).value.startsWith('row-'),
+                ),
+              )
+              .first;
+          await tapVisible(
+            tester,
+            find.descendant(of: row, matching: find.byIcon(Icons.more_vert)),
+          );
+          await pumpUntilFound(tester, find.text('Copy invitation URL'));
+          await tapVisible(tester, find.text('Copy invitation URL'));
           await pumpUntilFound(tester, find.textContaining('copied'));
           expect(stub.issuingSends, 1);
         });

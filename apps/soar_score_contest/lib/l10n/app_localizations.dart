@@ -3657,6 +3657,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The server can’t be reached, so invitations can’t be sent now.'**
   String get invitationsServerUnreachable;
+
+  /// Participant row menu action that removes this participant from the contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get participantActionRemove;
+
+  /// Participant menu action that creates an invitation for one pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitation'**
+  String get participantActionSend;
+
+  /// Participant menu action that copies one pilot’s invitation URL.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy invitation URL'**
+  String get participantActionCopy;
+
+  /// Tooltip for the participant row three-dot menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant actions'**
+  String get participantActions;
 }
 
 class _AppLocalizationsDelegate

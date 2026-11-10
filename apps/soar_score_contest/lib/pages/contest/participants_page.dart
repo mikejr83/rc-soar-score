@@ -22,6 +22,7 @@ import '../../widgets/contest_participants/participants_dialogs.dart';
 import '../../widgets/contest_participants/participants_header.dart';
 import '../../widgets/contest_participants/participants_save_bar.dart';
 import '../../widgets/contest_participants/participants_toolbar.dart';
+import '../../widgets/contest_participants/participant_actions.dart';
 import '../../widgets/discard_changes_dialog.dart';
 import '../../widgets/page_states/page_states.dart';
 import '../../widgets/participants/bulk_edit_bar.dart';
@@ -112,14 +113,6 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     setState(() => _invitations = session..addListener(_changed));
   }
 
-  /// The selected pilots' participation ids, and which have no invitation.
-  List<Id> _selectedPilots(ParticipantsController c) => [
-    for (final row in c.rows)
-      if (c.selection.contains(row.rowId) &&
-          canHaveInvitation(row.participation))
-        row.participation.id,
-  ];
-
   Future<void> _sendInvitations(List<Id> missing) async {
     final session = _invitations;
     if (session == null) return;
@@ -127,19 +120,20 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   }
 
   /// What the Invitations menu offers for the selection now.
-  ({VoidCallback? send, VoidCallback? copy, String? reason, int count})
-  _invitationMenu(ParticipantsController c) {
+  ({VoidCallback? send, VoidCallback? copy, String? reason}) _invitationMenu(
+    ParticipantsController c,
+    Set<String> rowIds,
+  ) {
     final l10n = AppLocalizations.of(context);
     final session = _invitations;
     if (session == null || session.phase == InvitationPhase.loadFailed) {
-      return (
-        send: null,
-        copy: null,
-        reason: l10n.invitationsNotReady,
-        count: 0,
-      );
+      return (send: null, copy: null, reason: l10n.invitationsNotReady);
     }
-    final pilots = _selectedPilots(c);
+    final pilots = [
+      for (final row in c.rows)
+        if (rowIds.contains(row.rowId) && canHaveInvitation(row.participation))
+          row.participation.id,
+    ];
     final missing = [
       for (final id in pilots)
         if (!session.has(id)) id,
@@ -151,7 +145,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     );
     final sendReason =
         unavailable ??
-        (c.selection.isEmpty
+        (rowIds.isEmpty
             ? l10n.invitationsSelectPilots
             : pilots.isEmpty
             ? l10n.invitationsOnlyPilots
@@ -159,20 +153,19 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
             ? l10n.invitationsAllHaveLinks
             : null);
     // Copy needs exactly one selected row, and it must be a pilot.
-    final oneRow = c.selection.length == 1 && pilots.length == 1;
+    final oneRow = rowIds.length == 1 && pilots.length == 1;
     final link = oneRow ? session.invitations.linkOf(pilots.single) : null;
     final copyReason = !oneRow
         ? l10n.invitationsSelectOne
         : link == null
         ? l10n.invitationsNoLinkYet
         : null;
-    final canSend = sendReason == null && !session.sending;
-    final reasons = [?sendReason, ?copyReason];
+    final canSend = sendReason == null && !session.sending && !c.saving;
+    final reasons = [?sendReason, if (rowIds.length == 1) ?copyReason];
     return (
       send: canSend ? () => _sendInvitations(missing) : null,
       copy: link == null ? null : () => _copyLink(link),
       reason: reasons.isEmpty ? null : reasons.join(' '),
-      count: missing.length,
     );
   }
 
@@ -438,11 +431,19 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     }
   }
 
-  Future<void> _removeSelected() async {
+  Future<void> _removeSelected() =>
+      _removeParticipants(Set.of(_controller!.selection));
+
+  Future<void> _removeParticipants(Set<String> rowIds) async {
     final c = _controller!;
+    if (!c.canEdit ||
+        c.saving ||
+        c.rows.any((row) => rowIds.contains(row.rowId) && c.hasFlights(row))) {
+      return;
+    }
     final names = [
       for (final row in c.rows)
-        if (c.selection.contains(row.rowId)) row.name,
+        if (rowIds.contains(row.rowId)) row.name,
     ];
     if (names.isEmpty) return;
     final ok = await confirmRemove(
@@ -451,10 +452,10 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
       contestName: c.contest?.name ?? 'this contest',
       inDraw: [
         for (final row in c.rows)
-          if (c.selection.contains(row.rowId) && c.inDraw(row)) row.name,
+          if (rowIds.contains(row.rowId) && c.inDraw(row)) row.name,
       ],
     );
-    if (ok && mounted) await c.removeSelected();
+    if (ok && mounted) await c.removeParticipants(rowIds);
   }
 
   void _showRow(StoredParticipant row, ParticipantColumn column) {
@@ -489,7 +490,6 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
         label: 'Loading the participants',
       );
     }
-    final invitationMenu = _invitationMenu(c);
     final ids = {for (final row in c.rows) row.rowId};
     _focus.retain(ids);
     final visible = c.visibleRows;
@@ -565,11 +565,6 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                       narrow: narrow,
                       onAddNew: _addNew,
                       onAddProfile: _addProfile,
-                      onRemove: _removeSelected,
-                      onSendInvitations: invitationMenu.send,
-                      onCopyLink: invitationMenu.copy,
-                      invitationsReason: invitationMenu.reason,
-                      sendCount: invitationMenu.count,
                     ),
                     const SizedBox(height: 16),
                     Column(
@@ -604,6 +599,24 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
       // The route's guard asks before leaving.
     }
     context.go(path);
+  }
+
+  Widget _actions(
+    ParticipantsController c,
+    Set<String> rowIds, {
+    StoredParticipant? row,
+  }) {
+    final invitation = _invitationMenu(c, rowIds);
+    return ParticipantActions(
+      rowId: row?.rowId,
+      count: rowIds.length,
+      onSend: invitation.send,
+      onCopy: invitation.copy,
+      reason: invitation.reason,
+      onRemove: row != null && c.canEdit && !c.saving && !c.hasFlights(row)
+          ? () => _removeParticipants(rowIds)
+          : null,
+    );
   }
 
   List<Widget> _list(
@@ -642,12 +655,14 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
       ];
     }
     return [
-      if (c.selection.isNotEmpty && !c.readOnly) ...[
+      if (c.selection.isNotEmpty) ...[
         BulkEditBar(
           key: const ValueKey('participants-bulk-bar'),
           count: c.selection.length,
           onClear: c.clearSelection,
-          onRemove: c.canEdit && !c.selectionHasFlights
+          showRemove: !c.readOnly,
+          actions: [_actions(c, Set.of(c.selection))],
+          onRemove: c.canEdit && !c.saving && !c.selectionHasFlights
               ? _removeSelected
               : null,
           removeReason: c.selectionHasFlights
@@ -693,6 +708,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                   editing: editing,
                   participant: row,
                   selectable: true,
+                  actions: _actions(c, {row.rowId}, row: row),
                 ),
                 const SizedBox(height: 8),
               ],
@@ -706,6 +722,8 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
           rows: visible,
           selectable: true,
           onToggleAll: () => c.toggleAll(visible.map((r) => r.rowId)),
+          actionsOf: (row) =>
+              _actions(c, {row.rowId}, row: row as StoredParticipant),
         ),
     ];
   }

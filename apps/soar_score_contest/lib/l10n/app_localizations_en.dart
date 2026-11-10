@@ -2659,4 +2659,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get invitationsServerUnreachable =>
       'The server can’t be reached, so invitations can’t be sent now.';
+
+  @override
+  String get participantActionRemove => 'Remove';
+
+  @override
+  String get participantActionSend => 'Send invitation';
+
+  @override
+  String get participantActionCopy => 'Copy invitation URL';
+
+  @override
+  String get participantActions => 'Participant actions';
 }

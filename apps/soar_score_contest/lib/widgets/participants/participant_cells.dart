@@ -356,10 +356,12 @@ class ParticipantCells {
             children: [
               Icon(Icons.flight, size: 14, color: scheme.onSurfaceVariant),
               const SizedBox(width: 4),
-              Text(
-                'Has flights',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
+              Flexible(
+                child: Text(
+                  'Has flights',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],

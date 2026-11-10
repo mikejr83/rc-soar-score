@@ -2526,5 +2526,13 @@
   "invitationsOffline": "You’re offline, so invitations can’t be sent now.",
   "@invitationsOffline": {"description": "Reason invitations cannot be sent: the device is offline."},
   "invitationsServerUnreachable": "The server can’t be reached, so invitations can’t be sent now.",
-  "@invitationsServerUnreachable": {"description": "Reason invitations cannot be sent: the internet is up but the server is unreachable."}
+  "@invitationsServerUnreachable": {"description": "Reason invitations cannot be sent: the internet is up but the server is unreachable."},
+  "participantActionRemove": "Remove",
+  "@participantActionRemove": {"description": "Participant row menu action that removes this participant from the contest."},
+  "participantActionSend": "Send invitation",
+  "@participantActionSend": {"description": "Participant menu action that creates an invitation for one pilot."},
+  "participantActionCopy": "Copy invitation URL",
+  "@participantActionCopy": {"description": "Participant menu action that copies one pilot’s invitation URL."},
+  "participantActions": "Participant actions",
+  "@participantActions": {"description": "Tooltip for the participant row three-dot menu."}
 }

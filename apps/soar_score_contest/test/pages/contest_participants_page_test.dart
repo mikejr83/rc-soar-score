@@ -175,7 +175,7 @@ void main() {
     // Rows stay selectable so a link can still be copied; nothing else acts.
     expect(find.byType(Checkbox), findsWidgets);
     expect(find.byKey(const ValueKey('remove-participants')), findsNothing);
-    expect(find.byKey(const ValueKey('invitations-menu')), findsOneWidget);
+    expect(find.byKey(const ValueKey('invitations-menu')), findsNothing);
     expect(find.byType(TextField), findsOneWidget);
     expect(_row(1), findsOneWidget);
   });

@@ -15,11 +15,15 @@ class ParticipantCard extends StatelessWidget {
     required this.editing,
     required this.participant,
     this.selectable = true,
+    this.actions,
   });
 
   final ParticipantEditing editing;
   final ParticipantRow participant;
   final bool selectable;
+
+  /// Optional actions beside the status, matching the wide table.
+  final Widget? actions;
 
   static const double _minFieldWidth = 170;
 
@@ -127,6 +131,7 @@ class ParticipantCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 cells.status(context),
+                ?actions,
               ],
             ),
             if (fields.isNotEmpty) ...[

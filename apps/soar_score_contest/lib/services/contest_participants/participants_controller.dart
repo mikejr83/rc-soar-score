@@ -635,10 +635,14 @@ class ParticipantsController extends ChangeNotifier {
       rows.any((r) => selection.contains(r.rowId) && hasFlights(r));
 
   /// Removes the selected people one by one; the server may refuse some.
-  Future<RemoveResult> removeSelected() async {
+  Future<RemoveResult> removeSelected() =>
+      removeParticipants(Set.of(selection));
+
+  /// Removes explicit targets without changing the selection before confirmation.
+  Future<RemoveResult> removeParticipants(Set<String> rowIds) async {
     final targets = [
       for (final r in rows)
-        if (selection.contains(r.rowId)) r,
+        if (rowIds.contains(r.rowId)) r,
     ];
     final removed = <String>[];
     final left = <String>[];
@@ -653,7 +657,7 @@ class ParticipantsController extends ChangeNotifier {
         refused.add((name: row.name, reason: apiErrorTextOf(error)));
       }
     }
-    selection.clear();
+    selection.removeAll(targets.map((row) => row.rowId));
     final result = RemoveResult(removed: removed, refused: refused);
     lastRemoval = result;
     leftTheDraw = [...leftTheDraw, ...left];
