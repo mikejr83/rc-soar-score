@@ -108,6 +108,7 @@ class ParticipantEntryContextDto {
     required this.assignmentId,
     required this.round,
     required this.roundCount,
+    this.lastOpenRound,
     required this.group,
     this.lane,
     this.taskType,
@@ -127,6 +128,11 @@ class ParticipantEntryContextDto {
   final Id assignmentId;
   final int round;
   final int roundCount;
+
+  /// The latest round the pilot can open: the next one to score, as on the
+  /// overview, or the last round when every flight has a score. Null from a
+  /// server that does not say; the app then allows every round.
+  final int? lastOpenRound;
   final String group;
   final int? lane;
   final String? taskType;

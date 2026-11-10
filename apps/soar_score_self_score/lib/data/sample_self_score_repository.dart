@@ -4,6 +4,7 @@ import '../models/group_results.dart';
 import '../models/guest_session.dart';
 import '../models/landing_result.dart';
 import '../models/pilot_overview.dart';
+import '../models/pilot_round.dart';
 import '../models/results_view.dart';
 import '../models/score_submission.dart';
 import '../models/team_overview.dart';
@@ -150,6 +151,10 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
       pilotNumber: int.tryParse(pilotId) ?? 0,
       round: round,
       roundCount: rounds.length,
+      lastOpenRound: [
+        for (final r in rounds)
+          if (r.status != PilotRoundStatus.upcoming) r.number,
+      ].fold<int>(round, (a, b) => b > a ? b : a),
       group: draw.group,
       lane: draw.lane,
       landingTable: landingTable,

@@ -95,6 +95,10 @@ ParticipantEntryContextDto _$ParticipantEntryContextDtoFromJson(
       ),
       round: $checkedConvert('round', (v) => (v as num).toInt()),
       roundCount: $checkedConvert('round_count', (v) => (v as num).toInt()),
+      lastOpenRound: $checkedConvert(
+        'last_open_round',
+        (v) => (v as num?)?.toInt(),
+      ),
       group: $checkedConvert('group', (v) => v as String),
       lane: $checkedConvert('lane', (v) => (v as num?)?.toInt()),
       taskType: $checkedConvert('task_type', (v) => v as String?),
@@ -139,6 +143,7 @@ ParticipantEntryContextDto _$ParticipantEntryContextDtoFromJson(
   fieldKeyMap: const {
     'assignmentId': 'assignment_id',
     'roundCount': 'round_count',
+    'lastOpenRound': 'last_open_round',
     'taskType': 'task_type',
     'matrixRevision': 'matrix_revision',
     'scoreRevision': 'score_revision',
@@ -155,6 +160,7 @@ Map<String, dynamic> _$ParticipantEntryContextDtoToJson(
   'assignment_id': const IdConverter().toJson(instance.assignmentId),
   'round': instance.round,
   'round_count': instance.roundCount,
+  'last_open_round': instance.lastOpenRound,
   'group': instance.group,
   'lane': instance.lane,
   'task_type': instance.taskType,

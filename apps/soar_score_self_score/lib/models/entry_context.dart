@@ -8,6 +8,7 @@ class EntryContext {
     this.pilotNumber,
     required this.round,
     required this.roundCount,
+    int? lastOpenRound,
     required this.group,
     this.lane,
     this.taskType,
@@ -17,12 +18,16 @@ class EntryContext {
     this.matrixRevision = 0,
     this.alreadySubmitted = false,
     this.submittedScore,
-  });
+  }) : lastOpenRound = lastOpenRound ?? roundCount;
 
   final String pilotName;
   final int? pilotNumber;
   final int round;
   final int roundCount;
+
+  /// The latest round the pilot can open: scored rounds and the next one to
+  /// score, as on the pilot overview. Later rounds stay closed.
+  final int lastOpenRound;
   final String group;
 
   /// Null for disciplines that fly without lanes.

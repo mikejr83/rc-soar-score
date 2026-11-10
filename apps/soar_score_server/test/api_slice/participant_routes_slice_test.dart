@@ -344,6 +344,8 @@ void _tests(SliceBackend backend) {
     expect(body['assignment_id'], assignmentOf(1, 2)['id']);
     expect(body['round'], 2);
     expect(body['round_count'], 3);
+    // Nothing is scored, so round 1 is the next to score and the last open.
+    expect(body['last_open_round'], 1);
     expect(body['matrix_revision'], 1);
     expect(body['score_revision'], 0);
     expect(body['state'], 'not_entered');
