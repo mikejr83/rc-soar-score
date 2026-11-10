@@ -10,6 +10,12 @@ class _FakeProfiles implements ParticipantProfileRepository {
   Future<ParticipantProfile?> findById(Id id) async => stored[id];
 
   @override
+  Future<Map<Id, ParticipantProfile>> findByIds(Iterable<Id> ids) async => {
+    for (final id in ids)
+      if (stored[id] != null) id: stored[id]!,
+  };
+
+  @override
   Future<List<ParticipantProfile>> listForOwner(Id accountId) async => [
     for (final p in stored.values)
       if (p.ownerAccountId == accountId) p,

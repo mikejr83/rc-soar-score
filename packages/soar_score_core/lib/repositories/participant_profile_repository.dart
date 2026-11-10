@@ -6,6 +6,10 @@ import 'mutation_metadata.dart';
 abstract interface class ParticipantProfileRepository {
   Future<ParticipantProfile?> findById(Id id);
 
+  /// The profiles with the given [ids], by id, in one read. An unknown id is
+  /// absent from the result.
+  Future<Map<Id, ParticipantProfile>> findByIds(Iterable<Id> ids);
+
   /// The profiles owned by [accountId], in the order they were created.
   Future<List<ParticipantProfile>> listForOwner(Id accountId);
 

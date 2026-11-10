@@ -13,6 +13,14 @@ class ParticipantProfileRepository extends DriftRepository
   Future<core.ParticipantProfile?> findById(core.Id id) => _store.find(id);
 
   @override
+  Future<Map<core.Id, core.ParticipantProfile>> findByIds(
+    Iterable<core.Id> ids,
+  ) async => {
+    for (final profile in await _store.whereIdIn('id', ids))
+      profile.id: profile,
+  };
+
+  @override
   Future<List<core.ParticipantProfile>> listForOwner(core.Id accountId) =>
       _store.whereId('owner_account_id', accountId, orderBy: 'created_at, id');
 

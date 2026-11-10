@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:postgres/postgres.dart' as pg;
 import 'package:shelf/shelf.dart';
@@ -22,14 +23,19 @@ enum SliceBackend { sqlite, postgres }
 class SliceClient {
   SliceClient._(this.database, this.director, this._drop);
 
-  static Future<SliceClient> open(SliceBackend backend) async {
+  /// With [interceptor], every statement the database runs goes through it,
+  /// for the statement-count tests.
+  static Future<SliceClient> open(
+    SliceBackend backend, {
+    QueryInterceptor? interceptor,
+  }) async {
     final director = core.Id.create();
     final SoarScoreDatabase database;
     Future<void> Function()? drop;
     switch (backend) {
       case SliceBackend.sqlite:
         database = SoarScoreDatabase(
-          NativeDatabase.memory(),
+          _intercept(NativeDatabase.memory(), interceptor),
           profile: DatabaseProfile.server,
         );
       case SliceBackend.postgres:
@@ -43,7 +49,7 @@ class SliceClient {
         );
         await admin.execute('CREATE DATABASE "$name"');
         database = SoarScoreDatabase(
-          config.named(name).toPgDatabase(),
+          _intercept(config.named(name).toPgDatabase(), interceptor),
           profile: DatabaseProfile.server,
         );
         drop = () async {
@@ -65,6 +71,11 @@ class SliceClient {
     );
     return SliceClient._(database, director, drop);
   }
+
+  static QueryExecutor _intercept(
+    QueryExecutor executor,
+    QueryInterceptor? interceptor,
+  ) => interceptor == null ? executor : executor.interceptWith(interceptor);
 
   final SoarScoreDatabase database;
   final core.Id director;

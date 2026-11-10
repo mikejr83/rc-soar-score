@@ -89,15 +89,12 @@ class F5jResultsInput {
         placeholder.assignmentId: placeholder,
     };
 
-    // Each placeholder's current score is read once, however often it is used.
-    final officials = <Id, OfficialScore?>{};
-    Future<OfficialScore?> officialOf(Id placeholderId) async {
-      if (officials.containsKey(placeholderId)) {
-        return officials[placeholderId];
-      }
-      return officials[placeholderId] = await repository.officialScoreRepository
-          .currentForPlaceholder(placeholderId);
-    }
+    // Every placeholder's current score, in one read.
+    final officials = await repository.officialScoreRepository
+        .currentForPlaceholders([
+          for (final placeholder in placeholders.values) placeholder.id,
+        ]);
+    final landing = LandingBonusResolver(repository, revision);
 
     // Newest submitted attempt of each placeholder that has no official
     // score, in one read.
@@ -111,7 +108,7 @@ class F5jResultsInput {
     Future<({OfficialScore? official, ScoreAttempt? attempt})?> scoreOf(
       ScorePlaceholder placeholder,
     ) async {
-      final official = await officialOf(placeholder.id);
+      final official = officials[placeholder.id];
       if (official != null) return (official: official, attempt: null);
       final attempt = attempts[placeholder.id];
       return attempt == null ? null : (official: null, attempt: attempt);
@@ -181,11 +178,7 @@ class F5jResultsInput {
               F5jFlightEntry(
                 pilotId: participation.id.value,
                 components: components,
-                landingBonus: await resolveLandingBonus(
-                  repository,
-                  revision,
-                  components,
-                ),
+                landingBonus: await landing.bonusOf(components),
                 retired: retired,
               ),
             );
