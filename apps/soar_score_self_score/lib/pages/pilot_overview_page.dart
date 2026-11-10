@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../data/score_changes.dart';
+import '../data/self_score_repository.dart';
 import '../data/self_score_scope.dart';
 import '../l10n/app_localizations.dart';
 import '../models/pilot_overview.dart';
@@ -50,6 +52,23 @@ class PilotOverviewPage extends StatelessWidget {
     }
   }
 
+  /// Copies the pilot's own invitation link. The server rebuilds it for the
+  /// session, so the link is never kept in the browser.
+  Future<void> _copyInvitationLink(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final repository = context.repository;
+    String message;
+    try {
+      final link = await repository.invitationLink();
+      await Clipboard.setData(ClipboardData(text: link));
+      message = l10n.invitationLinkCopied;
+    } on SelfScoreLoadException {
+      message = l10n.invitationLinkCopyFailed;
+    }
+    messenger.showSnackBar(SnackBar(content: Text(message)));
+  }
+
   void _notYet(BuildContext context, String message) =>
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(message)));
@@ -83,6 +102,7 @@ class PilotOverviewPage extends StatelessWidget {
           backLabel: l10n.backToPilots,
           actions: const [ConnectionIndicator()],
           showAccount: false,
+          onCopyInvitationLink: () => _copyInvitationLink(context),
         ),
         builder: (context, data) => ListView(
           padding: const EdgeInsets.all(16),
@@ -124,43 +144,24 @@ class PilotOverviewPage extends StatelessWidget {
               const SizedBox(height: 8),
             ],
             const Divider(height: 32),
+            FilledButton.icon(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(44),
+              ),
+              onPressed: () => context.push(resultsPath(contestId)),
+              icon: const Icon(Icons.leaderboard_outlined, size: 20),
+              label: Text(l10n.currentResults),
+            ),
+            const SizedBox(height: 8),
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(44),
-                side: BorderSide(
-                  color: theme.colorScheme.onSurface,
-                  width: 1.5,
-                ),
-              ),
-              onPressed: () => _notYet(
-                context,
-                'Invitation links arrive with the invitations feature (#141).',
-              ),
-              icon: const Icon(Icons.link, size: 20),
-              label: const Text('Copy invitation link'),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              style: TextButton.styleFrom(
-                minimumSize: const Size.fromHeight(44),
-                alignment: Alignment.centerLeft,
-                foregroundColor: theme.colorScheme.primary,
-              ),
-              onPressed: () => context.push(resultsPath(contestId)),
-              child: const Text('Current results'),
-            ),
-            const SizedBox(height: 8),
-            TextButton.icon(
-              style: TextButton.styleFrom(
-                minimumSize: const Size.fromHeight(44),
-                foregroundColor: theme.colorScheme.onSurface,
+                foregroundColor: theme.colorScheme.error,
+                side: BorderSide(color: theme.colorScheme.error),
               ),
               onPressed: () => _confirmRetire(context, data.pilotName),
               icon: const Icon(Icons.person_off_outlined, size: 20),
-              label: const Text(
-                'Retire pilot',
-                style: TextStyle(decoration: TextDecoration.underline),
-              ),
+              label: Text(l10n.retirePilot),
             ),
           ],
         ),

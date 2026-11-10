@@ -435,6 +435,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t refresh; last updated {time}'**
   String resultsRefreshFailed(String time);
+
+  /// Shown after the pilot's invitation link was copied to the clipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation link copied'**
+  String get invitationLinkCopied;
+
+  /// Shown when the pilot's invitation link could not be fetched to copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t copy the invitation link. Check your connection and try again.'**
+  String get invitationLinkCopyFailed;
+
+  /// Primary button at the bottom of the pilot overview that opens the contest results.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get currentResults;
+
+  /// Button at the bottom of the pilot overview that starts retiring the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire pilot'**
+  String get retirePilot;
 }
 
 class _AppLocalizationsDelegate

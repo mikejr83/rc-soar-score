@@ -88,6 +88,27 @@ void main() {
     },
   );
 
+  test(
+    'the participant invitation link is read with the session token',
+    () async {
+      final client = clientFor(
+        (request) => http.Response(
+          '{"participation_id":"019c0000-0000-7000-8000-000000000201",'
+          '"link":"https://score.example/invitations/abc"}',
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+        tokenProvider: () async => 'session-1',
+      );
+
+      final answer = await client.participantInvitationLink();
+
+      expect(answer.link, 'https://score.example/invitations/abc');
+      expect(seen.url.path, '/api/v1/self-scoring/invitation-link');
+      expect(seen.headers['authorization'], 'Bearer session-1');
+    },
+  );
+
   test('participant reads send the session token', () async {
     final client = clientFor(
       (request) => switch (request.url.path) {

@@ -67,6 +67,16 @@ Future<String> phase2Invitation(
       // A guest has no way back in but the card's QR code, so no sign out.
       expect(find.byTooltip('End session'), findsNothing);
     });
+    await journey.step(
+      'The pilot can copy their own invitation link',
+      () async {
+        await tapVisible(tester, find.byIcon(Icons.more_vert));
+        await pumpUntilFound(tester, find.text('Copy invitation link'));
+        await tapVisible(tester, find.text('Copy invitation link'));
+        await pumpUntilFound(tester, find.text('Invitation link copied'));
+        await tester.pump(const Duration(seconds: 5));
+      },
+    );
     await journey.step('Application info lists the legal links', () async {
       await tapVisible(tester, find.byIcon(Icons.more_vert));
       await pumpUntilFound(tester, find.text('Application info'));

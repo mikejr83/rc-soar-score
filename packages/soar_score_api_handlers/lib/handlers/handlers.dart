@@ -104,6 +104,7 @@ createHandlers(
       service: invitations,
       limiter: invitationRateLimiter,
       allowedOrigins: corsAllowedOrigins,
+      selfScoringBaseUrl: selfScoringBaseUrl,
     ),
   );
 }

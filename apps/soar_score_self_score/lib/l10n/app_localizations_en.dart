@@ -214,4 +214,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String resultsRefreshFailed(String time) {
     return 'Couldn\'t refresh; last updated $time';
   }
+
+  @override
+  String get invitationLinkCopied => 'Invitation link copied';
+
+  @override
+  String get invitationLinkCopyFailed =>
+      'Couldn\'t copy the invitation link. Check your connection and try again.';
+
+  @override
+  String get currentResults => 'Results';
+
+  @override
+  String get retirePilot => 'Retire pilot';
 }

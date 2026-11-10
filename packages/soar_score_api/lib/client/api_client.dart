@@ -143,6 +143,19 @@ class ApiClient {
     await _send('POST', _resolve('/api/v1/self-scoring/session/end'));
   }
 
+  /// `GET /api/v1/self-scoring/invitation-link` — the signed-in
+  /// participant's own invitation link, to copy to another device. Needs the
+  /// guest session token. The link is a secret: never log it.
+  Future<ContestInvitationDto> participantInvitationLink() async {
+    final uri = _resolve('/api/v1/self-scoring/invitation-link');
+    final response = await _send('GET', uri);
+    return _decode<ContestInvitationDto>(
+      response,
+      uri,
+      ContestInvitationDto.fromJson,
+    );
+  }
+
   /// `GET /api/v1/self-scoring/overview` — the signed-in participant's
   /// rounds, groups and score states. Needs the guest session token.
   Future<ParticipantOverviewDto> participantOverview() async {
