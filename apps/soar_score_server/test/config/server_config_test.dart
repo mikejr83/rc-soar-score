@@ -63,6 +63,27 @@ void main() {
       }
     });
 
+    test('LOG_DB_STATEMENT_DURATIONS is a boolean and off by default', () {
+      expect(ServerConfig.parse(minimal).logStatementDurations, isFalse);
+      expect(
+        ServerConfig.parse({...minimal, 'LOG_DB_STATEMENT_DURATIONS': 'true'})
+            .logStatementDurations,
+        isTrue,
+      );
+      expect(
+        ServerConfig.parse({...minimal, 'LOG_DB_STATEMENT_DURATIONS': 'false'})
+            .logStatementDurations,
+        isFalse,
+      );
+      expect(
+        () => ServerConfig.parse({
+          ...minimal,
+          'LOG_DB_STATEMENT_DURATIONS': 'yes',
+        }),
+        throwsA(isA<ConfigException>()),
+      );
+    });
+
     test('accepts a connection URL in place of the discrete variables', () {
       final config = ServerConfig.parse({
         'DATABASE_URL': 'postgresql://urluser:urlpw@ep-db.us-east-2.aws.neon.tech/neondb?sslmode=verify-full',
