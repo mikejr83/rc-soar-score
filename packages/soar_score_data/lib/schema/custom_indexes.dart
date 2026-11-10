@@ -44,6 +44,9 @@ const customIndexes = <String, List<String>>{
     // A round ordinal is taken once among rounds that are still in play.
     'CREATE UNIQUE INDEX rounds_live_ordinal ON rounds (contest_id, ordinal) '
         "WHERE superseded_by_round_id IS NULL AND status <> 'Cancelled'",
+    // The live ordinal index above is partial, so it cannot serve a plain
+    // "rounds of this contest" read.
+    'CREATE INDEX IF NOT EXISTS rounds_contest ON rounds (contest_id)',
   ],
   'matrix_assignments': [
     // A lane holds one pilot per group, among assignments not moved away.
@@ -55,6 +58,29 @@ const customIndexes = <String, List<String>>{
         'matrix_assignments (contest_participation_id, credited_round_id) '
         "WHERE superseded_by_assignment_id IS NULL AND assignment_type IN "
         "('Original', 'Moved', 'LateAdd')",
+    // The lane index above is partial (lane IS NOT NULL); reading a round's
+    // assignments needs a plain one.
+    'CREATE INDEX IF NOT EXISTS matrix_assignments_scheduled_round ON '
+        'matrix_assignments (scheduled_round_id)',
+  ],
+  'score_placeholders': [
+    // Results, scores and report reads filter on these two columns.
+    'CREATE INDEX IF NOT EXISTS score_placeholders_contest ON '
+        'score_placeholders (contest_id)',
+    'CREATE INDEX IF NOT EXISTS score_placeholders_participation ON '
+        'score_placeholders (contest_participation_id)',
+  ],
+  'score_attempts': [
+    'CREATE INDEX IF NOT EXISTS score_attempts_placeholder ON '
+        'score_attempts (score_placeholder_id)',
+  ],
+  'flight_results': [
+    'CREATE INDEX IF NOT EXISTS flight_results_contest_round ON '
+        'flight_results (contest_id, credited_round_id)',
+  ],
+  'participation_standings': [
+    'CREATE INDEX IF NOT EXISTS participation_standings_contest_round ON '
+        'participation_standings (contest_id, as_of_round)',
   ],
   'review_requests': [
     // One open review request per score.
