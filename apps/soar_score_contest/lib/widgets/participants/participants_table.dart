@@ -43,6 +43,15 @@ class ParticipantsTable extends StatelessWidget {
   static const double _padding = 12;
 
   List<_Column> _columns() => [
+    // The number is the first thing a director reads about a pilot, so it
+    // leads the row, right after the checkbox.
+    if (editing.rules.has(ParticipantOption.pilotNumbers))
+      _Column(
+        editing.rules.numberHeader,
+        110,
+        0,
+        (context, cells) => cells.number(context),
+      ),
     _Column(
       'Name',
       130,
@@ -72,14 +81,8 @@ class ParticipantsTable extends StatelessWidget {
         ParticipantOption.teams => [
           _Column('Team', 150, 1.2, (context, cells) => cells.team(context)),
         ],
-        ParticipantOption.pilotNumbers => [
-          _Column(
-            editing.rules.numberHeader,
-            110,
-            0,
-            (context, cells) => cells.number(context),
-          ),
-        ],
+        // The number column already leads the row.
+        ParticipantOption.pilotNumbers => const [],
         ParticipantOption.models => [
           _Column(
             'Models',

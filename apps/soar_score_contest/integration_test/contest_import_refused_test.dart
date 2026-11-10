@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import 'support/exchange_files.dart';
+import 'support/exchange_files_native.dart'
+    if (dart.library.js_interop) 'support/exchange_files_web.dart';
 import 'support/interact.dart';
 import 'support/launch_app.dart';
 

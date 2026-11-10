@@ -748,17 +748,6 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
                 dense: true,
               ),
             ),
-            if (widget.row.pendingComponents.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  widget.row.pendingComponents.entries
-                      .map((e) => '${e.key.replaceAll('_', ' ')}: ${e.value}')
-                      .join(', '),
-                  key: const ValueKey('pilot-entry-values'),
-                  style: theme.textTheme.bodySmall,
-                ),
-              ),
           ] else
             Text(
               '–',

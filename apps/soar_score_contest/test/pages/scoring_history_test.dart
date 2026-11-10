@@ -83,29 +83,63 @@ void main() {
     expect(find.text('Not adopted'), findsNothing);
   });
 
-  testWidgets('shows the pilot values of a waiting submission', (tester) async {
+  testWidgets('a waiting submission fills the form, not the row text', (
+    tester,
+  ) async {
     final server = ScoringServer();
-    server.seedPendingSubmission(scoringAssignmentId(1, 1), {
+    final slot = scoringAssignmentId(1, 1);
+    server.seedPendingSubmission(slot, {
       'time_flown': 600,
       'launch_height': 120,
     });
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
-    expect(find.text('time flown: 600, launch height: 120'), findsOneWidget);
+    // The pilot entry is marked by the chip alone; the values show in the
+    // form, not as text on the row.
+    expect(find.text('Pilot entry'), findsOneWidget);
+    expect(find.text('time flown: 600, launch height: 120'), findsNothing);
+    final slotValue = slot.value;
+    expect(
+      tester
+          .widget<TextField>(find.byKey(ValueKey('score-time-$slotValue')))
+          .controller!
+          .text,
+      '10:00',
+    );
+    expect(
+      tester
+          .widget<TextField>(find.byKey(ValueKey('score-height-$slotValue')))
+          .controller!
+          .text,
+      '120',
+    );
   });
 
-  testWidgets('shows the pilot values of a submission in review too', (
-    tester,
-  ) async {
+  testWidgets('a submission in review fills the form too', (tester) async {
     final server = ScoringServer();
-    server.seedPendingSubmission(scoringAssignmentId(1, 1), {
+    final slot = scoringAssignmentId(1, 1);
+    server.seedPendingSubmission(slot, {
       'time_flown': 600,
       'launch_height': 120,
     }, inReview: true);
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
     expect(find.text('Pilot entry'), findsOneWidget);
-    expect(find.text('time flown: 600, launch height: 120'), findsOneWidget);
+    expect(find.text('time flown: 600, launch height: 120'), findsNothing);
+    expect(
+      tester
+          .widget<TextField>(find.byKey(ValueKey('score-time-${slot.value}')))
+          .controller!
+          .text,
+      '10:00',
+    );
+    expect(
+      tester
+          .widget<TextField>(find.byKey(ValueKey('score-height-${slot.value}')))
+          .controller!
+          .text,
+      '120',
+    );
   });
 
   testWidgets('an official score hides the pilot values', (tester) async {
