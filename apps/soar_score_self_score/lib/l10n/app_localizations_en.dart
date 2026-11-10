@@ -124,6 +124,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backToPilots => 'Back to pilots';
 
   @override
+  String get flightResults => 'Flight Results';
+
+  @override
   String get seeGroupResults => 'See group results';
 
   @override

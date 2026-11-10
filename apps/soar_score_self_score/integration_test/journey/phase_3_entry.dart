@@ -69,6 +69,21 @@ Future<void> phase3Entry(
       await scrollTo(tester, find.text('See group results'));
       expect(find.text('See group results'), findsOneWidget);
     });
+    await journey.step(
+      'Flight Results opens the group and back returns',
+      () async {
+        await openPath(tester, pilotPath(contest.id, pilotId));
+        await pumpUntilFound(tester, find.text('2 rounds'));
+        // Only the submitted round has a score, so only it offers the button.
+        expect(find.text('Flight Results'), findsOneWidget);
+        await tapVisible(tester, find.text('Flight Results'));
+        await pumpUntilFound(tester, find.text('Preliminary'));
+        expect(find.text('Group results'), findsNothing);
+        await tester.tap(find.byTooltip('Back to pilot overview'));
+        await pumpUntilFound(tester, find.text('2 rounds'));
+        expect(find.text('Flight Results'), findsOneWidget);
+      },
+    );
     await journey.step('The stored entry is read-only when reopened', () async {
       await openPath(tester, scoreEntryPath(contest.id, pilotId, '1'));
       await pumpUntilFound(tester, find.text('Time flown'));

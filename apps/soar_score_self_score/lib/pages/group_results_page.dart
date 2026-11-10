@@ -50,10 +50,10 @@ class GroupResultsPage extends StatelessWidget {
         contextLine: data == null
             ? null
             : '${data.contestName} · Round ${data.round}',
-        onBack: () => context.canPop()
-            ? context.pop()
-            : context.go(pilotPath(contestId, pilotId)),
-        backLabel: 'Back to score entry',
+        // Always the overview, whether the page came from its Flight Results
+        // button or from the score entry form.
+        onBack: () => context.go(pilotPath(contestId, pilotId)),
+        backLabel: 'Back to pilot overview',
         showAccount: false,
       ),
       builder: (context, data) => ListView(
