@@ -353,6 +353,49 @@ class ApiClient {
     );
   }
 
+  /// `GET /api/v1/contests/{id}/participants` — only the profiles of the
+  /// people in contest [id], instead of the whole directory.
+  Future<List<ParticipantProfile>> contestParticipants(Id id) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/participants');
+    final response = await _send('GET', uri);
+    return _decode<List<ParticipantProfile>>(
+      response,
+      uri,
+      (json) => [
+        for (final item in json['participants'] as List<dynamic>)
+          ParticipantProfile.fromJson(item as Map<String, dynamic>),
+      ],
+    );
+  }
+
+  /// `GET /api/v1/contests/{id}/report-data` — what the reports read, in one
+  /// request. With no arguments, the facts every report needs; with [asOfRound]
+  /// or [rounds] it adds the stored standings and the flight results of those
+  /// rounds, and with [facts] false it leaves the facts out (the official
+  /// scores still come when [scores] is true).
+  Future<ReportData> reportData(
+    Id id, {
+    bool facts = true,
+    bool scores = false,
+    int? asOfRound,
+    List<int> rounds = const [],
+  }) async {
+    final standings = asOfRound != null || rounds.isNotEmpty;
+    final uri = _resolve('/api/v1/contests/${id.value}/report-data').replace(
+      queryParameters: {
+        'include': [
+          if (facts) 'facts',
+          if (scores) 'scores',
+          if (standings) 'standings',
+        ].join(','),
+        if (asOfRound != null) 'asOfRound': '$asOfRound',
+        if (rounds.isNotEmpty) 'rounds': rounds.join(','),
+      },
+    );
+    final response = await _send('GET', uri);
+    return _decode<ReportData>(response, uri, ReportData.fromJson);
+  }
+
   /// `GET /api/v1/participants/{id}` — one of the caller's profiles.
   Future<ParticipantProfile> participant(Id id) async {
     final uri = _resolve('/api/v1/participants/${id.value}');

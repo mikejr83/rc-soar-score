@@ -47,6 +47,8 @@ export 'landing_table_view.dart';
 export 'landing_tables_service.dart';
 export 'participant_details.dart';
 export 'participants_service.dart';
+export 'report_data.dart';
+export 'report_data_service.dart';
 export 'participation_remove_result.dart';
 export 'participation_update_result.dart';
 export 'models_service.dart';

@@ -44,10 +44,10 @@ class StandingsReportData {
   final Map<int, Map<Id, FlightDetail>> details;
 
   /// Reads the standings as of [asOf] and the flights of the given [rounds],
-  /// which must be rounds that exist (a cancelled round has no results). With
-  /// [withDetails] it also reads the official scores for the Flight details
-  /// lines. Any failed read is thrown, so a sheet is never built from part of
-  /// its data.
+  /// which must be rounds that exist (a cancelled round has no results), in
+  /// one request. With [withDetails] the same response carries the official
+  /// scores for the Flight details lines. Any failed read is thrown, so a
+  /// sheet is never built from part of its data.
   static Future<StandingsReportData> load(
     ApiClient client,
     Id contestId, {
@@ -55,13 +55,18 @@ class StandingsReportData {
     required int asOf,
     required bool withDetails,
   }) async {
-    final results = await Future.wait<Object?>([
-      _standing(client, contestId, asOf),
-      for (final round in rounds) client.roundResults(contestId, round),
-      if (withDetails) _scores(client, contestId),
-    ]);
-    final standings = results[0]! as ContestResults;
-    final scores = withDetails ? results.last as ContestScores? : null;
+    final report = await client.reportData(
+      contestId,
+      facts: false,
+      scores: withDetails,
+      asOfRound: asOf,
+      rounds: rounds,
+    );
+    final standings = report.results;
+    if (standings == null) {
+      throw NoStoredStandings(asOf);
+    }
+    final scores = report.scores;
     final components = {
       if (scores != null)
         for (final slot in scores.slots)
@@ -71,7 +76,7 @@ class StandingsReportData {
     final flights = <int, Map<Id, FlightResult>>{};
     final details = <int, Map<Id, FlightDetail>>{};
     for (var i = 0; i < rounds.length; i++) {
-      final round = results[i + 1]! as RoundResults;
+      final round = report.roundResults![i];
       final byPilot = <Id, FlightResult>{};
       for (final flight in round.flights) {
         if (flight.result.isSelected) {
@@ -94,35 +99,6 @@ class StandingsReportData {
       flights: flights,
       details: details,
     );
-  }
-
-  static Future<ContestResults> _standing(
-    ApiClient client,
-    Id contestId,
-    int asOf,
-  ) async {
-    try {
-      return await client.results(contestId, asOfRound: asOf);
-    } on ApiHttpError catch (error) {
-      if (error.statusCode == 400) {
-        throw NoStoredStandings(asOf);
-      }
-      rethrow;
-    }
-  }
-
-  /// The official scores; a contest with no scores resource has none, which is
-  /// not a failure. Any other failure is thrown, because the em dash on the
-  /// sheet means "not recorded" and must not stand for "could not be read".
-  static Future<ContestScores?> _scores(ApiClient client, Id id) async {
-    try {
-      return await client.scores(id);
-    } on ApiHttpError catch (error) {
-      if (error.statusCode == 404) {
-        return null;
-      }
-      rethrow;
-    }
   }
 
   static FlightDetail _detail(FlightResult flight, Map<String, Object?>? raw) =>

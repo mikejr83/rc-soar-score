@@ -21,6 +21,7 @@ import 'package:soar_score_api_handlers/handlers/participations_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/roles_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/public_publication_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/publication_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/report_data_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/results_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/scores_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/sync_handlers.dart';
@@ -84,6 +85,7 @@ createHandlers(
     recalculation: recalculation,
   );
   addResultsRoutes(router, repository);
+  addReportDataRoutes(router, repository);
   addPublicationRoutes(router, repository, enabled: publishingEnabled);
   addImportRoutes(router, gliderScoreImport);
   addSyncRoutes(
