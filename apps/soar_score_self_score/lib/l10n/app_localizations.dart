@@ -406,7 +406,7 @@ abstract class AppLocalizations {
   /// **'Couldn\'t refresh; last updated {time}'**
   String resultsRefreshFailed(String time);
 
-  /// More menu entry on the pilot overview that copies the pilot's invitation link.
+  /// Tooltip of the title bar button on the pilot overview that copies the pilot's invitation link.
   ///
   /// In en, this message translates to:
   /// **'Copy invitation link'**

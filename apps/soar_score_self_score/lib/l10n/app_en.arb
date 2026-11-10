@@ -253,7 +253,7 @@
   },
   "copyInvitationLink": "Copy invitation link",
   "@copyInvitationLink": {
-    "description": "More menu entry on the pilot overview that copies the pilot's invitation link."
+    "description": "Tooltip of the title bar button on the pilot overview that copies the pilot's invitation link."
   },
   "currentResults": "Results",
   "@currentResults": {

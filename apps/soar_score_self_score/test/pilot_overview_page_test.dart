@@ -88,10 +88,8 @@ void main() {
     expect(find.text('Copy invitation link'), findsNothing);
   });
 
-  testWidgets('Copy invitation link is in the More menu', (tester) async {
+  testWidgets('Copy invitation link is a title bar action', (tester) async {
     await _pump(tester, _CountingRepository());
-    await tester.tap(find.byIcon(Icons.more_vert));
-    await tester.pumpAndSettle();
-    expect(find.text('Copy invitation link'), findsOneWidget);
+    expect(find.byTooltip('Copy invitation link'), findsOneWidget);
   });
 }
