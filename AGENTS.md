@@ -212,6 +212,7 @@ Documentation, help and support (spec: `plan/ui/public-site/docs-help.md`, `supp
 | --------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------- |
 | Landing page (Sign in / Sign up)                          | `/`                                                          | `pages/home_page.dart`           |
 | Contests list, "Is this you?"                             | `/contests`                                                  | `pages/contests_page.dart`       |
+| Application info (licences, Privacy Policy, Terms)        | `/app-info`                                                  | `pages/app_info_page.dart`       |
 | Invitation link (guest session)                           | `/invitations/:credential`                                   | `pages/invitation_page.dart`     |
 | Contest entry (guest: pilot overview; else team overview) | `/contests/:contestId`                                       | `router.dart`                    |
 | Team overview (helper view, team standings)               | `/contests/:contestId/team`                                  | `pages/team_page.dart`           |

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import 'pages/app_info_page.dart';
 import 'pages/contests_page.dart';
 import 'pages/group_results_page.dart';
 import 'pages/home_page.dart';
@@ -14,6 +15,7 @@ import 'session/guest_session_scope.dart';
 /// Routes follow `plan/ui/participant-scoring/participant-scoring.md`.
 const homePath = '/';
 const contestsPath = '/contests';
+const appInfoPath = '/app-info';
 
 /// The address an invitation link carries. Matches `/invitations/{credential}`
 /// in the participant-scoring spec.
@@ -37,6 +39,10 @@ String groupResultsPath(String contestId, String pilotId, String roundId) =>
 final router = GoRouter(
   routes: [
     GoRoute(path: homePath, builder: (context, state) => const HomePage()),
+    GoRoute(
+      path: appInfoPath,
+      builder: (context, state) => const AppInfoPage(),
+    ),
     GoRoute(
       path: '/invitations/:credential',
       // Keyed by the credential: the page keeps the answer for the link it

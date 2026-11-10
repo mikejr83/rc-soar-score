@@ -101,16 +101,9 @@ class PilotOverviewPage extends StatelessWidget {
               ? null
               : () => context.go(teamPath(contestId)),
           backLabel: l10n.backToPilots,
-          actions: [
-            const ConnectionIndicator(),
-            IconButton(
-              tooltip: l10n.copyInvitationLink,
-              icon: const Icon(Icons.link),
-              onPressed: () => _copyInvitationLink(context),
-            ),
-            const EndSessionButton(),
-          ],
+          actions: const [ConnectionIndicator(), EndSessionButton()],
           showAccount: false,
+          onCopyInvitationLink: () => _copyInvitationLink(context),
         ),
         builder: (context, data) => ListView(
           padding: const EdgeInsets.all(16),

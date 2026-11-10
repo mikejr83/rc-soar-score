@@ -97,9 +97,11 @@ void main() {
     expect(find.text('Copy invitation link'), findsNothing);
   });
 
-  testWidgets('Copy invitation link is a title bar action', (tester) async {
+  testWidgets('Copy invitation link is in the More menu', (tester) async {
     await _pump(tester, _CountingRepository());
-    expect(find.byTooltip('Copy invitation link'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    expect(find.text('Copy invitation link'), findsOneWidget);
   });
 
   testWidgets('the invitation link button copies the pilot\'s link', (
@@ -123,7 +125,9 @@ void main() {
     );
     await _pump(tester, _CountingRepository());
 
-    await tester.tap(find.byTooltip('Copy invitation link'));
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Copy invitation link'));
     await tester.pumpAndSettle();
 
     expect(copied, 'https://score.example/invitations/abc');
@@ -134,7 +138,9 @@ void main() {
     final repository = _CountingRepository()..linkFails = true;
     await _pump(tester, repository);
 
-    await tester.tap(find.byTooltip('Copy invitation link'));
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Copy invitation link'));
     await tester.pumpAndSettle();
 
     expect(

@@ -13,6 +13,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreMenuTooltip => 'More';
 
   @override
+  String get copyInvitationLink => 'Copy invitation link';
+
+  @override
+  String get appInfoLink => 'Application info';
+
+  @override
+  String get appInfoTitle => 'Application info';
+
+  @override
+  String get backLabel => 'Back';
+
+  @override
   String get openSourceLicencesLink => 'Open source licences';
 
   @override
@@ -199,9 +211,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String resultsRefreshFailed(String time) {
     return 'Couldn\'t refresh; last updated $time';
   }
-
-  @override
-  String get copyInvitationLink => 'Copy invitation link';
 
   @override
   String get invitationLinkCopied => 'Invitation link copied';
