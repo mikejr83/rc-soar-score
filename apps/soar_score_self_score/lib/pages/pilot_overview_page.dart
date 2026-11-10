@@ -112,10 +112,10 @@ class PilotOverviewPage extends StatelessWidget {
                 onEnter: () => context.push(
                   scoreEntryPath(contestId, pilotId, '${round.number}'),
                 ),
-                // The read-only score view is not built; the group results
-                // show the submitted values for the round.
+                // A submitted round opens its score entry page read-only; the
+                // form links on to the group results.
                 onView: () => context.push(
-                  groupResultsPath(contestId, pilotId, '${round.number}'),
+                  scoreEntryPath(contestId, pilotId, '${round.number}'),
                 ),
               ),
               const SizedBox(height: 8),

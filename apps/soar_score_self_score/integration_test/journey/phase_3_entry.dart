@@ -58,6 +58,17 @@ Future<void> phase3Entry(
       expect(find.text('Next to score'), findsOneWidget);
       expect(find.textContaining(pilot), findsWidgets);
     });
+    await journey.step('View opens the submitted round read-only', () async {
+      // The submitted round offers View; the next round offers Enter.
+      expect(find.text('View'), findsOneWidget);
+      await tapVisible(tester, find.text('View'));
+      await pumpUntilFound(tester, find.text('Time flown'));
+      // It is the read-only score entry page, not the group results: nothing
+      // can be submitted, and the button links on to the group results.
+      expect(find.text('Submit score'), findsNothing);
+      await scrollTo(tester, find.text('See group results'));
+      expect(find.text('See group results'), findsOneWidget);
+    });
     await journey.step('The stored entry is read-only when reopened', () async {
       await openPath(tester, scoreEntryPath(contest.id, pilotId, '1'));
       await pumpUntilFound(tester, find.text('Time flown'));

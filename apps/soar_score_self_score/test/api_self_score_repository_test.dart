@@ -381,15 +381,21 @@ void main() {
     final you = group.rows[0];
     expect(you.isYou, isTrue);
     expect(you.time, '9:00');
+    expect(you.height, 45);
+    expect(you.landing, 'Good 50');
+    expect(you.rawScore, '962.5');
     expect(you.score, '962.5');
-    expect(you.detail, 'Height 45 m · Good 50');
+    expect(you.isEstimate, isFalse);
     final zero = group.rows[1];
     expect(zero.kind, GroupRowKind.zero);
     expect(zero.zeroReason, 'landed out');
+    expect(zero.height, isNull);
+    expect(zero.landing, isNull);
     final pending = group.rows[2];
     expect(pending.kind, GroupRowKind.noScore);
-    expect(pending.score, isNull);
-    expect(pending.detail, 'Estimate 900');
+    expect(pending.score, '900');
+    expect(pending.isEstimate, isTrue);
+    expect(pending.height, isNull);
   });
 
   test('overall results keep the held round and have no teams', () async {

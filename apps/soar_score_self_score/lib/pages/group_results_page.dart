@@ -76,11 +76,11 @@ class GroupResultsPage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                    'Time, height and landing are the values entered for '
-                    'each flight. A zero shows why.',
-                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                  ),
+                    Text(
+                      'Each column is part of the flight score, so you can '
+                      'compare how the group flew. A dash means no value yet.',
+                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                    ),
                 ],
               ),
             ),
@@ -112,22 +112,12 @@ class GroupResultsPage extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text('Pilot and flight', style: labelStyle)),
-              SizedBox(
-                width: 64,
-                child: Text(
-                  'Time',
-                  textAlign: TextAlign.right,
-                  style: labelStyle,
-                ),
-              ),
-              SizedBox(
-                width: 56,
-                child: Text(
-                  'Score',
-                  textAlign: TextAlign.right,
-                  style: labelStyle,
-                ),
-              ),
+              const SizedBox(width: 8),
+              _heading('Time', GroupResultColumns.time, labelStyle),
+              _heading('Height', GroupResultColumns.height, labelStyle),
+              _heading('Landing', GroupResultColumns.landing, labelStyle),
+              _heading('Raw', GroupResultColumns.raw, labelStyle),
+              _heading('Score', GroupResultColumns.score, labelStyle),
             ],
           ),
           const SizedBox(height: 6),
@@ -142,4 +132,16 @@ class GroupResultsPage extends StatelessWidget {
       ),
     );
   }
+}
+
+/// One heading over a column, matching the width its cells use.
+Widget _heading(
+  String label,
+  double width,
+  TextStyle? style,
+) {
+  return SizedBox(
+    width: width,
+    child: Text(label, textAlign: TextAlign.right, style: style),
+  );
 }
