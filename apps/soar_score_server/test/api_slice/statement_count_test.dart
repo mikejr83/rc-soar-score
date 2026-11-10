@@ -183,10 +183,10 @@ void _size(
 }
 
 // Measured 2026-11-10 after batching (xtra-large 100x8 / large 50x15):
-// scores 16 / 23, stored results 7-9, pilot group results 33 / 40, overall
+// scores 16 / 23, stored results 9-11, pilot group results 33 / 40, overall
 // 30 / 37. Before batching the same reads ran 760-2,030 statements.
 int _budgetScores(int rounds) => rounds + 12;
-const _budgetStored = 12;
+const _budgetStored = 14;
 int _budgetPilotResults(int rounds) => rounds + 28;
 
 /// Creates the contest, its [pilots] and the draw through the API, then

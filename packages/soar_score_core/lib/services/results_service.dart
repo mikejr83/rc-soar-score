@@ -393,12 +393,20 @@ class ResultsService {
 
   /// Whether an official score was set after [after], or at all when null.
   Future<bool> _latestScoreAt(Id contestId, {required DateTime? after}) async {
-    // A correction appends a revision with a later set_at, so the latest
-    // set_at over all revisions is the latest over the current ones.
-    final latest = (await repository.officialScoreRepository
-        .latestSetAtForContests([contestId]))[contestId];
-    if (latest == null) return false;
-    return after == null || latest.isAfter(after);
+    // Only the current score of each placeholder counts: a correction can
+    // carry an earlier set_at than the score it replaced.
+    final current = await repository.officialScoreRepository
+        .currentForPlaceholders([
+          for (final placeholder
+              in await repository.scorePlaceholderRepository.listForContest(
+                contestId,
+              ))
+            placeholder.id,
+        ]);
+    for (final official in current.values) {
+      if (after == null || official.setAt.isAfter(after)) return true;
+    }
+    return false;
   }
 
   Future<MatrixRevision?> _currentMatrixRevision(Id contestId) async {
