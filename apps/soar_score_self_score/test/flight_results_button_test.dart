@@ -88,7 +88,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(GroupResultsPage), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Back to pilot overview'));
+    await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
     expect(find.byType(GroupResultsPage), findsNothing);
     expect(find.byType(ScoreEntryPage), findsNothing);

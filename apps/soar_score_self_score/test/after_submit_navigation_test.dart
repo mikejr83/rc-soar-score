@@ -156,11 +156,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(GroupResultsPage), findsOneWidget);
 
-      // The group page's own back returns to the overview, not the form.
+      // The group page's own back returns to the submitted entry form.
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      expect(find.text('See group results'), findsOneWidget);
+
       await tester.tap(find.byTooltip('Back to pilot overview'));
       await tester.pumpAndSettle();
-      expect(find.byType(GroupResultsPage), findsNothing);
-      expect(find.text('See group results'), findsNothing);
       expect(find.text('Enter'), findsNothing);
       expect(find.text('Submitted'), findsWidgets);
       // The first load, and one reload when the score was accepted.
