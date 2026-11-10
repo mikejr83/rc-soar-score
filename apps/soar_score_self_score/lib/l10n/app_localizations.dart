@@ -94,6 +94,18 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('en')];
 
+  /// Tooltip of the app bar button that opens the action menu.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get moreMenuTooltip;
+
+  /// Action menu entry on the pilot overview that copies the pilot's invitation link.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy invitation link'**
+  String get copyInvitationLink;
+
   /// Tooltip of the app bar button and text of the footer link that open the Application info page.
   ///
   /// In en, this message translates to:

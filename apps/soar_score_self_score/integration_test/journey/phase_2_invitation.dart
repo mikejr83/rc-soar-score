@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_self_score/router.dart';
 
@@ -43,7 +44,9 @@ Future<String> phase2Invitation(
       expect(find.text('Enter'), findsOneWidget);
     });
     await journey.step('Application info lists the legal links', () async {
-      await tapVisible(tester, find.byTooltip('Application info'));
+      await tapVisible(tester, find.byIcon(Icons.more_vert));
+      await pumpUntilFound(tester, find.text('Application info'));
+      await tapVisible(tester, find.text('Application info'));
       await pumpUntilFound(tester, find.text('Licences in this app'));
       expect(find.text('Open source licences'), findsOneWidget);
       expect(find.text('Privacy Policy'), findsOneWidget);

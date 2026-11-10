@@ -10,6 +10,12 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get moreMenuTooltip => 'More';
+
+  @override
+  String get copyInvitationLink => 'Copy invitation link';
+
+  @override
   String get appInfoLink => 'Application info';
 
   @override

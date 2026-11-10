@@ -30,14 +30,15 @@ void main() {
     );
   });
 
-  testWidgets('app bar has one Application info button, no menu', (
-    tester,
-  ) async {
+  testWidgets('action menu has one Application info entry', (tester) async {
     await tester.pumpWidget(
       _app(const Scaffold(appBar: SelfScoreAppBar(title: 'Contests'))),
     );
-    expect(find.byIcon(Icons.more_vert), findsNothing);
-    await tester.tap(find.byTooltip('Application info'));
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    expect(find.text('Privacy Policy'), findsNothing);
+    expect(find.text('Copy invitation link'), findsNothing);
+    await tester.tap(find.text('Application info'));
     await tester.pumpAndSettle();
     expect(find.byType(AppInfoPage), findsOneWidget);
     for (final text in [
@@ -48,6 +49,28 @@ void main() {
     ]) {
       expect(find.text(text), findsOneWidget);
     }
+  });
+
+  testWidgets('a page can add Copy invitation link to the menu', (
+    tester,
+  ) async {
+    var copied = 0;
+    await tester.pumpWidget(
+      _app(
+        Scaffold(
+          appBar: SelfScoreAppBar(
+            title: 'Pilot',
+            onCopyInvitationLink: () => copied++,
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    expect(find.text('Application info'), findsOneWidget);
+    await tester.tap(find.text('Copy invitation link'));
+    await tester.pumpAndSettle();
+    expect(copied, 1);
   });
 
   testWidgets('footer has one link to Application info', (tester) async {

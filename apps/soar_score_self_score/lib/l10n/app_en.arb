@@ -1,5 +1,13 @@
 {
   "@@locale": "en",
+  "moreMenuTooltip": "More",
+  "@moreMenuTooltip": {
+    "description": "Tooltip of the app bar button that opens the action menu."
+  },
+  "copyInvitationLink": "Copy invitation link",
+  "@copyInvitationLink": {
+    "description": "Action menu entry on the pilot overview that copies the pilot's invitation link."
+  },
   "appInfoLink": "Application info",
   "@appInfoLink": {
     "description": "Tooltip of the app bar button and text of the footer link that open the Application info page."
