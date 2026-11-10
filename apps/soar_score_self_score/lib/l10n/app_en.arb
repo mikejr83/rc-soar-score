@@ -228,5 +228,27 @@
   "endSession": "End session",
   "@endSession": {
     "description": "Tooltip of the button that ends the guest session and returns to the start page."
+  },
+  "refreshResults": "Refresh",
+  "refreshingResults": "Refreshing\u2026",
+  "loading": "Loading",
+  "resultsRefreshHint": "Refresh to see the latest scores",
+  "resultsLastRefreshed": "Last refreshed: {time}",
+  "@resultsLastRefreshed": {
+    "description": "Local time of the last successful results fetch, not the score submission time.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "resultsRefreshFailed": "Couldn't refresh; last updated {time}",
+  "@resultsRefreshFailed": {
+    "description": "Shown when a results refresh fails but an earlier successful fetch is available.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   }
 }

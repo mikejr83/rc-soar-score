@@ -177,4 +177,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get endSession => 'End session';
+
+  @override
+  String get refreshResults => 'Refresh';
+
+  @override
+  String get refreshingResults => 'Refreshing…';
+
+  @override
+  String get loading => 'Loading';
+
+  @override
+  String get resultsRefreshHint => 'Refresh to see the latest scores';
+
+  @override
+  String resultsLastRefreshed(String time) {
+    return 'Last refreshed: $time';
+  }
+
+  @override
+  String resultsRefreshFailed(String time) {
+    return 'Couldn\'t refresh; last updated $time';
+  }
 }
