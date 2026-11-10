@@ -157,7 +157,7 @@ void main() {
       expect(find.byType(GroupResultsPage), findsOneWidget);
 
       // The group page's own back returns to the submitted entry form.
-      await tester.tap(find.byTooltip('Back to score entry'));
+      await tester.tap(find.byTooltip('Back'));
       await tester.pumpAndSettle();
       expect(find.text('See group results'), findsOneWidget);
 

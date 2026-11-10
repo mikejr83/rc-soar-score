@@ -117,6 +117,10 @@ class PilotOverviewPage extends StatelessWidget {
                 onView: () => context.push(
                   scoreEntryPath(contestId, pilotId, '${round.number}'),
                 ),
+                // Back from the group results returns here.
+                onFlightResults: () => context.push(
+                  groupResultsPath(contestId, pilotId, '${round.number}'),
+                ),
               ),
               const SizedBox(height: 8),
             ],
