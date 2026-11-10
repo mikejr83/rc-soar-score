@@ -81,5 +81,47 @@ Future<void> phase3Entry(
       await scrollTo(tester, find.text('Flight penalty (points)'));
       expect(find.text('Submit score'), findsNothing);
     });
+    await journey.step('Next and Previous load each round', () async {
+      await openPath(tester, scoreEntryPath(contest.id, pilotId, '1'));
+      await pumpUntilFound(tester, find.text('Time flown'));
+      expect(find.textContaining('Round 1'), findsOneWidget);
+      final stored = tester
+          .widget<TextField>(await fieldFor(tester, 'Time flown'))
+          .controller!
+          .text;
+      expect(stored, isNotEmpty);
+
+      // Round 2 has no score: the form is empty and can be filled in.
+      await tester.tap(find.byTooltip('Next round'));
+      await pumpUntilFound(tester, find.textContaining('Round 2'));
+      await pumpUntilFound(tester, find.text('Time flown'));
+      final empty = tester.widget<TextField>(
+        await fieldFor(tester, 'Time flown'),
+      );
+      expect(empty.controller!.text, isEmpty);
+      expect(empty.enabled, isTrue);
+      await scrollTo(tester, find.text('Submit score'));
+      expect(find.text('Submit score'), findsOneWidget);
+
+      // Round 2 is the next to score, so Next stops here.
+      expect(
+        tester
+            .widget<IconButton>(
+              find.widgetWithIcon(IconButton, Icons.chevron_right),
+            )
+            .onPressed,
+        isNull,
+      );
+
+      // Back to round 1: its own stored score, read-only.
+      await tester.tap(find.byTooltip('Previous round'));
+      await pumpUntilFound(tester, find.textContaining('Round 1'));
+      await pumpUntilFound(tester, find.text('Time flown'));
+      final back = tester.widget<TextField>(
+        await fieldFor(tester, 'Time flown'),
+      );
+      expect(back.controller!.text, stored);
+      expect(back.enabled, isFalse);
+    });
   });
 }
