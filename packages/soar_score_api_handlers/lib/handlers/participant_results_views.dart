@@ -66,14 +66,20 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
   };
   final landing = await _landingResults(repository, calculation.revision);
 
+  final inGroup = <ContestParticipation>[
+    for (final assignment in byPilot.values)
+      if (assignment.group == mine.group)
+        if (participations[assignment.contestParticipationId]
+            case final participation? when participation.isPilot)
+          participation,
+  ];
+  final profiles = await repository.participantProfileRepository.findByIds([
+    for (final participation in inGroup) participation.participantProfileId,
+  ]);
+
   final rows = <({double? sortKey, ParticipantGroupRowDto row})>[];
-  for (final assignment in byPilot.values) {
-    if (assignment.group != mine.group) continue;
-    final participation = participations[assignment.contestParticipationId];
-    if (participation == null || !participation.isPilot) continue;
-    final profile = await repository.participantProfileRepository.findById(
-      participation.participantProfileId,
-    );
+  for (final participation in inGroup) {
+    final profile = profiles[participation.participantProfileId];
     final name = [
       profile?.firstName,
       profile?.lastName,
@@ -189,13 +195,16 @@ Future<ParticipantOverallResultsDto?> participantOverallResults(
         ))
       p.id.value: p,
   };
+  final profiles = await repository.participantProfileRepository.findByIds([
+    for (final place in standing.ranking.places)
+      if (participations[place.pilotId] case final participation?)
+        participation.participantProfileId,
+  ]);
   final lines = <ParticipantStandingDto>[];
   for (final place in standing.ranking.places) {
     final participation = participations[place.pilotId];
     if (participation == null) continue;
-    final profile = await repository.participantProfileRepository.findById(
-      participation.participantProfileId,
-    );
+    final profile = profiles[participation.participantProfileId];
     lines.add(
       ParticipantStandingDto(
         place: place.place,

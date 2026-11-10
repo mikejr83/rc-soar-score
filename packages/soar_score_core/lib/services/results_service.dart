@@ -393,13 +393,17 @@ class ResultsService {
 
   /// Whether an official score was set after [after], or at all when null.
   Future<bool> _latestScoreAt(Id contestId, {required DateTime? after}) async {
-    for (final placeholder
-        in await repository.scorePlaceholderRepository.listForContest(
-          contestId,
-        )) {
-      final official = await repository.officialScoreRepository
-          .currentForPlaceholder(placeholder.id);
-      if (official == null) continue;
+    // Only the current score of each placeholder counts: a correction can
+    // carry an earlier set_at than the score it replaced.
+    final current = await repository.officialScoreRepository
+        .currentForPlaceholders([
+          for (final placeholder
+              in await repository.scorePlaceholderRepository.listForContest(
+                contestId,
+              ))
+            placeholder.id,
+        ]);
+    for (final official in current.values) {
       if (after == null || official.setAt.isAfter(after)) return true;
     }
     return false;

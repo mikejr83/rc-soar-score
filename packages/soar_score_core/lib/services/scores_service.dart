@@ -103,6 +103,10 @@ class ScoresService {
                 placeholder.state == ScorePlaceholderState.inReview)
               placeholder.id,
         ]);
+    final officials = await repository.officialScoreRepository
+        .currentForPlaceholders([
+          for (final placeholder in placeholders.values) placeholder.id,
+        ]);
     final slots = <ScoreSlot>[];
     final progress = <RoundProgress>[];
     for (final round in rounds) {
@@ -123,8 +127,7 @@ class ScoresService {
         slots.add(
           ScoreSlot(
             placeholder: placeholder,
-            officialScore: await repository.officialScoreRepository
-                .currentForPlaceholder(placeholder.id),
+            officialScore: officials[placeholder.id],
             pendingAttempt: pending[placeholder.id],
           ),
         );

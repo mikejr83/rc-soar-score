@@ -78,6 +78,21 @@ class StubOfficialScoreRepository implements OfficialScoreRepository {
   };
 
   @override
+  Future<Map<Id, DateTime>> latestSetAtForContests(
+    Iterable<Id> contestIds,
+  ) async {
+    final latest = <Id, DateTime>{};
+    for (final score in stored) {
+      if (!contestIds.contains(score.contestId)) continue;
+      final seen = latest[score.contestId];
+      if (seen == null || score.setAt.isAfter(seen)) {
+        latest[score.contestId] = score.setAt;
+      }
+    }
+    return latest;
+  }
+
+  @override
   Future<RecordedScore> recordEntry(
     RecordedScore entry, {
     required MutationMetadata metadata,
