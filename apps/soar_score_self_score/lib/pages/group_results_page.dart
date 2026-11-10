@@ -17,12 +17,14 @@ class GroupResultsPage extends StatelessWidget {
     required this.contestId,
     required this.pilotId,
     required this.roundId,
+    this.now,
     super.key,
   });
 
   final String contestId;
   final String pilotId;
   final String roundId;
+  final DateTime Function()? now;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +38,7 @@ class GroupResultsPage extends StatelessWidget {
     );
     return LoadableScaffold<GroupResults>(
       allowRefresh: true,
+      now: now ?? DateTime.now,
       load: () => repository.groupResults(
         contestId,
         pilotId,

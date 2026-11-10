@@ -57,20 +57,23 @@ void main() {
       '${group ? 'group' : 'overall'} refresh succeeds, fails and retries',
       (tester) async {
         final repository = _Repository();
+        var now = DateTime(2026, 1, 1, 12);
         await tester.pumpWidget(
           SelfScoreScope(
             repository: repository,
             child: MaterialApp(
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               home: group
-                  ? const GroupResultsPage(
+                  ? GroupResultsPage(
                       contestId: SampleData.contestId,
                       pilotId: '12',
                       roundId: '4',
+                      now: () => now,
                     )
-                  : const ResultsPage(
+                  : ResultsPage(
                       contestId: SampleData.contestId,
                       asOfRound: 4,
+                      now: () => now,
                     ),
             ),
           ),
@@ -81,11 +84,12 @@ void main() {
         final initialTime = tester
             .widget<Text>(find.textContaining('Last refreshed:'))
             .data;
-        await tester.pump(const Duration(seconds: 2));
+        now = now.add(const Duration(seconds: 2));
         repository.pending = Completer<void>();
         await tester.tap(find.text('Refresh'));
         await tester.pump();
         expect(find.text('Refreshing…'), findsOneWidget);
+        expect(find.textContaining('Fetch 1'), findsOneWidget);
         expect(
           tester
               .widget<TextButton>(
@@ -95,31 +99,28 @@ void main() {
           isNull,
         );
         expect(repository.calls, 2);
-        // The displayed clock has second precision. Cross a real second so
-        // this proves only successful reads advance it.
-        await tester.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 1100)),
-        );
+        now = now.add(const Duration(seconds: 1));
         repository.pending!.complete();
         await tester.pumpAndSettle();
         final successTime = tester
             .widget<Text>(find.textContaining('Last refreshed:'))
             .data;
+        final successClock = successTime!.substring(
+          successTime.indexOf(':') + 2,
+        );
         expect(successTime, isNot(initialTime));
         expect(find.textContaining('Fetch 2'), findsOneWidget);
         expect(find.textContaining('Fetch 1'), findsNothing);
         repository.pending = Completer<void>();
         await tester.tap(find.text('Refresh'));
         await tester.pump();
-        await tester.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 1100)),
-        );
+        now = now.add(const Duration(seconds: 1));
         repository.pending!.completeError(Exception('offline'));
         await tester.pumpAndSettle();
         expect(find.textContaining('Could not load this page'), findsOneWidget);
         expect(
-          tester.widget<Text>(find.textContaining('Last refreshed:')).data,
-          successTime,
+          tester.widget<Text>(find.textContaining('last updated')).data,
+          endsWith(successClock),
         );
         repository.pending = null;
         await tester.tap(find.text('Retry'));

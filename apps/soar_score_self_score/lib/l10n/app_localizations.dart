@@ -382,6 +382,12 @@ abstract class AppLocalizations {
   /// **'Refreshing…'**
   String get refreshingResults;
 
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get loading;
+
   /// No description provided for @resultsRefreshHint.
   ///
   /// In en, this message translates to:
@@ -393,6 +399,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Last refreshed: {time}'**
   String resultsLastRefreshed(String time);
+
+  /// Shown when a results refresh fails but an earlier successful fetch is available.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t refresh; last updated {time}'**
+  String resultsRefreshFailed(String time);
 }
 
 class _AppLocalizationsDelegate

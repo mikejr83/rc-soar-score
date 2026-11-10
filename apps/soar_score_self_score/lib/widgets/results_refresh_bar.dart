@@ -8,12 +8,14 @@ class ResultsRefreshBar extends StatelessWidget {
   const ResultsRefreshBar({
     required this.lastRefreshed,
     required this.loading,
+    required this.refreshFailed,
     required this.onRefresh,
     super.key,
   });
 
   final DateTime? lastRefreshed;
   final bool loading;
+  final bool refreshFailed;
   final VoidCallback? onRefresh;
 
   @override
@@ -25,15 +27,24 @@ class ResultsRefreshBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              time == null
-                  ? strings.resultsRefreshHint
-                  : strings.resultsLastRefreshed(
-                      DateFormat.yMd(Localizations.localeOf(context).toString())
-                          .add_Hms()
-                          .format(time.toLocal()),
-                    ),
-              style: Theme.of(context).textTheme.bodySmall,
+            child: Semantics(
+              liveRegion: true,
+              child: Text(
+                time == null
+                    ? strings.resultsRefreshHint
+                    : refreshFailed
+                    ? strings.resultsRefreshFailed(
+                        DateFormat.yMd(
+                          Localizations.localeOf(context).toString(),
+                        ).add_jms().format(time.toLocal()),
+                      )
+                    : strings.resultsLastRefreshed(
+                        DateFormat.yMd(
+                          Localizations.localeOf(context).toString(),
+                        ).add_jms().format(time.toLocal()),
+                      ),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
           ),
           const SizedBox(width: 8),

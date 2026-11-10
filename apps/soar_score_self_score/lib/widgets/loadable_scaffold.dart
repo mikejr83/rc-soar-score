@@ -19,6 +19,7 @@ class LoadableScaffold<T> extends StatefulWidget {
     required this.appBar,
     required this.builder,
     this.allowRefresh = false,
+    this.now = DateTime.now,
     super.key,
   });
 
@@ -26,6 +27,9 @@ class LoadableScaffold<T> extends StatefulWidget {
 
   /// Shows a manual refresh action and the last successful fetch time.
   final bool allowRefresh;
+
+  /// Supplies the clock used for the last successful fetch timestamp.
+  final DateTime Function() now;
 
   /// Compared with `==`; a record of the repository and the route ids works.
   final Object reloadKey;
@@ -40,6 +44,7 @@ class LoadableScaffold<T> extends StatefulWidget {
 
 class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
   late Future<T> _future = _start();
+  T? _data;
   DateTime? _lastRefreshed;
   int _generation = 0;
 
@@ -49,16 +54,24 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
     final generation = ++_generation;
     final future = Future<T>.sync(widget.load);
     future.then<void>(
-      (_) {
+      (value) {
+        if (generation == _generation) {
+          _data = value;
+        }
         if (mounted && generation == _generation) {
-          _lastRefreshed = DateTime.now();
+          setState(() {
+            _lastRefreshed = widget.now();
+          });
         }
       },
       onError: (Object error) {
-        if (error is SessionEndedException &&
-            mounted &&
-            generation == _generation) {
-          context.guestSessions.clear();
+        if (mounted && generation == _generation) {
+          setState(() {
+            _data = null;
+          });
+          if (error is SessionEndedException) {
+            context.guestSessions.clear();
+          }
         }
       },
     );
@@ -69,6 +82,7 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
   void didUpdateWidget(LoadableScaffold<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.reloadKey != widget.reloadKey) {
+      _data = null;
       _lastRefreshed = null;
       _future = _start();
     }
@@ -85,16 +99,18 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
     return FutureBuilder<T>(
       future: _future,
       builder: (context, snapshot) {
-        final data = snapshot.data;
+        final data = snapshot.data ?? _data;
         final Widget body;
         final loading = snapshot.connectionState != ConnectionState.done;
         if (loading) {
-          body = Center(
-            child: Semantics(
-              label: 'Loading',
-              child: const CircularProgressIndicator(),
-            ),
-          );
+          body = data == null
+              ? Center(
+                  child: Semantics(
+                    label: AppLocalizations.of(context).loading,
+                    child: const CircularProgressIndicator(),
+                  ),
+                )
+              : widget.builder(context, data);
         } else if (snapshot.hasError) {
           final error = snapshot.error;
           body = error is SessionEndedException
@@ -115,7 +131,7 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
         } else if (data == null) {
           body = Center(
             child: Semantics(
-              label: 'Loading',
+              label: AppLocalizations.of(context).loading,
               child: const CircularProgressIndicator(),
             ),
           );
@@ -125,7 +141,7 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
         return Scaffold(
           appBar: widget.appBar(
             context,
-            loading || snapshot.hasError ? null : data,
+            snapshot.hasError && !loading ? null : data,
           ),
           body: SafeArea(
             child: Column(
@@ -134,6 +150,7 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
                   ResultsRefreshBar(
                     lastRefreshed: _lastRefreshed,
                     loading: loading,
+                    refreshFailed: snapshot.hasError && !loading,
                     onRefresh: snapshot.error is SessionEndedException
                         ? null
                         : _retry,
