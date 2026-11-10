@@ -67,6 +67,17 @@ Future<String> phase2Invitation(
       // A guest has no way back in but the card's QR code, so no sign out.
       expect(find.byTooltip('End session'), findsNothing);
     });
+    await journey.step('Application info lists the legal links', () async {
+      await tapVisible(tester, find.byIcon(Icons.more_vert));
+      await pumpUntilFound(tester, find.text('Application info'));
+      await tapVisible(tester, find.text('Application info'));
+      await pumpUntilFound(tester, find.text('Licences in this app'));
+      expect(find.text('Open source licences'), findsOneWidget);
+      expect(find.text('Privacy Policy'), findsOneWidget);
+      expect(find.text('Terms'), findsOneWidget);
+      await tapVisible(tester, find.byTooltip('Back'));
+      await pumpUntilFound(tester, find.text('2 rounds'));
+    });
     await journey.step('The same link works again', () async {
       await openPath(tester, invitationPath(contest.credentialOf(pilot)));
       await pumpUntilFound(tester, find.text('Hello, $pilot'));
