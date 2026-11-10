@@ -1,20 +1,21 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../app_sync_provider.dart';
-import '../../router.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/preferences/director_time.dart';
 import '../../services/sync/sync_status_text.dart';
 import 'sync_summary_builder.dart';
 
 /// The sync entry of the status bar: what the sync is doing in a few words
-/// and when it last ran.
+/// ("Sync successful", "Sync failed", "Sync conflicts"). Hovering it shows
+/// the details, such as when it last synced, and a tap syncs now.
 ///
-/// In a contest it is that contest's sync and a tap opens the details. Outside
-/// a contest it is the signed-in account's own data, and a tap syncs now.
+/// In a contest it is that contest's sync; the details page is in the
+/// contest's navigation. Outside a contest it is the signed-in account's own
+/// data.
 /// Shows nothing in a build that does not synchronize, or outside a contest
 /// while nobody is signed in.
 class ShellSyncStatus extends StatelessWidget {
@@ -35,39 +36,44 @@ class ShellSyncStatus extends StatelessWidget {
       scope: scope,
       builder: (context, sync, summary, syncing) {
         if (!sync.available) return const SizedBox.shrink();
+        final l10n = AppLocalizations.of(context);
         final text = SyncStatusText.of(
+          l10n,
           summary,
           syncing: syncing,
           time: DirectorTime.of(context),
+          canSyncNow: true,
         );
         final attention =
             (summary?.needsAttention ?? 0) > 0 ||
-            (summary != null && summary.localOnly && summary.problem != null);
-        return Semantics(
-          button: true,
-          label: 'Sync: $text',
-          excludeSemantics: true,
-          child: InkWell(
-            key: const ValueKey('shell-sync-status'),
-            borderRadius: BorderRadius.circular(8),
-            onTap: contest == null
-                ? (syncing ? null : () => unawaited(sync.syncNow(scope)))
-                : () => context.go(contestSyncPath(contest.id.value)),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  attention ? Icons.sync_problem : Icons.sync,
-                  size: 16,
-                  color: attention
-                      ? theme.colorScheme.error
-                      : theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 6),
-                Text('Sync', style: theme.textTheme.bodySmall),
-                const SizedBox(width: 6),
-                Flexible(child: Text(text, style: theme.textTheme.bodySmall)),
-              ],
+            (summary != null && summary.localOnly && summary.problem != null) ||
+            (summary?.problem != null && !syncing);
+        return Tooltip(
+          message: text.tooltip,
+          child: Semantics(
+            button: true,
+            label: l10n.syncSemanticsLabel(text.label),
+            excludeSemantics: true,
+            child: InkWell(
+              key: const ValueKey('shell-sync-status'),
+              borderRadius: BorderRadius.circular(8),
+              onTap: syncing ? null : () => unawaited(sync.syncNow(scope)),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    attention ? Icons.sync_problem : Icons.sync,
+                    size: 16,
+                    color: attention
+                        ? theme.colorScheme.error
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(text.label, style: theme.textTheme.bodySmall),
+                  ),
+                ],
+              ),
             ),
           ),
         );

@@ -298,6 +298,12 @@ abstract class AppLocalizations {
   /// **'Back to pilots'**
   String get backToPilots;
 
+  /// Button on a round card of the pilot overview, once a score was entered; opens the results of the pilot's group for that round.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight Results'**
+  String get flightResults;
+
   /// Button shown after a score is submitted; opens the results of the pilot's group for that round.
   ///
   /// In en, this message translates to:

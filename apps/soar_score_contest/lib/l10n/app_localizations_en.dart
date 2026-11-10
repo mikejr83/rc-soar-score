@@ -445,6 +445,72 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storageDetailClose => 'OK';
 
   @override
+  String get syncStatusChecking => 'Checking…';
+
+  @override
+  String get syncStatusSyncing => 'Syncing…';
+
+  @override
+  String get syncStatusLocalOnly => 'Local only';
+
+  @override
+  String get syncStatusNotSynced => 'Not synced yet';
+
+  @override
+  String get syncStatusSuccessful => 'Sync successful';
+
+  @override
+  String get syncStatusPending => 'Changes pending';
+
+  @override
+  String get syncStatusFailed => 'Sync failed';
+
+  @override
+  String get syncStatusConflicts => 'Sync conflicts';
+
+  @override
+  String get syncStatusRefused => 'Changes refused';
+
+  @override
+  String syncTooltipLastSynced(String time) {
+    return 'Last synced $time';
+  }
+
+  @override
+  String syncTooltipPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes waiting to be sent',
+      one: '1 change waiting to be sent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncTooltipAttention(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes need your attention',
+      one: '1 change needs your attention',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncTooltipLocalOnly =>
+      'This data is only on this device and is not backed up.';
+
+  @override
+  String get syncTooltipAction => 'Click to sync now';
+
+  @override
+  String syncSemanticsLabel(String status) {
+    return 'Sync: $status';
+  }
+
+  @override
   String get unsyncedWarningTitle => 'Changes have not synced';
 
   @override

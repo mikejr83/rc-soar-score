@@ -47,6 +47,25 @@ Future<void> runStartPhase(Journey journey, JourneyContext data) async {
     await pumpUntilFound(tester, find.text('Workspace'));
   });
 
+  await journey.step(
+    'The status bar sync entry is short and a click stays',
+    () async {
+      // Builds that do not synchronize have no entry. Where it exists it says a
+      // few words, never a time or zone, and does not leave the page.
+      final sync = find.byKey(const ValueKey('shell-sync-status'));
+      if (sync.evaluate().isEmpty) return;
+      expect(
+        find.descendant(
+          of: sync,
+          matching: find.textContaining(RegExp(r'\d{1,2}[/.]\d{1,2}')),
+        ),
+        findsNothing,
+      );
+      await tapVisible(tester, sync);
+      expect(find.text('Workspace'), findsWidgets);
+    },
+  );
+
   await journey.step('Settings lists the open source licences', () async {
     await openSettings(tester);
     await pumpUntilFound(tester, find.text('About'));

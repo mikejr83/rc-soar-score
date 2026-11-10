@@ -9,7 +9,6 @@ import '../l10n/app_localizations.dart';
 import '../models/pilot_overview.dart';
 import '../router.dart';
 import '../widgets/connection_indicator.dart';
-import '../widgets/end_session_button.dart';
 import '../widgets/loadable_scaffold.dart';
 import '../widgets/pilot_round_card.dart';
 import '../widgets/self_score_app_bar.dart';
@@ -101,7 +100,7 @@ class PilotOverviewPage extends StatelessWidget {
               ? null
               : () => context.go(teamPath(contestId)),
           backLabel: l10n.backToPilots,
-          actions: const [ConnectionIndicator(), EndSessionButton()],
+          actions: const [ConnectionIndicator()],
           showAccount: false,
           onCopyInvitationLink: () => _copyInvitationLink(context),
         ),
@@ -136,6 +135,10 @@ class PilotOverviewPage extends StatelessWidget {
                 // form links on to the group results.
                 onView: () => context.push(
                   scoreEntryPath(contestId, pilotId, '${round.number}'),
+                ),
+                // Back from the group results returns here.
+                onFlightResults: () => context.push(
+                  groupResultsPath(contestId, pilotId, '${round.number}'),
                 ),
               ),
               const SizedBox(height: 8),

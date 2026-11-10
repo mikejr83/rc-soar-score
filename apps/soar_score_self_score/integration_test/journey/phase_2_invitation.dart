@@ -64,6 +64,8 @@ Future<String> phase2Invitation(
       pilotId = uri.pathSegments[uri.pathSegments.indexOf('pilots') + 1];
       expect(find.text('Next to score'), findsOneWidget);
       expect(find.text('Enter'), findsOneWidget);
+      // A guest has no way back in but the card's QR code, so no sign out.
+      expect(find.byTooltip('End session'), findsNothing);
     });
     await journey.step(
       'The pilot can copy their own invitation link',
