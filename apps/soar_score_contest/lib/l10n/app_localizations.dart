@@ -3592,12 +3592,6 @@ abstract class AppLocalizations {
   /// **'Send invitations ({count})'**
   String invitationsMenuSendCount(int count);
 
-  /// Participants invitations menu item that copies one pilot's link.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy link'**
-  String get invitationsMenuCopy;
-
   /// Snack bar after a pilot's invitation link was copied.
   ///
   /// In en, this message translates to:
@@ -3657,6 +3651,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The server can’t be reached, so invitations can’t be sent now.'**
   String get invitationsServerUnreachable;
+
+  /// Participant row menu action that removes this participant from the contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get participantActionRemove;
+
+  /// Participant menu action that creates an invitation for one pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitation'**
+  String get participantActionSend;
+
+  /// Participant menu action that copies one pilot’s invitation URL.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy invitation URL'**
+  String get participantActionCopy;
+
+  /// Tooltip for the participant row three-dot menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant actions'**
+  String get participantActions;
+
+  /// Reason Send invitation is off in a participant row menu: the pilot already has one.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot already has an invitation.'**
+  String get participantInvitationExists;
+
+  /// Reason Remove is off in a participant row menu: the pilot has flights.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots with flights can’t be removed.'**
+  String get participantRemoveHasFlights;
+
+  /// Reason Remove is off in a participant row menu: the contest is locked, completed or saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants can’t be removed from this contest now.'**
+  String get participantRemoveUnavailable;
 }
 
 class _AppLocalizationsDelegate

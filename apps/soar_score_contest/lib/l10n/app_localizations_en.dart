@@ -2624,9 +2624,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get invitationsMenuCopy => 'Copy link';
-
-  @override
   String get invitationsLinkCopied => 'Link copied.';
 
   @override
@@ -2659,4 +2656,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get invitationsServerUnreachable =>
       'The server can’t be reached, so invitations can’t be sent now.';
+
+  @override
+  String get participantActionRemove => 'Remove';
+
+  @override
+  String get participantActionSend => 'Send invitation';
+
+  @override
+  String get participantActionCopy => 'Copy invitation URL';
+
+  @override
+  String get participantActions => 'Participant actions';
+
+  @override
+  String get participantInvitationExists =>
+      'This pilot already has an invitation.';
+
+  @override
+  String get participantRemoveHasFlights =>
+      'Pilots with flights can’t be removed.';
+
+  @override
+  String get participantRemoveUnavailable =>
+      'Participants can’t be removed from this contest now.';
 }

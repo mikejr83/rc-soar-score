@@ -9,7 +9,7 @@ Finder _check(int n) => find.descendant(
   matching: find.byType(Checkbox),
 );
 
-Finder _remove() => find.byKey(const ValueKey('remove-participants'));
+Finder _remove() => find.byKey(const ValueKey('bulk-remove'));
 
 Finder _save() => find.byKey(const ValueKey('save-participants'));
 
@@ -132,8 +132,17 @@ void main() {
       await tester.tap(_check(1));
       await tester.pumpAndSettle();
 
-      expect(tester.widget<OutlinedButton>(_remove()).onPressed, isNull);
-      expect(find.byKey(const ValueKey('remove-reason')), findsOneWidget);
+      expect(tester.widget<TextButton>(_remove()).onPressed, isNull);
+      expect(
+        find.byWidgetPredicate(
+          (w) =>
+              w is Tooltip &&
+              (w.message ?? '').contains(
+                'selection contains a pilot with flights',
+              ),
+        ),
+        findsOneWidget,
+      );
     });
   });
 

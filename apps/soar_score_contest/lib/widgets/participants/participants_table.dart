@@ -27,6 +27,7 @@ class ParticipantsTable extends StatelessWidget {
     required this.rows,
     required this.onToggleAll,
     this.selectable = true,
+    this.actionsOf,
   });
 
   final ParticipantEditing editing;
@@ -38,6 +39,9 @@ class ParticipantsTable extends StatelessWidget {
 
   /// Whether rows can be selected (a read-only list hides the checkboxes).
   final bool selectable;
+
+  /// Optional row actions; omitted by the new-contest wizard.
+  final Widget Function(ParticipantRow row)? actionsOf;
 
   static const double _gap = 8;
   static const double _padding = 12;
@@ -102,6 +106,7 @@ class ParticipantsTable extends StatelessWidget {
     final columns = _columns();
     final checkboxWidth = selectable ? 40.0 : 0.0;
     final minWidth =
+        (actionsOf == null ? 0 : 48) +
         checkboxWidth +
         columns.fold<double>(0, (sum, column) => sum + column.minWidth) +
         _gap * columns.length +
@@ -142,6 +147,7 @@ class ParticipantsTable extends StatelessWidget {
               bool divider = true,
               Key? key,
               Widget? note,
+              Widget? actions,
             }) => Container(
               key: key,
               constraints: BoxConstraints(minHeight: minHeight),
@@ -167,6 +173,8 @@ class ParticipantsTable extends StatelessWidget {
                           const SizedBox(width: _gap),
                         SizedBox(width: widths[index], child: cell),
                       ],
+                      if (actionsOf != null)
+                        SizedBox(width: 48, child: actions),
                     ],
                   ),
                   ?note,
@@ -225,6 +233,7 @@ class ParticipantsTable extends StatelessWidget {
                               ),
                         divider: index < rows.length - 1,
                         lead: cells.checkbox(),
+                        actions: actionsOf?.call(participant),
                         cells: [
                           for (final column in columns)
                             column.cell(context, cells),

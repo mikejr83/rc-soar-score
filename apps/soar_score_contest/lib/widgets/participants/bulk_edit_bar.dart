@@ -13,6 +13,8 @@ class BulkEditBar extends StatelessWidget {
     required this.onClear,
     required this.onRemove,
     this.removeReason,
+    this.showRemove = true,
+    this.actions = const [],
     this.teams,
     this.classes,
     this.roles,
@@ -20,6 +22,12 @@ class BulkEditBar extends StatelessWidget {
     this.onClass,
     this.onRole,
   });
+
+  /// Additional actions for the current selection, styled like bulk actions.
+  final List<Widget> actions;
+
+  /// Read-only lists can retain selection actions without offering removal.
+  final bool showRemove;
 
   final int count;
   final VoidCallback onClear;
@@ -149,16 +157,18 @@ class BulkEditBar extends StatelessWidget {
                     text: (role) => role.displayName,
                     onPick: onRole!,
                   ),
-                Tooltip(
-                  message: removeReason ?? '',
-                  child: TextButton.icon(
-                    key: const ValueKey('bulk-remove'),
-                    style: buttonStyle,
-                    onPressed: onRemove,
-                    icon: const Icon(Icons.person_remove_outlined, size: 18),
-                    label: const Text('Remove'),
+                ...actions,
+                if (showRemove)
+                  Tooltip(
+                    message: removeReason ?? '',
+                    child: TextButton.icon(
+                      key: const ValueKey('bulk-remove'),
+                      style: buttonStyle,
+                      onPressed: onRemove,
+                      icon: const Icon(Icons.person_remove_outlined, size: 18),
+                      label: const Text('Remove'),
+                    ),
                   ),
-                ),
                 IconButton(
                   tooltip: 'Clear selection',
                   color: foreground,

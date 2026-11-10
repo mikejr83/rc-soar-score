@@ -15,11 +15,15 @@ class ParticipantCard extends StatelessWidget {
     required this.editing,
     required this.participant,
     this.selectable = true,
+    this.actions,
   });
 
   final ParticipantEditing editing;
   final ParticipantRow participant;
   final bool selectable;
+
+  /// Optional actions beside the status, matching the wide table.
+  final Widget? actions;
 
   static const double _minFieldWidth = 170;
 
@@ -122,11 +126,20 @@ class ParticipantCard extends StatelessWidget {
                     children: [
                       cells.nameBlock(context),
                       cells.emailCell(context, prefix: true),
+                      // With the menu button beside it, the status drops
+                      // under the name so a phone keeps room for both.
+                      if (actions != null) ...[
+                        const SizedBox(height: 4),
+                        cells.status(context),
+                      ],
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                cells.status(context),
+                if (actions == null) ...[
+                  const SizedBox(width: 8),
+                  cells.status(context),
+                ] else
+                  actions!,
               ],
             ),
             if (fields.isNotEmpty) ...[
