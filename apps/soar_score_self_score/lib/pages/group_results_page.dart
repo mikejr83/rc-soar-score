@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../data/self_score_scope.dart';
 import '../models/group_results.dart';
+import '../l10n/app_localizations.dart';
 import '../router.dart';
 import '../widgets/group_result_tile.dart';
 import '../widgets/loadable_scaffold.dart';
@@ -34,6 +35,7 @@ class GroupResultsPage extends StatelessWidget {
       fontWeight: FontWeight.w600,
     );
     return LoadableScaffold<GroupResults>(
+      allowRefresh: true,
       load: () => repository.groupResults(
         contestId,
         pilotId,
@@ -69,7 +71,7 @@ class GroupResultsPage extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Updates as scores come in',
+                          AppLocalizations.of(context).resultsRefreshHint,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: muted,
                           ),

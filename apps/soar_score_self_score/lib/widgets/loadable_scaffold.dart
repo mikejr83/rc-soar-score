@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../router.dart';
 import '../session/guest_session_scope.dart';
 import 'load_error_view.dart';
+import 'results_refresh_bar.dart';
 
 /// A page scaffold that loads its data, shows a loading state while waiting,
 /// an error with Retry when the load fails, and [builder] once it succeeds.
@@ -17,10 +18,14 @@ class LoadableScaffold<T> extends StatefulWidget {
     required this.reloadKey,
     required this.appBar,
     required this.builder,
+    this.allowRefresh = false,
     super.key,
   });
 
   final Future<T> Function() load;
+
+  /// Shows a manual refresh action and the last successful fetch time.
+  final bool allowRefresh;
 
   /// Compared with `==`; a record of the repository and the route ids works.
   final Object reloadKey;
@@ -35,15 +40,24 @@ class LoadableScaffold<T> extends StatefulWidget {
 
 class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
   late Future<T> _future = _start();
+  DateTime? _lastRefreshed;
+  int _generation = 0;
 
   /// Loads, and drops the stored guest session when the server says it is
   /// over, so nothing routes from it again.
   Future<T> _start() {
-    final future = widget.load();
+    final generation = ++_generation;
+    final future = Future<T>.sync(widget.load);
     future.then<void>(
-      (_) {},
+      (_) {
+        if (mounted && generation == _generation) {
+          _lastRefreshed = DateTime.now();
+        }
+      },
       onError: (Object error) {
-        if (error is SessionEndedException && mounted) {
+        if (error is SessionEndedException &&
+            mounted &&
+            generation == _generation) {
           context.guestSessions.clear();
         }
       },
@@ -55,6 +69,7 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
   void didUpdateWidget(LoadableScaffold<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.reloadKey != widget.reloadKey) {
+      _lastRefreshed = null;
       _future = _start();
     }
   }
@@ -72,7 +87,15 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
       builder: (context, snapshot) {
         final data = snapshot.data;
         final Widget body;
-        if (snapshot.hasError) {
+        final loading = snapshot.connectionState != ConnectionState.done;
+        if (loading) {
+          body = Center(
+            child: Semantics(
+              label: 'Loading',
+              child: const CircularProgressIndicator(),
+            ),
+          );
+        } else if (snapshot.hasError) {
           final error = snapshot.error;
           body = error is SessionEndedException
               // Retrying cannot help: the person needs their link again.
@@ -97,14 +120,28 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
             ),
           );
         } else {
-          return Scaffold(
-            appBar: widget.appBar(context, data),
-            body: SafeArea(child: widget.builder(context, data)),
-          );
+          body = widget.builder(context, data);
         }
         return Scaffold(
-          appBar: widget.appBar(context, null),
-          body: SafeArea(child: body),
+          appBar: widget.appBar(
+            context,
+            loading || snapshot.hasError ? null : data,
+          ),
+          body: SafeArea(
+            child: Column(
+              children: [
+                if (widget.allowRefresh)
+                  ResultsRefreshBar(
+                    lastRefreshed: _lastRefreshed,
+                    loading: loading,
+                    onRefresh: snapshot.error is SessionEndedException
+                        ? null
+                        : _retry,
+                  ),
+                Expanded(child: body),
+              ],
+            ),
+          ),
         );
       },
     );

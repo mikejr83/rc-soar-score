@@ -369,6 +369,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'End session'**
   String get endSession;
+
+  /// No description provided for @refreshResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refreshResults;
+
+  /// No description provided for @refreshingResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing…'**
+  String get refreshingResults;
+
+  /// No description provided for @resultsRefreshHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh to see the latest scores'**
+  String get resultsRefreshHint;
+
+  /// Local time of the last successful results fetch, not the score submission time.
+  ///
+  /// In en, this message translates to:
+  /// **'Last refreshed: {time}'**
+  String resultsLastRefreshed(String time);
 }
 
 class _AppLocalizationsDelegate

@@ -21,6 +21,7 @@ class ResultsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final repository = context.repository;
     return LoadableScaffold<ResultsView>(
+      allowRefresh: true,
       load: () => repository.results(contestId, asOfRound: asOfRound),
       reloadKey: (repository, contestId, asOfRound),
       appBar: (context, data) => SelfScoreAppBar(
