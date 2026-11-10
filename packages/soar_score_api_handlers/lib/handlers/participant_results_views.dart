@@ -64,7 +64,7 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
     for (final flight in calculation.recalculation?.flights ?? const [])
       if (flight.round == roundOrdinal) flight.pilotId: flight,
   };
-  final landing = await _landingLabels(repository, calculation.revision);
+  final landing = await _landingResults(repository, calculation.revision);
 
   final rows = <({double? sortKey, ParticipantGroupRowDto row})>[];
   for (final assignment in byPilot.values) {
@@ -85,6 +85,7 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
     final seconds = components?['time_flown'];
     final height = components?['launch_height'];
     final landingKey = components?['landing'];
+    final landingResult = landingKey == null ? null : landing[landingKey];
     final zero = flight?.flight.outcome == FlightOutcome.zero;
     rows.add((
       sortKey: flight?.group.groupScore,
@@ -104,9 +105,8 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
         isEstimate: false,
         timeFlownSeconds: seconds is num ? seconds.round() : null,
         launchHeight: height is num ? height : null,
-        landing: landingKey == null
-            ? null
-            : landing[landingKey] ?? landingKey.toString(),
+        landing: landingResult?.displayValue ?? landingKey?.toString(),
+        landingPoints: landingResult?.pointValue,
         flightScore: flight?.group.groupScore,
         rawScore: flight?.flight.rawScore,
         roundScore: flight?.group.groupScore,
@@ -226,7 +226,7 @@ Future<ParticipantOverallResultsDto?> participantOverallResults(
   );
 }
 
-Future<Map<String, String>> _landingLabels(
+Future<Map<String, LandingResult>> _landingResults(
   Repository repository,
   ContestConfigurationRevision revision,
 ) async {
@@ -236,6 +236,6 @@ Future<Map<String, String>> _landingLabels(
       : await repository.landingTableRepository.findById(tableId);
   return {
     for (final result in table?.results ?? const <LandingResult>[])
-      result.entryKey: result.displayValue,
+      result.entryKey: result,
   };
 }

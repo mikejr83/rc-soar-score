@@ -359,21 +359,20 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
     };
     final seconds = row.timeFlownSeconds;
     final height = row.launchHeight;
-    final detail = [
-      if (kind == GroupRowKind.noScore && row.flightScore != null)
-        'Estimate ${ScoreFormat.score(row.flightScore!)}',
-      if (height != null) 'Height ${ScoreFormat.score(height)} m',
-      ?row.landing,
-    ].join(' · ');
+    final score = row.flightScore;
     return GroupResultRow(
       name: row.pilotName,
       pilotNumber: row.pilotNumber,
       kind: kind,
       time: seconds == null ? null : FlightTimeInput.format(seconds.toDouble()),
-      score: kind == GroupRowKind.noScore || row.flightScore == null
+      height: height?.round(),
+      landing: row.landingPoints,
+      rawScore: row.rawScore == null ? null : ScoreFormat.score(row.rawScore!),
+      // A missing score is not in the standings yet, so it gets no value even
+      // when the server carries an estimate.
+      score: kind == GroupRowKind.noScore || score == null
           ? null
-          : ScoreFormat.score(row.flightScore!),
-      detail: detail.isEmpty ? null : detail,
+          : ScoreFormat.score(score),
       zeroReason: row.zeroReason?.toLowerCase(),
       isYou: row.isYou,
     );

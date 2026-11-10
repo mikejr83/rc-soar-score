@@ -62,10 +62,14 @@ class StatusChip extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: text),
           const SizedBox(width: 4),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelLarge
-                ?.copyWith(color: text, fontWeight: FontWeight.w600),
+          // Flexible so a width-constrained chip (the group-results name
+          // column) wraps the label instead of overflowing.
+          Flexible(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.labelLarge
+                  ?.copyWith(color: text, fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),
