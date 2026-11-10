@@ -346,7 +346,6 @@ flutter drive --driver=test_driver/integration_test.dart \
 
 The scripts exit at once when chromedriver is missing or does not answer on port 4444 (another instance may hold it). They also stop any test file that runs longer than `E2E_TEST_TIMEOUT` seconds (default 300) and count it as failed. A healthy file takes about a minute, so a run that is silent for much longer is hung. `E2E_SERVER_PORT` (default 18080) changes the test server's port. More in `apps/soar_score_contest/AGENTS.md`.
 
-
 ### End-to-End Tests (Self-Scoring App)
 
 The self-scoring app's journey lives in `apps/soar_score_self_score/integration_test/`: a pilot opens an invitation link, enters a round and sees the score. It runs the real web build in headless Chrome against `apps/soar_score_server/tool/e2e_server.dart --profile server` (a test-only server with invitations on; never deploy it) and is local only, like the contest app's. Set up Chrome and chromedriver as above first.

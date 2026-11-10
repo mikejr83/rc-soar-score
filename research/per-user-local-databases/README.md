@@ -116,7 +116,7 @@ When the open profile is not the freshly synced account, the director should alw
 | `soar_score_ui.db`                      | One per profile (drafts, panels, theme). The wizard draft is already keyed by account.                                                                                                  |
 | Secure-storage session                  | Still one slot per OS user. Not changed by this proposal; the profile list is the memory of previous accounts, not of their tokens.                                                     |
 | Demo mode                               | Own root (`demo\`), single profile, reset deletes the whole folder. Demo data never joins a real profile. In demo mode the claim should not run against a real service.                 |
-| E2E scripts                             | `scripts/e2e-contest.ps1` passes the demo defines and deletes the demo database. They need to follow the new demo path.                                                                         |
+| E2E scripts                             | `scripts/e2e-contest.ps1` passes the demo defines and deletes the demo database. They need to follow the new demo path.                                                                 |
 
 ## Risks and open questions
 
