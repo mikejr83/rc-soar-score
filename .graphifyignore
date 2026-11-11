@@ -4,18 +4,18 @@
 # Agent skills and tool config (vendored docs, e.g. the Auth0 skill references)
 .agents/
 .claude/
+.codex/
+.dart_tool/
+.e2e-tools/
 .kilo/
+.idea/
 .impeccable/
 .vscode/
 .mcp.json
 skills-lock.json
 
-# One-off research scratch and benchmarks
+# Research - Keeping this out until it either becomes docs or a plan.
 research/
-
-# Requirements, design notes and ticket history are read in `plan/` and `docs/`
-plan/
-docs/
 
 # Repo meta
 .github/
