@@ -7,7 +7,18 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
 import 'package:soar_score_core/soar_score_core.dart'
-    show Account, AccountKind, Id, InvitationCodec, InvitationService;
+    show
+        Account,
+        AccountKind,
+        Id,
+        Invitation,
+        InvitationCodec,
+        InvitationService,
+        ParticipantAccess,
+        ProtectedCredential,
+        ParticipantScoresService,
+        ParticipantSubmissionRefusal,
+        ScoresService;
 import 'package:soar_score_data/soar_score_data.dart';
 
 /// The secret the E2E server signs invitation links with. Public on purpose:
@@ -41,6 +52,17 @@ const e2eInvitationSecret = 'e2e-invitation-secret-at-least-32-bytes-long';
 /// HEAD and OPTIONS) answer 503 once, so a journey can check what the app
 /// does when a save fails and then succeeds on Retry. Test-only, like the
 /// rest of this server.
+///
+/// `POST /__e2e/pilot-submission` stores a pilot's own score the way the
+/// self-scoring app's submission does (a preliminary `ScoreAttempt`; the row
+/// shows the "Pilot entry" chip until the director saves), for a database that
+/// has no invitations: the contest app's journeys run on the installation
+/// profile, where a real invitation cannot exist. The body is
+/// `{"contest_id", "participation_id", "round", "components"}`. The
+/// submission is made through `ScoresService.submitParticipantScore` with a
+/// made-up guest and invitation, so it is checked as a real one is. A
+/// refusal (the pilot already has a score, say) answers 409 with its reason. Test-only,
+/// like the rest of this server.
 ///
 /// Invitations (the self-scoring app's links and guest sessions) are on, signed
 /// with the fixed [e2eInvitationSecret]. `POST /__e2e/advance-clock?hours=N`
@@ -93,6 +115,7 @@ Future<void> main(List<String> args) async {
       .addMiddleware(_journeyLog())
       .addMiddleware(_failNextWrite())
       .addMiddleware(_advanceClock(clock))
+      .addMiddleware(_pilotSubmission(repository))
       .addHandler(
         buildApiHandler(
           name: 'soar_score_e2e',
@@ -230,4 +253,59 @@ Middleware _advanceClock(_AdvanceableClock clock) =>
         return Response.ok('The invitation clock is now ${clock.now()}.');
       }
       return inner(request);
+    };
+
+/// See `POST /__e2e/pilot-submission` in the library comment.
+Middleware _pilotSubmission(Repository repository) =>
+    (inner) => (request) async {
+      if (request.method != 'POST' ||
+          request.url.path != '__e2e/pilot-submission') {
+        return inner(request);
+      }
+      final body =
+          jsonDecode(await request.readAsString()) as Map<String, dynamic>;
+      final contest = await repository.contestRepository.findById(
+        Id.parse(body['contest_id'] as String),
+      );
+      final participation = await repository.contestParticipationRepository
+          .findById(Id.parse(body['participation_id'] as String));
+      if (contest == null || participation == null) {
+        return Response.notFound('No such contest or participation.');
+      }
+      final latest = await repository.matrixRevisionRepository.latestForContest(
+        contest.id,
+      );
+      if (latest == null) return Response.badRequest(body: 'No draw yet.');
+      final guest = Id.create();
+      final invitation = Invitation(
+        id: Id.create(),
+        contestId: contest.id,
+        contestParticipationId: participation.id,
+        protectedCredential: ProtectedCredential('e2e-no-real-credential'),
+        issuedBy: guest,
+        issuedAt: DateTime.now().toUtc(),
+        clientMutationId: 'e2e-pilot-submission-${Id.create().value}',
+      );
+      final access = ParticipantAccess(
+        guestAccountId: guest,
+        invitation: invitation,
+        participation: participation,
+        contest: contest,
+        readOnly: false,
+      );
+      try {
+        await ScoresService(repository).submitParticipantScore(
+          access,
+          body['round'] as int,
+          clientMutationId: 'e2e-pilot-${Id.create().value}',
+          matrixRevision: latest.revisionNumber,
+          components: Map<String, Object?>.from(body['components'] as Map),
+          sourceDevice: 'e2e',
+        );
+      } on ParticipantSubmissionRefusal catch (refusal) {
+        // Answered here so the browser can read it (an escaped error is a
+        // 500 without CORS headers, which it reports as "Failed to fetch").
+        return Response(409, body: '${refusal.code}: ${refusal.message}');
+      }
+      return Response(201, body: 'The pilot submission is stored.');
     };

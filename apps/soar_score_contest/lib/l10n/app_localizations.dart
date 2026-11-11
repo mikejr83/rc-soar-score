@@ -3783,6 +3783,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Participants can’t be removed from this contest now.'**
   String get participantRemoveUnavailable;
+
+  /// Chip on a score row whose values a pilot or helper submitted and the director has not saved yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot entry'**
+  String get scorePilotEntryChip;
+
+  /// Tooltip of the Pilot entry chip.
+  ///
+  /// In en, this message translates to:
+  /// **'A pilot or helper submitted values. The submission is kept in history.'**
+  String get scorePilotEntryTooltip;
 }
 
 class _AppLocalizationsDelegate

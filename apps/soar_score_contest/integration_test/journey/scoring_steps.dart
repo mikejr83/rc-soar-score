@@ -155,6 +155,20 @@ Future<List<String>> scoreOpenRows(
   return scored;
 }
 
+/// Opens [row], types the flight of its pilot and saves it as the official
+/// score, waiting until the group's official count has gone up. A pilot's
+/// waiting submission is replaced by the typed values.
+Future<void> saveFlightOf(
+  WidgetTester tester,
+  JourneyContext data,
+  ScoringRow row,
+) async {
+  final before = _officialCount(tester);
+  await _enterFlight(tester, data, row, null);
+  await tapVisible(tester, _key('score-save-${row.id.value}'));
+  await _pumpUntilOfficial(tester, before + 1, row.pilot.name);
+}
+
 /// Types the flight of [row] (and [penalty] when given) without saving it.
 Future<void> _enterFlight(
   WidgetTester tester,
