@@ -177,19 +177,22 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
     final profile = await showDialog<ParticipantProfile>(
       context: context,
       builder: (context) => Dialog.fullscreen(
-        child: Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              tooltip: 'Cancel',
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(),
+        // Keep wizard snackbars from covering the editor action bar.
+        child: ScaffoldMessenger(
+          child: Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                tooltip: 'Cancel',
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              title: const Text('Add participant'),
             ),
-            title: const Text('Add participant'),
-          ),
-          body: ParticipantEditorPage(
-            onDone: (profile) => Navigator.of(context).pop(profile),
-            onCancel: () => Navigator.of(context).pop(),
-            onSavedAnother: others.add,
+            body: ParticipantEditorPage(
+              onDone: (profile) => Navigator.of(context).pop(profile),
+              onCancel: () => Navigator.of(context).pop(),
+              onSavedAnother: others.add,
+            ),
           ),
         ),
       ),
