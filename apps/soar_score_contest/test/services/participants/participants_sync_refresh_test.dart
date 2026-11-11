@@ -51,4 +51,47 @@ void main() {
       expect(two.classification, 'Expert');
     },
   );
+
+  test(
+    'a save that starts while a refresh read is out is not rolled back',
+    () async {
+      final server = ParticipantsServer();
+      final gate = Completer<void>();
+      var hold = false;
+      final c = ParticipantsController(
+        client: ApiClient(
+          baseUrl: Uri.parse('http://localhost'),
+          httpClient: MockClient((request) async {
+            // The answer is taken now, so it is the old list when it arrives.
+            final answer = await server.handle(request);
+            if (hold && request.method == 'GET') await gate.future;
+            return answer;
+          }),
+        ),
+        contestId: contestId,
+      );
+      addTearDown(c.dispose);
+      await c.load();
+      final id = personParticipationId(1).value;
+      c.edit(
+        c.data!.participants
+            .firstWhere((p) => p.rowId == id)
+            .withEdits(classification: 'Sportsman'),
+      );
+
+      hold = true;
+      final refresh = c.refreshQuietly();
+      await Future<void>.delayed(Duration.zero);
+      hold = false;
+      await c.save();
+      gate.complete();
+      await refresh;
+
+      expect(c.hasUnsaved, isFalse);
+      expect(
+        c.data!.participants.firstWhere((p) => p.rowId == id).classification,
+        'Sportsman',
+      );
+    },
+  );
 }

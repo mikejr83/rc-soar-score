@@ -133,4 +133,15 @@ void main() {
       expect(_row(c, 1).baseRevision, isNot(0));
     },
   );
+
+  test('invalid typed text survives a refresh', () async {
+    final server = ScoringServer();
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setHeight('abc');
+    expect(c.isDirty(_row(c, 1)), isFalse, reason: 'parses to nothing');
+
+    await c.refreshAfterSync();
+
+    expect(c.draftOf(_row(c, 1)).heightText, 'abc');
+  });
 }

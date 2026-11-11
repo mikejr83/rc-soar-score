@@ -234,15 +234,32 @@ class ParticipantsController extends ChangeNotifier {
       return;
     }
     try {
-      await _read();
+      // A save that started while the read was out makes the read older than
+      // the page, so it is dropped: made again at once when that save has
+      // ended, else once it does.
+      for (var tries = 0; tries < 3; tries++) {
+        final epoch = _saveEpoch;
+        if (await _read(staleIf: () => epoch != _saveEpoch)) break;
+        if (saving) {
+          _refreshAfterSave = true;
+          return;
+        }
+        if (tries == 2) return;
+      }
     } on Object {
       return;
     }
     notifyListeners();
   }
 
-  Future<void> _read() async {
+  /// Counts the saves started, so a read can tell one began meanwhile.
+  int _saveEpoch = 0;
+
+  /// Reads the list and takes it in; false when [staleIf] says the read is
+  /// out of date, in which case nothing changed.
+  Future<bool> _read({bool Function()? staleIf}) async {
     final loaded = await ParticipantsPageData.load(client, contestId);
+    if (staleIf != null && staleIf()) return false;
     data = loaded;
     _teams = loaded.base.teams;
     _saved = loaded.participants;
@@ -256,6 +273,7 @@ class ParticipantsController extends ChangeNotifier {
     _states.removeWhere((id, _) => !ids.contains(id));
     selection.retainAll(ids);
     _rules = _makeRules();
+    return true;
   }
 
   // Editing.
@@ -410,6 +428,7 @@ class ParticipantsController extends ChangeNotifier {
     final ids = changedIds;
     if (ids.isEmpty) return;
     saving = true;
+    _saveEpoch++;
     recalculated = const [];
     recalculationWarning = null;
     for (final id in ids) {

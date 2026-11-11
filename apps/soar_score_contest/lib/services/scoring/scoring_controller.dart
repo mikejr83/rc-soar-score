@@ -148,7 +148,8 @@ class ScoringController extends ChangeNotifier {
       if (saveOf(row.id).isBusy) continue;
       final draft = _drafts[row.id];
       if (draft == null) continue;
-      final typed = draft.isDirty && !draft.isUntouchedPrefill;
+      // Raw text counts, so an invalid entry is not wiped by a refresh.
+      final typed = draft.editedSinceLoad;
       if (!typed) {
         draft.resetTo(row.savedComponents, shown: _shown(row));
       } else if (before[row.id]?.baseRevision != row.baseRevision) {
