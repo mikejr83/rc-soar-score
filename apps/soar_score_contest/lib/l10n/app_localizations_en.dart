@@ -1814,6 +1814,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publicationPageHistoryByYou => 'Published by you';
 
   @override
+  String get publicationPageHistoryByDirector => 'Published by a director';
+
+  @override
   String get publicationPageHistoryAutomatic => 'Updated automatically';
 
   @override

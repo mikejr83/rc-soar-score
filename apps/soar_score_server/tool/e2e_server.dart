@@ -100,6 +100,7 @@ Future<void> main(List<String> args) async {
           version: '0.0.0',
           schemaRevision: database.schemaVersion,
           repository: repository,
+          publishingEnabled: args.contains('--publishing'),
           // Only the service gets the advanceable clock: link and guest
           // session expiry are enforced inside it. The participant handler
           // keeps the real clock, which only sets the cookie's Max-Age at

@@ -40,7 +40,7 @@ class PublicationControlCard extends StatelessWidget {
     }
     final publication = facts.publication;
     final policy = facts.options?.publicUpdateMode;
-    final at = publication.publishedAt;
+    final at = publication.projection?.publishedAt ?? publication.publishedAt;
     final reason = PublicationActionsRow.disabledReason(
       l10n,
       publication,

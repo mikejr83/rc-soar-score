@@ -96,7 +96,9 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
   trap cleanup EXIT
   start_server() {
     log="$(mktemp)"
-    (cd "$root/apps/soar_score_server" && exec dart run tool/e2e_server.dart --port "$port") >"$log" 2>&1 &
+    server_args=()
+    [ "$(basename "$file")" != contest_lifecycle_journey_test.dart ] || server_args+=(--publishing)
+    (cd "$root/apps/soar_score_server" && exec dart run tool/e2e_server.dart --port "$port" "${server_args[@]}") >"$log" 2>&1 &
     server_pid=$!
     for _ in $(seq 1 120); do
       if grep -q E2E_SERVER_READY "$log"; then

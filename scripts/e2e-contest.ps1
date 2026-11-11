@@ -79,8 +79,10 @@ if ($Device -in 'web', 'chrome') {
         }
         foreach ($file in $testFiles) {
             $log = New-TemporaryFile
+            $serverArgs = @('run', 'tool/e2e_server.dart', '--port', $port)
+            if ($file.Name -eq 'contest_lifecycle_journey_test.dart') { $serverArgs += '--publishing' }
             $server = Start-Process dart `
-                -ArgumentList 'run', 'tool/e2e_server.dart', '--port', $port `
+                -ArgumentList $serverArgs `
                 -WorkingDirectory (Join-Path $root 'apps\soar_score_server') `
                 -RedirectStandardOutput $log -PassThru -WindowStyle Hidden
             try {
