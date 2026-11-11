@@ -219,6 +219,19 @@ class ParticipantsController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Reads everything again after a sync, keeping the director's edits and
+  /// saying nothing when the read fails: the list stays as it was. Not while
+  /// the page loads or a save runs, which read the list themselves.
+  Future<void> refreshQuietly() async {
+    if (data == null || loading || saving) return;
+    try {
+      await _read();
+    } on Object {
+      return;
+    }
+    notifyListeners();
+  }
+
   Future<void> _read() async {
     final loaded = await ParticipantsPageData.load(client, contestId);
     data = loaded;

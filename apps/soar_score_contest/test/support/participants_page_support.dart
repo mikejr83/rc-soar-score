@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/app_sync_provider.dart';
+import 'package:soar_score_contest/services/sync/app_sync.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
 import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
@@ -576,6 +578,7 @@ Future<void> pumpParticipantsPage(
   Size size = const Size(1280, 1000),
   UnsavedChangesGuard? guard,
   AppConnectivity? connectivity,
+  AppSync? sync,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -615,6 +618,7 @@ Future<void> pumpParticipantsPage(
   if (connectivity != null) {
     app = AppConnectivityInherited(monitor: connectivity, child: app);
   }
+  if (sync != null) app = AppSyncInherited(sync: sync, child: app);
   await tester.pumpWidget(
     ApiClientInherited(
       client: ApiClient(

@@ -107,6 +107,52 @@ class ScoringController extends ChangeNotifier {
     }
   }
 
+  /// Reads the contest's scores again after a sync, without disturbing the
+  /// page: the round and group stay, and nothing the director typed is lost.
+  ///
+  /// A row with unsaved edits keeps them; when its official score moved on
+  /// meanwhile, the row is marked stale with the newer values, which is the
+  /// same choice (keep mine or take theirs) a conflicting save leads to. A row
+  /// being saved is left alone until its save answers. Every other row shows
+  /// what was pulled, including a pilot's new submission. A failed read leaves
+  /// the page as it was.
+  Future<void> refreshAfterSync() async {
+    if (data == null || loading) return;
+    final ScoringPageData loaded;
+    try {
+      loaded = await ScoringPageData.load(client, contestId);
+    } on Object {
+      return;
+    }
+    if (_disposed || data == null) return;
+    final before = {for (final row in rows) row.id: row};
+    var next = loaded;
+    // A save in flight answers with its own copy of the slot.
+    for (final row in before.values) {
+      final slot = row.slot;
+      if (saveOf(row.id).isBusy && slot != null) next = next.withSlot(slot);
+    }
+    data = next;
+    _clampGroup();
+    for (final row in rows) {
+      if (saveOf(row.id).isBusy) continue;
+      final draft = _drafts[row.id];
+      if (draft == null) continue;
+      final typed = draft.isDirty && !draft.isUntouchedPrefill;
+      if (!typed) {
+        draft.resetTo(row.savedComponents, shown: _shown(row));
+      } else if (before[row.id]?.baseRevision != row.baseRevision) {
+        _theirs[row.id] = row.savedComponents;
+        _saves[row.id] = const RowSave(
+          RowSaveKind.stale,
+          message: 'This row changed since you opened it.',
+        );
+      }
+    }
+    await _loadResults();
+    notifyListeners();
+  }
+
   void _clampGroup() {
     final current = data?.roundByOrdinal(round);
     if (current != null && (group < 1 || group > current.groupCount)) {

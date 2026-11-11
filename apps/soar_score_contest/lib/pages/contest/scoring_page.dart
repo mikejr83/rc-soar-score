@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -25,6 +27,7 @@ import '../../widgets/scoring/scoring_toolbar.dart';
 import '../../widgets/scoring/confirm_zeros_dialog.dart';
 import '../../widgets/scoring/unsaved_edits_dialog.dart';
 import '../../widgets/unsaved_changes_guard.dart';
+import '../../widgets/sync/reload_on_sync.dart';
 
 /// Official score entry for one group of one round
 /// (`plan/ui/contest-administration/official-scoring.md`, ADR 0002).
@@ -338,7 +341,13 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ReloadOnSync.contest(
+    contestId: widget.contestId,
+    onSynced: () => unawaited(_controller?.refreshAfterSync()),
+    child: _scaffold(context),
+  );
+
+  Widget _scaffold(BuildContext context) {
     final c = _controller;
     return Scaffold(
       body: c == null
