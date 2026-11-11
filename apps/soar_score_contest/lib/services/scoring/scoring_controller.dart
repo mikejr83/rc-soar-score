@@ -105,7 +105,14 @@ class ScoringController extends ChangeNotifier {
       loading = false;
       notifyListeners();
     }
+    // A sync that came in meanwhile may be newer than what the load read.
+    if (_refreshAfterLoad) {
+      _refreshAfterLoad = false;
+      if (loadError == null) await refreshAfterSync();
+    }
   }
+
+  bool _refreshAfterLoad = false;
 
   /// Counts stored entries, so a read can tell a save answered meanwhile.
   int _savedEpoch = 0;
@@ -141,7 +148,11 @@ class ScoringController extends ChangeNotifier {
   bool _refreshAgain = false;
 
   Future<void> _refreshOnce() async {
-    if (data == null || loading) return;
+    if (loading) {
+      _refreshAfterLoad = true;
+      return;
+    }
+    if (data == null) return;
     ScoringPageData? loaded;
     try {
       // A save that answers while the read is out makes the read older than

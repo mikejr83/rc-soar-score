@@ -550,6 +550,22 @@ class ParticipantsServer {
     return _json({'matrix_rows_removed': rows, 'recalculation_warning': null});
   }
 
+  /// Moves person [n] to the team called [name] behind the page's back. A
+  /// team change does not change the participation's revision.
+  void changeTeamElsewhere(int n, String name) {
+    _memberships.removeWhere(
+      (m) => m.contestParticipationId == personParticipationId(n),
+    );
+    _memberships.add(
+      TeamMembership(
+        id: _id('0017', n + 100),
+        teamId: _teamIdOf(name),
+        contestParticipationId: personParticipationId(n),
+        contestId: contestId,
+      ),
+    );
+  }
+
   /// Changes the stored participation of person [n] behind the page's back,
   /// so the next save is stale.
   void changeElsewhere(int n) {

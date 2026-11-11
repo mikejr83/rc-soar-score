@@ -210,7 +210,14 @@ class ParticipantsController extends ChangeNotifier {
       loading = false;
       notifyListeners();
     }
+    // A sync that came in meanwhile may be newer than what the load read.
+    if (_refreshAfterLoad) {
+      _refreshAfterLoad = false;
+      if (loadError == null) await refreshQuietly();
+    }
   }
+
+  bool _refreshAfterLoad = false;
 
   /// Reads everything again, keeping the director's edits.
   Future<void> reload() async {
@@ -248,7 +255,11 @@ class ParticipantsController extends ChangeNotifier {
   bool _refreshAgain = false;
 
   Future<void> _refreshOnce() async {
-    if (data == null || loading) return;
+    if (loading) {
+      _refreshAfterLoad = true;
+      return;
+    }
+    if (data == null) return;
     if (saving) {
       // The save does not read the list again, so it asks for this once done.
       _refreshAfterSave = true;
@@ -283,18 +294,58 @@ class ParticipantsController extends ChangeNotifier {
     if (staleIf != null && staleIf()) return false;
     data = loaded;
     _teams = loaded.base.teams;
+    final before = {for (final row in _saved) row.rowId: row};
     _saved = loaded.participants;
     final ids = {for (final row in _saved) row.rowId};
     _drafts.removeWhere((id, _) => !ids.contains(id));
-    // Models are saved on their own, so an edited row shows the fresh ones.
+    // A row keeps only the cells the director edited; the others show what
+    // was read, so a change made elsewhere is not undone by a save. Models
+    // are saved on their own, so an edited row shows the fresh ones.
     for (final row in _saved) {
       final edited = _drafts[row.rowId];
-      if (edited != null) _drafts[row.rowId] = edited.withModels(row.models);
+      if (edited == null) continue;
+      final was = before[row.rowId];
+      final merged = was == null
+          ? edited.withModels(row.models)
+          : _mergeEdits(row, edited, edited.changedFrom(was));
+      if (merged.changedFrom(row).isEmpty) {
+        _drafts.remove(row.rowId);
+      } else {
+        _drafts[row.rowId] = merged;
+      }
     }
     _states.removeWhere((id, _) => !ids.contains(id));
     selection.retainAll(ids);
     _rules = _makeRules();
     return true;
+  }
+
+  /// The fresh [row] with the [edited] cells of the director's [draft] put on
+  /// it. An edited role or class keeps the revision the draft was opened at,
+  /// so a save notices a change made elsewhere to the same participation.
+  StoredParticipant _mergeEdits(
+    StoredParticipant row,
+    StoredParticipant draft,
+    Set<ParticipantCell> edited,
+  ) {
+    final role = edited.contains(ParticipantCell.role);
+    final classification =
+        role || edited.contains(ParticipantCell.classification);
+    return StoredParticipant(
+      participation: role || classification
+          ? draft.participation
+          : row.participation,
+      profile: row.profile,
+      membershipId: row.membershipId,
+      models: row.models,
+      roleId: role ? draft.roleId : row.roleId,
+      roleName: role ? draft.roleName : row.roleName,
+      isPilot: role ? draft.isPilot : row.isPilot,
+      classification: classification
+          ? draft.classification
+          : row.classification,
+      team: edited.contains(ParticipantCell.team) ? draft.team : row.team,
+    );
   }
 
   // Editing.

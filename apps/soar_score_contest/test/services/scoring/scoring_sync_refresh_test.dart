@@ -181,4 +181,33 @@ void main() {
 
     expect(c.draftOf(_row(c, 1)).timeText, '9:00');
   });
+
+  test('a sync that arrives while the page loads is read afterwards', () async {
+    final server = ScoringServer();
+    final gate = Completer<void>();
+    var hold = true;
+    final c = ScoringController(
+      client: ApiClient(
+        baseUrl: Uri.parse('http://localhost'),
+        httpClient: MockClient((request) async {
+          final answer = await server.handle(request);
+          if (hold && request.method == 'GET') await gate.future;
+          return answer;
+        }),
+      ),
+      contestId: contestId,
+      round: 1,
+      group: 1,
+    );
+    addTearDown(c.dispose);
+    final loading = c.load(); // reads the scores as they are now
+    await Future<void>.delayed(Duration.zero);
+    hold = false;
+    server.seedPendingSubmission(scoringAssignmentId(1, 1), a);
+    await c.refreshAfterSync();
+    gate.complete();
+    await loading;
+
+    expect(c.draftOf(_row(c, 1)).timeText, '9:00');
+  });
 }

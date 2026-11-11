@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/services/contest_participants/participants_controller.dart';
+import 'package:soar_score_contest/services/contest_participants/stored_participant.dart';
+import 'package:soar_score_contest/services/participants/participant_row_style.dart';
 
 import '../../support/matrix_test_support.dart';
 import '../../support/participants_page_support.dart';
@@ -126,6 +128,61 @@ void main() {
     expect(reads, during, reason: 'no second read runs beside the first');
     gate.complete();
     await Future.wait([first, second]);
+
+    final two = c.data!.participants.firstWhere(
+      (p) => p.rowId == personParticipationId(2).value,
+    );
+    expect(two.classification, 'Expert');
+  });
+
+  test('a refresh keeps only the cells that were edited', () async {
+    final server = ParticipantsServer();
+    final c = ParticipantsController(
+      client: ApiClient(
+        baseUrl: Uri.parse('http://localhost'),
+        httpClient: MockClient(server.handle),
+      ),
+      contestId: contestId,
+    );
+    addTearDown(c.dispose);
+    await c.load();
+    final id = personParticipationId(1).value;
+    StoredParticipant row() =>
+        c.data!.participants.firstWhere((p) => p.rowId == id);
+    c.edit(row().withEdits(classification: 'Sportsman'));
+
+    server.changeTeamElsewhere(1, 'Harbor Hawks');
+    await c.refreshQuietly();
+
+    expect(c.cellsChanged(id), {ParticipantCell.classification});
+    final shown = c.rows.firstWhere((p) => p.rowId == id);
+    expect(shown.team, 'Harbor Hawks');
+    expect(shown.classification, 'Sportsman');
+  });
+
+  test('a sync that arrives while the page loads is read afterwards', () async {
+    final server = ParticipantsServer();
+    final gate = Completer<void>();
+    var hold = true;
+    final c = ParticipantsController(
+      client: ApiClient(
+        baseUrl: Uri.parse('http://localhost'),
+        httpClient: MockClient((request) async {
+          final answer = await server.handle(request);
+          if (hold && request.method == 'GET') await gate.future;
+          return answer;
+        }),
+      ),
+      contestId: contestId,
+    );
+    addTearDown(c.dispose);
+    final loading = c.load(); // reads the list as it is now
+    await Future<void>.delayed(Duration.zero);
+    hold = false;
+    server.changeElsewhere(2);
+    await c.refreshQuietly();
+    gate.complete();
+    await loading;
 
     final two = c.data!.participants.firstWhere(
       (p) => p.rowId == personParticipationId(2).value,
