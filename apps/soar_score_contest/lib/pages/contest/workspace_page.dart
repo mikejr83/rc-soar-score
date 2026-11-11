@@ -89,6 +89,9 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   // layout rather than hiding it.
   WorkspaceFacts? _facts;
   Contest? _factsFor;
+  // Counts the facts loads started: a sync reload has the same contest as the
+  // load it replaces, so only the newest may apply its answer.
+  int _factsGeneration = 0;
   bool _factsFailed = false;
   final CompletionDismissals _dismissals = CompletionDismissals();
 
@@ -275,6 +278,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       _importNoteFor = contest.id;
     }
     _factsFor = contest;
+    final generation = ++_factsGeneration;
     _loadImportNote(contest);
     final client = apiClientOf(context);
     if (client == null) {
@@ -293,7 +297,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
         _logger.info(
           'Successfully loaded workspace facts for contest ${contest.id}',
         );
-        if (mounted && _factsFor == contest) {
+        if (mounted && _factsFor == contest && _factsGeneration == generation) {
           _logger.info(
             'Workspace facts for contest ${contest.id} are ready to be applied.',
           );
@@ -311,7 +315,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
         _logger.warning(
           'Failed to load workspace facts for contest ${contest.id}',
         );
-        if (mounted && _factsFor == contest) {
+        if (mounted && _factsFor == contest && _factsGeneration == generation) {
           setState(() {
             _facts = null;
             _factsFailed = true;
