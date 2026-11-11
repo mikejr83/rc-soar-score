@@ -1,0 +1,24 @@
+# Paths graphify skips so the graph describes the app, not its tooling.
+# gitignore syntax. Build the graph with: graphify update .
+
+# Agent skills and tool config (vendored docs, e.g. the Auth0 skill references)
+.agents/
+.claude/
+.kilo/
+.impeccable/
+.vscode/
+.mcp.json
+skills-lock.json
+
+# One-off research scratch and benchmarks
+research/
+
+# Requirements, design notes and ticket history are read in `plan/` and `docs/`
+plan/
+docs/
+
+# Repo meta
+.github/
+CONTRIBUTING.md
+SECURITY.md
+LICENSE
