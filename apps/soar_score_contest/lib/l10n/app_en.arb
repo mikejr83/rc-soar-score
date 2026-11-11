@@ -1615,6 +1615,10 @@
       }
     }
   },
+  "pilotImportMaybeHint": "Link adds missing details from GliderScore to the participant you pick. Names and registration numbers are never overwritten.",
+  "@pilotImportMaybeHint": {
+    "description": "Hint under the heading of pilots that might be a participant already, explaining the Link choice."
+  },
   "pilotImportWillUpdate": "Will update: {fields}",
   "@pilotImportWillUpdate": {
     "description": "Row text naming the details an import adds to an existing participant.",
@@ -1644,9 +1648,9 @@
   "@pilotImportChoiceAdd": {
     "description": "Choice for a pilot that might be an existing participant: add a new one."
   },
-  "pilotImportChoiceUpdate": "Update {name}",
+  "pilotImportChoiceUpdate": "Link to {name}",
   "@pilotImportChoiceUpdate": {
-    "description": "Choice for a pilot that might be an existing participant: update that participant.",
+    "description": "Choice for a pilot that might be an existing participant: link the GliderScore pilot to that participant and fill in details it lacks.",
     "placeholders": {
       "name": {
         "type": "String"

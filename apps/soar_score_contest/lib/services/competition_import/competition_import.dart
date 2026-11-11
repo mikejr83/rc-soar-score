@@ -113,6 +113,9 @@ class CompetitionImportController extends ChangeNotifier {
       files: _files,
       pilotFilter: (pilot) => _usedPilots.contains(pilot.sourcePilotNo),
     );
+    // The pilots step shows the inner controller's choices, so its changes
+    // must redraw the dialog that listens to this one.
+    pilots.addListener(notifyListeners);
   }
 
   /// The tables a competition import reads, all of which the mappers use.
@@ -590,6 +593,7 @@ class CompetitionImportController extends ChangeNotifier {
 
   @override
   void dispose() {
+    pilots.removeListener(notifyListeners);
     pilots.dispose();
     super.dispose();
   }

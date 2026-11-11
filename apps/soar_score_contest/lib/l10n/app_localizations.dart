@@ -2102,6 +2102,12 @@ abstract class AppLocalizations {
   /// **'Maybe the same person ({count})'**
   String pilotImportMaybeHeading(int count);
 
+  /// Hint under the heading of pilots that might be a participant already, explaining the Link choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Link adds missing details from GliderScore to the participant you pick. Names and registration numbers are never overwritten.'**
+  String get pilotImportMaybeHint;
+
   /// Row text naming the details an import adds to an existing participant.
   ///
   /// In en, this message translates to:
@@ -2138,10 +2144,10 @@ abstract class AppLocalizations {
   /// **'Add as new'**
   String get pilotImportChoiceAdd;
 
-  /// Choice for a pilot that might be an existing participant: update that participant.
+  /// Choice for a pilot that might be an existing participant: link the GliderScore pilot to that participant and fill in details it lacks.
   ///
   /// In en, this message translates to:
-  /// **'Update {name}'**
+  /// **'Link to {name}'**
   String pilotImportChoiceUpdate(String name);
 
   /// Name of a participant detail in the list of details an import updates.
