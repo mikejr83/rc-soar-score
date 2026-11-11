@@ -49,9 +49,7 @@ void main() {
 
     api.roles.add(ownRole('Timer'));
     sync.state = AppSyncState(
-      scopes: {
-        scope: SyncScopeSummary(lastSyncedAt: DateTime.utc(2026, 11, 10)),
-      },
+      scopes: {scope: SyncScopeSummary(dataRevision: 1)},
     );
     await tester.pumpAndSettle();
 

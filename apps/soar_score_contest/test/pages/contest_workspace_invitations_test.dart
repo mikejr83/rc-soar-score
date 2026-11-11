@@ -144,11 +144,7 @@ void main() {
     // The sync puts the contest on the server.
     source.synchronized = true;
     sync.state = AppSyncState(
-      scopes: {
-        ContestScopeKey(contestId): SyncScopeSummary(
-          lastSyncedAt: DateTime.utc(2026, 11, 10),
-        ),
-      },
+      scopes: {ContestScopeKey(contestId): SyncScopeSummary(dataRevision: 1)},
     );
     await tester.pumpAndSettle();
 

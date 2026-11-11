@@ -261,6 +261,60 @@ void main() {
     expect(rig.applier.applied.first.scope, scope);
   });
 
+  group('data revision', () {
+    test('a sync that changed nothing leaves it', () async {
+      final rig = Rig();
+
+      await rig.engine.syncScope(scope);
+      await rig.engine.syncScope(scope);
+
+      expect(rig.engine.state.scopes[scope]!.dataRevision, 0);
+    });
+
+    test('a pulled change moves it', () async {
+      final rig = Rig();
+      rig.gateway.onExchange = (request) async =>
+          FakeGateway.response(changes: [change(1)], serverSequence: 1);
+
+      await rig.engine.syncScope(scope);
+
+      expect(rig.engine.state.scopes[scope]!.dataRevision, 1);
+    });
+
+    test('an accepted mutation moves it', () async {
+      final rig = Rig();
+      rig.store.mutations.add(mutation(1));
+      rig.gateway.onExchange = (request) async => request.mutations.isEmpty
+          ? FakeGateway.response()
+          : FakeGateway.response(results: [accepted('m-1', 7)]);
+
+      await rig.engine.syncScope(scope);
+
+      expect(rig.engine.state.scopes[scope]!.dataRevision, 1);
+    });
+
+    test('a rejected mutation alone does not move it', () async {
+      final rig = Rig();
+      rig.store.mutations.add(mutation(1));
+      rig.gateway.onExchange = (request) async => request.mutations.isEmpty
+          ? FakeGateway.response()
+          : FakeGateway.response(
+              results: [
+                const SyncMutationResult(
+                  clientMutationId: 'm-1',
+                  outcome: MutationOutcome.rejected,
+                  reasonCode: 'locked',
+                  currentRevision: 4,
+                ),
+              ],
+            );
+
+      await rig.engine.syncScope(scope);
+
+      expect(rig.engine.state.scopes[scope]!.dataRevision, 0);
+    });
+  });
+
   test('a sync with no changes still records the time', () async {
     final rig = Rig();
 

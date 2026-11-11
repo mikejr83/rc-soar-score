@@ -38,6 +38,9 @@ class SyncEngine {
   final _outcomes = StreamController<SyncFailureKind?>.broadcast();
   final _remoteSequence = <SyncScopeKey, int>{};
 
+  // Per scope, how many exchanges changed local data or the service's copy.
+  final _dataRevision = <SyncScopeKey, int>{};
+
   SyncState _state;
   bool _registered = false;
   bool _versionsChecked = false;
@@ -160,6 +163,13 @@ class SyncEngine {
             pending.map(mutationToDto).toList(),
           );
           await _recordResults(pending, response.results);
+          // The service now holds what was accepted, which screens that read
+          // it (invitations, the publication) need to read again.
+          if (response.results.any(
+            (r) => r.outcome == MutationOutcome.accepted,
+          )) {
+            _bumpRevision(scope);
+          }
           await _pull(scope, response, from: pulled.cursor);
         }
       });
@@ -269,6 +279,27 @@ class SyncEngine {
     if (changes.isEmpty) return cursor;
     final ordered = [...changes]
       ..sort((a, b) => a.sequence.compareTo(b.sequence));
+    // Whatever was applied before a failure is already in the store.
+    var applied = false;
+    try {
+      await _applyOrdered(scope, ordered, () => applied = true);
+    } finally {
+      if (applied) _bumpRevision(scope);
+    }
+    final highest = ordered.last.sequence;
+    if (highest <= cursor) return cursor;
+    await _store.writeCursor(scope, highest, syncedAt: _config.now());
+    return highest;
+  }
+
+  void _bumpRevision(SyncScopeKey scope) =>
+      _dataRevision[scope] = (_dataRevision[scope] ?? 0) + 1;
+
+  Future<void> _applyOrdered(
+    SyncScopeKey scope,
+    List<SyncChangeDto> ordered,
+    void Function() onApplied,
+  ) async {
     for (final change in ordered) {
       try {
         await _applier.apply(changeFromDto(scope, change));
@@ -278,11 +309,8 @@ class SyncEngine {
         // dropped, and the scope reports why it cannot go on.
         throw _UnsupportedChange(change.sequence, change.entityType);
       }
+      onApplied();
     }
-    final highest = ordered.last.sequence;
-    if (highest <= cursor) return cursor;
-    await _store.writeCursor(scope, highest, syncedAt: _config.now());
-    return highest;
   }
 
   Future<void> _recordResults(
@@ -358,6 +386,7 @@ class SyncEngine {
       rejectedMutations: status.rejectedMutations,
       lastSyncedAt: status.lastSyncedAt,
       remoteSequence: _remoteSequence[scope],
+      dataRevision: _dataRevision[scope] ?? 0,
       failure: failure,
       skipReason: skip,
     );
