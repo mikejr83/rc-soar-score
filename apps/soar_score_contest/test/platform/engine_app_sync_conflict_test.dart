@@ -44,7 +44,7 @@ class _Store implements core.SyncStore {
 
 class _Applier implements core.ReplicatedChangeApplier {
   @override
-  Future<void> apply(core.ReplicatedChange change) async {}
+  Future<bool> apply(core.ReplicatedChange change) async => false;
 }
 
 /// Answers a conflict decision with [answer]; every other call fails as the

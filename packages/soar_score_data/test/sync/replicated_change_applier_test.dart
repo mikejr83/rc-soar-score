@@ -43,6 +43,18 @@ void _tests(Backend backend) {
     expect(await inst.count('tombstones'), 0);
   });
 
+  test('says whether it changed stored data', () async {
+    final first = contest(name: 'First', revision: 1);
+    final second = contest(name: 'Second', revision: 2, id: first.id);
+
+    expect(await inst.applier.apply(change(first)), isTrue);
+    expect(await inst.applier.apply(change(first)), isFalse);
+    expect(await inst.applier.apply(change(second)), isTrue);
+    expect(await inst.applier.apply(change(first)), isFalse);
+    expect(await inst.applier.apply(change(second, isDelete: true)), isTrue);
+    expect(await inst.applier.apply(change(second, isDelete: true)), isFalse);
+  });
+
   test('applying the same change again changes nothing', () async {
     final c = contest(revision: 3);
     await inst.applier.apply(change(c));

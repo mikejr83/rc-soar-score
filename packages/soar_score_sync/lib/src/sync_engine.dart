@@ -279,12 +279,13 @@ class SyncEngine {
     if (changes.isEmpty) return cursor;
     final ordered = [...changes]
       ..sort((a, b) => a.sequence.compareTo(b.sequence));
-    // Whatever was applied before a failure is already in the store.
-    var applied = false;
+    // Whatever was written before a failure is already in the store. A change
+    // the store already held (a replay after a failed page) writes nothing.
+    var changed = false;
     try {
-      await _applyOrdered(scope, ordered, () => applied = true);
+      await _applyOrdered(scope, ordered, () => changed = true);
     } finally {
-      if (applied) _bumpRevision(scope);
+      if (changed) _bumpRevision(scope);
     }
     final highest = ordered.last.sequence;
     if (highest <= cursor) return cursor;
@@ -298,18 +299,17 @@ class SyncEngine {
   Future<void> _applyOrdered(
     SyncScopeKey scope,
     List<SyncChangeDto> ordered,
-    void Function() onApplied,
+    void Function() onChanged,
   ) async {
     for (final change in ordered) {
       try {
-        await _applier.apply(changeFromDto(scope, change));
+        if (await _applier.apply(changeFromDto(scope, change))) onChanged();
       } on UnsupportedEntityTypeError {
         // The applier refuses an entity type it has no store for, or one that
         // is derived. Stop here without moving the cursor past it: nothing is
         // dropped, and the scope reports why it cannot go on.
         throw _UnsupportedChange(change.sequence, change.entityType);
       }
-      onApplied();
     }
   }
 

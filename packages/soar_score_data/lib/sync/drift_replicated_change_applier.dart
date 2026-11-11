@@ -24,7 +24,7 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
   final EntityStores _stores;
 
   @override
-  Future<void> apply(core.ReplicatedChange change) async {
+  Future<bool> apply(core.ReplicatedChange change) async {
     if (derivedEntityTypes.contains(change.entityType)) {
       throw core.UnsupportedEntityTypeError(
         change.entityType,
@@ -32,10 +32,10 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
       );
     }
     final store = _stores.of(change.entityType);
-    await _db.transaction(() async {
+    return _db.transaction<bool>(() async {
       final stored = await store.findJson(change.entityId);
       if (change.isDelete) {
-        if (stored == null) return;
+        if (stored == null) return false;
         if (change.entityType == 'LandingTable') {
           // The entries go with their table.
           await _stores
@@ -46,13 +46,13 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
         if (change.entityType == 'MatrixAssignment') {
           await clearSupersededMarkers(_db, change.entityId);
         }
-        return;
+        return true;
       }
       final storedRevision = stored?['revision'] as int?;
       if (store.hasRevision &&
           storedRevision != null &&
           storedRevision >= change.revision) {
-        return;
+        return false;
       }
       final json = {...change.payload}..remove('supersedes');
       if (store.hasRevision) json['revision'] = change.revision;
@@ -82,6 +82,7 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
           await results.upsertJson(results.encode(result));
         }
       }
+      return true;
     });
   }
 }

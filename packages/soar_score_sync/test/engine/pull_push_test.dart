@@ -237,6 +237,23 @@ void main() {
     },
   );
 
+  test('replaying a stored change after a failed page leaves the data '
+      'revision where it was', () async {
+    final rig = Rig();
+    rig.applier.unsupportedOnSequence = 2;
+    rig.gateway.onExchange = (request) async =>
+        FakeGateway.response(changes: [change(1), change(2)]);
+
+    await rig.engine.syncScope(scope);
+    // Change 1 was written before change 2 was refused.
+    expect(rig.engine.state.scopes[scope]!.dataRevision, 1);
+
+    // The cursor did not move, so the same page comes again: change 1 is
+    // already stored and writes nothing.
+    await rig.engine.syncScope(scope);
+    expect(rig.engine.state.scopes[scope]!.dataRevision, 1);
+  });
+
   test('other argument errors are not reported as unsupported', () async {
     final rig = Rig();
     rig.applier.invalidOnSequence = 1;
