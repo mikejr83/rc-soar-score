@@ -82,6 +82,10 @@ Future<void> phase3Entry(
       expect(find.text('Submit score'), findsNothing);
     });
     await journey.step('Next and Previous load each round', () async {
+      // Leave sideways first: reopening the same address would keep the
+      // page as step 3.7 left it, scrolled down.
+      await openPath(tester, resultsPath(contest.id));
+      await tester.pump(const Duration(milliseconds: 300));
       await openPath(tester, scoreEntryPath(contest.id, pilotId, '1'));
       await pumpUntilFound(tester, find.text('Time flown'));
       expect(find.textContaining('Round 1'), findsOneWidget);
