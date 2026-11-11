@@ -18,6 +18,7 @@ import '../../widgets/reports/reports_context_strip.dart';
 import '../../widgets/reports/reports_list.dart';
 import '../../widgets/reports/reports_states.dart';
 import '../../widgets/workspace/states/workspace_not_found_view.dart';
+import '../../widgets/sync/reload_on_sync.dart';
 
 /// The reports of one contest (`plan/ui/contest-administration/reports.md`):
 /// a strip saying what reports are built from, then a card for each report
@@ -128,7 +129,13 @@ class _ContestReportsPageState extends State<ContestReportsPage> {
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<ReportsFacts>(
+  Widget build(BuildContext context) => ReloadOnSync.contest(
+    contestId: widget.contestId,
+    onSynced: _retry,
+    child: _content(context),
+  );
+
+  Widget _content(BuildContext context) => FutureBuilder<ReportsFacts>(
     future: _loading,
     builder: (context, snapshot) {
       final error = snapshot.error;

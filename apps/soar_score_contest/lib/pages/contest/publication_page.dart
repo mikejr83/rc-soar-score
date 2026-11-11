@@ -11,6 +11,7 @@ import '../../services/publication/publication_page_data.dart';
 import '../../widgets/publication/publication_actions_row.dart';
 import '../../widgets/publication/publication_text.dart';
 import '../../widgets/workspace/states/workspace_not_found_view.dart';
+import '../../widgets/sync/reload_on_sync.dart';
 
 /// The publication of one contest: its state, the public update policy, the
 /// latest published copy and the publish and visibility actions.
@@ -69,7 +70,13 @@ class _ContestPublicationPageState extends State<ContestPublicationPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ReloadOnSync.contest(
+    contestId: widget.contestId,
+    onSynced: _reload,
+    child: _content(context),
+  );
+
+  Widget _content(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final monitor = appConnectivityOf(context);
     final offline = monitor?.internetStatus == ConnectivityStatus.unavailable;
