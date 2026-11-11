@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/services/scoring/scoring_row.dart';
 
 import '../support/interact.dart';
 import '../support/launch_app.dart';
@@ -515,8 +516,16 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await pumpUntilFound(tester, time);
       expect(tester.widget<TextField>(time).controller!.text, isNotEmpty);
       await saveFlightOf(tester, data, row);
+      // The list builds only the rows near the screen and saving moves on
+      // to the next pilot, so the saved row may be gone from the tree: bring
+      // it back and check that row itself.
       await pumpUntilGone(tester, chip);
-      expect(find.text('Pilot entry'), findsNothing);
+      final saved = await rowOf(tester, pilot);
+      expect(saved, isNotNull, reason: 'the saved row is built again');
+      expect(saved!.hasPendingSubmission, isFalse);
+      expect(saved.status, RowStatus.official);
+      expect(_key('score-row-${row.id.value}'), findsOneWidget);
+      expect(chip, findsNothing);
     }),
     webOnly: true,
   );
