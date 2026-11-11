@@ -97,8 +97,10 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
   start_server() {
     log="$(mktemp)"
     server_args=()
-    [ "$(basename "$file")" != contest_lifecycle_journey_test.dart ] || server_args+=(--publishing)
-    (cd "$root/apps/soar_score_server" && exec dart run tool/e2e_server.dart --port "$port" "${server_args[@]}") >"$log" 2>&1 &
+    if tr -d '\r' < "$root/scripts/e2e-contest-publishing.txt" | grep -Fxq "$(basename "$file")"; then
+      server_args+=(--publishing)
+    fi
+    (cd "$root/apps/soar_score_server" && exec dart run tool/e2e_server.dart --port "$port" ${server_args[@]+"${server_args[@]}"}) >"$log" 2>&1 &
     server_pid=$!
     for _ in $(seq 1 120); do
       if grep -q E2E_SERVER_READY "$log"; then

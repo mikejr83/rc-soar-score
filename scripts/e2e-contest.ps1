@@ -77,10 +77,11 @@ if ($Device -in 'web', 'chrome') {
                 throw "No E2E test file named '$TestFileName' found in integration_test."
             }
         }
+        $publishingFiles = @(Get-Content (Join-Path $root 'scripts/e2e-contest-publishing.txt'))
         foreach ($file in $testFiles) {
             $log = New-TemporaryFile
             $serverArgs = @('run', 'tool/e2e_server.dart', '--port', $port)
-            if ($file.Name -eq 'contest_lifecycle_journey_test.dart') { $serverArgs += '--publishing' }
+            if ($file.Name -cin $publishingFiles) { $serverArgs += '--publishing' }
             $server = Start-Process dart `
                 -ArgumentList $serverArgs `
                 -WorkingDirectory (Join-Path $root 'apps\soar_score_server') `
