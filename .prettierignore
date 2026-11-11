@@ -33,3 +33,6 @@ out/
 
 # Agents
 .agents/skills/
+
+# Graphify
+graphify-out/
