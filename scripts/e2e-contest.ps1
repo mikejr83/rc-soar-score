@@ -156,8 +156,8 @@ try {
             throw "No E2E test file named '$TestFileName' found in integration_test."
         }
     }
-    # The journeys that send invitations (see below).
-    $hostedServerFiles = @('contest_lifecycle_journey_test.dart')
+    # The journeys that need a hosted server to reach (see below).
+    $hostedServerFiles = @(Get-Content (Join-Path $PSScriptRoot 'e2e-contest-hosted.txt'))
     foreach ($testFile in $testFiles) {
         Write-Host "Running $($testFile.Name)"
         $flutterArgs = @(
@@ -179,6 +179,7 @@ try {
         # the journey that sends them gets the web run's server, started
         # without --publishing: it answers, and still says it does not publish.
         $hosted = $null
+        $hostedLog = $null
         if ($testFile.Name -cin $hostedServerFiles) {
             $hostedPort = if ($env:E2E_SERVER_PORT) { $env:E2E_SERVER_PORT } else { 18080 }
             $hostedLog = New-TemporaryFile
@@ -210,6 +211,7 @@ try {
         finally {
             # dart run starts a child process; kill the whole tree.
             if ($hosted) { taskkill /F /T /PID $hosted.Id | Out-Null }
+            if ($hostedLog) { Remove-Item $hostedLog -Force -ErrorAction SilentlyContinue }
         }
         if ($code -ne 0) { $status = 1 }
     }
