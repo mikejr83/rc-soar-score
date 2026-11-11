@@ -279,6 +279,18 @@
   "@invitationLinkCopyFailed": {
     "description": "Shown when the pilot's invitation link could not be fetched to copy."
   },
+  "invitationLinkDialogTitle": "Your invitation link",
+  "@invitationLinkDialogTitle": {
+    "description": "Title of the dialog that shows the invitation link when the browser would not copy it."
+  },
+  "invitationLinkDialogBody": "Your browser would not copy it. Select the link and copy it yourself.",
+  "@invitationLinkDialogBody": {
+    "description": "Explains why the invitation link is shown instead of copied."
+  },
+  "invitationLinkDialogClose": "Close",
+  "@invitationLinkDialogClose": {
+    "description": "Button that closes the invitation link dialog."
+  },
   "currentResults": "Results",
   "@currentResults": {
     "description": "Primary button at the bottom of the pilot overview that opens the contest results."

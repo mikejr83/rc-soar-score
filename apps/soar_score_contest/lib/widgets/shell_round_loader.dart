@@ -7,6 +7,7 @@ import '../connectivity_provider.dart';
 import '../ui_account_provider.dart';
 import '../services/workspace/shell_round_item.dart';
 import '../services/workspace/workspace_facts_loader.dart';
+import 'sync/reload_on_sync.dart';
 
 final Logger _logger = Logger('ShellRoundLoader');
 
@@ -43,6 +44,10 @@ class _ShellRoundLoaderState extends State<ShellRoundLoader> {
   Object? _loadedFor;
   bool _refreshing = false;
 
+  // Counts the loads started: a sync reload has the same (contest, path) key
+  // as the load it replaces, so only the newest load may apply its answer.
+  int _generation = 0;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -65,6 +70,7 @@ class _ShellRoundLoaderState extends State<ShellRoundLoader> {
       _item = null;
     }
     _loadedFor = key;
+    final generation = ++_generation;
     final client = apiClientOf(context);
     if (client == null) {
       _item = null;
@@ -83,7 +89,7 @@ class _ShellRoundLoaderState extends State<ShellRoundLoader> {
       actingAccountId: uiAccountIdOf(context),
     ).then(
       (facts) {
-        if (mounted && _loadedFor == key) {
+        if (mounted && _loadedFor == key && _generation == generation) {
           setState(() {
             _item = ShellRoundItem.of(facts);
             _refreshing = false;
@@ -92,7 +98,7 @@ class _ShellRoundLoaderState extends State<ShellRoundLoader> {
       },
       onError: (Object error) {
         _logger.warning('Could not read the round of ${widget.contest.id}');
-        if (mounted && _loadedFor == key) {
+        if (mounted && _loadedFor == key && _generation == generation) {
           setState(() {
             _item = null;
             _refreshing = false;
@@ -102,7 +108,17 @@ class _ShellRoundLoaderState extends State<ShellRoundLoader> {
     );
   }
 
+  // A sync can move the round on (a score arrived), so the entry reads the
+  // facts again. The old entry stays until the new one is ready.
+  void _onSynced() {
+    _loadedFor = null;
+    setState(_ensure);
+  }
+
   @override
-  Widget build(BuildContext context) =>
-      widget.builder(context, _item, _refreshing);
+  Widget build(BuildContext context) => ReloadOnSync(
+    scope: ContestScopeKey(widget.contest.id),
+    onSynced: _onSynced,
+    child: widget.builder(context, _item, _refreshing),
+  );
 }

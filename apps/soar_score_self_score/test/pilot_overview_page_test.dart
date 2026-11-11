@@ -149,4 +149,34 @@ void main() {
     );
     expect(find.text('Invitation link copied'), findsNothing);
   });
+
+  testWidgets('a browser that refuses the clipboard shows the link', (
+    tester,
+  ) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          throw PlatformException(code: 'copy_fail', message: 'refused');
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+    await _pump(tester, _CountingRepository());
+
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Copy invitation link'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Your invitation link'), findsOneWidget);
+    expect(find.text('https://score.example/invitations/abc'), findsOneWidget);
+    expect(find.text('Invitation link copied'), findsNothing);
+  });
 }

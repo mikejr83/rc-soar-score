@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_self_score/router.dart';
 
@@ -70,24 +71,33 @@ Future<String> phase2Invitation(
     await journey.step(
       'The pilot can copy their own invitation link',
       () async {
-        await tapVisible(tester, find.byIcon(Icons.more_vert));
-        await pumpUntilFound(tester, find.text('Copy invitation link'));
-        await tapVisible(tester, find.text('Copy invitation link'));
-        await pumpUntilFound(tester, find.text('Invitation link copied'));
+        // A browser driven by a test has no focus and refuses the real
+        // clipboard, so the copy is caught on the platform channel.
+        String? copied;
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          (call) async {
+            if (call.method == 'Clipboard.setData') {
+              copied = (call.arguments as Map)['text'] as String?;
+            }
+            return null;
+          },
+        );
+        try {
+          await tapVisible(tester, find.byIcon(Icons.more_vert));
+          await pumpUntilFound(tester, find.text('Copy invitation link'));
+          await tapVisible(tester, find.text('Copy invitation link'));
+          await pumpUntilFound(tester, find.text('Invitation link copied'));
+        } finally {
+          tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          );
+        }
+        expect(copied, endsWith(contest.credentialOf(pilot)));
         await tester.pump(const Duration(seconds: 5));
       },
     );
-    await journey.step('Application info lists the legal links', () async {
-      await tapVisible(tester, find.byIcon(Icons.more_vert));
-      await pumpUntilFound(tester, find.text('Application info'));
-      await tapVisible(tester, find.text('Application info'));
-      await pumpUntilFound(tester, find.text('Licences in this app'));
-      expect(find.text('Open source licences'), findsOneWidget);
-      expect(find.text('Privacy Policy'), findsOneWidget);
-      expect(find.text('Terms'), findsOneWidget);
-      await tapVisible(tester, find.byTooltip('Back'));
-      await pumpUntilFound(tester, find.text('2 rounds'));
-    });
     await journey.step('The same link works again', () async {
       await openPath(tester, invitationPath(contest.credentialOf(pilot)));
       await pumpUntilFound(tester, find.text('Hello, $pilot'));

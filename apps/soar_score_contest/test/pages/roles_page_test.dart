@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/app_sync_provider.dart';
+import 'package:soar_score_contest/services/sync/app_sync_state.dart';
+import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
 import 'package:soar_score_contest/widgets/roles/role_detail_pane.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../support/fake_app_sync.dart';
 import '../support/roles_test_support.dart';
 
 /// The list row for [name]; the detail pane repeats the selected name.
@@ -29,6 +33,29 @@ void main() {
     expect(names, ['Helper', 'Pilot', 'Team Manager', 'Boss', 'Timer']);
     expect(find.text('System role'), findsNWidgets(3));
     expect(find.text('Your role'), findsNWidgets(2));
+  });
+
+  testWidgets('a sync of the account lists the roles it pulled', (
+    tester,
+  ) async {
+    final api = FakeRolesApi();
+    final scope = DirectorScopeKey(Id.create());
+    final sync = FakeAppSync()..accountScope = scope;
+    await tester.pumpWidget(
+      AppSyncInherited(sync: sync, child: rolesApp(api.client)),
+    );
+    await tester.pumpAndSettle();
+    expect(_row('Timer'), findsNothing);
+
+    api.roles.add(ownRole('Timer'));
+    sync.state = AppSyncState(
+      scopes: {
+        scope: SyncScopeSummary(lastSyncedAt: DateTime.utc(2026, 11, 10)),
+      },
+    );
+    await tester.pumpAndSettle();
+
+    expect(_row('Timer'), findsOneWidget);
   });
 
   group('system roles', () {

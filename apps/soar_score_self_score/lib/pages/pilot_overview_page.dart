@@ -53,20 +53,52 @@ class PilotOverviewPage extends StatelessWidget {
   }
 
   /// Copies the pilot's own invitation link. The server rebuilds it for the
-  /// session, so the link is never kept in the browser.
+  /// session, so the link is never kept in the browser. A browser can refuse
+  /// the clipboard (no focus, no permission): the link is then shown to copy
+  /// by hand.
   Future<void> _copyInvitationLink(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
     final repository = context.repository;
-    String message;
+    final String link;
     try {
-      final link = await repository.invitationLink();
-      await Clipboard.setData(ClipboardData(text: link));
-      message = l10n.invitationLinkCopied;
+      link = await repository.invitationLink();
     } on SelfScoreLoadException {
-      message = l10n.invitationLinkCopyFailed;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.invitationLinkCopyFailed)),
+      );
+      return;
     }
-    messenger.showSnackBar(SnackBar(content: Text(message)));
+    try {
+      await Clipboard.setData(ClipboardData(text: link));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.invitationLinkCopied)),
+      );
+    } on Object {
+      if (!navigator.mounted) return;
+      await showDialog<void>(
+        context: navigator.context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.invitationLinkDialogTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.invitationLinkDialogBody),
+              const SizedBox(height: 12),
+              SelectableText(link),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.invitationLinkDialogClose),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   void _notYet(BuildContext context, String message) =>
