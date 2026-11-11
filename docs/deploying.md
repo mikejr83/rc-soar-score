@@ -7,6 +7,9 @@ because the server and the clients must ship together. The
 
 ## Release process
 
+The full checklist (versions, release notes, rollback, hotfixes) is in
+[Releasing](releasing.md); this page describes what the Deploy workflow does.
+
 1. Push finished work to `master` as usual. Nothing goes live.
 2. When you want users to get it, create a GitHub release with a new tag
    (for example `v0.1.0`) and publish it. Publishing a draft counts; saving a
