@@ -1,6 +1,8 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:test/test.dart';
 
+import 'package:soar_score_data/soar_score_data.dart';
+
 import '../support/backends.dart';
 import '../support/fixtures.dart';
 
@@ -53,6 +55,58 @@ void _tests(Backend backend) {
     expect(await inst.applier.apply(change(first)), isFalse);
     expect(await inst.applier.apply(change(second, isDelete: true)), isTrue);
     expect(await inst.applier.apply(change(second, isDelete: true)), isFalse);
+  });
+
+  test('an entity without revisions says whether its rows changed', () async {
+    final server = await Installation.open(
+      backend,
+      profile: DatabaseProfile.server,
+    );
+    addTearDown(server.close);
+    final tableId = core.Id.create();
+    final table = core.LandingTable(
+      id: tableId,
+      ownerAccountId: core.Id.create(),
+      name: 'Club table',
+      inputUnit: core.LandingInputUnit.points,
+      createdAt: DateTime.utc(2026, 10, 5),
+    );
+    final result = core.LandingResult(
+      id: core.Id.create(),
+      landingTableId: tableId,
+      entryKey: 'none',
+      displayValue: 'None',
+      pointValue: 0,
+      ordinalPosition: 1,
+    );
+    core.ReplicatedChange tableChange(core.LandingResult entry) =>
+        core.ReplicatedChange(
+          scope: core.ContestScopeKey(core.Id.create()),
+          sequence: 1,
+          entityType: 'LandingTable',
+          entityId: tableId,
+          revision: 1,
+          payload: {
+            ...table.toJson(),
+            'results': [entry.toJson()],
+          },
+          isDelete: false,
+        );
+
+    expect(await server.applier.apply(tableChange(result)), isTrue);
+    // The same page again writes the same rows.
+    expect(await server.applier.apply(tableChange(result)), isFalse);
+    // An entry that differs is a change.
+    final edited = core.LandingResult(
+      id: result.id,
+      landingTableId: tableId,
+      entryKey: 'none',
+      displayValue: 'Nothing',
+      pointValue: 0,
+      ordinalPosition: 1,
+    );
+    expect(await server.applier.apply(tableChange(edited)), isTrue);
+    expect(await server.applier.apply(tableChange(edited)), isFalse);
   });
 
   test('applying the same change again changes nothing', () async {
