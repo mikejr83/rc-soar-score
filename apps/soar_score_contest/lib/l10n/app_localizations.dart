@@ -2676,6 +2676,12 @@ abstract class AppLocalizations {
   /// **'Published by you'**
   String get publicationPageHistoryByYou;
 
+  /// Publication history attribution when the publisher is not known to be the current account.
+  ///
+  /// In en, this message translates to:
+  /// **'Published by a director'**
+  String get publicationPageHistoryByDirector;
+
   /// History list: the update policy published this copy after a score.
   ///
   /// In en, this message translates to:

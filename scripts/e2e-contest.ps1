@@ -77,10 +77,13 @@ if ($Device -in 'web', 'chrome') {
                 throw "No E2E test file named '$TestFileName' found in integration_test."
             }
         }
+        $publishingFiles = @(Get-Content (Join-Path $root 'scripts/e2e-contest-publishing.txt'))
         foreach ($file in $testFiles) {
             $log = New-TemporaryFile
+            $serverArgs = @('run', 'tool/e2e_server.dart', '--port', $port)
+            if ($file.Name -cin $publishingFiles) { $serverArgs += '--publishing' }
             $server = Start-Process dart `
-                -ArgumentList 'run', 'tool/e2e_server.dart', '--port', $port `
+                -ArgumentList $serverArgs `
                 -WorkingDirectory (Join-Path $root 'apps\soar_score_server') `
                 -RedirectStandardOutput $log -PassThru -WindowStyle Hidden
             try {
@@ -153,6 +156,8 @@ try {
             throw "No E2E test file named '$TestFileName' found in integration_test."
         }
     }
+    # The journeys that send invitations (see below).
+    $hostedServerFiles = @('contest_lifecycle_journey_test.dart')
     foreach ($testFile in $testFiles) {
         Write-Host "Running $($testFile.Name)"
         $flutterArgs = @(
@@ -168,15 +173,43 @@ try {
         if ($testFile.Name -eq 'matrix_draw_cancel_test.dart') {
             $flutterArgs += '--dart-define=SOAR_SCORE_E2E_SLOW_DRAW=true'
         }
-        for ($attempt = 1; $attempt -le 2; $attempt++) {
-            Stop-App
-            $output = & flutter @flutterArgs 2>&1 | Tee-Object -Variable lines |
-                ForEach-Object { Write-Host $_ }
-            $code = $LASTEXITCODE
-            Stop-App
-            $launchFailed = ($lines -join "`n") -match 'Unable to start the app'
-            if ($code -eq 0 -or -not $launchFailed) { break }
-            Write-Host "Launch failed for $($testFile.Name); retrying once."
+        # The app reads as offline when the hosted server it reports to does
+        # not answer its health check, and the Reports page then will not
+        # offer to send invitations. The Windows run has no hosted server, so
+        # the journey that sends them gets the web run's server, started
+        # without --publishing: it answers, and still says it does not publish.
+        $hosted = $null
+        if ($testFile.Name -cin $hostedServerFiles) {
+            $hostedPort = if ($env:E2E_SERVER_PORT) { $env:E2E_SERVER_PORT } else { 18080 }
+            $hostedLog = New-TemporaryFile
+            $hosted = Start-Process dart `
+                -ArgumentList @('run', 'tool/e2e_server.dart', '--port', $hostedPort) `
+                -WorkingDirectory (Join-Path $root 'apps\soar_score_server') `
+                -RedirectStandardOutput $hostedLog -PassThru -WindowStyle Hidden
+            $deadline = (Get-Date).AddSeconds(120)
+            while (-not (Select-String -Path $hostedLog -Pattern 'E2E_SERVER_READY' -Quiet)) {
+                if ($hosted.HasExited -or (Get-Date) -gt $deadline) {
+                    throw 'E2E server did not start'
+                }
+                Start-Sleep -Milliseconds 500
+            }
+            $flutterArgs += "--dart-define=SOAR_SCORE_API_BASE_URL=http://localhost:$hostedPort"
+        }
+        try {
+            for ($attempt = 1; $attempt -le 2; $attempt++) {
+                Stop-App
+                $output = & flutter @flutterArgs 2>&1 | Tee-Object -Variable lines |
+                    ForEach-Object { Write-Host $_ }
+                $code = $LASTEXITCODE
+                Stop-App
+                $launchFailed = ($lines -join "`n") -match 'Unable to start the app'
+                if ($code -eq 0 -or -not $launchFailed) { break }
+                Write-Host "Launch failed for $($testFile.Name); retrying once."
+            }
+        }
+        finally {
+            # dart run starts a child process; kill the whole tree.
+            if ($hosted) { taskkill /F /T /PID $hosted.Id | Out-Null }
         }
         if ($code -ne 0) { $status = 1 }
     }

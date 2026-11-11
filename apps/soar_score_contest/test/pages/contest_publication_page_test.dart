@@ -7,6 +7,8 @@ import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/contest/publication_page.dart';
 import 'package:soar_score_contest/router.dart';
+import 'package:soar_score_contest/services/ui_account/ui_account.dart';
+import 'package:soar_score_contest/ui_account_provider.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
@@ -20,6 +22,7 @@ Future<void> _pump(
   WorkspaceServer server, {
   Size size = const Size(1000, 1200),
   Brightness brightness = Brightness.light,
+  String? accountId,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -37,20 +40,23 @@ Future<void> _pump(
   );
   addTearDown(router.dispose);
   await tester.pumpWidget(
-    ApiClientInherited(
-      client: ApiClient(
-        baseUrl: Uri.parse('http://localhost'),
-        httpClient: MockClient(server.handle),
-      ),
-      child: MaterialApp.router(
-        theme: ContestAppTheme.lightTheme,
-        darkTheme: ContestAppTheme.darkTheme,
-        themeMode: brightness == Brightness.dark
-            ? ThemeMode.dark
-            : ThemeMode.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        routerConfig: router,
+    UiAccountInherited(
+      account: FixedUiAccount(accountId ?? 'local'),
+      child: ApiClientInherited(
+        client: ApiClient(
+          baseUrl: Uri.parse('http://localhost'),
+          httpClient: MockClient(server.handle),
+        ),
+        child: MaterialApp.router(
+          theme: ContestAppTheme.lightTheme,
+          darkTheme: ContestAppTheme.darkTheme,
+          themeMode: brightness == Brightness.dark
+              ? ThemeMode.dark
+              : ThemeMode.light,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
       ),
     ),
   );
@@ -128,6 +134,7 @@ void main() {
     expect(find.text('Unpublished'), findsOneWidget);
     expect(_key('publication-page-no-copy'), findsOneWidget);
     expect(_key('publication-publish'), findsOneWidget);
+    expect(find.textContaining('Public updates:'), findsOneWidget);
   });
 
   testWidgets('publishing shows the latest copy', (tester) async {
@@ -198,7 +205,11 @@ void main() {
 
   testWidgets('lists every published copy, newest first', (tester) async {
     final server = _server()..startPublished();
-    await _pump(tester, server);
+    await _pump(
+      tester,
+      server,
+      accountId: '019c0000-0000-7000-8000-000000000001',
+    );
     // Publish twice more: copies 2 and 3.
     for (var i = 0; i < 2; i++) {
       await tester.tap(_key('publication-publish'));
@@ -217,6 +228,31 @@ void main() {
     expect(find.text('Updated automatically'), findsNWidgets(2));
     expect(find.textContaining('Copy 3, from contest revision 1,'), findsOne);
   });
+
+  testWidgets(
+    'history does not attribute another or unknown publisher to you',
+    (tester) async {
+      final server = _server()..startPublished();
+      server.history = [
+        for (final publisher in ['019c0000-0000-7000-8000-000000000002', null])
+          {
+            'id': '019c0000-0000-7000-8000-00000000e001',
+            'projection_revision': 1,
+            'contest_revision': 1,
+            'published_at': '2026-10-17T15:00:00.000Z',
+            'published_by': publisher,
+            'publisher_kind': 'person',
+          },
+      ];
+      await _pump(
+        tester,
+        server,
+        accountId: '019c0000-0000-7000-8000-000000000001',
+      );
+      expect(find.text('Published by a director'), findsNWidgets(2));
+      expect(find.text('Published by you'), findsNothing);
+    },
+  );
 
   testWidgets('an unpublished contest has no history', (tester) async {
     await _pump(tester, _server());

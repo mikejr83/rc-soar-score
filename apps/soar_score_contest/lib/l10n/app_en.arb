@@ -2104,6 +2104,10 @@
   "@publicationPageHistoryByYou": {
     "description": "History list: the director published this copy."
   },
+  "publicationPageHistoryByDirector": "Published by a director",
+  "@publicationPageHistoryByDirector": {
+    "description": "Publication history attribution when the publisher is not known to be the current account."
+  },
   "publicationPageHistoryAutomatic": "Updated automatically",
   "@publicationPageHistoryAutomatic": {
     "description": "History list: the update policy published this copy after a score."

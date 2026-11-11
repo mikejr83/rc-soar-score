@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import 'package:soar_score_contest/widgets/reports/standings/standings_table_view.dart';
 
 import '../support/interact.dart';
@@ -10,6 +14,7 @@ import 'export_step.dart';
 import 'journey.dart';
 
 Finder _key(String key) => find.byKey(ValueKey(key));
+const _apiBase = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
 
 /// Phase 6: complete the contest and check the results a director publishes.
 Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
@@ -56,8 +61,8 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
     () => inContest(() async {
       await pumpUntilFound(tester, _key('status-summary'));
       // Publishing goes to the server the app syncs with (the remote client),
-      // not to the embedded server. The E2E server never publishes, so the
-      // card explains instead of offering a button that would fail.
+      // not to the embedded server. The native journey has no publishing
+      // server, so the card explains why the action is unavailable.
       await pumpUntilFound(tester, _key('workspace-control-publication'));
       await pumpUntilFound(tester, _key('control-publication-reason'));
       expect(_key('publication-publish'), findsOneWidget);
@@ -86,7 +91,91 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
       expect(_key('publication-withdraw-delisting'), findsNothing);
       expect(_key('publication-page-history'), findsNothing);
     }),
+    nativeOnly: true,
   );
+
+  await journey.step('Publication: publish and make the real copy public', () async {
+    await inContest(() async {
+      await pumpUntilFound(tester, _key('workspace-control-publication'));
+      final location = GoRouter.of(
+        tester.element(_key('workspace-control-publication')),
+      ).routeInformationProvider.value.uri.path;
+      final match = RegExp(r'/contests/([^/]+)').firstMatch(location);
+      expect(match, isNotNull, reason: 'Expected a contest route: $location');
+      final contestId = match!.group(1)!;
+      // This fresh contest has never been published, so its copies start at 1.
+      final before = await http.get(
+        Uri.parse('$_apiBase/api/v1/contests/$contestId/publication'),
+      );
+      expect(before.statusCode, 404);
+      await pumpUntilFound(tester, _key('publication-publish'));
+      await tapVisible(tester, _key('publication-publish'));
+      await pumpUntilFound(tester, _key('publish-dialog'));
+      await tester.tap(_key('publish-dialog-confirm'));
+      await pumpUntilFound(tester, _key('publication-visibility'));
+
+      final director = await http.get(
+        Uri.parse('$_apiBase/api/v1/contests/$contestId/publication'),
+      );
+      expect(director.statusCode, 200);
+      final publication = jsonDecode(director.body) as Map<String, dynamic>;
+      final id = publication['publication_id'] as String;
+      final unlisted = await http.get(
+        Uri.parse('$_apiBase/public/publications/$id'),
+      );
+      expect(unlisted.statusCode, 200);
+      final copy = jsonDecode(unlisted.body) as Map<String, dynamic>;
+      expect(copy['visibility'], 'Unlisted');
+      expect(copy['projection_revision'], 1);
+      expect(
+        (copy['contest'] as Map<String, dynamic>)['name'],
+        data.contestName,
+      );
+      expect(copy['participants'], isNotEmpty);
+      expect(copy['scores'], isNotEmpty);
+
+      await tapVisible(tester, _key('publication-visibility'));
+      await pumpUntilFound(tester, _key('public-dialog'));
+      await tester.tap(_key('public-dialog-confirm'));
+      await pumpUntilFound(tester, _key('publication-request-delisting'));
+      final published = await http.get(
+        Uri.parse('$_apiBase/public/publications/$id'),
+      );
+      expect(published.statusCode, 200);
+      expect(
+        (jsonDecode(published.body) as Map<String, dynamic>)['visibility'],
+        'Public',
+      );
+      await tapVisible(tester, _key('publication-open-page'));
+      await pumpUntilFound(tester, _key('publication-page-copy'));
+      await pumpUntilFound(tester, _key('publication-page-history'));
+      expect(find.text('Published, Public'), findsWidgets);
+      await pumpUntilGone(tester, find.text('Results published.'));
+      await tapVisible(tester, _key('publication-publish'));
+      await pumpUntilFound(tester, _key('publish-dialog'));
+      await tester.tap(_key('publish-dialog-confirm'));
+      await pumpUntilFound(tester, find.text('Results published.'));
+      final updated = await http.get(
+        Uri.parse('$_apiBase/public/publications/$id'),
+      );
+      expect(updated.statusCode, 200);
+      expect(
+        (jsonDecode(updated.body)
+            as Map<String, dynamic>)['projection_revision'],
+        2,
+      );
+      final history = await http.get(
+        Uri.parse(
+          '$_apiBase/api/v1/contests/$contestId/publication/projections',
+        ),
+      );
+      expect(history.statusCode, 200);
+      final revisions =
+          (jsonDecode(history.body) as Map<String, dynamic>)['projections']
+              as List<dynamic>;
+      expect(revisions.map((entry) => entry['projection_revision']), [2, 1]);
+    });
+  }, webOnly: true);
 
   await journey.step(
     'Overall Standings: every pilot ranked, no Provisional, options apply',
