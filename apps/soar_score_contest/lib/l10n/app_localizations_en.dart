@@ -1445,6 +1445,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get pilotImportMaybeHint =>
+      'Link adds missing details from GliderScore to the participant you pick. Names and registration numbers are never overwritten.';
+
+  @override
   String pilotImportWillUpdate(String fields) {
     return 'Will update: $fields';
   }
@@ -1468,7 +1472,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String pilotImportChoiceUpdate(String name) {
-    return 'Update $name';
+    return 'Link to $name';
   }
 
   @override

@@ -118,7 +118,7 @@ void main() {
     final boxes = find.byWidgetPredicate((w) => w is DropdownButton<String>);
     expect(boxes, findsWidgets);
     for (final box in boxes.evaluate()) {
-      expect(tester.getSize(find.byWidget(box.widget)).width, 120);
+      expect(tester.getSize(find.byWidget(box.widget)).width, 180);
     }
     await tester.tap(find.byKey(const ValueKey('pilot-import-choice-3')));
     await tester.pumpAndSettle();

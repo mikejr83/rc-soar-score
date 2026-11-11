@@ -78,6 +78,26 @@ Future<void> importPilotsFromGliderScore(
   expect(find.text(l10n.pilotImportUpdateHeading(1)), findsOneWidget);
   expect(find.text(l10n.pilotImportMaybeHeading(1)), findsOneWidget);
   expect(find.textContaining('1 GliderScore test pilot'), findsOneWidget);
+  // The maybe pilot's dropdown shows each choice once picked, and ends back
+  // on Skip so the counts below hold.
+  expect(find.text(l10n.pilotImportMaybeHint), findsOneWidget);
+  Future<void> pickChoice(String label) async {
+    await tapVisible(tester, _key('pilot-import-choice-3'));
+    await pumpUntilFound(tester, find.text(label).last);
+    await tester.tap(find.text(label).last);
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: _key('pilot-import-choice-3'),
+        matching: find.text(label),
+      ),
+      findsOneWidget,
+    );
+  }
+
+  await pickChoice(l10n.pilotImportChoiceAdd);
+  await pickChoice(l10n.pilotImportChoiceUpdate('${milo.first} ${milo.last}'));
+  await pickChoice(l10n.pilotImportChoiceSkip);
   await tapVisible(tester, _key('pilot-import-confirm'));
   await pumpUntilFound(tester, _key('pilot-import-result'));
   expect(find.text(l10n.pilotImportDone(1, 1, 0, 1)), findsOneWidget);

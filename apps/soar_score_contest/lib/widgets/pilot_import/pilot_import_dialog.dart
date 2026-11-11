@@ -235,6 +235,11 @@ class PilotImportReviewList extends StatelessWidget {
           ...notes,
           if (maybes.isNotEmpty) ...[
             _heading(context, l10n.pilotImportMaybeHeading(maybes.length)),
+            Text(
+              l10n.pilotImportMaybeHint,
+              key: const ValueKey('pilot-import-maybe-hint'),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             for (final i in maybes) _MaybeRow(controller: controller, index: i),
           ],
           if (updates.isNotEmpty) ...[
@@ -383,7 +388,7 @@ class _MaybeRow extends StatelessWidget {
       title: Text('${draft.firstName} ${draft.lastName}'),
       subtitle: notes.isEmpty ? null : Text(notes),
       trailing: SizedBox(
-        width: 120,
+        width: 180,
         child: DropdownButton<String>(
           key: ValueKey('pilot-import-choice-$no'),
           isExpanded: true,
@@ -420,9 +425,14 @@ class _MaybeRow extends StatelessWidget {
             for (final id in match.candidateIds)
               DropdownMenuItem(
                 value: 'update:${id.value}',
-                child: Text(
-                  l10n.pilotImportChoiceUpdate(_name(review.profile(id))),
-                  overflow: TextOverflow.ellipsis,
+                child: Tooltip(
+                  message: l10n.pilotImportChoiceUpdate(
+                    _name(review.profile(id)),
+                  ),
+                  child: Text(
+                    l10n.pilotImportChoiceUpdate(_name(review.profile(id))),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
           ],
