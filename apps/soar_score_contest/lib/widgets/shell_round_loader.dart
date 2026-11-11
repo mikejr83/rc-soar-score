@@ -44,6 +44,10 @@ class _ShellRoundLoaderState extends State<ShellRoundLoader> {
   Object? _loadedFor;
   bool _refreshing = false;
 
+  // Counts the loads started: a sync reload has the same (contest, path) key
+  // as the load it replaces, so only the newest load may apply its answer.
+  int _generation = 0;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -66,6 +70,7 @@ class _ShellRoundLoaderState extends State<ShellRoundLoader> {
       _item = null;
     }
     _loadedFor = key;
+    final generation = ++_generation;
     final client = apiClientOf(context);
     if (client == null) {
       _item = null;
@@ -84,7 +89,7 @@ class _ShellRoundLoaderState extends State<ShellRoundLoader> {
       actingAccountId: uiAccountIdOf(context),
     ).then(
       (facts) {
-        if (mounted && _loadedFor == key) {
+        if (mounted && _loadedFor == key && _generation == generation) {
           setState(() {
             _item = ShellRoundItem.of(facts);
             _refreshing = false;
@@ -93,7 +98,7 @@ class _ShellRoundLoaderState extends State<ShellRoundLoader> {
       },
       onError: (Object error) {
         _logger.warning('Could not read the round of ${widget.contest.id}');
-        if (mounted && _loadedFor == key) {
+        if (mounted && _loadedFor == key && _generation == generation) {
           setState(() {
             _item = null;
             _refreshing = false;
