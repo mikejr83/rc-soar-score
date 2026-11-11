@@ -295,6 +295,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       pilotNumber: session.pilotNumber,
       round: entry.round,
       roundCount: entry.roundCount,
+      lastOpenRound: entry.lastOpenRound,
       group: entry.group,
       lane: entry.lane,
       taskType: entry.taskType,

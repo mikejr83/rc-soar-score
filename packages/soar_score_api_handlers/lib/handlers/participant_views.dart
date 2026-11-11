@@ -143,6 +143,12 @@ Future<ParticipantEntryContextDto?> participantEntryContext(
     assignmentId: flight.assignmentId,
     round: flight.ordinal,
     roundCount: flights.roundCount,
+    lastOpenRound:
+        (flights.flights
+                    .where((f) => f.state == ParticipantScoreState.notEntered)
+                    .firstOrNull ??
+                flights.flights.last)
+            .ordinal,
     group: flight.group,
     lane: flight.lane,
     taskType: null,
