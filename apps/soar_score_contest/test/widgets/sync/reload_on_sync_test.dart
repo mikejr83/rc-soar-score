@@ -123,4 +123,34 @@ void main() {
       same(child),
     );
   });
+
+  testWidgets('the contests variant also follows every contest scope', (
+    tester,
+  ) async {
+    final sync = FakeAppSync()..accountScope = account;
+    var calls = 0;
+    await _pump(
+      tester,
+      sync,
+      ReloadOnSync.contests(onSynced: () => calls++, child: const SizedBox()),
+    );
+    // A contest scope the page has not seen before gets its first data.
+    sync.state = _synced({other: 1});
+    await tester.pump();
+    expect(calls, 1);
+
+    sync.state = _synced({other: 1, contest: 2});
+    await tester.pump();
+    expect(calls, 2);
+
+    // The account's own data counts as well.
+    sync.state = _synced({other: 1, contest: 2, account: 1});
+    await tester.pump();
+    expect(calls, 3);
+
+    // Nothing changed: no news.
+    sync.state = _synced({other: 1, contest: 2, account: 1});
+    await tester.pump();
+    expect(calls, 3);
+  });
 }

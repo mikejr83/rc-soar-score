@@ -23,7 +23,7 @@ class ReloadOnSync extends StatefulWidget {
     required SyncScopeKey this.scope,
     required this.onSynced,
     required this.child,
-  });
+  }) : anyContest = false;
 
   /// Watches the signed-in account's own data scope (contest list,
   /// participants, roles, landing tables). Nothing fires while nobody is
@@ -32,7 +32,18 @@ class ReloadOnSync extends StatefulWidget {
     super.key,
     required this.onSynced,
     required this.child,
-  }) : scope = null;
+  }) : scope = null,
+       anyContest = false;
+
+  /// Watches the account's contest list: the account's own scope and every
+  /// contest scope. A contest the account owns arrives, is renamed or changes
+  /// state through its own contest scope, not through the account's.
+  const ReloadOnSync.contests({
+    super.key,
+    required this.onSynced,
+    required this.child,
+  }) : scope = null,
+       anyContest = true;
 
   /// Watches the contest with the route id [contestId]. An id that does not
   /// parse leaves [child] as it is: the page shows its own not-found state.
@@ -59,6 +70,9 @@ class ReloadOnSync extends StatefulWidget {
   /// The contest scope to watch for the contest's own pages; [account] for
   /// the pages of the signed-in account.
   final SyncScopeKey? scope;
+
+  /// Whether every contest scope counts too, besides [scope] or the account's.
+  final bool anyContest;
 
   final VoidCallback onSynced;
 
@@ -89,7 +103,8 @@ class _ReloadOnSyncState extends State<ReloadOnSync> {
   @override
   void didUpdateWidget(ReloadOnSync oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.scope != widget.scope) {
+    if (oldWidget.scope != widget.scope ||
+        oldWidget.anyContest != widget.anyContest) {
       // A different contest: what it last synced is not news.
       final sync = _sync;
       _seen = sync == null ? 0 : _revision(sync);
@@ -98,7 +113,13 @@ class _ReloadOnSyncState extends State<ReloadOnSync> {
 
   int _revision(AppSync sync) {
     final scope = widget.scope ?? sync.accountScope;
-    return scope == null ? 0 : sync.state.of(scope)?.dataRevision ?? 0;
+    var total = scope == null ? 0 : sync.state.of(scope)?.dataRevision ?? 0;
+    if (widget.anyContest) {
+      for (final entry in sync.state.scopes.entries) {
+        if (entry.key is ContestScopeKey) total += entry.value.dataRevision;
+      }
+    }
+    return total;
   }
 
   void _check() {

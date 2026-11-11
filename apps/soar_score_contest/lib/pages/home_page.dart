@@ -184,7 +184,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) =>
-      ReloadOnSync.account(onSynced: _retry, child: _content(context));
+      ReloadOnSync.contests(onSynced: _retry, child: _content(context));
 
   Widget _content(BuildContext context) => FutureBuilder<List<Contest>>(
     future: _contests,
