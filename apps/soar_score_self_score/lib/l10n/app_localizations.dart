@@ -448,6 +448,24 @@ abstract class AppLocalizations {
   /// **'Couldn\'t copy the invitation link. Check your connection and try again.'**
   String get invitationLinkCopyFailed;
 
+  /// Title of the dialog that shows the invitation link when the browser would not copy it.
+  ///
+  /// In en, this message translates to:
+  /// **'Your invitation link'**
+  String get invitationLinkDialogTitle;
+
+  /// Explains why the invitation link is shown instead of copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Your browser would not copy it. Select the link and copy it yourself.'**
+  String get invitationLinkDialogBody;
+
+  /// Button that closes the invitation link dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get invitationLinkDialogClose;
+
   /// Primary button at the bottom of the pilot overview that opens the contest results.
   ///
   /// In en, this message translates to:
