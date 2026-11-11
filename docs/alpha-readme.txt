@@ -1,8 +1,9 @@
 RC Soar Score contest app - Windows alpha {{VERSION}}
 =====================================================
 
-This is an alpha for contest directors to try next to GliderScore. It runs
-offline on this computer. There is no account and no sign-in in this build.
+This is an alpha for contest directors to try next to GliderScore. Contests
+are stored on this computer. Syncing and publishing use the hosted server at
+https://api.rcsoarscore.com, so an internet connection is needed for those.
 
 Install
   1. Unzip this folder anywhere you like (not inside Program Files).
