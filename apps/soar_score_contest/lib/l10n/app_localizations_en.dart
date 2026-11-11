@@ -445,6 +445,72 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storageDetailClose => 'OK';
 
   @override
+  String get syncStatusChecking => 'Checking…';
+
+  @override
+  String get syncStatusSyncing => 'Syncing…';
+
+  @override
+  String get syncStatusLocalOnly => 'Local only';
+
+  @override
+  String get syncStatusNotSynced => 'Not synced yet';
+
+  @override
+  String get syncStatusSuccessful => 'Sync successful';
+
+  @override
+  String get syncStatusPending => 'Changes pending';
+
+  @override
+  String get syncStatusFailed => 'Sync failed';
+
+  @override
+  String get syncStatusConflicts => 'Sync conflicts';
+
+  @override
+  String get syncStatusRefused => 'Changes refused';
+
+  @override
+  String syncTooltipLastSynced(String time) {
+    return 'Last synced $time';
+  }
+
+  @override
+  String syncTooltipPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes waiting to be sent',
+      one: '1 change waiting to be sent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncTooltipAttention(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes need your attention',
+      one: '1 change needs your attention',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncTooltipLocalOnly =>
+      'This data is only on this device and is not backed up.';
+
+  @override
+  String get syncTooltipAction => 'Click to sync now';
+
+  @override
+  String syncSemanticsLabel(String status) {
+    return 'Sync: $status';
+  }
+
+  @override
   String get unsyncedWarningTitle => 'Changes have not synced';
 
   @override
@@ -1379,6 +1445,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get pilotImportMaybeHint =>
+      'Link adds missing details from GliderScore to the participant you pick. Names and registration numbers are never overwritten.';
+
+  @override
   String pilotImportWillUpdate(String fields) {
     return 'Will update: $fields';
   }
@@ -1402,7 +1472,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String pilotImportChoiceUpdate(String name) {
-    return 'Update $name';
+    return 'Link to $name';
   }
 
   @override
@@ -1746,6 +1816,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get publicationPageHistoryByYou => 'Published by you';
+
+  @override
+  String get publicationPageHistoryByDirector => 'Published by a director';
 
   @override
   String get publicationPageHistoryAutomatic => 'Updated automatically';
@@ -2624,9 +2697,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get invitationsMenuCopy => 'Copy link';
-
-  @override
   String get invitationsLinkCopied => 'Link copied.';
 
   @override
@@ -2659,4 +2729,35 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get invitationsServerUnreachable =>
       'The server can’t be reached, so invitations can’t be sent now.';
+
+  @override
+  String get participantActionRemove => 'Remove';
+
+  @override
+  String get participantActionSend => 'Send invitation';
+
+  @override
+  String get participantActionCopy => 'Copy invitation URL';
+
+  @override
+  String get participantActions => 'Participant actions';
+
+  @override
+  String get participantInvitationExists =>
+      'This pilot already has an invitation.';
+
+  @override
+  String get participantRemoveHasFlights =>
+      'Pilots with flights can’t be removed.';
+
+  @override
+  String get participantRemoveUnavailable =>
+      'Participants can’t be removed from this contest now.';
+
+  @override
+  String get scorePilotEntryChip => 'Pilot entry';
+
+  @override
+  String get scorePilotEntryTooltip =>
+      'A pilot or helper submitted values. The submission is kept in history.';
 }

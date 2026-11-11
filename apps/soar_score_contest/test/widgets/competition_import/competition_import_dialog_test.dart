@@ -10,6 +10,7 @@ import 'package:soar_score_contest/widgets/competition_import/competition_import
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../support/competition_import_fakes.dart';
+import '../../support/pilot_import_fakes.dart' show profile;
 
 void main() {
   late FakeCompetitionImportStore store;
@@ -64,6 +65,38 @@ void main() {
   setUp(() {
     store = FakeCompetitionImportStore([]);
     outcome = null;
+  });
+
+  testWidgets('a choice for a maybe pilot shows in the dropdown', (
+    tester,
+  ) async {
+    // Ada Lovelace matches by name only, so the director decides.
+    store = FakeCompetitionImportStore([
+      profile(first: 'Ada', last: 'Lovelace', email: 'ada@x.test'),
+    ]);
+    await open(tester);
+    await tester.tap(key('competition-import-row-1'));
+    await tester.pump();
+    await tester.tap(key('competition-import-continue'));
+    await tester.pumpAndSettle();
+    expect(key('pilot-import-maybe-hint'), findsOneWidget);
+
+    Finder shown(String text) => find.descendant(
+      of: key('pilot-import-choice-1'),
+      matching: find.text(text),
+    );
+    expect(shown('Skip'), findsOneWidget);
+    await tester.tap(key('pilot-import-choice-1'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add as new').last);
+    await tester.pumpAndSettle();
+    expect(shown('Add as new'), findsOneWidget);
+
+    await tester.tap(key('pilot-import-choice-1'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Link to Ada Lovelace').last);
+    await tester.pumpAndSettle();
+    expect(shown('Link to Ada Lovelace'), findsOneWidget);
   });
 
   testWidgets('a cancelled chooser closes the dialog', (tester) async {

@@ -1,0 +1,37 @@
+name: Release notes
+
+# Fills in the notes of a release when it is published: Claude summarises the
+# pull requests merged since the previous release (grouped by .github/release.yml)
+# and the result goes below a marker in the release body, so a hand-written
+# intro above it is kept. A failure here never blocks the deploys: they are
+# separate workflows. Manual runs write the notes to the job log only.
+# Process: docs/releasing.md.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to preview notes for (log only)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  notes:
+    name: Write release notes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: Production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+          DRY: ${{ github.event_name == 'workflow_dispatch' && '--dry-run' || '' }}
+        run: python3 scripts/generate_release_notes.py "$TAG" $DRY

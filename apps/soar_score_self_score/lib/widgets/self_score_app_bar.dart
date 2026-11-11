@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
-import 'licences_menu_button.dart';
+import 'app_info_button.dart';
 
 /// The flat top bar: brand mark, an optional context line over the page
 /// title, the connection state and the account control.
@@ -13,6 +13,7 @@ class SelfScoreAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backLabel = 'Back',
     this.actions = const [],
     this.showAccount = true,
+    this.onCopyInvitationLink,
     super.key,
   });
 
@@ -24,6 +25,9 @@ class SelfScoreAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String backLabel;
   final List<Widget> actions;
   final bool showAccount;
+
+  /// Adds "Copy invitation link" to the action menu when set.
+  final VoidCallback? onCopyInvitationLink;
 
   @override
   Size get preferredSize => const Size.fromHeight(57);
@@ -87,7 +91,7 @@ class SelfScoreAppBar extends StatelessWidget implements PreferredSizeWidget {
                     onPressed: () {},
                     icon: const Icon(Icons.account_circle_outlined),
                   ),
-                const LicencesMenuButton(),
+                AppInfoButton(onCopyInvitationLink: onCopyInvitationLink),
               ],
             ),
           ),

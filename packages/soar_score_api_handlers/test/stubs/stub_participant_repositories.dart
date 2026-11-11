@@ -12,6 +12,12 @@ class StubParticipantProfileRepository implements ParticipantProfileRepository {
   Future<ParticipantProfile?> findById(Id id) async => profiles[id];
 
   @override
+  Future<Map<Id, ParticipantProfile>> findByIds(Iterable<Id> ids) async => {
+    for (final id in ids)
+      if (profiles[id] != null) id: profiles[id]!,
+  };
+
+  @override
   Future<List<ParticipantProfile>> listForOwner(Id accountId) async => [
     for (final profile in profiles.values)
       if (profile.ownerAccountId == accountId) profile,

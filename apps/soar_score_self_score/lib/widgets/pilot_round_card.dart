@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/pilot_round.dart';
 import 'status_chip.dart';
 
@@ -11,6 +12,7 @@ class PilotRoundCard extends StatelessWidget {
     required this.nextRound,
     required this.onEnter,
     required this.onView,
+    required this.onFlightResults,
     super.key,
   });
 
@@ -20,6 +22,9 @@ class PilotRoundCard extends StatelessWidget {
   final int nextRound;
   final VoidCallback onEnter;
   final VoidCallback onView;
+
+  /// Opens the group results; offered once a score was entered for the round.
+  final VoidCallback onFlightResults;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +42,11 @@ class PilotRoundCard extends StatelessWidget {
       _ => null,
     };
     final dimmed = note != null;
+    // A score was entered for the group once the round is submitted or waits
+    // for review.
+    final hasScore =
+        status == PilotRoundStatus.submitted ||
+        status == PilotRoundStatus.pendingReview;
     final chip = switch (status) {
       PilotRoundStatus.submitted => const StatusChip(
         label: 'Submitted',
@@ -121,14 +131,38 @@ class PilotRoundCard extends StatelessWidget {
                     label: const Text('Enter'),
                   )
                 else
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(0, 44),
-                      side: BorderSide(color: scheme.onSurface, width: 1.5),
-                    ),
-                    onPressed: onView,
-                    icon: const Icon(Icons.visibility_outlined, size: 20),
-                    label: const Text('View'),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, 44),
+                          side: BorderSide(color: scheme.onSurface, width: 1.5),
+                        ),
+                        onPressed: onView,
+                        icon: const Icon(Icons.visibility_outlined, size: 20),
+                        label: const Text('View'),
+                      ),
+                      if (hasScore)
+                        OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(0, 44),
+                            side: BorderSide(
+                              color: scheme.onSurface,
+                              width: 1.5,
+                            ),
+                          ),
+                          onPressed: onFlightResults,
+                          icon: const Icon(
+                            Icons.leaderboard_outlined,
+                            size: 20,
+                          ),
+                          label: Text(
+                            AppLocalizations.of(context).flightResults,
+                          ),
+                        ),
+                    ],
                   ),
               ],
             ],

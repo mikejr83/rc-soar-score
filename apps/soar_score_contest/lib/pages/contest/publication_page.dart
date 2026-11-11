@@ -8,9 +8,11 @@ import '../../connectivity_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../router.dart';
 import '../../services/publication/publication_page_data.dart';
+import '../../ui_account_provider.dart';
 import '../../widgets/publication/publication_actions_row.dart';
 import '../../widgets/publication/publication_text.dart';
 import '../../widgets/workspace/states/workspace_not_found_view.dart';
+import '../../widgets/sync/reload_on_sync.dart';
 
 /// The publication of one contest: its state, the public update policy, the
 /// latest published copy and the publish and visibility actions.
@@ -69,7 +71,13 @@ class _ContestPublicationPageState extends State<ContestPublicationPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ReloadOnSync.contest(
+    contestId: widget.contestId,
+    onSynced: _reload,
+    child: _content(context),
+  );
+
+  Widget _content(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final monitor = appConnectivityOf(context);
     final offline = monitor?.internetStatus == ConnectivityStatus.unavailable;
@@ -87,21 +95,31 @@ class _ContestPublicationPageState extends State<ContestPublicationPage> {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 720),
-              child: error != null
-                  ? _Failed(onRetry: _reload)
-                  : data == null
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
-                  : _Ready(
-                      data: data,
-                      isOffline: offline,
-                      onChanged: _reload,
-                      l10n: l10n,
-                    ),
+              child: Card(
+                key: const ValueKey('publication-page-card'),
+                margin: EdgeInsets.zero,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: error != null
+                        ? _Failed(onRetry: _reload)
+                        : data == null
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(32),
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        : _Ready(
+                            data: data,
+                            isOffline: offline,
+                            onChanged: _reload,
+                            l10n: l10n,
+                          ),
+                  ),
+                ),
+              ),
             ),
           ),
         );
@@ -182,12 +200,11 @@ class _Ready extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          publication.isPublished
-              ? policyText
-              : l10n.publicationScopeUnpublished,
-          key: const ValueKey('publication-page-policy'),
-        ),
+        if (!publication.isPublished) ...[
+          Text(l10n.publicationScopeUnpublished),
+          const SizedBox(height: 4),
+        ],
+        Text(policyText, key: const ValueKey('publication-page-policy')),
         if (publication.pendingDelist case final request?) ...[
           const SizedBox(height: 4),
           Text(
@@ -290,7 +307,11 @@ class _Ready extends StatelessWidget {
                         Text(
                           entry.isBySystem
                               ? l10n.publicationPageHistoryAutomatic
-                              : l10n.publicationPageHistoryByYou,
+                              : entry.publishedBy != null &&
+                                    entry.publishedBy!.value ==
+                                        uiAccountOf(context)?.id
+                              ? l10n.publicationPageHistoryByYou
+                              : l10n.publicationPageHistoryByDirector,
                           style: theme.textTheme.bodySmall,
                         ),
                       ],

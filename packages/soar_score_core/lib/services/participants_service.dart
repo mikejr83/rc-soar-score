@@ -25,6 +25,25 @@ class ParticipantsService {
   Future<List<ParticipantProfile>> list(Id ownerAccountId) =>
       repository.participantProfileRepository.listForOwner(ownerAccountId);
 
+  /// Only the profiles of the people in contest [contestId], one read for
+  /// the participations and one for all their profiles.
+  ///
+  /// The caller must already have checked that the contest is theirs: this
+  /// does not look at who owns a profile, only at who takes part. Throws an
+  /// [EntityNotFoundError] when the contest does not exist.
+  Future<List<ParticipantProfile>> listForContest(Id contestId) async {
+    if (await repository.contestRepository.findById(contestId) == null) {
+      throw EntityNotFoundError(entityType: 'Contest', entityId: contestId);
+    }
+    final participations = await repository.contestParticipationRepository
+        .listForContest(contestId);
+    final profiles = await repository.participantProfileRepository.findByIds({
+      for (final participation in participations)
+        participation.participantProfileId,
+    });
+    return profiles.values.toList();
+  }
+
   /// The profile [id] of [ownerAccountId].
   ///
   /// Throws an [EntityNotFoundError] when there is none, or it is another

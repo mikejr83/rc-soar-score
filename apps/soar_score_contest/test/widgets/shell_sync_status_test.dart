@@ -1,7 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_contest/app_sync_provider.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/sync/app_sync_state.dart';
 import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
@@ -43,7 +45,11 @@ Future<GoRouter> _pump(
   await tester.pumpWidget(
     AppSyncInherited(
       sync: sync,
-      child: MaterialApp.router(routerConfig: router),
+      child: MaterialApp.router(
+        routerConfig: router,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -57,7 +63,7 @@ void main() {
     expect(find.byKey(const ValueKey('shell-sync-status')), findsNothing);
   });
 
-  testWidgets('shows the status and opens the sync details', (tester) async {
+  testWidgets('shows the status and a tap syncs now', (tester) async {
     final contest = _contest();
     final sync = FakeAppSync(
       state: AppSyncState(
@@ -70,12 +76,60 @@ void main() {
     );
     await _pump(tester, sync);
 
-    expect(find.text('Not synced yet · 2 pending'), findsOneWidget);
+    expect(find.text('Not synced yet'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('shell-sync-status')));
     await tester.pumpAndSettle();
 
-    expect(find.text('sync page'), findsOneWidget);
+    expect(sync.synced, [ContestScopeKey(contest.id)]);
+    expect(find.text('sync page'), findsNothing);
+  });
+
+  testWidgets('the time and the details are in the tooltip', (tester) async {
+    final contest = _contest();
+    final sync = FakeAppSync(
+      state: AppSyncState(
+        scopes: {
+          ContestScopeKey(contest.id): SyncScopeSummary(
+            lastSyncedAt: DateTime.utc(2026, 4),
+          ),
+        },
+      ),
+    );
+    await _pump(tester, sync);
+
+    expect(find.text('Sync successful'), findsOneWidget);
+    expect(find.textContaining('Last synced'), findsNothing);
+
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(
+      tester.getCenter(find.byKey(const ValueKey('shell-sync-status'))),
+    );
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(find.textContaining('Last synced'), findsOneWidget);
+    expect(find.textContaining('Click to sync now'), findsOneWidget);
+  });
+
+  testWidgets('a tap does not start a second sync while one runs', (
+    tester,
+  ) async {
+    final contest = _contest();
+    final sync = FakeAppSync(
+      state: AppSyncState(
+        scopes: {ContestScopeKey(contest.id): const SyncScopeSummary()},
+        syncing: true,
+      ),
+    );
+    await _pump(tester, sync);
+
+    expect(find.text('Syncing…'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('shell-sync-status')));
+    await tester.pump();
+
+    expect(sync.synced, isEmpty);
   });
 
   testWidgets('follows the engine as its state changes', (tester) async {
@@ -108,7 +162,7 @@ void main() {
     )..accountScope = account;
     await _pump(tester, sync, inContest: false);
 
-    expect(find.textContaining('Synced '), findsOneWidget);
+    expect(find.text('Sync successful'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('shell-sync-status')));
     await tester.pumpAndSettle();

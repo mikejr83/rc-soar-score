@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/services/scoring/scoring_row.dart';
 
 import '../support/interact.dart';
 import '../support/launch_app.dart';
 import '../support/open_demo_contest.dart';
+import '../support/pilot_submission.dart';
 import '../support/pump_until_gone.dart';
 import 'journey.dart';
 import 'scoring_steps.dart';
@@ -479,6 +481,53 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       expect(find.byKey(const ValueKey('score-saving-progress')), findsNothing);
     }),
     timeout: _longStep,
+  );
+
+  // A pilot's submission arrives through the hosted server's invitations,
+  // which only the web run's E2E server has; the Windows build's embedded
+  // server gets one by sync, which this signed-out journey cannot show.
+  await journey.step(
+    'Round 3: a pilot\'s own entry shows as Pilot entry until the director saves',
+    () => inContest(() async {
+      // Tess retires in the next step, and the draw decides who the group
+      // Save above took, so the first pilot without a score submits.
+      final pilot = await submitAsPilot(
+        contestName: data.contestName,
+        candidates: [
+          for (final name in data.pilotNames)
+            if (name != 'Tess Valdez') name,
+        ],
+        round: 3,
+        timeFlown: 480,
+      );
+      await openGroupOf(tester, data, 3, pilot);
+      final row = (await rowOf(tester, pilot))!;
+      final chip = find.descendant(
+        of: _key('score-row-${row.id.value}'),
+        matching: find.text('Pilot entry'),
+      );
+      await pumpUntilFound(tester, chip);
+      expect(row.hasPendingSubmission, isTrue);
+      expect(find.text('Pilot entry'), findsOneWidget);
+
+      // The director checks the values and saves: the chip goes.
+      await tapVisible(tester, _key('score-row-${row.id.value}'));
+      final time = fieldWithKey('score-time-${row.id.value}');
+      await pumpUntilFound(tester, time);
+      expect(tester.widget<TextField>(time).controller!.text, isNotEmpty);
+      await saveFlightOf(tester, data, row);
+      // The list builds only the rows near the screen and saving moves on
+      // to the next pilot, so the saved row may be gone from the tree: bring
+      // it back and check that row itself.
+      await pumpUntilGone(tester, chip);
+      final saved = await rowOf(tester, pilot);
+      expect(saved, isNotNull, reason: 'the saved row is built again');
+      expect(saved!.hasPendingSubmission, isFalse);
+      expect(saved.status, RowStatus.official);
+      expect(_key('score-row-${row.id.value}'), findsOneWidget);
+      expect(chip, findsNothing);
+    }),
+    webOnly: true,
   );
 
   await journey.step(

@@ -1,50 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/services/reports/pilot_cards/pilot_invitations.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/fake_app_connectivity.dart';
+import '../support/fake_pilot_invitation_source.dart';
 import '../support/participants_page_support.dart';
-
-class _Source implements PilotInvitationSource {
-  _Source({
-    this.links = const {},
-    this.reason,
-    this.failSend = false,
-    this.failReadAfterSend = false,
-  });
-
-  Map<String, String> links;
-  final String? reason;
-  final bool failSend;
-  final bool failReadAfterSend;
-  final sent = <List<Id>>[];
-  var _sentOnce = false;
-
-  @override
-  Future<PilotInvitations> read(ApiClient client, Id contestId) async {
-    if (failReadAfterSend && _sentOnce) {
-      return const PilotInvitations(loadFailed: true);
-    }
-    return PilotInvitations(
-      links: Map.of(links),
-      sendUnavailableReason: reason,
-    );
-  }
-
-  @override
-  Future<void> send(ApiClient client, Id contestId, List<Id> ids) async {
-    if (failSend) throw StateError('no');
-    _sentOnce = true;
-    sent.add(ids);
-    links = {
-      ...links,
-      for (final id in ids) id.value: 'https://x.test/${id.value}',
-    };
-  }
-}
 
 Finder _check(int n) => find.descendant(
   of: find.byKey(ValueKey('row-${personParticipationId(n).value}')),
@@ -73,14 +35,14 @@ void main() {
   testWidgets('sends invitations for the selected pilots after confirming', (
     tester,
   ) async {
-    final source = _Source();
+    final source = FakePilotInvitationSource();
     PilotInvitationSources.current = source;
     await pumpParticipantsPage(tester, ParticipantsServer());
     await tester.tap(_check(1));
     await tester.tap(_check(2));
     await tester.pumpAndSettle();
 
-    await _openMenu(tester);
+    expect(find.byKey(const ValueKey('invitations-menu')), findsNothing);
     expect(find.text('Send invitations (2)'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('invitations-send')));
     await tester.pumpAndSettle();
@@ -101,7 +63,7 @@ void main() {
   testWidgets('non-flying participants are not sent invitations', (
     tester,
   ) async {
-    final source = _Source();
+    final source = FakePilotInvitationSource();
     PilotInvitationSources.current = source;
     await pumpParticipantsPage(tester, ParticipantsServer());
     await tester.tap(_check(5));
@@ -116,7 +78,7 @@ void main() {
 
   testWidgets('Copy link copies the one selected pilot’s link', (tester) async {
     final link = 'https://x.test/${personParticipationId(1).value}';
-    PilotInvitationSources.current = _Source(
+    PilotInvitationSources.current = FakePilotInvitationSource(
       links: {personParticipationId(1).value: link},
     );
     String? copied;
@@ -129,12 +91,12 @@ void main() {
         return null;
       },
     );
-    addTearDown(
-      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+    addTearDown(() {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         null,
-      ),
-    );
+      );
+    });
     await pumpParticipantsPage(tester, ParticipantsServer());
     await tester.tap(_check(1));
     await tester.pumpAndSettle();
@@ -150,7 +112,7 @@ void main() {
   testWidgets('Copy link is off for a pilot without an invitation', (
     tester,
   ) async {
-    PilotInvitationSources.current = _Source();
+    PilotInvitationSources.current = FakePilotInvitationSource();
     await pumpParticipantsPage(tester, ParticipantsServer());
     await tester.tap(_check(1));
     await tester.pumpAndSettle();
@@ -167,7 +129,7 @@ void main() {
   });
 
   testWidgets('the server’s reason turns sending off', (tester) async {
-    PilotInvitationSources.current = _Source(
+    PilotInvitationSources.current = FakePilotInvitationSource(
       reason: 'Invitations can’t be sent for a completed contest.',
     );
     await pumpParticipantsPage(tester, ParticipantsServer());
@@ -191,7 +153,7 @@ void main() {
   testWidgets('Copy link needs exactly one selected row that is a pilot', (
     tester,
   ) async {
-    PilotInvitationSources.current = _Source(
+    PilotInvitationSources.current = FakePilotInvitationSource(
       links: {
         personParticipationId(1).value: 'https://x.test/1',
         personParticipationId(2).value: 'https://x.test/2',
@@ -202,23 +164,31 @@ void main() {
     await tester.tap(_check(1));
     await tester.tap(_check(5));
     await tester.pumpAndSettle();
-    await _openMenu(tester);
-    expect(menuItem(tester, 'invitations-copy').onPressed, isNull);
-    await _closeMenu(tester);
-    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('invitations-copy')), findsNothing);
+    expect(
+      tester
+          .widget<TextButton>(find.byKey(const ValueKey('invitations-send')))
+          .onPressed,
+      isNull,
+    );
 
     // Two pilots are two rows as well.
     await tester.tap(_check(5));
     await tester.tap(_check(2));
     await tester.pumpAndSettle();
-    await _openMenu(tester);
-    expect(menuItem(tester, 'invitations-copy').onPressed, isNull);
+    expect(find.byKey(const ValueKey('invitations-copy')), findsNothing);
+    expect(
+      tester
+          .widget<TextButton>(find.byKey(const ValueKey('invitations-send')))
+          .onPressed,
+      isNull,
+    );
   });
 
   testWidgets('a retired pilot gets neither Send nor Copy link', (
     tester,
   ) async {
-    PilotInvitationSources.current = _Source(
+    PilotInvitationSources.current = FakePilotInvitationSource(
       links: {personParticipationId(1).value: 'https://x.test/1'},
     );
     await pumpParticipantsPage(tester, ParticipantsServer(retiredPilot: 1));
@@ -234,7 +204,7 @@ void main() {
     tester,
   ) async {
     final link = 'https://x.test/${personParticipationId(1).value}';
-    PilotInvitationSources.current = _Source(
+    PilotInvitationSources.current = FakePilotInvitationSource(
       links: {personParticipationId(1).value: link},
       reason: 'Invitations can’t be sent for a completed contest.',
     );
@@ -248,12 +218,12 @@ void main() {
         return null;
       },
     );
-    addTearDown(
-      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+    addTearDown(() {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         null,
-      ),
-    );
+      );
+    });
     await pumpParticipantsPage(
       tester,
       ParticipantsServer(state: LifecycleState.completed, drawn: true),
@@ -271,7 +241,7 @@ void main() {
   testWidgets('a failed send says nothing was sent and issues nothing', (
     tester,
   ) async {
-    final source = _Source(failSend: true);
+    final source = FakePilotInvitationSource(failSend: true);
     PilotInvitationSources.current = source;
     await pumpParticipantsPage(tester, ParticipantsServer());
     await tester.tap(_check(1));
@@ -295,7 +265,7 @@ void main() {
   testWidgets('a send whose read-back fails reports that it worked', (
     tester,
   ) async {
-    final source = _Source(failReadAfterSend: true);
+    final source = FakePilotInvitationSource(failReadAfterSend: true);
     PilotInvitationSources.current = source;
     await pumpParticipantsPage(tester, ParticipantsServer());
     await tester.tap(_check(1));
@@ -317,7 +287,7 @@ void main() {
   testWidgets('losing the connection turns sending off with the reason', (
     tester,
   ) async {
-    final source = _Source();
+    final source = FakePilotInvitationSource();
     PilotInvitationSources.current = source;
     final connectivity = FakeAppConnectivity();
     await pumpParticipantsPage(

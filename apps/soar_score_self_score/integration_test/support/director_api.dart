@@ -49,6 +49,9 @@ class SeededContest {
     required this.links,
     required this.api,
     required this.pilotNames,
+    required this.participations,
+    required this.rounds,
+    required this.assignments,
   });
 
   final String id;
@@ -57,6 +60,71 @@ class SeededContest {
   final Map<String, String> links;
   final DirectorApi api;
   final List<String> pilotNames;
+
+  /// Participation id per pilot name.
+  final Map<String, String> participations;
+
+  /// The draw: rounds (`id`, `ordinal`) and assignments (`id`, `group`,
+  /// `scheduled_round_id`, `contest_participation_id`).
+  final List<Map<String, Object?>> rounds;
+  final List<Map<String, Object?>> assignments;
+
+  Map<String, Object?> _slot(String name, int round) {
+    final roundId = rounds.singleWhere((r) => r['ordinal'] == round)['id'];
+    return assignments.singleWhere(
+      (a) =>
+          a['scheduled_round_id'] == roundId &&
+          a['contest_participation_id'] == participations[name],
+    );
+  }
+
+  /// The group [name] flies in during [round].
+  int groupOf(String name, int round) => _slot(name, round)['group']! as int;
+
+  /// Other pilots in [name]'s group in [round].
+  List<String> groupMates(String name, int round) => [
+    for (final other in pilotNames)
+      if (other != name && groupOf(other, round) == groupOf(name, round)) other,
+  ];
+
+  /// The director's action on the contest (`closeScoring`, `complete`,
+  /// `hideResults`, `showResults`).
+  Future<void> action(String action) async {
+    final contest = await api.call('GET', '/contests/$id');
+    await api.call(
+      'POST',
+      '/contests/$id/actions',
+      body: {'action': action, 'base_revision': contest['revision']},
+    );
+  }
+
+  /// The director enters the official score for [name]'s flight in [round].
+  /// [baseRevision] is 1 over a pilot's own submission, 0 for a fresh flight.
+  Future<void> scoreAsDirector(
+    String name,
+    int round, {
+    required int timeFlown,
+    int launchHeight = 45,
+    String landing = 'points_50',
+    int baseRevision = 0,
+    String mutation = 'director-1',
+  }) async {
+    await api.call(
+      'POST',
+      '/contests/$id/assignments/${_slot(name, round)['id']}/scores',
+      status: 201,
+      body: {
+        'client_mutation_id': '$mutation-$name-$round',
+        'base_score_revision': baseRevision,
+        'components': {
+          'time_flown': timeFlown,
+          'launch_height': launchHeight,
+          'landing': landing,
+        },
+        'reason': 'E2E director entry',
+      },
+    );
+  }
 
   /// The credential in [name]'s link (the last path segment).
   String credentialOf(String name) => Uri.parse(links[name]!).pathSegments.last;
@@ -148,7 +216,7 @@ Future<SeededContest> seedContest({
     );
     participations[pilots[i]] = participationId;
   }
-  await api.call(
+  final draw = await api.call(
     'POST',
     '/contests/$contestId/matrix/draws',
     status: 201,
@@ -181,6 +249,9 @@ Future<SeededContest> seedContest({
     id: contestId,
     api: api,
     pilotNames: pilots,
+    participations: participations,
+    rounds: (draw['rounds']! as List).cast<Map<String, Object?>>(),
+    assignments: (draw['assignments']! as List).cast<Map<String, Object?>>(),
     links: {
       for (final e in participations.entries) e.key: byParticipation[e.value]!,
     },

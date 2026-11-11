@@ -101,4 +101,70 @@ void main() {
       ),
     );
   });
+
+  test('reportData(id) GETs the facts in one request', () async {
+    final contest = Contest(
+      id: contestId,
+      name: 'Spring Open',
+      startDateTime: DateTime.utc(2026, 10, 17, 14),
+      endDateTime: DateTime.utc(2026, 10, 18, 22),
+      timezone: 'America/Denver',
+      createdAt: DateTime.utc(2026, 10, 1),
+      updatedAt: DateTime.utc(2026, 10, 1),
+    );
+    final data = ReportData(
+      contest: contest,
+      participations: const [],
+      participants: const [],
+      teams: const [],
+      teamMemberships: const [],
+      matrix: CurrentMatrix(),
+      scores: ContestScores(),
+    );
+    final client = clientFor((_) => body(data.toJson()));
+
+    expect(await client.reportData(contestId), data);
+    expect(seen.method, 'GET');
+    expect(seen.url.path, '/api/v1/contests/${contestId.value}/report-data');
+    expect(seen.url.queryParameters, {'include': 'facts'});
+  });
+
+  test('reportData asks for the standings and rounds it names', () async {
+    final data = ReportData(
+      contest: Contest(
+        id: contestId,
+        name: 'Spring Open',
+        startDateTime: DateTime.utc(2026, 10, 17, 14),
+        endDateTime: DateTime.utc(2026, 10, 18, 22),
+        timezone: 'America/Denver',
+        createdAt: DateTime.utc(2026, 10, 1),
+        updatedAt: DateTime.utc(2026, 10, 1),
+      ),
+      results: ContestResults(asOfRound: 2),
+      roundResults: [RoundResults(ordinal: 1), RoundResults(ordinal: 2)],
+    );
+    final client = clientFor((_) => body(data.toJson()));
+
+    final read = await client.reportData(
+      contestId,
+      facts: false,
+      scores: true,
+      asOfRound: 2,
+      rounds: [1, 2],
+    );
+
+    expect(read, data);
+    expect(seen.url.queryParameters, {
+      'include': 'scores,standings',
+      'asOfRound': '2',
+      'rounds': '1,2',
+    });
+  });
+
+  test('contestParticipants(id) GETs only the contest\'s profiles', () async {
+    final client = clientFor((_) => body({'participants': <Object?>[]}));
+
+    expect(await client.contestParticipants(contestId), isEmpty);
+    expect(seen.url.path, '/api/v1/contests/${contestId.value}/participants');
+  });
 }

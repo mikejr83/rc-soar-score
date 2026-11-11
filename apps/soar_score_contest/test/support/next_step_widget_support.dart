@@ -170,6 +170,10 @@ class WorkspaceServer {
       throw http.ClientException('offline', request.url);
     }
     final path = request.url.path;
+    if (request.method == 'GET' && path.endsWith('/report-data')) {
+      reportDataRequests.add(request.url);
+      return _reportData(request);
+    }
     if (request.method == 'POST' && path.endsWith('/actions')) {
       await actionGate?.future;
       return _action(jsonDecode(request.body) as Map<String, dynamic>);
@@ -293,6 +297,97 @@ class WorkspaceServer {
       return _json(contest.toJson());
     }
     return inner.handle(request);
+  }
+
+  /// The `report-data` URLs requested, in order.
+  final List<Uri> reportDataRequests = [];
+
+  /// `GET /contests/{id}/report-data`, assembled from the same routes the
+  /// separate reads use, so a test that changes one of them changes the
+  /// report data too. A failing part fails the whole answer, as the real
+  /// endpoint does, except the three cases it answers in the body: no
+  /// configuration yet, no scores yet, and no standing stored as of the
+  /// asked round.
+  Future<http.Response> _reportData(http.Request request) async {
+    final base = request.url.path.substring(
+      0,
+      request.url.path.length - '/report-data'.length,
+    );
+    final query = request.url.queryParameters;
+    final include = (query['include'] ?? 'facts').split(',').toSet();
+
+    Future<http.Response> read(String suffix, [Map<String, String>? q]) =>
+        handle(
+          http.Request(
+            'GET',
+            request.url.replace(path: '$base$suffix', queryParameters: q),
+          ),
+        );
+    Object? decode(http.Response response) => jsonDecode(response.body);
+
+    final contestResponse = await read('');
+    if (contestResponse.statusCode != 200) {
+      return contestResponse;
+    }
+    final body = <String, Object?>{'contest': decode(contestResponse)};
+    if (include.contains('facts')) {
+      final configuration = await read('/configuration');
+      if (configuration.statusCode != 404 && configuration.statusCode != 200) {
+        return configuration;
+      }
+      body['configuration'] = configuration.statusCode == 200
+          ? decode(configuration)
+          : null;
+      for (final (key, suffix, listKey) in [
+        ('participations', '/participations', 'participations'),
+        ('participants', '/participants', 'participants'),
+        ('teams', '/teams', 'teams'),
+        ('team_memberships', '/team-memberships', 'team_memberships'),
+      ]) {
+        final response = await read(suffix);
+        if (response.statusCode != 200) {
+          return response;
+        }
+        body[key] = (decode(response)! as Map)[listKey];
+      }
+      final matrix = await read('/matrix');
+      if (matrix.statusCode != 200) {
+        return matrix;
+      }
+      body['matrix'] = decode(matrix);
+    }
+    if (include.contains('facts') || include.contains('scores')) {
+      final scores = await read('/scores');
+      if (scores.statusCode != 200 && scores.statusCode != 404) {
+        return scores;
+      }
+      body['scores'] = scores.statusCode == 200
+          ? decode(scores)
+          : ContestScores().toJson();
+    }
+    if (include.contains('standings')) {
+      final asOf = query['asOfRound'];
+      if (asOf != null) {
+        final standing = await read('/results', {'asOfRound': asOf});
+        if (standing.statusCode != 200 && standing.statusCode != 400) {
+          return standing;
+        }
+        body['results'] = standing.statusCode == 200 ? decode(standing) : null;
+      }
+      final rounds = query['rounds'];
+      if (rounds != null && rounds.isNotEmpty) {
+        final results = <Object?>[];
+        for (final round in rounds.split(',')) {
+          final response = await read('/results/rounds/$round');
+          if (response.statusCode != 200) {
+            return response;
+          }
+          results.add(decode(response));
+        }
+        body['round_results'] = results;
+      }
+    }
+    return _json(body);
   }
 
   /// A pending delisting request as the server sends it.

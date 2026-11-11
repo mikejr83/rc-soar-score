@@ -1,0 +1,20 @@
+# Input for GitHub's generated release notes (and for the AI-written notes in
+# .github/workflows/release-notes.yml, which starts from this grouping).
+# Groups use the type: labels already on issues and pull requests.
+changelog:
+  exclude:
+    authors:
+      - dependabot
+  categories:
+    - title: New features
+      labels:
+        - type:feature
+    - title: Fixes
+      labels:
+        - type:bug
+    - title: Documentation
+      labels:
+        - area:docs
+    - title: Other changes
+      labels:
+        - "*"

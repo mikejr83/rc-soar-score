@@ -33,6 +33,9 @@ class ParticipantsController extends ChangeNotifier {
   /// Whether a save is running (rows are locked meanwhile).
   bool saving = false;
 
+  /// A sync arrived while saving; the list is read again once the save ends.
+  bool _refreshAfterSave = false;
+
   /// The rows as stored, with the director's edits in [_drafts].
   List<StoredParticipant> _saved = const [];
   final Map<String, StoredParticipant> _drafts = {};
@@ -207,7 +210,14 @@ class ParticipantsController extends ChangeNotifier {
       loading = false;
       notifyListeners();
     }
+    // A sync that came in meanwhile may be newer than what the load read.
+    if (_refreshAfterLoad) {
+      _refreshAfterLoad = false;
+      if (loadError == null) await refreshQuietly();
+    }
   }
+
+  bool _refreshAfterLoad = false;
 
   /// Reads everything again, keeping the director's edits.
   Future<void> reload() async {
@@ -219,21 +229,123 @@ class ParticipantsController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _read() async {
+  /// Reads everything again after a sync, keeping the director's edits and
+  /// saying nothing when the read fails: the list stays as it was. Not while
+  /// the page loads (which reads the list itself). During a save the read waits
+  /// until the save ends.
+  Future<void> refreshQuietly() async {
+    // One read at a time: a sync that arrives meanwhile asks for one more
+    // read after this one, so an older answer never lands over a newer one.
+    if (_refreshing) {
+      _refreshAgain = true;
+      return;
+    }
+    _refreshing = true;
+    try {
+      do {
+        _refreshAgain = false;
+        await _refreshOnce();
+      } while (_refreshAgain && !_disposed);
+    } finally {
+      _refreshing = false;
+    }
+  }
+
+  bool _refreshing = false;
+  bool _refreshAgain = false;
+
+  Future<void> _refreshOnce() async {
+    if (loading) {
+      _refreshAfterLoad = true;
+      return;
+    }
+    if (data == null) return;
+    if (saving) {
+      // The save does not read the list again, so it asks for this once done.
+      _refreshAfterSave = true;
+      return;
+    }
+    try {
+      // A save that started while the read was out makes the read older than
+      // the page, so it is dropped: made again at once when that save has
+      // ended, else once it does.
+      for (var tries = 0; tries < 3; tries++) {
+        final epoch = _saveEpoch;
+        if (await _read(staleIf: () => epoch != _saveEpoch)) break;
+        if (saving) {
+          _refreshAfterSave = true;
+          return;
+        }
+        if (tries == 2) return;
+      }
+    } on Object {
+      return;
+    }
+    notifyListeners();
+  }
+
+  /// Counts the saves started, so a read can tell one began meanwhile.
+  int _saveEpoch = 0;
+
+  /// Reads the list and takes it in; false when [staleIf] says the read is
+  /// out of date, in which case nothing changed.
+  Future<bool> _read({bool Function()? staleIf}) async {
     final loaded = await ParticipantsPageData.load(client, contestId);
+    if (staleIf != null && staleIf()) return false;
     data = loaded;
     _teams = loaded.base.teams;
+    final before = {for (final row in _saved) row.rowId: row};
     _saved = loaded.participants;
     final ids = {for (final row in _saved) row.rowId};
     _drafts.removeWhere((id, _) => !ids.contains(id));
-    // Models are saved on their own, so an edited row shows the fresh ones.
+    // A row keeps only the cells the director edited; the others show what
+    // was read, so a change made elsewhere is not undone by a save. Models
+    // are saved on their own, so an edited row shows the fresh ones.
     for (final row in _saved) {
       final edited = _drafts[row.rowId];
-      if (edited != null) _drafts[row.rowId] = edited.withModels(row.models);
+      if (edited == null) continue;
+      final was = before[row.rowId];
+      final merged = was == null
+          ? edited.withModels(row.models)
+          : _mergeEdits(row, edited, edited.changedFrom(was));
+      if (merged.changedFrom(row).isEmpty) {
+        _drafts.remove(row.rowId);
+      } else {
+        _drafts[row.rowId] = merged;
+      }
     }
     _states.removeWhere((id, _) => !ids.contains(id));
     selection.retainAll(ids);
     _rules = _makeRules();
+    return true;
+  }
+
+  /// The fresh [row] with the [edited] cells of the director's [draft] put on
+  /// it. An edited role or class keeps the revision the draft was opened at,
+  /// so a save notices a change made elsewhere to the same participation.
+  StoredParticipant _mergeEdits(
+    StoredParticipant row,
+    StoredParticipant draft,
+    Set<ParticipantCell> edited,
+  ) {
+    final role = edited.contains(ParticipantCell.role);
+    final classification =
+        role || edited.contains(ParticipantCell.classification);
+    return StoredParticipant(
+      participation: role || classification
+          ? draft.participation
+          : row.participation,
+      profile: row.profile,
+      membershipId: row.membershipId,
+      models: row.models,
+      roleId: role ? draft.roleId : row.roleId,
+      roleName: role ? draft.roleName : row.roleName,
+      isPilot: role ? draft.isPilot : row.isPilot,
+      classification: classification
+          ? draft.classification
+          : row.classification,
+      team: edited.contains(ParticipantCell.team) ? draft.team : row.team,
+    );
   }
 
   // Editing.
@@ -388,6 +500,7 @@ class ParticipantsController extends ChangeNotifier {
     final ids = changedIds;
     if (ids.isEmpty) return;
     saving = true;
+    _saveEpoch++;
     recalculated = const [];
     recalculationWarning = null;
     for (final id in ids) {
@@ -432,6 +545,10 @@ class ParticipantsController extends ChangeNotifier {
     message = ok == 0 ? null : '$ok participant${ok == 1 ? '' : 's'} saved.';
     _rules = _makeRules();
     notifyListeners();
+    if (_refreshAfterSave) {
+      _refreshAfterSave = false;
+      await refreshQuietly();
+    }
   }
 
   String _recalcLabel(StoredParticipant row, Set<ParticipantCell> changed) {
@@ -635,10 +752,14 @@ class ParticipantsController extends ChangeNotifier {
       rows.any((r) => selection.contains(r.rowId) && hasFlights(r));
 
   /// Removes the selected people one by one; the server may refuse some.
-  Future<RemoveResult> removeSelected() async {
+  Future<RemoveResult> removeSelected() =>
+      removeParticipants(Set.of(selection));
+
+  /// Removes explicit targets without changing the selection before confirmation.
+  Future<RemoveResult> removeParticipants(Set<String> rowIds) async {
     final targets = [
       for (final r in rows)
-        if (selection.contains(r.rowId)) r,
+        if (rowIds.contains(r.rowId)) r,
     ];
     final removed = <String>[];
     final left = <String>[];
@@ -653,7 +774,7 @@ class ParticipantsController extends ChangeNotifier {
         refused.add((name: row.name, reason: apiErrorTextOf(error)));
       }
     }
-    selection.clear();
+    selection.removeAll(targets.map((row) => row.rowId));
     final result = RemoveResult(removed: removed, refused: refused);
     lastRemoval = result;
     leftTheDraw = [...leftTheDraw, ...left];

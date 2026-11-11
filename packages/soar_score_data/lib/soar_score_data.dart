@@ -17,6 +17,7 @@ export 'schema/table_group.dart';
 export 'schema/table_groups.dart';
 export 'seeding/demo/demo_data_seeder.dart';
 export 'seeding/system_data_seeder.dart';
+export 'timing/statement_timing_interceptor.dart';
 export 'seeding/system_seed_outcome.dart';
 export 'sync/drift_replicated_change_applier.dart';
 export 'sync/drift_sync_acceptor_store.dart';

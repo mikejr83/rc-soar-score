@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_self_score/router.dart';
 
@@ -22,6 +24,28 @@ Future<String> phase2Invitation(
   final pilot = contest.pilotNames.first;
   var pilotId = '';
   await journey.phase(2, 'Open the invitation link', () async {
+    await journey.step('The landing page defers sign in and sign up', () async {
+      await openPath(tester, '/');
+      await pumpUntilFound(
+        tester,
+        find.text('Score your flights at the field'),
+      );
+      expect(
+        tester
+            .widget<FilledButton>(find.widgetWithText(FilledButton, 'Sign in'))
+            .onPressed,
+        isNull,
+      );
+      expect(
+        tester
+            .widget<OutlinedButton>(
+              find.widgetWithText(OutlinedButton, 'Sign up'),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(find.textContaining('coming in a future release'), findsOneWidget);
+    });
     await journey.step('A link that does not exist is refused', () async {
       await openPath(tester, invitationPath('not-a-real-credential'));
       await pumpUntilFound(tester, find.text('This link does not work'));
@@ -41,7 +65,39 @@ Future<String> phase2Invitation(
       pilotId = uri.pathSegments[uri.pathSegments.indexOf('pilots') + 1];
       expect(find.text('Next to score'), findsOneWidget);
       expect(find.text('Enter'), findsOneWidget);
+      // A guest has no way back in but the card's QR code, so no sign out.
+      expect(find.byTooltip('End session'), findsNothing);
     });
+    await journey.step(
+      'The pilot can copy their own invitation link',
+      () async {
+        // A browser driven by a test has no focus and refuses the real
+        // clipboard, so the copy is caught on the platform channel.
+        String? copied;
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          (call) async {
+            if (call.method == 'Clipboard.setData') {
+              copied = (call.arguments as Map)['text'] as String?;
+            }
+            return null;
+          },
+        );
+        try {
+          await tapVisible(tester, find.byIcon(Icons.more_vert));
+          await pumpUntilFound(tester, find.text('Copy invitation link'));
+          await tapVisible(tester, find.text('Copy invitation link'));
+          await pumpUntilFound(tester, find.text('Invitation link copied'));
+        } finally {
+          tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          );
+        }
+        expect(copied, endsWith(contest.credentialOf(pilot)));
+        await tester.pump(const Duration(seconds: 5));
+      },
+    );
     await journey.step('The same link works again', () async {
       await openPath(tester, invitationPath(contest.credentialOf(pilot)));
       await pumpUntilFound(tester, find.text('Hello, $pilot'));

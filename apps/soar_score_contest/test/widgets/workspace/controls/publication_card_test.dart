@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
+import 'package:soar_score_contest/widgets/publication/publication_text.dart';
 
 import '../../../support/fake_app_connectivity.dart';
 import '../../../support/matrix_test_support.dart';
@@ -75,6 +77,20 @@ void main() {
       expect(find.textContaining('Last published'), findsOneWidget);
       expect(find.textContaining('Public updates:'), findsOneWidget);
       expect(_key('publication-change-policy'), findsOneWidget);
+    });
+
+    testWidgets('an update shows the latest projection time', (tester) async {
+      final server = _server()..startPublished();
+      await pumpWorkspace(tester, server);
+      await tester.ensureVisible(_key('publication-publish'));
+      await tester.tap(_key('publication-publish'));
+      await tester.pumpAndSettle();
+      await tester.tap(_key('publish-dialog-confirm'));
+      await tester.pumpAndSettle();
+      final time = AppLocalizationsEn().publicationTime(
+        DateTime.parse('2026-10-17T16:00:00Z'),
+      );
+      expect(find.textContaining('Last published $time.'), findsOneWidget);
     });
 
     testWidgets('making it public asks first and then changes it', (

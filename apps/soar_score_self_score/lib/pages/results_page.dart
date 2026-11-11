@@ -12,15 +12,23 @@ import '../widgets/self_score_app_bar.dart';
 /// Where the pilot stands as of a round. [asOfRound] null means the latest
 /// round; an earlier round shows a banner with a way back to the latest.
 class ResultsPage extends StatelessWidget {
-  const ResultsPage({required this.contestId, this.asOfRound, super.key});
+  const ResultsPage({
+    required this.contestId,
+    this.asOfRound,
+    this.now,
+    super.key,
+  });
 
   final String contestId;
   final int? asOfRound;
+  final DateTime Function()? now;
 
   @override
   Widget build(BuildContext context) {
     final repository = context.repository;
     return LoadableScaffold<ResultsView>(
+      allowRefresh: true,
+      now: now ?? DateTime.now,
       load: () => repository.results(contestId, asOfRound: asOfRound),
       reloadKey: (repository, contestId, asOfRound),
       appBar: (context, data) => SelfScoreAppBar(

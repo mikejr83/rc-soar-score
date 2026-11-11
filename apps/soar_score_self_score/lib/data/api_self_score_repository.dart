@@ -150,6 +150,16 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
           error.statusCode >= 500 ||
           error.statusCode == 408 ||
           error.statusCode == 429;
+      // The director routes' envelope (`{"error": {"code": ...}}`) carries
+      // the contest-state refusals, such as `scoring_closed` once the contest
+      // is completed. That is a refusal, not a lost connection: queuing it
+      // would retry a score that can never be accepted.
+      final envelopeCode = refusal == null && !transient
+          ? _codeOf(error)
+          : null;
+      if (envelopeCode != null) {
+        return ScoreRejected(code: envelopeCode, message: '');
+      }
       if (refusal == null || transient) {
         throw const SelfScoreOfflineException(_unreachable);
       }
@@ -202,6 +212,10 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       );
 
   @override
+  Future<String> invitationLink() =>
+      _read(() async => (await _client.participantInvitationLink()).link);
+
+  @override
   Future<PilotOverview> pilotOverview(String contestId, String pilotId) =>
       _read(() async => _overview(await _client.participantOverview()));
 
@@ -216,7 +230,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       access: switch (dto.access.code) {
         'open' => ScoringAccess.open,
         'not_open' || 'not_started' => ScoringAccess.notStarted,
-        'completed' => ScoringAccess.completed,
+        'contest_completed' => ScoringAccess.completed,
         // Any other refusal is closed to the pilot.
         _ => ScoringAccess.closed,
       },
@@ -281,6 +295,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       pilotNumber: session.pilotNumber,
       round: entry.round,
       roundCount: entry.roundCount,
+      lastOpenRound: entry.lastOpenRound,
       group: entry.group,
       lane: entry.lane,
       taskType: entry.taskType,
@@ -349,21 +364,20 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
     };
     final seconds = row.timeFlownSeconds;
     final height = row.launchHeight;
-    final detail = [
-      if (kind == GroupRowKind.noScore && row.flightScore != null)
-        'Estimate ${ScoreFormat.score(row.flightScore!)}',
-      if (height != null) 'Height ${ScoreFormat.score(height)} m',
-      ?row.landing,
-    ].join(' · ');
+    final score = row.flightScore;
     return GroupResultRow(
       name: row.pilotName,
       pilotNumber: row.pilotNumber,
       kind: kind,
       time: seconds == null ? null : FlightTimeInput.format(seconds.toDouble()),
-      score: kind == GroupRowKind.noScore || row.flightScore == null
+      height: height?.round(),
+      landing: row.landingPoints,
+      rawScore: row.rawScore == null ? null : ScoreFormat.score(row.rawScore!),
+      // A missing score is not in the standings yet, so it gets no value even
+      // when the server carries an estimate.
+      score: kind == GroupRowKind.noScore || score == null
           ? null
-          : ScoreFormat.score(row.flightScore!),
-      detail: detail.isEmpty ? null : detail,
+          : ScoreFormat.score(score),
       zeroReason: row.zeroReason?.toLowerCase(),
       isYou: row.isYou,
     );

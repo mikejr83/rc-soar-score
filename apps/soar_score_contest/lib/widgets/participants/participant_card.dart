@@ -15,11 +15,15 @@ class ParticipantCard extends StatelessWidget {
     required this.editing,
     required this.participant,
     this.selectable = true,
+    this.actions,
   });
 
   final ParticipantEditing editing;
   final ParticipantRow participant;
   final bool selectable;
+
+  /// Optional actions beside the status, matching the wide table.
+  final Widget? actions;
 
   static const double _minFieldWidth = 170;
 
@@ -48,6 +52,9 @@ class ParticipantCard extends StatelessWidget {
     );
 
     final fields = <Widget>[
+      // The number leads, like the table's first column.
+      if (editing.rules.has(ParticipantOption.pilotNumbers))
+        labelled('Pilot no.', cells.number(context)),
       for (final option in ParticipantCells.columnsFor(editing))
         ...switch (option) {
           ParticipantOption.roles => [labelled('Role', cells.role(context))],
@@ -59,9 +66,8 @@ class ParticipantCard extends StatelessWidget {
             ),
           ],
           ParticipantOption.teams => [labelled('Team', cells.team(context))],
-          ParticipantOption.pilotNumbers => [
-            labelled('Pilot no.', cells.number(context)),
-          ],
+          // The number field already leads the card.
+          ParticipantOption.pilotNumbers => const [],
           ParticipantOption.models => [
             labelled('Models', cells.modelsCell(context)),
           ],
@@ -120,11 +126,20 @@ class ParticipantCard extends StatelessWidget {
                     children: [
                       cells.nameBlock(context),
                       cells.emailCell(context, prefix: true),
+                      // With the menu button beside it, the status drops
+                      // under the name so a phone keeps room for both.
+                      if (actions != null) ...[
+                        const SizedBox(height: 4),
+                        cells.status(context),
+                      ],
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                cells.status(context),
+                if (actions == null) ...[
+                  const SizedBox(width: 8),
+                  cells.status(context),
+                ] else
+                  actions!,
               ],
             ),
             if (fields.isNotEmpty) ...[

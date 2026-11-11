@@ -98,7 +98,8 @@ extension ParticipantsRowStyles on ParticipantsController {
         tone: ParticipantStatusTone.warning,
       );
     } else {
-      status = const ParticipantStatus('', Icons.circle);
+      // No state of its own: the shared cell shows Ready or Non-flying.
+      status = null;
     }
 
     return ParticipantRowStyle(

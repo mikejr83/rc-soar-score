@@ -4,9 +4,31 @@ import 'package:soar_score_ui/soar_score_ui.dart';
 import '../models/group_result_row.dart';
 import 'status_chip.dart';
 
+/// The widths of the group-results columns, shared by the header row and each
+/// [GroupResultTile] so the columns line up. The table is fixed-width and
+/// scrolls sideways on a narrow screen.
+abstract final class GroupResultColumns {
+  /// The pilot name, "(you)", chip and note.
+  static const double name = 132;
+  static const double time = 56;
+  static const double height = 44;
+
+  /// The landing points: at most three digits, e.g. `100`.
+  static const double landing = 40;
+  static const double raw = 56;
+  static const double score = 48;
+
+  /// Space between the name and the first column.
+  static const double gap = 8;
+
+  /// The full table width, for tests.
+  static double get all => name + gap + time + height + landing + raw + score;
+}
+
 /// One pilot's flight in the group results: name and number, a reason chip
-/// when the flight is zero, unscored or under review, then time and score.
-/// The viewer's row carries a star, "(you)" and a leading bar.
+/// when the flight is zero, unscored or under review, then the columns that
+/// make up the score. The viewer's row carries a star, "(you)" and a leading
+/// bar.
 class GroupResultTile extends StatelessWidget {
   const GroupResultTile({required this.row, super.key});
 
@@ -36,11 +58,10 @@ class GroupResultTile extends StatelessWidget {
       ),
     };
     final note = switch (row.kind) {
-      GroupRowKind.scored => row.detail,
+      GroupRowKind.scored => null,
       GroupRowKind.zero => 'Time, height and landing are zeroed.',
       GroupRowKind.noScore => 'Not in the standings for this round.',
-      GroupRowKind.pendingReview =>
-        'Showing the original entry: ${row.detail}.',
+      GroupRowKind.pendingReview => 'The review keeps the original entry.',
     };
     final numbers = BrandTypography.numbers.copyWith(
       fontWeight: row.isYou ? FontWeight.w700 : null,
@@ -58,7 +79,8 @@ class GroupResultTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
+          SizedBox(
+            width: GroupResultColumns.name,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -105,25 +127,39 @@ class GroupResultTile extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: 64,
-            child: Text(
-              row.time ?? '–',
-              textAlign: TextAlign.right,
-              style: numbers,
-            ),
+          const SizedBox(width: GroupResultColumns.gap),
+          _Cell(GroupResultColumns.time, row.time, numbers),
+          _Cell(
+            GroupResultColumns.height,
+            row.height == null ? null : '${row.height} m',
+            numbers,
           ),
-          SizedBox(
-            width: 56,
-            child: Text(
-              row.score ?? '–',
-              textAlign: TextAlign.right,
-              style: numbers,
-            ),
+          _Cell(
+            GroupResultColumns.landing,
+            row.landing == null ? null : '${row.landing}',
+            numbers,
           ),
+          _Cell(GroupResultColumns.raw, row.rawScore, numbers),
+          _Cell(GroupResultColumns.score, row.score, numbers),
         ],
       ),
+    );
+  }
+}
+
+/// One value under a column heading; a dash when the value is absent.
+class _Cell extends StatelessWidget {
+  const _Cell(this.width, this.value, this.style);
+
+  final double width;
+  final String? value;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      child: Text(value ?? '–', textAlign: TextAlign.right, style: style),
     );
   }
 }

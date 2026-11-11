@@ -1,0 +1,28 @@
+# Paths graphify skips so the graph describes the app, not its tooling.
+# gitignore syntax. Build the graph with: graphify update .
+
+# Agent skills and tool config (vendored docs, e.g. the Auth0 skill references)
+.agents/
+.claude/
+.codex/
+.dart_tool/
+.e2e-tools/
+.kilo/
+.idea/
+.impeccable/
+.vscode/
+.mcp.json
+skills-lock.json
+
+# Research - Keeping this out until it either becomes docs or a plan.
+research/
+
+# Generated, localization, and other files that should not be included in the graph
+*.g.dart
+app_localizations*.dart
+
+# Repo meta
+.github/
+CONTRIBUTING.md
+SECURITY.md
+LICENSE

@@ -56,6 +56,10 @@ abstract interface class SelfScoreRepository {
   /// which case the same [ScoreSubmission] can be sent again safely.
   Future<SubmitResult> submitScore(ScoreSubmission submission);
 
+  /// The signed-in pilot's own invitation link, to copy to another device.
+  /// Never log it. Throws [SelfScoreLoadException] when it cannot be had.
+  Future<String> invitationLink();
+
   Future<ContestsView> contests();
 
   Future<TeamOverview> teamOverview(String contestId);

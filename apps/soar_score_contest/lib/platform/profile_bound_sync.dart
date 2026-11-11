@@ -116,7 +116,7 @@ class ProfileBoundChangeApplier implements core.ReplicatedChangeApplier {
   final SyncProfileBinding _binding;
 
   @override
-  Future<void> apply(core.ReplicatedChange change) =>
+  Future<bool> apply(core.ReplicatedChange change) =>
       _binding.write(() => _inner.apply(change));
 }
 

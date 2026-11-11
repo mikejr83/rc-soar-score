@@ -90,6 +90,7 @@ void main() {
       final routes = {
         'contests': homePath,
         'workspace': contestWorkspacePath(id),
+        'publication': contestPublicationPath(id),
         'configuration': contestConfigurationPath(id),
         'contest participants': contestParticipantsPath(id),
         'matrix': contestMatrixPath(id),
@@ -151,6 +152,13 @@ void main() {
             for (var i = 0; i < 20; i++) {
               await Future<void>.delayed(const Duration(milliseconds: 50));
               await tester.pump();
+            }
+            if (name == 'publication') {
+              expect(
+                find.byKey(const ValueKey('publication-page-policy')),
+                findsOneWidget,
+                reason: 'Publication content must load before checking layout',
+              );
             }
             // Flutter reports only the first exception to `takeException`,
             // so read each one from the error handler and name its widget.

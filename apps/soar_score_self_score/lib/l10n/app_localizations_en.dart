@@ -13,6 +13,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreMenuTooltip => 'More';
 
   @override
+  String get copyInvitationLink => 'Copy invitation link';
+
+  @override
+  String get appInfoLink => 'Application info';
+
+  @override
+  String get appInfoTitle => 'Application info';
+
+  @override
+  String get backLabel => 'Back';
+
+  @override
   String get openSourceLicencesLink => 'Open source licences';
 
   @override
@@ -124,6 +136,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backToPilots => 'Back to pilots';
 
   @override
+  String get flightResults => 'Flight Results';
+
+  @override
   String get seeGroupResults => 'See group results';
 
   @override
@@ -177,4 +192,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get endSession => 'End session';
+
+  @override
+  String get refreshResults => 'Refresh';
+
+  @override
+  String get refreshingResults => 'Refreshing…';
+
+  @override
+  String get loading => 'Loading';
+
+  @override
+  String get resultsRefreshHint => 'Refresh to see the latest scores';
+
+  @override
+  String resultsLastRefreshed(String time) {
+    return 'Last refreshed: $time';
+  }
+
+  @override
+  String resultsRefreshFailed(String time) {
+    return 'Couldn\'t refresh; last updated $time';
+  }
+
+  @override
+  String get invitationLinkCopied => 'Invitation link copied';
+
+  @override
+  String get invitationLinkCopyFailed =>
+      'Couldn\'t copy the invitation link. Check your connection and try again.';
+
+  @override
+  String get invitationLinkDialogTitle => 'Your invitation link';
+
+  @override
+  String get invitationLinkDialogBody =>
+      'Your browser would not copy it. Select the link and copy it yourself.';
+
+  @override
+  String get invitationLinkDialogClose => 'Close';
+
+  @override
+  String get currentResults => 'Results';
+
+  @override
+  String get retirePilot => 'Retire pilot';
 }

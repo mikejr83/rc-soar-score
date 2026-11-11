@@ -388,6 +388,14 @@ class InvitationService {
     );
   }
 
+  /// The credential of the invitation a verified guest session was opened
+  /// with, for the participant to copy their own link.
+  ///
+  /// Throws a [ContestStateError] (`invitation_link_unavailable`) when the
+  /// link cannot be reproduced because the server's secret changed.
+  String credentialForAccess(ParticipantAccess access) =>
+      _issued(access.invitation, created: false).credential;
+
   /// The link of [invitation], to print or copy again.
   String credentialOf(Invitation invitation) =>
       codec.credentialFor(invitation.id, invitation.invitationRevision);

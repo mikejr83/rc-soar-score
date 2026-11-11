@@ -46,7 +46,7 @@ class ScoreEntryPage extends StatelessWidget {
               ].join(' · '),
         onBack: () => context.go(pilotPath(contestId, pilotId)),
         backLabel: 'Back to pilot overview',
-        actions: data == null
+        actions: data == null || data.round != round
             ? const []
             : [
                 IconButton(
@@ -58,7 +58,7 @@ class ScoreEntryPage extends StatelessWidget {
                 ),
                 IconButton(
                   tooltip: 'Next round',
-                  onPressed: data.round < data.roundCount
+                  onPressed: data.round < data.lastOpenRound
                       ? () => goToRound(data.round + 1)
                       : null,
                   icon: const Icon(Icons.chevron_right),
@@ -66,8 +66,12 @@ class ScoreEntryPage extends StatelessWidget {
               ],
         showAccount: false,
       ),
-      // The form keeps its own state, so a new flight gets a new form.
-      builder: (context, data) => !data.formSupported
+      // The form keeps its own state, so a new flight gets a new form. While
+      // the flight loads, the previous round's data is still here: wait for
+      // the right round instead of building the form from it.
+      builder: (context, data) => data.round != round
+          ? const Center(child: CircularProgressIndicator())
+          : !data.formSupported
           ? const _UnsupportedFlight()
           : ScoreEntryForm(
               key: ValueKey((contestId, pilotId, roundId)),

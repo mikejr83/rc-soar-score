@@ -118,6 +118,17 @@ void main() {
       expect(result.fields, ['time_flown', 'landing']);
     });
 
+    test('a closed contest in the director envelope is a refusal', () async {
+      final result = await _repository(
+        (_) => _json(
+          '{"error":{"code":"scoring_closed","message":"completed"}}',
+          409,
+        ),
+      ).submitScore(_submission);
+      expect(result, isA<ScoreRejected>());
+      expect((result as ScoreRejected).code, 'scoring_closed');
+    });
+
     test('a 401 with no body ends the session instead of queueing', () async {
       for (final body in ['', '<html>']) {
         final result = await _repository((_) => _json(body, 401))
@@ -242,6 +253,15 @@ void main() {
     );
   });
 
+  test('a completed contest is read as completed, not as closed', () async {
+    final body =
+        jsonDecode(_fixture('participant_overview')) as Map<String, dynamic>;
+    body['access'] = {'code': 'contest_completed', 'message': 'raw words'};
+    final overview = await _repository((_) => _json(jsonEncode(body)))
+        .pilotOverview('c', 'p');
+    expect(overview.access, ScoringAccess.completed);
+  });
+
   test('pages after the overview do not fetch the overview again', () async {
     final repository = _repository(_fixtures);
     await repository.entryContext('c', 'p', 2);
@@ -354,23 +374,33 @@ void main() {
     expect(entry.submittedScore!.details!.enteredBy, 'Alex Rivera');
   });
 
-  test('group results show zero, estimate and own rows', () async {
-    final group = await _repository(_fixtures).groupResults('c', 'p', 1);
-    expect(group.group, 'A');
-    expect(group.latestRound, 2);
-    final you = group.rows[0];
-    expect(you.isYou, isTrue);
-    expect(you.time, '9:00');
-    expect(you.score, '962.5');
-    expect(you.detail, 'Height 45 m · Good 50');
-    final zero = group.rows[1];
-    expect(zero.kind, GroupRowKind.zero);
-    expect(zero.zeroReason, 'landed out');
-    final pending = group.rows[2];
-    expect(pending.kind, GroupRowKind.noScore);
-    expect(pending.score, isNull);
-    expect(pending.detail, 'Estimate 900');
-  });
+  test(
+    'group results show the components, points and distinct raw/score',
+    () async {
+      final group = await _repository(_fixtures).groupResults('c', 'p', 1);
+      expect(group.group, 'A');
+      expect(group.latestRound, 2);
+      final you = group.rows[0];
+      expect(you.isYou, isTrue);
+      expect(you.time, '9:00');
+      expect(you.height, 45);
+      expect(you.landing, 50);
+      expect(you.rawScore, '975');
+      expect(you.score, '962.5');
+      final zero = group.rows[1];
+      expect(zero.kind, GroupRowKind.zero);
+      expect(zero.zeroReason, 'landed out');
+      expect(zero.height, isNull);
+      expect(zero.landing, isNull);
+      // An unscored flight is not in the standings, so it shows no value even
+      // though the server carries an estimate.
+      final pending = group.rows[2];
+      expect(pending.kind, GroupRowKind.noScore);
+      expect(pending.score, isNull);
+      expect(pending.landing, isNull);
+      expect(pending.height, isNull);
+    },
+  );
 
   test('overall results keep the held round and have no teams', () async {
     final results = await _repository(_fixtures).results('c');

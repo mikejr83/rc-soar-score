@@ -114,16 +114,21 @@ class Journey {
   }
 
   /// Runs [body] as the next step of the phase. A [nativeOnly] step is logged
-  /// as skipped on the web.
+  /// as skipped on the web, a [webOnly] step as skipped on the native build.
   Future<void> step(
     String title,
     Future<void> Function() body, {
     bool nativeOnly = false,
+    bool webOnly = false,
     Duration timeout = const Duration(minutes: 4),
   }) async {
     final id = '$_phase.${++_stepInPhase}';
     if (nativeOnly && kIsWeb) {
       _note('  $id $title: SKIPPED (native only)');
+      return;
+    }
+    if (webOnly && !kIsWeb) {
+      _note('  $id $title: SKIPPED (web only)');
       return;
     }
     final started = _clock.elapsed;

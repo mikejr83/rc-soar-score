@@ -1,4 +1,4 @@
-{"assignment_id":"0192f6a0-0000-7000-8000-0000000000a2","round":2,"round_count":5,"group":"B","lane":null,"task_type":null,"matrix_revision":3,"score_revision":0,"rules_version":"f5j-2026.1","state":"not_entered","allows_motor_restart":true,"submitted_score":null,
+{"assignment_id":"0192f6a0-0000-7000-8000-0000000000a2","round":2,"round_count":5,"last_open_round":2,"group":"B","lane":null,"task_type":null,"matrix_revision":3,"score_revision":0,"rules_version":"f5j-2026.1","state":"not_entered","allows_motor_restart":true,"submitted_score":null,
 "fields":[
 {"key":"time_flown","label":"Time flown","type":"seconds","required":true,"unit":"seconds","precision":1,"min":0,"max":900,"options":[],"depends_on":{}},
 {"key":"launch_height","label":"Launch height","type":"integer","required":true,"unit":"metres","precision":0,"min":0,"max":200,"options":[],"depends_on":{}},

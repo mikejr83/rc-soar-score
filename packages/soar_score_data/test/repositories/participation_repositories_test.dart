@@ -41,6 +41,24 @@ void _tests(Backend backend) {
       expect(await repo.findById(core.Id.create()), isNull);
     });
 
+    test(
+      'findByIds reads many profiles at once, leaving out unknown ids',
+      () async {
+        final unknown = core.Id.create();
+        final found = await repo.findByIds([
+          for (final profile in examples) profile.id,
+          unknown,
+          examples.first.id,
+        ]);
+
+        expect(found.keys, unorderedEquals([for (final p in examples) p.id]));
+        for (final profile in examples) {
+          expect(found[profile.id], profile);
+        }
+        expect(await repo.findByIds(const []), isEmpty);
+      },
+    );
+
     test('listForOwner returns the profiles of that account', () async {
       final owner = examples.first.ownerAccountId;
       final owned = examples.where((p) => p.ownerAccountId == owner);

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../data/self_score_scope.dart';
 import '../models/group_results.dart';
+import '../l10n/app_localizations.dart';
 import '../router.dart';
 import '../widgets/group_result_tile.dart';
 import '../widgets/loadable_scaffold.dart';
@@ -16,12 +17,14 @@ class GroupResultsPage extends StatelessWidget {
     required this.contestId,
     required this.pilotId,
     required this.roundId,
+    this.now,
     super.key,
   });
 
   final String contestId;
   final String pilotId;
   final String roundId;
+  final DateTime Function()? now;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +37,8 @@ class GroupResultsPage extends StatelessWidget {
       fontWeight: FontWeight.w600,
     );
     return LoadableScaffold<GroupResults>(
+      allowRefresh: true,
+      now: now ?? DateTime.now,
       load: () => repository.groupResults(
         contestId,
         pilotId,
@@ -45,10 +50,12 @@ class GroupResultsPage extends StatelessWidget {
         contextLine: data == null
             ? null
             : '${data.contestName} · Round ${data.round}',
+        // Back to wherever the pilot came from: the score entry form, or the
+        // pilot overview when it was opened by Flight Results.
         onBack: () => context.canPop()
             ? context.pop()
             : context.go(pilotPath(contestId, pilotId)),
-        backLabel: 'Back to score entry',
+        backLabel: 'Back',
         showAccount: false,
       ),
       builder: (context, data) => ListView(
@@ -61,24 +68,27 @@ class GroupResultsPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const StatusChip(
                         label: 'Preliminary',
                         icon: Icons.pending_outlined,
                       ),
-                      Text(
-                        'Updates as scores come in',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: muted,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context).resultsRefreshHint,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: muted,
+                          ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Time, height and landing are the values entered for '
-                    'each flight. A zero shows why.',
+                    'Time, height and landing are the values entered for each '
+                    'flight. Raw is the score before normalising; Score is the '
+                    'flight score that counts. A dash means no value yet.',
                     style: theme.textTheme.bodySmall?.copyWith(color: muted),
                   ),
                 ],
@@ -109,29 +119,33 @@ class GroupResultsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(child: Text('Pilot and flight', style: labelStyle)),
-              SizedBox(
-                width: 64,
-                child: Text(
-                  'Time',
-                  textAlign: TextAlign.right,
-                  style: labelStyle,
+          // The table scrolls sideways on a narrow screen so the columns stay
+          // aligned; it sits still on a wide one.
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    SizedBox(
+                      width: GroupResultColumns.name,
+                      child: Text('Pilot and flight', style: labelStyle),
+                    ),
+                    const SizedBox(width: GroupResultColumns.gap),
+                    _heading('Time', GroupResultColumns.time, labelStyle),
+                    _heading('Height', GroupResultColumns.height, labelStyle),
+                    _heading('Landing', GroupResultColumns.landing, labelStyle),
+                    _heading('Raw', GroupResultColumns.raw, labelStyle),
+                    _heading('Score', GroupResultColumns.score, labelStyle),
+                  ],
                 ),
-              ),
-              SizedBox(
-                width: 56,
-                child: Text(
-                  'Score',
-                  textAlign: TextAlign.right,
-                  style: labelStyle,
-                ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                for (final row in data.rows) GroupResultTile(row: row),
+              ],
+            ),
           ),
-          const SizedBox(height: 6),
-          for (final row in data.rows) GroupResultTile(row: row),
           const SizedBox(height: 16),
           Text(
             'Scores are preliminary. The director can change them until '
@@ -142,4 +156,12 @@ class GroupResultsPage extends StatelessWidget {
       ),
     );
   }
+}
+
+/// One heading over a column, matching the width its cells use.
+Widget _heading(String label, double width, TextStyle? style) {
+  return SizedBox(
+    width: width,
+    child: Text(label, textAlign: TextAlign.right, style: style),
+  );
 }

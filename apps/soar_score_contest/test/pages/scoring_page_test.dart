@@ -78,6 +78,20 @@ void main() {
     expect(find.text('Ann Lee'), findsNothing);
   });
 
+  testWidgets('fills the form with a waiting pilot submission', (tester) async {
+    final server = ScoringServer();
+    server.seedPendingSubmission(scoringAssignmentId(1, 1), {
+      'time_flown': 600,
+      'launch_height': 120,
+      'landing': 'points_50',
+    });
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    await _activate(tester, 1, 1);
+
+    expect(tester.widget<TextField>(_time(1, 1)).controller!.text, '10:00');
+    expect(tester.widget<TextField>(_height(1, 1)).controller!.text, '120');
+  });
+
   testWidgets('honours the round and group of the route', (tester) async {
     await pumpScoringPage(tester, ScoringServer(), round: 2, group: 2);
     expect(find.text('Round 2 of 2'), findsOneWidget);

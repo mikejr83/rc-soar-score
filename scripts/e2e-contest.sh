@@ -96,7 +96,11 @@ if [ "$device" = web ] || [ "$device" = chrome ]; then
   trap cleanup EXIT
   start_server() {
     log="$(mktemp)"
-    (cd "$root/apps/soar_score_server" && exec dart run tool/e2e_server.dart --port "$port") >"$log" 2>&1 &
+    server_args=()
+    if tr -d '\r' < "$root/scripts/e2e-contest-publishing.txt" | grep -Fxq "$(basename "$file")"; then
+      server_args+=(--publishing)
+    fi
+    (cd "$root/apps/soar_score_server" && exec dart run tool/e2e_server.dart --port "$port" ${server_args[@]+"${server_args[@]}"}) >"$log" 2>&1 &
     server_pid=$!
     for _ in $(seq 1 120); do
       if grep -q E2E_SERVER_READY "$log"; then
@@ -166,9 +170,39 @@ fi
 # a second file's launch fails while the previous run's app is still alive.
 status=0
 for file in "${files[@]}"; do
+  # The app reads as offline when the hosted server it reports to does not
+  # answer its health check, and the Reports page then will not offer to send
+  # invitations. A native run has no hosted server, so the journeys listed in
+  # e2e-contest-hosted.txt get the web run's server, started without
+  # --publishing: it answers, and still says it does not publish.
+  hosted_pid=""
+  hosted_log=""
+  hosted_args=()
+  if tr -d '\r' < "$root/scripts/e2e-contest-hosted.txt" | grep -Fxq "$(basename "$file")"; then
+    hosted_port="${E2E_SERVER_PORT:-18080}"
+    hosted_log="$(mktemp)"
+    (cd "$root/apps/soar_score_server" && exec dart run tool/e2e_server.dart --port "$hosted_port") >"$hosted_log" 2>&1 &
+    hosted_pid=$!
+    hosted_ready=""
+    for _ in $(seq 1 120); do
+      if grep -q E2E_SERVER_READY "$hosted_log"; then hosted_ready=1; break; fi
+      kill -0 "$hosted_pid" 2>/dev/null || break
+      sleep 1
+    done
+    if [ -z "$hosted_ready" ]; then
+      cat "$hosted_log" >&2
+      echo "E2E server did not start" >&2
+      kill "$hosted_pid" 2>/dev/null || true
+      rm -f "$hosted_log"
+      exit 1
+    fi
+    hosted_args=(--dart-define=SOAR_SCORE_API_BASE_URL="http://localhost:$hosted_port")
+  fi
   e2e_args=(--dart-define=SOAR_SCORE_DEMO=true --dart-define=SOAR_SCORE_DEMO_RESET=true)
   [ "$(basename "$file")" = "signed_out_landing_journey_test.dart" ] && e2e_args+=(--dart-define=SOAR_SCORE_E2E_SIGNED_OUT=true)
   [ "$(basename "$file")" = "matrix_draw_cancel_test.dart" ] && e2e_args+=(--dart-define=SOAR_SCORE_E2E_SLOW_DRAW=true)
-  flutter test "$file" -d "$device" "${e2e_args[@]}" ${stop_after[@]+"${stop_after[@]}"} ${extra[@]+"${extra[@]}"} || status=1
+  flutter test "$file" -d "$device" "${e2e_args[@]}" ${hosted_args[@]+"${hosted_args[@]}"} ${stop_after[@]+"${stop_after[@]}"} ${extra[@]+"${extra[@]}"} || status=1
+  if [ -n "$hosted_pid" ]; then kill "$hosted_pid" 2>/dev/null || true; wait "$hosted_pid" 2>/dev/null || true; fi
+  [ -z "$hosted_log" ] || rm -f "$hosted_log"
 done
 exit $status

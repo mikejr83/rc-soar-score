@@ -198,6 +198,27 @@ void _tests(SliceBackend backend) {
     },
   );
 
+  test('a pilot can read their own invitation link, and only theirs', () async {
+    final issued = await service.issue(
+      contestId: core.Id.parse(_contestId),
+      participationId: core.Id.parse(_participationId(1)),
+      issuedBy: api.director,
+      clientMutationId: 'issue-link-1',
+    );
+    final token = (await service.resolve(issued.credential)).sessionToken;
+
+    final (status, body) = await call('/invitation-link', token: token);
+    expect(status, 200, reason: '$body');
+    expect(
+      body['link'],
+      'https://score.rcsoarscore.com/invitations/${issued.credential}',
+    );
+    expect(body['participation_id'], _participationId(1));
+
+    final (noSession, _) = await call('/invitation-link');
+    expect(noSession, 401);
+  });
+
   test('the overview lists the pilot\'s own rounds and the next one', () async {
     final token = await sessionFor(1);
     final (status, body) = await call('/overview', token: token);
@@ -344,6 +365,8 @@ void _tests(SliceBackend backend) {
     expect(body['assignment_id'], assignmentOf(1, 2)['id']);
     expect(body['round'], 2);
     expect(body['round_count'], 3);
+    // Nothing is scored, so round 1 is the next to score and the last open.
+    expect(body['last_open_round'], 1);
     expect(body['matrix_revision'], 1);
     expect(body['score_revision'], 0);
     expect(body['state'], 'not_entered');

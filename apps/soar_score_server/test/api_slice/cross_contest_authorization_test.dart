@@ -133,6 +133,16 @@ void _tests(SliceBackend backend) {
     await api.expectForeignDenied(
       outsider,
       'GET',
+      '/contests/$_contestId/participants',
+    );
+    await api.expectForeignDenied(
+      outsider,
+      'GET',
+      '/contests/$_contestId/report-data',
+    );
+    await api.expectForeignDenied(
+      outsider,
+      'GET',
       '/contests/$_contestId/scores',
     );
     await api.expectForeignDenied(

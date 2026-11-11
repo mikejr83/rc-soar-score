@@ -7,15 +7,24 @@ import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/contest/publication_page.dart';
 import 'package:soar_score_contest/router.dart';
+import 'package:soar_score_contest/services/ui_account/ui_account.dart';
+import 'package:soar_score_contest/ui_account_provider.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 import '../support/matrix_test_support.dart';
 import '../support/next_step_widget_support.dart';
 
 Finder _key(String key) => find.byKey(ValueKey(key));
 
-Future<void> _pump(WidgetTester tester, WorkspaceServer server) async {
-  tester.view.physicalSize = const Size(1000, 1200);
+Future<void> _pump(
+  WidgetTester tester,
+  WorkspaceServer server, {
+  Size size = const Size(1000, 1200),
+  Brightness brightness = Brightness.light,
+  String? accountId,
+}) async {
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final router = GoRouter(
@@ -31,15 +40,23 @@ Future<void> _pump(WidgetTester tester, WorkspaceServer server) async {
   );
   addTearDown(router.dispose);
   await tester.pumpWidget(
-    ApiClientInherited(
-      client: ApiClient(
-        baseUrl: Uri.parse('http://localhost'),
-        httpClient: MockClient(server.handle),
-      ),
-      child: MaterialApp.router(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        routerConfig: router,
+    UiAccountInherited(
+      account: FixedUiAccount(accountId ?? 'local'),
+      child: ApiClientInherited(
+        client: ApiClient(
+          baseUrl: Uri.parse('http://localhost'),
+          httpClient: MockClient(server.handle),
+        ),
+        child: MaterialApp.router(
+          theme: ContestAppTheme.lightTheme,
+          darkTheme: ContestAppTheme.darkTheme,
+          themeMode: brightness == Brightness.dark
+              ? ThemeMode.dark
+              : ThemeMode.light,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
       ),
     ),
   );
@@ -52,11 +69,72 @@ WorkspaceServer _server() => WorkspaceServer(
 );
 
 void main() {
+  for (final brightness in Brightness.values) {
+    testWidgets('publication content uses the $brightness theme card', (
+      tester,
+    ) async {
+      final server = WorkspaceServer(
+        state: brightness == Brightness.light
+            ? LifecycleState.ready
+            : LifecycleState.running,
+        configuration: matrixConfiguration(),
+      )..startPublished();
+      await _pump(tester, server, brightness: brightness);
+      final card = _key('publication-page-card');
+      expect(card, findsOneWidget);
+      for (final key in [
+        'publication-page-state',
+        'publication-page-policy',
+        'publication-publish',
+        'publication-page-copy',
+        'publication-page-history',
+      ]) {
+        expect(find.descendant(of: card, matching: _key(key)), findsOneWidget);
+      }
+      expect(tester.getSize(card).width, 720);
+      final material = tester.widget<Material>(
+        find.descendant(of: card, matching: find.byType(Material)).first,
+      );
+      final theme = Theme.of(tester.element(card));
+      expect(material.color, theme.cardTheme.color);
+      expect(material.shape, theme.cardTheme.shape);
+      expect(material.elevation, theme.cardTheme.elevation);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('narrow publication card wraps actions and scrolls history', (
+    tester,
+  ) async {
+    final server = _server()..startPublished(visibility: 'Public');
+    await _pump(tester, server, size: const Size(320, 480));
+    final card = _key('publication-page-card');
+    expect(tester.getTopLeft(card).dx, 16);
+    expect(tester.getSize(card).width, 288);
+    expect(tester.getTopLeft(_key('publication-page-state')).dx, 32);
+    expect(tester.takeException(), isNull);
+    await tester.ensureVisible(_key('publication-history-1'));
+    await tester.pumpAndSettle();
+    expect(_key('publication-history-1').hitTestable(), findsOneWidget);
+    await tester.ensureVisible(_key('publication-publish'));
+    expect(_key('publication-publish').hitTestable(), findsOneWidget);
+    expect(
+      tester.widget<ButtonStyleButton>(_key('publication-publish')).onPressed,
+      isNotNull,
+    );
+    expect(
+      tester.getTopLeft(_key('publication-request-delisting')).dy,
+      greaterThan(tester.getTopLeft(_key('publication-publish')).dy),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('an unpublished contest shows nothing published', (tester) async {
     await _pump(tester, _server());
     expect(find.text('Unpublished'), findsOneWidget);
     expect(_key('publication-page-no-copy'), findsOneWidget);
     expect(_key('publication-publish'), findsOneWidget);
+    expect(find.textContaining('Public updates:'), findsOneWidget);
   });
 
   testWidgets('publishing shows the latest copy', (tester) async {
@@ -86,12 +164,19 @@ void main() {
     final server = _server()..contestStatus = 404;
     await _pump(tester, server);
     expect(find.text('Contest not found'), findsOneWidget);
+    expect(_key('publication-page-card'), findsNothing);
   });
 
   testWidgets('a failed load offers Retry', (tester) async {
     final server = _server()..contestStatus = 500;
     await _pump(tester, server);
-    expect(_key('publication-page-failed'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: _key('publication-page-card'),
+        matching: _key('publication-page-failed'),
+      ),
+      findsOneWidget,
+    );
     server.contestStatus = 200;
     await tester.tap(_key('publication-page-retry'));
     await tester.pumpAndSettle();
@@ -120,7 +205,11 @@ void main() {
 
   testWidgets('lists every published copy, newest first', (tester) async {
     final server = _server()..startPublished();
-    await _pump(tester, server);
+    await _pump(
+      tester,
+      server,
+      accountId: '019c0000-0000-7000-8000-000000000001',
+    );
     // Publish twice more: copies 2 and 3.
     for (var i = 0; i < 2; i++) {
       await tester.tap(_key('publication-publish'));
@@ -139,6 +228,31 @@ void main() {
     expect(find.text('Updated automatically'), findsNWidgets(2));
     expect(find.textContaining('Copy 3, from contest revision 1,'), findsOne);
   });
+
+  testWidgets(
+    'history does not attribute another or unknown publisher to you',
+    (tester) async {
+      final server = _server()..startPublished();
+      server.history = [
+        for (final publisher in ['019c0000-0000-7000-8000-000000000002', null])
+          {
+            'id': '019c0000-0000-7000-8000-00000000e001',
+            'projection_revision': 1,
+            'contest_revision': 1,
+            'published_at': '2026-10-17T15:00:00.000Z',
+            'published_by': publisher,
+            'publisher_kind': 'person',
+          },
+      ];
+      await _pump(
+        tester,
+        server,
+        accountId: '019c0000-0000-7000-8000-000000000001',
+      );
+      expect(find.text('Published by a director'), findsNWidgets(2));
+      expect(find.text('Published by you'), findsNothing);
+    },
+  );
 
   testWidgets('an unpublished contest has no history', (tester) async {
     await _pump(tester, _server());

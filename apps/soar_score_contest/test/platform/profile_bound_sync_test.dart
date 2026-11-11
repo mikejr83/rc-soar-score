@@ -199,9 +199,10 @@ class _CountingApplier implements core.ReplicatedChangeApplier {
   final EmbeddedServer _server;
 
   @override
-  Future<void> apply(core.ReplicatedChange change) async {
+  Future<bool> apply(core.ReplicatedChange change) async {
     await _server.database.customStatement('UPDATE contests SET name = name');
     _onApply();
+    return true;
   }
 }
 

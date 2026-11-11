@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
-import '../router.dart';
 import '../widgets/legal_footer.dart';
 
 /// The landing page: brand lockup, what the app is for and the two ways in.
@@ -42,31 +40,55 @@ class HomePage extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'This is the self-scoring app for RC Soar Score. Sign in '
-                          'to see your contests, or sign up to start.',
+                          'This is the self-scoring app for RC Soar Score. Open '
+                          'the link your contest director sent you to start '
+                          'scoring.',
                           style: theme.textTheme.bodyLarge?.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 32),
-                        FilledButton(
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48),
+                        // Accounts come in a future release; until then the
+                        // only way in is the director's link. The hint tells a
+                        // screen reader why the buttons are off.
+                        Semantics(
+                          hint:
+                              'Sign in and sign up are not available yet. '
+                              'Use the link your contest director sent you.',
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              FilledButton(
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(48),
+                                ),
+                                onPressed: null,
+                                child: const Text('Sign in'),
+                              ),
+                              const SizedBox(height: 12),
+                              OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(48),
+                                  side: BorderSide(
+                                    color: scheme.onSurface,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                onPressed: null,
+                                child: const Text('Sign up'),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Sign in and sign up are coming in a future '
+                                'release, when pilots can create accounts '
+                                'that track their results over time.',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
-                          onPressed: () => context.go(contestsPath),
-                          child: const Text('Sign in'),
-                        ),
-                        const SizedBox(height: 12),
-                        OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48),
-                            side: BorderSide(
-                              color: scheme.onSurface,
-                              width: 1.5,
-                            ),
-                          ),
-                          onPressed: () => context.go(contestsPath),
-                          child: const Text('Sign up'),
                         ),
                         const Spacer(),
                         const Divider(),

@@ -113,6 +113,16 @@ void main() {
     expect(narrowSheet.dy, greaterThan(narrowMatrix.dy));
   });
 
+  testWidgets('opening the reports page asks the API once', (tester) async {
+    final server = _server(matrix: drawnMatrix(), scored: _scored(2));
+    await _pump(tester, server);
+
+    expect(server.reportDataRequests, hasLength(1));
+    expect(server.reportDataRequests.single.queryParameters, {
+      'include': 'facts',
+    });
+  });
+
   testWidgets('fits a compact window with large text and every warning', (
     tester,
   ) async {

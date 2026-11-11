@@ -9,6 +9,7 @@ import '../widgets/landings/landing_detail_pane.dart';
 import '../widgets/landings/landing_list_pane.dart';
 import '../widgets/master_detail.dart';
 import '../widgets/page_states/page_states.dart';
+import '../widgets/sync/reload_on_sync.dart';
 
 /// The director's landing tables beside the system ones (system scope,
 /// `plan/ui/contest-administration/main-page.md`).
@@ -100,45 +101,49 @@ class _LandingsPageState extends State<LandingsPage> {
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<List<LandingTableView>>(
-    future: _tables,
-    builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        return loadFailedView(
-          snapshot.error!,
-          title: 'Landing tables could not be loaded.',
-          onRetry: _reload,
-        );
-      }
-      final all = snapshot.data;
-      if (all == null) {
-        return const PageStateView.loading(label: 'Loading landing tables');
-      }
-      if (all.isEmpty) {
-        return const PageStateView.empty(title: 'No landing tables yet.');
-      }
-      final selected = all.firstWhere(
-        (view) => view.table.id == _selectedId,
-        orElse: () => all.first,
+  Widget build(BuildContext context) =>
+      ReloadOnSync.account(onSynced: _reload, child: _content(context));
+
+  Widget _content(BuildContext context) =>
+      FutureBuilder<List<LandingTableView>>(
+        future: _tables,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return loadFailedView(
+              snapshot.error!,
+              title: 'Landing tables could not be loaded.',
+              onRetry: _reload,
+            );
+          }
+          final all = snapshot.data;
+          if (all == null) {
+            return const PageStateView.loading(label: 'Loading landing tables');
+          }
+          if (all.isEmpty) {
+            return const PageStateView.empty(title: 'No landing tables yet.');
+          }
+          final selected = all.firstWhere(
+            (view) => view.table.id == _selectedId,
+            orElse: () => all.first,
+          );
+          return MasterDetail(
+            showDetail: _showDetail,
+            list: (context, wide) => LandingListPane(
+              tables: all,
+              selectedId: selected.table.id,
+              highlight: wide,
+              onSelect: (view) => setState(() {
+                _selectedId = view.table.id;
+                _showDetail = true;
+              }),
+            ),
+            detail: (context, wide) => LandingDetailPane(
+              view: selected,
+              onBack: wide ? null : () => setState(() => _showDetail = false),
+              onCopy: () => context.go(newLandingPath, extra: selected),
+              onDelete: () => _delete(selected),
+            ),
+          );
+        },
       );
-      return MasterDetail(
-        showDetail: _showDetail,
-        list: (context, wide) => LandingListPane(
-          tables: all,
-          selectedId: selected.table.id,
-          highlight: wide,
-          onSelect: (view) => setState(() {
-            _selectedId = view.table.id;
-            _showDetail = true;
-          }),
-        ),
-        detail: (context, wide) => LandingDetailPane(
-          view: selected,
-          onBack: wide ? null : () => setState(() => _showDetail = false),
-          onCopy: () => context.go(newLandingPath, extra: selected),
-          onDelete: () => _delete(selected),
-        ),
-      );
-    },
-  );
 }

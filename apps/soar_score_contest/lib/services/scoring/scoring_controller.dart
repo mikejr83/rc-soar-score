@@ -105,6 +105,95 @@ class ScoringController extends ChangeNotifier {
       loading = false;
       notifyListeners();
     }
+    // A sync that came in meanwhile may be newer than what the load read.
+    if (_refreshAfterLoad) {
+      _refreshAfterLoad = false;
+      if (loadError == null) await refreshAfterSync();
+    }
+  }
+
+  bool _refreshAfterLoad = false;
+
+  /// Counts stored entries, so a read can tell a save answered meanwhile.
+  int _savedEpoch = 0;
+
+  /// Reads the contest's scores again after a sync, without disturbing the
+  /// page: the round and group stay, and nothing the director typed is lost.
+  ///
+  /// A row with unsaved edits keeps them; when its official score moved on
+  /// meanwhile, the row is marked stale with the newer values, which is the
+  /// same choice (keep mine or take theirs) a conflicting save leads to. A row
+  /// being saved is left alone until its save answers. Every other row shows
+  /// what was pulled, including a pilot's new submission. A failed read leaves
+  /// the page as it was.
+  Future<void> refreshAfterSync() async {
+    // One read at a time: a sync that arrives meanwhile asks for one more
+    // read after this one, so an older answer never lands over a newer one.
+    if (_refreshing) {
+      _refreshAgain = true;
+      return;
+    }
+    _refreshing = true;
+    try {
+      do {
+        _refreshAgain = false;
+        await _refreshOnce();
+      } while (_refreshAgain && !_disposed);
+    } finally {
+      _refreshing = false;
+    }
+  }
+
+  bool _refreshing = false;
+  bool _refreshAgain = false;
+
+  Future<void> _refreshOnce() async {
+    if (loading) {
+      _refreshAfterLoad = true;
+      return;
+    }
+    if (data == null) return;
+    ScoringPageData? loaded;
+    try {
+      // A save that answers while the read is out makes the read older than
+      // the page, so the read is made again rather than put over the save.
+      for (var tries = 0; tries < 3 && loaded == null; tries++) {
+        final epoch = _savedEpoch;
+        final read = await ScoringPageData.load(client, contestId);
+        if (epoch == _savedEpoch) loaded = read;
+      }
+    } on Object {
+      return;
+    }
+    if (loaded == null) return;
+    if (_disposed || data == null) return;
+    final before = {for (final row in rows) row.id: row};
+    var next = loaded;
+    // A save in flight answers with its own copy of the slot.
+    for (final row in before.values) {
+      final slot = row.slot;
+      if (saveOf(row.id).isBusy && slot != null) next = next.withSlot(slot);
+    }
+    data = next;
+    _clampGroup();
+    for (final row in rows) {
+      if (saveOf(row.id).isBusy) continue;
+      final draft = _drafts[row.id];
+      if (draft == null) continue;
+      // Raw text counts, so an invalid entry is not wiped by a refresh.
+      final typed = draft.editedSinceLoad;
+      if (!typed) {
+        draft.resetTo(row.savedComponents, shown: _shown(row));
+      } else if (before[row.id]?.baseRevision != row.baseRevision) {
+        _theirs[row.id] = row.savedComponents;
+        _saves[row.id] = const RowSave(
+          RowSaveKind.stale,
+          message: 'This row changed since you opened it.',
+        );
+      }
+    }
+    await _loadResults();
+    notifyListeners();
   }
 
   void _clampGroup() {
@@ -152,8 +241,31 @@ class ScoringController extends ChangeNotifier {
     final draft = ScoreRowDraft(
       settings: data!.settings,
       saved: row.savedComponents,
+      shown: _shown(row),
     )..addListener(notifyListeners);
     return _drafts[row.id] = draft;
+  }
+
+  /// The pilot submission (attempt id) the director discarded or reverted, by
+  /// row: the form shows what is saved instead of that submission. A different
+  /// attempt, which means a newer submission, fills the form again.
+  final Map<Id, Id> _prefillDismissed = {};
+
+  void _dismissPrefill(ScoringRow row) {
+    final attempt = row.slot?.pendingAttempt;
+    if (row.hasPendingSubmission && attempt != null) {
+      _prefillDismissed[row.id] = attempt.id;
+    }
+  }
+
+  /// What [row]'s form starts with.
+  Map<String, Object?> _shown(ScoringRow row) {
+    final dismissed = _prefillDismissed[row.id];
+    if (dismissed != null && dismissed == row.slot?.pendingAttempt?.id) {
+      return row.savedComponents;
+    }
+    _prefillDismissed.remove(row.id);
+    return row.formComponents;
   }
 
   RowSave saveOf(Id id) => _saves[id] ?? RowSave.idle;
@@ -199,9 +311,7 @@ class ScoringController extends ChangeNotifier {
   }
 
   void discardAll() {
-    for (final row in rows) {
-      _drafts[row.id]?.resetTo(row.savedComponents);
-    }
+    rows.forEach(_dismissPrefill);
     _drafts.clear();
     _saves.clear();
     _theirs.clear();
@@ -211,7 +321,8 @@ class ScoringController extends ChangeNotifier {
 
   /// Puts one row back to what is saved.
   void revert(ScoringRow row) {
-    _drafts[row.id]?.resetTo(row.savedComponents);
+    _dismissPrefill(row);
+    _drafts[row.id]?.resetTo(row.savedComponents, shown: _shown(row));
     _saves.remove(row.id);
     _theirs.remove(row.id);
     _clearRemovalReason(row.id);
@@ -261,6 +372,7 @@ class ScoringController extends ChangeNotifier {
   /// Takes a stored entry into the page: the slot, the contest and the row's
   /// draft and save state.
   void _applySaved(ScoringRow row, ScoreEntryResult result) {
+    _savedEpoch++;
     _mutationIds.remove(row.id);
     final slot = ScoreSlot(
       placeholder: result.placeholder,
@@ -552,7 +664,11 @@ class ScoringController extends ChangeNotifier {
   /// Drops the typed values and shows the newer revision.
   void takeTheirs(ScoringRow row) {
     final fresh = rows.firstWhere((r) => r.id == row.id, orElse: () => row);
-    _drafts[row.id]?.resetTo(fresh.savedComponents);
+    _prefillDismissed.remove(row.id);
+    _drafts[row.id]?.resetTo(
+      fresh.savedComponents,
+      shown: fresh.formComponents,
+    );
     _saves.remove(row.id);
     _theirs.remove(row.id);
     _clearRemovalReason(row.id);
@@ -566,7 +682,15 @@ class ScoringController extends ChangeNotifier {
       data = loaded;
       loadError = null;
       for (final row in rows) {
-        _drafts[row.id]?.rebase(row.savedComponents);
+        final draft = _drafts[row.id];
+        if (draft == null) continue;
+        // An untouched form follows the reload (a pilot may have submitted
+        // since); what the director typed stays.
+        if (draft.isDirty && !draft.isUntouchedPrefill) {
+          draft.rebase(row.savedComponents);
+        } else {
+          draft.resetTo(row.savedComponents, shown: _shown(row));
+        }
       }
       _saves.clear();
       // A reload that shows the penalty already removed settles the row.
@@ -651,7 +775,7 @@ class ScoringController extends ChangeNotifier {
         retiredAtRound: retiredAtRound,
       ),
     );
-    _drafts[row.id]?.resetTo(row.savedComponents);
+    _drafts[row.id]?.resetTo(row.savedComponents, shown: _shown(row));
     _saves.remove(row.id);
     await refresh();
     // refresh() does not touch the notice, so it shows after the reload.

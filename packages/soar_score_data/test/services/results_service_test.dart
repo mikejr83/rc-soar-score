@@ -169,6 +169,22 @@ void _tests(Backend backend) {
       expect(winner.contestParticipationId, firstRound[0].participationId);
     });
 
+    test('a backdated correction does not make the results stale', () async {
+      for (var i = 1; i < firstRound.length; i++) {
+        await enter(firstRound[i], times[i]);
+      }
+      // The first score is stamped later than its correction, as a clock
+      // set back would leave it; only the current score counts.
+      now = DateTime.utc(2026, 10, 17, 19);
+      await enter(firstRound[0], times[0]);
+      now = DateTime.utc(2026, 10, 17, 16);
+      await enter(firstRound[0], 595, base: 1);
+      now = DateTime.utc(2026, 10, 17, 17);
+      await results.recalculate(contestId);
+
+      expect((await results.read(contestId)).isStale, isFalse);
+    });
+
     test('results of another calculation version read as stale', () async {
       await scoreRoundOne();
       await results.recalculate(contestId);

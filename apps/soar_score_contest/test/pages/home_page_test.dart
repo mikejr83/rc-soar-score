@@ -7,6 +7,9 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/app_sync_provider.dart';
+import 'package:soar_score_contest/services/sync/app_sync_state.dart';
+import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/home_page.dart';
 import 'package:soar_score_contest/services/competition_import/competition_import.dart';
@@ -15,6 +18,7 @@ import 'package:soar_score_contest/ui_account_provider.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/competition_import_fakes.dart';
+import '../support/fake_app_sync.dart';
 
 Contest _contest(String name, {int day = 17}) => Contest(
   id: Id.parse('019c0000-0000-7000-8000-0000000000$day'),
@@ -370,5 +374,43 @@ void main() {
       expect(calls, 1);
       expect(find.text('Same Account Open'), findsNWidgets(2));
     });
+  });
+
+  testWidgets('a contest that arrives by sync shows without leaving', (
+    tester,
+  ) async {
+    final contests = <Contest>[];
+    final sync = FakeAppSync();
+    var reads = 0;
+    final client = _client((_) async {
+      reads++;
+      return _json({
+        'contests': [for (final c in contests) c.toJson()],
+      });
+    });
+    await tester.pumpWidget(AppSyncInherited(sync: sync, child: _app(client)));
+    await tester.pumpAndSettle();
+    expect(find.text('Fall Classic'), findsNothing);
+
+    // The account's contest is pulled through its own contest scope.
+    final arrived = _contest('Fall Classic');
+    contests.add(arrived);
+    sync.state = AppSyncState(
+      scopes: {
+        ContestScopeKey(arrived.id): const SyncScopeSummary(dataRevision: 1),
+      },
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Fall Classic'), findsWidgets);
+
+    // A sync that changed nothing reads nothing.
+    final before = reads;
+    sync.state = AppSyncState(
+      scopes: {
+        ContestScopeKey(arrived.id): const SyncScopeSummary(dataRevision: 1),
+      },
+    );
+    await tester.pumpAndSettle();
+    expect(reads, before);
   });
 }

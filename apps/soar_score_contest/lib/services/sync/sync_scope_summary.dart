@@ -10,6 +10,7 @@ class SyncScopeSummary extends Equatable {
     this.rejectedChanges = 0,
     this.conflicts = 0,
     this.lastSyncedAt,
+    this.dataRevision = 0,
     this.problem,
     this.localOnly = false,
   });
@@ -26,6 +27,11 @@ class SyncScopeSummary extends Equatable {
   /// When the scope last synced; null before the first sync.
   final DateTime? lastSyncedAt;
 
+  /// Moves when a sync changed local data or what the service holds, and
+  /// not for a sync that changed nothing. Pages that show synced data reload
+  /// when it moves (see `ReloadOnSync`).
+  final int dataRevision;
+
   /// Why the last attempt failed; null when it did not.
   final SyncProblem? problem;
 
@@ -41,6 +47,7 @@ class SyncScopeSummary extends Equatable {
     rejectedChanges,
     conflicts,
     lastSyncedAt,
+    dataRevision,
     problem,
     localOnly,
   ];

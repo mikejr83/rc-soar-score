@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/scoring/row_save.dart';
 import '../../services/scoring/score_check.dart';
 import '../../services/scoring/score_row_draft.dart';
@@ -738,27 +739,14 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         children: [
           _label(context, 'Indicators', labels),
           if (widget.row.hasPendingSubmission) ...[
-            const Tooltip(
-              message:
-                  'A pilot or helper submitted values. The submission is '
-                  'kept in history.',
+            Tooltip(
+              message: AppLocalizations.of(context).scorePilotEntryTooltip,
               child: StatusChip(
                 icon: Icons.smartphone,
-                label: 'Pilot entry',
+                label: AppLocalizations.of(context).scorePilotEntryChip,
                 dense: true,
               ),
             ),
-            if (widget.row.pendingComponents.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  widget.row.pendingComponents.entries
-                      .map((e) => '${e.key.replaceAll('_', ' ')}: ${e.value}')
-                      .join(', '),
-                  key: const ValueKey('pilot-entry-values'),
-                  style: theme.textTheme.bodySmall,
-                ),
-              ),
           ] else
             Text(
               '–',

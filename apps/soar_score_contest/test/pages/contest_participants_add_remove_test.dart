@@ -26,7 +26,7 @@ Future<void> _searchAndPick(
   await tester.pumpAndSettle();
 }
 
-Finder _remove() => find.byKey(const ValueKey('remove-participants'));
+Finder _remove() => find.byKey(const ValueKey('bulk-remove'));
 
 void main() {
   group('adding', () {
@@ -171,13 +171,14 @@ void main() {
     testWidgets('Remove is off until someone is selected', (tester) async {
       await pumpParticipantsPage(tester, ParticipantsServer());
 
-      expect(tester.widget<OutlinedButton>(_remove()).onPressed, isNull);
+      expect(_remove(), findsNothing);
+      expect(find.byKey(const ValueKey('remove-participants')), findsNothing);
 
       await tester.tap(_check(5));
       await tester.pumpAndSettle();
 
-      expect(tester.widget<OutlinedButton>(_remove()).onPressed, isNotNull);
-      expect(find.text('Remove 1'), findsOneWidget);
+      expect(tester.widget<TextButton>(_remove()).onPressed, isNotNull);
+      expect(find.text('Remove'), findsOneWidget);
     });
 
     testWidgets('the confirmation names the people; confirming removes them', (
@@ -222,8 +223,17 @@ void main() {
       await tester.tap(_check(1));
       await tester.pumpAndSettle();
 
-      expect(tester.widget<OutlinedButton>(_remove()).onPressed, isNull);
-      expect(find.byKey(const ValueKey('remove-reason')), findsOneWidget);
+      expect(tester.widget<TextButton>(_remove()).onPressed, isNull);
+      expect(
+        find.byWidgetPredicate(
+          (w) =>
+              w is Tooltip &&
+              (w.message ?? '').contains(
+                'selection contains a pilot with flights',
+              ),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a removal the server refuses is reported as partial', (

@@ -668,6 +668,96 @@ abstract class AppLocalizations {
   /// **'OK'**
   String get storageDetailClose;
 
+  /// Status bar sync entry before the engine has looked at the scope.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get syncStatusChecking;
+
+  /// Status bar sync entry while a sync runs.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncStatusSyncing;
+
+  /// Status bar sync entry for data with no account behind it.
+  ///
+  /// In en, this message translates to:
+  /// **'Local only'**
+  String get syncStatusLocalOnly;
+
+  /// Status bar sync entry before the first sync.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced yet'**
+  String get syncStatusNotSynced;
+
+  /// Status bar sync entry when the last sync worked and nothing needs the director.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync successful'**
+  String get syncStatusSuccessful;
+
+  /// Status bar sync entry when changes made here wait to be sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes pending'**
+  String get syncStatusPending;
+
+  /// Status bar sync entry when the last sync attempt failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get syncStatusFailed;
+
+  /// Status bar sync entry when a conflict waits for a decision.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync conflicts'**
+  String get syncStatusConflicts;
+
+  /// Status bar sync entry when the service refused changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes refused'**
+  String get syncStatusRefused;
+
+  /// Tooltip line of the status bar sync entry: when the scope last synced.
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced {time}'**
+  String syncTooltipLastSynced(String time);
+
+  /// Tooltip line of the status bar sync entry: changes not yet sent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change waiting to be sent} other{{count} changes waiting to be sent}}'**
+  String syncTooltipPending(int count);
+
+  /// Tooltip line of the status bar sync entry: refused changes and conflicts.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change needs your attention} other{{count} changes need your attention}}'**
+  String syncTooltipAttention(int count);
+
+  /// Tooltip line of the status bar sync entry for data with no account behind it.
+  ///
+  /// In en, this message translates to:
+  /// **'This data is only on this device and is not backed up.'**
+  String get syncTooltipLocalOnly;
+
+  /// Tooltip line of the status bar sync entry: what a click does.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to sync now'**
+  String get syncTooltipAction;
+
+  /// Screen reader label of the status bar sync entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync: {status}'**
+  String syncSemanticsLabel(String status);
+
   /// Title of the warning shown before an action that would lose changes that have not reached the service.
   ///
   /// In en, this message translates to:
@@ -2012,6 +2102,12 @@ abstract class AppLocalizations {
   /// **'Maybe the same person ({count})'**
   String pilotImportMaybeHeading(int count);
 
+  /// Hint under the heading of pilots that might be a participant already, explaining the Link choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Link adds missing details from GliderScore to the participant you pick. Names and registration numbers are never overwritten.'**
+  String get pilotImportMaybeHint;
+
   /// Row text naming the details an import adds to an existing participant.
   ///
   /// In en, this message translates to:
@@ -2048,10 +2144,10 @@ abstract class AppLocalizations {
   /// **'Add as new'**
   String get pilotImportChoiceAdd;
 
-  /// Choice for a pilot that might be an existing participant: update that participant.
+  /// Choice for a pilot that might be an existing participant: link the GliderScore pilot to that participant and fill in details it lacks.
   ///
   /// In en, this message translates to:
-  /// **'Update {name}'**
+  /// **'Link to {name}'**
   String pilotImportChoiceUpdate(String name);
 
   /// Name of a participant detail in the list of details an import updates.
@@ -2585,6 +2681,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Published by you'**
   String get publicationPageHistoryByYou;
+
+  /// Publication history attribution when the publisher is not known to be the current account.
+  ///
+  /// In en, this message translates to:
+  /// **'Published by a director'**
+  String get publicationPageHistoryByDirector;
 
   /// History list: the update policy published this copy after a score.
   ///
@@ -3592,12 +3694,6 @@ abstract class AppLocalizations {
   /// **'Send invitations ({count})'**
   String invitationsMenuSendCount(int count);
 
-  /// Participants invitations menu item that copies one pilot's link.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy link'**
-  String get invitationsMenuCopy;
-
   /// Snack bar after a pilot's invitation link was copied.
   ///
   /// In en, this message translates to:
@@ -3657,6 +3753,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The server can’t be reached, so invitations can’t be sent now.'**
   String get invitationsServerUnreachable;
+
+  /// Participant row menu action that removes this participant from the contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get participantActionRemove;
+
+  /// Participant menu action that creates an invitation for one pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitation'**
+  String get participantActionSend;
+
+  /// Participant menu action that copies one pilot’s invitation URL.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy invitation URL'**
+  String get participantActionCopy;
+
+  /// Tooltip for the participant row three-dot menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant actions'**
+  String get participantActions;
+
+  /// Reason Send invitation is off in a participant row menu: the pilot already has one.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot already has an invitation.'**
+  String get participantInvitationExists;
+
+  /// Reason Remove is off in a participant row menu: the pilot has flights.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots with flights can’t be removed.'**
+  String get participantRemoveHasFlights;
+
+  /// Reason Remove is off in a participant row menu: the contest is locked, completed or saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants can’t be removed from this contest now.'**
+  String get participantRemoveUnavailable;
+
+  /// Chip on a score row whose values a pilot or helper submitted and the director has not saved yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot entry'**
+  String get scorePilotEntryChip;
+
+  /// Tooltip of the Pilot entry chip.
+  ///
+  /// In en, this message translates to:
+  /// **'A pilot or helper submitted values. The submission is kept in history.'**
+  String get scorePilotEntryTooltip;
 }
 
 class _AppLocalizationsDelegate

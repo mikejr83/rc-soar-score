@@ -6,15 +6,21 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/app_sync_provider.dart';
 import 'package:soar_score_contest/pages/contest/workspace_page.dart';
+import 'package:soar_score_contest/services/sync/app_sync_state.dart';
+import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
 import 'package:soar_score_contest/services/reports/pilot_cards/pilot_invitations.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/fake_app_connectivity.dart';
+import '../support/fake_app_sync.dart';
 import '../support/matrix_test_support.dart';
 
 class _Source implements PilotInvitationSource {
   _Source({this.failSend = false, this.failReadAfterSend = false});
+
+  bool synchronized = true;
 
   final bool failSend;
   final bool failReadAfterSend;
@@ -26,7 +32,7 @@ class _Source implements PilotInvitationSource {
     if (failReadAfterSend && sent.isNotEmpty) {
       return const PilotInvitations(loadFailed: true);
     }
-    return PilotInvitations(links: Map.of(links));
+    return PilotInvitations(links: Map.of(links), synchronized: synchronized);
   }
 
   @override
@@ -43,13 +49,20 @@ Future<void> _pump(
   WidgetTester tester,
   MatrixServer server, {
   FakeAppConnectivity? connectivity,
+  FakeAppSync? sync,
 }) async {
   tester.view.physicalSize = const Size(1200, 1800);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  Widget app(Widget child) => connectivity == null
-      ? child
-      : AppConnectivityInherited(monitor: connectivity, child: child);
+  Widget app(Widget child) {
+    final synced = sync == null
+        ? child
+        : AppSyncInherited(sync: sync, child: child);
+    return connectivity == null
+        ? synced
+        : AppConnectivityInherited(monitor: connectivity, child: synced);
+  }
+
   await tester.pumpWidget(
     app(
       ApiClientInherited(
@@ -113,6 +126,33 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('All 4 pilots have a QR code'), findsOneWidget);
+  });
+
+  testWidgets('a sync of the contest updates the card without leaving', (
+    tester,
+  ) async {
+    final source = _Source()..synchronized = false;
+    PilotInvitationSources.current = source;
+    final sync = FakeAppSync();
+    await _pump(
+      tester,
+      MatrixServer(configuration: matrixConfiguration()),
+      sync: sync,
+    );
+    expect(find.textContaining('hasn’t synchronized'), findsOneWidget);
+
+    // The sync puts the contest on the server.
+    source.synchronized = true;
+    sync.state = AppSyncState(
+      scopes: {ContestScopeKey(contestId): SyncScopeSummary(dataRevision: 1)},
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('hasn’t synchronized'), findsNothing);
+    expect(
+      find.textContaining('0 of 4 pilots have a QR code.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a running contest still offers the card', (tester) async {

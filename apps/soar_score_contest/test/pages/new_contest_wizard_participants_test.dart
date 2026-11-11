@@ -174,6 +174,12 @@ void main() {
     final store = await storeAtStep4(options: const {ParticipantOption.teams});
     await pumpWizard(tester, respond: stepApi, store: store);
 
+    // A wizard message must not obscure the editor's Save button.
+    ScaffoldMessenger.of(
+      tester.element(find.byKey(const ValueKey('add-participant-new'))),
+    ).showSnackBar(const SnackBar(content: Text('Participant added')));
+    await tester.pump();
+
     await tester.tap(find.byKey(const ValueKey('add-participant-new')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('first-name')), 'Jordan');
@@ -184,6 +190,10 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Add to contest'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('save-participant')).hitTestable(),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(const ValueKey('save-participant')));
     await tester.pumpAndSettle();
 

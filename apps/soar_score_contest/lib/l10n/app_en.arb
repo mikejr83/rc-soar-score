@@ -499,6 +499,48 @@
   "@storageDetailClose": {
     "description": "Button that closes the storage detail dialog."
   },
+  "syncStatusChecking": "Checking…",
+  "@syncStatusChecking": {"description": "Status bar sync entry before the engine has looked at the scope."},
+  "syncStatusSyncing": "Syncing…",
+  "@syncStatusSyncing": {"description": "Status bar sync entry while a sync runs."},
+  "syncStatusLocalOnly": "Local only",
+  "@syncStatusLocalOnly": {"description": "Status bar sync entry for data with no account behind it."},
+  "syncStatusNotSynced": "Not synced yet",
+  "@syncStatusNotSynced": {"description": "Status bar sync entry before the first sync."},
+  "syncStatusSuccessful": "Sync successful",
+  "@syncStatusSuccessful": {"description": "Status bar sync entry when the last sync worked and nothing needs the director."},
+  "syncStatusPending": "Changes pending",
+  "@syncStatusPending": {"description": "Status bar sync entry when changes made here wait to be sent."},
+  "syncStatusFailed": "Sync failed",
+  "@syncStatusFailed": {"description": "Status bar sync entry when the last sync attempt failed."},
+  "syncStatusConflicts": "Sync conflicts",
+  "@syncStatusConflicts": {"description": "Status bar sync entry when a conflict waits for a decision."},
+  "syncStatusRefused": "Changes refused",
+  "@syncStatusRefused": {"description": "Status bar sync entry when the service refused changes."},
+  "syncTooltipLastSynced": "Last synced {time}",
+  "@syncTooltipLastSynced": {
+    "description": "Tooltip line of the status bar sync entry: when the scope last synced.",
+    "placeholders": {"time": {"type": "String"}}
+  },
+  "syncTooltipPending": "{count, plural, =1{1 change waiting to be sent} other{{count} changes waiting to be sent}}",
+  "@syncTooltipPending": {
+    "description": "Tooltip line of the status bar sync entry: changes not yet sent.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "syncTooltipAttention": "{count, plural, =1{1 change needs your attention} other{{count} changes need your attention}}",
+  "@syncTooltipAttention": {
+    "description": "Tooltip line of the status bar sync entry: refused changes and conflicts.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "syncTooltipLocalOnly": "This data is only on this device and is not backed up.",
+  "@syncTooltipLocalOnly": {"description": "Tooltip line of the status bar sync entry for data with no account behind it."},
+  "syncTooltipAction": "Click to sync now",
+  "@syncTooltipAction": {"description": "Tooltip line of the status bar sync entry: what a click does."},
+  "syncSemanticsLabel": "Sync: {status}",
+  "@syncSemanticsLabel": {
+    "description": "Screen reader label of the status bar sync entry.",
+    "placeholders": {"status": {"type": "String"}}
+  },
   "unsyncedWarningTitle": "Changes have not synced",
   "@unsyncedWarningTitle": {
     "description": "Title of the warning shown before an action that would lose changes that have not reached the service."
@@ -1573,6 +1615,10 @@
       }
     }
   },
+  "pilotImportMaybeHint": "Link adds missing details from GliderScore to the participant you pick. Names and registration numbers are never overwritten.",
+  "@pilotImportMaybeHint": {
+    "description": "Hint under the heading of pilots that might be a participant already, explaining the Link choice."
+  },
   "pilotImportWillUpdate": "Will update: {fields}",
   "@pilotImportWillUpdate": {
     "description": "Row text naming the details an import adds to an existing participant.",
@@ -1602,9 +1648,9 @@
   "@pilotImportChoiceAdd": {
     "description": "Choice for a pilot that might be an existing participant: add a new one."
   },
-  "pilotImportChoiceUpdate": "Update {name}",
+  "pilotImportChoiceUpdate": "Link to {name}",
   "@pilotImportChoiceUpdate": {
-    "description": "Choice for a pilot that might be an existing participant: update that participant.",
+    "description": "Choice for a pilot that might be an existing participant: link the GliderScore pilot to that participant and fill in details it lacks.",
     "placeholders": {
       "name": {
         "type": "String"
@@ -2062,6 +2108,10 @@
   "@publicationPageHistoryByYou": {
     "description": "History list: the director published this copy."
   },
+  "publicationPageHistoryByDirector": "Published by a director",
+  "@publicationPageHistoryByDirector": {
+    "description": "Publication history attribution when the publisher is not known to be the current account."
+  },
   "publicationPageHistoryAutomatic": "Updated automatically",
   "@publicationPageHistoryAutomatic": {
     "description": "History list: the update policy published this copy after a score."
@@ -2505,8 +2555,6 @@
   "@invitationsMenuSend": {"description": "Participants invitations menu item that creates invitations for the selected pilots."},
   "invitationsMenuSendCount": "Send invitations ({count})",
   "@invitationsMenuSendCount": {"description": "Participants invitations menu item with the number of selected pilots that have none.", "placeholders": {"count": {"type": "int"}}},
-  "invitationsMenuCopy": "Copy link",
-  "@invitationsMenuCopy": {"description": "Participants invitations menu item that copies one pilot's link."},
   "invitationsLinkCopied": "Link copied.",
   "@invitationsLinkCopied": {"description": "Snack bar after a pilot's invitation link was copied."},
   "invitationsSelectPilots": "Select pilots to send invitations.",
@@ -2526,5 +2574,23 @@
   "invitationsOffline": "You’re offline, so invitations can’t be sent now.",
   "@invitationsOffline": {"description": "Reason invitations cannot be sent: the device is offline."},
   "invitationsServerUnreachable": "The server can’t be reached, so invitations can’t be sent now.",
-  "@invitationsServerUnreachable": {"description": "Reason invitations cannot be sent: the internet is up but the server is unreachable."}
+  "@invitationsServerUnreachable": {"description": "Reason invitations cannot be sent: the internet is up but the server is unreachable."},
+  "participantActionRemove": "Remove",
+  "@participantActionRemove": {"description": "Participant row menu action that removes this participant from the contest."},
+  "participantActionSend": "Send invitation",
+  "@participantActionSend": {"description": "Participant menu action that creates an invitation for one pilot."},
+  "participantActionCopy": "Copy invitation URL",
+  "@participantActionCopy": {"description": "Participant menu action that copies one pilot’s invitation URL."},
+  "participantActions": "Participant actions",
+  "@participantActions": {"description": "Tooltip for the participant row three-dot menu."},
+  "participantInvitationExists": "This pilot already has an invitation.",
+  "@participantInvitationExists": {"description": "Reason Send invitation is off in a participant row menu: the pilot already has one."},
+  "participantRemoveHasFlights": "Pilots with flights can’t be removed.",
+  "@participantRemoveHasFlights": {"description": "Reason Remove is off in a participant row menu: the pilot has flights."},
+  "participantRemoveUnavailable": "Participants can’t be removed from this contest now.",
+  "@participantRemoveUnavailable": {"description": "Reason Remove is off in a participant row menu: the contest is locked, completed or saving."},
+  "scorePilotEntryChip": "Pilot entry",
+  "@scorePilotEntryChip": {"description": "Chip on a score row whose values a pilot or helper submitted and the director has not saved yet."},
+  "scorePilotEntryTooltip": "A pilot or helper submitted values. The submission is kept in history.",
+  "@scorePilotEntryTooltip": {"description": "Tooltip of the Pilot entry chip."}
 }

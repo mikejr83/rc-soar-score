@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -20,6 +22,7 @@ import '../../services/workspace/workspace_page_state.dart';
 import '../../services/workspace/workspace_section.dart';
 import '../../widgets/api_error_text.dart';
 import '../../widgets/contest_scope.dart';
+import '../../widgets/sync/reload_on_sync.dart';
 import '../../widgets/workspace/activity/recent_activity_section.dart';
 import '../../widgets/workspace/attention/attention_section.dart';
 import '../../widgets/workspace/checklist/setup_checklist_section.dart';
@@ -86,6 +89,9 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
   // layout rather than hiding it.
   WorkspaceFacts? _facts;
   Contest? _factsFor;
+  // Counts the facts loads started: a sync reload has the same contest as the
+  // load it replaces, so only the newest may apply its answer.
+  int _factsGeneration = 0;
   bool _factsFailed = false;
   final CompletionDismissals _dismissals = CompletionDismissals();
 
@@ -188,6 +194,22 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
     });
   }
 
+  /// A sync finished: the contest and the facts behind the sections may have
+  /// changed. Both reload quietly, so the page stays on screen. A failed reload
+  /// leaves what is shown as it was.
+  Future<void> _onSynced() async {
+    await _refresh();
+    if (!mounted) {
+      return;
+    }
+    final contest = _shown;
+    if (contest == null) {
+      return;
+    }
+    _factsFor = null;
+    _ensureFacts(contest);
+  }
+
   void _reportStale(String what) {
     setState(() {
       _staleWhat = what;
@@ -256,6 +278,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       _importNoteFor = contest.id;
     }
     _factsFor = contest;
+    final generation = ++_factsGeneration;
     _loadImportNote(contest);
     final client = apiClientOf(context);
     if (client == null) {
@@ -274,7 +297,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
         _logger.info(
           'Successfully loaded workspace facts for contest ${contest.id}',
         );
-        if (mounted && _factsFor == contest) {
+        if (mounted && _factsFor == contest && _factsGeneration == generation) {
           _logger.info(
             'Workspace facts for contest ${contest.id} are ready to be applied.',
           );
@@ -292,7 +315,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
         _logger.warning(
           'Failed to load workspace facts for contest ${contest.id}',
         );
-        if (mounted && _factsFor == contest) {
+        if (mounted && _factsFor == contest && _factsGeneration == generation) {
           setState(() {
             _facts = null;
             _factsFailed = true;
@@ -404,52 +427,56 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       hasMatrix: facts?.hasMatrix ?? false,
       hasAttentionItems: facts != null && NeedsAttention.of(facts).hasItems,
     );
-    return WorkspaceScope(
-      refresh: () async {
-        await _refresh();
-      },
-      announce: _announce,
-      readOnly: readOnly,
-      facts: facts,
-      factsFailed: _factsFailed,
-      reloadFacts: _reloadFacts,
-      reportStale: _reportStale,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // The unavailable banner (server unreachable, local copy shown)
-          // has no source until the local store lands (#319), so it is not
-          // wired here; it must not fake a local copy.
-          WorkspaceBanners(
-            offline: offline,
-            staleChange: _staleWhat,
-            onRefresh: _tryAgain,
-            // Facts load after the first frame of a contest, so the note of
-            // the last one must not show in that frame.
-            importNote: _importNoteFor == contest.id ? _importNote : null,
-          ),
-          Expanded(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                WorkspaceFrame(
-                  plan: plan,
-                  scrollController: _scroll,
-                  sectionBuilder: (section) => WorkspaceSectionSlot(
-                    section: section,
-                    readOnly: readOnly,
-                    child: _content(section, contest, plan, readOnly),
-                  ),
-                ),
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  child: WorkspaceLiveRegion(message: _announcement),
-                ),
-              ],
+    return ReloadOnSync(
+      scope: ContestScopeKey(contest.id),
+      onSynced: () => unawaited(_onSynced()),
+      child: WorkspaceScope(
+        refresh: () async {
+          await _refresh();
+        },
+        announce: _announce,
+        readOnly: readOnly,
+        facts: facts,
+        factsFailed: _factsFailed,
+        reloadFacts: _reloadFacts,
+        reportStale: _reportStale,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // The unavailable banner (server unreachable, local copy shown)
+            // has no source until the local store lands (#319), so it is not
+            // wired here; it must not fake a local copy.
+            WorkspaceBanners(
+              offline: offline,
+              staleChange: _staleWhat,
+              onRefresh: _tryAgain,
+              // Facts load after the first frame of a contest, so the note of
+              // the last one must not show in that frame.
+              importNote: _importNoteFor == contest.id ? _importNote : null,
             ),
-          ),
-        ],
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  WorkspaceFrame(
+                    plan: plan,
+                    scrollController: _scroll,
+                    sectionBuilder: (section) => WorkspaceSectionSlot(
+                      section: section,
+                      readOnly: readOnly,
+                      child: _content(section, contest, plan, readOnly),
+                    ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    child: WorkspaceLiveRegion(message: _announcement),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

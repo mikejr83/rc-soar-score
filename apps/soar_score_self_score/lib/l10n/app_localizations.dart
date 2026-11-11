@@ -94,11 +94,35 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('en')];
 
-  /// Tooltip of the app bar button that opens the menu with legal and licence links.
+  /// Tooltip of the app bar button that opens the action menu.
   ///
   /// In en, this message translates to:
   /// **'More'**
   String get moreMenuTooltip;
+
+  /// Action menu entry on the pilot overview that copies the pilot's invitation link.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy invitation link'**
+  String get copyInvitationLink;
+
+  /// Tooltip of the app bar button and text of the footer link that open the Application info page.
+  ///
+  /// In en, this message translates to:
+  /// **'Application info'**
+  String get appInfoLink;
+
+  /// Title of the page that lists the licences, the Privacy Policy and the Terms.
+  ///
+  /// In en, this message translates to:
+  /// **'Application info'**
+  String get appInfoTitle;
+
+  /// Tooltip of the back button on the Application info page.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get backLabel;
 
   /// Link to the public site page that lists the open source software this app uses.
   ///
@@ -274,6 +298,12 @@ abstract class AppLocalizations {
   /// **'Back to pilots'**
   String get backToPilots;
 
+  /// Button on a round card of the pilot overview, once a score was entered; opens the results of the pilot's group for that round.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight Results'**
+  String get flightResults;
+
   /// Button shown after a score is submitted; opens the results of the pilot's group for that round.
   ///
   /// In en, this message translates to:
@@ -369,6 +399,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'End session'**
   String get endSession;
+
+  /// No description provided for @refreshResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refreshResults;
+
+  /// No description provided for @refreshingResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing…'**
+  String get refreshingResults;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get loading;
+
+  /// No description provided for @resultsRefreshHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh to see the latest scores'**
+  String get resultsRefreshHint;
+
+  /// Local time of the last successful results fetch, not the score submission time.
+  ///
+  /// In en, this message translates to:
+  /// **'Last refreshed: {time}'**
+  String resultsLastRefreshed(String time);
+
+  /// Shown when a results refresh fails but an earlier successful fetch is available.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t refresh; last updated {time}'**
+  String resultsRefreshFailed(String time);
+
+  /// Shown after the pilot's invitation link was copied to the clipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation link copied'**
+  String get invitationLinkCopied;
+
+  /// Shown when the pilot's invitation link could not be fetched to copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t copy the invitation link. Check your connection and try again.'**
+  String get invitationLinkCopyFailed;
+
+  /// Title of the dialog that shows the invitation link when the browser would not copy it.
+  ///
+  /// In en, this message translates to:
+  /// **'Your invitation link'**
+  String get invitationLinkDialogTitle;
+
+  /// Explains why the invitation link is shown instead of copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Your browser would not copy it. Select the link and copy it yourself.'**
+  String get invitationLinkDialogBody;
+
+  /// Button that closes the invitation link dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get invitationLinkDialogClose;
+
+  /// Primary button at the bottom of the pilot overview that opens the contest results.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get currentResults;
+
+  /// Button at the bottom of the pilot overview that starts retiring the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire pilot'**
+  String get retirePilot;
 }
 
 class _AppLocalizationsDelegate
