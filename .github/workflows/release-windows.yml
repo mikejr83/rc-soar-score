@@ -55,7 +55,31 @@ jobs:
       - name: Bootstrap
         run: melos bootstrap
 
+      - name: Configure vcpkg binary cache
+        id: vcpkg
+        shell: pwsh
+        run: |
+          $cache = Join-Path $env:RUNNER_TEMP 'vcpkg-binary-cache'
+          New-Item -ItemType Directory -Force -Path $cache | Out-Null
+          "VCPKG_BINARY_SOURCES=clear;files,$cache,readwrite" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "cache-path=$cache" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "image=$env:ImageOS-$env:ImageVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          $revision = git -C "$env:VCPKG_INSTALLATION_ROOT" rev-parse HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot determine the vcpkg revision' }
+          "revision=$revision" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      # Tag runs can restore default-branch caches but cannot share caches
+      # with other tags. Run workflow_dispatch on master to warm this cache
+      # before a release, and again after the runner image/toolchain changes.
+      - name: Cache native dependency binaries
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.vcpkg.outputs.cache-path }}
+          key: vcpkg-${{ runner.os }}-${{ runner.arch }}-${{ steps.vcpkg.outputs.image }}-${{ steps.vcpkg.outputs.revision }}-${{ hashFiles('.github/workflows/release-windows.yml') }}
+
       - name: Install native dependencies for auth0_flutter
+        # Always install: vcpkg checks package ABIs and restores compatible
+        # binaries from the cache, compiling only missing packages.
         run: |
           "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append
           & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install --recurse "cpp-httplib[core,openssl]:x64-windows" nlohmann-json:x64-windows openssl:x64-windows
@@ -69,10 +93,7 @@ jobs:
 
       # Notices for the offline app, from the generator that also feeds the
       # public /open-source page. Flags are those of scripts/generate_licences.dart.
-      - name: Install web dependencies for the notices generator
-        working-directory: apps/soar_score_web
-        run: npm ci
-
+      # --product contest-app reads Dart dependencies, so npm ci is unnecessary.
       - name: Generate third-party notices
         run: >
           dart scripts/generate_licences.dart
