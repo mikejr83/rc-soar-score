@@ -62,12 +62,21 @@ def gh(*args):
 
 
 def previous_tag(tag):
-    """The release tag before this one, by publish date (pre-releases count)."""
-    releases = json.loads(gh("api", "repos/{owner}/{repo}/releases?per_page=30"))
-    tags = [r["tag_name"] for r in releases if not r.get("draft")]
-    if tag in tags:
-        tags = tags[tags.index(tag) + 1 :]
-    return tags[0] if tags else None
+    """The release tag before this one, by creation date (pre-releases count).
+
+    Reads every page of releases, so an old tag finds its real predecessor.
+    Stops with an error if the tag is not a published release, because any
+    other answer would compare against the wrong release.
+    """
+    pages = json.loads(
+        gh("api", "--paginate", "--slurp",
+           "repos/{owner}/{repo}/releases?per_page=100")
+    )
+    tags = [r["tag_name"] for page in pages for r in page if not r.get("draft")]
+    if tag not in tags:
+        sys.exit(f"::error::{tag} is not a published release of this repository")
+    after = tags[tags.index(tag) + 1 :]
+    return after[0] if after else None
 
 
 def github_notes(tag, prev):

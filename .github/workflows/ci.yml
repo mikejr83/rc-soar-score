@@ -4,7 +4,7 @@ on:
   # Documentation-only changes skip the whole workflow. A push or PR runs
   # unless every changed file matches these patterns.
   push:
-    branches: [master]
+    branches: [master, "hotfix/**"]
     paths-ignore:
       - "plan/**"
       - "docs/**"
@@ -20,7 +20,7 @@ on:
       - ".github/CODEOWNERS"
       - ".github/ISSUE_TEMPLATE/**"
   pull_request:
-    branches: [master]
+    branches: [master, "hotfix/**"]
     paths-ignore:
       - "plan/**"
       - "docs/**"
