@@ -8,9 +8,10 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../support/fake_app_sync.dart';
 
-AppSyncState _synced(Map<SyncScopeKey, DateTime?> at) => AppSyncState(
+AppSyncState _synced(Map<SyncScopeKey, int> revisions) => AppSyncState(
   scopes: {
-    for (final e in at.entries) e.key: SyncScopeSummary(lastSyncedAt: e.value),
+    for (final e in revisions.entries)
+      e.key: SyncScopeSummary(dataRevision: e.value),
   },
 );
 
@@ -42,23 +43,20 @@ void main() {
       ),
     );
 
-    sync.state = _synced({other: DateTime.utc(2026, 11, 10)});
+    sync.state = _synced({other: 1});
     await tester.pump();
     expect(calls, 0);
 
-    sync.state = _synced({contest: DateTime.utc(2026, 11, 10, 1)});
+    sync.state = _synced({contest: 1});
     await tester.pump();
     expect(calls, 1);
 
     // The same sync reported again (another scope moved) is not news.
-    sync.state = _synced({
-      contest: DateTime.utc(2026, 11, 10, 1),
-      other: DateTime.utc(2026, 11, 10, 2),
-    });
+    sync.state = _synced({contest: 1, other: 2});
     await tester.pump();
     expect(calls, 1);
 
-    sync.state = _synced({contest: DateTime.utc(2026, 11, 10, 3)});
+    sync.state = _synced({contest: 2});
     await tester.pump();
     expect(calls, 2);
   });
@@ -66,9 +64,7 @@ void main() {
   testWidgets('what was synced before the page opened is not news', (
     tester,
   ) async {
-    final sync = FakeAppSync(
-      state: _synced({contest: DateTime.utc(2026, 11, 10)}),
-    );
+    final sync = FakeAppSync(state: _synced({contest: 1}));
     var calls = 0;
     await _pump(
       tester,
@@ -79,7 +75,7 @@ void main() {
         child: const SizedBox(),
       ),
     );
-    sync.state = _synced({contest: DateTime.utc(2026, 11, 10)});
+    sync.state = _synced({contest: 1});
     await tester.pump();
     expect(calls, 0);
   });
@@ -92,11 +88,11 @@ void main() {
       sync,
       ReloadOnSync.account(onSynced: () => calls++, child: const SizedBox()),
     );
-    sync.state = _synced({contest: DateTime.utc(2026, 11, 10)});
+    sync.state = _synced({contest: 1});
     await tester.pump();
     expect(calls, 0);
 
-    sync.state = _synced({account: DateTime.utc(2026, 11, 10)});
+    sync.state = _synced({account: 1});
     await tester.pump();
     expect(calls, 1);
   });
@@ -113,7 +109,7 @@ void main() {
         child: const SizedBox(),
       ),
     );
-    sync.state = _synced({contest: DateTime.utc(2026, 11, 10)});
+    sync.state = _synced({contest: 1});
     await tester.pump();
     expect(calls, 0);
   });

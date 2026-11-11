@@ -10,5 +10,8 @@ import 'replicated_change.dart';
 /// `UnsupportedEntityTypeError`, and no other error should look like one.
 abstract interface class ReplicatedChangeApplier {
   /// Applies [change] atomically. Applying the same change again is a no-op.
-  Future<void> apply(ReplicatedChange change);
+  ///
+  /// Completes with whether stored data changed: false when the store already
+  /// held this revision or newer, or the entity to delete was not there.
+  Future<bool> apply(ReplicatedChange change);
 }

@@ -6,7 +6,9 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../../app_sync_provider.dart';
 import '../../services/sync/app_sync.dart';
 
-/// Calls [onSynced] when [scope] has synced since this widget was built.
+/// Calls [onSynced] when a sync has changed [scope]'s data since this widget
+/// was built: it pulled changes in or the service accepted ours. A sync that
+/// changed nothing is not news.
 ///
 /// A page that loads data once goes stale when a sync pulls changes into the
 /// local store: nothing else announces a pulled change (the database's own
@@ -69,7 +71,7 @@ class ReloadOnSync extends StatefulWidget {
 class _ReloadOnSyncState extends State<ReloadOnSync> {
   AppSync? _sync;
   StreamSubscription<Object?>? _subscription;
-  DateTime? _seen;
+  int _seen = 0;
 
   @override
   void didChangeDependencies() {
@@ -80,7 +82,7 @@ class _ReloadOnSyncState extends State<ReloadOnSync> {
     _subscription = null;
     _sync = sync;
     if (!sync.available) return;
-    _seen = _lastSynced(sync);
+    _seen = _revision(sync);
     _subscription = sync.states.listen((_) => _check());
   }
 
@@ -90,21 +92,21 @@ class _ReloadOnSyncState extends State<ReloadOnSync> {
     if (oldWidget.scope != widget.scope) {
       // A different contest: what it last synced is not news.
       final sync = _sync;
-      _seen = sync == null ? null : _lastSynced(sync);
+      _seen = sync == null ? 0 : _revision(sync);
     }
   }
 
-  DateTime? _lastSynced(AppSync sync) {
+  int _revision(AppSync sync) {
     final scope = widget.scope ?? sync.accountScope;
-    return scope == null ? null : sync.state.of(scope)?.lastSyncedAt;
+    return scope == null ? 0 : sync.state.of(scope)?.dataRevision ?? 0;
   }
 
   void _check() {
     if (!mounted) return;
     final sync = _sync;
-    final synced = sync == null ? null : _lastSynced(sync);
-    if (synced == null || synced == _seen) return;
-    _seen = synced;
+    final revision = sync == null ? 0 : _revision(sync);
+    if (revision == _seen) return;
+    _seen = revision;
     widget.onSynced();
   }
 

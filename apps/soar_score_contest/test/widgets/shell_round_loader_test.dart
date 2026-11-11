@@ -146,11 +146,7 @@ void main() {
     await tester.pump();
 
     sync.state = AppSyncState(
-      scopes: {
-        ContestScopeKey(contest.id): SyncScopeSummary(
-          lastSyncedAt: DateTime.utc(2026, 11, 10),
-        ),
-      },
+      scopes: {ContestScopeKey(contest.id): SyncScopeSummary(dataRevision: 1)},
     );
     await tester.pumpAndSettle();
     expect(shown?.kind, ShellRoundKind.inProgress);
