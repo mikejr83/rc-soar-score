@@ -99,7 +99,7 @@ For a fix that cannot wait for what is on `master`:
 
 1. Branch `hotfix/vX.Y.Z` from the **release tag** that is live.
 2. Make only the fix, with a test, and open a PR into the hotfix branch.
-   CI runs on it like on any PR.
+   CI runs on pushes to `hotfix/**` and on PRs into it, like on `master`.
 3. When the checks pass and the PR is merged, publish a release with the next patch tag
    (`vX.Y.(Z+1)`), **target the hotfix branch**. Deploy runs from that tag.
 4. Merge the same fix into `master` (cherry-pick or merge the branch) so the
