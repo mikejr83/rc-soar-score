@@ -127,6 +127,30 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   /// Reads the invitations again after a sync (the contest may have reached
   /// the server). The menu keeps working from the old ones meanwhile.
   Future<void> _refreshInvitations() async {
+    if (_invitationsRefreshing) {
+      _invitationsRefreshAgain = true;
+      return;
+    }
+    _invitationsRefreshing = true;
+    try {
+      do {
+        _invitationsRefreshAgain = false;
+        await _refreshInvitationsOnce();
+      } while (_invitationsRefreshAgain && mounted);
+    } finally {
+      _invitationsRefreshing = false;
+    }
+  }
+
+  bool _invitationsRefreshing = false;
+  bool _invitationsRefreshAgain = false;
+
+  /// True from the confirmation of an invitation send until it ends: the
+  /// session it holds must not be replaced meanwhile.
+  bool _sendingInvitations = false;
+  bool _invitationsRefreshDeferred = false;
+
+  Future<void> _refreshInvitationsOnce() async {
     final publication = publicationClientOf(context);
     final id = _controller?.contestId;
     if (publication == null || id == null) return;
@@ -139,6 +163,13 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
       session.dispose();
       return;
     }
+    if (_sendingInvitations) {
+      // The open confirmation or send holds the current session. Reading
+      // again once it ends brings the page up to date.
+      session.dispose();
+      _invitationsRefreshDeferred = true;
+      return;
+    }
     final old = _invitations;
     old?.removeListener(_changed);
     setState(() => _invitations = session..addListener(_changed));
@@ -148,7 +179,16 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   Future<void> _sendInvitations(List<Id> missing) async {
     final session = _invitations;
     if (session == null) return;
-    await sendInvitationsGuarded(context, session, missing);
+    _sendingInvitations = true;
+    try {
+      await sendInvitationsGuarded(context, session, missing);
+    } finally {
+      _sendingInvitations = false;
+      if (_invitationsRefreshDeferred && mounted) {
+        _invitationsRefreshDeferred = false;
+        unawaited(_refreshInvitations());
+      }
+    }
   }
 
   /// What the invitation actions offer for [targets] now. A row menu passes

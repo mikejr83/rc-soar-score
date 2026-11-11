@@ -144,4 +144,41 @@ void main() {
 
     expect(c.draftOf(_row(c, 1)).heightText, 'abc');
   });
+
+  test('a later sync is not lost behind a read that is still out', () async {
+    final server = ScoringServer();
+    final gate = Completer<void>();
+    var hold = false;
+    var reads = 0;
+    final c = ScoringController(
+      client: ApiClient(
+        baseUrl: Uri.parse('http://localhost'),
+        httpClient: MockClient((request) async {
+          final answer = await server.handle(request);
+          if (request.method == 'GET') reads++;
+          if (hold && request.method == 'GET') await gate.future;
+          return answer;
+        }),
+      ),
+      contestId: contestId,
+      round: 1,
+      group: 1,
+    );
+    addTearDown(c.dispose);
+    await c.load();
+
+    hold = true;
+    final first = c.refreshAfterSync(); // reads the old scores
+    await Future<void>.delayed(Duration.zero);
+    hold = false;
+    server.seedPendingSubmission(scoringAssignmentId(1, 1), a);
+    final during = reads;
+    final second = c.refreshAfterSync(); // joins behind the first
+    await Future<void>.delayed(Duration.zero);
+    expect(reads, during, reason: 'no second read runs beside the first');
+    gate.complete();
+    await Future.wait([first, second]);
+
+    expect(c.draftOf(_row(c, 1)).timeText, '9:00');
+  });
 }

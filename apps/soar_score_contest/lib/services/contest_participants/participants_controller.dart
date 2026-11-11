@@ -227,6 +227,27 @@ class ParticipantsController extends ChangeNotifier {
   /// the page loads (which reads the list itself). During a save the read waits
   /// until the save ends.
   Future<void> refreshQuietly() async {
+    // One read at a time: a sync that arrives meanwhile asks for one more
+    // read after this one, so an older answer never lands over a newer one.
+    if (_refreshing) {
+      _refreshAgain = true;
+      return;
+    }
+    _refreshing = true;
+    try {
+      do {
+        _refreshAgain = false;
+        await _refreshOnce();
+      } while (_refreshAgain && !_disposed);
+    } finally {
+      _refreshing = false;
+    }
+  }
+
+  bool _refreshing = false;
+  bool _refreshAgain = false;
+
+  Future<void> _refreshOnce() async {
     if (data == null || loading) return;
     if (saving) {
       // The save does not read the list again, so it asks for this once done.

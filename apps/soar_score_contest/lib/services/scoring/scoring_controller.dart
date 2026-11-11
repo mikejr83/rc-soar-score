@@ -107,6 +107,9 @@ class ScoringController extends ChangeNotifier {
     }
   }
 
+  /// Counts stored entries, so a read can tell a save answered meanwhile.
+  int _savedEpoch = 0;
+
   /// Reads the contest's scores again after a sync, without disturbing the
   /// page: the round and group stay, and nothing the director typed is lost.
   ///
@@ -116,10 +119,28 @@ class ScoringController extends ChangeNotifier {
   /// being saved is left alone until its save answers. Every other row shows
   /// what was pulled, including a pilot's new submission. A failed read leaves
   /// the page as it was.
-  /// Counts stored entries, so a read can tell a save answered meanwhile.
-  int _savedEpoch = 0;
-
   Future<void> refreshAfterSync() async {
+    // One read at a time: a sync that arrives meanwhile asks for one more
+    // read after this one, so an older answer never lands over a newer one.
+    if (_refreshing) {
+      _refreshAgain = true;
+      return;
+    }
+    _refreshing = true;
+    try {
+      do {
+        _refreshAgain = false;
+        await _refreshOnce();
+      } while (_refreshAgain && !_disposed);
+    } finally {
+      _refreshing = false;
+    }
+  }
+
+  bool _refreshing = false;
+  bool _refreshAgain = false;
+
+  Future<void> _refreshOnce() async {
     if (data == null || loading) return;
     ScoringPageData? loaded;
     try {

@@ -94,4 +94,42 @@ void main() {
       );
     },
   );
+
+  test('a later sync is not lost behind a read that is still out', () async {
+    final server = ParticipantsServer();
+    final gate = Completer<void>();
+    var hold = false;
+    var reads = 0;
+    final c = ParticipantsController(
+      client: ApiClient(
+        baseUrl: Uri.parse('http://localhost'),
+        httpClient: MockClient((request) async {
+          final answer = await server.handle(request);
+          if (request.method == 'GET') reads++;
+          if (hold && request.method == 'GET') await gate.future;
+          return answer;
+        }),
+      ),
+      contestId: contestId,
+    );
+    addTearDown(c.dispose);
+    await c.load();
+
+    hold = true;
+    final first = c.refreshQuietly(); // reads the list as it is now
+    await Future<void>.delayed(Duration.zero);
+    hold = false;
+    server.changeElsewhere(2);
+    final during = reads;
+    final second = c.refreshQuietly(); // joins behind the first
+    await Future<void>.delayed(Duration.zero);
+    expect(reads, during, reason: 'no second read runs beside the first');
+    gate.complete();
+    await Future.wait([first, second]);
+
+    final two = c.data!.participants.firstWhere(
+      (p) => p.rowId == personParticipationId(2).value,
+    );
+    expect(two.classification, 'Expert');
+  });
 }
