@@ -38,8 +38,25 @@ env:
   API_URL: https://api.rcsoarscore.com
 
 jobs:
+  check-tag:
+    name: Check the tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      # Release tags are vMAJOR.MINOR.PATCH with an optional -alpha.N / -beta.N
+      # / -rc.N suffix (docs/releasing.md). A bad tag stops the deploy before
+      # anything changes. A manual run may also deploy a branch or commit.
+      - name: Tag matches the version pattern
+        run: |
+          if [ "${{ github.event_name }}" = release ] || [[ "$REF" == v* ]]; then
+            [[ "$REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$ ]] \
+              || { echo "::error::Tag '$REF' does not match vMAJOR.MINOR.PATCH[-alpha.N|-beta.N|-rc.N]"; exit 1; }
+          fi
+          echo "ok: $REF"
+
   api:
     name: API (Fly.io)
+    needs: check-tag
     if: github.event_name == 'release' || inputs.api
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -67,11 +84,11 @@ jobs:
   public-site:
     name: Public site (Vercel)
     if: >-
-      ${{ !cancelled() && (needs.api.result == 'success' || needs.api.result == 'skipped')
+      ${{ !cancelled() && needs.check-tag.result == 'success' && (needs.api.result == 'success' || needs.api.result == 'skipped')
       && (github.event_name == 'release' || inputs.public_site) }}
     # The site proxies /api to the server, so the new server goes first. A
     # skipped API job (manual run) does not block this one; a failed one does.
-    needs: api
+    needs: [check-tag, api]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: Production
@@ -105,10 +122,10 @@ jobs:
   flutter-web:
     name: ${{ matrix.name }} (Cloudflare)
     if: >-
-      ${{ !cancelled() && (needs.api.result == 'success' || needs.api.result == 'skipped')
+      ${{ !cancelled() && needs.check-tag.result == 'success' && (needs.api.result == 'success' || needs.api.result == 'skipped')
       && (github.event_name == 'release' || inputs.flutter_web) }}
     # The apps are built against the new server, so the server goes first.
-    needs: api
+    needs: [check-tag, api]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: Production
