@@ -33,6 +33,9 @@ class ParticipantsController extends ChangeNotifier {
   /// Whether a save is running (rows are locked meanwhile).
   bool saving = false;
 
+  /// A sync arrived while saving; the list is read again once the save ends.
+  bool _refreshAfterSave = false;
+
   /// The rows as stored, with the director's edits in [_drafts].
   List<StoredParticipant> _saved = const [];
   final Map<String, StoredParticipant> _drafts = {};
@@ -221,9 +224,15 @@ class ParticipantsController extends ChangeNotifier {
 
   /// Reads everything again after a sync, keeping the director's edits and
   /// saying nothing when the read fails: the list stays as it was. Not while
-  /// the page loads or a save runs, which read the list themselves.
+  /// the page loads (which reads the list itself). During a save the read waits
+  /// until the save ends.
   Future<void> refreshQuietly() async {
-    if (data == null || loading || saving) return;
+    if (data == null || loading) return;
+    if (saving) {
+      // The save does not read the list again, so it asks for this once done.
+      _refreshAfterSave = true;
+      return;
+    }
     try {
       await _read();
     } on Object {
@@ -445,6 +454,10 @@ class ParticipantsController extends ChangeNotifier {
     message = ok == 0 ? null : '$ok participant${ok == 1 ? '' : 's'} saved.';
     _rules = _makeRules();
     notifyListeners();
+    if (_refreshAfterSave) {
+      _refreshAfterSave = false;
+      await refreshQuietly();
+    }
   }
 
   String _recalcLabel(StoredParticipant row, Set<ParticipantCell> changed) {

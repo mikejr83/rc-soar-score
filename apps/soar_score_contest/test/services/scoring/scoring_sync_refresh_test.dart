@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -90,4 +92,45 @@ void main() {
     expect(c.data, isNotNull);
     expect(c.draftOf(_row(c, 1)).heightText, '99');
   });
+
+  test(
+    'a save that answers while the read is out is not rolled back',
+    () async {
+      final server = ScoringServer();
+      final gate = Completer<void>();
+      var hold = false;
+      final c = ScoringController(
+        client: ApiClient(
+          baseUrl: Uri.parse('http://localhost'),
+          httpClient: MockClient((request) async {
+            // The answer is taken now, so it is the old slot when it arrives.
+            final answer = await server.handle(request);
+            if (hold && request.method == 'GET') await gate.future;
+            return answer;
+          }),
+        ),
+        contestId: contestId,
+        round: 1,
+        group: 1,
+      );
+      addTearDown(c.dispose);
+      await c.load();
+      final draft = c.draftOf(_row(c, 1));
+      draft.setTime('9:00');
+      draft.setHeight('120');
+
+      hold = true;
+      final refresh = c.refreshAfterSync();
+      await Future<void>.delayed(Duration.zero);
+      // Reads already out stay held; the save's own requests go through.
+      hold = false;
+      expect(await c.save(_row(c, 1)), isTrue);
+      gate.complete();
+      await refresh;
+
+      expect(c.isDirty(_row(c, 1)), isFalse);
+      expect(c.draftOf(_row(c, 1)).heightText, '120');
+      expect(_row(c, 1).baseRevision, isNot(0));
+    },
+  );
 }

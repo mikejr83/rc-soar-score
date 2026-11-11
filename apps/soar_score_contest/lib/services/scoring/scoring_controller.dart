@@ -116,14 +116,24 @@ class ScoringController extends ChangeNotifier {
   /// being saved is left alone until its save answers. Every other row shows
   /// what was pulled, including a pilot's new submission. A failed read leaves
   /// the page as it was.
+  /// Counts stored entries, so a read can tell a save answered meanwhile.
+  int _savedEpoch = 0;
+
   Future<void> refreshAfterSync() async {
     if (data == null || loading) return;
-    final ScoringPageData loaded;
+    ScoringPageData? loaded;
     try {
-      loaded = await ScoringPageData.load(client, contestId);
+      // A save that answers while the read is out makes the read older than
+      // the page, so the read is made again rather than put over the save.
+      for (var tries = 0; tries < 3 && loaded == null; tries++) {
+        final epoch = _savedEpoch;
+        final read = await ScoringPageData.load(client, contestId);
+        if (epoch == _savedEpoch) loaded = read;
+      }
     } on Object {
       return;
     }
+    if (loaded == null) return;
     if (_disposed || data == null) return;
     final before = {for (final row in rows) row.id: row};
     var next = loaded;
@@ -329,6 +339,7 @@ class ScoringController extends ChangeNotifier {
   /// Takes a stored entry into the page: the slot, the contest and the row's
   /// draft and save state.
   void _applySaved(ScoringRow row, ScoreEntryResult result) {
+    _savedEpoch++;
     _mutationIds.remove(row.id);
     final slot = ScoreSlot(
       placeholder: result.placeholder,
