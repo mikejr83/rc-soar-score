@@ -79,7 +79,7 @@ Future<void> phase3Entry(
         await tapVisible(tester, find.text('Flight Results'));
         await pumpUntilFound(tester, find.text('Preliminary'));
         expect(find.text('Group results'), findsNothing);
-        await tester.tap(find.byTooltip('Back to pilot overview'));
+        await tester.tap(find.byTooltip('Back'));
         await pumpUntilFound(tester, find.text('2 rounds'));
         expect(find.text('Flight Results'), findsOneWidget);
       },
