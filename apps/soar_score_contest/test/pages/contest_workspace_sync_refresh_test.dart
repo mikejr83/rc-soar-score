@@ -14,8 +14,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../support/fake_app_sync.dart';
 import '../support/matrix_test_support.dart';
 
-AppSyncState _syncedAt(Id contest, DateTime at) => AppSyncState(
-  scopes: {ContestScopeKey(contest): SyncScopeSummary(lastSyncedAt: at)},
+AppSyncState _changed(Id contest) => AppSyncState(
+  scopes: {ContestScopeKey(contest): const SyncScopeSummary(dataRevision: 1)},
 );
 
 void main() {
@@ -61,11 +61,11 @@ void main() {
     expect(before, greaterThan(0));
 
     // Another scope syncing is not news to this page.
-    sync.state = _syncedAt(Id.create(), DateTime.utc(2026, 11, 10));
+    sync.state = _changed(Id.create());
     await tester.pumpAndSettle();
     expect(scoreReads, before);
 
-    sync.state = _syncedAt(contestId, DateTime.utc(2026, 11, 10));
+    sync.state = _changed(contestId);
     await tester.pumpAndSettle();
     expect(scoreReads, greaterThan(before));
   });

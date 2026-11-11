@@ -10,8 +10,10 @@ class FakeApplier implements ReplicatedChangeApplier {
   int? unsupportedOnSequence;
   int? invalidOnSequence;
 
+  final _stored = <int>{};
+
   @override
-  Future<void> apply(ReplicatedChange change) async {
+  Future<bool> apply(ReplicatedChange change) async {
     if (change.sequence == failOnSequence) {
       throw StateError('disk full');
     }
@@ -23,5 +25,7 @@ class FakeApplier implements ReplicatedChangeApplier {
     }
     log.add('apply:${change.sequence}');
     applied.add(change);
+    // Like the real store, a change it already holds is a no-op.
+    return _stored.add(change.sequence);
   }
 }

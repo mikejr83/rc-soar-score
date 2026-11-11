@@ -124,10 +124,11 @@ class _CountingApplier implements core.ReplicatedChangeApplier {
   int applied = 0;
 
   @override
-  Future<void> apply(core.ReplicatedChange change) async {
+  Future<bool> apply(core.ReplicatedChange change) async {
     // A real write, so the database is what refuses a stale one.
     await _server.database.customStatement('UPDATE contests SET name = name');
     applied++;
+    return true;
   }
 }
 

@@ -71,7 +71,29 @@ class ScoreRowDraft extends ChangeNotifier {
     final cumulative = saved['cumulative_penalty'];
     cumulativePenaltyText = cumulative is num ? '${cumulative.toInt()}' : '';
     zeroConfirmed = false;
+    _loadedFields = _fields;
   }
+
+  /// Everything the fields hold, as text, to tell whether they were edited.
+  String get _fields => [
+    timeText,
+    heightText,
+    landing,
+    landingText,
+    lateLanding,
+    motorRestart,
+    outOfBounds,
+    noAltitude,
+    penaltyText,
+    cumulativePenaltyText,
+  ].join('\u0000');
+
+  late String _loadedFields;
+
+  /// Whether anything was typed or toggled since the fields were last filled
+  /// from a score. Unlike [isDirty] this sees invalid text too, which parses
+  /// to nothing and so compares equal to an empty row.
+  bool get editedSinceLoad => _fields != _loadedFields;
 
   /// Replaces the draft with [saved], after a save or a reload. [shown]
   /// fills the fields instead when it is given (see the constructor).

@@ -2749,4 +2749,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get participantRemoveUnavailable =>
       'Participants can’t be removed from this contest now.';
+
+  @override
+  String get scorePilotEntryChip => 'Pilot entry';
+
+  @override
+  String get scorePilotEntryTooltip =>
+      'A pilot or helper submitted values. The submission is kept in history.';
 }

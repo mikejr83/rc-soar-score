@@ -105,6 +105,95 @@ class ScoringController extends ChangeNotifier {
       loading = false;
       notifyListeners();
     }
+    // A sync that came in meanwhile may be newer than what the load read.
+    if (_refreshAfterLoad) {
+      _refreshAfterLoad = false;
+      if (loadError == null) await refreshAfterSync();
+    }
+  }
+
+  bool _refreshAfterLoad = false;
+
+  /// Counts stored entries, so a read can tell a save answered meanwhile.
+  int _savedEpoch = 0;
+
+  /// Reads the contest's scores again after a sync, without disturbing the
+  /// page: the round and group stay, and nothing the director typed is lost.
+  ///
+  /// A row with unsaved edits keeps them; when its official score moved on
+  /// meanwhile, the row is marked stale with the newer values, which is the
+  /// same choice (keep mine or take theirs) a conflicting save leads to. A row
+  /// being saved is left alone until its save answers. Every other row shows
+  /// what was pulled, including a pilot's new submission. A failed read leaves
+  /// the page as it was.
+  Future<void> refreshAfterSync() async {
+    // One read at a time: a sync that arrives meanwhile asks for one more
+    // read after this one, so an older answer never lands over a newer one.
+    if (_refreshing) {
+      _refreshAgain = true;
+      return;
+    }
+    _refreshing = true;
+    try {
+      do {
+        _refreshAgain = false;
+        await _refreshOnce();
+      } while (_refreshAgain && !_disposed);
+    } finally {
+      _refreshing = false;
+    }
+  }
+
+  bool _refreshing = false;
+  bool _refreshAgain = false;
+
+  Future<void> _refreshOnce() async {
+    if (loading) {
+      _refreshAfterLoad = true;
+      return;
+    }
+    if (data == null) return;
+    ScoringPageData? loaded;
+    try {
+      // A save that answers while the read is out makes the read older than
+      // the page, so the read is made again rather than put over the save.
+      for (var tries = 0; tries < 3 && loaded == null; tries++) {
+        final epoch = _savedEpoch;
+        final read = await ScoringPageData.load(client, contestId);
+        if (epoch == _savedEpoch) loaded = read;
+      }
+    } on Object {
+      return;
+    }
+    if (loaded == null) return;
+    if (_disposed || data == null) return;
+    final before = {for (final row in rows) row.id: row};
+    var next = loaded;
+    // A save in flight answers with its own copy of the slot.
+    for (final row in before.values) {
+      final slot = row.slot;
+      if (saveOf(row.id).isBusy && slot != null) next = next.withSlot(slot);
+    }
+    data = next;
+    _clampGroup();
+    for (final row in rows) {
+      if (saveOf(row.id).isBusy) continue;
+      final draft = _drafts[row.id];
+      if (draft == null) continue;
+      // Raw text counts, so an invalid entry is not wiped by a refresh.
+      final typed = draft.editedSinceLoad;
+      if (!typed) {
+        draft.resetTo(row.savedComponents, shown: _shown(row));
+      } else if (before[row.id]?.baseRevision != row.baseRevision) {
+        _theirs[row.id] = row.savedComponents;
+        _saves[row.id] = const RowSave(
+          RowSaveKind.stale,
+          message: 'This row changed since you opened it.',
+        );
+      }
+    }
+    await _loadResults();
+    notifyListeners();
   }
 
   void _clampGroup() {
@@ -283,6 +372,7 @@ class ScoringController extends ChangeNotifier {
   /// Takes a stored entry into the page: the slot, the contest and the row's
   /// draft and save state.
   void _applySaved(ScoringRow row, ScoreEntryResult result) {
+    _savedEpoch++;
     _mutationIds.remove(row.id);
     final slot = ScoreSlot(
       placeholder: result.placeholder,

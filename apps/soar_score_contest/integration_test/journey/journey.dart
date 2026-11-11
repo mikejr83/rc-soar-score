@@ -113,7 +113,8 @@ class Journey {
     }
   }
 
-  /// Runs [body] as the next step of the phase, logging platform skips.
+  /// Runs [body] as the next step of the phase. A [nativeOnly] step is logged
+  /// as skipped on the web, a [webOnly] step as skipped on the native build.
   Future<void> step(
     String title,
     Future<void> Function() body, {

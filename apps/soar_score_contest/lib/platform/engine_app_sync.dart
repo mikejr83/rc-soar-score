@@ -138,6 +138,7 @@ class EngineAppSync implements AppSync {
           rejectedChanges: entry.value.rejectedMutations,
           conflicts: entry.value.conflictsNeedingAction,
           lastSyncedAt: entry.value.lastSyncedAt,
+          dataRevision: entry.value.dataRevision,
           problem:
               _problem(entry.value.failure) ??
               (entry.value.skipReason == SyncSkipReason.accountless
