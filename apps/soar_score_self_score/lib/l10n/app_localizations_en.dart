@@ -223,6 +223,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t copy the invitation link. Check your connection and try again.';
 
   @override
+  String get invitationLinkDialogTitle => 'Your invitation link';
+
+  @override
+  String get invitationLinkDialogBody =>
+      'Your browser would not copy it. Select the link and copy it yourself.';
+
+  @override
+  String get invitationLinkDialogClose => 'Close';
+
+  @override
   String get currentResults => 'Results';
 
   @override
