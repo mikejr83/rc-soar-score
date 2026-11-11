@@ -66,6 +66,12 @@ void main() {
     expect(response.statusCode, 400);
   });
 
+  test('revision refuses a contest id that is not an id', () async {
+    final response = await api.send('GET', '/sync/revision?contest_id=nope');
+
+    expect(response.statusCode, 400);
+  });
+
   test('system data needs a non-negative after_sequence', () async {
     final missing = await api.send('GET', '/sync/system-data');
     final negative = await api.send(

@@ -752,6 +752,42 @@ abstract class AppLocalizations {
   /// **'Click to sync now'**
   String get syncTooltipAction;
 
+  /// Status bar entry of the web app: the label that reloads the data on screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refreshStatusReady;
+
+  /// Status bar refresh entry while it checks the service.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing'**
+  String get refreshStatusRefreshing;
+
+  /// Status bar refresh entry when the service could not be asked.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh failed'**
+  String get refreshStatusFailed;
+
+  /// Tooltip line of the status bar refresh entry: when the data was last checked.
+  ///
+  /// In en, this message translates to:
+  /// **'Last refreshed {time}'**
+  String refreshTooltipLast(String time);
+
+  /// Tooltip line of the status bar refresh entry: what a click does and that the page refreshes by itself.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to refresh now. The page also refreshes by itself every few minutes when something changed.'**
+  String get refreshTooltipAction;
+
+  /// Screen reader label of the status bar refresh entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh: {status}'**
+  String refreshSemanticsLabel(String status);
+
   /// Screen reader label of the status bar sync entry.
   ///
   /// In en, this message translates to:

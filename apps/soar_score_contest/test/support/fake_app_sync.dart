@@ -9,11 +9,17 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 /// An [AppSync] with a state the test sets, recording what screens ask.
 class FakeAppSync implements AppSync {
-  FakeAppSync({this.available = true, AppSyncState? state})
-    : _state = state ?? const AppSyncState();
+  FakeAppSync({
+    this.available = true,
+    this.refreshable = false,
+    AppSyncState? state,
+  }) : _state = state ?? const AppSyncState();
 
   @override
   final bool available;
+
+  @override
+  final bool refreshable;
 
   AppSyncState _state;
   final _controller = StreamController<AppSyncState>.broadcast();

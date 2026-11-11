@@ -1,10 +1,13 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 import 'dart:math';
 
-import 'package:soar_score_core/soar_score_core.dart';
+import 'package:logging/logging.dart';
+
+import '../../models/id.dart';
 
 import 'sync_timer_factory.dart';
+
+final _logger = Logger('SyncPoller');
 
 /// Where the director is, which sets how often the service is asked for
 /// changes made elsewhere (participants scoring, another installation).
@@ -145,12 +148,7 @@ class SyncPoller {
       await onPoll(_focus);
     } on Object catch (error, stack) {
       // The next check is one interval after this one.
-      developer.log(
-        'The periodic sync check failed',
-        name: 'SyncPoller',
-        error: error,
-        stackTrace: stack,
-      );
+      _logger.warning('The periodic sync check failed', error, stack);
     } finally {
       _polling = false;
     }

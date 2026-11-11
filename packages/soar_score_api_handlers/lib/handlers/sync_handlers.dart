@@ -17,6 +17,9 @@ final _logger = Logger('Sync');
 ///   installations
 /// - `POST /contests/{contestId}/activations` makes an installation the
 ///   contest's administration installation
+/// - `GET /sync/revision` where a scope's log stands, to learn cheaply
+///   whether anything changed (`contest_id` picks a contest, else the
+///   caller's own data)
 /// - `POST /sync/exchange` pushes unsent mutations and pulls the changes
 ///   after the cursor for one scope
 /// - `GET /sync/system-data` the pull-only system data stream
@@ -114,6 +117,30 @@ void addSyncRoutes(
       kind: body.kind,
     );
     return jsonResponse(activation.toJson());
+  });
+
+  router.get('/sync/revision', (Request request) async {
+    final principal = requirePrincipal(request);
+    final raw = request.url.queryParameters['contest_id'];
+    final Id? contestId;
+    try {
+      contestId = raw == null ? null : Id.parse(raw);
+    } on ArgumentError {
+      throw ArgumentError.value(raw, 'contest_id', 'is not a contest id');
+    }
+    final sequence = await acceptor.revision(
+      accountId: principal.accountId,
+      scope: contestId == null
+          ? DirectorScopeKey(principal.accountId)
+          : ContestScopeKey(contestId),
+    );
+    return jsonResponse(
+      SyncRevisionDto(
+        accountId: principal.accountId,
+        contestId: contestId,
+        sequence: sequence,
+      ).toJson(),
+    );
   });
 
   router.post('/sync/exchange', (Request request) async {

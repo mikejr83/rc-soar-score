@@ -16,7 +16,8 @@ import '../../services/sync/app_sync.dart';
 /// synced data in this and reload there. The old content stays on screen, so
 /// [onSynced] should reload quietly rather than show a loading state.
 ///
-/// Builds without sync ([AppSync.available] false, as on web) never call back.
+/// Builds with neither sync nor refresh ([AppSync.available] and
+/// [AppSync.refreshable] false) never call back.
 class ReloadOnSync extends StatefulWidget {
   const ReloadOnSync({
     super.key,
@@ -95,7 +96,7 @@ class _ReloadOnSyncState extends State<ReloadOnSync> {
     unawaited(_subscription?.cancel());
     _subscription = null;
     _sync = sync;
-    if (!sync.available) return;
+    if (!sync.available && !sync.refreshable) return;
     _seen = _revision(sync);
     _subscription = sync.states.listen((_) => _check());
   }

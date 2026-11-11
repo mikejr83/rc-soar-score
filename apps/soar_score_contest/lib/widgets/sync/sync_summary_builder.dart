@@ -11,7 +11,8 @@ import '../../services/sync/sync_scope_summary.dart';
 /// store when it first appears and again whenever the engine reports.
 ///
 /// Builds with a null summary until the first read finishes, and always when
-/// the build does not synchronize ([AppSync.available] is false).
+/// the build neither synchronizes nor refreshes ([AppSync.available] and
+/// [AppSync.refreshable] are false).
 class SyncSummaryBuilder extends StatefulWidget {
   const SyncSummaryBuilder({
     super.key,
@@ -44,7 +45,7 @@ class _SyncSummaryBuilderState extends State<SyncSummaryBuilder> {
     if (identical(sync, _sync)) return;
     unawaited(_subscription?.cancel());
     _sync = sync;
-    if (!sync.available) return;
+    if (!sync.available && !sync.refreshable) return;
     _subscription = sync.states.listen((_) {
       if (mounted) setState(() {});
     });
@@ -55,7 +56,9 @@ class _SyncSummaryBuilderState extends State<SyncSummaryBuilder> {
   void didUpdateWidget(SyncSummaryBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
     final sync = _sync;
-    if (sync != null && sync.available && oldWidget.scope != widget.scope) {
+    if (sync != null &&
+        (sync.available || sync.refreshable) &&
+        oldWidget.scope != widget.scope) {
       unawaited(sync.refresh(widget.scope));
     }
   }

@@ -16,8 +16,11 @@ import 'sync_summary_builder.dart';
 /// In a contest it is that contest's sync; the details page is in the
 /// contest's navigation. Outside a contest it is the signed-in account's own
 /// data.
-/// Shows nothing in a build that does not synchronize, or outside a contest
-/// while nobody is signed in.
+/// The web build has no sync; there it is a Refresh entry that reloads the
+/// data on screen (`RevisionAppSync`).
+///
+/// Shows nothing in a build that neither synchronizes nor refreshes, or outside
+/// a contest while nobody is signed in.
 class ShellSyncStatus extends StatelessWidget {
   const ShellSyncStatus({super.key, this.contest});
 
@@ -35,15 +38,25 @@ class ShellSyncStatus extends StatelessWidget {
     return SyncSummaryBuilder(
       scope: scope,
       builder: (context, sync, summary, syncing) {
-        if (!sync.available) return const SizedBox.shrink();
+        if (!sync.available && !sync.refreshable) {
+          return const SizedBox.shrink();
+        }
         final l10n = AppLocalizations.of(context);
-        final text = SyncStatusText.of(
-          l10n,
-          summary,
-          syncing: syncing,
-          time: DirectorTime.of(context),
-          canSyncNow: true,
-        );
+        final time = DirectorTime.of(context);
+        final text = sync.available
+            ? SyncStatusText.of(
+                l10n,
+                summary,
+                syncing: syncing,
+                time: time,
+                canSyncNow: true,
+              )
+            : SyncStatusText.ofRefresh(
+                l10n,
+                summary,
+                syncing: syncing,
+                time: time,
+              );
         final attention =
             (summary?.needsAttention ?? 0) > 0 ||
             (summary != null && summary.localOnly && summary.problem != null) ||
@@ -52,7 +65,9 @@ class ShellSyncStatus extends StatelessWidget {
           message: text.tooltip,
           child: Semantics(
             button: true,
-            label: l10n.syncSemanticsLabel(text.label),
+            label: sync.available
+                ? l10n.syncSemanticsLabel(text.label)
+                : l10n.refreshSemanticsLabel(text.label),
             excludeSemantics: true,
             child: InkWell(
               key: const ValueKey('shell-sync-status'),

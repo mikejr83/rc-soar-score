@@ -506,6 +506,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncTooltipAction => 'Click to sync now';
 
   @override
+  String get refreshStatusReady => 'Refresh';
+
+  @override
+  String get refreshStatusRefreshing => 'Refreshing';
+
+  @override
+  String get refreshStatusFailed => 'Refresh failed';
+
+  @override
+  String refreshTooltipLast(String time) {
+    return 'Last refreshed $time';
+  }
+
+  @override
+  String get refreshTooltipAction =>
+      'Click to refresh now. The page also refreshes by itself every few minutes when something changed.';
+
+  @override
+  String refreshSemanticsLabel(String status) {
+    return 'Refresh: $status';
+  }
+
+  @override
   String syncSemanticsLabel(String status) {
     return 'Sync: $status';
   }

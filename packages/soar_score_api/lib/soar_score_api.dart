@@ -55,6 +55,7 @@ export 'dto/sync_exchange_response.dart';
 export 'dto/sync_info_dto.dart';
 export 'dto/sync_mutation_dto.dart';
 export 'dto/sync_mutation_result.dart';
+export 'dto/sync_revision_dto.dart';
 export 'dto/sync_scope_dto.dart';
 export 'dto/system_data_response.dart';
 export 'dto/update_contest_request.dart';

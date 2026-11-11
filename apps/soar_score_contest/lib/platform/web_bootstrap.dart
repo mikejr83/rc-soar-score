@@ -6,6 +6,8 @@ import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 import '../auth/auth_session.dart';
 import '../auth/auth_session_factory.dart';
 import '../services/preferences/preferences_controller.dart';
+import '../services/sync/app_sync.dart';
+import '../services/sync/revision_app_sync.dart';
 import '../services/ui_account/auth_ui_account.dart';
 import '../services/ui_account/ui_account.dart';
 import 'app_bootstrap.dart';
@@ -27,7 +29,12 @@ const String defaultApiBaseUrl = 'http://localhost:8080';
 /// is compiled out of the web artifact entirely.
 class WebBootstrap extends AppBootstrap {
   WebBootstrap(this._client, this._auth, this.localUiStore)
-    : uiAccount = AuthUiAccount(_auth);
+    : uiAccount = AuthUiAccount(_auth),
+      _refresh = RevisionAppSync(
+        fetch: _client.syncRevision,
+        isSignedIn: () => _auth.isSignedIn,
+        signInChanges: _auth,
+      );
 
   final ApiClient _client;
   final AuthSession _auth;
@@ -37,7 +44,21 @@ class WebBootstrap extends AppBootstrap {
   @override
   final UiAccount uiAccount;
 
+  /// The web build has no sync engine; it asks the service now and then
+  /// whether the data on screen changed and offers a Refresh.
+  final RevisionAppSync _refresh;
+
   bool _closed = false;
+
+  @override
+  AppSync get appSync => _refresh;
+
+  @override
+  void syncFocusChanged(String? contestId) => _refresh.focusChanged(contestId);
+
+  @override
+  void appActiveChanged({required bool active}) =>
+      _refresh.activeChanged(active: active);
 
   @override
   ApiClient get apiClient => _client;
@@ -72,6 +93,7 @@ class WebBootstrap extends AppBootstrap {
       return;
     }
     _closed = true;
+    await _refresh.close();
     _client.close();
     await localUiStore.close();
     (uiAccount as AuthUiAccount).dispose();
