@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -33,6 +35,7 @@ import '../../widgets/participants/pilot_models_dialog.dart';
 import '../../widgets/participants/participants_table.dart';
 import '../../widgets/unsaved_changes_guard.dart';
 import '../participant_editor_page.dart';
+import '../../widgets/sync/reload_on_sync.dart';
 
 /// Who takes part in an existing contest, and their contest-specific data
 /// (role, class, team), at `/contest-administration/contests/{id}/participants`
@@ -121,10 +124,71 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     setState(() => _invitations = session..addListener(_changed));
   }
 
+  /// Reads the invitations again after a sync (the contest may have reached
+  /// the server). The menu keeps working from the old ones meanwhile.
+  Future<void> _refreshInvitations() async {
+    if (_invitationsRefreshing) {
+      _invitationsRefreshAgain = true;
+      return;
+    }
+    _invitationsRefreshing = true;
+    try {
+      do {
+        _invitationsRefreshAgain = false;
+        await _refreshInvitationsOnce();
+      } while (_invitationsRefreshAgain && mounted);
+    } finally {
+      _invitationsRefreshing = false;
+    }
+  }
+
+  bool _invitationsRefreshing = false;
+  bool _invitationsRefreshAgain = false;
+
+  /// True from the confirmation of an invitation send until it ends: the
+  /// session it holds must not be replaced meanwhile.
+  bool _sendingInvitations = false;
+  bool _invitationsRefreshDeferred = false;
+
+  Future<void> _refreshInvitationsOnce() async {
+    final publication = publicationClientOf(context);
+    final id = _controller?.contestId;
+    if (publication == null || id == null) return;
+    final session = await PilotInvitationSession.open(
+      source: PilotInvitationSources.current,
+      client: publication,
+      contestId: id,
+    );
+    if (!mounted) {
+      session.dispose();
+      return;
+    }
+    if (_sendingInvitations) {
+      // The open confirmation or send holds the current session. Reading
+      // again once it ends brings the page up to date.
+      session.dispose();
+      _invitationsRefreshDeferred = true;
+      return;
+    }
+    final old = _invitations;
+    old?.removeListener(_changed);
+    setState(() => _invitations = session..addListener(_changed));
+    old?.dispose();
+  }
+
   Future<void> _sendInvitations(List<Id> missing) async {
     final session = _invitations;
     if (session == null) return;
-    await sendInvitationsGuarded(context, session, missing);
+    _sendingInvitations = true;
+    try {
+      await sendInvitationsGuarded(context, session, missing);
+    } finally {
+      _sendingInvitations = false;
+      if (_invitationsRefreshDeferred && mounted) {
+        _invitationsRefreshDeferred = false;
+        unawaited(_refreshInvitations());
+      }
+    }
   }
 
   /// What the invitation actions offer for [targets] now. A row menu passes
@@ -484,7 +548,16 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   // Building.
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ReloadOnSync.contest(
+    contestId: widget.contestId,
+    onSynced: () {
+      unawaited(_controller?.refreshQuietly());
+      _refreshInvitations();
+    },
+    child: _scaffold(context),
+  );
+
+  Widget _scaffold(BuildContext context) {
     final c = _controller;
     return Scaffold(
       body: c == null
