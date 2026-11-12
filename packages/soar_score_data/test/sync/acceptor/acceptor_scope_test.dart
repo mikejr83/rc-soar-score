@@ -236,6 +236,140 @@ void _tests(Backend backend) {
     });
   });
 
+  group('supersession markers', () {
+    late Map<String, Object?> round;
+    late Map<String, Object?> assignment;
+    late Map<String, Object?> foreignRound;
+    late Map<String, Object?> foreignAssignment;
+
+    setUp(() async {
+      final rounds = await harness.server.stores
+          .of('Round')
+          .whereIdJson('contest_id', contestId);
+      rounds.sort(
+        (a, b) => (a['ordinal']! as int).compareTo(b['ordinal']! as int),
+      );
+      round = rounds.first;
+      assignment = await first('MatrixAssignment', contestId);
+      foreignRound = await first('Round', otherId);
+      foreignAssignment = await first('MatrixAssignment', otherId);
+    });
+
+    Map<String, Object?> marked(Map<String, Object?> target) => {
+      ...round,
+      'superseded_by_round_id': target['id'],
+    };
+
+    Map<String, Object?> newAssignment(Map<String, Object?> target) => {
+      ...assignment,
+      'id': core.Id.create().value,
+      'superseded_by_assignment_id': target['id'],
+    };
+
+    Future<void> expectUntouched(String type, Map<String, Object?> row) async {
+      expect(
+        await harness.stored(type, core.Id.parse(row['id']! as String)),
+        row,
+      );
+    }
+
+    test('a round marker naming another contest\'s round is refused', () async {
+      // The refusal is itself recorded; nothing else changes.
+      final before = (await footprint()).sublist(1);
+
+      final out = await harness.exchange(
+        scope,
+        mutations: [
+          harness.save(
+            'Round',
+            marked(foreignRound),
+            base: round['revision']! as int,
+          ),
+        ],
+      );
+
+      expect(out.results.single.outcome, core.MutationOutcome.rejected);
+      expect(out.results.single.reasonCode, 'unauthorized');
+      expect(out.conflicts, isEmpty);
+      expect((await footprint()).sublist(1), before);
+      await expectUntouched('Round', round);
+    });
+
+    test('an assignment marker naming another contest\'s assignment is '
+        'refused', () async {
+      // The refusal is itself recorded; nothing else changes.
+      final before = (await footprint()).sublist(1);
+
+      final out = await harness.exchange(
+        scope,
+        mutations: [
+          harness.save('MatrixAssignment', newAssignment(foreignAssignment)),
+        ],
+      );
+
+      expect(out.results.single.outcome, core.MutationOutcome.rejected);
+      expect(out.results.single.reasonCode, 'unauthorized');
+      expect((await footprint()).sublist(1), before);
+      await expectUntouched('MatrixAssignment', foreignAssignment);
+    });
+
+    test('a round marker naming a round of this contest is accepted', () async {
+      final rounds = await harness.server.stores
+          .of('Round')
+          .whereIdJson('contest_id', contestId);
+      final other = rounds.firstWhere((r) => r['id'] != round['id']);
+
+      final out = await harness.exchange(
+        scope,
+        mutations: [
+          harness.save('Round', marked(other), base: round['revision']! as int),
+        ],
+      );
+
+      expect(out.results.single.outcome, core.MutationOutcome.accepted);
+    });
+
+    test('a decision that takes a foreign marker is refused', () async {
+      final record =
+          (await harness.serverRepository.syncAcceptorStore.transaction(
+            (tx) => tx.acceptedAfter(scope, 0, limit: 1),
+          )).first;
+      for (final (type, entity) in [
+        ('Round', marked(foreignRound)),
+        ('MatrixAssignment', newAssignment(foreignAssignment)),
+      ]) {
+        final conflictId = core.Id.create();
+        await harness.serverRepository.syncAcceptorStore.transaction(
+          (tx) => tx.saveConflict(
+            core.ConflictRecord(
+              id: conflictId,
+              contestId: contestId,
+              entityType: type,
+              entityId: core.Id.parse(entity['id']! as String),
+              competingMutationId: record.id,
+              reasonCode: 'stale_base',
+              createdAt: DateTime.utc(2026, 10, 14),
+              competingPayload: entity,
+            ),
+          ),
+        );
+        final before = await footprint();
+
+        final result = await harness.service.resolveConflict(
+          accountId: harness.account,
+          conflictId: conflictId,
+          clientMutationId: 'decide-$type',
+          choice: core.ConflictResolutionChoice.tookCompeting,
+        );
+
+        expect(result.outcome, core.MutationOutcome.rejected, reason: type);
+        expect(result.reasonCode, 'unauthorized', reason: type);
+        expect(await footprint(), before, reason: type);
+      }
+      await expectUntouched('Round', round);
+    });
+  });
+
   group('score attempts', () {
     late Map<String, Object?> attempt;
     late Map<String, Object?> foreignConfig;

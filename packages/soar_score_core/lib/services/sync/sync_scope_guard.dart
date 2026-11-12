@@ -48,10 +48,14 @@ abstract final class SyncScopeGuard {
       'scheduled_round_id': 'Round',
       'credited_round_id': 'Round',
       'source_assignment_id': 'MatrixAssignment',
+      'superseded_by_assignment_id': 'MatrixAssignment',
       're_flight_id': 'ReFlight',
     },
     'MatrixRevision': {'previous_revision_id': 'MatrixRevision'},
-    'Round': {'matrix_revision_id': 'MatrixRevision'},
+    'Round': {
+      'matrix_revision_id': 'MatrixRevision',
+      'superseded_by_round_id': 'Round',
+    },
     'RoundGroup': {'round_id': 'Round'},
     'ReFlight': {
       'credited_round_id': 'Round',
