@@ -80,3 +80,5 @@ export 'exchange/exchange_tables.dart';
 export 'exchange/exchange_transforms.dart';
 export 'exchange/inspection_owners.dart';
 export 'exchange/contest_importer.dart';
+
+export 'repositories/pilot_import_link_repository.dart';

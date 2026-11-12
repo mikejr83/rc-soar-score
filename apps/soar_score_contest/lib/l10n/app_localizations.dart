@@ -2120,6 +2120,40 @@ abstract class AppLocalizations {
   /// **'Nothing new to add'**
   String get pilotImportNothingNew;
 
+  /// A previously confirmed GliderScore pilot link.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked to {name}'**
+  String pilotImportLinkedTo(String name);
+
+  /// Explains why a remembered pilot needs approval again.
+  ///
+  /// In en, this message translates to:
+  /// **'GliderScore details changed. Select to approve this import.'**
+  String get pilotImportSourceChanged;
+
+  /// A source pilot field changed since the last confirmed import.
+  ///
+  /// In en, this message translates to:
+  /// **'{field}: {before} → {after}'**
+  String pilotImportSourceFieldChange(
+    String field,
+    String before,
+    String after,
+  );
+
+  /// Name of the first-name field in a pilot import review.
+  ///
+  /// In en, this message translates to:
+  /// **'first name'**
+  String get pilotImportFieldFirstName;
+
+  /// Name of the last-name field in a pilot import review.
+  ///
+  /// In en, this message translates to:
+  /// **'last name'**
+  String get pilotImportFieldLastName;
+
   /// Row text when the identifiers of a pilot point at different participants.
   ///
   /// In en, this message translates to:

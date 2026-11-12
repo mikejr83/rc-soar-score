@@ -112,3 +112,6 @@ export 'preferences/locale_number.dart';
 export 'preferences/supported_locales.dart';
 export 'time/time.dart';
 export 'sync/sync_protocol.dart';
+
+export 'models/imports/pilot_import_link.dart';
+export 'repositories/pilot_import_link_repository.dart';

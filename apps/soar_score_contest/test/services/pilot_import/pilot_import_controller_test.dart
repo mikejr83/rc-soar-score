@@ -55,6 +55,31 @@ void main() {
     expect(reads, isEmpty);
   });
 
+  test('a remembered name-only pilot is preselected', () async {
+    final draft = const PilotDraft(
+      sourcePilotNo: 3,
+      firstName: 'Sam',
+      lastName: 'Samename',
+    );
+    final now = DateTime.utc(2026);
+    store.links.add(
+      PilotImportLink(
+        id: Id.create(),
+        ownerAccountId: sam.ownerAccountId,
+        sourcePilotNo: 3,
+        participantProfileId: sam.id,
+        sourceValues: PilotImportMatcher.sourceValues(draft),
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+    final c = controller();
+    await c.chooseAndRead();
+    expect(c.review!.matches[2].remembered, isTrue);
+    expect(c.selections[2].targetProfileId, sam.id);
+    expect(c.selections[2].choice, PilotImportChoice.update);
+  });
+
   test('reading builds a review with sensible defaults', () async {
     final c = controller();
     expect(await c.chooseAndRead(), isTrue);

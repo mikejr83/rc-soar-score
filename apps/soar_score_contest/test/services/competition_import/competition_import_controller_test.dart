@@ -159,6 +159,44 @@ void main() {
     ], unorderedEquals(['Lovelace', 'Nilsson']));
   });
 
+  test('a link from one competition is reused for another', () async {
+    final ada = ParticipantProfile(
+      id: Id.create(),
+      ownerAccountId: Id.create(),
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026),
+    );
+    const draft = PilotDraft(
+      sourcePilotNo: 1,
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+    );
+    store.profiles.add(ada);
+    store.links.add(
+      PilotImportLink(
+        id: Id.create(),
+        ownerAccountId: ada.ownerAccountId,
+        sourcePilotNo: 1,
+        participantProfileId: ada.id,
+        sourceValues: PilotImportMatcher.sourceValues(draft),
+        createdAt: DateTime.utc(2026),
+        updatedAt: DateTime.utc(2026),
+      ),
+    );
+    await controller.chooseAndRead();
+    controller.toggle(2);
+    await controller.continueToPilots();
+    final match = controller.pilots.review!.matches.single;
+    expect(match.remembered, isTrue);
+    expect(controller.pilots.selections.single.targetProfileId, ada.id);
+    expect(
+      controller.pilots.selections.single.choice,
+      PilotImportChoice.update,
+    );
+  });
+
   test(
     'Completed starts from the file and the director can change it',
     () async {

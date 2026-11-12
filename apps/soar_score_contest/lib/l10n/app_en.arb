@@ -1629,6 +1629,24 @@
     }
   },
   "pilotImportNothingNew": "Nothing new to add",
+  "pilotImportLinkedTo": "Linked to {name}",
+  "@pilotImportLinkedTo": {
+    "description": "A previously confirmed GliderScore pilot link.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "pilotImportSourceChanged": "GliderScore details changed. Select to approve this import.",
+  "@pilotImportSourceChanged": {
+    "description": "Explains why a remembered pilot needs approval again."
+  },
+  "pilotImportSourceFieldChange": "{field}: {before} → {after}",
+  "@pilotImportSourceFieldChange": {
+    "description": "A source pilot field changed since the last confirmed import.",
+    "placeholders": {"field": {"type": "String"}, "before": {"type": "String"}, "after": {"type": "String"}}
+  },
+  "pilotImportFieldFirstName": "first name",
+  "@pilotImportFieldFirstName": {"description": "Name of the first-name field in a pilot import review."},
+  "pilotImportFieldLastName": "last name",
+  "@pilotImportFieldLastName": {"description": "Name of the last-name field in a pilot import review."},
   "@pilotImportNothingNew": {
     "description": "Row text when an existing participant already has everything the file holds."
   },

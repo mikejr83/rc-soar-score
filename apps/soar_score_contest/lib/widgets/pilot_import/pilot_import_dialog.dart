@@ -303,6 +303,8 @@ String _details(PilotDraft p) => [
 ].where((s) => s.isNotEmpty).join(' · ');
 
 String _fieldName(AppLocalizations l10n, String field) => switch (field) {
+  'firstName' => l10n.pilotImportFieldFirstName,
+  'lastName' => l10n.pilotImportFieldLastName,
   'email' => l10n.pilotImportFieldEmail,
   'faiNumber' => l10n.pilotImportFieldFai,
   'nationalOrgId' => l10n.pilotImportFieldNationalId,
@@ -330,6 +332,9 @@ class _CheckRow extends StatelessWidget {
     final exact = match.kind == PilotMatchKind.exact;
     final included = selection.choice != PilotImportChoice.skip;
     final details = _details(draft);
+    final linked = match.remembered && match.candidateIds.length == 1
+        ? controller.review!.profile(match.candidateIds.single)
+        : null;
     final note = !exact
         ? null
         : match.changes.isEmpty
@@ -349,7 +354,21 @@ class _CheckRow extends StatelessWidget {
             : PilotImportChoice.skip,
       ),
       title: Text('${draft.firstName} ${draft.lastName}'),
-      subtitle: Text([?note, if (details.isNotEmpty) details].join('\n')),
+      subtitle: Text(
+        [
+          if (linked != null)
+            l10n.pilotImportLinkedTo('${linked.firstName} ${linked.lastName}'),
+          if (match.sourceChanged) l10n.pilotImportSourceChanged,
+          for (final change in match.sourceChanges)
+            l10n.pilotImportSourceFieldChange(
+              _fieldName(l10n, change.field),
+              change.from ?? '—',
+              change.to,
+            ),
+          ?note,
+          if (details.isNotEmpty) details,
+        ].join('\n'),
+      ),
     );
   }
 }
@@ -380,6 +399,12 @@ class _MaybeRow extends StatelessWidget {
     final notes = [
       if (match.conflict) l10n.pilotImportConflict,
       if (match.isDuplicateInFile) l10n.pilotImportDuplicateInFile,
+      for (final change in match.sourceChanges)
+        l10n.pilotImportSourceFieldChange(
+          _fieldName(l10n, change.field),
+          change.from ?? '—',
+          change.to,
+        ),
       _details(draft),
     ].where((s) => s.isNotEmpty).join('\n');
     return ListTile(

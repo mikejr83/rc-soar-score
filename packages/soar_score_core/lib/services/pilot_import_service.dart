@@ -39,10 +39,21 @@ class PilotImportReviewChangedError extends Error {
 /// still match them, so an edit to a participant the import does not touch
 /// (which could turn a "new" pilot into a duplicate) also refuses the import.
 class PilotImportService {
-  PilotImportService(this.profiles, {DateTime Function()? clock})
-    : _clock = clock ?? DateTime.now;
+  PilotImportService(
+    this.profiles, {
+    DateTime Function()? clock,
+    this.saveImport,
+  }) : _clock = clock ?? DateTime.now;
 
   final ParticipantProfileRepository profiles;
+
+  /// Optional atomic persistence for both profiles and remembered links.
+  final Future<List<ParticipantProfile>> Function(
+    List<ParticipantProfile> profiles,
+    List<PilotImportSelection> selections,
+    MutationMetadata metadata,
+  )?
+  saveImport;
   final DateTime Function() _clock;
 
   Future<PilotImportOutcome> apply(
@@ -126,7 +137,9 @@ class PilotImportService {
       }
     }
 
-    final saved = toSave.isEmpty
+    final saved = saveImport != null
+        ? await saveImport!(toSave, selections, metadata)
+        : toSave.isEmpty
         ? const <ParticipantProfile>[]
         : await profiles.saveAll(toSave, metadata: metadata);
     return PilotImportOutcome(

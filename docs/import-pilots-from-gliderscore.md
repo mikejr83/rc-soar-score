@@ -1,8 +1,8 @@
 # Import pilots from GliderScore
 
 The Windows contest app can add the pilots in a GliderScore database to your
-participants list. It reads the file on your computer; nothing is sent
-anywhere. Only pilots are imported: not contests, draws or scores. To import
+participants list. It reads the file on your computer. Your participants and
+remembered links sync with your account. Only pilots are imported: not contests, draws or scores. To import
 competitions as contests, see
 [import competitions](import-competitions-from-gliderscore.md).
 
@@ -26,6 +26,10 @@ The review has three groups:
 
 The review also tells you how many GliderScore test pilots were left out and
 which details were not imported.
+
+Once you confirm a pilot, the app remembers the link for both pilot and competition imports. A remembered pilot shows “Linked to” the participant. If GliderScore details change later, select the pilot to approve importing the changes. Deleting a participant removes its remembered links.
+
+Links identify the director's GliderScore 6 database and pilot number; saving the database or adding competitions does not break them. Distinguishing an independent GliderScore database on a different computer from a transferred database is not yet supported. Earlier imports establish links when next confirmed.
 
 ## What is imported
 

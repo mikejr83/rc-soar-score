@@ -293,7 +293,8 @@ class ContestImporter {
         'format_unsupported',
         'This file format (${header.formatVersion}) is not supported.',
       ),
-    if (header.schemaVersion != _db.schemaVersion)
+    if (header.schemaVersion != _db.schemaVersion &&
+        !(_db.schemaVersion == 2 && header.schemaVersion == 1))
       ImportRefusal(
         'schema_mismatch',
         'This file holds data of database version ${header.schemaVersion}; '

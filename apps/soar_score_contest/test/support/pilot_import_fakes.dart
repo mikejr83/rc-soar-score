@@ -36,10 +36,13 @@ ParticipantProfile profile({
 );
 
 /// An in-memory [PilotImportStore] that records what it was asked to save.
-class FakePilotImportStore implements PilotImportStore {
+class FakePilotImportStore implements PilotImportStore, PilotImportLinkStore {
   FakePilotImportStore(this.profiles);
 
   List<ParticipantProfile> profiles;
+  List<PilotImportLink> links = [];
+  @override
+  Future<List<PilotImportLink>> existingLinks() async => links;
   final applied = <List<PilotImportSelection>>[];
   final appliedRevisions = <Map<Id, int>>[];
   Object? applyError;

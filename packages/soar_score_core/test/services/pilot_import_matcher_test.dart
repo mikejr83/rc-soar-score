@@ -60,6 +60,65 @@ void main() {
   PilotMatch one(PilotDraft d, List<ParticipantProfile> existing) =>
       matcher.match([d], existing).single;
 
+  group('remembered links', () {
+    late ParticipantProfile profile;
+    late PilotImportLink link;
+    setUp(() {
+      profile = _profile();
+      link = PilotImportLink(
+        id: Id.create(),
+        ownerAccountId: _owner,
+        sourcePilotNo: 1,
+        participantProfileId: profile.id,
+        sourceValues: PilotImportMatcher.sourceValues(_draft()),
+        createdAt: _now,
+        updatedAt: _now,
+      );
+    });
+    test('previous name-only decision is selected automatically', () {
+      final m = matcher.match([_draft()], [profile], links: [link]).single;
+      expect(m.remembered, isTrue);
+      expect(m.candidateIds, [profile.id]);
+      expect(m.defaultAction, PilotImportAction.update);
+    });
+    test('changed source data needs approval', () {
+      final m = matcher
+          .match([_draft(club: 'New Club')], [profile], links: [link])
+          .single;
+      expect(m.sourceChanged, isTrue);
+      expect(m.defaultAction, PilotImportAction.ask);
+      expect(PilotImportSelection.defaultFor(m).targetProfileId, profile.id);
+    });
+    test('format-only source differences do not require approval', () {
+      final m = matcher
+          .match(
+            [_draft(first: ' ALEX ', last: 'ashdown')],
+            [profile],
+            links: [link],
+          )
+          .single;
+      expect(m.sourceChanged, isFalse);
+      expect(m.defaultAction, PilotImportAction.update);
+    });
+    test('deleted participant cannot be resolved', () {
+      final m = matcher.match([_draft()], [], links: [link]).single;
+      expect(m.remembered, isFalse);
+      expect(m.kind, PilotMatchKind.newPilot);
+    });
+    test('conflicting identifier is not selected automatically', () {
+      final other = _profile(email: 'other@example.com');
+      final m = matcher
+          .match(
+            [_draft(email: 'other@example.com')],
+            [profile, other],
+            links: [link],
+          )
+          .single;
+      expect(m.conflict, isTrue);
+      expect(m.defaultAction, PilotImportAction.ask);
+    });
+  });
+
   group('kinds', () {
     test('nobody in the list means new, added by default', () {
       final m = one(_draft(), const []);

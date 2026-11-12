@@ -47,6 +47,9 @@ class PilotMatch {
     this.conflict = false,
     this.changes = const [],
     this.duplicateOfSourcePilotNo,
+    this.remembered = false,
+    this.sourceChanged = false,
+    this.sourceChanges = const [],
   });
 
   final PilotDraft draft;
@@ -75,13 +78,22 @@ class PilotMatch {
   /// same rules.
   final int? duplicateOfSourcePilotNo;
 
+  /// This candidate was explicitly linked during an earlier import.
+  final bool remembered;
+
+  /// The incoming source data differs from the last confirmed source data.
+  final bool sourceChanged;
+
+  /// Normalized source details changed since the link was last confirmed.
+  final List<PilotFieldChange> sourceChanges;
+
   bool get isDuplicateInFile => duplicateOfSourcePilotNo != null;
 
   /// True for an exact match with nothing to change.
   bool get isUnchanged => kind == PilotMatchKind.exact && changes.isEmpty;
 
   PilotImportAction get defaultAction {
-    if (isDuplicateInFile) {
+    if (isDuplicateInFile || sourceChanged || conflict) {
       return PilotImportAction.ask;
     }
     return switch (kind) {

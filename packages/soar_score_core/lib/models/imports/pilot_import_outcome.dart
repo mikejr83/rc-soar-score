@@ -40,6 +40,9 @@ class PilotImportSelection {
         PilotImportAction.ask => PilotImportSelection(
           match: match,
           choice: PilotImportChoice.skip,
+          targetProfileId: match.remembered && match.candidateIds.length == 1
+              ? match.candidateIds.single
+              : null,
         ),
       };
 

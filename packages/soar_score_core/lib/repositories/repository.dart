@@ -3,6 +3,7 @@ import 'account_identity_repository.dart';
 import 'contest_model_link_repository.dart';
 import 'contest_import_repository.dart';
 import 'import_provenance_repository.dart';
+import 'pilot_import_link_repository.dart';
 import 'contest_configuration_preset_repository.dart';
 import 'model_catalog_repository.dart';
 import 'account_public_profile_repository.dart';
@@ -54,6 +55,8 @@ abstract interface class Repository {
   get contestConfigurationRevisionRepository;
 
   ParticipantProfileRepository get participantProfileRepository;
+
+  PilotImportLinkRepository get pilotImportLinkRepository;
 
   ContestParticipationRepository get contestParticipationRepository;
 

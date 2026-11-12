@@ -1457,6 +1457,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pilotImportNothingNew => 'Nothing new to add';
 
   @override
+  String pilotImportLinkedTo(String name) {
+    return 'Linked to $name';
+  }
+
+  @override
+  String get pilotImportSourceChanged =>
+      'GliderScore details changed. Select to approve this import.';
+
+  @override
+  String pilotImportSourceFieldChange(
+    String field,
+    String before,
+    String after,
+  ) {
+    return '$field: $before → $after';
+  }
+
+  @override
+  String get pilotImportFieldFirstName => 'first name';
+
+  @override
+  String get pilotImportFieldLastName => 'last name';
+
+  @override
   String get pilotImportConflict =>
       'Their email and registration numbers match different people in your list.';
 

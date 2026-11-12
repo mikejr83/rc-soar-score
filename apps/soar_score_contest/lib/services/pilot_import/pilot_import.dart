@@ -35,6 +35,11 @@ abstract class PilotImportStore {
   });
 }
 
+/// Optional remembered-link capability of a pilot import store.
+abstract interface class PilotImportLinkStore {
+  Future<List<PilotImportLink>> existingLinks();
+}
+
 /// The system file dialog the import uses. A journey cannot drive it, so it
 /// swaps in a recorder.
 class GliderScoreFiles {
@@ -208,10 +213,15 @@ class PilotImportController extends ChangeNotifier {
     final result = _result!;
     final draft = _mapper.map(result);
     final existing = await store.existing();
+    final linkStore = store;
+    final links = linkStore is PilotImportLinkStore
+        ? await (linkStore as PilotImportLinkStore).existingLinks()
+        : <PilotImportLink>[];
     final filter = pilotFilter;
     final matches = _matcher.match(
       filter == null ? draft.pilots : draft.pilots.where(filter).toList(),
       existing,
+      links: links,
     );
     _review = PilotImportReview(
       draft: draft,

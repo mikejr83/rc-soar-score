@@ -81,6 +81,49 @@ void main() {
     expect(result, isFalse);
   });
 
+  testWidgets('remembered pilot with changed source requires approval', (
+    tester,
+  ) async {
+    final sam = store.profiles[1];
+    final now = DateTime.utc(2026);
+    store.links.add(
+      PilotImportLink(
+        id: Id.create(),
+        ownerAccountId: sam.ownerAccountId,
+        sourcePilotNo: 3,
+        participantProfileId: sam.id,
+        sourceValues: PilotImportMatcher.sourceValues(
+          const PilotDraft(
+            sourcePilotNo: 3,
+            firstName: 'Sam',
+            lastName: 'Samename',
+            club: 'Old Club',
+          ),
+        ),
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+    await open(tester);
+    expect(find.textContaining('Linked to Sam Samename'), findsOneWidget);
+    expect(find.textContaining('GliderScore details changed.'), findsOneWidget);
+    expect(find.textContaining('club: old club → —'), findsOneWidget);
+    final row = tester.widget<CheckboxListTile>(
+      find.byKey(const ValueKey('pilot-import-row-3')),
+    );
+    expect(row.value, isFalse);
+    await tester.tap(find.byKey(const ValueKey('pilot-import-row-3')));
+    await tester.pump();
+    expect(
+      tester
+          .widget<CheckboxListTile>(
+            find.byKey(const ValueKey('pilot-import-row-3')),
+          )
+          .value,
+      isTrue,
+    );
+  });
+
   testWidgets('shows new pilots, matches and maybes, with the notes', (
     tester,
   ) async {

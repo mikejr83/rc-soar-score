@@ -231,6 +231,17 @@ class EntityStores {
       encode: (entity) => entity.toJson(),
       hasRevision: true,
     ),
+    EntityStore<core.PilotImportLink>(
+      entityType: 'PilotImportLink',
+      mapper: TableMapper(
+        db,
+        db.pilotImportLinks,
+        jsonColumns: {'source_values'},
+      ),
+      decode: core.PilotImportLink.fromJson,
+      encode: (entity) => entity.toJson(),
+      hasRevision: true,
+    ),
     EntityStore<core.ImportProvenance>(
       entityType: 'ImportProvenance',
       mapper: TableMapper(

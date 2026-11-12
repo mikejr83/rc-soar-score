@@ -52,7 +52,7 @@ void main() {
           name: embeddedServerName,
           displayName: embeddedServerDisplayName,
           version: embeddedServerVersion,
-          schemaRevision: null,
+          schemaRevision: 2,
         ),
       );
       client.close();
@@ -75,7 +75,7 @@ void main() {
         // Windows build must hold (ticket 018).
         final health = await client.health();
         expect(health.name, embeddedServerName);
-        expect(health.schemaRevision, null);
+        expect(health.schemaRevision, 2);
         client.close();
       } finally {
         await server.close();

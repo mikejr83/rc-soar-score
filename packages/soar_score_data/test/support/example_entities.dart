@@ -24,6 +24,7 @@ const exampleEntities = <(String entity, String file)>[
   ('ModelCatalog', 'model_catalog'),
   ('ContestModelLink', 'contest_model_link'),
   ('ImportProvenance', 'import_provenance'),
+  ('PilotImportLink', 'pilot_import_link'),
   ('MatrixRevision', 'matrix_revision'),
   ('Round', 'round'),
   ('RoundGroup', 'round_group'),

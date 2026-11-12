@@ -23,6 +23,7 @@ import 'schema/tables/discipline_rules_table.dart';
 import 'schema/tables/discipline_score_fields_table.dart';
 import 'schema/tables/discipline_validations_table.dart';
 import 'schema/tables/import_provenance_table.dart';
+import 'schema/tables/pilot_import_links_table.dart';
 import 'schema/tables/landing_results_table.dart';
 import 'schema/tables/landing_tables_table.dart';
 import 'schema/tables/local_account_table.dart';
@@ -92,6 +93,7 @@ part 'database.g.dart';
     ModelCatalogs,
     ContestModelLinks,
     ImportProvenances,
+    PilotImportLinks,
     Accounts,
     AccountAliases,
     AccountIdentities,
@@ -158,24 +160,122 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
       tablesFor(profile, allTables);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) => migrateToVersion1(m, profileTables),
+    onCreate: (m) => createCurrentSchema(m, profileTables),
     beforeOpen: (details) async {
       // SQLite ignores foreign keys unless asked; PostgreSQL always checks.
       if (executor.dialect == SqlDialect.sqlite) {
         await customStatement('PRAGMA foreign_keys = ON');
       }
     },
-    onUpgrade: (m, from, to) {
-      throw UnsupportedError(
-        'Schema upgrade from $from to $to is not implemented yet: '
-        'only schema version 1 exists (see migrate.dart).',
-      );
+    onUpgrade: (m, from, to) async {
+      if (from != 1 || to != 2) {
+        throw UnsupportedError(
+          'Schema upgrade from $from to $to is not supported.',
+        );
+      }
+      await transaction(() async {
+        final tableLookup = executor.dialect == SqlDialect.sqlite
+            ? "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'pilot_import_links'"
+            : "SELECT table_name AS name FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'pilot_import_links'";
+        if ((await customSelect(tableLookup).get()).isNotEmpty) {
+          if (!await _compatiblePilotImportLinks()) {
+            throw StateError(
+              'Version 1 database contains an incompatible pilot_import_links '
+              'table. No data was changed.',
+            );
+          }
+        } else {
+          await m.createTable(pilotImportLinks);
+        }
+      });
     },
   );
+
+  /// Recognizes the alpha version of the table without changing its rows.
+  Future<bool> _compatiblePilotImportLinks() async {
+    const expected = <String, String>{
+      'id': 'text',
+      'owner_account_id': 'text',
+      'source_system': 'text',
+      'source_pilot_no': 'integer',
+      'participant_profile_id': 'text',
+      'source_values': 'text',
+      'created_at': 'text',
+      'updated_at': 'text',
+      'revision': 'integer',
+    };
+    final sqlite = executor.dialect == SqlDialect.sqlite;
+    final columns = await customSelect(
+      sqlite ? 'PRAGMA table_info("pilot_import_links")' : "SELECT column_name AS name, data_type AS type, is_nullable, column_default AS dflt_value FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'pilot_import_links'",
+    ).get();
+    if (columns.length != expected.length) return false;
+    for (final row in columns) {
+      final name = row.read<String>('name');
+      final expectedType = expected[name];
+      final actualType = row.read<String>('type').toLowerCase();
+      final requiredType = expectedType == 'integer' && !sqlite
+          ? 'bigint'
+          : expectedType;
+      if (requiredType == null || requiredType != actualType) {
+        return false;
+      }
+      if (sqlite
+          ? row.read<int>('notnull') != 1
+          : row.read<String>('is_nullable') != 'NO') {
+        return false;
+      }
+      if (name == 'revision' &&
+          !RegExp(r'\b0\b').hasMatch('${row.data['dflt_value']}')) {
+        return false;
+      }
+    }
+    final uniqueSets = <String>[];
+    if (sqlite) {
+      final primary = columns.where((row) => row.read<int>('pk') > 0).toList();
+      if (primary.length != 1 || primary.single.read<String>('name') != 'id') {
+        return false;
+      }
+      final indexes = await customSelect(
+        'PRAGMA index_list("pilot_import_links")',
+      ).get();
+      for (final index in indexes.where(
+        (row) => row.read<int>('unique') == 1 && row.read<int>('partial') == 0,
+      )) {
+        final name = index.read<String>('name');
+        final safe = name.replaceAll('"', '""');
+        final parts = await customSelect('PRAGMA index_info("$safe")').get();
+        uniqueSets.add(parts.map((row) => row.read<String>('name')).join(','));
+      }
+    } else {
+      final constraints = await customSelect(
+        "SELECT tc.constraint_name, tc.constraint_type, kcu.column_name FROM information_schema.table_constraints tc JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name AND tc.constraint_schema = kcu.constraint_schema AND tc.table_name = kcu.table_name WHERE tc.table_schema = current_schema() AND tc.table_name = 'pilot_import_links' AND tc.constraint_type IN ('PRIMARY KEY', 'UNIQUE') ORDER BY tc.constraint_name, kcu.ordinal_position",
+      ).get();
+      final groups = <String, List<String>>{};
+      final types = <String, String>{};
+      for (final row in constraints) {
+        final name = row.read<String>('constraint_name');
+        (groups[name] ??= []).add(row.read<String>('column_name'));
+        types[name] = row.read<String>('constraint_type');
+      }
+      if (!groups.entries.any(
+        (e) => types[e.key] == 'PRIMARY KEY' && e.value.join(',') == 'id',
+      )) {
+        return false;
+      }
+      uniqueSets.addAll(
+        groups.entries
+            .where((e) => types[e.key] == 'UNIQUE')
+            .map((e) => e.value.join(',')),
+      );
+    }
+    return uniqueSets.contains(
+      'owner_account_id,source_system,source_pilot_no',
+    );
+  }
 }
 
 /// Opens the local SQLite database at [dbFilePath].

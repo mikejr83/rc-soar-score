@@ -129,6 +129,8 @@ Planned work is tracked in GitHub issues (milestones M0 to M5, epic parent issue
 
 ## Business and Architecture Requirements
 
+Persistent schema changes require a new schema version and a data-preserving, transactional migration. Keep versioned SQLite and PostgreSQL schema snapshots and test upgrades, rollback, and compatibility as described in `packages/soar_score_data/AGENTS.md`. Never require deleting a user's database to upgrade.
+
 Documentation is provided in the `./plan` folder. This contains business, architecture, and ui requirements. Consult this documentation when determining the best course of action for implementing business logic.
 
 ## Page Map
