@@ -15,7 +15,7 @@ import 'package:soar_score_api_handlers/handlers/models_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/invitation_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participant_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participants_handlers.dart';
-import 'package:soar_score_api_handlers/middleware/failure_rate_limiter.dart';
+import 'package:soar_score_api_handlers/middleware/invitation_throttle.dart';
 import 'package:soar_score_core/soar_score_core.dart' show InvitationService;
 import 'package:soar_score_api_handlers/handlers/participations_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/roles_handlers.dart';
@@ -48,7 +48,8 @@ createHandlers(
   GliderScoreImportRunner? gliderScoreImport,
   DrawRunner? drawRunner,
   InvitationService? invitations,
-  FailureRateLimiter? invitationRateLimiter,
+  InvitationThrottle? invitationThrottle,
+  String? trustedProxySecret,
   Set<String> corsAllowedOrigins = const {},
   String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
 }) {
@@ -109,7 +110,8 @@ createHandlers(
     participantHandler: buildParticipantHandler(
       repository,
       service: invitations,
-      limiter: invitationRateLimiter,
+      throttle: invitationThrottle,
+      trustedProxySecret: trustedProxySecret,
       allowedOrigins: corsAllowedOrigins,
       selfScoringBaseUrl: selfScoringBaseUrl,
     ),

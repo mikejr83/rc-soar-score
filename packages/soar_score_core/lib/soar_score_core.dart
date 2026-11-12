@@ -61,6 +61,7 @@ export 'repositories/flight_result_repository.dart';
 export 'repositories/installation_activation_repository.dart';
 export 'repositories/installation_repository.dart';
 export 'repositories/invitation_repository.dart';
+export 'repositories/request_throttle_store.dart';
 export 'repositories/landing_table_repository.dart';
 export 'repositories/local_account_repository.dart';
 export 'repositories/matrix_assignment_repository.dart';

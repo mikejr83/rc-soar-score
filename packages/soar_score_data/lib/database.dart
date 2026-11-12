@@ -44,6 +44,7 @@ import 'schema/tables/publication_projections_table.dart';
 import 'schema/tables/publication_participants_table.dart';
 import 'schema/tables/delist_requests_table.dart';
 import 'schema/tables/invitations_table.dart';
+import 'schema/tables/request_throttles_table.dart';
 import 'schema/tables/matrix_revisions_table.dart';
 import 'schema/tables/rounds_table.dart';
 import 'schema/tables/round_groups_table.dart';
@@ -108,6 +109,7 @@ part 'database.g.dart';
     PublicationProjections,
     PublicationParticipants,
     DelistRequests,
+    RequestThrottles,
     Invitations,
     MatrixRevisions,
     Rounds,
@@ -193,6 +195,10 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
           await m.createTable(pilotImportLinks);
         }
         await _addCurrentAttemptId();
+        // Service-only counters (unreleased version 2); IF NOT EXISTS.
+        if (profileTables.contains(requestThrottles)) {
+          await m.createTable(requestThrottles);
+        }
       });
     },
   );

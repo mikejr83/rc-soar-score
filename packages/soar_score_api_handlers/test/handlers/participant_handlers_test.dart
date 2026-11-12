@@ -31,7 +31,11 @@ class _RefusingService implements core.InvitationService {
 void main() {
   cookieTests();
   var now = DateTime.utc(2026, 11, 5, 12);
-  Handler build({core.InvitationService? service}) => buildApiHandler(
+  Handler build({
+    core.InvitationService? service,
+    InvitationThrottle? throttle,
+    String? trustedProxySecret,
+  }) => buildApiHandler(
     name: 'soar_score_server',
     displayName: 'Soar Score API Server',
     version: '0.1.0',
@@ -41,7 +45,9 @@ void main() {
     authMiddleware: (inner) =>
         (request) => Response(401, body: 'account sign-in'),
     invitations: service,
-    invitationRateLimiter: FailureRateLimiter(maxFailures: 2, clock: () => now),
+    invitationThrottle:
+        throttle ?? InvitationThrottle(maxFailures: 2, clock: () => now),
+    trustedProxySecret: trustedProxySecret,
   );
 
   Future<Response> send(
@@ -122,6 +128,96 @@ void main() {
       expect((await attempt('2.2.2.2')).statusCode, 404);
       now = now.add(const Duration(minutes: 11));
       expect((await attempt('1.1.1.1')).statusCode, 404);
+    });
+  });
+
+  group('resolve throttling', () {
+    Future<Response> resolve(
+      Handler handler, {
+      Object? body = const {'credential': 'nope'},
+      Map<String, String> headers = const {'fly-client-ip': '1.1.1.1'},
+    }) async => handler(
+      Request(
+        'POST',
+        Uri.parse('http://localhost/api/v1/self-scoring/invitations/resolve'),
+        body: body is String ? body : jsonEncode(body),
+        headers: headers,
+      ),
+    );
+
+    test('malformed bodies count as failures', () async {
+      final handler = build(service: _RefusingService());
+      expect((await resolve(handler, body: 'not json')).statusCode, 400);
+      expect((await resolve(handler, body: '[]')).statusCode, 400);
+      final blocked = await resolve(handler, body: '{"credential": "x"}');
+      expect(blocked.statusCode, 429);
+      expect(await codeOf(blocked), 'rate_limited');
+    });
+
+    test('every attempt counts, valid or not', () async {
+      // A service that opens every link: only the attempt limit can stop it.
+      final handler = build(
+        service: _RefusingService(),
+        throttle: InvitationThrottle(
+          maxAttempts: 3,
+          maxFailures: 100,
+          clock: () => now,
+        ),
+      );
+      for (var i = 0; i < 3; i++) {
+        expect((await resolve(handler)).statusCode, 404);
+      }
+      final blocked = await resolve(handler);
+      expect(blocked.statusCode, 429);
+      expect(int.parse(blocked.headers['retry-after']!), greaterThan(0));
+      expect(
+        (await resolve(
+          handler,
+          headers: {'fly-client-ip': '2.2.2.2'},
+        )).statusCode,
+        404,
+      );
+    });
+
+    test('a forwarded address counts only with the proxy secret', () async {
+      final handler = build(
+        service: _RefusingService(),
+        trustedProxySecret: 'proxy-secret-proxy-secret-proxy-secret',
+      );
+      Map<String, String> viaProxy(String visitor, {String? secret}) => {
+        'fly-client-ip': '9.9.9.9',
+        forwardedClientHeader: visitor,
+        proxySecretHeader: secret ?? 'proxy-secret-proxy-secret-proxy-secret',
+      };
+      // Two failures by visitor A through the proxy block A, not B nor the
+      // proxy's own address.
+      await resolve(handler, headers: viaProxy('10.0.0.1'));
+      await resolve(handler, headers: viaProxy('10.0.0.1'));
+      expect(
+        (await resolve(handler, headers: viaProxy('10.0.0.1'))).statusCode,
+        429,
+      );
+      expect(
+        (await resolve(handler, headers: viaProxy('10.0.0.2'))).statusCode,
+        404,
+      );
+      // A wrong secret is no proxy: the Fly address (the proxy's) is used and
+      // the forged visitor is ignored.
+      for (var i = 0; i < 2; i++) {
+        await resolve(handler, headers: viaProxy('10.0.0.3', secret: 'wrong'));
+      }
+      expect(
+        (await resolve(
+          handler,
+          headers: viaProxy('10.0.0.4', secret: 'wrong'),
+        )).statusCode,
+        429,
+        reason: 'all forged requests share the Fly address',
+      );
+      expect(
+        (await resolve(handler, headers: viaProxy('10.0.0.5'))).statusCode,
+        404,
+      );
     });
   });
 
