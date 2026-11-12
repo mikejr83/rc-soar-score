@@ -16,6 +16,7 @@ AuditEvent auditEvent(
   AuditAction action, {
   String? reason,
   Id? actor,
+  Authority authority = Authority.director,
   int? minute,
 }) => AuditEvent(
   id: _eventId(n),
@@ -24,7 +25,7 @@ AuditEvent auditEvent(
   contestId: contestId,
   action: action,
   actorId: actor,
-  authority: Authority.director,
+  authority: authority,
   serverTimestamp: DateTime.utc(
     2026,
     10,
@@ -46,6 +47,12 @@ class FakeAuditApi {
   bool failAudit = false;
   bool missingContest = false;
 
+  /// Makes the audit route answer with this status (and no events).
+  int? auditStatus;
+
+  /// Makes the audit route fail once it has answered this many reads.
+  int? failAfterReads;
+
   late final ApiClient client = ApiClient(
     baseUrl: Uri.parse('http://fake.test'),
     httpClient: MockClient(_answer),
@@ -62,7 +69,16 @@ class FakeAuditApi {
     }
     if (request.url.path.endsWith('/audit-events')) {
       requests.add(request.url.queryParameters);
-      if (failAudit) {
+      final status = auditStatus;
+      if (status != null) {
+        return http.Response(
+          '{"error":{"code":"x","message":"m","requestId":null}}',
+          status,
+          headers: headers,
+        );
+      }
+      final after = failAfterReads;
+      if (failAudit || (after != null && requests.length > after)) {
         return http.Response('down', 503);
       }
       final query = request.url.queryParameters;

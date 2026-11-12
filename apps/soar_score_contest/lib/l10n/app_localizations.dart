@@ -1322,6 +1322,24 @@ abstract class AppLocalizations {
   /// **'This contest was not found'**
   String get activityPageNotFound;
 
+  /// Activity page: the acting account is the signed-in one. Shown beside the time.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get activityActorYou;
+
+  /// Activity page: the system acted, not an account. Shown beside the time.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get activityActorSystem;
+
+  /// Activity page: another account acted. id is the last characters of its account id, since the audit trail holds no name. Shown beside the time.
+  ///
+  /// In en, this message translates to:
+  /// **'Account {id}'**
+  String activityActorAccount(String id);
+
   /// Recent activity line: the contest was completed. actor is "you" when the signed-in account did it.
   ///
   /// In en, this message translates to:

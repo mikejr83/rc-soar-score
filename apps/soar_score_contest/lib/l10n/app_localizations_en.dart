@@ -871,6 +871,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activityPageNotFound => 'This contest was not found';
 
   @override
+  String get activityActorYou => 'You';
+
+  @override
+  String get activityActorSystem => 'System';
+
+  @override
+  String activityActorAccount(String id) {
+    return 'Account $id';
+  }
+
+  @override
   String activityComplete(String actor) {
     String _temp0 = intl.Intl.selectLogic(actor, {
       'you': 'You completed the contest. Participant scoring closed.',

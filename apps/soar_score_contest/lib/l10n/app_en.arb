@@ -982,6 +982,23 @@
   "@activityPageNotFound": {
     "description": "Activity page title when the contest does not exist."
   },
+  "activityActorYou": "You",
+  "@activityActorYou": {
+    "description": "Activity page: the acting account is the signed-in one. Shown beside the time."
+  },
+  "activityActorSystem": "System",
+  "@activityActorSystem": {
+    "description": "Activity page: the system acted, not an account. Shown beside the time."
+  },
+  "activityActorAccount": "Account {id}",
+  "@activityActorAccount": {
+    "description": "Activity page: another account acted. id is the last characters of its account id, since the audit trail holds no name. Shown beside the time.",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
   "activityComplete": "{actor, select, you{You completed the contest. Participant scoring closed.} other{The contest was completed. Participant scoring closed.}}",
   "@activityComplete": {
     "description": "Recent activity line: the contest was completed. actor is \"you\" when the signed-in account did it.",

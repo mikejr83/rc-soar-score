@@ -60,7 +60,9 @@ class RecentActivityCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (entries.isNotEmpty)
+                  // Shown whatever the preview holds: it reads only the newest
+                  // events, so the full list can hold lines it does not.
+                  if (onViewAll != null)
                     TextButton(
                       key: const ValueKey('activity-view-all'),
                       onPressed: onViewAll,

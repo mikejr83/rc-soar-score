@@ -8,17 +8,24 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../../support/fake_audit_api.dart';
 import '../../support/matrix_test_support.dart';
 
-Future<void> _pump(WidgetTester tester, FakeAuditApi api) async {
+Future<void> _pump(
+  WidgetTester tester,
+  FakeAuditApi api, {
+  FakeAuditApi? hosted,
+}) async {
   tester.view.physicalSize = const Size(900, 12000);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     ApiClientInherited(
       client: api.client,
-      child: MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: ContestActivityPage(contestId: matrixContestId)),
+      child: PublicationClientInherited(
+        client: (hosted ?? api).client,
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(body: ContestActivityPage(contestId: matrixContestId)),
+        ),
       ),
     ),
   );
@@ -50,6 +57,45 @@ void main() {
     expect(find.textContaining('2026-10-18 03:02'), findsOneWidget);
     expect(find.byKey(const ValueKey('activity-end')), findsOneWidget);
     expect(find.byKey(const ValueKey('activity-load-more')), findsNothing);
+  });
+
+  testWidgets('shows who acted: two accounts and the system differ', (
+    tester,
+  ) async {
+    final alice = Id.parse('019c0000-0000-7000-8000-00000000a11c');
+    final bob = Id.parse('019c0000-0000-7000-8000-0000000000b0');
+    final api = FakeAuditApi([
+      auditEvent(1, AuditAction.matrixDrawn, actor: alice),
+      auditEvent(2, AuditAction.matrixDrawn, actor: bob),
+      auditEvent(3, AuditAction.matrixDrawn, authority: Authority.system),
+    ]);
+    await _pump(tester, api);
+
+    expect(find.textContaining('· Account 0000a11c'), findsOneWidget);
+    expect(find.textContaining('· Account 000000b0'), findsOneWidget);
+    expect(find.textContaining('· System'), findsOneWidget);
+  });
+
+  testWidgets('publications on the publishing server are listed', (
+    tester,
+  ) async {
+    final api = FakeAuditApi([auditEvent(1, AuditAction.configurationSaved)]);
+    final hosted = FakeAuditApi([
+      auditEvent(
+        2,
+        AuditAction.publicationAttempt,
+        authority: Authority.system,
+      ),
+    ]);
+    await _pump(tester, api, hosted: hosted);
+
+    expect(find.text('The published results were updated'), findsOneWidget);
+    expect(find.text('The contest configuration was saved'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('activity-filter-publication')));
+    await tester.pumpAndSettle();
+    expect(find.text('The published results were updated'), findsOneWidget);
+    expect(find.text('The contest configuration was saved'), findsNothing);
   });
 
   testWidgets('a filter reads only that kind', (tester) async {
@@ -88,19 +134,19 @@ void main() {
   });
 
   testWidgets('Load more adds the next page', (tester) async {
-    final api = FakeAuditApi([for (var n = 1; n <= 70; n++) _lock(n)]);
+    final api = FakeAuditApi([for (var n = 1; n <= 30; n++) _lock(n)]);
     await _pump(tester, api);
 
     expect(find.byKey(const ValueKey('activity-load-more')), findsOneWidget);
     final before = find.text('Administration was locked').evaluate().length;
-    expect(before, lessThan(70));
+    expect(before, lessThan(30));
 
     final more = find.byKey(const ValueKey('activity-load-more'));
     await tester.ensureVisible(more);
     await tester.tap(more);
     await tester.pumpAndSettle();
 
-    expect(find.text('Administration was locked').evaluate().length, 70);
+    expect(find.text('Administration was locked').evaluate().length, 30);
     expect(find.byKey(const ValueKey('activity-load-more')), findsNothing);
     expect(find.byKey(const ValueKey('activity-end')), findsOneWidget);
   });
@@ -121,7 +167,14 @@ void main() {
   testWidgets('a failed further page keeps the list and offers Retry', (
     tester,
   ) async {
-    final api = FakeAuditApi([for (var n = 1; n <= 70; n++) _lock(n)]);
+    // The first read holds a page of lines and routine entries after them, so
+    // the next page needs a second read.
+    final api = FakeAuditApi([
+      for (var n = 1; n <= 5; n++) _lock(n),
+      for (var n = 50; n < 75; n++)
+        auditEvent(n, AuditAction.scoreAttempt, minute: n),
+      for (var n = 100; n < 125; n++) _lock(n),
+    ]);
     await _pump(tester, api);
     final shown = find.text('Administration was locked').evaluate().length;
 
@@ -139,7 +192,7 @@ void main() {
     await tester.ensureVisible(retry);
     await tester.tap(retry);
     await tester.pumpAndSettle();
-    expect(find.text('Administration was locked').evaluate().length, 70);
+    expect(find.text('Administration was locked').evaluate().length, 30);
   });
 
   testWidgets('an unknown contest says so', (tester) async {

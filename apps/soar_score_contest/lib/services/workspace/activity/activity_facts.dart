@@ -65,6 +65,8 @@ class ActivityFacts extends Equatable {
       kind: kind,
       byYou: actor != null && actor == actingAccountId,
       at: event.serverTimestamp,
+      actorId: actor,
+      system: event.authority == Authority.system,
       pilot: pilot,
       round: round,
     );

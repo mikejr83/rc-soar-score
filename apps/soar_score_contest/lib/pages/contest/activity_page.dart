@@ -10,7 +10,7 @@ import '../../connectivity_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../router.dart';
 import '../../services/workspace/activity/activity_entry.dart';
-import '../../services/workspace/activity/activity_log_loader.dart';
+import '../../services/workspace/activity/activity_log_reader.dart';
 import '../../ui_account_provider.dart';
 import '../../widgets/page_states/load_failed_view.dart';
 import '../../widgets/page_states/page_banner.dart';
@@ -33,7 +33,7 @@ class ContestActivityPage extends StatefulWidget {
 class _ContestActivityPageState extends State<ContestActivityPage> {
   Contest? _contest;
   List<ActivityEntry> _entries = const [];
-  int _nextOffset = 0;
+  ActivityLogReader? _reader;
   bool _hasMore = false;
   ActivityFilter _filter = ActivityFilter.all;
 
@@ -80,10 +80,16 @@ class _ContestActivityPageState extends State<ContestActivityPage> {
         throw StateError('No API client is available.');
       }
       final id = Id.parse(widget.contestId);
+      final reader = ActivityLogReader(
+        client,
+        id,
+        filter: _filter,
+        publicationClient: publicationClientOf(context),
+        actingAccountId: accountId,
+      );
       final results = await Future.wait<Object>([
         if (_contest == null) client.contest(id),
-        ActivityLogLoader(client)
-            .load(id, filter: _filter, actingAccountId: accountId),
+        reader.next(),
       ]);
       if (!mounted || generation != _generation) {
         return;
@@ -91,8 +97,8 @@ class _ContestActivityPageState extends State<ContestActivityPage> {
       final page = results.last as ActivityLogPage;
       setState(() {
         _contest ??= results.first as Contest;
+        _reader = reader;
         _entries = page.entries;
-        _nextOffset = page.nextOffset;
         _hasMore = page.hasMore;
         _loading = false;
       });
@@ -108,23 +114,17 @@ class _ContestActivityPageState extends State<ContestActivityPage> {
   }
 
   Future<void> _loadMore() async {
-    final client = apiClientOf(context);
-    if (client == null || _loadingMore) {
+    final reader = _reader;
+    if (reader == null || _loadingMore) {
       return;
     }
     final generation = _generation;
-    final accountId = uiAccountIdOf(context);
     setState(() {
       _loadingMore = true;
       _moreFailed = false;
     });
     try {
-      final page = await ActivityLogLoader(client).load(
-        Id.parse(widget.contestId),
-        filter: _filter,
-        offset: _nextOffset,
-        actingAccountId: accountId,
-      );
+      final page = await reader.next();
       if (!mounted || generation != _generation) {
         return;
       }
@@ -137,7 +137,6 @@ class _ContestActivityPageState extends State<ContestActivityPage> {
           for (final entry in page.entries)
             if (seen.add(entry.id)) entry,
         ];
-        _nextOffset = page.nextOffset;
         _hasMore = page.hasMore;
         _loadingMore = false;
       });
@@ -308,7 +307,11 @@ class _ContestActivityPageState extends State<ContestActivityPage> {
         child: Column(
           children: [
             for (final entry in _entries)
-              ActivityEntryTile(contest: contest, entry: entry),
+              ActivityEntryTile(
+                contest: contest,
+                entry: entry,
+                showActor: true,
+              ),
           ],
         ),
       ),

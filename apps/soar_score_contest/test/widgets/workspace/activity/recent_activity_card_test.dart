@@ -199,4 +199,16 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('View all stays when the preview is empty or failed', (
+    tester,
+  ) async {
+    for (final activity in [ActivityFacts.none, ActivityFacts.unavailable]) {
+      var opened = 0;
+      await _pump(tester, activity, onViewAll: () => opened++);
+
+      await tester.tap(find.byKey(const ValueKey('activity-view-all')));
+      expect(opened, 1);
+    }
+  });
 }

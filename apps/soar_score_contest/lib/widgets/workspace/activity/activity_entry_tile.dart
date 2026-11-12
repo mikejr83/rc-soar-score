@@ -15,18 +15,23 @@ class ActivityEntryTile extends StatelessWidget {
     super.key,
     required this.contest,
     required this.entry,
+    this.showActor = false,
   });
 
   final Contest contest;
   final ActivityEntry entry;
+
+  /// Names who acted beside the time, for the full list.
+  final bool showActor;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
     final text = Text(_text(context, entry), style: theme.textTheme.bodyMedium);
+    final actor = showActor ? _actor(AppLocalizations.of(context)) : null;
     final when = Text(
-      _when(entry.at),
+      actor == null ? _when(entry.at) : '${_when(entry.at)} · $actor',
       style: theme.textTheme.bodySmall?.copyWith(color: muted),
     );
     return Padding(
@@ -65,6 +70,25 @@ class ActivityEntryTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// Who acted: "You" for the signed-in account, "System" for an automatic
+  /// action, else a stable short form of the account id (the audit trail
+  /// holds no names, #345); none when the event records no actor.
+  String? _actor(AppLocalizations l10n) {
+    if (entry.byYou) {
+      return l10n.activityActorYou;
+    }
+    if (entry.system) {
+      return l10n.activityActorSystem;
+    }
+    final id = entry.actorId;
+    if (id == null) {
+      return null;
+    }
+    return l10n.activityActorAccount(
+      id.length > 8 ? id.substring(id.length - 8) : id,
     );
   }
 
