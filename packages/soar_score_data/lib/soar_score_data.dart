@@ -57,6 +57,7 @@ export 'repositories/publication_projection_repository.dart';
 export 'repositories/publication_publisher.dart';
 export 'repositories/results_repository.dart';
 export 'repositories/repository.dart';
+export 'repositories/request_throttle_store.dart';
 export 'repositories/contest_import_repository.dart';
 export 'repositories/import_provenance_repository.dart';
 export 'repositories/model_catalog_repository.dart';

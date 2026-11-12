@@ -93,7 +93,8 @@ Environment variables on each host:
 
 | Where  | Variable                  | Value                                                                                                                                                 |
 | ------ | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vercel | `SOAR_SCORE_API_URL`      | `https://api.rcsoarscore.com` (production). Server-side only; the `/api/*` rewrite in `next.config.ts` proxies to it. Renamed from `RAILWAY_API_URL`. |
+| Vercel | `SOAR_SCORE_API_URL`      | `https://api.rcsoarscore.com` (production). Server-side only; `src/proxy.ts` forwards `/api/*` to it. Renamed from `RAILWAY_API_URL`. |
+| Vercel | `TRUSTED_PROXY_SECRET`    | The same value as the Fly secret of that name; the proxy sends it with the visitor's address so the API's rate limits count visitors (deploy-api-fly.md, "Throttling invitation links"). |
 | Vercel | `NEXT_PUBLIC_*`           | optional overrides listed in `apps/soar_score_web/AGENTS.md`                                                                                          |
 | Fly    | `DATABASE_URL` (secret)   | see [deploy-api-fly.md](deploy-api-fly.md)                                                                                                            |
 | Fly    | everything else           | `apps/soar_score_server/fly.toml`                                                                                                                     |

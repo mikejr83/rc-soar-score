@@ -2,7 +2,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api_handlers/handlers/handlers.dart';
 import 'package:soar_score_api_handlers/handlers/invitation_handlers.dart';
-import 'package:soar_score_api_handlers/middleware/failure_rate_limiter.dart';
+import 'package:soar_score_api_handlers/middleware/invitation_throttle.dart';
 import 'package:soar_score_api_handlers/middleware/middleware.dart';
 import 'package:soar_score_core/repositories/repository.dart';
 import 'package:soar_score_core/services/invitations/invitation_service.dart';
@@ -64,8 +64,12 @@ final _logger = Logger('Handler');
 /// [invitations], when provided, turns on the participant routes at
 /// `/api/v1/self-scoring` (opening an invitation link and the guest session); they
 /// need no account sign-in and sit outside [authMiddleware]. Without it they
-/// answer 409 `invitations_not_available`. [invitationRateLimiter] replaces
-/// the default limit on failed link attempts (tests).
+/// answer 409 `invitations_not_available`. [invitationThrottle] replaces the
+/// default (in-memory) limits on opening links; the server passes one backed
+/// by the database so every machine counts together.
+/// [trustedProxySecret] is the secret the site's `/api` proxy proves itself
+/// with, so the visitor's address it forwards is believed (see
+/// [clientAddressOf]).
 ///
 /// [selfScoringBaseUrl] is the site invitation links point at (the director's
 /// `GET`/`POST /contests/{id}/invitations` build `{base}/invitations/{credential}`).
@@ -86,7 +90,8 @@ Handler buildApiHandler({
   DrawRunner? drawRunner,
   Set<String> corsAllowedOrigins = const {},
   InvitationService? invitations,
-  FailureRateLimiter? invitationRateLimiter,
+  InvitationThrottle? invitationThrottle,
+  String? trustedProxySecret,
   String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
 }) {
   final handlers = createHandlers(
@@ -101,7 +106,8 @@ Handler buildApiHandler({
     gliderScoreImport: gliderScoreImport,
     drawRunner: drawRunner,
     invitations: invitations,
-    invitationRateLimiter: invitationRateLimiter,
+    invitationThrottle: invitationThrottle,
+    trustedProxySecret: trustedProxySecret,
     corsAllowedOrigins: corsAllowedOrigins,
     selfScoringBaseUrl: selfScoringBaseUrl,
   );

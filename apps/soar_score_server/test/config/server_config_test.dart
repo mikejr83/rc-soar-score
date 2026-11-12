@@ -63,6 +63,26 @@ void main() {
       }
     });
 
+    test('TRUSTED_PROXY_SECRET is optional and at least 32 characters', () {
+      expect(ServerConfig.parse(minimal).trustedProxySecret, isNull);
+      final secret = 'p' * 32;
+      expect(
+        ServerConfig.parse({...minimal, 'TRUSTED_PROXY_SECRET': secret})
+            .trustedProxySecret,
+        secret,
+      );
+      expect(
+        () => ServerConfig.parse({...minimal, 'TRUSTED_PROXY_SECRET': 'short'}),
+        throwsA(
+          isA<ConfigException>().having(
+            (e) => e.toString(),
+            'message',
+            allOf(contains('TRUSTED_PROXY_SECRET'), isNot(contains('short'))),
+          ),
+        ),
+      );
+    });
+
     test('LOG_DB_STATEMENT_DURATIONS is a boolean and off by default', () {
       expect(ServerConfig.parse(minimal).logStatementDurations, isFalse);
       expect(
