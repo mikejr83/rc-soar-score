@@ -16,6 +16,15 @@ class ScorePromotionResult {
 
   /// True when this exact adoption was already done and nothing was stored.
   final bool replayed;
+
+  factory ScorePromotionResult.fromJson(Map<String, Object?> json) =>
+      ScorePromotionResult(
+        entry: ScoreEntryResult.fromJson(json),
+        replayed: json['replayed']! as bool,
+      );
+
+  /// The entry's JSON plus `replayed`.
+  Map<String, Object?> toJson() => {...entry.toJson(), 'replayed': replayed};
 }
 
 /// Director adoption of a participant submission ("mark official").

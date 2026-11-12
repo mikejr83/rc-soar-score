@@ -364,4 +364,56 @@ void _tests(SliceBackend backend) {
       isNull,
     );
   });
+
+  group('over HTTP', () {
+    Future<Map<String, Object?>> post(
+      Map<String, Object?> body, {
+      int status = 201,
+    }) => api.expectOk(
+      'POST',
+      '/contests/$_contestId/assignments/${slotId.value}/scores/official',
+      status: status,
+      body: body,
+    );
+
+    test('marks the submission official, then answers a repeat 200', () async {
+      await submitFirst();
+      final body = {
+        'source_attempt_id': attemptId.value,
+        'expected_score_revision': 1,
+      };
+
+      final first = await post(body);
+      expect(first['replayed'], false);
+      expect(
+        (first['official_score']! as Map)['score_attempt_id'],
+        attemptId.value,
+      );
+      expect((first['placeholder']! as Map)['state'], 'Official');
+
+      final again = await post(body, status: 200);
+      expect(again['replayed'], true);
+      expect(
+        (again['official_score']! as Map)['id'],
+        (first['official_score']! as Map)['id'],
+      );
+    });
+
+    test('a stale revision is 409 and stores nothing', () async {
+      await submitFirst();
+      final response = await api.send(
+        'POST',
+        '/contests/$_contestId/assignments/${slotId.value}/scores/official',
+        body: {
+          'source_attempt_id': attemptId.value,
+          'expected_score_revision': 0,
+        },
+      );
+      expect(response.status, 409);
+      expect(
+        (await placeholderOf(1, 1)).state,
+        core.ScorePlaceholderState.submitted,
+      );
+    });
+  });
 }
