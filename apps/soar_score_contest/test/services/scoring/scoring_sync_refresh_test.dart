@@ -80,7 +80,7 @@ void main() {
     },
   );
 
-  test('a failed read leaves the page as it was', () async {
+  test('a failed read keeps the rows and says they may be behind', () async {
     final server = ScoringServer()..seedScore(first, a);
     final c = await _open(server);
     c.draftOf(_row(c, 1)).setHeight('99');
@@ -88,8 +88,16 @@ void main() {
     server.readFailure = 503;
     await c.refreshAfterSync();
 
-    expect(c.loadError, isNull);
+    // The notice with its Retry shows, since later checks will not repeat
+    // the news that the read missed.
+    expect(c.loadError, isNotNull);
     expect(c.data, isNotNull);
+    expect(c.draftOf(_row(c, 1)).heightText, '99');
+
+    server.readFailure = null;
+    await c.refreshAfterSync();
+
+    expect(c.loadError, isNull);
     expect(c.draftOf(_row(c, 1)).heightText, '99');
   });
 

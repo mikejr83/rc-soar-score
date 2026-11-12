@@ -3,6 +3,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
+import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -127,6 +128,12 @@ void addSyncRoutes(
       contestId = raw == null ? null : Id.parse(raw);
     } on ArgumentError {
       throw ArgumentError.value(raw, 'contest_id', 'is not a contest id');
+    }
+    // Unlike an exchange, which must accept the first upload of a contest the
+    // service does not hold yet, a read needs a contest that exists and is the
+    // caller's: a deleted contest keeps its log, which is not for anyone else.
+    if (contestId != null) {
+      await requireContestDirector(request, repository, contestId);
     }
     final sequence = await acceptor.revision(
       accountId: principal.accountId,

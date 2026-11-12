@@ -125,7 +125,7 @@ class ScoringController extends ChangeNotifier {
   /// same choice (keep mine or take theirs) a conflicting save leads to. A row
   /// being saved is left alone until its save answers. Every other row shows
   /// what was pulled, including a pilot's new submission. A failed read leaves
-  /// the page as it was.
+  /// the rows as they were and shows the refresh-failed notice with a Retry.
   Future<void> refreshAfterSync() async {
     // One read at a time: a sync that arrives meanwhile asks for one more
     // read after this one, so an older answer never lands over a newer one.
@@ -162,11 +162,18 @@ class ScoringController extends ChangeNotifier {
         final read = await ScoringPageData.load(client, contestId);
         if (epoch == _savedEpoch) loaded = read;
       }
-    } on Object {
+    } on Object catch (error) {
+      // The page keeps its rows, but says they may be behind: a sync reported
+      // news and the later checks will not repeat it.
+      if (!_disposed && data != null) {
+        loadError = error;
+        notifyListeners();
+      }
       return;
     }
     if (loaded == null) return;
     if (_disposed || data == null) return;
+    loadError = null;
     final before = {for (final row in rows) row.id: row};
     var next = loaded;
     // A save in flight answers with its own copy of the slot.

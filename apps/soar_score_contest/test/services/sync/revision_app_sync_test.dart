@@ -218,6 +218,37 @@ void main() {
     });
   });
 
+  test('a check brought up while the tab is hidden waits for its return', () {
+    withSync((async) {
+      async.flushMicrotasks();
+      sync.activeChanged(active: false);
+      service.calls.clear();
+
+      sync.focusChanged(_contest.value);
+      signedIn.set(false);
+      signedIn.set(true);
+      async.flushMicrotasks();
+      expect(service.calls, isEmpty);
+
+      sync.activeChanged(active: true);
+      async.flushMicrotasks();
+      expect(service.calls, isNotEmpty);
+    });
+  });
+
+  test('a check under way when the tab is hidden does not start the next', () {
+    withSync((async) {
+      async.flushMicrotasks();
+      service.calls.clear();
+
+      sync.focusChanged(_contest.value);
+      sync.activeChanged(active: false);
+      async.flushMicrotasks();
+
+      expect(service.calls, [_contest]);
+    });
+  });
+
   test('a failed check says why and keeps the pages as they are', () {
     withSync((async) {
       async.flushMicrotasks();

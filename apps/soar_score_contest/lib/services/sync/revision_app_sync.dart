@@ -62,6 +62,7 @@ class RevisionAppSync implements AppSync {
   final _checkedAt = <SyncScopeKey, DateTime>{};
   SyncScopeKey? _accountScope;
   bool _syncing = false;
+  bool _hidden = false;
   final _pending = <Id?, bool>{};
   bool _closed = false;
   bool _enabled = false;
@@ -108,7 +109,12 @@ class RevisionAppSync implements AppSync {
   }
 
   /// The tab went to the background ([active] false) or came back.
-  void activeChanged({required bool active}) => _poller.paused = !active;
+  void activeChanged({required bool active}) {
+    _hidden = !active;
+    _poller.paused = !active;
+    // Checks that came up while the tab was hidden run now.
+    if (active) _runPending();
+  }
 
   @override
   Future<void> refresh(SyncScopeKey scope) async {}
@@ -119,20 +125,30 @@ class RevisionAppSync implements AppSync {
   Future<void> syncNow(SyncScopeKey scope) =>
       _check([scope is ContestScopeKey ? scope.contestId : null], force: true);
 
-  Future<void> _poll(SyncPollFocus focus) => _check([
-    if (focus case SyncPollContest(:final contestId)) contestId,
-    null,
-  ], force: false);
+  Future<void> _poll(SyncPollFocus focus) => _check(
+    [if (focus case SyncPollContest(:final contestId)) contestId, null],
+    force: false,
+    queue: false,
+  );
 
   /// Looks at each of [targets], a contest or null for the director's own
   /// data. With [force] a target moves even when its number did not.
-  Future<void> _check(List<Id?> targets, {required bool force}) async {
+  Future<void> _check(
+    List<Id?> targets, {
+    required bool force,
+    bool queue = true,
+  }) async {
     if (_closed || !_isSignedIn()) return;
-    if (_syncing) {
-      // One request at a time, but a check asked for meanwhile (opening a
-      // contest during another check) is not dropped: it runs next.
-      for (final target in targets) {
-        _pending[target] = (_pending[target] ?? false) || force;
+    // Nothing is asked of the service from a hidden tab, not even a check that
+    // focus, sign-in or the queue brings up. One request runs at a time. A
+    // check that cannot run now waits and runs when the tab is back or the
+    // running check ends; the timer's own check is not kept, since the timer
+    // asks again.
+    if (_syncing || _hidden) {
+      if (queue) {
+        for (final target in targets) {
+          _pending[target] = (_pending[target] ?? false) || force;
+        }
       }
       return;
     }
@@ -140,8 +156,15 @@ class RevisionAppSync implements AppSync {
     _syncing = true;
     _emit();
     try {
-      for (final target in targets) {
-        await _checkOne(target, force: force, session: session);
+      for (var i = 0; i < targets.length; i++) {
+        if (_hidden) {
+          // The tab was hidden while this ran: the rest waits.
+          for (final target in targets.skip(i)) {
+            _pending[target] = (_pending[target] ?? false) || force;
+          }
+          break;
+        }
+        await _checkOne(targets[i], force: force, session: session);
         if (session != _session) return;
       }
     } finally {
