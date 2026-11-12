@@ -383,4 +383,59 @@ void main() {
       expect(flagged, [1002, 1004]);
     });
   });
+
+  group('a pilot whose link is under review', () {
+    PilotImportLink linkFor(ParticipantProfile profile, int no) =>
+        PilotImportLink(
+          id: Id.create(),
+          ownerAccountId: _owner,
+          sourcePilotNo: no,
+          participantProfileId: profile.id,
+          sourceValues: PilotImportMatcher.sourceValues(
+            _draft(no: no, first: profile.firstName, last: profile.lastName),
+          ),
+          createdAt: _now,
+          updatedAt: _now,
+        );
+
+    test('is held back: no link and no guess from the file is used', () {
+      final ada = _profile(first: 'Ada', last: 'Lovelace', email: 'a@x.test');
+      final held = matcher
+          .match(
+            [_draft(no: 7, first: 'Ada', last: 'Lovelace', email: 'a@x.test')],
+            [ada],
+            links: [linkFor(ada, 7)],
+            pilotsUnderReview: {7},
+          )
+          .single;
+
+      expect(held.linkReview, isTrue);
+      expect(held.remembered, isFalse);
+      expect(held.candidateIds, isEmpty);
+      expect(held.defaultAction, PilotImportAction.ask);
+      final selection = PilotImportSelection.defaultFor(held);
+      expect(selection.choice, PilotImportChoice.skip);
+      expect(selection.targetProfileId, isNull);
+    });
+
+    test('leaves the other pilots of the file alone', () {
+      final ada = _profile(first: 'Ada', last: 'Lovelace');
+      final grace = _profile(first: 'Grace', last: 'Hopper');
+      final matches = matcher.match(
+        [
+          _draft(no: 7, first: 'Ada', last: 'Lovelace'),
+          _draft(no: 8, first: 'Grace', last: 'Hopper'),
+        ],
+        [ada, grace],
+        links: [linkFor(ada, 7), linkFor(grace, 8)],
+        pilotsUnderReview: {7},
+      );
+
+      expect(matches[0].linkReview, isTrue);
+      expect(matches[1].linkReview, isFalse);
+      expect(matches[1].remembered, isTrue);
+      expect(matches[1].candidateIds, [grace.id]);
+      expect(matches[1].defaultAction, PilotImportAction.update);
+    });
+  });
 }

@@ -81,6 +81,20 @@ void main() {
     expect(result, isFalse);
   });
 
+  testWidgets('a pilot whose link waits for a decision cannot be imported', (
+    tester,
+  ) async {
+    store.underReview = {3};
+    await open(tester);
+
+    expect(
+      find.textContaining('Waiting for your decision in Account sync'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('pilot-import-held-3')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pilot-import-choice-3')), findsNothing);
+  });
+
   testWidgets('remembered pilot with changed source requires approval', (
     tester,
   ) async {

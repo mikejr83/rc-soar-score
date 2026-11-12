@@ -305,7 +305,9 @@ class _CompetitionImportDialogState extends State<CompetitionImportDialog> {
   }
 
   Widget _failed(BuildContext context, AppLocalizations l10n) {
-    final text = _c.changedDuringReview
+    final text = _c.pilots.linkReviewPending
+        ? l10n.pilotImportLinkReviewPending
+        : _c.changedDuringReview
         ? l10n.pilotImportChangedDuringReview
         : l10n.competitionImportFailed(apiErrorText(_c.error!));
     return Text(

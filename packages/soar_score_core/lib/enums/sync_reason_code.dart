@@ -15,6 +15,7 @@ enum SyncReasonCode {
   locked('locked'),
   unauthorized('unauthorized'),
   directorOverParticipant('director_over_participant'),
+  sameParticipantLink('same_participant_link'),
   scoredAssignment('scored_assignment'),
   dependencyFailed('dependency_failed'),
   unsupportedProtocolVersion('unsupported_protocol_version'),

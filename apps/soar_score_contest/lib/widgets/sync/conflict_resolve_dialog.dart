@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/sync/conflict_answer.dart';
 import '../../services/sync/open_conflict.dart';
 import '../../services/pilot_import/pilot_import.dart';
 import 'payload_comparison.dart';
+import 'pilot_link_review.dart';
 
 /// Sends the director's decision: one of the two versions, or an edited one.
 typedef ResolveConflict = Future<ConflictAnswer> Function(
@@ -36,14 +38,16 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
   bool _editing = false;
   bool _sending = false;
   String? _error;
-  Future<List<ParticipantProfile>>? _participants;
+  late final Future<List<ParticipantProfile>> _participants;
+
+  bool get _isLinkReview => widget.conflict.entityType == 'PilotImportLink';
 
   @override
   void initState() {
     super.initState();
-    if (widget.conflict.entityType == 'PilotImportLink') {
-      _participants = PilotImportStore.current?.existing();
-    }
+    _participants =
+        PilotImportStore.current?.existing() ??
+        Future.value(const <ParticipantProfile>[]);
     final start =
         widget.conflict.acceptedPayload ??
         widget.conflict.competingPayload ??
@@ -69,7 +73,9 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
     });
     final answer = await widget.onResolve(choice, payload);
     if (!mounted) return;
-    if (answer.resolved) {
+    if (answer.resolved || (_isLinkReview && answer.refusal != null)) {
+      // A refused link review was replaced while it was open: the page loads
+      // the new comparison and the director decides again.
       Navigator.of(context).pop(answer);
       return;
     }
@@ -105,7 +111,11 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
     final conflict = widget.conflict;
     return AlertDialog(
       key: const ValueKey('conflict-dialog'),
-      title: Text('Resolve ${conflict.entityType} conflict'),
+      title: Text(
+        _isLinkReview
+            ? AppLocalizations.of(context).shellNavAccountSync
+            : 'Resolve ${conflict.entityType} conflict',
+      ),
       content: SizedBox(
         width: 640,
         child: SingleChildScrollView(
@@ -130,37 +140,8 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-              ] else if (_participants != null)
-                FutureBuilder<List<ParticipantProfile>>(
-                  future: _participants,
-                  builder: (context, snapshot) {
-                    String participant(Map<String, Object?>? payload) {
-                      final id = payload?['participant_profile_id'];
-                      final matches =
-                          (snapshot.data ?? const <ParticipantProfile>[]).where(
-                            (p) => p.id.value == id,
-                          );
-                      return matches.isEmpty
-                          ? '$id'
-                          : '${matches.first.firstName} ${matches.first.lastName}';
-                    }
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'GliderScore pilot ${conflict.acceptedPayload?['source_pilot_no']}',
-                        ),
-                        Text(
-                          'Accepted: ${participant(conflict.acceptedPayload)}',
-                        ),
-                        Text(
-                          'Competing: ${participant(conflict.competingPayload)}',
-                        ),
-                      ],
-                    );
-                  },
-                )
+              ] else if (_isLinkReview)
+                PilotLinkReview(conflict: conflict, participants: _participants)
               else
                 PayloadComparison(
                   acceptedLabel: 'Accepted by the service',
@@ -211,17 +192,58 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
             onPressed: _sending
                 ? null
                 : () => _send(ConflictResolutionChoice.tookCompeting),
-            child: const Text('Use competing change'),
+            child: _isLinkReview
+                ? _LinkChoiceLabel(
+                    participants: _participants,
+                    payload: conflict.competingPayload,
+                    label: AppLocalizations.of(context).pilotLinkReviewUse,
+                  )
+                : const Text('Use competing change'),
           ),
           FilledButton(
             key: const ValueKey('conflict-keep-accepted'),
             onPressed: _sending
                 ? null
                 : () => _send(ConflictResolutionChoice.keptAccepted),
-            child: const Text('Keep accepted value'),
+            child: _isLinkReview
+                ? _LinkChoiceLabel(
+                    participants: _participants,
+                    payload: conflict.acceptedPayload,
+                    label: AppLocalizations.of(context).pilotLinkReviewKeep,
+                  )
+                : const Text('Keep accepted value'),
           ),
         ],
       ],
     );
   }
+}
+
+/// A button label that names the participant of one link.
+class _LinkChoiceLabel extends StatelessWidget {
+  const _LinkChoiceLabel({
+    required this.participants,
+    required this.payload,
+    required this.label,
+  });
+
+  final Future<List<ParticipantProfile>> participants;
+  final Map<String, Object?>? payload;
+  final String Function(String name) label;
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<List<ParticipantProfile>>(
+    future: participants,
+    builder: (context, snapshot) {
+      final id = PilotLinkReview.participantId(payload);
+      for (final p in snapshot.data ?? const <ParticipantProfile>[]) {
+        if (p.id.value == id) {
+          return Text(label('${p.firstName} ${p.lastName}'));
+        }
+      }
+      return Text(
+        label(AppLocalizations.of(context).pilotLinkReviewNoParticipant),
+      );
+    },
+  );
 }

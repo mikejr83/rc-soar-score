@@ -122,7 +122,7 @@ class SyncLog {
     Map<String, Object?>? accepted,
     int? currentRevision,
     Id? conflictEntityId,
-    ConflictRecord? previousConflict,
+    bool requiresAction = true,
   }) async {
     final now = ctx.clock();
     final record = _record(
@@ -136,7 +136,7 @@ class SyncLog {
     );
     await tx.recordMutation(record);
     final conflict = ConflictRecord(
-      id: previousConflict?.id ?? ctx.newId(),
+      id: ctx.newId(),
       contestId: ctx.scope.contestIdOrNull,
       ownerAccountId: ctx.scope.ownerAccountIdOrNull,
       entityType: mutation.entityType,
@@ -145,7 +145,12 @@ class SyncLog {
       competingMutationId: record.id,
       reasonCode: reasonCode,
       reason: message,
-      createdAt: previousConflict?.createdAt ?? now,
+      requiresAction: requiresAction,
+      resolution: requiresAction
+          ? ConflictResolution.pending
+          : ConflictResolution.automatic,
+      resolvedAt: requiresAction ? null : now,
+      createdAt: now,
       acceptedPayload: accepted,
       competingPayload: competing.isDelete
           ? const {'operation': 'delete'}
@@ -155,7 +160,7 @@ class SyncLog {
     await tx.saveConflict(conflict);
     await emit(tx, ctx, conflict);
     ctx.conflicts.add(
-      SyncConflictPointer(id: conflict.id, requiresAction: true),
+      SyncConflictPointer(id: conflict.id, requiresAction: requiresAction),
     );
     await appendAudit(
       tx,
@@ -171,6 +176,43 @@ class SyncLog {
       reasonCode: reasonCode,
       currentRevision: currentRevision,
     );
+  }
+
+  /// Closes a conflict nobody needs to decide any more (the choice it asked
+  /// for was replaced or withdrawn) and sends the closed record down the
+  /// stream, so every installation stops asking.
+  Future<void> closeAutomatically(
+    SyncAcceptorTransaction tx,
+    ExchangeContext ctx,
+    ConflictRecord conflict,
+  ) async {
+    final closed = ConflictRecord(
+      id: conflict.id,
+      contestId: conflict.contestId,
+      ownerAccountId: conflict.ownerAccountId,
+      entityType: conflict.entityType,
+      entityId: conflict.entityId,
+      acceptedMutationId: conflict.acceptedMutationId,
+      competingMutationId: conflict.competingMutationId,
+      reasonCode: conflict.reasonCode,
+      reason: conflict.reason,
+      requiresAction: conflict.requiresAction,
+      resolution: ConflictResolution.automatic,
+      createdAt: conflict.createdAt,
+      resolvedAt: ctx.clock(),
+      acceptedPayload: conflict.acceptedPayload,
+      competingPayload: conflict.competingPayload,
+      entityRevision: conflict.entityRevision,
+    );
+    await tx.saveConflict(closed);
+    await emit(tx, ctx, closed);
+    final known = ctx.conflicts.indexWhere((c) => c.id == conflict.id);
+    if (known >= 0) {
+      ctx.conflicts[known] = SyncConflictPointer(
+        id: conflict.id,
+        requiresAction: false,
+      );
+    }
   }
 
   /// Stores a silent record: [mutation] won, and [competing] (a participant's

@@ -19,6 +19,7 @@ import 'json_equality.dart';
 import 'mutation_payloads.dart';
 import 'mutation_replay.dart';
 import 'mutation_result.dart';
+import 'pilot_link_collisions.dart';
 import 'sync_entity_catalog.dart';
 import 'sync_log.dart';
 import 'sync_mutation.dart';
@@ -30,10 +31,13 @@ import 'sync_scope_ids.dart';
 /// valid siblings. The decision is recorded, so a retry of the same
 /// `client_mutation_id` returns it unchanged and applies nothing twice.
 class MutationProcessor {
-  MutationProcessor(this._store, {SyncLog? log}) : _log = log ?? SyncLog();
+  MutationProcessor(this._store, {SyncLog? log})
+    : _log = log ?? SyncLog(),
+      _links = PilotLinkCollisions(log ?? SyncLog());
 
   final SyncAcceptorStore _store;
   final SyncLog _log;
+  final PilotLinkCollisions _links;
 
   /// Authorities a director's installation may send. A participant's
   /// submissions and the service's own changes never arrive in an exchange.
@@ -152,6 +156,10 @@ class MutationProcessor {
     }
 
     if (await tx.findTombstone(m.entityType, m.entityId) != null) {
+      if (payload.isDelete && PilotLinkCollisions.handles(ctx, m.entityType)) {
+        // The link already went with its participant: the same wish twice.
+        return _log.accept(tx, ctx, m, MutationPayload.delete);
+      }
       return reject(
         SyncReasonCode.entityDeleted,
         'The ${m.entityType} was deleted.',
@@ -183,12 +191,28 @@ class MutationProcessor {
       if (refused != null) return reject(refused.$1, refused.$2);
     }
 
+    final links = PilotLinkCollisions.handles(ctx, m.entityType);
+    if (links && !payload.isDelete) {
+      final problem = await _links.targetProblem(tx, ctx, payload.entity);
+      if (problem != null) return reject(problem.$1, problem.$2);
+    }
+
     final step = _Step(tx, ctx, m, kind, payload, stored, contest);
     final result = payload.isDelete
         ? await _delete(step)
         : kind.shape == SyncEntityShape.revisioned
         ? await _saveRevisioned(step)
         : await _saveImmutable(step);
+
+    if (result.outcome == MutationOutcome.accepted) {
+      if (links) {
+        // A change to the stored link ends the reviews that compared it.
+        if (payload.isDelete) await _links.withdrawn(tx, ctx, m.entityId);
+        await _links.storedLinkChanged(tx, ctx, m.entityId);
+      } else if (payload.isDelete && m.entityType == 'ParticipantProfile') {
+        await _links.participantDeleted(tx, ctx, m, m.entityId);
+      }
+    }
 
     if (bootstrap && result.outcome == MutationOutcome.accepted) {
       await _openInitialActivation(tx, ctx, scope as ContestScopeKey);
@@ -204,34 +228,15 @@ class MutationProcessor {
     final base = s.m.baseRevision;
 
     if (stored == null) {
+      if (PilotLinkCollisions.handles(s.ctx, s.m.entityType)) {
+        // A pilot link is created on the installation that first meets the
+        // pilot, so its later edits can reach the service before it holds
+        // the link: they take the pilot or compete for it like the first.
+        final taken = await _links.collide(s.tx, s.ctx, s.m, s.payload);
+        if (taken != null) return taken;
+        return _store_(s, {...entity, 'revision': entity['revision'] ?? 1});
+      }
       if (base != null) {
-        if (s.m.entityType == 'PilotImportLink') {
-          final conflicts = await s.tx.conflictsNeedingAction(s.ctx.scope);
-          for (final conflict in conflicts) {
-            final previous = conflict.competingPayload;
-            if (conflict.entityType != 'PilotImportLink' ||
-                previous?['id'] != s.m.entityId.value ||
-                previous?['revision'] != base)
-              continue;
-            final accepted = await s.tx.findEntity(
-              'PilotImportLink',
-              conflict.entityId,
-            );
-            if (accepted == null) break;
-            return _log.conflict(
-              s.tx,
-              s.ctx,
-              s.m,
-              reasonCode: SyncReasonCode.uniqueViolation.code,
-              message: conflict.reason ?? 'Review competing pilot links.',
-              competing: s.payload,
-              accepted: accepted,
-              currentRevision: accepted['revision'] as int?,
-              conflictEntityId: conflict.entityId,
-              previousConflict: conflict,
-            );
-          }
-        }
         return _log.reject(
           s.tx,
           s.ctx,
@@ -648,38 +653,6 @@ class MutationProcessor {
     SyncConstraintError error,
   ) async {
     if (error.kind == SyncConstraintKind.unique) {
-      if (m.entityType == 'PilotImportLink' && ctx.scope is DirectorScopeKey) {
-        final submitted = MutationPayload.parse(m.payload);
-        if (!submitted.isDelete) {
-          final entity = submitted.entity;
-          final candidates = await tx.findEntitiesWhere(
-            'PilotImportLink',
-            'owner_account_id',
-            (ctx.scope as DirectorScopeKey).ownerAccountId,
-          );
-          final matching = candidates
-              .where(
-                (candidate) =>
-                    candidate['source_system'] == entity['source_system'] &&
-                    candidate['source_pilot_no'] == entity['source_pilot_no'],
-              )
-              .toList();
-          if (matching.length == 1) {
-            final accepted = matching.single;
-            return _log.conflict(
-              tx,
-              ctx,
-              m,
-              reasonCode: SyncReasonCode.uniqueViolation.code,
-              message: 'Two devices linked this GliderScore pilot to different participants. Review the links.',
-              competing: submitted,
-              accepted: accepted,
-              currentRevision: accepted['revision'] as int?,
-              conflictEntityId: Id.parse(accepted['id']! as String),
-            );
-          }
-        }
-      }
       final stored = await tx.findEntity(m.entityType, m.entityId);
       return _log.conflict(
         tx,

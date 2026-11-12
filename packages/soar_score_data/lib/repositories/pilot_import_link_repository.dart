@@ -1,10 +1,8 @@
-import 'dart:convert';
-
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'drift_repository.dart';
 import '../sync/drift_sync_store.dart';
-import '../sync/sql_placeholders.dart';
+import '../sync/table_mapper.dart';
 
 import 'package:drift/drift.dart' show Variable;
 
@@ -16,6 +14,74 @@ class PilotImportLinkRepository extends DriftRepository
   @override
   Future<List<core.PilotImportLink>> listForOwner(core.Id ownerAccountId) =>
       _links.whereId('owner_account_id', ownerAccountId);
+  @override
+  Future<Set<int>> pilotsUnderReview(core.Id ownerAccountId) async {
+    final numbers = <int>{};
+    void add(Object? payload) {
+      final number = payload is Map ? payload['source_pilot_no'] : null;
+      if (number is int) numbers.add(number);
+    }
+
+    // Both sides of every review that waits for the director.
+    final scope = core.DirectorScopeKey(ownerAccountId);
+    for (final conflict in await DriftSyncStore(
+      db,
+    ).conflictsNeedingAction(scope)) {
+      if (conflict.entityType == 'PilotImportLink' &&
+          conflict.reasonCode == core.SyncReasonCode.uniqueViolation.code) {
+        add(conflict.acceptedPayload);
+        add(conflict.competingPayload);
+      }
+    }
+    // This installation's own link when the collision is not yet reviewable
+    // here: set aside for the service's link but not sent yet, or sent and
+    // answered with a conflict that has not come down yet.
+    final here = {
+      for (final link in await listForOwner(ownerAccountId)) link.id.value,
+    };
+    final mutations =
+        await TableMapper(
+          db,
+          db.mutationRecords,
+          jsonColumns: {'payload'},
+        ).where(
+          "owner_account_id = ? AND entity_type = 'PilotImportLink' AND "
+          "(outcome = 'Pending' OR "
+          "(outcome = 'Conflict' AND reason_code = 'unique_violation'))",
+          [Variable<String>(ownerAccountId.value)],
+        );
+    // A link removed on purpose (deleted, or gone with its participant) is not
+    // set aside for the service's: only the director's choice is worth a
+    // review, and it names a participant this installation still has.
+    final deleted = {
+      for (final row in mutations)
+        if (_operation(row) == 'delete') row['entity_id'],
+    };
+    for (final row in mutations) {
+      if (_operation(row) != 'save' || deleted.contains(row['entity_id'])) {
+        continue;
+      }
+      final stored = here.contains(row['entity_id']);
+      final waiting = row['outcome'] == 'Pending' ? !stored : stored;
+      if (!waiting) continue;
+      final data = (row['payload'] as Map?)?['data'];
+      final entity = data is Map ? data['entity'] : null;
+      if (entity is! Map) continue;
+      final target = entity['participant_profile_id'];
+      if (target is String &&
+          await _profiles.find(core.Id.parse(target)) == null) {
+        continue;
+      }
+      add(entity);
+    }
+    return numbers;
+  }
+
+  static Object? _operation(Map<String, Object?> row) {
+    final data = (row['payload'] as Map?)?['data'];
+    return data is Map ? data['operation'] : null;
+  }
+
   @override
   Future<core.PilotImportLink> save(
     core.PilotImportLink link, {
@@ -45,35 +111,12 @@ class PilotImportLinkRepository extends DriftRepository
     Set<int>? reviewedPilotNumbers,
   }) => unitOfWork.run((context) async {
     if (reviewedOwner != null) {
-      final conflicts = await DriftSyncStore(db)
-          .conflictsNeedingAction(core.DirectorScopeKey(reviewedOwner));
-      final displaced = await db
-          .customSelect(
-            portableSql(
-              db,
-              "SELECT m.payload FROM mutation_records m WHERE m.owner_account_id = ? AND m.entity_type = 'PilotImportLink' AND m.outcome = 'Pending' AND NOT EXISTS (SELECT 1 FROM pilot_import_links l WHERE l.id = m.entity_id)",
-            ),
-            variables: [Variable<String>(reviewedOwner.value)],
-          )
-          .get();
-      final blocked = <Object?>{
-        for (final conflict in conflicts)
-          if (conflict.entityType == 'PilotImportLink')
-            conflict.acceptedPayload?['source_pilot_no'],
-      };
-      for (final row in displaced) {
-        final payload = jsonDecode(row.read<String>('payload')) as Map;
-        final data = payload['data'] as Map?;
-        final entity = data?['entity'];
-        blocked.add(entity is Map ? entity['source_pilot_no'] : null);
-      }
-      if (blocked.contains(null) ||
-          (reviewedPilotNumbers == null
-              ? blocked.isNotEmpty
-              : blocked.any(reviewedPilotNumbers.contains))) {
-        throw StateError(
-          'Review competing pilot links in Account sync before importing pilots.',
-        );
+      final held = await pilotsUnderReview(reviewedOwner);
+      final touched = reviewedPilotNumbers == null
+          ? held
+          : held.where(reviewedPilotNumbers.contains).toSet();
+      if (touched.isNotEmpty) {
+        throw core.PilotImportLinkReviewError(touched);
       }
     }
     if (reviewedOwner != null && reviewedLinks != null) {

@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../app_sync_provider.dart';
 import '../../l10n/app_localizations.dart';
-import '../../pages/contest/sync_page.dart';
+import '../../router.dart';
 import '../../services/preferences/director_time.dart';
 import '../../services/sync/sync_status_text.dart';
 import 'sync_summary_builder.dart';
@@ -61,12 +62,9 @@ class ShellSyncStatus extends StatelessWidget {
               onTap: syncing
                   ? null
                   : () {
-                      if (contest == null && (summary?.conflicts ?? 0) > 0) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => DirectorSyncPage(scope: scope),
-                          ),
-                        );
+                      if (contest == null &&
+                          (summary?.needsAttention ?? 0) > 0) {
+                        context.go(accountSyncPath);
                       } else {
                         unawaited(sync.syncNow(scope));
                       }

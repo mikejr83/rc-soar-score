@@ -119,7 +119,9 @@ class _PilotImportDialogState extends State<PilotImportDialog> {
   Widget _failed(AppLocalizations l10n) {
     final error = _c.error!;
     final String text;
-    if (_c.changedDuringReview) {
+    if (_c.linkReviewPending) {
+      text = l10n.pilotImportLinkReviewPending;
+    } else if (_c.changedDuringReview) {
       text = l10n.pilotImportChangedDuringReview;
     } else if (error is ApiHttpError &&
         error.error?.code == 'import_unavailable') {
@@ -397,6 +399,7 @@ class _MaybeRow extends StatelessWidget {
       PilotImportChoice.update => 'update:${selection.targetProfileId?.value}',
     };
     final notes = [
+      if (match.linkReview) l10n.pilotImportLinkReview,
       if (match.conflict) l10n.pilotImportConflict,
       if (match.isDuplicateInFile) l10n.pilotImportDuplicateInFile,
       for (final change in match.sourceChanges)
@@ -412,57 +415,65 @@ class _MaybeRow extends StatelessWidget {
       dense: true,
       title: Text('${draft.firstName} ${draft.lastName}'),
       subtitle: notes.isEmpty ? null : Text(notes),
-      trailing: SizedBox(
-        width: 180,
-        child: DropdownButton<String>(
-          key: ValueKey('pilot-import-choice-$no'),
-          isExpanded: true,
-          value: current,
-          onChanged: (value) {
-            if (value == null) return;
-            if (value == _skip) {
-              controller.choose(index, PilotImportChoice.skip);
-            } else if (value == _add) {
-              controller.choose(index, PilotImportChoice.add);
-            } else {
-              controller.choose(
-                index,
-                PilotImportChoice.update,
-                target: Id.parse(value.substring('update:'.length)),
-              );
-            }
-          },
-          items: [
-            DropdownMenuItem(
-              value: _skip,
-              child: Text(
-                l10n.pilotImportChoiceSkip,
-                overflow: TextOverflow.ellipsis,
+      // A pilot whose link waits for a decision cannot be chosen for.
+      trailing: match.linkReview
+          ? Text(
+              l10n.pilotImportChoiceSkip,
+              key: ValueKey('pilot-import-held-$no'),
+            )
+          : SizedBox(
+              width: 180,
+              child: DropdownButton<String>(
+                key: ValueKey('pilot-import-choice-$no'),
+                isExpanded: true,
+                value: current,
+                onChanged: (value) {
+                  if (value == null) return;
+                  if (value == _skip) {
+                    controller.choose(index, PilotImportChoice.skip);
+                  } else if (value == _add) {
+                    controller.choose(index, PilotImportChoice.add);
+                  } else {
+                    controller.choose(
+                      index,
+                      PilotImportChoice.update,
+                      target: Id.parse(value.substring('update:'.length)),
+                    );
+                  }
+                },
+                items: [
+                  DropdownMenuItem(
+                    value: _skip,
+                    child: Text(
+                      l10n.pilotImportChoiceSkip,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: _add,
+                    child: Text(
+                      l10n.pilotImportChoiceAdd,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  for (final id in match.candidateIds)
+                    DropdownMenuItem(
+                      value: 'update:${id.value}',
+                      child: Tooltip(
+                        message: l10n.pilotImportChoiceUpdate(
+                          _name(review.profile(id)),
+                        ),
+                        child: Text(
+                          l10n.pilotImportChoiceUpdate(
+                            _name(review.profile(id)),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
-            DropdownMenuItem(
-              value: _add,
-              child: Text(
-                l10n.pilotImportChoiceAdd,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            for (final id in match.candidateIds)
-              DropdownMenuItem(
-                value: 'update:${id.value}',
-                child: Tooltip(
-                  message: l10n.pilotImportChoiceUpdate(
-                    _name(review.profile(id)),
-                  ),
-                  child: Text(
-                    l10n.pilotImportChoiceUpdate(_name(review.profile(id))),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
     );
   }
 

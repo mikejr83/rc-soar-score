@@ -231,16 +231,21 @@ class SyncAcceptorService {
     final conflicts = [...ctx.conflicts];
     for (final record in page) {
       if (record.entityType != SyncEntityCatalog.conflictRecordType) continue;
-      if (conflicts.any((c) => c.id == record.entityId)) continue;
       final entity = MutationPayload.parse(record.payload).entity;
-      conflicts.add(
-        SyncConflictPointer(
-          id: record.entityId,
-          requiresAction:
-              entity['requires_action'] == true &&
-              entity['resolution'] == 'Pending',
-        ),
+      final pointer = SyncConflictPointer(
+        id: record.entityId,
+        requiresAction:
+            entity['requires_action'] == true &&
+            entity['resolution'] == 'Pending',
       );
+      // A conflict can change more than once in a page (a review replaced by
+      // a later edit, then closed): the last record is the one that counts.
+      final known = conflicts.indexWhere((c) => c.id == record.entityId);
+      if (known >= 0) {
+        conflicts[known] = pointer;
+      } else {
+        conflicts.add(pointer);
+      }
     }
 
     await _noteProgress(tx, ctx, input, finished: !more);

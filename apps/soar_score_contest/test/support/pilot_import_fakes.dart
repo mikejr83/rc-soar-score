@@ -43,6 +43,11 @@ class FakePilotImportStore implements PilotImportStore, PilotImportLinkStore {
   List<PilotImportLink> links = [];
   @override
   Future<List<PilotImportLink>> existingLinks() async => links;
+
+  /// The pilot numbers an import holds back.
+  Set<int> underReview = {};
+  @override
+  Future<Set<int>> pilotsUnderReview() async => underReview;
   final applied = <List<PilotImportSelection>>[];
   final appliedRevisions = <Map<Id, int>>[];
   Object? applyError;

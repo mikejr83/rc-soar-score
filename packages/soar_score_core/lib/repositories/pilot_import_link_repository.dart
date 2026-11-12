@@ -13,6 +13,13 @@ abstract interface class PilotImportLinkRepository {
     Set<int>? reviewedPilotNumbers,
   });
   Future<List<PilotImportLink>> listForOwner(Id ownerAccountId);
+
+  /// The source pilot numbers whose link is not settled: two installations
+  /// linked the pilot differently and the director has not decided which link
+  /// is right, or this installation's own link for it was set aside and its
+  /// choice has not been sent yet. A link for such a pilot must not be reused
+  /// by an import.
+  Future<Set<int>> pilotsUnderReview(Id ownerAccountId);
   Future<PilotImportLink> save(
     PilotImportLink link, {
     required MutationMetadata metadata,

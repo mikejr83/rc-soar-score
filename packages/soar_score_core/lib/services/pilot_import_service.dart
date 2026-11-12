@@ -25,6 +25,22 @@ class PilotImportReviewChangedError extends Error {
       'changed since the review';
 }
 
+/// An import touches a pilot whose link is still being decided: two devices
+/// linked it differently and the director has not chosen in Account sync.
+class PilotImportLinkReviewError extends Error {
+  PilotImportLinkReviewError(Set<int> pilotNumbers)
+    : pilotNumbers = Set.unmodifiable(pilotNumbers);
+
+  /// The GliderScore pilot numbers waiting for a decision.
+  final Set<int> pilotNumbers;
+
+  @override
+  String toString() =>
+      'PilotImportLinkReviewError: the link of pilot(s) '
+      '${(pilotNumbers.toList()..sort()).join(', ')} needs review in '
+      'Account sync';
+}
+
 /// Stores the pilots a director chose to import from GliderScore.
 ///
 /// New profiles and updates are written in one transaction through the

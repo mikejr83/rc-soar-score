@@ -80,6 +80,78 @@ void main() {
     expect(c.selections[2].choice, PilotImportChoice.update);
   });
 
+  group('a pilot whose link is under review', () {
+    PilotImportLink linkTo(ParticipantProfile target, int number) {
+      final now = DateTime.utc(2026);
+      return PilotImportLink(
+        id: Id.create(),
+        ownerAccountId: target.ownerAccountId,
+        sourcePilotNo: number,
+        participantProfileId: target.id,
+        sourceValues: PilotImportMatcher.sourceValues(
+          PilotDraft(
+            sourcePilotNo: number,
+            firstName: target.firstName,
+            lastName: target.lastName,
+          ),
+        ),
+        createdAt: now,
+        updatedAt: now,
+      );
+    }
+
+    test('is held back and cannot be chosen', () async {
+      store.links.add(linkTo(sam, 3));
+      store.underReview = {3};
+      final c = controller();
+      await c.chooseAndRead();
+
+      final held = c.review!.matches[2];
+      expect(held.linkReview, isTrue);
+      expect(held.remembered, isFalse);
+      expect(held.candidateIds, isEmpty);
+      expect(c.selections[2].choice, PilotImportChoice.skip);
+
+      c.choose(2, PilotImportChoice.update, target: sam.id);
+      c.choose(2, PilotImportChoice.add);
+      expect(c.selections[2].choice, PilotImportChoice.skip);
+    });
+
+    test('lets the other pilots of the file go ahead', () async {
+      store.links.add(linkTo(sam, 3));
+      store.underReview = {3};
+      final c = controller();
+      await c.chooseAndRead();
+
+      await c.apply();
+
+      expect(c.step, PilotImportStep.done);
+      final saved = store.applied.single;
+      expect(
+        saved
+            .where((s) => s.choice != PilotImportChoice.skip)
+            .map((s) => s.match.draft.sourcePilotNo),
+        containsAll([1, 2]),
+      );
+      expect(
+        saved.singleWhere((s) => s.match.draft.sourcePilotNo == 3).choice,
+        PilotImportChoice.skip,
+      );
+    });
+
+    test('stops an import that was reviewed before the review began', () async {
+      final c = controller();
+      await c.chooseAndRead();
+      store.applyError = PilotImportLinkReviewError({3});
+
+      await c.apply();
+
+      expect(c.step, PilotImportStep.failed);
+      expect(c.linkReviewPending, isTrue);
+      expect(c.changedDuringReview, isTrue);
+    });
+  });
+
   test('reading builds a review with sensible defaults', () async {
     final c = controller();
     expect(await c.chooseAndRead(), isTrue);

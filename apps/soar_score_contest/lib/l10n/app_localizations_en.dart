@@ -1595,6 +1595,58 @@ class AppLocalizationsEn extends AppLocalizations {
       'Importing from GliderScore is not available on this computer.';
 
   @override
+  String get pilotImportLinkReview =>
+      'Waiting for your decision in Account sync: two devices linked this pilot to different participants.';
+
+  @override
+  String get pilotImportLinkReviewPending =>
+      'A pilot in this import was linked to different participants on two devices. Decide the link in Account sync, then review again.';
+
+  @override
+  String get shellNavAccountSync => 'Account sync';
+
+  @override
+  String get accountSyncIntro =>
+      'Decisions your devices could not make on their own wait here.';
+
+  @override
+  String pilotLinkReviewTitle(int number) {
+    return 'GliderScore pilot $number';
+  }
+
+  @override
+  String get pilotLinkReviewIntro =>
+      'Two devices linked this pilot to different participants. Choose the participant this pilot is linked to on every device.';
+
+  @override
+  String pilotLinkReviewKept(String name) {
+    return 'Link the account has now: $name';
+  }
+
+  @override
+  String pilotLinkReviewOther(String name) {
+    return 'Link from the other device: $name';
+  }
+
+  @override
+  String get pilotLinkReviewNoParticipant =>
+      'a participant who is not in your list';
+
+  @override
+  String pilotLinkReviewKeep(String name) {
+    return 'Keep $name';
+  }
+
+  @override
+  String pilotLinkReviewUse(String name) {
+    return 'Use $name';
+  }
+
+  @override
+  String get pilotLinkReviewChanged =>
+      'This pilot\'s link changed while you were reviewing. The comparison is refreshed; decide again.';
+
+  @override
   String get pilotImportChangedDuringReview =>
       'Your participants changed while you were reviewing. Review again before importing.';
 

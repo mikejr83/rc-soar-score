@@ -206,6 +206,7 @@ One list, shared by server and client, defined in `soar_score_core`:
 | `locked`                       | Rejected           | The score or contest state does not allow modification                         |
 | `unauthorized`                 | Rejected           | The account lacks authority for the scope or the entity                        |
 | `director_over_participant`    | Conflict (silent)  | A director's official value beat a participant submission                      |
+| `same_participant_link`        | Conflict (silent)  | Two installations linked a GliderScore pilot to the same participant           |
 | `scored_assignment`            | Rejected           | A change would reinterpret an assignment that already has scores               |
 | `dependency_failed`            | Skipped            | A mutation it depends on failed                                                |
 | `unsupported_protocol_version` | Version error      | Protocol version outside the supported range                                   |

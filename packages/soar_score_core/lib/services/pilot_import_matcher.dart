@@ -19,6 +19,7 @@ class PilotImportMatcher {
     List<PilotDraft> drafts,
     List<ParticipantProfile> existing, {
     List<PilotImportLink> links = const [],
+    Set<int> pilotsUnderReview = const {},
   }) {
     final result = <PilotMatch>[];
     final seen = <PilotDraft>[];
@@ -27,6 +28,23 @@ class PilotImportMatcher {
       final found = _find(draft, existing);
       final duplicateOf = _earlierSamePerson(draft, seen);
       seen.add(draft);
+
+      final number = draft.sourcePilotNo;
+      if (number != null && pilotsUnderReview.contains(number)) {
+        // Which participant this pilot is linked to is still being decided in
+        // Account sync, so neither the link nor a guess from the file is used.
+        result.add(
+          PilotMatch(
+            draft: draft,
+            kind: PilotMatchKind.likely,
+            candidateIds: const [],
+            candidateRevisions: const {},
+            duplicateOfSourcePilotNo: duplicateOf?.sourcePilotNo,
+            linkReview: true,
+          ),
+        );
+        continue;
+      }
 
       final remembered = links.where(
         (l) =>

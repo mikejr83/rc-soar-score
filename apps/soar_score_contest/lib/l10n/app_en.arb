@@ -1808,6 +1808,59 @@
   "@pilotImportUnavailable": {
     "description": "Shown when the GliderScore reader is missing."
   },
+  "pilotImportLinkReview": "Waiting for your decision in Account sync: two devices linked this pilot to different participants.",
+  "@pilotImportLinkReview": {
+    "description": "Row text for a GliderScore pilot whose remembered link is under review, so it cannot be imported yet."
+  },
+  "pilotImportLinkReviewPending": "A pilot in this import was linked to different participants on two devices. Decide the link in Account sync, then review again.",
+  "@pilotImportLinkReviewPending": {
+    "description": "Shown when an import is stopped because a pilot's link needs a decision first."
+  },
+  "shellNavAccountSync": "Account sync",
+  "@shellNavAccountSync": {
+    "description": "Breadcrumb and heading of the page that lists what the account's sync needs from the director."
+  },
+  "accountSyncIntro": "Decisions your devices could not make on their own wait here.",
+  "@accountSyncIntro": {
+    "description": "Introduction under the Account sync heading."
+  },
+  "pilotLinkReviewTitle": "GliderScore pilot {number}",
+  "@pilotLinkReviewTitle": {
+    "description": "Names the GliderScore pilot whose link is being reviewed.",
+    "placeholders": {"number": {"type": "int"}}
+  },
+  "pilotLinkReviewIntro": "Two devices linked this pilot to different participants. Choose the participant this pilot is linked to on every device.",
+  "@pilotLinkReviewIntro": {
+    "description": "Explains the pilot link review."
+  },
+  "pilotLinkReviewKept": "Link the account has now: {name}",
+  "@pilotLinkReviewKept": {
+    "description": "The participant the account's link names.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "pilotLinkReviewOther": "Link from the other device: {name}",
+  "@pilotLinkReviewOther": {
+    "description": "The participant the other device's latest link names.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "pilotLinkReviewNoParticipant": "a participant who is not in your list",
+  "@pilotLinkReviewNoParticipant": {
+    "description": "Shown instead of a name when the participant is not in the list."
+  },
+  "pilotLinkReviewKeep": "Keep {name}",
+  "@pilotLinkReviewKeep": {
+    "description": "Button that keeps the account's link.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "pilotLinkReviewUse": "Use {name}",
+  "@pilotLinkReviewUse": {
+    "description": "Button that takes the other device's link.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "pilotLinkReviewChanged": "This pilot's link changed while you were reviewing. The comparison is refreshed; decide again.",
+  "@pilotLinkReviewChanged": {
+    "description": "Shown when the link under review changed before the decision arrived."
+  },
   "pilotImportChangedDuringReview": "Your participants changed while you were reviewing. Review again before importing.",
   "@pilotImportChangedDuringReview": {
     "description": "Shown when a participant was edited during the pilot import review."

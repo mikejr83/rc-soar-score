@@ -48,6 +48,7 @@ class PilotMatch {
     this.changes = const [],
     this.duplicateOfSourcePilotNo,
     this.remembered = false,
+    this.linkReview = false,
     this.sourceChanged = false,
     this.sourceChanges = const [],
   });
@@ -81,6 +82,11 @@ class PilotMatch {
   /// This candidate was explicitly linked during an earlier import.
   final bool remembered;
 
+  /// Two devices linked this pilot differently and the director has not yet
+  /// decided which link is right (Account sync). The link must not be reused,
+  /// so the pilot waits until it is decided.
+  final bool linkReview;
+
   /// The incoming source data differs from the last confirmed source data.
   final bool sourceChanged;
 
@@ -93,7 +99,7 @@ class PilotMatch {
   bool get isUnchanged => kind == PilotMatchKind.exact && changes.isEmpty;
 
   PilotImportAction get defaultAction {
-    if (isDuplicateInFile || sourceChanged || conflict) {
+    if (isDuplicateInFile || sourceChanged || conflict || linkReview) {
       return PilotImportAction.ask;
     }
     return switch (kind) {

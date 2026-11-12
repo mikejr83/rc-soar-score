@@ -75,6 +75,13 @@ class ShellHeader extends StatelessWidget {
     if (path == landingsPath || path.startsWith('$landingsPath/')) {
       return (landingsPath, 'landings', (l10n) => l10n.shellNavLandings);
     }
+    if (path == accountSyncPath) {
+      return (
+        accountSyncPath,
+        'account-sync',
+        (l10n) => l10n.shellNavAccountSync,
+      );
+    }
     if (path == settingsPath) {
       return (settingsPath, 'settings', (l10n) => l10n.shellNavSettings);
     }

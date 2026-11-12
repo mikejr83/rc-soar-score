@@ -31,7 +31,9 @@ Once you confirm a pilot, the app remembers the link for both pilot and competit
 
 Links identify the director's GliderScore 6 database and pilot number; saving the database or adding competitions does not break them. Distinguishing an independent GliderScore database on a different computer from a transferred database is not yet supported. Earlier imports establish links when next confirmed.
 
-If two devices independently confirm links for the same pilot while offline, synchronizing those links can encounter a collision. Resolving competing links across devices is not yet supported.
+If two devices independently confirm links for the same pilot while offline, the account keeps the link it received first and asks you to choose in **Account sync** (the sync status at the bottom of the window opens it). The review shows the pilot number and the participant each device linked, using the latest change from each device. Your choice reaches both devices. If the link changes while you are reviewing, the comparison is refreshed and you decide again. Until you decide, importing that pilot (from a pilot or a competition import) is held back; the other pilots in the file import normally.
+
+If both devices linked the same participant, there is nothing to decide. The next import compares the saved GliderScore details with the file and asks you to approve any changes. If a participant is deleted on one device while another device links it offline, the deletion is kept, the link is not, and the pilot is linked again the next time you import it.
 
 ## What is imported
 

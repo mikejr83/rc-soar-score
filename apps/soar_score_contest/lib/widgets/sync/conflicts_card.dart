@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/preferences/director_time.dart';
 import '../../services/sync/open_conflict.dart';
+
+String _label(BuildContext context, OpenConflict conflict) {
+  final number = conflict.acceptedPayload?['source_pilot_no'];
+  return conflict.entityType == 'PilotImportLink' && number is int
+      ? AppLocalizations.of(context).pilotLinkReviewTitle(number)
+      : conflict.entityType;
+}
 
 /// The conflicts that wait for a decision, each with a button to review it.
 class ConflictsCard extends StatelessWidget {
@@ -52,7 +60,7 @@ class ConflictsCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${conflict.entityType}, found '
+                              '${_label(context, conflict)}, found '
                               '${DirectorTime.of(context)(conflict.createdAt)}',
                               style: theme.textTheme.titleSmall,
                             ),

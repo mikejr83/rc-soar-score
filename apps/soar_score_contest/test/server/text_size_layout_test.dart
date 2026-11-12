@@ -98,6 +98,7 @@ void main() {
         'reports': contestReportsPath(id),
         'pilot scoring cards': contestReportPath(id, ReportKind.cards),
         'sync': contestSyncPath(id),
+        'account sync': accountSyncPath,
         'settings': settingsPath,
         'participants': participantsPath,
         'roles': rolesPath,

@@ -38,6 +38,10 @@ abstract class PilotImportStore {
 /// Optional remembered-link capability of a pilot import store.
 abstract interface class PilotImportLinkStore {
   Future<List<PilotImportLink>> existingLinks();
+
+  /// The GliderScore pilot numbers whose link still waits for the director's
+  /// decision in Account sync. An import holds those pilots back.
+  Future<Set<int>> pilotsUnderReview();
 }
 
 /// The system file dialog the import uses. A journey cannot drive it, so it
@@ -159,7 +163,13 @@ class PilotImportController extends ChangeNotifier {
 
   /// True when the failure is that a participant changed during the review.
   bool get changedDuringReview =>
-      _error is StaleRevisionError || _error is PilotImportReviewChangedError;
+      _error is StaleRevisionError ||
+      _error is PilotImportReviewChangedError ||
+      _error is PilotImportLinkReviewError;
+
+  /// True when the failure is that a pilot's link needs a decision in Account
+  /// sync first.
+  bool get linkReviewPending => _error is PilotImportLinkReviewError;
 
   /// True when nothing was read yet, so a failure can be retried by choosing
   /// a file again.
@@ -214,14 +224,19 @@ class PilotImportController extends ChangeNotifier {
     final draft = _mapper.map(result);
     final existing = await store.existing();
     final linkStore = store;
-    final links = linkStore is PilotImportLinkStore
-        ? await (linkStore as PilotImportLinkStore).existingLinks()
-        : <PilotImportLink>[];
+    final linked = linkStore is PilotImportLinkStore
+        ? linkStore as PilotImportLinkStore
+        : null;
+    final links = linked == null
+        ? <PilotImportLink>[]
+        : await linked.existingLinks();
+    final held = linked == null ? <int>{} : await linked.pilotsUnderReview();
     final filter = pilotFilter;
     final matches = _matcher.match(
       filter == null ? draft.pilots : draft.pilots.where(filter).toList(),
       existing,
       links: links,
+      pilotsUnderReview: held,
     );
     _review = PilotImportReview(
       draft: draft,
@@ -255,6 +270,8 @@ class PilotImportController extends ChangeNotifier {
   /// candidate).
   void choose(int index, PilotImportChoice choice, {Id? target}) {
     final old = _selections[index];
+    // A pilot whose link is under review stays out until it is decided.
+    if (old.match.linkReview) return;
     _selections = [..._selections]
       ..[index] = PilotImportSelection(
         match: old.match,

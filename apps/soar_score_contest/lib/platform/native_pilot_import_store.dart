@@ -35,6 +35,13 @@ class NativePilotImportStore implements PilotImportStore, PilotImportLinkStore {
       });
 
   @override
+  Future<Set<int>> pilotsUnderReview() => _server.runProfileOperation(
+    () => _server.repository.pilotImportLinkRepository.pilotsUnderReview(
+      _server.actingAccountId,
+    ),
+  );
+
+  @override
   Future<core.PilotImportOutcome> apply(
     List<core.PilotImportSelection> selections, {
     required Map<core.Id, int> reviewedRevisions,

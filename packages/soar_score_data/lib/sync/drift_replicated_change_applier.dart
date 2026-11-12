@@ -45,6 +45,13 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
               .removeWhereId('landing_table_id', change.entityId);
         }
         await store.remove(change.entityId);
+        if (change.entityType == 'ParticipantProfile') {
+          // A deleted participant keeps no link: the pilot is linked again at
+          // the next import.
+          await _stores
+              .of('PilotImportLink')
+              .removeWhereId('participant_profile_id', change.entityId);
+        }
         if (change.entityType == 'MatrixAssignment') {
           await clearSupersededMarkers(_db, change.entityId);
         }
@@ -69,20 +76,10 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
               local.sourcePilotNo != incoming.sourcePilotNo ||
               local.id == incoming.id)
             continue;
-          final pending =
-              await (_db.select(_db.mutationRecords)..where(
-                    (m) =>
-                        m.entityType.equals('PilotImportLink') &
-                        m.entityId.equals(local.id.value) &
-                        m.outcome.equals('Pending'),
-                  ))
-                  .get();
-          if (pending.isEmpty) {
-            throw StateError('Conflicting pilot link has no pending mutation');
-          }
-          // The pending mutation retains the complete local choice for the
-          // server to record as a conflict. Its row must leave the unique
-          // index before the accepted remote link can be applied.
+          // The service holds another link for this pilot. This installation's
+          // own link leaves the unique index so the service's can come in; its
+          // mutations stay in the outbox (or already sit in the service's
+          // conflict), which keeps the director's choice for the review.
           await store.remove(local.id);
         }
       }

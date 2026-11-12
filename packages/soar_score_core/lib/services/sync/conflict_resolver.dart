@@ -19,6 +19,7 @@ import 'exchange_context.dart';
 import 'mutation_payloads.dart';
 import 'mutation_replay.dart';
 import 'mutation_result.dart';
+import 'pilot_link_collisions.dart';
 import 'sync_entity_catalog.dart';
 import 'sync_log.dart';
 import 'sync_mutation.dart';
@@ -32,12 +33,14 @@ import 'sync_scope_ids.dart';
 /// revision of the same entity.
 class ConflictResolver {
   ConflictResolver(this._store, this._clock, this._newId, {SyncLog? log})
-    : _log = log ?? SyncLog();
+    : _log = log ?? SyncLog(),
+      _links = PilotLinkCollisions(log ?? SyncLog());
 
   final SyncAcceptorStore _store;
   final DateTime Function() _clock;
   final Id Function() _newId;
   final SyncLog _log;
+  final PilotLinkCollisions _links;
 
   /// The conflict [id], so the caller can check the scope and take its lock.
   Future<ConflictRecord> find(Id id, {required Id accountId}) =>
@@ -129,8 +132,18 @@ class ConflictResolver {
     if (choice == ConflictResolutionChoice.merged && merged == null) {
       return refuse(SyncReasonCode.invalidPayload);
     }
-    if (conflict.entityType == 'PilotImportLink' &&
-        conflict.reasonCode == SyncReasonCode.uniqueViolation.code) {
+    final ctx = ExchangeContext(
+      scope: scope,
+      accountId: accountId,
+      clock: _clock,
+      newId: _newId,
+    );
+    final isLinkReview =
+        conflict.entityType == PilotLinkCollisions.entityType &&
+        conflict.reasonCode == SyncReasonCode.uniqueViolation.code;
+    if (isLinkReview) {
+      // The director decides about the comparison that was shown: if either
+      // link moved since, the review was replaced and this one is stale.
       final current = await tx.findEntity(
         conflict.entityType,
         conflict.entityId,
@@ -141,14 +154,13 @@ class ConflictResolver {
       if (choice == ConflictResolutionChoice.merged) {
         return refuse(SyncReasonCode.invalidPayload);
       }
+      final competing = conflict.competingPayload;
+      if (choice == ConflictResolutionChoice.tookCompeting &&
+          (competing == null ||
+              await _links.targetProblem(tx, ctx, competing) != null)) {
+        return refuse(SyncReasonCode.entityDeleted);
+      }
     }
-
-    final ctx = ExchangeContext(
-      scope: scope,
-      accountId: accountId,
-      clock: _clock,
-      newId: _newId,
-    );
     final now = _clock();
     final resolved = ConflictRecord(
       id: conflict.id,
@@ -214,6 +226,15 @@ class ConflictResolver {
     final result = await _apply(tx, ctx, conflict, decision, taken);
     await tx.saveConflict(resolved);
     await _log.emit(tx, ctx, resolved);
+    if (isLinkReview) {
+      // Another review of the same link compared the state before this one.
+      await _links.storedLinkChanged(
+        tx,
+        ctx,
+        conflict.entityId,
+        except: conflict.id,
+      );
+    }
     await _audit(tx, ctx, decision, AuditAction.conflictAccepted);
     return result;
   }
