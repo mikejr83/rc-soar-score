@@ -90,7 +90,9 @@ class RolesService {
     required MutationMetadata metadata,
   }) async {
     await _requireOwned(ownerAccountId, id);
-    final usage = await this.usage(ownerAccountId, id);
+    // Counts every contest, not only the director's: a role in use anywhere
+    // must not be deleted.
+    final usage = await _usage(id);
     if (usage.isNotEmpty) {
       throw ContestStateError(
         'role_in_use',
@@ -101,17 +103,35 @@ class RolesService {
     await repository.roleRepository.delete(id, metadata: metadata);
   }
 
-  /// The contests that have participants in role [id], by contest name.
+  /// The contests of [ownerAccountId] that have participants in role [id],
+  /// by contest name.
   ///
-  /// Throws an [EntityNotFoundError] when the director cannot see the role.
+  /// A system role is shared by every account, so contests of other accounts
+  /// are left out before anything is counted or named. Throws an
+  /// [EntityNotFoundError] when the director cannot see the role.
   Future<List<RoleUsage>> usage(Id ownerAccountId, Id id) async {
     final roles = await list(ownerAccountId);
     if (!roles.any((role) => role.id == id)) {
       throw EntityNotFoundError(entityType: 'Role', entityId: id);
     }
+    return _usage(id, ownerAccountId: ownerAccountId);
+  }
+
+  /// The contests using role [id], only those owned by [ownerAccountId] when
+  /// it is given.
+  Future<List<RoleUsage>> _usage(Id id, {Id? ownerAccountId}) async {
+    final participations = await repository.contestParticipationRepository
+        .listForRole(id);
+    final contests = await repository.contestRepository.findByIds({
+      for (final participation in participations) participation.contestId,
+    });
     final counts = <Id, int>{};
-    for (final participation
-        in await repository.contestParticipationRepository.listForRole(id)) {
+    for (final participation in participations) {
+      final contest = contests[participation.contestId];
+      if (contest == null) continue;
+      if (ownerAccountId != null && contest.ownerAccountId != ownerAccountId) {
+        continue;
+      }
       counts.update(
         participation.contestId,
         (count) => count + 1,
@@ -120,12 +140,10 @@ class RolesService {
     }
     final usage = <RoleUsage>[];
     for (final MapEntry(:key, :value) in counts.entries) {
-      final contest = await repository.contestRepository.findById(key);
-      if (contest == null) continue;
       usage.add(
         RoleUsage(
           contestId: key,
-          contestName: contest.name,
+          contestName: contests[key]!.name,
           participantCount: value,
         ),
       );
