@@ -12,6 +12,7 @@ Future<void> _pump(
   WidgetTester tester,
   ActivityFacts? activity, {
   VoidCallback? onRetry,
+  VoidCallback? onViewAll,
   double width = 640,
 }) async {
   tester.view.physicalSize = Size(width, 1000);
@@ -31,6 +32,7 @@ Future<void> _pump(
             contest: matrixContest(),
             activity: activity,
             onRetry: onRetry,
+            onViewAll: onViewAll,
           ),
         ),
       ),
@@ -81,9 +83,11 @@ void main() {
     );
   });
 
-  testWidgets('View all is off and says why', (tester) async {
+  testWidgets('View all opens the activity page', (tester) async {
+    var opened = 0;
     await _pump(
       tester,
+      onViewAll: () => opened++,
       ActivityFacts(
         entries: [
           ActivityEntry(
@@ -96,11 +100,8 @@ void main() {
       ),
     );
 
-    final button = tester.widget<TextButton>(
-      find.byKey(const ValueKey('activity-view-all')),
-    );
-    expect(button.onPressed, isNull);
-    expect(find.text('The full activity log is not available yet.'), findsOne);
+    await tester.tap(find.byKey(const ValueKey('activity-view-all')));
+    expect(opened, 1);
   });
 
   testWidgets('shows the empty state', (tester) async {

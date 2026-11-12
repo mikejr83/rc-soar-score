@@ -317,9 +317,28 @@ void main() {
       expect(await events('?limit=1'), hasLength(1));
     });
 
+    test('pages with offset', () async {
+      await create();
+      await act('lock', 0);
+      await act('unlock', 1);
+
+      final first = await events('?limit=1');
+      final second = await events('?limit=1&offset=1');
+      expect(first.single['transition'], 'unlock');
+      expect(second.single['transition'], 'lock');
+      expect(await events('?limit=1&offset=2'), isEmpty);
+    });
+
     test('a bad action or limit is 400', () async {
       await create();
-      for (final query in ['?action=Nope', '?limit=x', '?limit=0']) {
+      for (final query in [
+        '?action=Nope',
+        '?limit=x',
+        '?limit=0',
+        '?limit=1&offset=x',
+        '?limit=1&offset=-1',
+        '?offset=1',
+      ]) {
         final response = await send(
           'GET',
           '/contests/$_contestId/audit-events$query',

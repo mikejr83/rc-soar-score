@@ -15,6 +15,7 @@ import 'auth/auth_session.dart';
 import 'auth/auth_session_inherited.dart';
 import 'auth/identity_provider_check.dart';
 import 'pages/contest/configuration_page.dart';
+import 'pages/contest/activity_page.dart';
 import 'pages/contest/publication_page.dart';
 import 'pages/contest/workspace_page.dart';
 import 'pages/home_page.dart';
@@ -126,6 +127,10 @@ String contestReportPath(String contestId, ReportKind kind) =>
 /// The publication page of the contest with [contestId].
 String contestPublicationPath(String contestId) =>
     '$contestsPath/$contestId/publication';
+
+/// The activity page (the full audit list) of the contest with [contestId].
+String contestActivityPath(String contestId) =>
+    '$contestsPath/$contestId/activity';
 
 /// The sync details page of the contest with [contestId].
 String contestSyncPath(String contestId) => '$contestsPath/$contestId/sync';
@@ -348,6 +353,13 @@ GoRouter buildAppRouter({
             path: '$contestsPath/:contestId/publication',
             name: 'contestPublication',
             builder: (context, state) => ContestPublicationPage(
+              contestId: state.pathParameters['contestId']!,
+            ),
+          ),
+          _shellRoute(
+            path: '$contestsPath/:contestId/activity',
+            name: 'contestActivity',
+            builder: (context, state) => ContestActivityPage(
               contestId: state.pathParameters['contestId']!,
             ),
           ),

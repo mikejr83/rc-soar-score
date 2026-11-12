@@ -121,6 +121,7 @@ void main() {
       contestId,
       action: AuditAction.stateTransition,
       limit: 5,
+      offset: 10,
     );
 
     expect(seen.method, 'GET');
@@ -128,6 +129,7 @@ void main() {
     expect(seen.url.queryParameters, {
       'action': 'StateTransition',
       'limit': '5',
+      'offset': '10',
     });
     expect(events.single.transition, ContestAction.lock);
     expect(events.single.actorId, event.actorId);

@@ -177,22 +177,32 @@ class ContestsService {
 
   /// The audit events of contest [id], newest first.
   ///
-  /// [action] keeps only events of that kind and [limit] the newest that
-  /// many. Throws an [EntityNotFoundError] when there is no such contest and
-  /// an [ArgumentError] for a [limit] below 1.
+  /// [action] keeps only events of that kind, [offset] skips that many of the
+  /// matching events (a page after the first) and [limit] keeps the newest
+  /// that many after them. Throws an [EntityNotFoundError] when there is no
+  /// such contest and an [ArgumentError] for a [limit] below 1, a negative
+  /// [offset] or an [offset] without a [limit].
   Future<List<AuditEvent>> auditEvents(
     Id id, {
     AuditAction? action,
     int? limit,
+    int? offset,
   }) async {
     if (limit != null && limit < 1) {
       throw ArgumentError.value(limit, 'limit', 'must be at least 1');
+    }
+    if (offset != null && offset < 0) {
+      throw ArgumentError.value(offset, 'offset', 'must not be negative');
+    }
+    if (offset != null && limit == null) {
+      throw ArgumentError.value(offset, 'offset', 'needs a limit');
     }
     await _require(id);
     return repository.auditEventRepository.listForContest(
       id,
       action: action,
       limit: limit,
+      offset: offset,
     );
   }
 

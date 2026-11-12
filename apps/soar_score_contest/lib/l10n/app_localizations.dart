@@ -1178,17 +1178,11 @@ abstract class AppLocalizations {
   /// **'Recent activity'**
   String get activityHeading;
 
-  /// Disabled button on the Recent activity card that will open the full activity log.
+  /// Button on the Recent activity card that opens the full activity page.
   ///
   /// In en, this message translates to:
   /// **'View all'**
   String get activityViewAll;
-
-  /// Note under the Recent activity list explaining the disabled View all button.
-  ///
-  /// In en, this message translates to:
-  /// **'The full activity log is not available yet.'**
-  String get activityViewAllUnavailable;
 
   /// Recent activity card text when the contest has no events.
   ///
@@ -1213,6 +1207,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get activityRetry;
+
+  /// Text under the heading of the Activity page.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything the contest\'s directors did, newest first. Times are in the contest\'s time zone.'**
+  String get activityPageIntro;
+
+  /// Label of the filter on the Activity page that narrows the list to one kind of event.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get activityFilterLabel;
+
+  /// Activity page filter: every kind of event.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything'**
+  String get activityFilterAll;
+
+  /// Activity page filter: contest actions (scoring opened or closed, lock, complete) and pilot retirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest and pilots'**
+  String get activityFilterContest;
+
+  /// Activity page filter: corrections of official scores.
+  ///
+  /// In en, this message translates to:
+  /// **'Score corrections'**
+  String get activityFilterScores;
+
+  /// Activity page filter: saved contest configurations.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration'**
+  String get activityFilterConfiguration;
+
+  /// Activity page filter: matrix draws.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix'**
+  String get activityFilterMatrix;
+
+  /// Activity page filter: published results.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication'**
+  String get activityFilterPublication;
+
+  /// Activity page text while the first events load.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading activity…'**
+  String get activityPageLoading;
+
+  /// Activity page title when the contest has no events.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing has happened yet'**
+  String get activityPageEmpty;
+
+  /// Activity page title when the chosen filter matches no events.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity of this kind'**
+  String get activityPageEmptyFiltered;
+
+  /// Activity page text under the title when the chosen filter matches no events.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another kind, or show everything.'**
+  String get activityPageEmptyFilteredBody;
+
+  /// Button on the Activity page that clears the filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Show everything'**
+  String get activityPageShowEverything;
+
+  /// Activity page title when reading the events failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity could not be loaded'**
+  String get activityPageFailed;
+
+  /// Text under the Activity list when reading the next page of events failed.
+  ///
+  /// In en, this message translates to:
+  /// **'More activity could not be loaded.'**
+  String get activityPageMoreFailed;
+
+  /// Banner on the Activity page when the device has no internet connection.
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline. Showing what was loaded; Retry works once you are back online.'**
+  String get activityPageOffline;
+
+  /// Button under the Activity list that reads the next page of events.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get activityPageLoadMore;
+
+  /// Text under the last page of the Activity list.
+  ///
+  /// In en, this message translates to:
+  /// **'That is everything'**
+  String get activityPageEnd;
+
+  /// Activity page title when the contest does not exist.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest was not found'**
+  String get activityPageNotFound;
 
   /// Recent activity line: the contest was completed. actor is "you" when the signed-in account did it.
   ///
@@ -1333,6 +1441,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reports'**
   String get shellNavReports;
+
+  /// Navigation rail destination, page title and breadcrumb: the contest's full activity list.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get shellNavActivity;
 
   /// Navigation rail destination, page title and breadcrumb: contest, native builds.
   ///
