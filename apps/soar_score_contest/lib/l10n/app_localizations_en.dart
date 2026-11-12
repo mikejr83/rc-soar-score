@@ -862,6 +862,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'You are offline. Showing what was loaded; Retry works once you are back online.';
 
   @override
+  String get activityPageIncomplete =>
+      'Published results could not be loaded, so publications may be missing from this list.';
+
+  @override
   String get activityPageLoadMore => 'Load more';
 
   @override

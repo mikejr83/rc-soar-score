@@ -545,6 +545,19 @@ class ApiClient {
     );
   }
 
+  /// `GET /api/v1/account` — the id of the account the caller acts as: the
+  /// id the audit trail records as the actor of the caller's actions. It is
+  /// not the sign-in identity's subject.
+  Future<Id> accountId() async {
+    final uri = _resolve('/api/v1/account');
+    final response = await _send('GET', uri);
+    return _decode<Id>(
+      response,
+      uri,
+      (json) => Id.parse(json['account_id'] as String),
+    );
+  }
+
   /// `GET /api/v1/account/preferences` — the signed-in account's preferred
   /// time zone and locale; a field is null until chosen.
   Future<AccountPreferences> getAccountPreferences() async {

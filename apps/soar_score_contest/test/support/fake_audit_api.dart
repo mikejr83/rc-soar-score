@@ -50,6 +50,9 @@ class FakeAuditApi {
   /// Makes the audit route answer with this status (and no events).
   int? auditStatus;
 
+  /// Makes every request fail as if the network were down.
+  bool networkDown = false;
+
   /// Makes the audit route fail once it has answered this many reads.
   int? failAfterReads;
 
@@ -59,6 +62,9 @@ class FakeAuditApi {
   );
 
   Future<http.Response> _answer(http.Request request) async {
+    if (networkDown) {
+      throw http.ClientException('network down', request.url);
+    }
     final headers = {'content-type': 'application/json'};
     if (missingContest) {
       return http.Response(

@@ -34,4 +34,50 @@ void main() {
 
     expect(account.id, localUiAccountId);
   });
+
+  test(
+    'the audit id is the service account id, not the sign-in subject',
+    () async {
+      final session = FakeAuthSession(subjectId: 'auth0|1', signedIn: true);
+      final account = AuthUiAccount(session, lookupActor: () async => 'uuid-1');
+      addTearDown(account.dispose);
+
+      expect(account.auditActorId, isNull);
+      await account.refreshActor();
+
+      expect(account.id, 'user:auth0|1');
+      expect(account.auditActorId, 'uuid-1');
+      expect((account as UiAccount).auditActorId, 'uuid-1');
+    },
+  );
+
+  test('the audit id follows sign-in and sign-out and survives a failed '
+      'lookup as unknown', () async {
+    final session = FakeAuthSession(subjectId: 'auth0|1');
+    var fail = false;
+    final account = AuthUiAccount(
+      session,
+      lookupActor: () async {
+        if (fail) throw StateError('down');
+        return 'uuid-1';
+      },
+    );
+    addTearDown(account.dispose);
+
+    await session.signIn();
+    await Future<void>.delayed(Duration.zero);
+    expect(account.auditActorId, 'uuid-1');
+
+    await session.signOut();
+    expect(account.auditActorId, isNull);
+
+    fail = true;
+    await session.signIn();
+    await Future<void>.delayed(Duration.zero);
+    expect(account.auditActorId, isNull);
+  });
+
+  test('an account that is its own audit id answers its id', () {
+    expect(const FixedUiAccount('abc').auditActorId, 'abc');
+  });
 }

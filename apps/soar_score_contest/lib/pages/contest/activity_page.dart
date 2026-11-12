@@ -41,6 +41,13 @@ class _ContestActivityPageState extends State<ContestActivityPage> {
   bool _loading = true;
   Object? _error;
 
+  /// The contest could not be read (so there is no time zone to show).
+  Object? _contestError;
+
+  /// Whether publications are missing because the publishing server did not
+  /// answer.
+  bool _incomplete = false;
+
   /// Set while a further page loads or after it failed.
   bool _loadingMore = false;
   bool _moreFailed = false;
@@ -70,47 +77,70 @@ class _ContestActivityPageState extends State<ContestActivityPage> {
     setState(() {
       _loading = true;
       _error = null;
+      _contestError = null;
       _moreFailed = false;
       _loadingMore = false;
     });
     final client = apiClientOf(context);
-    final accountId = uiAccountIdOf(context);
+    final publicationClient = publicationClientOf(context);
+    final accountId = auditActorIdOf(context);
+
+    Contest? contest = _contest;
+    Object? contestError;
+    Object? feedError;
+    ActivityLogPage? page;
+    ActivityLogReader? reader;
+    final Id id;
     try {
       if (client == null) {
         throw StateError('No API client is available.');
       }
-      final id = Id.parse(widget.contestId);
-      final reader = ActivityLogReader(
-        client,
-        id,
-        filter: _filter,
-        publicationClient: publicationClientOf(context),
-        actingAccountId: accountId,
-      );
-      final results = await Future.wait<Object>([
-        if (_contest == null) client.contest(id),
-        reader.next(),
-      ]);
-      if (!mounted || generation != _generation) {
-        return;
-      }
-      final page = results.last as ActivityLogPage;
-      setState(() {
-        _contest ??= results.first as Contest;
-        _reader = reader;
-        _entries = page.entries;
-        _hasMore = page.hasMore;
-        _loading = false;
-      });
+      id = Id.parse(widget.contestId);
     } on Object catch (error) {
-      if (!mounted || generation != _generation) {
-        return;
+      if (mounted && generation == _generation) {
+        setState(() {
+          _contestError = error is ArgumentError ? const _NotFound() : error;
+          _loading = false;
+        });
       }
-      setState(() {
-        _error = error is ArgumentError ? const _NotFound() : error;
-        _loading = false;
-      });
+      return;
     }
+    // The contest (its time zone) and the feed are read on their own: a feed
+    // that fails still leaves the page, its filters and the offline notice.
+    reader = ActivityLogReader(
+      client,
+      id,
+      filter: _filter,
+      publicationClient: publicationClient,
+      actingAccountId: accountId,
+    );
+    await Future.wait<void>([
+      if (contest == null)
+        client
+            .contest(id)
+            .then<void>(
+              (loaded) => contest = loaded,
+              onError: (Object error) => contestError = error,
+            ),
+      reader.next().then<void>(
+        (loaded) => page = loaded,
+        onError: (Object error) => feedError = error,
+      ),
+    ]);
+    if (!mounted || generation != _generation) {
+      return;
+    }
+    final read = page;
+    setState(() {
+      _contest = contest;
+      _contestError = contestError;
+      _error = feedError;
+      _reader = read == null ? null : reader;
+      _entries = read?.entries ?? const [];
+      _hasMore = read?.hasMore ?? false;
+      _incomplete = read?.incomplete ?? false;
+      _loading = false;
+    });
   }
 
   Future<void> _loadMore() async {
@@ -138,6 +168,7 @@ class _ContestActivityPageState extends State<ContestActivityPage> {
             if (seen.add(entry.id)) entry,
         ];
         _hasMore = page.hasMore;
+        _incomplete = page.incomplete;
         _loadingMore = false;
       });
     } on Object {
@@ -169,7 +200,7 @@ class _ContestActivityPageState extends State<ContestActivityPage> {
   Widget _content(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final contest = _contest;
-    final error = _error;
+    final error = _contestError ?? _error;
     if (error is _NotFound ||
         (error is ApiHttpError && error.statusCode == 404)) {
       return PageStateView.notFound(
@@ -183,11 +214,11 @@ class _ContestActivityPageState extends State<ContestActivityPage> {
     }
     if (contest == null) {
       // The contest, and with it the time zone, is not known yet.
-      return error != null
+      return _contestError != null
           ? KeyedSubtree(
               key: const ValueKey('activity-page-failed'),
               child: loadFailedView(
-                error,
+                _contestError!,
                 title: l10n.activityPageFailed,
                 onRetry: () => unawaited(_loadFirst()),
               ),
@@ -230,6 +261,18 @@ class _ContestActivityPageState extends State<ContestActivityPage> {
             ],
             _FilterBar(selected: _filter, onSelected: _choose),
             const SizedBox(height: 8),
+            if (_incomplete && !_loading) ...[
+              PageBanner(
+                key: const ValueKey('activity-page-incomplete'),
+                kind: PageBannerKind.status,
+                icon: Icons.warning_amber_outlined,
+                shape: PageBannerShape.card,
+                text: l10n.activityPageIncomplete,
+                actionLabel: l10n.activityRetry,
+                onAction: () => unawaited(_loadFirst()),
+              ),
+              const SizedBox(height: 8),
+            ],
             ..._body(context, contest, l10n),
           ],
         ),

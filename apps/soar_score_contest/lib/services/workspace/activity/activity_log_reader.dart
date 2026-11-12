@@ -25,13 +25,22 @@ enum ActivityFilter {
 
 /// One page of the activity list.
 class ActivityLogPage {
-  const ActivityLogPage({required this.entries, required this.hasMore});
+  const ActivityLogPage({
+    required this.entries,
+    required this.hasMore,
+    required this.incomplete,
+  });
 
   /// The lines of this page, newest first.
   final List<ActivityEntry> entries;
 
   /// Whether older lines may follow.
   final bool hasMore;
+
+  /// Whether a source that may fail without failing the list could not be
+  /// read, so lines are missing from it (publications, when the publishing
+  /// server does not answer). Reading again from the start fills them in.
+  final bool incomplete;
 }
 
 /// One place the audit events are read from, with its own paging position.
@@ -42,6 +51,7 @@ class _Source {
     this.action, {
     this.skipPublication = false,
     this.tolerant = false,
+    this.optional = false,
     this.actingAccountId,
   });
 
@@ -57,7 +67,14 @@ class _Source {
   /// signed out of the publishing server, or whose contest is not on it yet,
   /// has none there, which is not a failed read.
   final bool tolerant;
+
+  /// A failing read drops this source from the list ([failed]) instead of
+  /// failing it: the other sources stay readable.
+  final bool optional;
   final String? actingAccountId;
+
+  /// An [optional] source whose read failed; it gives no more lines.
+  bool failed = false;
 
   /// Lines read and not yet handed out, newest first.
   final List<ActivityEntry> buffer = [];
@@ -77,6 +94,18 @@ class _Source {
         );
       } on ApiHttpError catch (error) {
         if (tolerant && (error.statusCode == 401 || error.statusCode == 404)) {
+          exhausted = true;
+          return;
+        }
+        if (optional) {
+          failed = true;
+          exhausted = true;
+          return;
+        }
+        rethrow;
+      } on Object {
+        if (optional) {
+          failed = true;
           exhausted = true;
           return;
         }
@@ -154,22 +183,31 @@ class ActivityLogReader {
     if (hosted == null || identical(hosted, client)) {
       return [local()];
     }
-    _Source publication() => _Source(
+    // Beside local events the publications may fail without taking the local
+    // history with them; alone they are the whole list.
+    _Source publication({required bool optional}) => _Source(
       hosted,
       contestId,
       AuditAction.publicationAttempt,
       tolerant: true,
+      optional: optional,
       actingAccountId: actingAccountId,
     );
     return switch (filter) {
-      ActivityFilter.publication => [publication()],
-      ActivityFilter.all => [local(skipPublication: true), publication()],
+      ActivityFilter.publication => [publication(optional: false)],
+      ActivityFilter.all => [
+        local(skipPublication: true),
+        publication(optional: true),
+      ],
       _ => [local()],
     };
   }
 
   /// Whether older lines may follow what was read so far.
   bool get hasMore => _sources.any((source) => source.hasMore);
+
+  /// Whether an optional source failed, so its lines are missing.
+  bool get incomplete => _sources.any((source) => source.failed);
 
   /// The next [pageSize] lines (fewer at the end of the list).
   Future<ActivityLogPage> next() async {
@@ -188,6 +226,7 @@ class ActivityLogReader {
     return ActivityLogPage(
       entries: List.unmodifiable(entries),
       hasMore: hasMore,
+      incomplete: incomplete,
     );
   }
 

@@ -970,6 +970,10 @@
   "@activityPageOffline": {
     "description": "Banner on the Activity page when the device has no internet connection."
   },
+  "activityPageIncomplete": "Published results could not be loaded, so publications may be missing from this list.",
+  "@activityPageIncomplete": {
+    "description": "Banner on the Activity page when the server that publishes results did not answer; the rest of the list is shown. Retry reads the list again."
+  },
   "activityPageLoadMore": "Load more",
   "@activityPageLoadMore": {
     "description": "Button under the Activity list that reads the next page of events."

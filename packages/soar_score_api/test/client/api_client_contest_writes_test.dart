@@ -136,6 +136,20 @@ void main() {
     expect(events.single.serverTimestamp, event.serverTimestamp);
   });
 
+  test('accountId GETs the account route and decodes the id', () async {
+    final client = clientFor(
+      (_) => http.Response(
+        jsonEncode({'account_id': contestId.value}),
+        200,
+        headers: jsonHeaders,
+      ),
+    );
+
+    expect(await client.accountId(), contestId);
+    expect(seen.method, 'GET');
+    expect(seen.url.path, '/api/v1/account');
+  });
+
   test('a 409 carries the server error code', () async {
     final client = clientFor(
       (_) => http.Response(

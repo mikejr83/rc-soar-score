@@ -1304,6 +1304,12 @@ abstract class AppLocalizations {
   /// **'You are offline. Showing what was loaded; Retry works once you are back online.'**
   String get activityPageOffline;
 
+  /// Banner on the Activity page when the server that publishes results did not answer; the rest of the list is shown. Retry reads the list again.
+  ///
+  /// In en, this message translates to:
+  /// **'Published results could not be loaded, so publications may be missing from this list.'**
+  String get activityPageIncomplete;
+
   /// Button under the Activity list that reads the next page of events.
   ///
   /// In en, this message translates to:

@@ -201,9 +201,64 @@ void main() {
       },
     );
 
-    test('a failing publishing server fails the page', () async {
+    test('a failing publishing server leaves local history, marked '
+        'incomplete', () async {
+      for (final fail in <void Function(FakeAuditApi)>[
+        (api) => api.auditStatus = 503,
+        (api) => api.networkDown = true,
+      ]) {
+        final local = FakeAuditApi([for (var n = 1; n <= 60; n++) _saved(n)]);
+        final hosted = FakeAuditApi([_published(900, minute: 30)]);
+        fail(hosted);
+        final reader = _reader(local, hosted: hosted);
+
+        final first = await reader.next();
+        final second = await reader.next();
+        final third = await reader.next();
+
+        expect(first.incomplete, isTrue);
+        expect(first.entries, hasLength(25));
+        expect(second.entries, hasLength(25));
+        expect(third.entries, hasLength(10));
+        expect(third.hasMore, isFalse);
+      }
+    });
+
+    test('a new reader after recovery has both sources in order', () async {
+      final local = FakeAuditApi([for (var n = 1; n <= 3; n++) _saved(n)]);
+      final hosted = FakeAuditApi([_published(900, minute: 2)])
+        ..auditStatus = 503;
+      expect((await _reader(local, hosted: hosted).next()).incomplete, isTrue);
+
+      hosted.auditStatus = null;
+      final page = await _reader(local, hosted: hosted).next();
+
+      expect(page.incomplete, isFalse);
+      expect(page.entries.map((e) => e.kind), [
+        ActivityKind.configurationSaved,
+        ActivityKind.publication,
+        ActivityKind.configurationSaved,
+        ActivityKind.configurationSaved,
+      ]);
+    });
+
+    test('Publication alone fails when the publishing server does', () async {
       final local = FakeAuditApi([_saved(1)]);
       final hosted = FakeAuditApi([])..auditStatus = 503;
+
+      expect(
+        _reader(
+          local,
+          filter: ActivityFilter.publication,
+          hosted: hosted,
+        ).next(),
+        throwsA(anything),
+      );
+    });
+
+    test('a failing local source fails the page', () async {
+      final local = FakeAuditApi([_saved(1)])..auditStatus = 503;
+      final hosted = FakeAuditApi([_published(900)]);
 
       expect(_reader(local, hosted: hosted).next(), throwsA(anything));
     });
