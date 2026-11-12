@@ -205,16 +205,22 @@ class _DriftSyncAcceptorTransaction implements core.SyncAcceptorTransaction {
   }
 
   @override
-  Future<void> markSuperseded(core.Id sourceId, core.Id movedId) async {
+  Future<void> markSuperseded(
+    core.Id sourceId,
+    core.Id movedId,
+    core.Id contestId,
+  ) async {
     final marked = await _db.customUpdate(
       portableSql(
         _db,
         'UPDATE matrix_assignments SET superseded_by_assignment_id = ? '
-        'WHERE id = ? AND superseded_by_assignment_id IS NULL',
+        'WHERE id = ? AND contest_id = ? '
+        'AND superseded_by_assignment_id IS NULL',
       ),
       variables: [
         Variable<String>(movedId.value),
         Variable<String>(sourceId.value),
+        Variable<String>(contestId.value),
       ],
       updates: {_db.matrixAssignments},
     );

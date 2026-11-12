@@ -23,6 +23,7 @@ import 'pilot_link_collisions.dart';
 import 'sync_entity_catalog.dart';
 import 'sync_log.dart';
 import 'sync_mutation.dart';
+import 'sync_scope_guard.dart';
 import 'sync_scope_ids.dart';
 
 /// Applies the director's decision for a conflict.
@@ -230,6 +231,7 @@ class ConflictResolver {
         ? MutationPayload.save(chosen ?? merged!)
         : _competing(conflict);
     final result = await _apply(tx, ctx, conflict, decision, taken);
+    if (result.outcome == MutationOutcome.rejected) return result;
     await tx.saveConflict(resolved);
     await _log.emit(tx, ctx, resolved);
     if (isLinkReview) {
@@ -264,6 +266,36 @@ class ConflictResolver {
     final kind = SyncEntityCatalog.of(type);
     if (kind == null) throw SyncPayloadError('$type cannot be decided');
 
+    final stored = await tx.findEntity(type, id);
+    final entity = {...taken.entity};
+    if (type == 'PilotImportLink' &&
+        conflict.reasonCode == SyncReasonCode.uniqueViolation.code) {
+      if (stored == null || stored['revision'] != conflict.entityRevision) {
+        throw SyncPayloadError(
+          'The accepted pilot link changed after this conflict was recorded.',
+        );
+      }
+      entity['id'] = id.value;
+      entity['created_at'] = stored['created_at'];
+    }
+    // The decision may only write the conflict's own entity, in the
+    // conflict's own scope, as an ordinary mutation would be allowed to.
+    final problem = await SyncScopeGuard.writeProblem(
+      tx,
+      ctx,
+      kind,
+      id,
+      taken.isDelete ? MutationPayload.delete : MutationPayload.save(entity),
+      stored,
+    );
+    if (problem != null) {
+      return MutationResult(
+        clientMutationId: decision.clientMutationId,
+        outcome: MutationOutcome.rejected,
+        reasonCode: problem.$1.code,
+      );
+    }
+
     if (taken.isDelete) {
       await tx.removeEntity(type, id);
       final now = _clock();
@@ -289,18 +321,6 @@ class ConflictResolver {
       );
     }
 
-    final stored = await tx.findEntity(type, id);
-    final entity = {...taken.entity};
-    if (type == 'PilotImportLink' &&
-        conflict.reasonCode == SyncReasonCode.uniqueViolation.code) {
-      if (stored == null || stored['revision'] != conflict.entityRevision) {
-        throw SyncPayloadError(
-          'The accepted pilot link changed after this conflict was recorded.',
-        );
-      }
-      entity['id'] = id.value;
-      entity['created_at'] = stored['created_at'];
-    }
     switch (kind.shape) {
       case SyncEntityShape.revisioned:
         entity['revision'] = ((stored?['revision'] as int?) ?? 0) + 1;

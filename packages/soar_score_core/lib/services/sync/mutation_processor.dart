@@ -23,6 +23,7 @@ import 'pilot_link_collisions.dart';
 import 'sync_entity_catalog.dart';
 import 'sync_log.dart';
 import 'sync_mutation.dart';
+import 'sync_scope_guard.dart';
 import 'sync_scope_ids.dart';
 
 /// Decides one mutation: applies it, rejects it, or turns it into a conflict.
@@ -127,7 +128,14 @@ class MutationProcessor {
     }
     final stored = await tx.findEntity(m.entityType, m.entityId);
 
-    final problem = _ownershipProblem(ctx, kind, m, payload, stored);
+    final problem = await SyncScopeGuard.writeProblem(
+      tx,
+      ctx,
+      kind,
+      m.entityId,
+      payload,
+      stored,
+    );
     if (problem != null) return reject(problem.$1, problem.$2);
 
     var bootstrap = false;
@@ -397,7 +405,11 @@ class MutationProcessor {
               acceptedEntity: source,
             );
           }
-          await s.tx.markSuperseded(sourceId, s.m.entityId);
+          await s.tx.markSuperseded(
+            sourceId,
+            s.m.entityId,
+            (s.ctx.scope as ContestScopeKey).contestId,
+          );
         }
     }
     return _store_(s, entity);
@@ -672,56 +684,6 @@ class MutationProcessor {
 
   // Checks --------------------------------------------------------------
 
-  /// Why the mutation touches an entity outside the scope or the account's
-  /// reach, or null when it does not.
-  _Refusal? _ownershipProblem(
-    ExchangeContext ctx,
-    SyncEntityKind kind,
-    SyncMutation m,
-    MutationPayload payload,
-    Map<String, Object?>? stored,
-  ) {
-    final scopeId =
-        ctx.scope.contestIdOrNull?.value ??
-        ctx.scope.ownerAccountIdOrNull!.value;
-    _Refusal foreign(Object? found) => (
-      SyncReasonCode.unauthorized,
-      'The ${m.entityType} belongs to another scope: ${kind.scopeKey} is '
-          '$found, the exchange scope is $scopeId.',
-    );
-    _Refusal notOwner(Object? owner) => (
-      SyncReasonCode.unauthorized,
-      'Only the contest director owns the contest: owner_account_id is '
-          '$owner, the signed-in account is ${ctx.accountId.value}.',
-    );
-    if (!payload.isDelete) {
-      final entity = payload.entity;
-      if (entity['id'] != m.entityId.value) {
-        return (
-          SyncReasonCode.invalidPayload,
-          'The entity id does not match the mutation.',
-        );
-      }
-      if (entity[kind.scopeKey] != scopeId) {
-        return foreign(entity[kind.scopeKey]);
-      }
-      if (kind.entityType == 'Contest' &&
-          entity['owner_account_id'] != ctx.accountId.value) {
-        return notOwner(entity['owner_account_id']);
-      }
-    }
-    if (stored != null) {
-      if (stored[kind.scopeKey] != scopeId) {
-        return foreign(stored[kind.scopeKey]);
-      }
-      if (kind.entityType == 'Contest' &&
-          stored['owner_account_id'] != ctx.accountId.value) {
-        return notOwner(stored['owner_account_id']);
-      }
-    }
-    return null;
-  }
-
   Future<_Refusal?> _scoreReferenceProblem(
     SyncAcceptorTransaction tx,
     SyncMutation m,
@@ -800,7 +762,7 @@ class MutationProcessor {
 }
 
 /// Why a mutation is refused before it is looked at in detail.
-typedef _Refusal = (SyncReasonCode reason, String message);
+typedef _Refusal = ScopeRefusal;
 
 /// The state of one mutation while it is decided.
 class _Step {
