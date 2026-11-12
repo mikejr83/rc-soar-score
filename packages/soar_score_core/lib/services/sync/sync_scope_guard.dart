@@ -19,13 +19,20 @@ abstract final class SyncScopeGuard {
   /// The contest-scoped rows each entity type refers to: JSON key to the type
   /// of the row it names. A key that is absent or null is not checked.
   static const _references = <String, Map<String, String>>{
+    'TeamMembership': {
+      'team_id': 'Team',
+      'contest_participation_id': 'ContestParticipation',
+    },
+    'ContestModelLink': {'contest_participation_id': 'ContestParticipation'},
     'ScorePlaceholder': {
+      'contest_participation_id': 'ContestParticipation',
       'assignment_id': 'MatrixAssignment',
       'current_attempt_id': 'ScoreAttempt',
     },
     'ScoreAttempt': {
       'score_placeholder_id': 'ScorePlaceholder',
       'matrix_revision_id': 'MatrixRevision',
+      'config_revision_id': 'ContestConfigurationRevision',
     },
     'OfficialScore': {
       'score_placeholder_id': 'ScorePlaceholder',
@@ -37,13 +44,25 @@ abstract final class SyncScopeGuard {
     },
     'MatrixAssignment': {
       'matrix_revision_id': 'MatrixRevision',
+      'contest_participation_id': 'ContestParticipation',
+      'scheduled_round_id': 'Round',
+      'credited_round_id': 'Round',
       'source_assignment_id': 'MatrixAssignment',
+      're_flight_id': 'ReFlight',
     },
     'MatrixRevision': {'previous_revision_id': 'MatrixRevision'},
     'Round': {'matrix_revision_id': 'MatrixRevision'},
     'RoundGroup': {'round_id': 'Round'},
+    'ReFlight': {
+      'credited_round_id': 'Round',
+      'source_round_id': 'Round',
+      'scheduled_round_id': 'Round',
+      'previous_reflight_id': 'ReFlight',
+      'config_revision_id': 'ContestConfigurationRevision',
+    },
     'ReFlightParticipant': {
       're_flight_id': 'ReFlight',
+      'contest_participation_id': 'ContestParticipation',
       'assignment_id': 'MatrixAssignment',
     },
   };

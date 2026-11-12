@@ -128,12 +128,11 @@ class MutationProcessor {
     }
     final stored = await tx.findEntity(m.entityType, m.entityId);
 
-    final problem = await SyncScopeGuard.writeProblem(
-      tx,
+    final problem = SyncScopeGuard.ownershipProblem(
       ctx,
       kind,
       m.entityId,
-      payload,
+      payload.isDelete ? null : payload.entity,
       stored,
     );
     if (problem != null) return reject(problem.$1, problem.$2);
@@ -191,6 +190,20 @@ class MutationProcessor {
               : 'The contest is completed and no longer accepts changes.',
         );
       }
+    }
+
+    // Rows it refers to are only looked up once the installation is known to
+    // administer the contest and the contest accepts changes, and before
+    // anything is read from them, written or reported in a conflict.
+    if (!payload.isDelete) {
+      final foreign = await SyncScopeGuard.referenceProblem(
+        tx,
+        ctx,
+        m.entityType,
+        payload.entity,
+        supersedes: payload.supersedes,
+      );
+      if (foreign != null) return reject(foreign.$1, foreign.$2);
     }
 
     if (!payload.isDelete &&

@@ -1,3 +1,4 @@
+import 'package:soar_score_core/services/services.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:test/test.dart';
 
@@ -232,6 +233,132 @@ void _tests(Backend backend) {
         core.Id.parse(source['id']! as String),
       );
       expect(untouched!['superseded_by_assignment_id'], isNull);
+    });
+  });
+
+  group('score attempts', () {
+    late Map<String, Object?> attempt;
+    late Map<String, Object?> foreignConfig;
+
+    setUp(() async {
+      final matrix = await MatrixService(harness.clientRepository)
+          .current(contestId);
+      final firstRound = matrix.rounds.firstWhere(
+        (round) => round.ordinal == 1,
+      );
+      final slot = matrix.assignments.firstWhere(
+        (assignment) => assignment.scheduledRoundId == firstRound.id,
+      );
+      final metadata = core.MutationMetadata(
+        clientMutationId: 'entry-1',
+        authority: core.Authority.director,
+        clientTime: DateTime.utc(2026, 10, 14),
+        actorId: harness.account,
+      );
+      await ScoresService(harness.clientRepository).enterOfficialScore(
+        contestId,
+        slot.id,
+        clientMutationId: 'entry-1',
+        baseScoreRevision: 0,
+        components: const {
+          'time_flown': 540,
+          'launch_height': 200,
+          'landing': 'points_50',
+        },
+        actorId: harness.account,
+        metadata: metadata,
+      );
+      final sent = await harness.outbox(scope);
+      final mutation = sent.firstWhere((m) => m.entityType == 'ScoreAttempt');
+      attempt = (MutationPayload.parse(mutation.payload).entity);
+      foreignConfig = await first('ContestConfigurationRevision', otherId);
+    });
+
+    SyncMutation foreignAttempt() => harness.save('ScoreAttempt', {
+      ...attempt,
+      'config_revision_id': foreignConfig['id'],
+    });
+
+    test('an attempt with this contest\'s configuration is accepted', () async {
+      final sent = await harness.outbox(scope);
+
+      final out = await harness.exchange(scope, mutations: sent);
+
+      expect(
+        out.results.map((r) => r.outcome),
+        everyElement(core.MutationOutcome.accepted),
+      );
+    });
+
+    test(
+      'an attempt with another contest\'s configuration is refused',
+      () async {
+        final before = await footprint();
+
+        final out = await harness.exchange(
+          scope,
+          mutations: [foreignAttempt()],
+        );
+
+        expect(out.results.single.outcome, core.MutationOutcome.rejected);
+        expect(out.results.single.reasonCode, 'unauthorized');
+        expect(out.conflicts, isEmpty);
+        expect(await harness.server.count('score_attempts'), 0);
+        // Only the refusal itself is recorded; no sequence is assigned.
+        expect((await footprint())[3], before[3]);
+      },
+    );
+
+    test('an installation that does not administer the contest learns '
+        'nothing about the reference', () async {
+      await harness.register(harness.installationB, 'Tablet');
+
+      final out = await harness.exchange(
+        scope,
+        installation: harness.installationB,
+        mutations: [foreignAttempt()],
+      );
+
+      expect(out.results.single.outcome, core.MutationOutcome.rejected);
+      expect(out.results.single.reasonCode, 'inactive_installation');
+    });
+
+    test('a decision that takes an attempt with another contest\'s '
+        'configuration is refused', () async {
+      final mutation = foreignAttempt();
+      final conflictId = core.Id.create();
+      late core.MutationRecord anyRecord;
+      await harness.serverRepository.syncAcceptorStore.transaction((tx) async {
+        anyRecord = (await tx.acceptedAfter(scope, 0, limit: 1)).first;
+        await tx.saveConflict(
+          core.ConflictRecord(
+            id: conflictId,
+            contestId: contestId,
+            entityType: 'ScoreAttempt',
+            entityId: mutation.entityId,
+            competingMutationId: anyRecord.id,
+            reasonCode: 'stale_base',
+            createdAt: DateTime.utc(2026, 10, 14),
+            competingPayload: {
+              ...attempt,
+              'config_revision_id': foreignConfig['id'],
+            },
+          ),
+        );
+      });
+      final before = await footprint();
+
+      final result = await harness.service.resolveConflict(
+        accountId: harness.account,
+        conflictId: conflictId,
+        clientMutationId: 'decide-attempt',
+        choice: core.ConflictResolutionChoice.tookCompeting,
+      );
+
+      expect(result.outcome, core.MutationOutcome.rejected);
+      expect(result.reasonCode, 'unauthorized');
+      expect(await footprint(), before);
+      expect(await harness.server.count('score_attempts'), 0);
     });
   });
 }
