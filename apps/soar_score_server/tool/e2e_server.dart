@@ -48,6 +48,9 @@ const e2eInvitationSecret = 'e2e-invitation-secret-at-least-32-bytes-long';
 /// Matrix draws are held for a few seconds (`DelayedDrawRunner`) so a journey
 /// can see their progress and cancel one.
 ///
+/// `GET /api/v1/sync/revision` answers with the count of writes accepted so
+/// far, standing in for the hosted server's sync log (the web app's Refresh).
+///
 /// `POST /__e2e/fail-next-write` makes the next write (any method but GET,
 /// HEAD and OPTIONS) answer 503 once, so a journey can check what the app
 /// does when a save fails and then succeeds on Retry. Test-only, like the
@@ -114,6 +117,7 @@ Future<void> main(List<String> args) async {
       .addMiddleware(_cors())
       .addMiddleware(_journeyLog())
       .addMiddleware(_failNextWrite())
+      .addMiddleware(_syncRevision(localAccountId))
       .addMiddleware(_advanceClock(clock))
       .addMiddleware(_pilotSubmission(repository))
       .addHandler(
@@ -228,6 +232,31 @@ Middleware _failNextWrite() {
       );
     }
     return inner(request);
+  };
+}
+
+/// Answers `GET /api/v1/sync/revision` for the web app's Refresh, which the
+/// hosted server answers from the sync log. This server runs the installation
+/// profile, which has no sync log, so it counts the writes it has accepted
+/// instead: a number that moves exactly when the data changed, like the real
+/// one. Test-only, like the rest of this server.
+Middleware _syncRevision(Id accountId) {
+  var writes = 0;
+  return (inner) => (request) async {
+    if (request.method == 'GET' && request.url.path == 'api/v1/sync/revision') {
+      return Response.ok(
+        jsonEncode({
+          'account_id': accountId.value,
+          'contest_id': request.url.queryParameters['contest_id'],
+          'sequence': writes,
+        }),
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      );
+    }
+    final response = await inner(request);
+    final isWrite = !{'GET', 'HEAD', 'OPTIONS'}.contains(request.method);
+    if (isWrite && response.statusCode < 300) writes++;
+    return response;
   };
 }
 

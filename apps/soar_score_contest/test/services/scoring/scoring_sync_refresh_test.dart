@@ -102,6 +102,28 @@ void main() {
   });
 
   test(
+    'retrying a failed read after a sync still marks a changed row stale',
+    () async {
+      final server = ScoringServer()..seedScore(first, a);
+      final c = await _open(server);
+      c.draftOf(_row(c, 1)).setHeight('99');
+
+      server.readFailure = 503;
+      await c.refreshAfterSync();
+      expect(c.syncRefreshFailed, isTrue);
+
+      // Another operator corrected the row while the read kept failing.
+      server.seedCorrection(first, b, 'Corrected elsewhere');
+      server.readFailure = null;
+      await c.refreshAfterSync();
+
+      expect(c.syncRefreshFailed, isFalse);
+      expect(c.draftOf(_row(c, 1)).heightText, '99');
+      expect(c.saveOf(first).kind, RowSaveKind.stale);
+    },
+  );
+
+  test(
     'a save that answers while the read is out is not rolled back',
     () async {
       final server = ScoringServer();

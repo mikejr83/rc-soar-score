@@ -84,6 +84,7 @@ class ScoringController extends ChangeNotifier {
   Future<void> load() async {
     loading = true;
     loadError = null;
+    syncRefreshFailed = false;
     notifyListeners();
     try {
       final loaded = await ScoringPageData.load(client, contestId);
@@ -144,6 +145,12 @@ class ScoringController extends ChangeNotifier {
     }
   }
 
+  /// Whether [loadError] comes from a read after a sync that failed. Its
+  /// Retry must be [refreshAfterSync] again, not [refresh]: only that keeps
+  /// what was typed and marks a row another device saved meanwhile as stale,
+  /// where [refresh] would rebase the typed values onto the newer score.
+  bool syncRefreshFailed = false;
+
   bool _refreshing = false;
   bool _refreshAgain = false;
 
@@ -167,6 +174,7 @@ class ScoringController extends ChangeNotifier {
       // news and the later checks will not repeat it.
       if (!_disposed && data != null) {
         loadError = error;
+        syncRefreshFailed = true;
         notifyListeners();
       }
       return;
@@ -174,6 +182,7 @@ class ScoringController extends ChangeNotifier {
     if (loaded == null) return;
     if (_disposed || data == null) return;
     loadError = null;
+    syncRefreshFailed = false;
     final before = {for (final row in rows) row.id: row};
     var next = loaded;
     // A save in flight answers with its own copy of the slot.
@@ -688,6 +697,7 @@ class ScoringController extends ChangeNotifier {
       final loaded = await ScoringPageData.load(client, contestId);
       data = loaded;
       loadError = null;
+      syncRefreshFailed = false;
       for (final row in rows) {
         final draft = _drafts[row.id];
         if (draft == null) continue;
