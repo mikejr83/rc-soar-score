@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../../router.dart';
 import '../../../services/workspace/activity/activity_facts.dart';
 import '../workspace_scope.dart';
 import 'recent_activity_card.dart';
@@ -24,6 +26,7 @@ class RecentActivitySection extends StatelessWidget {
       contest: contest,
       activity: activity,
       onRetry: scope.reloadFacts,
+      onViewAll: () => context.go(contestActivityPath(contest.id.value)),
     );
   }
 }

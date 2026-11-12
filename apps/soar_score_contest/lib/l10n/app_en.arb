@@ -888,11 +888,7 @@
   },
   "activityViewAll": "View all",
   "@activityViewAll": {
-    "description": "Disabled button on the Recent activity card that will open the full activity log."
-  },
-  "activityViewAllUnavailable": "The full activity log is not available yet.",
-  "@activityViewAllUnavailable": {
-    "description": "Note under the Recent activity list explaining the disabled View all button."
+    "description": "Button on the Recent activity card that opens the full activity page."
   },
   "activityEmpty": "Nothing has happened yet",
   "@activityEmpty": {
@@ -909,6 +905,103 @@
   "activityRetry": "Retry",
   "@activityRetry": {
     "description": "Button on the Recent activity card that reads the events again."
+  },
+  "activityPageIntro": "Everything the contest's directors did, newest first. Times are in the contest's time zone.",
+  "@activityPageIntro": {
+    "description": "Text under the heading of the Activity page."
+  },
+  "activityFilterLabel": "Show",
+  "@activityFilterLabel": {
+    "description": "Label of the filter on the Activity page that narrows the list to one kind of event."
+  },
+  "activityFilterAll": "Everything",
+  "@activityFilterAll": {
+    "description": "Activity page filter: every kind of event."
+  },
+  "activityFilterContest": "Contest and pilots",
+  "@activityFilterContest": {
+    "description": "Activity page filter: contest actions (scoring opened or closed, lock, complete) and pilot retirements."
+  },
+  "activityFilterScores": "Score corrections",
+  "@activityFilterScores": {
+    "description": "Activity page filter: corrections of official scores."
+  },
+  "activityFilterConfiguration": "Configuration",
+  "@activityFilterConfiguration": {
+    "description": "Activity page filter: saved contest configurations."
+  },
+  "activityFilterMatrix": "Matrix",
+  "@activityFilterMatrix": {
+    "description": "Activity page filter: matrix draws."
+  },
+  "activityFilterPublication": "Publication",
+  "@activityFilterPublication": {
+    "description": "Activity page filter: published results."
+  },
+  "activityPageLoading": "Loading activity…",
+  "@activityPageLoading": {
+    "description": "Activity page text while the first events load."
+  },
+  "activityPageEmpty": "Nothing has happened yet",
+  "@activityPageEmpty": {
+    "description": "Activity page title when the contest has no events."
+  },
+  "activityPageEmptyFiltered": "No activity of this kind",
+  "@activityPageEmptyFiltered": {
+    "description": "Activity page title when the chosen filter matches no events."
+  },
+  "activityPageEmptyFilteredBody": "Choose another kind, or show everything.",
+  "@activityPageEmptyFilteredBody": {
+    "description": "Activity page text under the title when the chosen filter matches no events."
+  },
+  "activityPageShowEverything": "Show everything",
+  "@activityPageShowEverything": {
+    "description": "Button on the Activity page that clears the filter."
+  },
+  "activityPageFailed": "Activity could not be loaded",
+  "@activityPageFailed": {
+    "description": "Activity page title when reading the events failed."
+  },
+  "activityPageMoreFailed": "More activity could not be loaded.",
+  "@activityPageMoreFailed": {
+    "description": "Text under the Activity list when reading the next page of events failed."
+  },
+  "activityPageOffline": "You are offline. Showing what was loaded; Retry works once you are back online.",
+  "@activityPageOffline": {
+    "description": "Banner on the Activity page when the device has no internet connection."
+  },
+  "activityPageIncomplete": "Published results could not be loaded, so publications may be missing from this list.",
+  "@activityPageIncomplete": {
+    "description": "Banner on the Activity page when the server that publishes results did not answer; the rest of the list is shown. Retry reads the list again."
+  },
+  "activityPageLoadMore": "Load more",
+  "@activityPageLoadMore": {
+    "description": "Button under the Activity list that reads the next page of events."
+  },
+  "activityPageEnd": "That is everything",
+  "@activityPageEnd": {
+    "description": "Text under the last page of the Activity list."
+  },
+  "activityPageNotFound": "This contest was not found",
+  "@activityPageNotFound": {
+    "description": "Activity page title when the contest does not exist."
+  },
+  "activityActorYou": "You",
+  "@activityActorYou": {
+    "description": "Activity page: the acting account is the signed-in one. Shown beside the time."
+  },
+  "activityActorSystem": "System",
+  "@activityActorSystem": {
+    "description": "Activity page: the system acted, not an account. Shown beside the time."
+  },
+  "activityActorAccount": "Account {id}",
+  "@activityActorAccount": {
+    "description": "Activity page: another account acted. id is the last characters of its account id, since the audit trail holds no name. Shown beside the time.",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
   },
   "activityComplete": "{actor, select, you{You completed the contest. Participant scoring closed.} other{The contest was completed. Participant scoring closed.}}",
   "@activityComplete": {
@@ -1059,6 +1152,10 @@
   "shellNavReports": "Reports",
   "@shellNavReports": {
     "description": "Navigation rail destination, page title and breadcrumb: contest."
+  },
+  "shellNavActivity": "Activity",
+  "@shellNavActivity": {
+    "description": "Navigation rail destination, page title and breadcrumb: the contest's full activity list."
   },
   "shellNavSync": "Sync",
   "@shellNavSync": {

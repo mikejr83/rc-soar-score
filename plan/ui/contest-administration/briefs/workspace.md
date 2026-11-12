@@ -103,7 +103,7 @@ Compact reference information, quiet in the hierarchy:
 
 ### 6. Recent activity
 
-The last few audit events (who did what, when): configuration saved, matrix drawn, scoring opened, scores corrected, published. A "View all" link (the audit view is a later page; leave the link and say where it would go). Show an empty state for a new contest.
+The last few audit events (who did what, when): configuration saved, matrix drawn, scoring opened, scores corrected, published. A "View all" link to the contest's Activity page (`/contests/:id/activity`; no rail entry yet): the full paged list, newest first, with a filter by kind of event (#661). Show an empty state for a new contest.
 
 ## Lifecycle variations to show
 

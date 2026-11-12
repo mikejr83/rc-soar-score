@@ -121,6 +121,7 @@ void main() {
       contestId,
       action: AuditAction.stateTransition,
       limit: 5,
+      offset: 10,
     );
 
     expect(seen.method, 'GET');
@@ -128,10 +129,25 @@ void main() {
     expect(seen.url.queryParameters, {
       'action': 'StateTransition',
       'limit': '5',
+      'offset': '10',
     });
     expect(events.single.transition, ContestAction.lock);
     expect(events.single.actorId, event.actorId);
     expect(events.single.serverTimestamp, event.serverTimestamp);
+  });
+
+  test('accountId GETs the account route and decodes the id', () async {
+    final client = clientFor(
+      (_) => http.Response(
+        jsonEncode({'account_id': contestId.value}),
+        200,
+        headers: jsonHeaders,
+      ),
+    );
+
+    expect(await client.accountId(), contestId);
+    expect(seen.method, 'GET');
+    expect(seen.url.path, '/api/v1/account');
   });
 
   test('a 409 carries the server error code', () async {

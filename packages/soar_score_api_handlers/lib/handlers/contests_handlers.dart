@@ -18,7 +18,7 @@ final _logger = Logger('Contests');
 /// - `PUT /contests/{id}` replaces identity, schedule and location
 /// - `POST /contests/{id}/actions` applies a director action
 /// - `GET /contests/{id}/audit-events` lists the contest's audit events,
-///   newest first (`action` and `limit` narrow them)
+///   newest first (`action`, `limit` and `offset` narrow them)
 ///
 /// Writes act as the request's `Principal`: it owns what is created and is
 /// the actor recorded with each change. The handlers only translate between
@@ -148,10 +148,17 @@ void addContestRoutes(
       throw ArgumentError.value(limitText, 'limit', 'not a whole number');
     }
 
+    final offsetText = query['offset'];
+    final offset = offsetText == null ? null : int.tryParse(offsetText);
+    if (offsetText != null && offset == null) {
+      throw ArgumentError.value(offsetText, 'offset', 'not a whole number');
+    }
+
     final events = await service.auditEvents(
       contestId,
       action: action,
       limit: limit,
+      offset: offset,
     );
     return jsonResponse(<String, dynamic>{
       'audit_events': [

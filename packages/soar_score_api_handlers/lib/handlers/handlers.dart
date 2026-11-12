@@ -5,6 +5,7 @@ import 'package:soar_score_api_handlers/draw/isolate_draw_runner.dart';
 import 'package:soar_score_core/repositories/repository.dart';
 import 'package:soar_score_core/services/matrix/draw_job.dart';
 import 'package:soar_score_core/services/sync/sync_versions.dart';
+import 'package:soar_score_api_handlers/handlers/account_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/account_claim_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/account_preferences_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/configuration_handlers.dart';
@@ -58,6 +59,7 @@ createHandlers(
       (Request request) => jsonResponse(<String, Object>{'status': 'ok'}),
     );
   addAccountClaimRoutes(router, repository);
+  addAccountRoutes(router);
   addAccountPreferencesRoutes(router, repository);
   addContestRoutes(router, repository, publishingEnabled: publishingEnabled);
   addConfigurationRoutes(router, repository, recalculation: recalculation);

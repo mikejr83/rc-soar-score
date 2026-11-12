@@ -13,6 +13,7 @@ class StubAuditEventRepository implements AuditEventRepository {
     Id contestId, {
     AuditAction? action,
     int? limit,
+    int? offset,
   }) async {
     final events = [
       for (final event in _contests.audits.reversed)
@@ -20,7 +21,8 @@ class StubAuditEventRepository implements AuditEventRepository {
             (action == null || event.action == action))
           event,
     ];
-    return limit == null ? events : events.take(limit).toList();
+    final rest = events.skip(offset ?? 0);
+    return (limit == null ? rest : rest.take(limit)).toList();
   }
 
   @override

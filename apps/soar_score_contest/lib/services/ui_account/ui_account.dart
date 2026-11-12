@@ -27,3 +27,21 @@ class FixedUiAccount implements UiAccount {
   @override
   void removeListener(VoidCallback listener) {}
 }
+
+/// A [UiAccount] whose UI storage id is not the account id the audit trail
+/// records (web: the identity provider's subject versus the database account
+/// id). [auditActorId] is the latter, `null` while signed out or not known.
+abstract class AuditActorSource {
+  String? get auditActorId;
+}
+
+extension UiAccountAuditActor on UiAccount {
+  /// The id the audit trail records as this account's actor. For an account
+  /// whose storage id is that id (native), [UiAccount.id].
+  String? get auditActorId {
+    final self = this;
+    return self is AuditActorSource
+        ? (self as AuditActorSource).auditActorId
+        : id;
+  }
+}
