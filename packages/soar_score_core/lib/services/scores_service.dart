@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:logging/logging.dart';
 
 import '../enums/admin_lock.dart';
+import '../enums/audit_action.dart';
+import '../enums/audit_outcome.dart';
+import '../enums/review_request_state.dart';
 import '../enums/round_status.dart';
 import '../enums/authority.dart';
 import '../enums/discipline_type.dart';
@@ -13,8 +18,10 @@ import '../errors/sync_constraint_error.dart';
 import '../models/contest/contest.dart';
 import '../models/contest/contest_configuration_revision.dart';
 import '../models/id.dart';
+import '../models/sync/audit_event.dart';
 import '../models/matrix/matrix_assignment.dart';
 import '../models/scores/official_score.dart';
+import '../models/scores/review_request.dart';
 import '../models/scores/score_attempt.dart';
 import '../models/scores/score_placeholder.dart';
 import '../repositories/already_stored_error.dart';
@@ -36,6 +43,7 @@ import 'score_history.dart';
 
 part 'scores_service_bulk.dart';
 part 'scores_service_participant.dart';
+part 'scores_service_promotion.dart';
 
 final _logger = Logger('ScoresService');
 
