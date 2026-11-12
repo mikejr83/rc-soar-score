@@ -62,6 +62,7 @@ class RevisionAppSync implements AppSync {
   final _checkedAt = <SyncScopeKey, DateTime>{};
   SyncScopeKey? _accountScope;
   bool _syncing = false;
+  final _pending = <Id?, bool>{};
   bool _closed = false;
   bool _enabled = false;
 
@@ -126,7 +127,15 @@ class RevisionAppSync implements AppSync {
   /// Looks at each of [targets], a contest or null for the director's own
   /// data. With [force] a target moves even when its number did not.
   Future<void> _check(List<Id?> targets, {required bool force}) async {
-    if (_closed || !_isSignedIn() || _syncing) return;
+    if (_closed || !_isSignedIn()) return;
+    if (_syncing) {
+      // One request at a time, but a check asked for meanwhile (opening a
+      // contest during another check) is not dropped: it runs next.
+      for (final target in targets) {
+        _pending[target] = (_pending[target] ?? false) || force;
+      }
+      return;
+    }
     final session = _session;
     _syncing = true;
     _emit();
@@ -140,7 +149,21 @@ class RevisionAppSync implements AppSync {
         _syncing = false;
         _poller.synced();
         _emit();
+        _runPending();
       }
+    }
+  }
+
+  void _runPending() {
+    if (_pending.isEmpty) return;
+    final next = Map.of(_pending);
+    _pending.clear();
+    for (final force in {false, true}) {
+      final targets = [
+        for (final e in next.entries)
+          if (e.value == force) e.key,
+      ];
+      if (targets.isNotEmpty) unawaited(_check(targets, force: force));
     }
   }
 
@@ -166,27 +189,30 @@ class RevisionAppSync implements AppSync {
       return _failed(contestId, SyncProblem.serverError, session);
     }
     if (session != _session) return;
-    // The director's own data is named by the account the service answered
-    // for; the first answer tells the screens which scope that is.
-    final SyncScopeKey key = contestId == null
-        ? DirectorScopeKey(revision.accountId)
-        : ContestScopeKey(contestId);
-    if (contestId == null) _accountScope = key;
+    final key = _scopeOf(contestId);
+    if (key == null) return;
     final before = _sequences[key];
     _sequences[key] = revision.sequence;
     _checkedAt[key] = _now();
-    final moved = force || (before != null && before != revision.sequence);
+    // The first look at a scope reloads too: the page may have loaded before
+    // it, and a write in between would otherwise become the baseline unseen.
+    final moved = force || before == null || before != revision.sequence;
     _scopes[key] = _summary(key, bump: moved, problem: null);
   }
 
   void _failed(Id? contestId, SyncProblem problem, int session) {
     if (session != _session) return;
-    final SyncScopeKey? key = contestId == null
-        ? _accountScope
-        : ContestScopeKey(contestId);
+    final key = _scopeOf(contestId);
     if (key == null) return;
     _scopes[key] = _summary(key, bump: false, problem: problem);
   }
+
+  /// The scope of [contestId], or of the director's own data when null. The
+  /// latter is a label that exists from sign-in on, so the Refresh entry is
+  /// there before the first check and stays to retry a failed one; the
+  /// service is never sent it.
+  SyncScopeKey? _scopeOf(Id? contestId) =>
+      contestId == null ? _accountScope : ContestScopeKey(contestId);
 
   SyncScopeSummary _summary(
     SyncScopeKey key, {
@@ -209,12 +235,15 @@ class RevisionAppSync implements AppSync {
     _session++;
     _poller.enabled = signedIn;
     if (signedIn) {
+      _accountScope = DirectorScopeKey(Id.create());
+      _emit();
       unawaited(_check(const [null], force: false));
     } else {
       _scopes = {};
       _sequences.clear();
       _checkedAt.clear();
       _accountScope = null;
+      _pending.clear();
       _syncing = false;
       _emit();
     }

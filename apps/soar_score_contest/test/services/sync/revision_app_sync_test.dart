@@ -43,7 +43,7 @@ void main() {
   late _SignedIn signedIn;
   late RevisionAppSync sync;
   final contestScope = ContestScopeKey(_contest);
-  final accountScope = DirectorScopeKey(_account);
+  SyncScopeKey accountScope() => sync.accountScope!;
 
   void withSync(
     void Function(FakeAsync async) body, {
@@ -74,14 +74,15 @@ void main() {
     });
   });
 
-  test('signing in looks at the director\'s data and names its scope', () {
+  test('signing in looks at the director\'s data and offers its scope', () {
     withSync((async) {
       async.flushMicrotasks();
 
       expect(service.calls, [null]);
-      expect(sync.accountScope, accountScope);
-      expect(sync.state.of(accountScope)?.lastSyncedAt, isNotNull);
-      expect(revisionOf(accountScope), 0);
+      expect(sync.accountScope, isNotNull);
+      expect(sync.state.of(accountScope())?.lastSyncedAt, isNotNull);
+      // The first look reloads pages that loaded before it.
+      expect(revisionOf(accountScope()), 1);
     });
   });
 
@@ -128,17 +129,17 @@ void main() {
       async.flushMicrotasks();
       sync.focusChanged(_contest.value);
       async.flushMicrotasks();
-      expect(revisionOf(contestScope), 0);
+      expect(revisionOf(contestScope), 1);
 
       async.elapse(const Duration(minutes: 5));
-      expect(revisionOf(contestScope), 0);
+      expect(revisionOf(contestScope), 1);
 
       service.sequences[_contest] = 3;
       async.elapse(const Duration(minutes: 5));
-      expect(revisionOf(contestScope), 1);
+      expect(revisionOf(contestScope), 2);
 
       async.elapse(const Duration(minutes: 5));
-      expect(revisionOf(contestScope), 1);
+      expect(revisionOf(contestScope), 2);
     });
   });
 
@@ -151,7 +152,7 @@ void main() {
       unawaited(sync.syncNow(contestScope));
       async.flushMicrotasks();
 
-      expect(revisionOf(contestScope), 1);
+      expect(revisionOf(contestScope), 2);
     });
   });
 
@@ -159,7 +160,7 @@ void main() {
     withSync((async) {
       async.flushMicrotasks();
       async.elapse(const Duration(minutes: 8));
-      unawaited(sync.syncNow(accountScope));
+      unawaited(sync.syncNow(accountScope()));
       async.flushMicrotasks();
       service.calls.clear();
 
@@ -225,12 +226,12 @@ void main() {
         requestUri: Uri.parse('http://x'),
       );
 
-      unawaited(sync.syncNow(accountScope));
+      unawaited(sync.syncNow(accountScope()));
       async.flushMicrotasks();
 
-      final summary = sync.state.of(accountScope)!;
+      final summary = sync.state.of(accountScope())!;
       expect(summary.problem, SyncProblem.offline);
-      expect(summary.dataRevision, 0);
+      expect(summary.dataRevision, 1);
       expect(summary.lastSyncedAt, isNotNull);
     });
   });
@@ -244,9 +245,9 @@ void main() {
         body: '',
         requestUri: Uri.parse('http://x'),
       );
-      unawaited(sync.syncNow(accountScope));
+      unawaited(sync.syncNow(accountScope()));
       async.flushMicrotasks();
-      expect(sync.state.of(accountScope)!.problem, SyncProblem.signInExpired);
+      expect(sync.state.of(accountScope())!.problem, SyncProblem.signInExpired);
 
       service.failure = ApiHttpError(
         'boom',
@@ -254,9 +255,58 @@ void main() {
         body: '',
         requestUri: Uri.parse('http://x'),
       );
-      unawaited(sync.syncNow(accountScope));
+      unawaited(sync.syncNow(accountScope()));
       async.flushMicrotasks();
-      expect(sync.state.of(accountScope)!.problem, SyncProblem.serverError);
+      expect(sync.state.of(accountScope())!.problem, SyncProblem.serverError);
+    });
+  });
+
+  test(
+    'the Refresh scope exists before the first check and after it failed',
+    () {
+      withSync(startSignedIn: false, (async) {
+        service.failure = ApiNetworkError(
+          'down',
+          requestUri: Uri.parse('http://x'),
+        );
+
+        signedIn.set(true);
+        expect(sync.accountScope, isNotNull);
+        async.flushMicrotasks();
+
+        expect(sync.state.of(accountScope())!.problem, SyncProblem.offline);
+
+        service.failure = null;
+        unawaited(sync.syncNow(accountScope()));
+        async.flushMicrotasks();
+
+        expect(sync.state.of(accountScope())!.problem, isNull);
+        expect(revisionOf(accountScope()), 1);
+      });
+    },
+  );
+
+  test('opening a contest during another check still checks it', () {
+    withSync(startSignedIn: false, (async) {
+      signedIn.set(true);
+      // The director's check is still under way.
+      sync.focusChanged(_contest.value);
+      async.flushMicrotasks();
+
+      expect(service.calls, [null, _contest]);
+      expect(revisionOf(contestScope), 1);
+    });
+  });
+
+  test('a write between loading a page and its first check is not lost', () {
+    withSync((async) {
+      async.flushMicrotasks();
+      service.sequences[_contest] = 5;
+
+      sync.focusChanged(_contest.value);
+      async.flushMicrotasks();
+
+      expect(revisionOf(contestScope), 1);
     });
   });
 
