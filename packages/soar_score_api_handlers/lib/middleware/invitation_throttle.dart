@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
-import 'package:soar_score_core/soar_score_core.dart' show RequestThrottleStore;
+import 'package:soar_score_core/soar_score_core.dart'
+    show RequestThrottleStore, ThrottleCount;
 
 import 'failure_rate_limiter.dart';
 
@@ -72,19 +73,28 @@ class InvitationThrottle {
     final caller = _caller(address);
     final shared = store;
     if (shared != null) {
+      final ThrottleCount attempt;
+      final ThrottleCount? failed;
       try {
-        final attempt = await shared.hit(_attempts, caller, window: window);
-        final failed = await shared.read(_failures, caller, window: window);
-        await _purge(shared);
-        if (attempt.count > maxAttempts) return _remaining(attempt.windowStart);
-        if (failed != null && failed.count >= maxFailures) {
-          return _remaining(failed.windowStart);
-        }
-        return null;
+        attempt = await shared.hit(_attempts, caller, window: window);
+        failed = await shared.read(_failures, caller, window: window);
       } on Object catch (error) {
         _storeFailed(error);
+        return _admitInMemory(caller);
       }
+      // Cleanup never changes the decision the shared counters gave.
+      await _purge(shared);
+      final waits = [
+        if (attempt.count > maxAttempts) _remaining(attempt.windowStart),
+        if (failed != null && failed.count >= maxFailures)
+          _remaining(failed.windowStart),
+      ];
+      return waits.isEmpty ? null : waits.reduce((a, b) => a > b ? a : b);
     }
+    return _admitInMemory(caller);
+  }
+
+  Duration? _admitInMemory(String caller) {
     _memoryAttempts.recordFailure(caller);
     final waits = [
       _memoryAttempts.blockedFor(caller),
@@ -119,7 +129,12 @@ class InvitationThrottle {
     final last = _lastPurge;
     if (last != null && now.difference(last) < window) return;
     _lastPurge = now;
-    await shared.purgeBefore(now.subtract(window));
+    try {
+      await shared.purgeBefore(now.subtract(window));
+    } on Object catch (error) {
+      // Rows only linger until the next purge; admission is not affected.
+      _storeFailed(error);
+    }
   }
 
   void _storeFailed(Object error) {

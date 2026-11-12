@@ -111,6 +111,17 @@ Which address is counted:
   # and in Vercel: TRUSTED_PROXY_SECRET (Production), the same value
   ```
 
+To check it after a deploy, send junk links from one network: the answer is
+404 `invalid_invitation` until the 20th failure, then 429 `rate_limited` with
+`Retry-After`, while another network still gets 404. Do it on both paths. The
+site proxy strips one `/api` before forwarding, and the server mounts the route
+under `/api/v1`, so the site URL has `/api` twice:
+
+- direct: `POST https://api.rcsoarscore.com/api/v1/self-scoring/invitations/resolve`
+- via the site: `POST https://rcsoarscore.com/api/api/v1/self-scoring/invitations/resolve`
+
+with the body `{"credential": "nope"}`.
+
 Changing the limits is a code change (`InvitationThrottle`).
 
 To check that it is in effect, post any junk link; the answer is 404

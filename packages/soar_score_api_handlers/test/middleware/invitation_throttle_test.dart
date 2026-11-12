@@ -81,6 +81,39 @@ void main() {
     });
   });
 
+  test('a failed purge does not change the shared decision', () async {
+    final store = MemoryThrottleStore(clock: clock);
+    final first = make(store, attempts: 2);
+    expect(await first.admit('1.1.1.1'), isNull);
+    expect(await first.admit('1.1.1.1'), isNull);
+    store.purgeFails = true;
+    // A fresh instance has no local counts: only the shared ones can refuse.
+    final fresh = make(store, attempts: 2);
+    expect(await fresh.admit('1.1.1.1'), const Duration(minutes: 10));
+    expect(await fresh.admit('2.2.2.2'), isNull);
+  });
+
+  for (final shared in [true, false]) {
+    test('both limits exceeded: Retry-After covers the later expiry '
+        '(${shared ? 'shared store' : 'in memory'})', () async {
+      final throttle = make(
+        shared ? MemoryThrottleStore(clock: clock) : null,
+        attempts: 4,
+        failures: 3,
+      );
+      expect(await throttle.admit('1.1.1.1'), isNull); // attempts start 12:00
+      now = now.add(const Duration(minutes: 5)); // failures start 12:05
+      for (var i = 0; i < 3; i++) {
+        await throttle.recordFailure('1.1.1.1');
+      }
+      expect(await throttle.admit('1.1.1.1'), isNotNull); // failure block
+      expect(await throttle.admit('1.1.1.1'), isNotNull); // 4th attempt
+      now = now.add(const Duration(minutes: 1)); // 12:06
+      // Attempts expire at 12:10 (4 min), failures at 12:15 (9 min).
+      expect(await throttle.admit('1.1.1.1'), const Duration(minutes: 9));
+    });
+  }
+
   test('without a store it counts in memory', () async {
     final throttle = make(null, attempts: 2);
     expect(await throttle.admit('1.1.1.1'), isNull);

@@ -8,6 +8,9 @@ class MemoryThrottleStore implements core.RequestThrottleStore {
   final DateTime Function() clock;
   final _rows = <String, ({DateTime start, int count})>{};
   bool failing = false;
+
+  /// Only the cleanup fails; counting still works.
+  bool purgeFails = false;
   int purges = 0;
 
   int get rows => _rows.length;
@@ -50,6 +53,7 @@ class MemoryThrottleStore implements core.RequestThrottleStore {
 
   @override
   Future<void> purgeBefore(DateTime cutoff) async {
+    if (purgeFails) throw StateError('purge down (secret detail)');
     _check();
     purges++;
     _rows.removeWhere((_, row) => row.start.isBefore(cutoff));

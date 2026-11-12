@@ -984,6 +984,30 @@ void _tests(SliceBackend backend) {
       );
     });
 
+    test('successful redemptions count against the attempt limit', () async {
+      await configureAndAddPilots();
+      final issued = await issue();
+      final capped = createServerHandler(
+        api.database,
+        authMiddleware: fixedPrincipal(Principal(accountId: api.director)),
+        invitationSecret: _secret,
+        invitationThrottle: InvitationThrottle(
+          store: RequestThrottleStore(api.database),
+          maxAttempts: 3,
+        ),
+      );
+      final fly = {'fly-client-ip': '203.0.113.12'};
+      final body = jsonEncode({'credential': issued.credential});
+      for (var i = 0; i < 3; i++) {
+        expect(await open(capped, fly, body: body), 200, reason: 'redeem $i');
+      }
+      expect(await open(capped, fly, body: body), 429);
+      expect(
+        await open(capped, {'fly-client-ip': '203.0.113.13'}, body: body),
+        200,
+      );
+    });
+
     test('malformed bodies are counted too', () async {
       final fly = {'fly-client-ip': '203.0.113.9'};
       for (var i = 0; i < 20; i++) {

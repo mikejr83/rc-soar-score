@@ -22,7 +22,7 @@ const String serverVersion = '0.1.0';
 ///
 /// Opening an invitation link is throttled per caller address with counters in
 /// [database] (`request_throttles`), so every machine counts together and a
-/// restart forgets nothing.
+/// restart forgets nothing. [invitationThrottle] replaces that (tests).
 Handler createServerHandler(
   SoarScoreDatabase database, {
   required AuthMiddleware authMiddleware,
@@ -30,6 +30,7 @@ Handler createServerHandler(
   String? invitationSecret,
   String? selfScoringBaseUrl,
   String? trustedProxySecret,
+  InvitationThrottle? invitationThrottle,
 }) {
   final repository = Repository(database);
   return buildApiHandler(
@@ -45,10 +46,11 @@ Handler createServerHandler(
     trustedProxySecret: trustedProxySecret,
     invitationThrottle: invitationSecret == null
         ? null
-        : InvitationThrottle(
-            store: RequestThrottleStore(database),
-            keySecret: invitationSecret,
-          ),
+        : invitationThrottle ??
+              InvitationThrottle(
+                store: RequestThrottleStore(database),
+                keySecret: invitationSecret,
+              ),
     invitations: invitationSecret == null
         ? null
         : InvitationService(

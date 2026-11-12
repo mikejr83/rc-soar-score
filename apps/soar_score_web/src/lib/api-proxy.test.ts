@@ -70,14 +70,24 @@ describe('apiRequestHeaders', () => {
 });
 
 describe('apiTarget', () => {
-  it('drops the /api prefix and keeps the query', () => {
+  it('drops one /api prefix and keeps the query', () => {
+    expect(
+      apiTarget('/api/public/publications', '?a=1', 'https://api.rcsoarscore.com/'),
+    ).toBe('https://api.rcsoarscore.com/public/publications?a=1');
+  });
+
+  it('reaches the route the API mounts for opening a link', () => {
+    // The server mounts it at /api/v1/self-scoring, so through the site it is
+    // /api/api/v1/self-scoring/invitations/resolve.
     expect(
       apiTarget(
-        '/api/v1/self-scoring/invitations/resolve',
-        '?a=1',
-        'https://api.rcsoarscore.com/',
+        '/api/api/v1/self-scoring/invitations/resolve',
+        '',
+        'https://api.rcsoarscore.com',
       ),
-    ).toBe('https://api.rcsoarscore.com/v1/self-scoring/invitations/resolve?a=1');
+    ).toBe(
+      'https://api.rcsoarscore.com/api/v1/self-scoring/invitations/resolve',
+    );
   });
 
   it('defaults to the local server', () => {
