@@ -230,14 +230,17 @@ The `/public` reads are the only API responses meant to be cached (#906):
 | Any `/public` error (404 unknown, 403 `contest_not_visible`) | `no-store`           |
 | `/api/v1/*` (signed-in data)                                 | `no-store`           |
 
-A new publication, a delisting, or a change to hidden results therefore
-reaches every reader within **30 seconds** and no later. The site's Refresh
+For the next API read, a new publication, a delisting, or a change to hidden
+results shows within **30 seconds** and no later. A results page that is
+already open does not read again until it is reloaded or another contest is
+opened (`ContestProvider` fetches once per contest id), so an open page can
+keep showing what it loaded until the reader refreshes. The site's Refresh
 button bypasses the browser cache for the listing. Errors are never cached, so
 a contest that becomes visible shows at once.
 
 The Next.js `/api` rewrite on the public site passes these headers through
-unchanged (its config sets none of its own; `proxy-config.test.ts` guards
-that). Vercel's CDN ignores `max-age` and only caches on `s-maxage`, so the
+unchanged (`proxy-config.test.ts` runs the real Next.js server against a stub
+upstream and checks status, headers and body). Vercel's CDN ignores `max-age` and only caches on `s-maxage`, so the
 browser is the only cache between a reader and the API.
 
 An unknown id (404) and an id that exists but is not shown (403
