@@ -15,8 +15,9 @@ The full checklist (versions, release notes, rollback, hotfixes) is in
    (for example `v0.1.0`) and publish it. Publishing a draft counts; saving a
    draft does not.
 3. The Deploy workflow runs, in this order:
-   1. **API:** Fly builds the image from the tag's Dockerfile and deploys one
-      machine, then `scripts/hosted-smoke.sh` checks `/health` and that the
+   1. **API:** Fly builds the image from the tag's Dockerfile and updates the
+      app's machines (one always on, plus stopped burst machines), then
+      `scripts/hosted-smoke.sh` checks `/health` and that the
       API refuses an unauthenticated request. Later jobs wait for this.
    2. **Public site:** `vercel pull`, `vercel build --prod`, `vercel deploy
 --prebuilt --prod`.

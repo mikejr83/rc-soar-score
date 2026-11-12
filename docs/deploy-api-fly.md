@@ -123,8 +123,7 @@ number of arguments are logged. Argument values, which can hold invitation
 links, names and e-mail addresses, are never logged. The time is per statement
 and can include waiting behind another statement on the single connection; time a
 transaction waits to start is not measured. Remove the variable when done:
-every statement adds a log line, which is noisy and costs a little CPU on a
-256 MB machine.
+every statement adds a log line, which is noisy and costs a little CPU.
 
 ### Not read by the API
 
@@ -154,8 +153,9 @@ Check current prices on the Fly.io and Neon pricing pages first.
 A published GitHub release deploys the API through
 `.github/workflows/deploy.yml`. Fly builds the image from
 `apps/soar_score_server/Dockerfile` on its remote builder (there is no image in
-GitHub Container Registry) and runs a single machine. To deploy by hand, from a
-checkout of the tag:
+GitHub Container Registry) and updates the app's machines (one always-on
+machine plus the stopped burst machines, see "Machines and bursts"). To deploy
+by hand, from a checkout of the tag:
 
 ```sh
 fly deploy --remote-only --ha=false \
@@ -180,12 +180,45 @@ and installations never pull them; redeploying does not repair them. Have the
 pilot resubmit, or delete the stuck entry and enter it again. There is no
 backfill.
 
-## Idle behaviour
+## Machines and bursts
 
-During alpha the machine stops when idle and starts on the next request, so
-the first request after a quiet spell takes a few seconds (Neon's own wake-up
-adds a little more). For the MVP release set `min_machines_running = 1` and
-`auto_stop_machines = "off"` in `fly.toml`.
+The app runs one always-on machine (`shared-cpu-1x`, 512 MB, iad) and two more
+of the same size that sit stopped until they are needed. `fly.toml` sets
+`min_machines_running = 1`, `auto_start_machines = true`,
+`auto_stop_machines = "stop"` and a concurrency soft limit of 10 requests (hard
+limit 25). Fly's proxy starts a stopped machine when the running ones pass the
+soft limit and stops it again when load falls, so no schedule is needed for a
+contest weekend. A start takes a few seconds, which the always-on machine
+covers. A stopped machine costs only its small root disk; a running one is
+billed by the second.
+
+Creating machines is an account change, so it is done by hand, once, after the
+first deploy with this configuration:
+
+```sh
+fly machine list --app rc-soar-score-api          # note the existing machine id
+fly machine clone <machine-id> --app rc-soar-score-api
+fly machine clone <machine-id> --app rc-soar-score-api
+fly machine stop <new-machine-id> --app rc-soar-score-api   # for each clone
+```
+
+(`fly machine clone` starts the new machine; stop each clone so it only runs
+when Fly wakes it.) Clones inherit the image, size and settings, and a later
+deploy updates them with the first machine. `--ha=false` only stops a first
+deploy from creating spare machines; it does not remove existing ones. To
+remove a burst machine: `fly machine destroy <machine-id> --force`.
+
+Things to know:
+
+- Every machine opens its own database connection to Neon, and the
+  per-contest advisory lock keeps simultaneous writes safe across machines.
+- Extra machines add CPU, not database speed: they share one Neon database
+  and each runs statements one at a time. Region and batching still matter
+  most (issue #846, epic #838).
+- An in-memory cache, if added later, would be per machine.
+- Neon's free plan suspends the database after 5 minutes idle; the first
+  request after that waits for it to wake. Before a contest, load any API
+  page a few minutes ahead.
 
 ## Rollback
 

@@ -70,7 +70,8 @@ jobs:
 
       - name: Deploy
         # Fly builds the image from the Dockerfile (remote builder) and runs
-        # exactly one machine; the Dockerfile build context is the repo root.
+        # updates the app's existing machines (--ha=false only stops a first deploy
+        # from creating spares); the Dockerfile build context is the repo root.
         run: >
           flyctl deploy --remote-only --ha=false
           --config apps/soar_score_server/fly.toml
