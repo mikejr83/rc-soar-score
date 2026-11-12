@@ -46,7 +46,7 @@ void main() {
       rig.store.mutations.every((m) => m.outcome == MutationOutcome.accepted),
       isTrue,
     );
-    expect(rig.gateway.exchanges.every((r) => !r.firstUpload), isTrue);
+    expect(rig.gateway.exchanges.every((r) => r.firstUpload == null), isTrue);
   });
 
   test('the byte limit counts the whole request, in bytes', () async {
@@ -62,7 +62,7 @@ void main() {
               installationId: installationId,
               scope: SyncScopeDto.contest(contestId),
               lastAcknowledgedSequence: 0,
-              firstUpload: true,
+              firstUpload: 'open',
             ).toJson(),
           ),
         )
@@ -179,6 +179,71 @@ void main() {
     expect(resent, ['m-3', 'm-4']);
   });
 
+  test('a refusal from an earlier sync still blocks its dependent', () async {
+    final rig = Rig();
+    final first = mutation(1);
+    final refused = MutationRecord.fromJson({
+      ...first.toJson(),
+      'outcome': 'Rejected',
+      'reason_code': 'stale_base',
+    });
+    rig.store.mutations
+      ..add(refused)
+      ..add(mutation(2, dependsOn: first.id))
+      ..add(mutation(3));
+    rig.gateway.onExchange = acceptAll();
+
+    await rig.engine.syncScope(scope);
+    await rig.engine.syncScope(scope);
+
+    final sent = [for (final r in rig.gateway.exchanges) ...r.mutations]
+        .map((m) => m.clientMutationId);
+    expect(sent, ['m-3']);
+    expect(
+      rig.store.mutations
+          .firstWhere((m) => m.clientMutationId == 'm-2')
+          .outcome,
+      MutationOutcome.pending,
+    );
+  });
+
+  test('a mutation that fits only without the margin is still sent', () async {
+    final payload = {'blob': 'x' * 2000};
+    final probe = Rig();
+    final solo = utf8
+        .encode(
+          jsonEncode(
+            SyncExchangeRequest(
+              protocolVersion: 1,
+              schemaVersion: 1,
+              installationId: installationId,
+              scope: SyncScopeDto.contest(contestId),
+              lastAcknowledgedSequence: 0,
+              mutations: [
+                SyncMutationDto.fromJson(
+                  mutationToDtoForTest(mutation(1, payload: payload)),
+                ),
+              ],
+              firstUpload: 'open',
+            ).toJson(),
+          ),
+        )
+        .length;
+    probe.engine.dispose();
+    // Fits the limit exactly, but not with the batching margin.
+    final rig = Rig(maxBytes: solo + 10);
+    rig.store.mutations.add(mutation(1, payload: payload));
+    rig.gateway.onExchange = acceptAll();
+
+    await rig.engine.syncScope(scope);
+
+    expect(rig.store.mutations.single.outcome, MutationOutcome.accepted);
+    expect(
+      rig.gateway.exchanges.expand((r) => r.mutations).single.clientMutationId,
+      'm-1',
+    );
+  });
+
   group('first upload of a contest', () {
     test('every batch says so and the creation is decided last', () async {
       final rig = Rig(maxMutations: 2);
@@ -193,14 +258,85 @@ void main() {
 
       final pushes = rig.gateway.exchanges.where((r) => r.mutations.isNotEmpty);
       expect(pushes.map((r) => r.mutations.length), [2, 2]);
-      expect(pushes.every((r) => r.firstUpload), isTrue);
+      expect(pushes.every((r) => r.firstUpload == 'open'), isTrue);
       expect(
         rig.store.mutations.every((m) => m.outcome == MutationOutcome.accepted),
         isTrue,
       );
-      // The creation's own outcome came after every other one.
+      // The creation's own outcome came after every other one, and the
+      // service was told the upload is finished before that.
       final outcomes = rig.log.where((e) => e.startsWith('outcome:')).length;
       expect(outcomes, 4);
+      final finish = rig.gateway.exchanges.where(
+        (r) => r.firstUpload == 'finish',
+      );
+      expect(finish, hasLength(1));
+      expect(finish.single.mutations, isEmpty);
+      expect(rig.gateway.exchanges.last.firstUpload, 'finish');
+    });
+
+    test('an upload with a mutation still pending is not finished', () async {
+      final rig = Rig(maxMutations: 2);
+      final first = mutation(1);
+      rig.store.mutations
+        ..add(creation())
+        ..add(first)
+        ..add(mutation(2, dependsOn: first.id));
+      rig.gateway.onExchange = (request) async => FakeGateway.response(
+        results: [
+          for (final m in request.mutations)
+            m.clientMutationId == 'm-1'
+                ? SyncMutationResult(
+                    clientMutationId: 'm-1',
+                    outcome: MutationOutcome.skipped,
+                    reasonCode: 'dependency_failed',
+                  )
+                : accepted(m.clientMutationId, 3),
+        ],
+      );
+
+      await rig.engine.syncScope(scope);
+
+      expect(
+        rig.gateway.exchanges.any((r) => r.firstUpload == 'finish'),
+        isFalse,
+      );
+      expect(
+        rig.store.mutations
+            .firstWhere((m) => m.clientMutationId == 'create')
+            .outcome,
+        MutationOutcome.pending,
+      );
+    });
+
+    test('a refused mutation does not keep the upload open', () async {
+      final rig = Rig(maxMutations: 2);
+      rig.store.mutations
+        ..add(creation())
+        ..add(mutation(1))
+        ..add(mutation(2));
+      rig.gateway.onExchange = (request) async => FakeGateway.response(
+        results: [
+          for (final m in request.mutations)
+            m.clientMutationId == 'm-1'
+                ? SyncMutationResult(
+                    clientMutationId: 'm-1',
+                    outcome: MutationOutcome.rejected,
+                    reasonCode: 'invalid_payload',
+                  )
+                : accepted(m.clientMutationId, 3),
+        ],
+      );
+
+      await rig.engine.syncScope(scope);
+
+      expect(rig.gateway.exchanges.last.firstUpload, 'finish');
+      expect(
+        rig.store.mutations
+            .firstWhere((m) => m.clientMutationId == 'create')
+            .outcome,
+        MutationOutcome.accepted,
+      );
     });
 
     test(
@@ -240,7 +376,7 @@ void main() {
           (r) => r.mutations.any((m) => m.clientMutationId == 'create'),
         );
         expect(withCreation, hasLength(2));
-        expect(sentPushes.every((r) => r.firstUpload), isTrue);
+        expect(sentPushes.every((r) => r.firstUpload == 'open'), isTrue);
         expect(
           rig.store.mutations.every(
             (m) => m.outcome == MutationOutcome.accepted,
@@ -257,7 +393,7 @@ void main() {
 
       await rig.engine.syncScope(scope);
 
-      expect(rig.gateway.exchanges.last.firstUpload, isFalse);
+      expect(rig.gateway.exchanges.last.firstUpload, isNull);
     });
   });
 }

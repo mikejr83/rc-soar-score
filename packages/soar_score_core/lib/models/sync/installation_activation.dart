@@ -25,6 +25,7 @@ class InstallationActivation extends Equatable implements BackendOnly {
     required this.kind,
     required this.activatedAt,
     this.endedAt,
+    this.uploadOpen = false,
   }) {
     if (endedAt != null && endedAt!.isBefore(activatedAt)) {
       throw ArgumentError.value(
@@ -55,6 +56,12 @@ class InstallationActivation extends Equatable implements BackendOnly {
   /// When authority ended; null while this is the open row.
   final DateTime? endedAt;
 
+  /// True while the contest's first upload is still being sent in several
+  /// exchanges: the installation may then say `first_upload` and keep the
+  /// contest's history exempt from the lock and completed rules. Closed
+  /// explicitly when the upload finishes.
+  final bool uploadOpen;
+
   bool get isOpen => endedAt == null;
 
   /// A copy with authority ended at [at].
@@ -71,6 +78,18 @@ class InstallationActivation extends Equatable implements BackendOnly {
     );
   }
 
+  /// A copy with [uploadOpen] set.
+  InstallationActivation withUploadOpen(bool open) => InstallationActivation(
+    id: id,
+    contestId: contestId,
+    installationId: installationId,
+    activatedBy: activatedBy,
+    kind: kind,
+    activatedAt: activatedAt,
+    endedAt: endedAt,
+    uploadOpen: open,
+  );
+
   Map<String, Object?> toJson() => _$InstallationActivationToJson(this);
 
   @override
@@ -82,5 +101,6 @@ class InstallationActivation extends Equatable implements BackendOnly {
     kind,
     activatedAt,
     endedAt,
+    uploadOpen,
   ];
 }

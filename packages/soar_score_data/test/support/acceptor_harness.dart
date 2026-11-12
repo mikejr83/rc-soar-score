@@ -147,7 +147,7 @@ class AcceptorHarness {
     int? schemaVersion,
     int? protocolVersion,
     core.Id? as,
-    bool firstUpload = false,
+    FirstUploadPhase? firstUpload,
   }) => service.exchange(
     accountId: as ?? account,
     input: SyncExchangeInput(

@@ -23,6 +23,7 @@ InstallationActivation _$InstallationActivationFromJson(
     json['ended_at'],
     const UtcTimestampConverter().fromJson,
   ),
+  uploadOpen: json['upload_open'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$InstallationActivationToJson(
@@ -38,6 +39,7 @@ Map<String, dynamic> _$InstallationActivationToJson(
     instance.endedAt,
     const UtcTimestampConverter().toJson,
   ),
+  'upload_open': instance.uploadOpen,
 };
 
 const _$ActivationKindEnumMap = {

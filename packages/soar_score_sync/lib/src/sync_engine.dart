@@ -15,6 +15,9 @@ import 'sync_scope_state.dart';
 import 'sync_skip_reason.dart';
 import 'sync_state.dart';
 
+const _openUpload = 'open';
+const _finishUpload = 'finish';
+
 /// Keeps the local store in step with the service, one scope at a time.
 ///
 /// A sync pulls first and only then pushes the outbox. Changes are stored
@@ -211,13 +214,27 @@ class SyncEngine {
     final envelope = utf8
         .encode(
           jsonEncode(
-            _request(scope, cursor, const [], firstUpload: true).toJson(),
+            _request(
+              scope,
+              cursor,
+              const [],
+              firstUpload: _openUpload,
+            ).toJson(),
           ),
         )
         .length;
     final split = splitOutbox(
       pending,
       envelopeBytes: envelope,
+      soloBytes: (m) => utf8
+          .encode(
+            jsonEncode(
+              _request(scope, cursor, [
+                mutationToDto(m),
+              ], firstUpload: _openUpload).toJson(),
+            ),
+          )
+          .length,
       maxBytes: _config.maxExchangeBytes,
       maxMutations: _config.maxExchangeMutations,
     );
@@ -232,7 +249,12 @@ class SyncEngine {
     }
 
     // Mutations not accepted, by id: whatever depends on one waits.
-    final blocked = <Id>{for (final m in split.oversized) m.id};
+    // A refused mutation leaves the pending list, so earlier passes' refusals
+    // come from the store: a dependent of one must not be sent either.
+    final blocked = <Id>{
+      ...await _store.refusedMutationIds(scope),
+      for (final m in split.oversized) m.id,
+    };
     SyncMutationResult? heldAccepted;
     var sequence = cursor;
     var left = 0;
@@ -251,17 +273,23 @@ class SyncEngine {
         scope,
         sequence,
         sendable.map(mutationToDto).toList(),
-        firstUpload: firstUpload,
+        firstUpload: firstUpload ? _openUpload : null,
       );
       final accepted = <String>{
         for (final r in response.results)
           if (r.outcome == MutationOutcome.accepted) r.clientMutationId,
       };
+      final refused = <String>{
+        for (final r in response.results)
+          if (r.outcome == MutationOutcome.rejected ||
+              r.outcome == MutationOutcome.conflict)
+            r.clientMutationId,
+      };
       for (final m in sendable) {
-        if (!accepted.contains(m.clientMutationId)) {
-          blocked.add(m.id);
-          left++;
-        }
+        if (accepted.contains(m.clientMutationId)) continue;
+        blocked.add(m.id);
+        // Still pending afterwards: skipped or not answered.
+        if (!refused.contains(m.clientMutationId)) left++;
       }
       final held = heldCreation != null && sendable.contains(heldCreation);
       if (held) {
@@ -289,6 +317,16 @@ class SyncEngine {
       sequence = (await _pull(scope, response, from: sequence)).cursor;
     }
     if (heldCreation != null && heldAccepted != null && left == 0) {
+      // Everything of the upload is decided: tell the service, which then
+      // ends the contest's exemption from the lock rules, and only then
+      // let go of the creation.
+      final done = await _exchange(
+        scope,
+        sequence,
+        const [],
+        firstUpload: _finishUpload,
+      );
+      await _pull(scope, done, from: sequence);
       await _store.recordOutcome(
         mutationId: heldCreation.id,
         outcome: MutationOutcome.accepted,
@@ -345,7 +383,7 @@ class SyncEngine {
     int cursor,
     List<SyncMutationDto> mutations, {
     String? pageToken,
-    bool firstUpload = false,
+    String? firstUpload,
   }) => _gateway.exchange(
     _request(
       scope,
@@ -361,7 +399,7 @@ class SyncEngine {
     int cursor,
     List<SyncMutationDto> mutations, {
     String? pageToken,
-    bool firstUpload = false,
+    String? firstUpload,
   }) => SyncExchangeRequest(
     protocolVersion: _config.protocolVersion,
     schemaVersion: _config.schemaVersion,

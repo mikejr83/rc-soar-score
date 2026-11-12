@@ -44,10 +44,7 @@ SyncExchangeRequest _$SyncExchangeRequestFromJson(Map<String, dynamic> json) =>
                     .toList() ??
                 const [],
           ),
-          firstUpload: $checkedConvert(
-            'first_upload',
-            (v) => v as bool? ?? false,
-          ),
+          firstUpload: $checkedConvert('first_upload', (v) => v as String?),
         );
         return val;
       },

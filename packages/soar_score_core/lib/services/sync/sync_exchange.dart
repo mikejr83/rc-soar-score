@@ -16,7 +16,7 @@ class SyncExchangeInput {
     required this.lastAcknowledgedSequence,
     this.pageToken,
     this.mutations = const [],
-    this.firstUpload = false,
+    this.firstUpload,
   });
 
   final int protocolVersion;
@@ -29,10 +29,33 @@ class SyncExchangeInput {
   final String? pageToken;
   final List<SyncMutation> mutations;
 
-  /// The installation says this request belongs to the upload of a contest it
-  /// created, sent in several exchanges. The service honors it only while the
-  /// installation still holds the contest's `Initial` activation.
-  final bool firstUpload;
+  /// Set when the request belongs to the upload of a contest the installation
+  /// created, sent in several exchanges; null otherwise.
+  final FirstUploadPhase? firstUpload;
+}
+
+/// Where a request is in a first upload sent in several exchanges.
+enum FirstUploadPhase {
+  /// More exchanges follow. The first one that creates the contest opens the
+  /// upload; while it is open, requests that say so keep the contest's
+  /// history exempt from the lock and completed rules.
+  open('open'),
+
+  /// The upload is decided: the service closes it, and the exemption ends.
+  finish('finish');
+
+  const FirstUploadPhase(this.wire);
+
+  /// The text on the wire.
+  final String wire;
+
+  /// The phase named by [value], or null when it names none.
+  static FirstUploadPhase? tryParse(String? value) {
+    for (final phase in values) {
+      if (phase.wire == value) return phase;
+    }
+    return null;
+  }
 }
 
 /// A conflict an exchange created or touched.

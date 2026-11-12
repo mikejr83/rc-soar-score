@@ -14,6 +14,7 @@ import '../../enums/sync_reason_code.dart';
 import '../../repositories/sync_acceptor_store.dart';
 import '../../repositories/sync_scope_key.dart';
 import 'exchange_context.dart';
+import 'sync_exchange.dart';
 import 'field_merge.dart';
 import 'json_equality.dart';
 import 'mutation_payloads.dart';
@@ -139,13 +140,14 @@ class MutationProcessor {
       );
       // A later batch of a first upload: the contest was created by an earlier
       // exchange of the same upload, so its history is still exempt from the
-      // lock and completed rules. Only the installation that holds the
-      // contest's one `Initial` activation may say so.
-      if (holds &&
-          ctx.firstUpload &&
-          activations.length == 1 &&
-          activations.single.kind == ActivationKind.initial) {
-        ctx.createdContestId = scope.contestId;
+      // lock and completed rules. That holds only while the upload is open
+      // (saved on the contest's one `Initial` activation until the client
+      // finishes it) and only for the installation that holds it.
+      if (holds && ctx.firstUpload != null) {
+        final current = activations.where((a) => a.isOpen).single;
+        if (current.uploadOpen && current.kind == ActivationKind.initial) {
+          ctx.createdContestId = scope.contestId;
+        }
       }
       if (!holds) {
         final firstUpload =
@@ -647,6 +649,7 @@ class MutationProcessor {
         activatedBy: ctx.accountId,
         kind: ActivationKind.initial,
         activatedAt: now,
+        uploadOpen: ctx.firstUpload == FirstUploadPhase.open,
       ),
     );
   }

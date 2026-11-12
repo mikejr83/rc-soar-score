@@ -29,9 +29,14 @@ class OutboxBatches {
 /// scope, versions and cursor). A batch's size is that plus the exact length
 /// of each mutation as it is serialized and the commas between them, with
 /// [exchangeEnvelopeMargin] to spare. Multibyte text counts in bytes.
+///
+/// A mutation is [oversized] only when the exact request that carries it
+/// alone ([soloBytes]) exceeds [maxBytes]; one that fits only without the
+/// margin goes in a batch of its own.
 OutboxBatches splitOutbox(
   List<MutationRecord> pending, {
   required int envelopeBytes,
+  required int Function(MutationRecord mutation) soloBytes,
   int maxBytes = syncExchangeMaxBodyBytes,
   int maxMutations = syncExchangeMaxMutations,
 }) {
@@ -45,7 +50,14 @@ OutboxBatches splitOutbox(
         .encode(jsonEncode(mutationToDto(mutation).toJson()))
         .length;
     if (size > room) {
-      oversized.add(mutation);
+      if (soloBytes(mutation) > maxBytes) {
+        oversized.add(mutation);
+      } else {
+        if (current.isNotEmpty) batches.add(current);
+        batches.add([mutation]);
+        current = <MutationRecord>[];
+        used = 0;
+      }
       continue;
     }
     final next = used + size + (current.isEmpty ? 0 : 1);

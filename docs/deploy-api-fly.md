@@ -241,11 +241,12 @@ limits (the body is measured in bytes, request envelope included), stores each
 exchange's results before sending the next, and leaves a change that depends on
 a refused one queued. A single change too large to ever fit is marked rejected
 with `payload_too_large` and stays in the outbox with that reason. The first
-upload of a contest may span several exchanges: each says `first_upload`, and
-the service keeps the contest's history exempt from the lock and completed
-rules only while the sending installation holds the contest's `Initial`
-activation. The contest's own creation stays pending on the client until the
-whole upload is decided, so an interrupted upload resumes with the flag.
+upload of a contest may span several exchanges: each says `first_upload`, the
+creating exchange opens the upload on the contest's activation, and a final
+empty exchange saying `finish` closes it. The contest's history is exempt from
+the lock and completed rules only while the upload is open. The contest's own
+creation stays pending on the client until the finish is sent, so an
+interrupted upload resumes.
 
 A body is refused from its declared length, or as soon as the bytes read pass
 the limit, before anything is decoded or parsed. Rate counts are in memory per

@@ -193,6 +193,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
           await m.createTable(pilotImportLinks);
         }
         await _addCurrentAttemptId();
+        await _addUploadOpen();
       });
     },
   );
@@ -214,6 +215,31 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
       'ALTER TABLE score_placeholders ADD COLUMN current_attempt_id TEXT',
     );
     await fillCurrentAttemptIds(this);
+  }
+
+  /// Adds `installation_activations.upload_open` (unreleased version 2): false
+  /// for every existing activation, so no first upload is open after the
+  /// upgrade.
+  Future<void> _addUploadOpen() async {
+    final sqlite = executor.dialect == SqlDialect.sqlite;
+    // Only the server profile has the table.
+    final table = sqlite
+        ? "SELECT 1 AS x FROM sqlite_master WHERE type = 'table' AND name = 'installation_activations'"
+        : "SELECT 1 AS x FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'installation_activations'";
+    if ((await customSelect(table).get()).isEmpty) return;
+    final has = sqlite
+        ? await customSelect(
+            "SELECT 1 AS x FROM pragma_table_info('installation_activations') WHERE name = 'upload_open'",
+          ).get()
+        : await customSelect(
+            "SELECT 1 AS x FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'installation_activations' AND column_name = 'upload_open'",
+          ).get();
+    if (has.isNotEmpty) return;
+    await customStatement(
+      sqlite
+          ? 'ALTER TABLE installation_activations ADD COLUMN upload_open INTEGER NOT NULL DEFAULT 0 CHECK ("upload_open" IN (0, 1))'
+          : 'ALTER TABLE installation_activations ADD COLUMN upload_open boolean NOT NULL DEFAULT false',
+    );
   }
 
   /// Recognizes the alpha version of the table without changing its rows.

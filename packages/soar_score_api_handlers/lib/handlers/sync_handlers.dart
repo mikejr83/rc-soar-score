@@ -168,7 +168,7 @@ void addSyncRoutes(
         protocolVersion: body.protocolVersion,
         schemaVersion: body.schemaVersion,
         installationId: body.installationId,
-        firstUpload: body.firstUpload,
+        firstUpload: _firstUploadOf(body.firstUpload),
         scope: _scopeOf(body.scope),
         lastAcknowledgedSequence: body.lastAcknowledgedSequence,
         pageToken: body.pageToken,
@@ -261,3 +261,13 @@ SyncChangeDto _changeOf(AcceptedChange c) => SyncChangeDto(
   revision: c.revision,
   payload: c.payload,
 );
+
+FirstUploadPhase? _firstUploadOf(String? wire) {
+  if (wire == null) return null;
+  return FirstUploadPhase.tryParse(wire) ??
+      (throw ArgumentError.value(
+        wire,
+        'first_upload',
+        'is not open or finish',
+      ));
+}

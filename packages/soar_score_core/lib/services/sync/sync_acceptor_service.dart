@@ -150,6 +150,19 @@ class SyncAcceptorService {
     });
   }
 
+  /// Ends the open first upload of [scope], when [installationId] holds it:
+  /// the contest's history is then under the ordinary lock rules.
+  Future<void> _closeFirstUpload(ContestScopeKey scope, Id installationId) =>
+      _store.transaction((tx) async {
+        for (final activation in await tx.listActivations(scope.contestId)) {
+          if (activation.isOpen &&
+              activation.installationId == installationId &&
+              activation.uploadOpen) {
+            await tx.saveActivation(activation.withUploadOpen(false));
+          }
+        }
+      });
+
   /// Handles `POST /sync/conflicts/{id}/resolve`.
   Future<MutationResult> resolveConflict({
     required Id accountId,
@@ -213,6 +226,10 @@ class SyncAcceptorService {
     final decided = <int, MutationResult>{};
     for (final i in order) {
       decided[i] = await _processor.process(ctx, input.mutations[i]);
+    }
+    if (scope is ContestScopeKey &&
+        input.firstUpload == FirstUploadPhase.finish) {
+      await _closeFirstUpload(scope, input.installationId);
     }
     return [for (var i = 0; i < input.mutations.length; i++) decided[i]!];
   }

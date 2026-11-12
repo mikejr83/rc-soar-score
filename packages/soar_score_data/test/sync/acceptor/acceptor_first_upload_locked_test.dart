@@ -1,4 +1,5 @@
 import 'package:soar_score_core/services/services.dart';
+import 'package:soar_score_core/services/sync/sync_exchange.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:test/test.dart';
 
@@ -134,32 +135,36 @@ void _tests(Backend backend) {
   });
 
   group('a first upload sent in several exchanges', () {
-    /// Uploads the director's scope, then the contest's mutations in two
-    /// exchanges: the creation with a few, then the rest.
-    Future<SyncExchangeOutput> secondBatch({required bool firstUpload}) async {
+    late List<SyncMutation> tail;
+    late int afterHead;
+
+    /// Uploads the director's scope, then the contest's creation and a few
+    /// mutations in the first exchange, leaving the rest in [tail].
+    Future<void> sendHead({FirstUploadPhase? phase}) async {
       final director = core.DirectorScopeKey(harness.account);
       final owned = await harness.outbox(director);
       final accepted = await harness.exchange(director, mutations: owned);
       await harness.acknowledge(owned, accepted.results);
       final sent = await harness.outbox(scope);
-      final head = sent.take(3).toList();
-      final tail = sent.skip(3).toList();
-      final first = await harness.exchange(scope, mutations: head);
-      expect(
-        first.results.every((r) => r.outcome == core.MutationOutcome.accepted),
-        isTrue,
-      );
-      return harness.exchange(
+      final first = await harness.exchange(
         scope,
-        mutations: tail,
-        after: first.serverSequence,
-        firstUpload: firstUpload,
+        mutations: sent.take(3).toList(),
+        firstUpload: phase,
       );
+      expect(first.results.map((r) => r.outcome).toSet(), {
+        core.MutationOutcome.accepted,
+      });
+      tail = sent.skip(3).toList();
+      afterHead = first.serverSequence;
     }
 
-    test('the later batches are accepted with the flag', () async {
+    Future<SyncExchangeOutput> sendTail(FirstUploadPhase? phase) => harness
+        .exchange(scope, mutations: tail, after: afterHead, firstUpload: phase);
+
+    test('the later batches are accepted while the upload is open', () async {
       await prepare(core.AdminLock.locked);
-      final out = await secondBatch(firstUpload: true);
+      await sendHead(phase: FirstUploadPhase.open);
+      final out = await sendTail(FirstUploadPhase.open);
       expect(out.results.map((r) => r.outcome).toSet(), {
         core.MutationOutcome.accepted,
       });
@@ -167,8 +172,30 @@ void _tests(Backend backend) {
 
     test('without the flag they are refused as locked', () async {
       await prepare(core.AdminLock.locked);
-      final out = await secondBatch(firstUpload: false);
-      expect(out.results.map((r) => r.reasonCode).toSet(), contains('locked'));
+      await sendHead(phase: FirstUploadPhase.open);
+      final out = await sendTail(null);
+      expect(out.results.map((r) => r.reasonCode), contains('locked'));
+    });
+
+    test('finishing the upload ends the exemption', () async {
+      await prepare(core.AdminLock.locked);
+      await sendHead(phase: FirstUploadPhase.open);
+      await harness.exchange(
+        scope,
+        after: afterHead,
+        firstUpload: FirstUploadPhase.finish,
+      );
+
+      final out = await sendTail(FirstUploadPhase.open);
+
+      expect(out.results.map((r) => r.reasonCode), contains('locked'));
+    });
+
+    test('an upload sent whole never opens the exemption', () async {
+      await prepare(core.AdminLock.locked);
+      await sendHead();
+      final out = await sendTail(FirstUploadPhase.open);
+      expect(out.results.map((r) => r.reasonCode), contains('locked'));
     });
   });
 }

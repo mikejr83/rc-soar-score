@@ -17144,6 +17144,22 @@ class $InstallationActivationsTable extends InstallationActivations
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _uploadOpenMeta = const VerificationMeta(
+    'uploadOpen',
+  );
+  @override
+  late final GeneratedColumn<bool> uploadOpen = GeneratedColumn<bool>(
+    'upload_open',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
+      SqlDialect.sqlite: 'CHECK ("upload_open" IN (0, 1))',
+      SqlDialect.postgres: '',
+    }),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -17153,6 +17169,7 @@ class $InstallationActivationsTable extends InstallationActivations
     kind,
     activatedAt,
     endedAt,
+    uploadOpen,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -17226,6 +17243,12 @@ class $InstallationActivationsTable extends InstallationActivations
         endedAt.isAcceptableOrUnknown(data['ended_at']!, _endedAtMeta),
       );
     }
+    if (data.containsKey('upload_open')) {
+      context.handle(
+        _uploadOpenMeta,
+        uploadOpen.isAcceptableOrUnknown(data['upload_open']!, _uploadOpenMeta),
+      );
+    }
     return context;
   }
 
@@ -17266,6 +17289,10 @@ class $InstallationActivationsTable extends InstallationActivations
         DriftSqlType.string,
         data['${effectivePrefix}ended_at'],
       ),
+      uploadOpen: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}upload_open'],
+      )!,
     );
   }
 
@@ -17284,6 +17311,7 @@ class InstallationActivationData extends DataClass
   final String kind;
   final String activatedAt;
   final String? endedAt;
+  final bool uploadOpen;
   const InstallationActivationData({
     required this.id,
     required this.contestId,
@@ -17292,6 +17320,7 @@ class InstallationActivationData extends DataClass
     required this.kind,
     required this.activatedAt,
     this.endedAt,
+    required this.uploadOpen,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -17305,6 +17334,7 @@ class InstallationActivationData extends DataClass
     if (!nullToAbsent || endedAt != null) {
       map['ended_at'] = Variable<String>(endedAt);
     }
+    map['upload_open'] = Variable<bool>(uploadOpen);
     return map;
   }
 
@@ -17319,6 +17349,7 @@ class InstallationActivationData extends DataClass
       endedAt: endedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(endedAt),
+      uploadOpen: Value(uploadOpen),
     );
   }
 
@@ -17335,6 +17366,7 @@ class InstallationActivationData extends DataClass
       kind: serializer.fromJson<String>(json['kind']),
       activatedAt: serializer.fromJson<String>(json['activatedAt']),
       endedAt: serializer.fromJson<String?>(json['endedAt']),
+      uploadOpen: serializer.fromJson<bool>(json['uploadOpen']),
     );
   }
   @override
@@ -17348,6 +17380,7 @@ class InstallationActivationData extends DataClass
       'kind': serializer.toJson<String>(kind),
       'activatedAt': serializer.toJson<String>(activatedAt),
       'endedAt': serializer.toJson<String?>(endedAt),
+      'uploadOpen': serializer.toJson<bool>(uploadOpen),
     };
   }
 
@@ -17359,6 +17392,7 @@ class InstallationActivationData extends DataClass
     String? kind,
     String? activatedAt,
     Value<String?> endedAt = const Value.absent(),
+    bool? uploadOpen,
   }) => InstallationActivationData(
     id: id ?? this.id,
     contestId: contestId ?? this.contestId,
@@ -17367,6 +17401,7 @@ class InstallationActivationData extends DataClass
     kind: kind ?? this.kind,
     activatedAt: activatedAt ?? this.activatedAt,
     endedAt: endedAt.present ? endedAt.value : this.endedAt,
+    uploadOpen: uploadOpen ?? this.uploadOpen,
   );
   InstallationActivationData copyWithCompanion(
     InstallationActivationsCompanion data,
@@ -17385,6 +17420,9 @@ class InstallationActivationData extends DataClass
           ? data.activatedAt.value
           : this.activatedAt,
       endedAt: data.endedAt.present ? data.endedAt.value : this.endedAt,
+      uploadOpen: data.uploadOpen.present
+          ? data.uploadOpen.value
+          : this.uploadOpen,
     );
   }
 
@@ -17397,7 +17435,8 @@ class InstallationActivationData extends DataClass
           ..write('activatedBy: $activatedBy, ')
           ..write('kind: $kind, ')
           ..write('activatedAt: $activatedAt, ')
-          ..write('endedAt: $endedAt')
+          ..write('endedAt: $endedAt, ')
+          ..write('uploadOpen: $uploadOpen')
           ..write(')'))
         .toString();
   }
@@ -17411,6 +17450,7 @@ class InstallationActivationData extends DataClass
     kind,
     activatedAt,
     endedAt,
+    uploadOpen,
   );
   @override
   bool operator ==(Object other) =>
@@ -17422,7 +17462,8 @@ class InstallationActivationData extends DataClass
           other.activatedBy == this.activatedBy &&
           other.kind == this.kind &&
           other.activatedAt == this.activatedAt &&
-          other.endedAt == this.endedAt);
+          other.endedAt == this.endedAt &&
+          other.uploadOpen == this.uploadOpen);
 }
 
 class InstallationActivationsCompanion
@@ -17434,6 +17475,7 @@ class InstallationActivationsCompanion
   final Value<String> kind;
   final Value<String> activatedAt;
   final Value<String?> endedAt;
+  final Value<bool> uploadOpen;
   final Value<int> rowid;
   const InstallationActivationsCompanion({
     this.id = const Value.absent(),
@@ -17443,6 +17485,7 @@ class InstallationActivationsCompanion
     this.kind = const Value.absent(),
     this.activatedAt = const Value.absent(),
     this.endedAt = const Value.absent(),
+    this.uploadOpen = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   InstallationActivationsCompanion.insert({
@@ -17453,6 +17496,7 @@ class InstallationActivationsCompanion
     required String kind,
     required String activatedAt,
     this.endedAt = const Value.absent(),
+    this.uploadOpen = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        contestId = Value(contestId),
@@ -17468,6 +17512,7 @@ class InstallationActivationsCompanion
     Expression<String>? kind,
     Expression<String>? activatedAt,
     Expression<String>? endedAt,
+    Expression<bool>? uploadOpen,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -17478,6 +17523,7 @@ class InstallationActivationsCompanion
       if (kind != null) 'kind': kind,
       if (activatedAt != null) 'activated_at': activatedAt,
       if (endedAt != null) 'ended_at': endedAt,
+      if (uploadOpen != null) 'upload_open': uploadOpen,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -17490,6 +17536,7 @@ class InstallationActivationsCompanion
     Value<String>? kind,
     Value<String>? activatedAt,
     Value<String?>? endedAt,
+    Value<bool>? uploadOpen,
     Value<int>? rowid,
   }) {
     return InstallationActivationsCompanion(
@@ -17500,6 +17547,7 @@ class InstallationActivationsCompanion
       kind: kind ?? this.kind,
       activatedAt: activatedAt ?? this.activatedAt,
       endedAt: endedAt ?? this.endedAt,
+      uploadOpen: uploadOpen ?? this.uploadOpen,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -17528,6 +17576,9 @@ class InstallationActivationsCompanion
     if (endedAt.present) {
       map['ended_at'] = Variable<String>(endedAt.value);
     }
+    if (uploadOpen.present) {
+      map['upload_open'] = Variable<bool>(uploadOpen.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -17544,6 +17595,7 @@ class InstallationActivationsCompanion
           ..write('kind: $kind, ')
           ..write('activatedAt: $activatedAt, ')
           ..write('endedAt: $endedAt, ')
+          ..write('uploadOpen: $uploadOpen, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -57361,6 +57413,7 @@ typedef $$InstallationActivationsTableCreateCompanionBuilder =
       required String kind,
       required String activatedAt,
       Value<String?> endedAt,
+      Value<bool> uploadOpen,
       Value<int> rowid,
     });
 typedef $$InstallationActivationsTableUpdateCompanionBuilder =
@@ -57372,6 +57425,7 @@ typedef $$InstallationActivationsTableUpdateCompanionBuilder =
       Value<String> kind,
       Value<String> activatedAt,
       Value<String?> endedAt,
+      Value<bool> uploadOpen,
       Value<int> rowid,
     });
 
@@ -57459,6 +57513,11 @@ class $$InstallationActivationsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<bool> get uploadOpen => $composableBuilder(
+    column: $table.uploadOpen,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$InstallationsTableFilterComposer get installationId {
     final $$InstallationsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -57540,6 +57599,11 @@ class $$InstallationActivationsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get uploadOpen => $composableBuilder(
+    column: $table.uploadOpen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$InstallationsTableOrderingComposer get installationId {
     final $$InstallationsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -57612,6 +57676,11 @@ class $$InstallationActivationsTableAnnotationComposer
 
   GeneratedColumn<String> get endedAt =>
       $composableBuilder(column: $table.endedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get uploadOpen => $composableBuilder(
+    column: $table.uploadOpen,
+    builder: (column) => column,
+  );
 
   $$InstallationsTableAnnotationComposer get installationId {
     final $$InstallationsTableAnnotationComposer composer = $composerBuilder(
@@ -57709,6 +57778,7 @@ class $$InstallationActivationsTableTableManager
                 Value<String> kind = const Value.absent(),
                 Value<String> activatedAt = const Value.absent(),
                 Value<String?> endedAt = const Value.absent(),
+                Value<bool> uploadOpen = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => InstallationActivationsCompanion(
                 id: id,
@@ -57718,6 +57788,7 @@ class $$InstallationActivationsTableTableManager
                 kind: kind,
                 activatedAt: activatedAt,
                 endedAt: endedAt,
+                uploadOpen: uploadOpen,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -57729,6 +57800,7 @@ class $$InstallationActivationsTableTableManager
                 required String kind,
                 required String activatedAt,
                 Value<String?> endedAt = const Value.absent(),
+                Value<bool> uploadOpen = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => InstallationActivationsCompanion.insert(
                 id: id,
@@ -57738,6 +57810,7 @@ class $$InstallationActivationsTableTableManager
                 kind: kind,
                 activatedAt: activatedAt,
                 endedAt: endedAt,
+                uploadOpen: uploadOpen,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
