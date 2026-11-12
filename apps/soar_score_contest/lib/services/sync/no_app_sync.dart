@@ -14,6 +14,9 @@ class NoAppSync implements AppSync {
   bool get available => false;
 
   @override
+  bool get refreshable => false;
+
+  @override
   SyncScopeKey? get accountScope => null;
 
   @override

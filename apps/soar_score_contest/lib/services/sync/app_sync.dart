@@ -8,11 +8,18 @@ import 'refused_change.dart';
 /// What the screens may ask of synchronization.
 ///
 /// The native build backs it with the sync engine; the web build has nothing
-/// to synchronize and uses [NoAppSync]. Screens depend on this and never on
+/// to synchronize and refreshes from the service (`RevisionAppSync`); tests
+/// without sync use [NoAppSync]. Screens depend on this and never on
 /// the engine, so the web build contains no engine.
 abstract interface class AppSync {
   /// False when this build does not synchronize (web).
   bool get available;
+
+  /// True when this build has no engine but can ask the service whether the
+  /// data on screen changed and reload it: the web build. The screens then
+  /// show a Refresh entry in place of the sync status, and pages wrapped in
+  /// `ReloadOnSync` reload when [AppSyncState] says the data moved.
+  bool get refreshable;
 
   AppSyncState get state;
 

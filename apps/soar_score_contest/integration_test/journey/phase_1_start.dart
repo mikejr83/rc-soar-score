@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/pages/home_page.dart';
@@ -50,10 +51,21 @@ Future<void> runStartPhase(Journey journey, JourneyContext data) async {
   await journey.step(
     'The status bar sync entry is short and a click stays',
     () async {
-      // Builds that do not synchronize have no entry. Where it exists it says a
-      // few words, never a time or zone, and does not leave the page.
+      // Where it exists it says a few words, never a time or zone, and does
+      // not leave the page. The web build has no sync but refreshes from the
+      // service, so its entry reads "Refresh" and a click reloads the page.
       final sync = find.byKey(const ValueKey('shell-sync-status'));
-      if (sync.evaluate().isEmpty) return;
+      if (kIsWeb) {
+        // Opening a contest starts a check, which reads "Refreshing" until it
+        // answers; the click comes once the entry is ready, and its absence
+        // is a failure here.
+        await pumpUntilFound(
+          tester,
+          find.descendant(of: sync, matching: find.text('Refresh')),
+        );
+      } else if (sync.evaluate().isEmpty) {
+        return;
+      }
       expect(
         find.descendant(
           of: sync,
@@ -63,6 +75,16 @@ Future<void> runStartPhase(Journey journey, JourneyContext data) async {
       );
       await tapVisible(tester, sync);
       expect(find.text('Workspace'), findsWidgets);
+      if (kIsWeb) {
+        // The refresh finishes, successfully, and the entry offers it again.
+        await tester.pump();
+        await pumpUntilFound(
+          tester,
+          find.descendant(of: sync, matching: find.text('Refresh')),
+        );
+        expect(find.text('Refresh failed'), findsNothing);
+        await pumpUntilFound(tester, find.text('Workspace'));
+      }
     },
   );
 

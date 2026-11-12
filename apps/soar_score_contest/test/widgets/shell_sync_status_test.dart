@@ -6,6 +6,7 @@ import 'package:soar_score_contest/app_sync_provider.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/sync/app_sync_state.dart';
+import 'package:soar_score_contest/services/sync/sync_problem.dart';
 import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
 import 'package:soar_score_contest/widgets/sync/shell_sync_status.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -61,6 +62,40 @@ void main() {
     await _pump(tester, FakeAppSync(available: false));
 
     expect(find.byKey(const ValueKey('shell-sync-status')), findsNothing);
+  });
+
+  testWidgets('the web build shows Refresh and a tap refreshes', (
+    tester,
+  ) async {
+    final contest = _contest();
+    final sync = FakeAppSync(available: false, refreshable: true);
+    await _pump(tester, sync);
+
+    expect(find.text('Refresh'), findsOneWidget);
+    expect(find.text('Sync successful'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('shell-sync-status')));
+    await tester.pumpAndSettle();
+
+    expect(sync.synced, [ContestScopeKey(contest.id)]);
+  });
+
+  testWidgets('a failed refresh says so', (tester) async {
+    final contest = _contest();
+    final sync = FakeAppSync(
+      available: false,
+      refreshable: true,
+      state: AppSyncState(
+        scopes: {
+          ContestScopeKey(contest.id): const SyncScopeSummary(
+            problem: SyncProblem.offline,
+          ),
+        },
+      ),
+    );
+    await _pump(tester, sync);
+
+    expect(find.text('Refresh failed'), findsOneWidget);
   });
 
   testWidgets('shows the status and a tap syncs now', (tester) async {

@@ -4,7 +4,6 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import 'sync_engine.dart';
 import 'sync_failure_kind.dart';
-import 'sync_timer_factory.dart';
 
 /// Turns "a local change was committed" into a push.
 ///

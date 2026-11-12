@@ -536,6 +536,24 @@
   "@syncTooltipLocalOnly": {"description": "Tooltip line of the status bar sync entry for data with no account behind it."},
   "syncTooltipAction": "Click to sync now",
   "@syncTooltipAction": {"description": "Tooltip line of the status bar sync entry: what a click does."},
+  "refreshStatusReady": "Refresh",
+  "@refreshStatusReady": {"description": "Status bar entry of the web app: the label that reloads the data on screen."},
+  "refreshStatusRefreshing": "Refreshing",
+  "@refreshStatusRefreshing": {"description": "Status bar refresh entry while it checks the service."},
+  "refreshStatusFailed": "Refresh failed",
+  "@refreshStatusFailed": {"description": "Status bar refresh entry when the service could not be asked."},
+  "refreshTooltipLast": "Last refreshed {time}",
+  "@refreshTooltipLast": {
+    "description": "Tooltip line of the status bar refresh entry: when the data was last checked.",
+    "placeholders": {"time": {"type": "String"}}
+  },
+  "refreshTooltipAction": "Click to refresh now. The page also refreshes by itself every few minutes when something changed.",
+  "@refreshTooltipAction": {"description": "Tooltip line of the status bar refresh entry: what a click does and that the page refreshes by itself."},
+  "refreshSemanticsLabel": "Refresh: {status}",
+  "@refreshSemanticsLabel": {
+    "description": "Screen reader label of the status bar refresh entry.",
+    "placeholders": {"status": {"type": "String"}}
+  },
   "syncSemanticsLabel": "Sync: {status}",
   "@syncSemanticsLabel": {
     "description": "Screen reader label of the status bar sync entry.",

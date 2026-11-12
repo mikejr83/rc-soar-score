@@ -428,7 +428,9 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
                   if (c.loadError != null)
                     ScoringRefreshFailedBanner(
                       error: c.loadError!,
-                      onRetry: c.refresh,
+                      onRetry: c.syncRefreshFailed
+                          ? () => unawaited(c.refreshAfterSync())
+                          : c.refresh,
                     ),
                   if (check != null)
                     ScoreCheckPanel(

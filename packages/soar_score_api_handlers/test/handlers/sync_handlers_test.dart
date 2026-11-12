@@ -66,6 +66,35 @@ void main() {
     expect(response.statusCode, 400);
   });
 
+  test('revision refuses a contest id that is not an id', () async {
+    final response = await api.send('GET', '/sync/revision?contest_id=nope');
+
+    expect(response.statusCode, 400);
+  });
+
+  group('revision of a contest', () {
+    final contestId = Id.parse('019c0000-0000-7000-8000-00000000c001');
+
+    test('an unknown or deleted contest is a 404', () async {
+      final response = await api.send(
+        'GET',
+        '/sync/revision?contest_id=${contestId.value}',
+      );
+
+      expect(response.statusCode, 404);
+    });
+
+    test('a foreign director is refused', () async {
+      final two = TwoAccountApi()..storeContest(contestId);
+
+      await two.expectDenied(
+        two.outsiderApi,
+        'GET',
+        '/sync/revision?contest_id=${contestId.value}',
+      );
+    });
+  });
+
   test('system data needs a non-negative after_sequence', () async {
     final missing = await api.send('GET', '/sync/system-data');
     final negative = await api.send(

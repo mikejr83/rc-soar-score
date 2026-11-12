@@ -48,6 +48,7 @@ import '../dto/sync_exchange_request.dart';
 import '../dto/sync_exchange_response.dart';
 import '../dto/sync_info_dto.dart';
 import '../dto/sync_mutation_result.dart';
+import '../dto/sync_revision_dto.dart';
 import '../dto/system_data_response.dart';
 import '../dto/update_contest_request.dart';
 import '../dto/update_model_link_request.dart';
@@ -1378,6 +1379,16 @@ class ApiClient {
     final uri = _resolve('/api/v1/sync/info');
     final response = await _sendSync('GET', uri);
     return _decode<SyncInfoDto>(response, uri, SyncInfoDto.fromJson);
+  }
+
+  /// `GET /api/v1/sync/revision` — where the log of the contest
+  /// [contestId], or of the caller's own data when it is null, stands. A cheap
+  /// way to learn whether anything changed since the last look.
+  Future<SyncRevisionDto> syncRevision({Id? contestId}) async {
+    final uri = _resolve('/api/v1/sync/revision')
+        .replace(queryParameters: {'contest_id': ?contestId?.value});
+    final response = await _send('GET', uri);
+    return _decode<SyncRevisionDto>(response, uri, SyncRevisionDto.fromJson);
   }
 
   /// `POST /api/v1/installations` — registers an installation for the

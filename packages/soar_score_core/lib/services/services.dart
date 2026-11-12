@@ -83,6 +83,8 @@ export 'sync/sync_acceptor_service.dart';
 export 'sync/sync_entity_catalog.dart';
 export 'sync/sync_exchange.dart';
 export 'sync/sync_mutation.dart';
+export 'sync/sync_poller.dart';
+export 'sync/sync_timer_factory.dart';
 export 'sync/sync_versions.dart';
 export 'glider_score_restore_builder.dart';
 export 'glider_score_restore_comparison.dart';

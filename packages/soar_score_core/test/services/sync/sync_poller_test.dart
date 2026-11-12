@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:soar_score_core/soar_score_core.dart';
-import 'package:soar_score_sync/soar_score_sync.dart';
 import 'package:test/test.dart';
 
 class _ManualTimer implements Timer {

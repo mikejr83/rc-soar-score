@@ -60,6 +60,27 @@ void main() {
     expect(info.accepts(protocol: 1, schema: 1), isTrue);
   });
 
+  test('syncRevision GETs the caller\'s scope, or a contest\'s', () async {
+    final account = Id.parse('019c0000-0000-7000-8000-000000000001');
+    final contest = Id.parse('019c0000-0000-7000-8000-00000000c001');
+    final client = clientFor(
+      (_) => body({'account_id': account.value, 'sequence': 7}),
+    );
+
+    final own = await client.syncRevision();
+
+    expect(seen.method, 'GET');
+    expect(seen.url.path, '/api/v1/sync/revision');
+    expect(seen.url.queryParameters, isEmpty);
+    expect(own.sequence, 7);
+    expect(own.accountId, account);
+    expect(own.contestId, isNull);
+
+    await client.syncRevision(contestId: contest);
+
+    expect(seen.url.queryParameters, {'contest_id': contest.value});
+  });
+
   test('registerInstallation POSTs the request and decodes the row', () async {
     final client = clientFor((_) => body(installation.toJson(), 201));
     final request = RegisterInstallationRequest(

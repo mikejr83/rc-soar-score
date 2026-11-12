@@ -71,6 +71,24 @@ class SyncAcceptorService {
   /// The service's clock, for `GET /sync/info`.
   DateTime get serverTime => _clock();
 
+  /// The highest sequence of [scope]'s log, for a client that only wants to
+  /// know whether anything changed (`GET /sync/revision`). Reads nothing else.
+  ///
+  /// Throws a [ForbiddenError] for a scope the account does not own.
+  Future<int> revision({required Id accountId, required SyncScopeKey scope}) {
+    if (scope is SystemScopeKey) {
+      throw ArgumentError.value(
+        'system',
+        'scope',
+        'system data has its own stream',
+      );
+    }
+    return _store.transaction((tx) async {
+      await _requireScopeAccess(tx, scope, accountId);
+      return tx.highestSequence(scope);
+    });
+  }
+
   /// Handles one `POST /sync/exchange`.
   ///
   /// Version negotiation comes first and refuses a client outside the range

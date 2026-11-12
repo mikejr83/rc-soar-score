@@ -61,6 +61,25 @@ void main() {
     expect(calls, 2);
   });
 
+  testWidgets('fires on a refreshable build without sync', (tester) async {
+    final sync = FakeAppSync(available: false, refreshable: true);
+    var calls = 0;
+    await _pump(
+      tester,
+      sync,
+      ReloadOnSync(
+        scope: contest,
+        onSynced: () => calls++,
+        child: const SizedBox(),
+      ),
+    );
+
+    sync.state = _synced({contest: 1});
+    await tester.pump();
+
+    expect(calls, 1);
+  });
+
   testWidgets('what was synced before the page opened is not news', (
     tester,
   ) async {

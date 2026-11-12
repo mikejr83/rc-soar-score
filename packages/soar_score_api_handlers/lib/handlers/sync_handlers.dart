@@ -3,6 +3,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
+import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -17,6 +18,9 @@ final _logger = Logger('Sync');
 ///   installations
 /// - `POST /contests/{contestId}/activations` makes an installation the
 ///   contest's administration installation
+/// - `GET /sync/revision` where a scope's log stands, to learn cheaply
+///   whether anything changed (`contest_id` picks a contest, else the
+///   caller's own data)
 /// - `POST /sync/exchange` pushes unsent mutations and pulls the changes
 ///   after the cursor for one scope
 /// - `GET /sync/system-data` the pull-only system data stream
@@ -114,6 +118,36 @@ void addSyncRoutes(
       kind: body.kind,
     );
     return jsonResponse(activation.toJson());
+  });
+
+  router.get('/sync/revision', (Request request) async {
+    final principal = requirePrincipal(request);
+    final raw = request.url.queryParameters['contest_id'];
+    final Id? contestId;
+    try {
+      contestId = raw == null ? null : Id.parse(raw);
+    } on ArgumentError {
+      throw ArgumentError.value(raw, 'contest_id', 'is not a contest id');
+    }
+    // Unlike an exchange, which must accept the first upload of a contest the
+    // service does not hold yet, a read needs a contest that exists and is the
+    // caller's: a deleted contest keeps its log, which is not for anyone else.
+    if (contestId != null) {
+      await requireContestDirector(request, repository, contestId);
+    }
+    final sequence = await acceptor.revision(
+      accountId: principal.accountId,
+      scope: contestId == null
+          ? DirectorScopeKey(principal.accountId)
+          : ContestScopeKey(contestId),
+    );
+    return jsonResponse(
+      SyncRevisionDto(
+        accountId: principal.accountId,
+        contestId: contestId,
+        sequence: sequence,
+      ).toJson(),
+    );
   });
 
   router.post('/sync/exchange', (Request request) async {

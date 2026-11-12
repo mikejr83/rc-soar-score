@@ -14,6 +14,32 @@ class SyncStatusText {
   /// is waiting, why it failed.
   final String tooltip;
 
+  /// The status of the web build's refresh entry for [summary], which is null
+  /// before the first check. A click always refreshes, so the tooltip says so.
+  static SyncStatusText ofRefresh(
+    AppLocalizations l10n,
+    SyncScopeSummary? summary, {
+    required bool syncing,
+    required TimeText time,
+  }) {
+    final problem = summary?.problem;
+    final label = syncing
+        ? l10n.refreshStatusRefreshing
+        : problem != null
+        ? l10n.refreshStatusFailed
+        : l10n.refreshStatusReady;
+    final last = summary?.lastSyncedAt;
+    return SyncStatusText(
+      label: label,
+      tooltip: [
+        label,
+        if (problem != null) '${problem.label}. ${problem.explanation}',
+        if (last != null) l10n.refreshTooltipLast(time(last)),
+        if (!syncing) l10n.refreshTooltipAction,
+      ].join('\n'),
+    );
+  }
+
   /// The status of [summary], which is null before the engine has looked at
   /// the scope. Times come out in the director's preferred zone and locale.
   /// [canSyncNow] adds the hint that a click syncs.

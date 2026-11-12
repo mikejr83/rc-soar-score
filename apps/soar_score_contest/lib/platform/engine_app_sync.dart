@@ -28,6 +28,9 @@ class EngineAppSync implements AppSync {
   @override
   bool get available => true;
 
+  @override
+  bool get refreshable => false;
+
   core.SyncScopeKey? _accountScope;
 
   @override
