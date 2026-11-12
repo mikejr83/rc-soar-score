@@ -8,6 +8,7 @@ import 'package:soar_score_data/postgres_config.dart';
 
 import 'contests_table.dart';
 import 'migrate.dart';
+import 'sync/current_attempt_pointer.dart';
 import 'schema/database_profile.dart';
 import 'schema/enum_values.dart';
 import 'schema/tables/audit_events_table.dart';
@@ -212,14 +213,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     await customStatement(
       'ALTER TABLE score_placeholders ADD COLUMN current_attempt_id TEXT',
     );
-    await customStatement('''
-UPDATE score_placeholders SET current_attempt_id = COALESCE(
-  (SELECT o.score_attempt_id FROM official_scores o
-    WHERE o.score_placeholder_id = score_placeholders.id
-    ORDER BY o.score_revision DESC LIMIT 1),
-  (SELECT a.id FROM score_attempts a
-    WHERE a.score_placeholder_id = score_placeholders.id
-    ORDER BY a.accepted_at DESC, a.id DESC LIMIT 1))''');
+    await fillCurrentAttemptIds(this);
   }
 
   /// Recognizes the alpha version of the table without changing its rows.

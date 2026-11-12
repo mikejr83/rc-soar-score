@@ -6,6 +6,7 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 import '../database.dart';
 import '../repositories/repository.dart';
 import '../schema/database_profile.dart';
+import '../sync/current_attempt_pointer.dart';
 import '../sync/entity_stores.dart';
 import 'exchange_file.dart';
 import 'exchange_tables.dart';
@@ -175,6 +176,12 @@ class ContestImporter {
 
   final SoarScoreDatabase _db;
   final DateTime Function() _clock;
+
+  /// Columns older files of the same version do not have. A missing one reads
+  /// as null; import fills the slot pointers after the scores are written.
+  static const _legacyOptionalColumns = {
+    'score_placeholders': {'current_attempt_id'},
+  };
 
   static final _tableSpecs = {
     for (final spec in [...contestExchangeTables, ...directorExchangeTables])
@@ -379,8 +386,12 @@ class ContestImporter {
           );
           continue;
         }
+        final optional = _legacyOptionalColumns[table] ?? const <String>{};
         if (row.keys.toSet().difference(expected).isNotEmpty ||
-            expected.difference(row.keys.toSet()).isNotEmpty) {
+            expected
+                .difference(row.keys.toSet())
+                .difference(optional)
+                .isNotEmpty) {
           refuse(
             'malformed_row',
             'A row of "$table" does not have the columns of this app.',
@@ -685,6 +696,14 @@ class ContestImporter {
     }
 
     final tables = _rewrite(file, owner);
+    for (final MapEntry(key: table, value: columns)
+        in _legacyOptionalColumns.entries) {
+      for (final row in tables[table] ?? const <Map<String, Object?>>[]) {
+        for (final column in columns) {
+          row.putIfAbsent(column, () => null);
+        }
+      }
+    }
     await _db.customStatement('PRAGMA defer_foreign_keys = ON');
     var reused = 0;
     for (final spec in [...directorExchangeTables, ...contestExchangeTables]) {
@@ -706,6 +725,9 @@ class ContestImporter {
     }
 
     final contestId = core.Id.parse(header.contestId);
+    // Files from before the pointer existed leave it null; derive it now that
+    // the attempts and official scores are in. Pointers a file carries stay.
+    await fillCurrentAttemptIds(_db, contestId: contestId.value);
     final audit = stores.of('AuditEvent');
     switch (mode) {
       case ImportMode.inspection:
