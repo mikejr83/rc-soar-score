@@ -6,7 +6,6 @@ import 'package:soar_score_api_handlers/auth/principal.dart';
 import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
-import 'package:soar_score_api_handlers/middleware/request_limits.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 final _logger = Logger('Sync');
@@ -169,6 +168,7 @@ void addSyncRoutes(
         protocolVersion: body.protocolVersion,
         schemaVersion: body.schemaVersion,
         installationId: body.installationId,
+        firstUpload: body.firstUpload,
         scope: _scopeOf(body.scope),
         lastAcknowledgedSequence: body.lastAcknowledgedSequence,
         pageToken: body.pageToken,

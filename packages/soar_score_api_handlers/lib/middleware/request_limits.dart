@@ -7,14 +7,6 @@ library;
 /// contest configuration) is far below this.
 const int defaultMaxBodyBytes = 1024 * 1024;
 
-/// The most bytes a `POST /sync/exchange` body may hold. A director's first
-/// upload of the largest contest we support (100 pilots, 6 to 8 rounds) sends
-/// every row of it in one exchange.
-const int syncExchangeMaxBodyBytes = 16 * 1024 * 1024;
-
-/// The most mutations one `POST /sync/exchange` may carry.
-const int syncExchangeMaxMutations = 10000;
-
 /// The request body is larger than the route allows (413).
 class PayloadTooLargeError implements Exception {
   const PayloadTooLargeError(this.maxBytes);

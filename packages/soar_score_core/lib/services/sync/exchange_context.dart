@@ -11,6 +11,7 @@ class ExchangeContext {
     required this.clock,
     required this.newId,
     this.installationId,
+    this.firstUpload = false,
   });
 
   final SyncScopeKey scope;
@@ -21,6 +22,10 @@ class ExchangeContext {
   /// The installation that sent the mutations; null for a decision the
   /// director made through the resolve route.
   final Id? installationId;
+
+  /// The request says it continues the first upload of the contest, sent in
+  /// several exchanges (see `SyncExchangeInput.firstUpload`).
+  final bool firstUpload;
 
   final DateTime Function() clock;
   final Id Function() newId;

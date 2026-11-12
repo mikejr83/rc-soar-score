@@ -227,6 +227,7 @@ The acceptor applies the authority table in [offline-synchronization.md](offline
 
 - The first accepted upload for a contest from the director's installation creates the `Initial` activation when none exists, so the engine does not call the activation route for a first upload.
 - The lock and completed rules do not apply to the other mutations of the exchange that creates a contest (its first upload): they are the contest's history, so a restored or offline-completed contest uploads in full. Later exchanges are refused as usual.
+- A first upload too large for one exchange is sent in several (the service's limits are 16 MiB and 10,000 mutations per exchange, `soar_score_api` `sync_limits.dart`). Each exchange of it sets `first_upload`; the service then keeps the contest's history exempt from the lock and completed rules, but only while the sending installation holds the contest's single `Initial` activation. The client sends the contest's creation again until the whole upload is decided, so an interrupted upload resumes with the flag. A mutation too large to fit alone is rejected locally with `payload_too_large`.
 - `GET /sync/system-data` answers an empty page at the seeded sequence until system data changes are published.
 - Exchanges for one scope are serialized with an in-process lock. A deployment with several service instances needs a database lock.
 

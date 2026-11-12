@@ -137,6 +137,16 @@ class MutationProcessor {
       final holds = activations.any(
         (a) => a.isOpen && a.installationId == ctx.installationId,
       );
+      // A later batch of a first upload: the contest was created by an earlier
+      // exchange of the same upload, so its history is still exempt from the
+      // lock and completed rules. Only the installation that holds the
+      // contest's one `Initial` activation may say so.
+      if (holds &&
+          ctx.firstUpload &&
+          activations.length == 1 &&
+          activations.single.kind == ActivationKind.initial) {
+        ctx.createdContestId = scope.contestId;
+      }
       if (!holds) {
         final firstUpload =
             activations.isEmpty &&

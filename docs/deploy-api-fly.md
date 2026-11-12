@@ -236,6 +236,17 @@ client cannot use up the 512 MB machine. The limits live in
 | Results recalculation            | 10 per minute per account       | 429 `rate_limited` with `retry-after` |
 | Pilot group and overall results  | 60 per minute per guest session | 429 `rate_limited` with `retry-after` |
 
+The native app cuts its pending changes into exchanges that fit both sync
+limits (the body is measured in bytes, request envelope included), stores each
+exchange's results before sending the next, and leaves a change that depends on
+a refused one queued. A single change too large to ever fit is marked rejected
+with `payload_too_large` and stays in the outbox with that reason. The first
+upload of a contest may span several exchanges: each says `first_upload`, and
+the service keeps the contest's history exempt from the lock and completed
+rules only while the sending installation holds the contest's `Initial`
+activation. The contest's own creation stays pending on the client until the
+whole upload is decided, so an interrupted upload resumes with the flag.
+
 A body is refused from its declared length, or as soon as the bytes read pass
 the limit, before anything is decoded or parsed. Rate counts are in memory per
 machine, so a restart or another machine starts a fresh count. Fly's proxy

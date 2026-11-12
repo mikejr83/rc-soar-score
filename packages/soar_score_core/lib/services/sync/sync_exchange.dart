@@ -16,6 +16,7 @@ class SyncExchangeInput {
     required this.lastAcknowledgedSequence,
     this.pageToken,
     this.mutations = const [],
+    this.firstUpload = false,
   });
 
   final int protocolVersion;
@@ -27,6 +28,11 @@ class SyncExchangeInput {
   final int lastAcknowledgedSequence;
   final String? pageToken;
   final List<SyncMutation> mutations;
+
+  /// The installation says this request belongs to the upload of a contest it
+  /// created, sent in several exchanges. The service honors it only while the
+  /// installation still holds the contest's `Initial` activation.
+  final bool firstUpload;
 }
 
 /// A conflict an exchange created or touched.

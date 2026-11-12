@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
+import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:test/test.dart';

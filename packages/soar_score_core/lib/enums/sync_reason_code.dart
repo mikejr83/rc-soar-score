@@ -22,7 +22,8 @@ enum SyncReasonCode {
   schemaTooOld('schema_too_old'),
   reclaimRequiresSync('reclaim_requires_sync'),
   contestExists('contest_exists'),
-  invalidPayload('invalid_payload');
+  invalidPayload('invalid_payload'),
+  payloadTooLarge('payload_too_large');
 
   const SyncReasonCode(this.code);
 

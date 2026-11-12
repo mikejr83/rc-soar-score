@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import 'outbox_batches.dart';
 import 'outbox_order.dart';
 import 'resolve_conflict_outcome.dart';
 import 'sync_engine_config.dart';
@@ -157,20 +159,7 @@ class SyncEngine {
         final pulled = await _pull(scope, await _exchange(scope, cursor, []));
         final pending = inDependencyOrder(await _store.pendingMutations(scope));
         if (pending.isNotEmpty) {
-          final response = await _exchange(
-            scope,
-            pulled.cursor,
-            pending.map(mutationToDto).toList(),
-          );
-          await _recordResults(pending, response.results);
-          // The service now holds what was accepted, which screens that read
-          // it (invitations, the publication) need to read again.
-          if (response.results.any(
-            (r) => r.outcome == MutationOutcome.accepted,
-          )) {
-            _bumpRevision(scope);
-          }
-          await _pull(scope, response, from: pulled.cursor);
+          await _push(scope, pending, pulled.cursor);
         }
       });
       if (failure == null) {
@@ -186,6 +175,126 @@ class SyncEngine {
       return failure;
     } finally {
       _emit(_state.copyWith(syncing: false));
+    }
+  }
+
+  /// Sends [pending] in as many exchanges as the service's limits need, each
+  /// one's results stored before the next is sent.
+  ///
+  /// A mutation that depends on one that was not accepted is not sent; it
+  /// stays pending. One too large to ever fit is marked rejected with
+  /// `payload_too_large` and stays in the outbox with that reason.
+  ///
+  /// The first upload of a contest is the contest's creation plus its whole
+  /// history, and it may need several exchanges. The creation's own outcome
+  /// is therefore held back until every other mutation of the upload has been
+  /// decided: an interrupted upload still has it pending, sends it again (the
+  /// service answers a repeat with its first decision) and says
+  /// `first_upload`, so the service keeps the contest's history exempt from
+  /// its lock and completed rules.
+  Future<void> _push(
+    SyncScopeKey scope,
+    List<MutationRecord> pending,
+    int cursor,
+  ) async {
+    final creation = scope is ContestScopeKey
+        ? pending.where(
+            (m) =>
+                m.entityType == 'Contest' &&
+                m.entityId == scope.contestId &&
+                m.baseRevision == null,
+          )
+        : const <MutationRecord>[];
+    final heldCreation = creation.isEmpty ? null : creation.first;
+    final firstUpload = heldCreation != null;
+
+    final envelope = utf8
+        .encode(
+          jsonEncode(
+            _request(scope, cursor, const [], firstUpload: true).toJson(),
+          ),
+        )
+        .length;
+    final split = splitOutbox(
+      pending,
+      envelopeBytes: envelope,
+      maxBytes: _config.maxExchangeBytes,
+      maxMutations: _config.maxExchangeMutations,
+    );
+    for (final tooLarge in split.oversized) {
+      await _store.recordOutcome(
+        mutationId: tooLarge.id,
+        outcome: MutationOutcome.rejected,
+        serverRejectionTime: _config.now(),
+        reasonCode: SyncReasonCode.payloadTooLarge.code,
+        errorMessage: 'The change is too large to send in one request.',
+      );
+    }
+
+    // Mutations not accepted, by id: whatever depends on one waits.
+    final blocked = <Id>{for (final m in split.oversized) m.id};
+    SyncMutationResult? heldAccepted;
+    var sequence = cursor;
+    var left = 0;
+    for (final batch in split.batches) {
+      final sendable = <MutationRecord>[];
+      for (final m in batch) {
+        if (blocked.contains(m.dependsOnMutationId)) {
+          blocked.add(m.id);
+          left++;
+        } else {
+          sendable.add(m);
+        }
+      }
+      if (sendable.isEmpty) continue;
+      final response = await _exchange(
+        scope,
+        sequence,
+        sendable.map(mutationToDto).toList(),
+        firstUpload: firstUpload,
+      );
+      final accepted = <String>{
+        for (final r in response.results)
+          if (r.outcome == MutationOutcome.accepted) r.clientMutationId,
+      };
+      for (final m in sendable) {
+        if (!accepted.contains(m.clientMutationId)) {
+          blocked.add(m.id);
+          left++;
+        }
+      }
+      final held = heldCreation != null && sendable.contains(heldCreation);
+      if (held) {
+        for (final r in response.results) {
+          if (r.clientMutationId == heldCreation.clientMutationId &&
+              r.outcome == MutationOutcome.accepted) {
+            heldAccepted = r;
+          }
+        }
+      }
+      // Only an accepted creation is held back; a refusal is recorded now.
+      final keep = held && heldAccepted != null;
+      await _recordResults(
+        keep
+            ? [
+                for (final m in sendable)
+                  if (m != heldCreation) m,
+              ]
+            : sendable,
+        response.results,
+      );
+      // The service now holds what was accepted, which screens that read
+      // it (invitations, the publication) need to read again.
+      if (accepted.isNotEmpty) _bumpRevision(scope);
+      sequence = (await _pull(scope, response, from: sequence)).cursor;
+    }
+    if (heldCreation != null && heldAccepted != null && left == 0) {
+      await _store.recordOutcome(
+        mutationId: heldCreation.id,
+        outcome: MutationOutcome.accepted,
+        sequence: heldAccepted.sequence,
+        serverAcceptanceTime: _config.now(),
+      );
     }
   }
 
@@ -236,16 +345,32 @@ class SyncEngine {
     int cursor,
     List<SyncMutationDto> mutations, {
     String? pageToken,
+    bool firstUpload = false,
   }) => _gateway.exchange(
-    SyncExchangeRequest(
-      protocolVersion: _config.protocolVersion,
-      schemaVersion: _config.schemaVersion,
-      installationId: _config.installationId,
-      scope: scopeToDto(scope),
-      lastAcknowledgedSequence: cursor,
+    _request(
+      scope,
+      cursor,
+      mutations,
       pageToken: pageToken,
-      mutations: mutations,
+      firstUpload: firstUpload,
     ),
+  );
+
+  SyncExchangeRequest _request(
+    SyncScopeKey scope,
+    int cursor,
+    List<SyncMutationDto> mutations, {
+    String? pageToken,
+    bool firstUpload = false,
+  }) => SyncExchangeRequest(
+    protocolVersion: _config.protocolVersion,
+    schemaVersion: _config.schemaVersion,
+    installationId: _config.installationId,
+    scope: scopeToDto(scope),
+    lastAcknowledgedSequence: cursor,
+    pageToken: pageToken,
+    mutations: mutations,
+    firstUpload: firstUpload,
   );
 
   /// Stores [first]'s changes and every following page, moving the cursor

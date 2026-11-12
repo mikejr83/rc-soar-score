@@ -132,4 +132,43 @@ void _tests(Backend backend) {
 
     expect(out.results.single.reasonCode, 'locked');
   });
+
+  group('a first upload sent in several exchanges', () {
+    /// Uploads the director's scope, then the contest's mutations in two
+    /// exchanges: the creation with a few, then the rest.
+    Future<SyncExchangeOutput> secondBatch({required bool firstUpload}) async {
+      final director = core.DirectorScopeKey(harness.account);
+      final owned = await harness.outbox(director);
+      final accepted = await harness.exchange(director, mutations: owned);
+      await harness.acknowledge(owned, accepted.results);
+      final sent = await harness.outbox(scope);
+      final head = sent.take(3).toList();
+      final tail = sent.skip(3).toList();
+      final first = await harness.exchange(scope, mutations: head);
+      expect(
+        first.results.every((r) => r.outcome == core.MutationOutcome.accepted),
+        isTrue,
+      );
+      return harness.exchange(
+        scope,
+        mutations: tail,
+        after: first.serverSequence,
+        firstUpload: firstUpload,
+      );
+    }
+
+    test('the later batches are accepted with the flag', () async {
+      await prepare(core.AdminLock.locked);
+      final out = await secondBatch(firstUpload: true);
+      expect(out.results.map((r) => r.outcome).toSet(), {
+        core.MutationOutcome.accepted,
+      });
+    });
+
+    test('without the flag they are refused as locked', () async {
+      await prepare(core.AdminLock.locked);
+      final out = await secondBatch(firstUpload: false);
+      expect(out.results.map((r) => r.reasonCode).toSet(), contains('locked'));
+    });
+  });
 }

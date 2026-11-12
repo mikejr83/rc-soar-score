@@ -136,6 +136,7 @@ class SyncAcceptorService {
         scope: scope,
         accountId: accountId,
         installationId: input.installationId,
+        firstUpload: input.firstUpload,
         clock: _clock,
         newId: _newId,
       );
