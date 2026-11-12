@@ -155,35 +155,130 @@ class PilotLinkCollisions {
       await _log.closeAutomatically(tx, ctx, conflict);
       final competing = conflict.competingPayload;
       if (competing == null) continue;
+      Map<String, Object?>? holder = current;
       if (current == null) {
+        // The first contender takes the place of the removed link; any other
+        // contender is then reviewed against the link that now holds the pilot.
         await _promote(tx, ctx, conflict, competing);
+        holder = await _holding(tx, ctx, competing);
+      }
+      if (holder == null ||
+          holder['participant_profile_id'] ==
+              competing['participant_profile_id']) {
         continue;
       }
-      if (current['participant_profile_id'] ==
-          competing['participant_profile_id']) {
-        continue;
-      }
-      final reopened = ConflictRecord(
-        id: ctx.newId(),
-        ownerAccountId: conflict.ownerAccountId,
-        entityType: entityType,
-        entityId: linkId,
-        competingMutationId: conflict.competingMutationId,
-        reasonCode: conflict.reasonCode,
-        reason:
-            'The pilot link changed while it waited for a decision. Review '
-            'the links again.',
-        createdAt: ctx.clock(),
-        acceptedPayload: current,
-        competingPayload: competing,
-        entityRevision: current['revision'] as int?,
-      );
-      await tx.saveConflict(reopened);
-      await _log.emit(tx, ctx, reopened);
-      ctx.conflicts.add(
-        SyncConflictPointer(id: reopened.id, requiresAction: true),
-      );
+      await _reopen(tx, ctx, conflict, holder, competing);
     }
+  }
+
+  Future<void> _reopen(
+    SyncAcceptorTransaction tx,
+    ExchangeContext ctx,
+    ConflictRecord conflict,
+    Map<String, Object?> holder,
+    Map<String, Object?> competing,
+  ) async {
+    final reopened = ConflictRecord(
+      id: ctx.newId(),
+      ownerAccountId: conflict.ownerAccountId,
+      entityType: entityType,
+      entityId: Id.parse(holder['id']! as String),
+      competingMutationId: conflict.competingMutationId,
+      reasonCode: conflict.reasonCode,
+      reason:
+          'The pilot link changed while it waited for a decision. Review '
+          'the links again.',
+      createdAt: ctx.clock(),
+      acceptedPayload: holder,
+      competingPayload: competing,
+      entityRevision: holder['revision'] as int?,
+    );
+    await tx.saveConflict(reopened);
+    await _log.emit(tx, ctx, reopened);
+    ctx.conflicts.add(
+      SyncConflictPointer(id: reopened.id, requiresAction: true),
+    );
+  }
+
+  /// An edit of a link both installations already hold, made on a revision
+  /// that is no longer the stored one.
+  ///
+  /// Returns null when the edit builds on the stored link and can be stored.
+  /// Otherwise the two installations disagree: a different participant is a
+  /// review for the director, the same participant is kept quietly. An edit
+  /// that follows an earlier edit of a waiting review replaces it.
+  Future<MutationResult?> competeOnShared(
+    SyncAcceptorTransaction tx,
+    ExchangeContext ctx,
+    SyncMutation m,
+    MutationPayload payload,
+    Map<String, Object?> stored,
+  ) async {
+    final entity = payload.entity;
+    final base = m.baseRevision;
+    ConflictRecord? successorOf;
+    for (final earlier in await _pending(tx, ctx)) {
+      if (earlier.entityId == m.entityId &&
+          base != null &&
+          earlier.competingPayload?['id'] == m.entityId.value &&
+          earlier.competingPayload?['revision'] == base) {
+        successorOf = earlier;
+      }
+    }
+    if (successorOf == null && base == stored['revision']) return null;
+    if (successorOf != null) {
+      await _log.closeAutomatically(tx, ctx, successorOf);
+    }
+    final agree =
+        stored['participant_profile_id'] == entity['participant_profile_id'];
+    return _log.conflict(
+      tx,
+      ctx,
+      m,
+      reasonCode: agree
+          ? sameParticipantReason
+          : SyncReasonCode.uniqueViolation.code,
+      message: agree
+          ? 'Both devices linked this pilot to the same participant. The '
+                'saved GliderScore details are compared at the next import.'
+          : 'Two devices linked this GliderScore pilot to different '
+                'participants. Review the links.',
+      competing: payload,
+      accepted: stored,
+      currentRevision: stored['revision'] as int?,
+      requiresAction: !agree,
+    );
+  }
+
+  /// After the director kept the stored link of a review whose competing link
+  /// shares its id, publish the stored link again under a newer revision so
+  /// the installation that lost replaces its own edit.
+  Future<void> republishKept(
+    SyncAcceptorTransaction tx,
+    ExchangeContext ctx,
+    ConflictRecord conflict,
+  ) async {
+    if (conflict.competingPayload?['id'] != conflict.entityId.value) return;
+    final stored = await tx.findEntity(entityType, conflict.entityId);
+    if (stored == null) return;
+    final entity = {...stored, 'revision': (stored['revision'] as int) + 1};
+    await tx.writeEntity(entityType, entity);
+    await _log.accept(
+      tx,
+      ctx,
+      SyncMutation(
+        id: ctx.newId(),
+        clientMutationId: 'server:pilot-link-republished:${conflict.id.value}',
+        entityType: entityType,
+        entityId: conflict.entityId,
+        authority: Authority.system,
+        clientTime: ctx.clock(),
+        payload: MutationPayload.save(entity).toJson(),
+      ),
+      MutationPayload.save(entity),
+      revision: entity['revision'] as int?,
+    );
+    await storedLinkChanged(tx, ctx, conflict.entityId, except: conflict.id);
   }
 
   /// A participant was deleted. Its links go with it, and so do the reviews

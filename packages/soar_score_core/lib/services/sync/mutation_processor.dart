@@ -250,6 +250,18 @@ class MutationProcessor {
     }
 
     final current = stored['revision'] as int;
+    if (PilotLinkCollisions.handles(s.ctx, s.m.entityType) &&
+        !jsonEquals(_comparable(stored), _comparable(entity)) &&
+        (base == null || base <= current)) {
+      final competed = await _links.competeOnShared(
+        s.tx,
+        s.ctx,
+        s.m,
+        s.payload,
+        stored,
+      );
+      if (competed != null) return competed;
+    }
     if (base == null) {
       if (jsonEquals(_comparable(stored), _comparable(entity))) {
         return _acceptStored(s, stored);

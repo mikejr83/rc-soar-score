@@ -37,7 +37,8 @@ class PilotImportLinkRepository extends DriftRepository
     // here: set aside for the service's link but not sent yet, or sent and
     // answered with a conflict that has not come down yet.
     final here = {
-      for (final link in await listForOwner(ownerAccountId)) link.id.value,
+      for (final link in await listForOwner(ownerAccountId))
+        link.id.value: link.revision,
     };
     final mutations =
         await TableMapper(
@@ -61,12 +62,20 @@ class PilotImportLinkRepository extends DriftRepository
       if (_operation(row) != 'save' || deleted.contains(row['entity_id'])) {
         continue;
       }
-      final stored = here.contains(row['entity_id']);
-      final waiting = row['outcome'] == 'Pending' ? !stored : stored;
-      if (!waiting) continue;
+      final stored = here.containsKey(row['entity_id']);
       final data = (row['payload'] as Map?)?['data'];
       final entity = data is Map ? data['entity'] : null;
       if (entity is! Map) continue;
+      // A refused edit of a link both devices hold stays on record; it is
+      // over once the service's choice replaced this installation's link.
+      final replaced =
+          stored &&
+          entity['revision'] is int &&
+          here[row['entity_id']]! > (entity['revision'] as int);
+      final waiting = row['outcome'] == 'Pending'
+          ? !stored
+          : stored && !replaced;
+      if (!waiting) continue;
       final target = entity['participant_profile_id'];
       if (target is String &&
           await _profiles.find(core.Id.parse(target)) == null) {

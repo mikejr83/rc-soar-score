@@ -202,6 +202,7 @@ class ConflictResolver {
         clientMutationId: clientMutationId,
       );
       await tx.saveConflict(resolved);
+      if (isLinkReview) await _links.republishKept(tx, ctx, conflict);
       await _audit(tx, ctx, decision, AuditAction.conflictRejected);
       return emitted;
     }

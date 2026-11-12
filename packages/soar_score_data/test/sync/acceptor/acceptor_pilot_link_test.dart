@@ -541,4 +541,138 @@ void _tests(Backend backend) {
       );
     });
   });
+
+  group('devices that edit one shared link to different participants', () {
+    setUp(() async {
+      await offlineLinks();
+      // Installation A relinks the pilot; B, still on revision 0, relinks too.
+      final a = await send(harness.installationA, [
+        harness.save(
+          'PilotImportLink',
+          link(linkA, p2, revision: 1),
+          base: 0,
+          clientMutationId: 'a-edit',
+        ),
+      ]);
+      expect(a.single.outcome, core.MutationOutcome.accepted);
+    });
+
+    test('the second edit is a review the director decides', () async {
+      final b = await send(harness.installationB, [
+        harness.save(
+          'PilotImportLink',
+          link(linkA, p3, revision: 1),
+          base: 0,
+          clientMutationId: 'b-edit',
+        ),
+      ]);
+
+      expect(b.single.outcome, core.MutationOutcome.conflict);
+      expect(b.single.reasonCode, 'unique_violation');
+      final conflict = (await pending()).single;
+      expect(conflict.entityId, linkA);
+      expect(conflict.acceptedPayload!['participant_profile_id'], p2.value);
+      expect(conflict.competingPayload!['participant_profile_id'], p3.value);
+    });
+
+    test('keeping the stored link publishes it again for the loser', () async {
+      await send(harness.installationB, [
+        harness.save(
+          'PilotImportLink',
+          link(linkA, p3, revision: 1),
+          base: 0,
+          clientMutationId: 'b-edit',
+        ),
+      ]);
+      final review = (await pending()).single;
+
+      await resolve(review.id, core.ConflictResolutionChoice.keptAccepted);
+
+      final stored = await harness.stored('PilotImportLink', linkA);
+      expect(stored!['participant_profile_id'], p2.value);
+      expect(stored['revision'], 2);
+      final pulled = await harness.exchange(scope, after: 0);
+      final change = pulled.changes.lastWhere(
+        (c) => c.entityType == 'PilotImportLink',
+      );
+      expect(change.payload['revision'], 2);
+      expect(change.payload['participant_profile_id'], p2.value);
+      expect(await pending(), isEmpty);
+    });
+
+    test('a later edit of the same device replaces the review', () async {
+      await send(harness.installationB, [
+        harness.save(
+          'PilotImportLink',
+          link(linkA, p3, revision: 1),
+          base: 0,
+          clientMutationId: 'b-edit',
+        ),
+      ]);
+      final second = await send(harness.installationB, [
+        harness.save(
+          'PilotImportLink',
+          link(linkA, p3, revision: 2, values: {'club': 'north'}),
+          base: 1,
+          clientMutationId: 'b-edit-2',
+        ),
+      ]);
+
+      expect(second.single.outcome, core.MutationOutcome.conflict);
+      final conflict = (await pending()).single;
+      expect(conflict.competingPayload!['source_values'], {'club': 'north'});
+      expect(
+        (await harness.stored(
+          'PilotImportLink',
+          linkA,
+        ))!['participant_profile_id'],
+        p2.value,
+      );
+    });
+  });
+
+  group('three devices that link the pilot differently', () {
+    test(
+      'the surviving links are reviewed after the stored one goes',
+      () async {
+        await offlineLinks();
+        final linkC = core.Id.create();
+        await send(harness.installationB, [
+          harness.save(
+            'PilotImportLink',
+            link(linkB, p2),
+            clientMutationId: 'b1',
+          ),
+          harness.save(
+            'PilotImportLink',
+            link(linkC, p3),
+            clientMutationId: 'c1',
+          ),
+        ]);
+        expect(await pending(), hasLength(2));
+
+        await send(harness.installationA, [
+          harness.delete(
+            'PilotImportLink',
+            linkA,
+            base: 0,
+            clientMutationId: 'a-delete',
+          ),
+        ]);
+
+        final waiting = await pending();
+        expect(waiting, hasLength(1));
+        expect(waiting.single.entityId, linkB);
+        expect(
+          waiting.single.acceptedPayload!['participant_profile_id'],
+          p2.value,
+        );
+        expect(
+          waiting.single.competingPayload!['participant_profile_id'],
+          p3.value,
+        );
+        expect(await harness.stored('PilotImportLink', linkC), isNull);
+      },
+    );
+  });
 }
