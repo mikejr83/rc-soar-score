@@ -191,9 +191,36 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
         } else {
           await m.createTable(pilotImportLinks);
         }
+        await _addCurrentAttemptId();
       });
     },
   );
+
+  /// Adds `score_placeholders.current_attempt_id` (unreleased version 2) and
+  /// fills it: the attempt behind the current official score, else the
+  /// latest accepted attempt of the slot.
+  Future<void> _addCurrentAttemptId() async {
+    final sqlite = executor.dialect == SqlDialect.sqlite;
+    final has = sqlite
+        ? await customSelect(
+            "SELECT 1 AS x FROM pragma_table_info('score_placeholders') WHERE name = 'current_attempt_id'",
+          ).get()
+        : await customSelect(
+            "SELECT 1 AS x FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'score_placeholders' AND column_name = 'current_attempt_id'",
+          ).get();
+    if (has.isNotEmpty) return;
+    await customStatement(
+      'ALTER TABLE score_placeholders ADD COLUMN current_attempt_id TEXT',
+    );
+    await customStatement('''
+UPDATE score_placeholders SET current_attempt_id = COALESCE(
+  (SELECT o.score_attempt_id FROM official_scores o
+    WHERE o.score_placeholder_id = score_placeholders.id
+    ORDER BY o.score_revision DESC LIMIT 1),
+  (SELECT a.id FROM score_attempts a
+    WHERE a.score_placeholder_id = score_placeholders.id
+    ORDER BY a.accepted_at DESC, a.id DESC LIMIT 1))''');
+  }
 
   /// Recognizes the alpha version of the table without changing its rows.
   Future<bool> _compatiblePilotImportLinks() async {

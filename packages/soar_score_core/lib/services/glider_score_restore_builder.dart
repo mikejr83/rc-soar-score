@@ -222,6 +222,7 @@ class GliderScoreRestoreBuilder {
           assignmentId: placeholder.assignmentId,
           state: ScorePlaceholderState.official,
           scoreRevision: 1,
+          currentAttemptId: attempt.id,
           revision: placeholder.revision,
         ),
       );

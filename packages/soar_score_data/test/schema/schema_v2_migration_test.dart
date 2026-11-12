@@ -114,6 +114,31 @@ void main() => forEachBackend((backend) {
             for (final (type, file) in exampleEntities) {
               if (!preservedTypes.contains(type)) continue;
               for (final row in exampleRows(file)) {
+                if (type == 'ScorePlaceholder') {
+                  // Version 1 has no current-attempt column; the upgrade
+                  // fills it, so write the version 1 columns only.
+                  await old.customInsert(
+                    'INSERT INTO score_placeholders (id, contest_id, '
+                    'contest_participation_id, assignment_id, state, '
+                    'score_revision, locked_by, locked_at, revision) '
+                    'VALUES (${[for (var i = 1; i <= 9; i++) backend == Backend.sqlite ? '?' : '\$$i'].join(', ')})',
+                    variables: [
+                      for (final key in const [
+                        'id',
+                        'contest_id',
+                        'contest_participation_id',
+                        'assignment_id',
+                        'state',
+                        'score_revision',
+                        'locked_by',
+                        'locked_at',
+                        'revision',
+                      ])
+                        Variable(row[key]),
+                    ],
+                  );
+                  continue;
+                }
                 await stores.of(type).upsertJson(row);
               }
             }
@@ -243,6 +268,22 @@ void main() => forEachBackend((backend) {
               [for (final row in scoresAfter) row.data],
               [for (final row in scoresBefore) row.data],
             );
+            final unfilled = await upgraded
+                .customSelect(
+                  'SELECT COUNT(*) AS n FROM score_placeholders '
+                  'WHERE score_revision > 0 AND current_attempt_id IS NULL',
+                )
+                .getSingle();
+            expect(unfilled.read<int>('n'), 0);
+            final wrong = await upgraded
+                .customSelect(
+                  'SELECT COUNT(*) AS n FROM score_placeholders p '
+                  'JOIN official_scores o ON o.score_placeholder_id = p.id '
+                  'AND o.score_revision = p.score_revision '
+                  'WHERE p.current_attempt_id <> o.score_attempt_id',
+                )
+                .getSingle();
+            expect(wrong.read<int>('n'), 0);
             expect(
               (await upgraded
                       .customSelect(

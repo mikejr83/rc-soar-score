@@ -133,6 +133,7 @@ extension ParticipantScoresService on ScoresService {
       assignmentId: slot.placeholder.assignmentId,
       state: ScorePlaceholderState.submitted,
       scoreRevision: 1,
+      currentAttemptId: attempt.id,
       lockedBy: slot.placeholder.lockedBy,
       lockedAt: slot.placeholder.lockedAt,
       revision: slot.placeholder.revision,

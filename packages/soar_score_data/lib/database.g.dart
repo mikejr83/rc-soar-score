@@ -28361,6 +28361,17 @@ class $ScorePlaceholdersTable extends ScorePlaceholders
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _currentAttemptIdMeta = const VerificationMeta(
+    'currentAttemptId',
+  );
+  @override
+  late final GeneratedColumn<String> currentAttemptId = GeneratedColumn<String>(
+    'current_attempt_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _lockedByMeta = const VerificationMeta(
     'lockedBy',
   );
@@ -28403,6 +28414,7 @@ class $ScorePlaceholdersTable extends ScorePlaceholders
     assignmentId,
     state,
     scoreRevision,
+    currentAttemptId,
     lockedBy,
     lockedAt,
     revision,
@@ -28473,6 +28485,15 @@ class $ScorePlaceholdersTable extends ScorePlaceholders
     } else if (isInserting) {
       context.missing(_scoreRevisionMeta);
     }
+    if (data.containsKey('current_attempt_id')) {
+      context.handle(
+        _currentAttemptIdMeta,
+        currentAttemptId.isAcceptableOrUnknown(
+          data['current_attempt_id']!,
+          _currentAttemptIdMeta,
+        ),
+      );
+    }
     if (data.containsKey('locked_by')) {
       context.handle(
         _lockedByMeta,
@@ -28528,6 +28549,10 @@ class $ScorePlaceholdersTable extends ScorePlaceholders
         DriftSqlType.int,
         data['${effectivePrefix}score_revision'],
       )!,
+      currentAttemptId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}current_attempt_id'],
+      ),
       lockedBy: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}locked_by'],
@@ -28557,6 +28582,7 @@ class ScorePlaceholderData extends DataClass
   final String assignmentId;
   final String state;
   final int scoreRevision;
+  final String? currentAttemptId;
   final String? lockedBy;
   final String? lockedAt;
   final int revision;
@@ -28567,6 +28593,7 @@ class ScorePlaceholderData extends DataClass
     required this.assignmentId,
     required this.state,
     required this.scoreRevision,
+    this.currentAttemptId,
     this.lockedBy,
     this.lockedAt,
     required this.revision,
@@ -28580,6 +28607,9 @@ class ScorePlaceholderData extends DataClass
     map['assignment_id'] = Variable<String>(assignmentId);
     map['state'] = Variable<String>(state);
     map['score_revision'] = Variable<int>(scoreRevision);
+    if (!nullToAbsent || currentAttemptId != null) {
+      map['current_attempt_id'] = Variable<String>(currentAttemptId);
+    }
     if (!nullToAbsent || lockedBy != null) {
       map['locked_by'] = Variable<String>(lockedBy);
     }
@@ -28598,6 +28628,9 @@ class ScorePlaceholderData extends DataClass
       assignmentId: Value(assignmentId),
       state: Value(state),
       scoreRevision: Value(scoreRevision),
+      currentAttemptId: currentAttemptId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currentAttemptId),
       lockedBy: lockedBy == null && nullToAbsent
           ? const Value.absent()
           : Value(lockedBy),
@@ -28622,6 +28655,7 @@ class ScorePlaceholderData extends DataClass
       assignmentId: serializer.fromJson<String>(json['assignmentId']),
       state: serializer.fromJson<String>(json['state']),
       scoreRevision: serializer.fromJson<int>(json['scoreRevision']),
+      currentAttemptId: serializer.fromJson<String?>(json['currentAttemptId']),
       lockedBy: serializer.fromJson<String?>(json['lockedBy']),
       lockedAt: serializer.fromJson<String?>(json['lockedAt']),
       revision: serializer.fromJson<int>(json['revision']),
@@ -28639,6 +28673,7 @@ class ScorePlaceholderData extends DataClass
       'assignmentId': serializer.toJson<String>(assignmentId),
       'state': serializer.toJson<String>(state),
       'scoreRevision': serializer.toJson<int>(scoreRevision),
+      'currentAttemptId': serializer.toJson<String?>(currentAttemptId),
       'lockedBy': serializer.toJson<String?>(lockedBy),
       'lockedAt': serializer.toJson<String?>(lockedAt),
       'revision': serializer.toJson<int>(revision),
@@ -28652,6 +28687,7 @@ class ScorePlaceholderData extends DataClass
     String? assignmentId,
     String? state,
     int? scoreRevision,
+    Value<String?> currentAttemptId = const Value.absent(),
     Value<String?> lockedBy = const Value.absent(),
     Value<String?> lockedAt = const Value.absent(),
     int? revision,
@@ -28663,6 +28699,9 @@ class ScorePlaceholderData extends DataClass
     assignmentId: assignmentId ?? this.assignmentId,
     state: state ?? this.state,
     scoreRevision: scoreRevision ?? this.scoreRevision,
+    currentAttemptId: currentAttemptId.present
+        ? currentAttemptId.value
+        : this.currentAttemptId,
     lockedBy: lockedBy.present ? lockedBy.value : this.lockedBy,
     lockedAt: lockedAt.present ? lockedAt.value : this.lockedAt,
     revision: revision ?? this.revision,
@@ -28681,6 +28720,9 @@ class ScorePlaceholderData extends DataClass
       scoreRevision: data.scoreRevision.present
           ? data.scoreRevision.value
           : this.scoreRevision,
+      currentAttemptId: data.currentAttemptId.present
+          ? data.currentAttemptId.value
+          : this.currentAttemptId,
       lockedBy: data.lockedBy.present ? data.lockedBy.value : this.lockedBy,
       lockedAt: data.lockedAt.present ? data.lockedAt.value : this.lockedAt,
       revision: data.revision.present ? data.revision.value : this.revision,
@@ -28696,6 +28738,7 @@ class ScorePlaceholderData extends DataClass
           ..write('assignmentId: $assignmentId, ')
           ..write('state: $state, ')
           ..write('scoreRevision: $scoreRevision, ')
+          ..write('currentAttemptId: $currentAttemptId, ')
           ..write('lockedBy: $lockedBy, ')
           ..write('lockedAt: $lockedAt, ')
           ..write('revision: $revision')
@@ -28711,6 +28754,7 @@ class ScorePlaceholderData extends DataClass
     assignmentId,
     state,
     scoreRevision,
+    currentAttemptId,
     lockedBy,
     lockedAt,
     revision,
@@ -28725,6 +28769,7 @@ class ScorePlaceholderData extends DataClass
           other.assignmentId == this.assignmentId &&
           other.state == this.state &&
           other.scoreRevision == this.scoreRevision &&
+          other.currentAttemptId == this.currentAttemptId &&
           other.lockedBy == this.lockedBy &&
           other.lockedAt == this.lockedAt &&
           other.revision == this.revision);
@@ -28737,6 +28782,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
   final Value<String> assignmentId;
   final Value<String> state;
   final Value<int> scoreRevision;
+  final Value<String?> currentAttemptId;
   final Value<String?> lockedBy;
   final Value<String?> lockedAt;
   final Value<int> revision;
@@ -28748,6 +28794,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
     this.assignmentId = const Value.absent(),
     this.state = const Value.absent(),
     this.scoreRevision = const Value.absent(),
+    this.currentAttemptId = const Value.absent(),
     this.lockedBy = const Value.absent(),
     this.lockedAt = const Value.absent(),
     this.revision = const Value.absent(),
@@ -28760,6 +28807,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
     required String assignmentId,
     required String state,
     required int scoreRevision,
+    this.currentAttemptId = const Value.absent(),
     this.lockedBy = const Value.absent(),
     this.lockedAt = const Value.absent(),
     this.revision = const Value.absent(),
@@ -28777,6 +28825,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
     Expression<String>? assignmentId,
     Expression<String>? state,
     Expression<int>? scoreRevision,
+    Expression<String>? currentAttemptId,
     Expression<String>? lockedBy,
     Expression<String>? lockedAt,
     Expression<int>? revision,
@@ -28790,6 +28839,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
       if (assignmentId != null) 'assignment_id': assignmentId,
       if (state != null) 'state': state,
       if (scoreRevision != null) 'score_revision': scoreRevision,
+      if (currentAttemptId != null) 'current_attempt_id': currentAttemptId,
       if (lockedBy != null) 'locked_by': lockedBy,
       if (lockedAt != null) 'locked_at': lockedAt,
       if (revision != null) 'revision': revision,
@@ -28804,6 +28854,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
     Value<String>? assignmentId,
     Value<String>? state,
     Value<int>? scoreRevision,
+    Value<String?>? currentAttemptId,
     Value<String?>? lockedBy,
     Value<String?>? lockedAt,
     Value<int>? revision,
@@ -28817,6 +28868,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
       assignmentId: assignmentId ?? this.assignmentId,
       state: state ?? this.state,
       scoreRevision: scoreRevision ?? this.scoreRevision,
+      currentAttemptId: currentAttemptId ?? this.currentAttemptId,
       lockedBy: lockedBy ?? this.lockedBy,
       lockedAt: lockedAt ?? this.lockedAt,
       revision: revision ?? this.revision,
@@ -28847,6 +28899,9 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
     if (scoreRevision.present) {
       map['score_revision'] = Variable<int>(scoreRevision.value);
     }
+    if (currentAttemptId.present) {
+      map['current_attempt_id'] = Variable<String>(currentAttemptId.value);
+    }
     if (lockedBy.present) {
       map['locked_by'] = Variable<String>(lockedBy.value);
     }
@@ -28871,6 +28926,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
           ..write('assignmentId: $assignmentId, ')
           ..write('state: $state, ')
           ..write('scoreRevision: $scoreRevision, ')
+          ..write('currentAttemptId: $currentAttemptId, ')
           ..write('lockedBy: $lockedBy, ')
           ..write('lockedAt: $lockedAt, ')
           ..write('revision: $revision, ')
@@ -67985,6 +68041,7 @@ typedef $$ScorePlaceholdersTableCreateCompanionBuilder =
       required String assignmentId,
       required String state,
       required int scoreRevision,
+      Value<String?> currentAttemptId,
       Value<String?> lockedBy,
       Value<String?> lockedAt,
       Value<int> revision,
@@ -67998,6 +68055,7 @@ typedef $$ScorePlaceholdersTableUpdateCompanionBuilder =
       Value<String> assignmentId,
       Value<String> state,
       Value<int> scoreRevision,
+      Value<String?> currentAttemptId,
       Value<String?> lockedBy,
       Value<String?> lockedAt,
       Value<int> revision,
@@ -68177,6 +68235,11 @@ class $$ScorePlaceholdersTableFilterComposer
 
   ColumnFilters<int> get scoreRevision => $composableBuilder(
     column: $table.scoreRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currentAttemptId => $composableBuilder(
+    column: $table.currentAttemptId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -68390,6 +68453,11 @@ class $$ScorePlaceholdersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get currentAttemptId => $composableBuilder(
+    column: $table.currentAttemptId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get lockedBy => $composableBuilder(
     column: $table.lockedBy,
     builder: (column) => ColumnOrderings(column),
@@ -68493,6 +68561,11 @@ class $$ScorePlaceholdersTableAnnotationComposer
 
   GeneratedColumn<int> get scoreRevision => $composableBuilder(
     column: $table.scoreRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get currentAttemptId => $composableBuilder(
+    column: $table.currentAttemptId,
     builder: (column) => column,
   );
 
@@ -68724,6 +68797,7 @@ class $$ScorePlaceholdersTableTableManager
                 Value<String> assignmentId = const Value.absent(),
                 Value<String> state = const Value.absent(),
                 Value<int> scoreRevision = const Value.absent(),
+                Value<String?> currentAttemptId = const Value.absent(),
                 Value<String?> lockedBy = const Value.absent(),
                 Value<String?> lockedAt = const Value.absent(),
                 Value<int> revision = const Value.absent(),
@@ -68735,6 +68809,7 @@ class $$ScorePlaceholdersTableTableManager
                 assignmentId: assignmentId,
                 state: state,
                 scoreRevision: scoreRevision,
+                currentAttemptId: currentAttemptId,
                 lockedBy: lockedBy,
                 lockedAt: lockedAt,
                 revision: revision,
@@ -68748,6 +68823,7 @@ class $$ScorePlaceholdersTableTableManager
                 required String assignmentId,
                 required String state,
                 required int scoreRevision,
+                Value<String?> currentAttemptId = const Value.absent(),
                 Value<String?> lockedBy = const Value.absent(),
                 Value<String?> lockedAt = const Value.absent(),
                 Value<int> revision = const Value.absent(),
@@ -68759,6 +68835,7 @@ class $$ScorePlaceholdersTableTableManager
                 assignmentId: assignmentId,
                 state: state,
                 scoreRevision: scoreRevision,
+                currentAttemptId: currentAttemptId,
                 lockedBy: lockedBy,
                 lockedAt: lockedAt,
                 revision: revision,

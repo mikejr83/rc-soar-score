@@ -344,6 +344,7 @@ class ScoresService {
       assignmentId: placeholder.assignmentId,
       state: ScorePlaceholderState.official,
       scoreRevision: official.scoreRevision,
+      currentAttemptId: attempt.id,
       lockedBy: placeholder.lockedBy,
       lockedAt: placeholder.lockedAt,
       revision: placeholder.revision,
