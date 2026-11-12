@@ -120,6 +120,7 @@ class PilotLinkCollisions {
       currentRevision: held['revision'] as int?,
       conflictEntityId: Id.parse(held['id']! as String),
       requiresAction: !agree,
+      recordId: m.id,
     );
   }
 
@@ -215,17 +216,23 @@ class PilotLinkCollisions {
     Map<String, Object?> stored,
   ) async {
     final entity = payload.entity;
-    final base = m.baseRevision;
+    // An edit replaces a waiting contender only when it names that contender
+    // as the edit it follows (the sending installation records the edit it
+    // built on). A revision number alone is not evidence: two installations
+    // reach the same revision independently.
     ConflictRecord? successorOf;
-    for (final earlier in await _pending(tx, ctx)) {
-      if (earlier.entityId == m.entityId &&
-          base != null &&
-          earlier.competingPayload?['id'] == m.entityId.value &&
-          earlier.competingPayload?['revision'] == base) {
-        successorOf = earlier;
+    final follows = payload.follows == null ? null : Id.parse(payload.follows!);
+    if (follows != null) {
+      for (final earlier in await _pending(tx, ctx)) {
+        if (earlier.entityId == m.entityId &&
+            earlier.competingMutationId == follows) {
+          successorOf = earlier;
+        }
       }
     }
-    if (successorOf == null && base == stored['revision']) return null;
+    if (successorOf == null && m.baseRevision == stored['revision']) {
+      return null;
+    }
     if (successorOf != null) {
       await _log.closeAutomatically(tx, ctx, successorOf);
     }
@@ -247,7 +254,22 @@ class PilotLinkCollisions {
       accepted: stored,
       currentRevision: stored['revision'] as int?,
       requiresAction: !agree,
+      recordId: m.id,
     );
+  }
+
+  /// The revision a decision publishes: above the stored link and, when the
+  /// competing link shares its id, above the optimistic revision its device
+  /// already holds, so every replica applies the decision.
+  static int settledRevision(
+    Map<String, Object?> stored,
+    Map<String, Object?>? competing,
+  ) {
+    final held = stored['revision'] as int;
+    final theirs = competing?['id'] == stored['id']
+        ? (competing?['revision'] as int? ?? 0)
+        : 0;
+    return (held > theirs ? held : theirs) + 1;
   }
 
   /// After the director kept the stored link of a review whose competing link
@@ -261,7 +283,10 @@ class PilotLinkCollisions {
     if (conflict.competingPayload?['id'] != conflict.entityId.value) return;
     final stored = await tx.findEntity(entityType, conflict.entityId);
     if (stored == null) return;
-    final entity = {...stored, 'revision': (stored['revision'] as int) + 1};
+    final entity = {
+      ...stored,
+      'revision': settledRevision(stored, conflict.competingPayload),
+    };
     await tx.writeEntity(entityType, entity);
     await _log.accept(
       tx,

@@ -298,7 +298,14 @@ class ConflictResolver {
     }
     switch (kind.shape) {
       case SyncEntityShape.revisioned:
-        entity['revision'] = ((stored?['revision'] as int?) ?? 0) + 1;
+        entity['revision'] = stored == null
+            ? 1
+            : type == PilotLinkCollisions.entityType
+            ? PilotLinkCollisions.settledRevision(
+                stored,
+                conflict.competingPayload,
+              )
+            : (stored['revision'] as int) + 1;
       case SyncEntityShape.appendOnly:
       case SyncEntityShape.unrevisioned:
         await _renumber(tx, ctx, type, entity);

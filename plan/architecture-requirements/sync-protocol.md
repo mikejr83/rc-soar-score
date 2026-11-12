@@ -193,26 +193,29 @@ Both are recovery operations, not the normal conflict mechanism. Large responses
 
 One list, shared by server and client, defined in `soar_score_core`:
 
-| Code                           | Used with          | Meaning                                                                        |
-| ------------------------------ | ------------------ | ------------------------------------------------------------------------------ |
-| `stale_base`                   | Conflict, Rejected | `base_revision` is not current and the change cannot be merged automatically   |
-| `config_revision_conflict`     | Conflict           | Configuration changed on a stale revision; side-by-side resolution is required |
-| `inactive_installation`        | Rejected           | No open activation for the contest, or the installation is revoked             |
-| `unknown_matrix_revision`      | Rejected           | A score references a matrix revision the service does not have yet             |
-| `unknown_flight_group`         | Rejected           | A score references a group the service does not have yet                       |
-| `entity_deleted`               | Rejected           | The entity has a tombstone                                                     |
-| `unique_violation`             | Conflict           | For example two moves into the same lane                                       |
-| `invalid_payload`              | Rejected           | The payload is malformed, names a derived value, or is not a stored entity     |
-| `locked`                       | Rejected           | The score or contest state does not allow modification                         |
-| `unauthorized`                 | Rejected           | The account lacks authority for the scope or the entity                        |
-| `director_over_participant`    | Conflict (silent)  | A director's official value beat a participant submission                      |
-| `same_participant_link`        | Conflict (silent)  | Two installations linked a GliderScore pilot to the same participant           |
-| `scored_assignment`            | Rejected           | A change would reinterpret an assignment that already has scores               |
-| `dependency_failed`            | Skipped            | A mutation it depends on failed                                                |
-| `unsupported_protocol_version` | Version error      | Protocol version outside the supported range                                   |
-| `schema_too_old`               | Version error      | Client schema below the minimum                                                |
-| `reclaim_requires_sync`        | Activation error   | `Reclaim` attempted before pulling and reconciling                             |
-| `contest_exists`               | Import error       | A contest with that identifier already exists                                  |
+| Code                        | Used with          | Meaning                                                                        |
+| --------------------------- | ------------------ | ------------------------------------------------------------------------------ |
+| `stale_base`                | Conflict, Rejected | `base_revision` is not current and the change cannot be merged automatically   |
+| `config_revision_conflict`  | Conflict           | Configuration changed on a stale revision; side-by-side resolution is required |
+| `inactive_installation`     | Rejected           | No open activation for the contest, or the installation is revoked             |
+| `unknown_matrix_revision`   | Rejected           | A score references a matrix revision the service does not have yet             |
+| `unknown_flight_group`      | Rejected           | A score references a group the service does not have yet                       |
+| `entity_deleted`            | Rejected           | The entity has a tombstone                                                     |
+| `unique_violation`          | Conflict           | For example two moves into the same lane                                       |
+| `invalid_payload`           | Rejected           | The payload is malformed, names a derived value, or is not a stored entity     |
+| `locked`                    | Rejected           | The score or contest state does not allow modification                         |
+| `unauthorized`              | Rejected           | The account lacks authority for the scope or the entity                        |
+| `director_over_participant` | Conflict (silent)  | A director's official value beat a participant submission                      |
+| `same_participant_link`     | Conflict (silent)  | Two installations linked a GliderScore pilot to the same participant           |
+
+**Edits of a pilot link both devices hold.** A save of a `PilotImportLink` may carry `follows`, the id of the device's own unacknowledged edit of the same link that it was built on. The service opens a review (`unique_violation`) for a stale edit that names a different participant than the stored link, and replaces a waiting review only when the incoming edit's `follows` names that review's edit; a matching revision number or installation alone is no evidence, since two devices reach the same revision independently. An edit without `follows` is an ordinary edit. A decision (either choice) publishes the chosen link at a revision above the stored link and above the revision of the contender's device, so every replica applies it.
+
+| `scored_assignment` | Rejected | A change would reinterpret an assignment that already has scores |
+| `dependency_failed` | Skipped | A mutation it depends on failed |
+| `unsupported_protocol_version` | Version error | Protocol version outside the supported range |
+| `schema_too_old` | Version error | Client schema below the minimum |
+| `reclaim_requires_sync` | Activation error | `Reclaim` attempted before pulling and reconciling |
+| `contest_exists` | Import error | A contest with that identifier already exists |
 
 `Rejected` means the mutation is invalid and stays in the outbox with its reason until the director retries or discards it. `Conflict` means a decision is needed (or a silent record was stored). `Skipped` is retried automatically.
 

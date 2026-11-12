@@ -404,6 +404,82 @@ void main() {
     });
   });
 
+  group('one link both devices hold', () {
+    /// Both devices hold the link; A relinks it and syncs; B edits twice
+    /// offline (the last edit names the third participant) and syncs.
+    Future<
+      ({
+        core.ParticipantProfile first,
+        core.ParticipantProfile second,
+        core.ParticipantProfile third,
+      })
+    >
+    shared() async {
+      final first = await addProfile(a, 'First');
+      final second = await addProfile(a, 'Second');
+      final third = await addProfile(a, 'Third');
+      final link = await addLink(a, first);
+      await signIn(a, syncA, remoteA);
+      await signIn(b, syncB, remoteB);
+      final held = (await linksOn(b)).single;
+      expect(held.id, link.id);
+      final relinked = await editLink(
+        a,
+        (await linksOn(a)).single,
+        profile: second,
+      );
+      expect(await syncA.engine.syncScope(scope), isNull);
+      final mine = await editLink(b, held, profile: third);
+      await editLink(b, mine, values: {'club': 'north'});
+      expect(relinked.revision, greaterThan(held.revision));
+      expect(await syncB.engine.syncScope(scope), isNull);
+      return (first: first, second: second, third: third);
+    }
+
+    for (final choice in core.ConflictResolutionChoice.values.where(
+      (c) =>
+          c == core.ConflictResolutionChoice.keptAccepted ||
+          c == core.ConflictResolutionChoice.tookCompeting,
+    )) {
+      test('${choice.name} converges both devices and the service', () async {
+        final p = await shared();
+        final review = (await reviewsOn(syncB)).single;
+        expect(await NativePilotImportStore(b).pilotsUnderReview(), {pilot});
+
+        final result = await syncB.engine.resolveConflict(
+          scope,
+          review.id,
+          clientMutationId: 'decide-1',
+          choice: choice,
+        );
+        expect(result.accepted, isTrue);
+        expect(await syncA.engine.syncScope(scope), isNull);
+        expect(await syncB.engine.syncScope(scope), isNull);
+
+        final expected = choice == core.ConflictResolutionChoice.keptAccepted
+            ? p.second.id
+            : p.third.id;
+        final hostedLinks = await hosted.pilotImportLinkRepository.listForOwner(
+          director,
+        );
+        for (final links in [await linksOn(a), await linksOn(b), hostedLinks]) {
+          expect(links.single.participantProfileId, expected);
+        }
+        expect((await linksOn(a)).single.revision, hostedLinks.single.revision);
+        expect((await linksOn(b)).single.revision, hostedLinks.single.revision);
+        expect(await reviewsOn(syncA), isEmpty);
+        expect(await reviewsOn(syncB), isEmpty);
+        // The decision stays closed after another round of syncs, and both
+        // devices import again.
+        expect(await syncA.engine.syncScope(scope), isNull);
+        expect(await syncB.engine.syncScope(scope), isNull);
+        expect(await reviewsOn(syncB), isEmpty);
+        expect(await NativePilotImportStore(a).pilotsUnderReview(), isEmpty);
+        expect(await NativePilotImportStore(b).pilotsUnderReview(), isEmpty);
+      });
+    }
+  });
+
   group('the same participant', () {
     test('needs no review and leaves the details to the next import', () async {
       const draft = core.PilotDraft(
