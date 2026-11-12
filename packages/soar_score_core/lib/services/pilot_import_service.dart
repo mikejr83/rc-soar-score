@@ -2,10 +2,12 @@ import '../errors/entity_not_found_error.dart';
 import '../models/id.dart';
 import '../models/imports/pilot_import_draft.dart';
 import '../models/imports/pilot_import_outcome.dart';
+import '../models/imports/pilot_import_link.dart';
 import '../models/participants/participant_profile.dart';
 import '../repositories/already_stored_error.dart';
 import '../repositories/mutation_metadata.dart';
 import '../repositories/participant_profile_repository.dart';
+import '../repositories/pilot_import_link_repository.dart';
 import '../repositories/stale_revision_error.dart';
 import 'pilot_import_matcher.dart';
 
@@ -42,18 +44,15 @@ class PilotImportService {
   PilotImportService(
     this.profiles, {
     DateTime Function()? clock,
-    this.saveImport,
+    this.links,
+    this.reviewedLinks,
   }) : _clock = clock ?? DateTime.now;
 
   final ParticipantProfileRepository profiles;
 
   /// Optional atomic persistence for both profiles and remembered links.
-  final Future<List<ParticipantProfile>> Function(
-    List<ParticipantProfile> profiles,
-    List<PilotImportSelection> selections,
-    MutationMetadata metadata,
-  )?
-  saveImport;
+  final PilotImportLinkRepository? links;
+  final Map<Id, int>? reviewedLinks;
   final DateTime Function() _clock;
 
   Future<PilotImportOutcome> apply(
@@ -137,8 +136,16 @@ class PilotImportService {
       }
     }
 
-    final saved = saveImport != null
-        ? await saveImport!(toSave, selections, metadata)
+    final linkRepository = links;
+    final saved = linkRepository != null
+        ? await _saveWithLinks(
+            linkRepository,
+            ownerAccountId,
+            toSave,
+            selections,
+            metadata,
+            now,
+          )
         : toSave.isEmpty
         ? const <ParticipantProfile>[]
         : await profiles.saveAll(toSave, metadata: metadata);
@@ -153,6 +160,60 @@ class PilotImportService {
       ],
       unchanged: unchanged,
       skipped: skipped,
+    );
+  }
+
+  Future<List<ParticipantProfile>> _saveWithLinks(
+    PilotImportLinkRepository repository,
+    Id owner,
+    List<ParticipantProfile> profilesToSave,
+    List<PilotImportSelection> selections,
+    MutationMetadata metadata,
+    DateTime now,
+  ) async {
+    final existing = await repository.listForOwner(owner);
+    final writes = <PilotImportLink>[];
+    for (final selection in selections) {
+      final no = selection.match.draft.sourcePilotNo;
+      if (no == null || selection.choice == PilotImportChoice.skip) continue;
+      final target = selection.choice == PilotImportChoice.add
+          ? selection.newProfileId
+          : _target(selection);
+      final known = existing
+          .where(
+            (link) =>
+                link.sourceSystem == PilotImportLink.gliderScore6 &&
+                link.sourcePilotNo == no,
+          )
+          .toList();
+      final old = known.isEmpty ? null : known.single;
+      final values = PilotImportMatcher.sourceValues(selection.match.draft);
+      final same =
+          old != null &&
+          old.participantProfileId == target &&
+          values.entries.every(
+            (entry) => old.sourceValues[entry.key] == entry.value,
+          );
+      if (same) continue;
+      writes.add(
+        PilotImportLink(
+          id: old?.id ?? Id.create(),
+          ownerAccountId: owner,
+          sourcePilotNo: no,
+          participantProfileId: target,
+          sourceValues: values,
+          createdAt: old?.createdAt ?? now,
+          updatedAt: now,
+          revision: old?.revision ?? 0,
+        ),
+      );
+    }
+    return repository.saveImport(
+      profilesToSave,
+      writes,
+      metadata: metadata,
+      reviewedOwner: owner,
+      reviewedLinks: reviewedLinks,
     );
   }
 

@@ -30,7 +30,7 @@ class PilotImportMatcher {
 
       final remembered = links.where(
         (l) =>
-            l.sourceSystem == 'gliderscore6' &&
+            l.sourceSystem == PilotImportLink.gliderScore6 &&
             l.sourcePilotNo == draft.sourcePilotNo,
       );
       final link = remembered.length == 1 ? remembered.single : null;
@@ -58,9 +58,7 @@ class PilotImportMatcher {
                 to: e.value as String? ?? '—',
               ),
         ];
-        final changed =
-            values.entries.any((e) => link!.sourceValues[e.key] != e.value) ||
-            link!.sourceValues.length != values.length;
+        final changed = sourceChanges.isNotEmpty;
         result.add(
           PilotMatch(
             draft: draft,

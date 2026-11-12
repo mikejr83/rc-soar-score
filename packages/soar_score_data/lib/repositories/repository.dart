@@ -255,6 +255,7 @@ class Repository implements core.Repository {
   @override
   final core.ImportProvenanceRepository importProvenanceRepository;
 
+  @override
   final PilotImportLinkRepository pilotImportLinkRepository;
 
   @override

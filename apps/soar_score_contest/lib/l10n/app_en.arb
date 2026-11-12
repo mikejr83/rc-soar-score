@@ -1629,6 +1629,9 @@
     }
   },
   "pilotImportNothingNew": "Nothing new to add",
+  "@pilotImportNothingNew": {
+    "description": "Row text when an existing participant already has everything the file holds."
+  },
   "pilotImportLinkedTo": "Linked to {name}",
   "@pilotImportLinkedTo": {
     "description": "A previously confirmed GliderScore pilot link.",
@@ -1647,9 +1650,6 @@
   "@pilotImportFieldFirstName": {"description": "Name of the first-name field in a pilot import review."},
   "pilotImportFieldLastName": "last name",
   "@pilotImportFieldLastName": {"description": "Name of the last-name field in a pilot import review."},
-  "@pilotImportNothingNew": {
-    "description": "Row text when an existing participant already has everything the file holds."
-  },
   "pilotImportConflict": "Their email and registration numbers match different people in your list.",
   "@pilotImportConflict": {
     "description": "Row text when the identifiers of a pilot point at different participants."

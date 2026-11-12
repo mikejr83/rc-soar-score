@@ -18,7 +18,9 @@ Where your contests are
 
 Update
   Download the newer zip, close the app, unzip it and replace this folder.
-  Your contests are kept.
+  Your contests are kept. This release uses database schema 2; after the
+  hosted server is updated, installations on schema 1 must update before
+  they can sync again.
 
 Open source
   RC Soar Score is free software under the GNU Affero General Public

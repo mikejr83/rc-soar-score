@@ -100,6 +100,26 @@ void main() {
       expect(m.sourceChanged, isFalse);
       expect(m.defaultAction, PilotImportAction.update);
     });
+    test('extra or absent empty snapshot fields do not invent a change', () {
+      final incomplete = PilotImportLink(
+        id: link.id,
+        ownerAccountId: link.ownerAccountId,
+        sourcePilotNo: link.sourcePilotNo,
+        participantProfileId: link.participantProfileId,
+        sourceValues: const {
+          'firstName': 'alex',
+          'lastName': 'ashdown',
+          'futureField': 'retained',
+        },
+        createdAt: link.createdAt,
+        updatedAt: link.updatedAt,
+      );
+      final match = matcher
+          .match([_draft()], [profile], links: [incomplete])
+          .single;
+      expect(match.sourceChanged, isFalse);
+      expect(match.sourceChanges, isEmpty);
+    });
     test('deleted participant cannot be resolved', () {
       final m = matcher.match([_draft()], [], links: [link]).single;
       expect(m.remembered, isFalse);

@@ -5,6 +5,7 @@ import '../shared/shared.dart';
 
 /// An explicitly confirmed association between a source pilot and profile.
 class PilotImportLink extends Equatable implements Synchronizable {
+  static const gliderScore6 = 'gliderscore6';
   PilotImportLink({
     required this.id,
     required this.ownerAccountId,
@@ -13,7 +14,7 @@ class PilotImportLink extends Equatable implements Synchronizable {
     required Map<String, Object?> sourceValues,
     required this.createdAt,
     required this.updatedAt,
-    this.sourceSystem = 'gliderscore6',
+    this.sourceSystem = gliderScore6,
     this.revision = 0,
   }) : sourceValues = Map.unmodifiable(sourceValues);
   @override

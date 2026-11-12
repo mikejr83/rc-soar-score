@@ -31,6 +31,8 @@ Once you confirm a pilot, the app remembers the link for both pilot and competit
 
 Links identify the director's GliderScore 6 database and pilot number; saving the database or adding competitions does not break them. Distinguishing an independent GliderScore database on a different computer from a transferred database is not yet supported. Earlier imports establish links when next confirmed.
 
+If two devices independently confirm links for the same pilot while offline, synchronizing those links can encounter a collision. Resolving competing links across devices is not yet supported.
+
 ## What is imported
 
 | GliderScore       | Participant                                                    |

@@ -68,6 +68,113 @@ void main() => forEachBackend((backend) {
     );
     expect(await repo.participantProfileRepository.findById(id), isNull);
   });
+  test(
+    'a repeated unchanged import does not rewrite the link or create mutations',
+    () async {
+      final id = core.Id.create();
+      final participant = profile(id);
+      const draft = core.PilotDraft(
+        sourcePilotNo: 1,
+        firstName: 'A',
+        lastName: 'Pilot',
+      );
+      final initial = core.PilotImportLink(
+        id: core.Id.create(),
+        ownerAccountId: owner,
+        sourcePilotNo: 1,
+        participantProfileId: id,
+        sourceValues: core.PilotImportMatcher.sourceValues(draft),
+        createdAt: now,
+        updatedAt: now,
+      );
+      await repo.pilotImportLinkRepository.saveImport(
+        [participant],
+        [initial],
+        metadata: metadata(),
+      );
+      final current = (await repo.participantProfileRepository.findById(id))!;
+      final savedLink = (await repo.pilotImportLinkRepository.listForOwner(
+        owner,
+      )).single;
+      final match = const core.PilotImportMatcher()
+          .match([draft], [current], links: [savedLink])
+          .single;
+      final countBefore = await inst.count('mutation_records');
+      final service = core.PilotImportService(
+        repo.participantProfileRepository,
+        links: repo.pilotImportLinkRepository,
+        reviewedLinks: {savedLink.id: savedLink.revision},
+        clock: () => now.add(const Duration(days: 1)),
+      );
+      await service.apply(
+        owner,
+        [core.PilotImportSelection.defaultFor(match)],
+        metadata: metadata(),
+        reviewedRevisions: {id: current.revision},
+      );
+      final after = (await repo.pilotImportLinkRepository.listForOwner(owner))
+          .single;
+      expect(after.revision, savedLink.revision);
+      expect(after.updatedAt, savedLink.updatedAt);
+      expect(await inst.count('mutation_records'), countBefore);
+    },
+  );
+  test('an approved source change updates the saved link snapshot', () async {
+    final id = core.Id.create();
+    const before = core.PilotDraft(
+      sourcePilotNo: 1,
+      firstName: 'A',
+      lastName: 'Pilot',
+    );
+    const after = core.PilotDraft(
+      sourcePilotNo: 1,
+      firstName: 'A',
+      lastName: 'Pilot',
+      club: 'New Club',
+    );
+    final initial = core.PilotImportLink(
+      id: core.Id.create(),
+      ownerAccountId: owner,
+      sourcePilotNo: 1,
+      participantProfileId: id,
+      sourceValues: core.PilotImportMatcher.sourceValues(before),
+      createdAt: now,
+      updatedAt: now,
+    );
+    await repo.pilotImportLinkRepository.saveImport(
+      [profile(id)],
+      [initial],
+      metadata: metadata(),
+    );
+    final participant = (await repo.participantProfileRepository.findById(id))!;
+    final savedLink = (await repo.pilotImportLinkRepository.listForOwner(owner))
+        .single;
+    final match = const core.PilotImportMatcher()
+        .match([after], [participant], links: [savedLink])
+        .single;
+    final service = core.PilotImportService(
+      repo.participantProfileRepository,
+      links: repo.pilotImportLinkRepository,
+      reviewedLinks: {savedLink.id: savedLink.revision},
+      clock: () => now.add(const Duration(days: 1)),
+    );
+    await service.apply(
+      owner,
+      [
+        core.PilotImportSelection(
+          match: match,
+          choice: core.PilotImportChoice.update,
+          targetProfileId: id,
+        ),
+      ],
+      metadata: metadata(),
+      reviewedRevisions: {id: participant.revision},
+    );
+    final updated = (await repo.pilotImportLinkRepository.listForOwner(owner))
+        .single;
+    expect(updated.sourceValues['club'], 'new club');
+    expect(updated.revision, savedLink.revision + 1);
+  });
   test('a link added after review prevents the entire import', () async {
     final existingId = core.Id.create();
     await repo.pilotImportLinkRepository.saveImport(
