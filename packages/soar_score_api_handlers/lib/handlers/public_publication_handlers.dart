@@ -15,7 +15,13 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   server's UTC day), `limit` (at most 100) and `offset`. Without `to`,
 ///   only contests starting through the coming Sunday are listed (the
 ///   following Sunday when `today` is a Sunday). Unlisted ones are never
-///   listed. The answer may be cached for 30 seconds ([listCacheControl]).
+///   listed.
+///
+/// Both successful reads may be cached for 30 seconds ([publicCacheControl]):
+/// a new publication, a delisting or a change to hidden results reaches every
+/// reader within that long and no longer (#906). Errors, including the 403
+/// `contest_not_visible`, are never cached (`no-store`, set by the security
+/// headers middleware), so a contest that becomes visible shows at once.
 ///
 /// Both payloads carry `contest.status`, `upcoming`, `in_progress` or
 /// `completed`, worked out when the contest is read: before its start, Upcoming;
@@ -26,10 +32,10 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// embedded server) both routes answer 409 `publishing_not_available`.
 ///
 /// The handlers only translate between HTTP and [PublicPublicationService].
-/// How long a browser or the CDN may reuse a listing: the answer is the same
-/// for everyone asking with the same query, and a new publication shows up
-/// within this long.
-const listCacheControl = 'public, max-age=30';
+/// How long a browser or the CDN may reuse a public read: the answer is the
+/// same for everyone asking for the same thing. This is the longest a new
+/// publication, a delisting or a hiding of results takes to show (#906).
+const publicCacheControl = 'public, max-age=30';
 
 Handler buildPublicHandler(Repository repository, {required bool enabled}) {
   final service = PublicPublicationService(repository);
@@ -57,13 +63,14 @@ Handler buildPublicHandler(Repository repository, {required bool enabled}) {
       offset: _intParameter(query, 'offset') ?? 0,
     );
     return jsonResponse(page.toJson())
-        .change(headers: {'cache-control': listCacheControl});
+        .change(headers: {'cache-control': publicCacheControl});
   });
 
   router.get('/publications/<id>', (Request request, String id) async {
     requireEnabled();
     final publication = await service.read(Id.parse(id));
-    return jsonResponse(publication.toJson());
+    return jsonResponse(publication.toJson())
+        .change(headers: {'cache-control': publicCacheControl});
   });
 
   return router.call;

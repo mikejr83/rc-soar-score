@@ -7,16 +7,22 @@ import 'package:shelf/shelf.dart';
 ///   on every response.
 /// - `Cache-Control: no-store` on `/api/v1` responses (they are signed-in
 ///   data), unless a handler already chose its own. The `/public` reads
-///   keep the cache headers their handlers set.
+///   keep the cache headers their handlers set, and their errors (not found,
+///   not visible) are `no-store` too, so nothing stale outlives a change of
+///   visibility (#906).
 Middleware securityHeadersMiddleware() =>
     (inner) => (request) async {
       final response = await inner(request);
-      final authenticated = request.url.path.startsWith('api/v1');
+      final path = request.url.path;
+      final noStore =
+          path.startsWith('api/v1') ||
+          (path.startsWith('public') &&
+              (response.statusCode < 200 || response.statusCode >= 300));
       return response.change(
         headers: {
           'x-content-type-options': 'nosniff',
           'x-robots-tag': 'noindex, nofollow',
-          if (authenticated && !response.headers.containsKey('cache-control'))
+          if (noStore && !response.headers.containsKey('cache-control'))
             'cache-control': 'no-store',
         },
       );
