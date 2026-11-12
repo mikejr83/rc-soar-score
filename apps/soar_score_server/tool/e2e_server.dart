@@ -8,8 +8,6 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
 import 'package:soar_score_core/soar_score_core.dart'
     show
-        Account,
-        AccountKind,
         Id,
         Invitation,
         InvitationCodec,
@@ -20,6 +18,8 @@ import 'package:soar_score_core/soar_score_core.dart'
         ParticipantSubmissionRefusal,
         ScoresService;
 import 'package:soar_score_data/soar_score_data.dart';
+
+import 'e2e_database.dart';
 
 /// The secret the E2E server signs invitation links with. Public on purpose:
 /// this server is never deployed.
@@ -40,6 +40,8 @@ const e2eInvitationSecret = 'e2e-invitation-secret-at-least-32-bytes-long';
 /// profile with only the system data and one director account: the self
 /// scoring app's journey (`scripts/e2e-score.sh`) needs it, because invitations
 /// exist only on the hosted server.
+/// `--publishing` adds the backend tables to the native profile as well, while
+/// keeping its Local account and demo data for the contest lifecycle journey.
 ///
 /// Without `--database` it uses a new temporary file, deleted on exit. It
 /// prints `E2E_SERVER_READY <port>` once it listens; `scripts/e2e` waits for
@@ -80,32 +82,19 @@ Future<void> main(List<String> args) async {
   if (given != null && file.existsSync()) file.deleteSync();
 
   final serverProfile = (_option(args, '--profile') ?? 'native') == 'server';
-  final database = serverProfile
-      ? SoarScoreDatabase(
-          NativeDatabase(file, enableMigrations: true),
-          profile: DatabaseProfile.server,
-        )
-      : createLocalDatabase(file);
-  await SystemDataSeeder(database).seed();
+  final publishingEnabled = args.contains('--publishing');
+  final database = E2eDatabase(
+    serverProfile
+        ? NativeDatabase(file, enableMigrations: true)
+        : NativeDatabase.createInBackground(file, enableMigrations: true),
+    profile: serverProfile ? DatabaseProfile.server : DatabaseProfile.native,
+    publishingEnabled: publishingEnabled,
+  );
+  final localAccountId = await seedE2eDatabase(
+    database,
+    serverProfile: serverProfile,
+  );
   final repository = Repository(database);
-  final Id localAccountId;
-  if (serverProfile) {
-    localAccountId = Id.create();
-    final now = DateTime.now().toUtc();
-    await repository.accountRepository.save(
-      Account(
-        id: localAccountId,
-        firstName: 'Dana',
-        lastName: 'Director',
-        kind: AccountKind.registered,
-        createdAt: now,
-        updatedAt: now,
-      ),
-    );
-  } else {
-    localAccountId = await LocalAccountRepository(database).ensure();
-    await DemoDataSeeder(repository, localAccountId: localAccountId).seed();
-  }
 
   final clock = _AdvanceableClock();
   final inFlight = InFlightRequests();
@@ -123,7 +112,7 @@ Future<void> main(List<String> args) async {
           version: '0.0.0',
           schemaRevision: database.schemaVersion,
           repository: repository,
-          publishingEnabled: args.contains('--publishing'),
+          publishingEnabled: publishingEnabled,
           // Only the service gets the advanceable clock: link and guest
           // session expiry are enforced inside it. The participant handler
           // keeps the real clock, which only sets the cookie's Max-Age at
