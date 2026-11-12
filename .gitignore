@@ -37,6 +37,8 @@ graphify-out/*
 !graphify-out/GRAPH_REPORT.md
 
 # Agent items
+# Codex worktrees
+.worktrees/
 # Kilo agent plans
 /.kilo/plans
 # Chrome and chromedriver installed by scripts/e2e-setup
