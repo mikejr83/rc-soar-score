@@ -6,6 +6,26 @@ import 'handler_test_support.dart';
 final _owner = Id.parse('019c0000-0000-7000-8000-000000000001');
 const _contestId = '019c0000-0000-7000-8000-0000000000c1';
 
+/// Stores the contest, so a request reaches its body: the director check
+/// comes before the body is read.
+Future<void> _seed(HandlerHarness api) => api.contests.save(
+  Contest(
+    id: Id.parse(_contestId),
+    name: 'Spring Open',
+    startDateTime: DateTime.utc(2026, 10, 17, 14),
+    endDateTime: DateTime.utc(2026, 10, 18, 22),
+    timezone: 'America/Denver',
+    ownerAccountId: _owner,
+    createdAt: DateTime.utc(2026, 9),
+    updatedAt: DateTime.utc(2026, 9),
+  ),
+  metadata: MutationMetadata(
+    clientMutationId: 'seed',
+    authority: Authority.director,
+    clientTime: DateTime.utc(2026, 9),
+  ),
+);
+
 /// The HTTP side of the publication routes. What publishing stores is
 /// covered against the real repositories in `soar_score_data`.
 void main() {
@@ -61,6 +81,7 @@ void main() {
     setUp(() => api = HandlerHarness(_owner, publishingEnabled: true));
 
     test('a publish without a mutation id is a 400', () async {
+      await _seed(api);
       final response = await api.send(
         'POST',
         '/contests/$_contestId/publication',
@@ -73,6 +94,7 @@ void main() {
 
     for (final visibility in ['Delisted', 'Everyone', '']) {
       test('visibility "$visibility" is a 400', () async {
+        await _seed(api);
         final response = await api.send(
           'PATCH',
           '/contests/$_contestId/publication/visibility',
@@ -121,6 +143,7 @@ void main() {
     }
 
     test('a delist request body that is not an object is a 400', () async {
+      await _seed(api);
       final response = await api.send(
         'POST',
         '/contests/$_contestId/publication/delist-requests',

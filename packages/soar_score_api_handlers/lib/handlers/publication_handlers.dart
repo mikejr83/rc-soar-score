@@ -2,6 +2,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
+import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -53,6 +54,7 @@ void addPublicationRoutes(
 
   router.post('/contests/<id>/publication', (Request request, String id) async {
     final principal = available(request);
+    await requireContestDirector(request, repository, Id.parse(id));
     final body = await readJsonBody(request, PublishContestRequest.fromJson);
     final result = await service.publish(
       Id.parse(id),
@@ -82,6 +84,7 @@ void addPublicationRoutes(
     String id,
   ) async {
     final principal = available(request);
+    await requireContestDirector(request, repository, Id.parse(id));
     final body = await readJsonBody(request, SetVisibilityRequest.fromJson);
     final visibility = switch (body.visibility) {
       'Unlisted' => PublicationVisibility.unlisted,
@@ -135,6 +138,7 @@ void addPublicationRoutes(
     String id,
   ) async {
     final principal = available(request);
+    await requireContestDirector(request, repository, Id.parse(id));
     final body = await readJsonBody(request, RequestDelistingRequest.fromJson);
     final result = await delisting.request(
       Id.parse(id),

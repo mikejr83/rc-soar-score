@@ -165,6 +165,45 @@ void _tests(SliceBackend backend) {
     expect(contestIds, isNot(contains(_contestId)));
   });
 
+  test('writes that carry a body are refused before it is parsed', () async {
+    // A body that would be a 400 on its own: the refusal must come first.
+    const unparseable = 'not an object';
+    for (final (method, path) in [
+      ('POST', '/contests/$_contestId/publication'),
+      ('PATCH', '/contests/$_contestId/publication/visibility'),
+      ('POST', '/contests/$_contestId/publication/delist-requests'),
+      ('POST', '/contests/$_contestId/activations'),
+    ]) {
+      await api.expectForeignDenied(outsider, method, path, body: unparseable);
+    }
+  });
+
+  test('an unknown contest or conflict is a 404 before the body', () async {
+    const unparseable = 'not an object';
+    const unknown = '019c0000-0000-7000-8000-0000000009ff';
+    for (final (method, path) in [
+      ('POST', '/contests/$unknown/publication'),
+      ('PATCH', '/contests/$unknown/publication/visibility'),
+      ('POST', '/contests/$unknown/publication/delist-requests'),
+      ('POST', '/contests/$unknown/activations'),
+      ('POST', '/sync/conflicts/$unknown/resolve'),
+    ]) {
+      final response = await api.send(method, path, body: unparseable);
+      expect(response.status, 404, reason: '$method $path: ${response.body}');
+    }
+  });
+
+  test('an invalid id is a 400 on the same routes', () async {
+    for (final (method, path) in [
+      ('POST', '/contests/not-an-id/publication'),
+      ('POST', '/contests/not-an-id/activations'),
+      ('POST', '/sync/conflicts/not-an-id/resolve'),
+    ]) {
+      final response = await api.send(method, path, body: <String, Object?>{});
+      expect(response.status, 400, reason: '$method $path: ${response.body}');
+    }
+  });
+
   test('the director keeps access to the same routes', () async {
     await api.expectOk('GET', '/contests/$_contestId');
     await api.expectOk(
