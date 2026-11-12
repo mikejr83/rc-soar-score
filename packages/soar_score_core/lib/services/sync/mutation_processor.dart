@@ -205,6 +205,33 @@ class MutationProcessor {
 
     if (stored == null) {
       if (base != null) {
+        if (s.m.entityType == 'PilotImportLink') {
+          final conflicts = await s.tx.conflictsNeedingAction(s.ctx.scope);
+          for (final conflict in conflicts) {
+            final previous = conflict.competingPayload;
+            if (conflict.entityType != 'PilotImportLink' ||
+                previous?['id'] != s.m.entityId.value ||
+                previous?['revision'] != base)
+              continue;
+            final accepted = await s.tx.findEntity(
+              'PilotImportLink',
+              conflict.entityId,
+            );
+            if (accepted == null) break;
+            return _log.conflict(
+              s.tx,
+              s.ctx,
+              s.m,
+              reasonCode: SyncReasonCode.uniqueViolation.code,
+              message: conflict.reason ?? 'Review competing pilot links.',
+              competing: s.payload,
+              accepted: accepted,
+              currentRevision: accepted['revision'] as int?,
+              conflictEntityId: conflict.entityId,
+              previousConflict: conflict,
+            );
+          }
+        }
         return _log.reject(
           s.tx,
           s.ctx,
@@ -621,6 +648,38 @@ class MutationProcessor {
     SyncConstraintError error,
   ) async {
     if (error.kind == SyncConstraintKind.unique) {
+      if (m.entityType == 'PilotImportLink' && ctx.scope is DirectorScopeKey) {
+        final submitted = MutationPayload.parse(m.payload);
+        if (!submitted.isDelete) {
+          final entity = submitted.entity;
+          final candidates = await tx.findEntitiesWhere(
+            'PilotImportLink',
+            'owner_account_id',
+            (ctx.scope as DirectorScopeKey).ownerAccountId,
+          );
+          final matching = candidates
+              .where(
+                (candidate) =>
+                    candidate['source_system'] == entity['source_system'] &&
+                    candidate['source_pilot_no'] == entity['source_pilot_no'],
+              )
+              .toList();
+          if (matching.length == 1) {
+            final accepted = matching.single;
+            return _log.conflict(
+              tx,
+              ctx,
+              m,
+              reasonCode: SyncReasonCode.uniqueViolation.code,
+              message: 'Two devices linked this GliderScore pilot to different participants. Review the links.',
+              competing: submitted,
+              accepted: accepted,
+              currentRevision: accepted['revision'] as int?,
+              conflictEntityId: Id.parse(accepted['id']! as String),
+            );
+          }
+        }
+      }
       final stored = await tx.findEntity(m.entityType, m.entityId);
       return _log.conflict(
         tx,

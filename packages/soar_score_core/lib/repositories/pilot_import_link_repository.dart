@@ -10,6 +10,7 @@ abstract interface class PilotImportLinkRepository {
     required MutationMetadata metadata,
     Id? reviewedOwner,
     Map<Id, int>? reviewedLinks,
+    Set<int>? reviewedPilotNumbers,
   });
   Future<List<PilotImportLink>> listForOwner(Id ownerAccountId);
   Future<PilotImportLink> save(

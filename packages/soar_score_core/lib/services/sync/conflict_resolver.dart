@@ -129,6 +129,19 @@ class ConflictResolver {
     if (choice == ConflictResolutionChoice.merged && merged == null) {
       return refuse(SyncReasonCode.invalidPayload);
     }
+    if (conflict.entityType == 'PilotImportLink' &&
+        conflict.reasonCode == SyncReasonCode.uniqueViolation.code) {
+      final current = await tx.findEntity(
+        conflict.entityType,
+        conflict.entityId,
+      );
+      if (current == null || current['revision'] != conflict.entityRevision) {
+        return refuse(SyncReasonCode.staleBase);
+      }
+      if (choice == ConflictResolutionChoice.merged) {
+        return refuse(SyncReasonCode.invalidPayload);
+      }
+    }
 
     final ctx = ExchangeContext(
       scope: scope,
@@ -251,6 +264,16 @@ class ConflictResolver {
 
     final stored = await tx.findEntity(type, id);
     final entity = {...taken.entity};
+    if (type == 'PilotImportLink' &&
+        conflict.reasonCode == SyncReasonCode.uniqueViolation.code) {
+      if (stored == null || stored['revision'] != conflict.entityRevision) {
+        throw SyncPayloadError(
+          'The accepted pilot link changed after this conflict was recorded.',
+        );
+      }
+      entity['id'] = id.value;
+      entity['created_at'] = stored['created_at'];
+    }
     switch (kind.shape) {
       case SyncEntityShape.revisioned:
         entity['revision'] = ((stored?['revision'] as int?) ?? 0) + 1;

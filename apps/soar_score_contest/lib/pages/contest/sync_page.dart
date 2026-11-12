@@ -69,6 +69,45 @@ class ContestSyncPage extends StatelessWidget {
   }
 }
 
+/// The account's own sync conflicts, including remembered pilot links.
+class DirectorSyncPage extends StatelessWidget {
+  const DirectorSyncPage({super.key, required this.scope});
+
+  final SyncScopeKey scope;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Account sync')),
+    body: SyncSummaryBuilder(
+      scope: scope,
+      builder: (context, sync, summary, syncing) => ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          SyncDetailsCard(
+            summary: summary,
+            syncing: syncing,
+            onSyncNow: syncing || (summary?.localOnly ?? true)
+                ? null
+                : () => unawaited(sync.syncNow(scope)),
+          ),
+          const SizedBox(height: 16),
+          _Conflicts(
+            sync: sync,
+            scope: scope,
+            version: summary?.conflicts ?? 0,
+          ),
+          const SizedBox(height: 16),
+          _Refused(
+            sync: sync,
+            scope: scope,
+            version: summary?.rejectedChanges ?? 0,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 /// Loads the refused changes and reloads them when [version] changes.
 class _Refused extends StatefulWidget {
   const _Refused({

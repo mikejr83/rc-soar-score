@@ -121,6 +121,8 @@ class SyncLog {
     Id? acceptedMutationId,
     Map<String, Object?>? accepted,
     int? currentRevision,
+    Id? conflictEntityId,
+    ConflictRecord? previousConflict,
   }) async {
     final now = ctx.clock();
     final record = _record(
@@ -134,16 +136,16 @@ class SyncLog {
     );
     await tx.recordMutation(record);
     final conflict = ConflictRecord(
-      id: ctx.newId(),
+      id: previousConflict?.id ?? ctx.newId(),
       contestId: ctx.scope.contestIdOrNull,
       ownerAccountId: ctx.scope.ownerAccountIdOrNull,
       entityType: mutation.entityType,
-      entityId: mutation.entityId,
+      entityId: conflictEntityId ?? mutation.entityId,
       acceptedMutationId: acceptedMutationId,
       competingMutationId: record.id,
       reasonCode: reasonCode,
       reason: message,
-      createdAt: now,
+      createdAt: previousConflict?.createdAt ?? now,
       acceptedPayload: accepted,
       competingPayload: competing.isDelete
           ? const {'operation': 'delete'}

@@ -5,6 +5,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../services/sync/conflict_answer.dart';
 import '../../services/sync/open_conflict.dart';
+import '../../services/pilot_import/pilot_import.dart';
 import 'payload_comparison.dart';
 
 /// Sends the director's decision: one of the two versions, or an edited one.
@@ -35,10 +36,14 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
   bool _editing = false;
   bool _sending = false;
   String? _error;
+  Future<List<ParticipantProfile>>? _participants;
 
   @override
   void initState() {
     super.initState();
+    if (widget.conflict.entityType == 'PilotImportLink') {
+      _participants = PilotImportStore.current?.existing();
+    }
     final start =
         widget.conflict.acceptedPayload ??
         widget.conflict.competingPayload ??
@@ -125,7 +130,38 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-              ] else
+              ] else if (_participants != null)
+                FutureBuilder<List<ParticipantProfile>>(
+                  future: _participants,
+                  builder: (context, snapshot) {
+                    String participant(Map<String, Object?>? payload) {
+                      final id = payload?['participant_profile_id'];
+                      final matches =
+                          (snapshot.data ?? const <ParticipantProfile>[]).where(
+                            (p) => p.id.value == id,
+                          );
+                      return matches.isEmpty
+                          ? '$id'
+                          : '${matches.first.firstName} ${matches.first.lastName}';
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'GliderScore pilot ${conflict.acceptedPayload?['source_pilot_no']}',
+                        ),
+                        Text(
+                          'Accepted: ${participant(conflict.acceptedPayload)}',
+                        ),
+                        Text(
+                          'Competing: ${participant(conflict.competingPayload)}',
+                        ),
+                      ],
+                    );
+                  },
+                )
+              else
                 PayloadComparison(
                   acceptedLabel: 'Accepted by the service',
                   competingLabel: 'Competing change',
@@ -162,11 +198,14 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
             child: const Text('Keep edited value'),
           ),
         ] else ...[
-          OutlinedButton(
-            key: const ValueKey('conflict-edit'),
-            onPressed: _sending ? null : () => setState(() => _editing = true),
-            child: const Text('Edit'),
-          ),
+          if (conflict.entityType != 'PilotImportLink')
+            OutlinedButton(
+              key: const ValueKey('conflict-edit'),
+              onPressed: _sending
+                  ? null
+                  : () => setState(() => _editing = true),
+              child: const Text('Edit'),
+            ),
           OutlinedButton(
             key: const ValueKey('conflict-take-competing'),
             onPressed: _sending

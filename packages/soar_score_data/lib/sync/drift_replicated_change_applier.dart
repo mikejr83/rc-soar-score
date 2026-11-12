@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:drift/drift.dart' show Variable;
+import 'package:drift/drift.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../database.dart';
@@ -58,6 +58,34 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
       }
       final json = {...change.payload}..remove('supersedes');
       if (store.hasRevision) json['revision'] = change.revision;
+      if (change.entityType == 'PilotImportLink' && stored == null) {
+        final incoming = core.PilotImportLink.fromJson(json);
+        final links = await _stores
+            .of('PilotImportLink')
+            .whereId('owner_account_id', incoming.ownerAccountId);
+        for (final row in links) {
+          final local = row as core.PilotImportLink;
+          if (local.sourceSystem != incoming.sourceSystem ||
+              local.sourcePilotNo != incoming.sourcePilotNo ||
+              local.id == incoming.id)
+            continue;
+          final pending =
+              await (_db.select(_db.mutationRecords)..where(
+                    (m) =>
+                        m.entityType.equals('PilotImportLink') &
+                        m.entityId.equals(local.id.value) &
+                        m.outcome.equals('Pending'),
+                  ))
+                  .get();
+          if (pending.isEmpty) {
+            throw StateError('Conflicting pilot link has no pending mutation');
+          }
+          // The pending mutation retains the complete local choice for the
+          // server to record as a conflict. Its row must leave the unique
+          // index before the accepted remote link can be applied.
+          await store.remove(local.id);
+        }
+      }
       final supersedes = change.payload['supersedes'];
       // A store with revisions only gets here for a newer one, which is a
       // change. Without revisions an identical payload (a replayed page) is

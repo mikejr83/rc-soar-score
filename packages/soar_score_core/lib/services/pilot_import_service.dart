@@ -214,6 +214,12 @@ class PilotImportService {
       metadata: metadata,
       reviewedOwner: owner,
       reviewedLinks: reviewedLinks,
+      reviewedPilotNumbers: {
+        for (final selection in selections)
+          if (selection.choice != PilotImportChoice.skip &&
+              selection.match.draft.sourcePilotNo != null)
+            selection.match.draft.sourcePilotNo!,
+      },
     );
   }
 

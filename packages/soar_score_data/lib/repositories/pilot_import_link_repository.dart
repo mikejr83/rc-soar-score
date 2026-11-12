@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'drift_repository.dart';
+import '../sync/drift_sync_store.dart';
+import '../sync/sql_placeholders.dart';
+
+import 'package:drift/drift.dart' show Variable;
 
 class PilotImportLinkRepository extends DriftRepository
     implements core.PilotImportLinkRepository {
@@ -36,7 +42,40 @@ class PilotImportLinkRepository extends DriftRepository
     required core.MutationMetadata metadata,
     core.Id? reviewedOwner,
     Map<core.Id, int>? reviewedLinks,
+    Set<int>? reviewedPilotNumbers,
   }) => unitOfWork.run((context) async {
+    if (reviewedOwner != null) {
+      final conflicts = await DriftSyncStore(db)
+          .conflictsNeedingAction(core.DirectorScopeKey(reviewedOwner));
+      final displaced = await db
+          .customSelect(
+            portableSql(
+              db,
+              "SELECT m.payload FROM mutation_records m WHERE m.owner_account_id = ? AND m.entity_type = 'PilotImportLink' AND m.outcome = 'Pending' AND NOT EXISTS (SELECT 1 FROM pilot_import_links l WHERE l.id = m.entity_id)",
+            ),
+            variables: [Variable<String>(reviewedOwner.value)],
+          )
+          .get();
+      final blocked = <Object?>{
+        for (final conflict in conflicts)
+          if (conflict.entityType == 'PilotImportLink')
+            conflict.acceptedPayload?['source_pilot_no'],
+      };
+      for (final row in displaced) {
+        final payload = jsonDecode(row.read<String>('payload')) as Map;
+        final data = payload['data'] as Map?;
+        final entity = data?['entity'];
+        blocked.add(entity is Map ? entity['source_pilot_no'] : null);
+      }
+      if (blocked.contains(null) ||
+          (reviewedPilotNumbers == null
+              ? blocked.isNotEmpty
+              : blocked.any(reviewedPilotNumbers.contains))) {
+        throw StateError(
+          'Review competing pilot links in Account sync before importing pilots.',
+        );
+      }
+    }
     if (reviewedOwner != null && reviewedLinks != null) {
       final current = await listForOwner(reviewedOwner);
       final revisions = {for (final link in current) link.id: link.revision};
