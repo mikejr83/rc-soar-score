@@ -158,19 +158,34 @@ class NativeBootstrap extends AppBootstrap {
   /// Local database file for the native build: `soar_score.db` inside the
   /// per-user application-support directory
   /// (`%APPDATA%\<organization>\<app>` on Windows, the Roaming profile,
-  /// resolved per-user by `path_provider`). Demo mode uses `soar_score_demo.db`
-  /// beside it instead, so the real database is never touched.
-  static Future<String> databasePath({bool demo = false}) async {
-    final directory = await getApplicationSupportDirectory();
-    _logger.finer('Using application support directory: ${directory.path}');
-    return p.join(
+  /// resolved per-user by `path_provider`). A non-release build can override
+  /// the directory with `--dart-define=SOAR_SCORE_LOCAL_DATA_DIRECTORY=<path>`
+  /// (an absolute path; ignored in release builds, like the demo flags).
+  /// Demo mode uses `soar_score_demo.db` beside it instead, so the real
+  /// database is never touched.
+  static Future<String> databasePath({
+    bool demo = false,
+    String? localDataDirectory,
+  }) async {
+    final configuredDirectory =
+        localDataDirectory ?? _localDataDirectoryFromEnvironment;
+    final directory = configuredDirectory.isNotEmpty && !kReleaseMode
+        ? Directory(configuredDirectory)
+        : await getApplicationSupportDirectory();
+    await directory.create(recursive: true);
+    final database = p.join(
       directory.path,
       demo ? demoDatabaseName : standardDatabaseName,
     );
+    _logger.fine('Using local database: $database');
+    return database;
   }
 
   static const String standardDatabaseName = 'soar_score.db';
   static const String demoDatabaseName = 'soar_score_demo.db';
+
+  static const String _localDataDirectoryFromEnvironment =
+      String.fromEnvironment('SOAR_SCORE_LOCAL_DATA_DIRECTORY');
 
   /// Whether to run on the demo database, which holds example data: only when
   /// built with `--dart-define=SOAR_SCORE_DEMO=true`, and never in a release

@@ -31,6 +31,9 @@ melos.iml
 # VS Code settings
 .vscode/settings.json
 
+# Local native application data used by the VS Code development launch profile
+/.local-data/
+
 # Graphify output
 graphify-out/*
 !graphify-out/graph.json

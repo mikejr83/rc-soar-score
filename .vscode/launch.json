@@ -61,7 +61,9 @@
       "cwd": "apps/soar_score_contest",
       "args": [
         "-d",
-        "windows"
+        "windows",
+        "--dart-define",
+        "SOAR_SCORE_LOCAL_DATA_DIRECTORY=${workspaceFolder}/.local-data"
       ],
       "console": "debugConsole"
     },
@@ -75,7 +77,9 @@
         "-d",
         "windows",
         "--dart-define",
-        "SOAR_SCORE_DEMO=true"
+        "SOAR_SCORE_DEMO=true",
+        "--dart-define",
+        "SOAR_SCORE_LOCAL_DATA_DIRECTORY=${workspaceFolder}/.local-data"
       ],
       "console": "debugConsole"
     },
@@ -91,7 +95,9 @@
         "--dart-define",
         "SOAR_SCORE_DEMO=true",
         "--dart-define",
-        "SOAR_SCORE_DEMO_RESET=true"
+        "SOAR_SCORE_DEMO_RESET=true",
+        "--dart-define",
+        "SOAR_SCORE_LOCAL_DATA_DIRECTORY=${workspaceFolder}/.local-data"
       ],
       "console": "debugConsole"
     },
@@ -107,7 +113,9 @@
         "--dart-define",
         "SOAR_SCORE_DEMO=true",
         "--dart-define",
-        "SOAR_SCORE_DEMO_RESET=true"
+        "SOAR_SCORE_DEMO_RESET=true",
+        "--dart-define",
+        "SOAR_SCORE_LOCAL_DATA_DIRECTORY=${workspaceFolder}/.local-data"
       ],
       "console": "debugConsole"
     },

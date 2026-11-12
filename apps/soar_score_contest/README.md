@@ -36,6 +36,8 @@ Demo mode opens `soar_score_demo.db` instead of `soar_score.db`, so your real da
 
 The database is `soar_score.db` (`soar_score_demo.db` in demo mode) in the per-user application support folder, which on Windows is `%APPDATA%\Laminar Stack\RC Soar Score\` (the company and product names come from `windows/runner/Runner.rc`). Closing the app closes the server and the database.
 
+For development, `--dart-define=SOAR_SCORE_LOCAL_DATA_DIRECTORY=<path>` uses that folder instead (created if missing, ignored in release builds). The VS Code Windows launch configurations and tasks use `.local-data` in the workspace (git-ignored), so they start with an empty database rather than the one in `%APPDATA%`; remove the define to use that one. The sign-in is shared either way, because the Auth0 session is stored per Windows user, not beside the database.
+
 Nothing is released yet, so the database schema changes in place. If the app fails at startup with an error about a missing table, the file was made by an older build: delete `soar_score.db` and start again. In demo mode, use `SOAR_SCORE_DEMO_RESET=true` instead, which also loads the demo data again.
 
 ### Manual checklist: offline proof of concept

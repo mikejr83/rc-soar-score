@@ -63,7 +63,13 @@
       "label": "contest app: run with demo data (Windows)",
       "type": "shell",
       "command": "flutter",
-      "args": ["run", "-d", "windows", "--dart-define=SOAR_SCORE_DEMO=true"],
+      "args": [
+        "run",
+        "-d",
+        "windows",
+        "--dart-define=SOAR_SCORE_DEMO=true",
+        "--dart-define=SOAR_SCORE_LOCAL_DATA_DIRECTORY=${workspaceFolder}/.local-data"
+      ],
       "options": {
         "cwd": "${workspaceFolder}/apps/soar_score_contest"
       },
@@ -82,7 +88,8 @@
         "-d",
         "windows",
         "--dart-define=SOAR_SCORE_DEMO=true",
-        "--dart-define=SOAR_SCORE_DEMO_RESET=true"
+        "--dart-define=SOAR_SCORE_DEMO_RESET=true",
+        "--dart-define=SOAR_SCORE_LOCAL_DATA_DIRECTORY=${workspaceFolder}/.local-data"
       ],
       "options": {
         "cwd": "${workspaceFolder}/apps/soar_score_contest"
