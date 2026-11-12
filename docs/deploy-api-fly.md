@@ -220,6 +220,29 @@ Things to know:
   request after that waits for it to wake. Before a contest, load any API
   page a few minutes ahead.
 
+## Request limits
+
+The API refuses work a caller should not need, so one account or one bad
+client cannot use up the 512 MB machine. The limits live in
+`packages/soar_score_api_handlers/lib/middleware/request_limits.dart`.
+
+| Limit                            | Value                           | Answer                                |
+| -------------------------------- | ------------------------------- | ------------------------------------- |
+| JSON body, most routes           | 1 MiB                           | 413 `payload_too_large`               |
+| `POST /sync/exchange` body       | 16 MiB                          | 413 `payload_too_large`               |
+| Mutations in one exchange        | 10,000                          | 400                                   |
+| Entries in one bulk score save   | 100                             | 400                                   |
+| Draws and redraws (previews too) | 20 per minute per account       | 429 `rate_limited` with `retry-after` |
+| Results recalculation            | 10 per minute per account       | 429 `rate_limited` with `retry-after` |
+| Pilot group and overall results  | 60 per minute per guest session | 429 `rate_limited` with `retry-after` |
+
+A body is refused from its declared length, or as soon as the bytes read pass
+the limit, before anything is decoded or parsed. Rate counts are in memory per
+machine, so a restart or another machine starts a fresh count. Fly's proxy
+sets no body limit of its own; the Next.js `/api` rewrite on the public site
+has its own cap, so check it before sending the largest sync uploads through
+that path.
+
 ## Rollback
 
 ```sh

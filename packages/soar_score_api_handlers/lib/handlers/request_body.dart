@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:json_annotation/json_annotation.dart';
 import 'package:shelf/shelf.dart';
+
+import '../middleware/request_limits.dart';
 
 /// Reads the JSON object in the body of [request] and builds a request DTO
 /// from it with [fromJson].
@@ -9,13 +12,18 @@ import 'package:shelf/shelf.dart';
 /// Every way the body can be wrong (not JSON, not an object, a missing or
 /// mistyped field, an invalid id or date) is an [ArgumentError], which the
 /// error middleware answers with 400.
+///
+/// A body over [maxBytes] is a [PayloadTooLargeError] (413), refused from the
+/// declared length or, for a body without one, as soon as the bytes read pass
+/// the limit: nothing is decoded or parsed first.
 Future<T> readJsonBody<T>(
   Request request,
-  T Function(Map<String, dynamic> json) fromJson,
-) async {
+  T Function(Map<String, dynamic> json) fromJson, {
+  int maxBytes = defaultMaxBodyBytes,
+}) async {
   final Object? decoded;
   try {
-    decoded = jsonDecode(await request.readAsString());
+    decoded = jsonDecode(await _readText(request, maxBytes));
   } on FormatException {
     throw ArgumentError('The request body is not valid JSON.');
   }
@@ -33,4 +41,19 @@ Future<T> readJsonBody<T>(
   } on TypeError {
     throw ArgumentError('The request body has a field of the wrong type.');
   }
+}
+
+Future<String> _readText(Request request, int maxBytes) async {
+  final declared = request.contentLength;
+  if (declared != null && declared > maxBytes) {
+    throw PayloadTooLargeError(maxBytes);
+  }
+  final bytes = BytesBuilder(copy: false);
+  await for (final chunk in request.read()) {
+    if (bytes.length + chunk.length > maxBytes) {
+      throw PayloadTooLargeError(maxBytes);
+    }
+    bytes.add(chunk);
+  }
+  return (request.encoding ?? utf8).decode(bytes.takeBytes());
 }

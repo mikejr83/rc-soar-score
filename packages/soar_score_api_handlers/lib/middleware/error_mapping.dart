@@ -5,6 +5,7 @@ import 'package:shelf/shelf.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'request_id.dart';
+import 'request_limits.dart';
 
 final _logger = Logger('Errors');
 
@@ -66,6 +67,8 @@ Response handledError(
 /// - `ForbiddenError`: 403
 /// - `EntityNotFoundError`: 404
 /// - `ArgumentError`, `FormatException`, `ScoringValidationError`: 400
+/// - `PayloadTooLargeError`: 413; `TooManyRequestsError`: 429 with
+///   `retry-after`
 /// - an unmatched route: 404
 /// - anything else: 500 with a generic message. The details go to the log
 ///   only, so a response never leaks a stack trace or SQL.
@@ -80,6 +83,15 @@ Middleware errorMappingMiddleware() =>
         return response;
       } on HijackException {
         rethrow;
+      } on PayloadTooLargeError catch (e) {
+        return handledError(request, 413, 'payload_too_large', e.message);
+      } on TooManyRequestsError catch (e) {
+        return handledError(
+          request,
+          429,
+          'rate_limited',
+          'Too many requests; try again shortly.',
+        ).change(headers: {'retry-after': '${e.retryAfter.inSeconds + 1}'});
       } on EntityNotFoundError catch (e) {
         return handledError(request, 404, 'not_found', '$e');
       } on ForbiddenError catch (e) {

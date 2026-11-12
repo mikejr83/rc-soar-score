@@ -1,7 +1,9 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
+import 'package:soar_score_api_handlers/auth/principal.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
+import 'package:soar_score_api_handlers/middleware/request_limits.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:logging/logging.dart';
 
@@ -20,6 +22,8 @@ final _logger = Logger('ResultsHandlers');
 /// The handlers only translate between HTTP and [ResultsService].
 void addResultsRoutes(Router router, Repository repository) {
   final service = ResultsService(repository);
+  // A recalculation rebuilds every result of the contest.
+  final recalculationLimiter = RequestRateLimiter(maxRequests: 10);
 
   router.get('/contests/<id>/results', (Request request, String id) async {
     final contestId = Id.parse(id);
@@ -60,8 +64,10 @@ void addResultsRoutes(Router router, Repository repository) {
     Request request,
     String id,
   ) async {
+    final principal = requirePrincipal(request);
     final contestId = Id.parse(id);
     await requireContestDirector(request, repository, contestId);
+    recalculationLimiter.check(principal.accountId.toString());
     _logger.fine('Recalculating results for contest $id');
     final results = await service.recalculate(contestId);
     return jsonResponse(results.toJson());
