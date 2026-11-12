@@ -64,8 +64,9 @@ abstract interface class SyncAcceptorTransaction {
   /// Deletes the entity; a landing table takes its entries with it.
   Future<void> removeEntity(String entityType, Id id);
 
-  /// Marks the assignment [sourceId] as moved by [movedId].
-  Future<void> markSuperseded(Id sourceId, Id movedId);
+  /// Marks the assignment [sourceId] of [contestId] as moved by [movedId].
+  /// An assignment of another contest is never marked.
+  Future<void> markSuperseded(Id sourceId, Id movedId, Id contestId);
 
   /// The decided mutation with [clientMutationId] in [scope], or null.
   Future<MutationRecord?> findMutation(
