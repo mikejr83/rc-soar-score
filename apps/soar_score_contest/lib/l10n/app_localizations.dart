@@ -2316,6 +2316,42 @@ abstract class AppLocalizations {
   /// **'A pilot in this import was linked to different participants on two devices. Decide the link in Account sync, then review again.'**
   String get pilotImportLinkReviewPending;
 
+  /// Shown above the pilot review when another installation manages the remembered pilot links.
+  ///
+  /// In en, this message translates to:
+  /// **'Another computer manages the remembered GliderScore pilot links for this account, so this import cannot reuse or change them. You can import without remembered links: you confirm each match yourself and the saved links stay as they are.'**
+  String get pilotImportManagedElsewhere;
+
+  /// Button that reviews the same file without the remembered pilot links.
+  ///
+  /// In en, this message translates to:
+  /// **'Import without remembered links'**
+  String get pilotImportWithoutLinks;
+
+  /// Shown above the pilot review during a one-time import without remembered links.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing without remembered links: confirm each match below. The saved links stay as they are.'**
+  String get pilotImportWithoutLinksActive;
+
+  /// Label of the participant picker in the pilot link review.
+  ///
+  /// In en, this message translates to:
+  /// **'Or choose another participant'**
+  String get pilotLinkReviewPick;
+
+  /// Button that links the pilot to the participant picked in the review.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this participant'**
+  String get pilotLinkReviewUsePicked;
+
+  /// Shown when the participant picked for a pilot link was deleted before the choice was saved.
+  ///
+  /// In en, this message translates to:
+  /// **'That participant is no longer available. Pick another participant.'**
+  String get pilotLinkReviewPickRefused;
+
   /// Breadcrumb and heading of the page that lists what the account's sync needs from the director.
   ///
   /// In en, this message translates to:

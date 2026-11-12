@@ -152,6 +152,80 @@ void main() {
     });
   });
 
+  group('another installation manages the remembered links', () {
+    setUp(() => store.managedElsewhere = true);
+
+    PilotImportLink linkTo(ParticipantProfile p, int number) => PilotImportLink(
+      id: Id.create(),
+      ownerAccountId: p.ownerAccountId,
+      sourcePilotNo: number,
+      participantProfileId: p.id,
+      sourceValues: const {},
+      createdAt: DateTime.utc(2026),
+      updatedAt: DateTime.utc(2026),
+    );
+
+    test('the review says so and still uses the links by default', () async {
+      final c = controller();
+      await c.chooseAndRead();
+
+      expect(c.linksManagedElsewhere, isTrue);
+      expect(c.importingWithoutLinks, isFalse);
+    });
+
+    test('importing without remembered links confirms every match', () async {
+      store.links.add(linkTo(sam, 3));
+      final c = controller();
+      await c.chooseAndRead();
+      expect(c.review!.matches[2].remembered, isTrue);
+
+      await c.importWithoutRememberedLinks();
+
+      expect(c.importingWithoutLinks, isTrue);
+      final matches = c.review!.matches;
+      expect(matches.any((m) => m.remembered), isFalse);
+      // The pilot with a participant to match waits for the director.
+      for (var i = 0; i < matches.length; i++) {
+        if (matches[i].candidateIds.isNotEmpty) {
+          expect(c.selections[i].choice, PilotImportChoice.skip);
+        }
+      }
+      c.choose(1, PilotImportChoice.update);
+      expect(c.selections[1].choice, PilotImportChoice.update);
+    });
+
+    test('saves without remembering links', () async {
+      final c = controller();
+      await c.chooseAndRead();
+      await c.importWithoutRememberedLinks();
+
+      await c.apply();
+
+      expect(c.step, PilotImportStep.done);
+      expect(store.rememberedLinks, [false]);
+    });
+
+    test('a link under review no longer holds the pilot back', () async {
+      store.links.add(linkTo(sam, 3));
+      store.underReview = {3};
+      final c = controller();
+      await c.chooseAndRead();
+      await c.importWithoutRememberedLinks();
+
+      expect(c.review!.matches[2].linkReview, isFalse);
+    });
+  });
+
+  test('an import by the managing installation remembers its links', () async {
+    final c = controller();
+    await c.chooseAndRead();
+
+    await c.apply();
+
+    expect(c.linksManagedElsewhere, isFalse);
+    expect(store.rememberedLinks, [true]);
+  });
+
   test('reading builds a review with sensible defaults', () async {
     final c = controller();
     expect(await c.chooseAndRead(), isTrue);

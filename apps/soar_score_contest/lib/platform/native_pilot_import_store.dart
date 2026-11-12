@@ -42,9 +42,17 @@ class NativePilotImportStore implements PilotImportStore, PilotImportLinkStore {
   );
 
   @override
+  Future<bool> linksManagedElsewhere() => _server.runProfileOperation(
+    () => _server.repository.pilotImportLinkRepository.managedElsewhere(
+      _server.actingAccountId,
+    ),
+  );
+
+  @override
   Future<core.PilotImportOutcome> apply(
     List<core.PilotImportSelection> selections, {
     required Map<core.Id, int> reviewedRevisions,
+    bool rememberLinks = true,
   }) => _server.runProfileOperation(() async {
     // The owner is read once, inside the operation: a change of owner while
     // it runs stops its writes instead of splitting them between two.
@@ -53,8 +61,10 @@ class NativePilotImportStore implements PilotImportStore, PilotImportLinkStore {
     return core.PilotImportService(
       _server.repository.participantProfileRepository,
       clock: clock,
-      links: _server.repository.pilotImportLinkRepository,
-      reviewedLinks: seen,
+      links: rememberLinks
+          ? _server.repository.pilotImportLinkRepository
+          : null,
+      reviewedLinks: rememberLinks ? seen : null,
     ).apply(
       acting,
       selections,

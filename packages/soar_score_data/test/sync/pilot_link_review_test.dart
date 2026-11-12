@@ -8,8 +8,9 @@ import '../support/fixtures.dart';
 void main() => forEachBackend(_tests);
 
 /// What an installation does with the service's decisions about pilot links:
-/// its own link makes room for the service's, the pilots under review are
-/// known, and an import of those pilots (and only those) is stopped.
+/// its own link makes room for the service's, it knows when another
+/// installation manages the links, the pilots under review are known, and an
+/// import of those pilots (and only those) is stopped.
 void _tests(Backend backend) {
   late Installation inst;
   late Repository repo;
@@ -126,52 +127,68 @@ void _tests(Backend backend) {
             .any((m) => m.entityId == mine.id),
         isTrue,
       );
-      expect(await repo.pilotImportLinkRepository.pilotsUnderReview(owner), {
-        12,
-      });
+      // The service refuses the queued choice of a non-managing installation;
+      // no review waits, and this installation knows it does not manage links.
+      expect(
+        await repo.pilotImportLinkRepository.pilotsUnderReview(owner),
+        isEmpty,
+      );
+      expect(
+        await repo.pilotImportLinkRepository.managedElsewhere(owner),
+        isTrue,
+      );
     },
   );
 
-  test('a link answered with a conflict does not stop the pull', () async {
-    final mine = await saveLocal(profile('Ada'));
-    for (final m in await inst.syncStore.pendingMutations(scope)) {
-      if (m.entityId != mine.id) continue;
-      await inst.syncStore.recordOutcome(
-        mutationId: m.id,
-        outcome: core.MutationOutcome.conflict,
-        reasonCode: 'unique_violation',
+  group('managing the links', () {
+    test('an installation that wrote its links manages them', () async {
+      await saveLocal(profile('Ada'));
+
+      expect(
+        await repo.pilotImportLinkRepository.managedElsewhere(owner),
+        isFalse,
       );
-    }
-    // Still on this installation until the service's link comes down.
-    expect(await repo.pilotImportLinkRepository.pilotsUnderReview(owner), {12});
-    final theirs = link(profile('Grace'));
+    });
 
-    await inst.applier.apply(
-      remote('PilotImportLink', theirs.id, theirs.toJson()),
-    );
-
-    expect((await links()).single.id, theirs.id);
-    expect(
-      await repo.pilotImportLinkRepository.pilotsUnderReview(owner),
-      isEmpty,
-    );
-  });
-
-  test('an ordinary conflict on a link does not hold its pilot back', () async {
-    final mine = await saveLocal(profile('Ada'));
-    for (final m in await inst.syncStore.pendingMutations(scope)) {
-      if (m.entityId != mine.id) continue;
-      await inst.syncStore.recordOutcome(
-        mutationId: m.id,
-        outcome: core.MutationOutcome.conflict,
-        reasonCode: 'stale_base',
+    test('with no links at all, this installation may start', () async {
+      expect(
+        await repo.pilotImportLinkRepository.managedElsewhere(owner),
+        isFalse,
       );
-    }
+    });
 
-    expect(
-      await repo.pilotImportLinkRepository.pilotsUnderReview(owner),
-      isEmpty,
-    );
+    test('a link that came down from the service means another does', () async {
+      final theirs = link(profile('Grace'));
+      await repo.participantProfileRepository.save(
+        profile('Grace'),
+        metadata: metadata(),
+      );
+      await inst.applier.apply(
+        remote('PilotImportLink', theirs.id, theirs.toJson()),
+      );
+
+      expect(
+        await repo.pilotImportLinkRepository.managedElsewhere(owner),
+        isTrue,
+      );
+    });
+
+    test('a link the service refused for this reason means it too', () async {
+      final mine = await saveLocal(profile('Ada'));
+      for (final m in await inst.syncStore.pendingMutations(scope)) {
+        if (m.entityId != mine.id) continue;
+        await inst.syncStore.recordOutcome(
+          mutationId: m.id,
+          outcome: core.MutationOutcome.rejected,
+          reasonCode: 'not_link_manager',
+        );
+      }
+
+      expect(
+        await repo.pilotImportLinkRepository.managedElsewhere(owner),
+        isTrue,
+      );
+    });
   });
 
   test('a review that waits names its pilot until it is decided', () async {
@@ -207,11 +224,11 @@ void _tests(Backend backend) {
       ada = profile('Ada');
       grace = profile('Grace');
       edith = profile('Edith');
-      await saveLocal(ada);
+      final mine = await saveLocal(ada);
       await repo.participantProfileRepository.save(grace, metadata: metadata());
-      final theirs = link(grace);
+      final open = review(mine, link(grace));
       await inst.applier.apply(
-        remote('PilotImportLink', theirs.id, theirs.toJson()),
+        remote('ConflictRecord', open.id, open.toJson()),
       );
     });
 

@@ -231,6 +231,19 @@ void main() {
     expect(controller.pilots.selections.single.choice, PilotImportChoice.skip);
   });
 
+  test('importing without remembered links applies no links', () async {
+    store.managedElsewhere = true;
+    await controller.chooseAndRead();
+    controller.toggle(2);
+    await controller.continueToPilots();
+    expect(controller.pilots.linksManagedElsewhere, isTrue);
+
+    await controller.pilots.importWithoutRememberedLinks();
+
+    expect(controller.pilots.importingWithoutLinks, isTrue);
+    expect(controller.pilots.selections.single.choice, isNotNull);
+  });
+
   test(
     'Completed starts from the file and the director can change it',
     () async {

@@ -1816,6 +1816,30 @@
   "@pilotImportLinkReviewPending": {
     "description": "Shown when an import is stopped because a pilot's link needs a decision first."
   },
+  "pilotImportManagedElsewhere": "Another computer manages the remembered GliderScore pilot links for this account, so this import cannot reuse or change them. You can import without remembered links: you confirm each match yourself and the saved links stay as they are.",
+  "@pilotImportManagedElsewhere": {
+    "description": "Shown above the pilot review when another installation manages the remembered pilot links."
+  },
+  "pilotImportWithoutLinks": "Import without remembered links",
+  "@pilotImportWithoutLinks": {
+    "description": "Button that reviews the same file without the remembered pilot links."
+  },
+  "pilotImportWithoutLinksActive": "Importing without remembered links: confirm each match below. The saved links stay as they are.",
+  "@pilotImportWithoutLinksActive": {
+    "description": "Shown above the pilot review during a one-time import without remembered links."
+  },
+  "pilotLinkReviewPick": "Or choose another participant",
+  "@pilotLinkReviewPick": {
+    "description": "Label of the participant picker in the pilot link review."
+  },
+  "pilotLinkReviewUsePicked": "Use this participant",
+  "@pilotLinkReviewUsePicked": {
+    "description": "Button that links the pilot to the participant picked in the review."
+  },
+  "pilotLinkReviewPickRefused": "That participant is no longer available. Pick another participant.",
+  "@pilotLinkReviewPickRefused": {
+    "description": "Shown when the participant picked for a pilot link was deleted before the choice was saved."
+  },
   "shellNavAccountSync": "Account sync",
   "@shellNavAccountSync": {
     "description": "Breadcrumb and heading of the page that lists what the account's sync needs from the director."

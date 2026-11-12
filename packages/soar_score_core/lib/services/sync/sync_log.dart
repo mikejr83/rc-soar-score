@@ -123,13 +123,11 @@ class SyncLog {
     int? currentRevision,
     Id? conflictEntityId,
     bool requiresAction = true,
-    Id? recordId,
   }) async {
     final now = ctx.clock();
     final record = _record(
       ctx,
       mutation,
-      id: recordId,
       outcome: MutationOutcome.conflict,
       payload: mutation.payload,
       reasonCode: reasonCode,

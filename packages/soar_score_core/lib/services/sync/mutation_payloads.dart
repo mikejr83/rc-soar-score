@@ -7,7 +7,6 @@ class MutationPayload {
     required this.isDelete,
     this.entity = const {},
     this.supersedes,
-    this.follows,
   });
 
   /// The payload version this build writes and reads.
@@ -18,19 +17,13 @@ class MutationPayload {
 
   /// A save of [entity]; [supersedes] is the id of the assignment a `Moved`
   /// assignment replaces.
-  ///
-  /// [follows] is the id of the unacknowledged edit of the same entity that
-  /// the sender built this one on, when it had one: the evidence that this
-  /// edit continues that edit and not another device's.
   factory MutationPayload.save(
     Map<String, Object?> entity, {
     String? supersedes,
-    String? follows,
   }) => MutationPayload._(
     isDelete: false,
     entity: entity,
     supersedes: supersedes,
-    follows: follows,
   );
 
   /// Reads [json], throwing a [FormatException] when it is not a payload this
@@ -57,15 +50,7 @@ class MutationPayload {
         if (supersedes != null && supersedes is! String) {
           throw const FormatException('supersedes must be an id');
         }
-        final follows = payload.data['follows'];
-        if (follows != null && follows is! String) {
-          throw const FormatException('follows must be an id');
-        }
-        return MutationPayload.save(
-          entity,
-          supersedes: supersedes as String?,
-          follows: follows as String?,
-        );
+        return MutationPayload.save(entity, supersedes: supersedes as String?);
       default:
         throw FormatException('unknown operation ${payload.data['operation']}');
     }
@@ -76,17 +61,11 @@ class MutationPayload {
   /// The entity state of a save; empty for a delete.
   final Map<String, Object?> entity;
   final String? supersedes;
-  final String? follows;
 
   Map<String, Object?> toJson() => VersionedPayload(
     version: version,
     data: isDelete
         ? const {'operation': 'delete'}
-        : {
-            'operation': 'save',
-            'entity': entity,
-            'supersedes': ?supersedes,
-            'follows': ?follows,
-          },
+        : {'operation': 'save', 'entity': entity, 'supersedes': ?supersedes},
   ).toJson();
 }

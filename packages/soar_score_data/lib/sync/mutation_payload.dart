@@ -4,13 +4,11 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 const mutationPayloadVersion = 1;
 
 /// `MutationRecord.payload` for a save: the entity as the model wrote it.
-Map<String, Object?> savePayload(
-  Map<String, Object?> entity, {
-  core.Id? follows,
-}) => core.VersionedPayload(
-  version: mutationPayloadVersion,
-  data: {'operation': 'save', 'entity': entity, 'follows': ?follows?.value},
-).toJson();
+Map<String, Object?> savePayload(Map<String, Object?> entity) =>
+    core.VersionedPayload(
+      version: mutationPayloadVersion,
+      data: {'operation': 'save', 'entity': entity},
+    ).toJson();
 
 /// `MutationRecord.payload` for a delete.
 Map<String, Object?> deletePayload() => core.VersionedPayload(

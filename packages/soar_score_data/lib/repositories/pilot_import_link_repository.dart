@@ -4,7 +4,6 @@ import 'drift_repository.dart';
 import '../sync/drift_sync_store.dart';
 import '../sync/table_mapper.dart';
 
-import 'package:drift/drift.dart' show Variable;
 
 class PilotImportLinkRepository extends DriftRepository
     implements core.PilotImportLinkRepository {
@@ -33,62 +32,27 @@ class PilotImportLinkRepository extends DriftRepository
         add(conflict.competingPayload);
       }
     }
-    // This installation's own link when the collision is not yet reviewable
-    // here: set aside for the service's link but not sent yet, or sent and
-    // answered with a conflict that has not come down yet.
-    final here = {
-      for (final link in await listForOwner(ownerAccountId))
-        link.id.value: link.revision,
-    };
-    final mutations =
-        await TableMapper(
-          db,
-          db.mutationRecords,
-          jsonColumns: {'payload'},
-        ).where(
-          "owner_account_id = ? AND entity_type = 'PilotImportLink' AND "
-          "(outcome = 'Pending' OR "
-          "(outcome = 'Conflict' AND reason_code = 'unique_violation'))",
-          [Variable<String>(ownerAccountId.value)],
-        );
-    // A link removed on purpose (deleted, or gone with its participant) is not
-    // set aside for the service's: only the director's choice is worth a
-    // review, and it names a participant this installation still has.
-    final deleted = {
-      for (final row in mutations)
-        if (_operation(row) == 'delete') row['entity_id'],
-    };
-    for (final row in mutations) {
-      if (_operation(row) != 'save' || deleted.contains(row['entity_id'])) {
-        continue;
-      }
-      final stored = here.containsKey(row['entity_id']);
-      final data = (row['payload'] as Map?)?['data'];
-      final entity = data is Map ? data['entity'] : null;
-      if (entity is! Map) continue;
-      // A refused edit of a link both devices hold stays on record; it is
-      // over once the service's choice replaced this installation's link.
-      final replaced =
-          stored &&
-          entity['revision'] is int &&
-          here[row['entity_id']]! > (entity['revision'] as int);
-      final waiting = row['outcome'] == 'Pending'
-          ? !stored
-          : stored && !replaced;
-      if (!waiting) continue;
-      final target = entity['participant_profile_id'];
-      if (target is String &&
-          await _profiles.find(core.Id.parse(target)) == null) {
-        continue;
-      }
-      add(entity);
-    }
     return numbers;
   }
 
-  static Object? _operation(Map<String, Object?> row) {
-    final data = (row['payload'] as Map?)?['data'];
-    return data is Map ? data['operation'] : null;
+  @override
+  Future<bool> managedElsewhere(core.Id ownerAccountId) async {
+    // Mutation records may still carry the Local account's id from before the
+    // sign-in claim, so they are matched by entity, not by owner.
+    final mutations = await TableMapper(
+      db,
+      db.mutationRecords,
+    ).where("entity_type = 'PilotImportLink'", const []);
+    final written = {for (final row in mutations) row['entity_id']};
+    final refused = mutations.any(
+      (row) =>
+          row['outcome'] == 'Rejected' &&
+          row['reason_code'] == core.SyncReasonCode.notLinkManager.code,
+    );
+    if (refused) return true;
+    // A link this installation never wrote came down from the service.
+    return (await listForOwner(ownerAccountId))
+        .any((link) => !written.contains(link.id.value));
   }
 
   @override

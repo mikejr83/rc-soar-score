@@ -39,11 +39,14 @@ void main() {
   });
   tearDown(() => PilotImportStore.current = previous);
 
+  final payloads = <Map<String, Object?>?>[];
+
   Future<List<ConflictResolutionChoice>> open(
     WidgetTester tester,
     ConflictAnswer answer, {
     List<ConflictAnswer?>? closedWith,
   }) async {
+    payloads.clear();
     final asked = <ConflictResolutionChoice>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -62,6 +65,7 @@ void main() {
                   conflict: conflict,
                   onResolve: (choice, payload) async {
                     asked.add(choice);
+                    payloads.add(payload);
                     return answer;
                   },
                 ),
@@ -133,6 +137,50 @@ void main() {
     expect(find.byKey(const ValueKey('conflict-dialog')), findsNothing);
     expect(closed.single!.resolved, isFalse);
     expect(closed.single!.refusal, 'Stale base.');
+  });
+
+  testWidgets('the director can choose another participant', (tester) async {
+    final closed = <ConflictAnswer?>[];
+    final asked = await open(
+      tester,
+      const ConflictAnswer.resolved(),
+      closedWith: closed,
+    );
+    expect(
+      tester
+          .widget<OutlinedButton>(
+            find.byKey(const ValueKey('conflict-use-picked')),
+          )
+          .onPressed,
+      isNull,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('conflict-pick-participant')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Grace Hopper').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('conflict-use-picked')));
+    await tester.pumpAndSettle();
+
+    expect(asked, [ConflictResolutionChoice.merged]);
+    expect(payloads.single, {'participant_profile_id': grace.id.value});
+    expect(closed.single!.resolved, isTrue);
+  });
+
+  testWidgets('a picked participant who is gone keeps the dialog open', (
+    tester,
+  ) async {
+    await open(tester, const ConflictAnswer.notAccepted('Entity deleted.'));
+
+    await tester.tap(find.byKey(const ValueKey('conflict-pick-participant')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Grace Hopper').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('conflict-use-picked')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('conflict-dialog')), findsOneWidget);
+    expect(find.textContaining('no longer available'), findsOneWidget);
   });
 
   testWidgets('a participant who is gone is named as such', (tester) async {

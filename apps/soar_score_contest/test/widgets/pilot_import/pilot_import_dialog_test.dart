@@ -95,6 +95,40 @@ void main() {
     expect(find.byKey(const ValueKey('pilot-import-choice-3')), findsNothing);
   });
 
+  testWidgets('another installation managing the links offers a one-time '
+      'import', (tester) async {
+    store.managedElsewhere = true;
+    await open(tester);
+
+    expect(
+      find.byKey(const ValueKey('pilot-import-managed-elsewhere')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('pilot-import-without-links')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('Importing without remembered links'),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('pilot-import-without-links')),
+      findsNothing,
+    );
+    await tester.tap(find.byKey(const ValueKey('pilot-import-confirm')));
+    await tester.pumpAndSettle();
+    expect(store.rememberedLinks, [false]);
+  });
+
+  testWidgets('the managing installation sees no restriction', (tester) async {
+    await open(tester);
+
+    expect(
+      find.byKey(const ValueKey('pilot-import-managed-elsewhere')),
+      findsNothing,
+    );
+  });
+
   testWidgets('remembered pilot with changed source requires approval', (
     tester,
   ) async {

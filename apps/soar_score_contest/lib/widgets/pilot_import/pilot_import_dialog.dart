@@ -234,6 +234,7 @@ class PilotImportReviewList extends StatelessWidget {
         shrinkWrap: true,
         children: [
           Text(l10n.pilotImportReviewIntro),
+          if (controller.linksManagedElsewhere) _managedElsewhere(l10n),
           ...notes,
           if (maybes.isNotEmpty) ...[
             _heading(context, l10n.pilotImportMaybeHeading(maybes.length)),
@@ -257,6 +258,32 @@ class PilotImportReviewList extends StatelessWidget {
       ),
     );
   }
+
+  /// Another installation manages the remembered links: say so, and offer
+  /// the import that leaves them alone.
+  Widget _managedElsewhere(AppLocalizations l10n) => Padding(
+    padding: const EdgeInsets.only(top: 8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      key: const ValueKey('pilot-import-managed-elsewhere'),
+      children: [
+        Text(
+          controller.importingWithoutLinks
+              ? l10n.pilotImportWithoutLinksActive
+              : l10n.pilotImportManagedElsewhere,
+        ),
+        if (!controller.importingWithoutLinks)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: OutlinedButton(
+              key: const ValueKey('pilot-import-without-links'),
+              onPressed: controller.importWithoutRememberedLinks,
+              child: Text(l10n.pilotImportWithoutLinks),
+            ),
+          ),
+      ],
+    ),
+  );
 
   static Widget _heading(BuildContext context, String text) => Padding(
     padding: const EdgeInsets.only(top: 16, bottom: 4),

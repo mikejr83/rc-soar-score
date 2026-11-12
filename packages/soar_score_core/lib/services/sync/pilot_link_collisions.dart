@@ -8,29 +8,25 @@ import '../../repositories/sync_acceptor_store.dart';
 import '../../repositories/sync_scope_key.dart';
 import 'exchange_context.dart';
 import 'mutation_payloads.dart';
-import 'mutation_result.dart';
 import 'sync_exchange.dart';
 import 'sync_log.dart';
 import 'sync_mutation.dart';
 import 'sync_scope_ids.dart';
 
-/// What happens when installations of one director disagree about which
-/// participant a GliderScore pilot is linked to.
+/// The rules for remembered GliderScore pilot links on the service.
 ///
-/// Two installations that were offline can each create a link for the same
-/// pilot. The service keeps the one it saw first, and keeps the other as a
-/// conflict for the director, with the latest edit of that installation's
-/// queue (a later edit of the same link replaces the earlier one in the
-/// review). Rules:
+/// One installation manages the links of a director (GliderScore is one source
+/// per director): the first to write one. The service refuses link writes
+/// from any other installation, whether made live or queued offline and sent
+/// after reconnecting, so installations cannot disagree about a link. Other
+/// installations import with a one-time choice instead (nothing remembered
+/// changes).
 ///
-/// - Different participants: a conflict the director decides. Any change to
-///   either side while it waits closes it and opens a new one, so a decision
-///   is always about the comparison that was shown.
-/// - The same participant: nothing to decide. The stored link stays and the
-///   saved GliderScore details are compared at the next import, field by
-///   field.
-/// - A deleted participant stays deleted: its links go with it, a link edit
-///   that names it is refused, and a review that depended on it is closed.
+/// Disagreements that already exist are decided by the director in Account
+/// sync. While one waits, any change to either side closes it and opens a new
+/// one, so a decision is always about the comparison that was shown. A deleted
+/// participant stays deleted: its links go with it, a link edit that names it
+/// is refused, and a review that depended on it is closed.
 class PilotLinkCollisions {
   const PilotLinkCollisions(this._log);
 
@@ -39,12 +35,46 @@ class PilotLinkCollisions {
   static const entityType = 'PilotImportLink';
   static const _profileType = 'ParticipantProfile';
 
-  /// The reason of a link that matched the stored one and needs no review.
-  static final sameParticipantReason = SyncReasonCode.sameParticipantLink.code;
-
   /// Whether a mutation of [type] is a pilot link of a director's own data.
   static bool handles(ExchangeContext ctx, String type) =>
       type == entityType && ctx.scope is DirectorScopeKey;
+
+  /// Why the installation that sent [m] may not write links, or null.
+  ///
+  /// The managing installation is the one that sent the first link of the
+  /// director's log. Decisions and the service's own changes carry no
+  /// installation and are never refused.
+  Future<(SyncReasonCode, String)?> writerProblem(
+    SyncAcceptorTransaction tx,
+    ExchangeContext ctx,
+    SyncMutation m,
+  ) async {
+    final sender = ctx.installationId;
+    if (sender == null || m.authority == Authority.system) return null;
+    final manager = await _manager(tx, ctx);
+    if (manager == null || manager == sender) return null;
+    return (
+      SyncReasonCode.notLinkManager,
+      'Another installation manages the remembered GliderScore pilot links. '
+          'Import without remembered links here, or manage them there.',
+    );
+  }
+
+  Future<Id?> _manager(SyncAcceptorTransaction tx, ExchangeContext ctx) async {
+    var after = 0;
+    while (true) {
+      final page = await tx.acceptedAfter(ctx.scope, after, limit: 500);
+      if (page.isEmpty) return null;
+      for (final record in page) {
+        if (record.entityType == entityType &&
+            record.authority != Authority.system &&
+            record.sourceInstallationId != null) {
+          return record.sourceInstallationId;
+        }
+      }
+      after = page.last.sequence!;
+    }
+  }
 
   /// Why a link may not name its participant, or null.
   Future<(SyncReasonCode, String)?> targetProblem(
@@ -78,64 +108,6 @@ class PilotLinkCollisions {
       );
     }
     return null;
-  }
-
-  /// The decision for a link that is not stored under its own id.
-  ///
-  /// Returns null when no other link holds the pilot, and the link can be
-  /// stored. Otherwise the pilot is taken: the result is the conflict (or the
-  /// quiet record) that keeps the offered link.
-  Future<MutationResult?> collide(
-    SyncAcceptorTransaction tx,
-    ExchangeContext ctx,
-    SyncMutation m,
-    MutationPayload payload,
-  ) async {
-    final entity = payload.entity;
-    final held = await _holding(tx, ctx, entity);
-    if (held == null) return null;
-
-    // The offered link replaces whatever this installation offered before.
-    for (final earlier in await _pending(tx, ctx)) {
-      if (earlier.competingPayload?['id'] == m.entityId.value) {
-        await _log.closeAutomatically(tx, ctx, earlier);
-      }
-    }
-    final agree =
-        held['participant_profile_id'] == entity['participant_profile_id'];
-    return _log.conflict(
-      tx,
-      ctx,
-      m,
-      reasonCode: agree
-          ? sameParticipantReason
-          : SyncReasonCode.uniqueViolation.code,
-      message: agree
-          ? 'Both devices linked this pilot to the same participant. The '
-                'saved GliderScore details are compared at the next import.'
-          : 'Two devices linked this GliderScore pilot to different '
-                'participants. Review the links.',
-      competing: payload,
-      accepted: held,
-      currentRevision: held['revision'] as int?,
-      conflictEntityId: Id.parse(held['id']! as String),
-      requiresAction: !agree,
-      recordId: m.id,
-    );
-  }
-
-  /// A link of an installation's queue was deleted before the director
-  /// decided: it no longer competes.
-  Future<void> withdrawn(
-    SyncAcceptorTransaction tx,
-    ExchangeContext ctx,
-    Id linkId,
-  ) async {
-    for (final conflict in await _pending(tx, ctx)) {
-      if (conflict.competingPayload?['id'] == linkId.value) {
-        await _log.closeAutomatically(tx, ctx, conflict);
-      }
-    }
   }
 
   /// The stored link [linkId] changed or was removed. Reviews of it that are
@@ -199,111 +171,6 @@ class PilotLinkCollisions {
     ctx.conflicts.add(
       SyncConflictPointer(id: reopened.id, requiresAction: true),
     );
-  }
-
-  /// An edit of a link both installations already hold, made on a revision
-  /// that is no longer the stored one.
-  ///
-  /// Returns null when the edit builds on the stored link and can be stored.
-  /// Otherwise the two installations disagree: a different participant is a
-  /// review for the director, the same participant is kept quietly. An edit
-  /// that follows an earlier edit of a waiting review replaces it.
-  Future<MutationResult?> competeOnShared(
-    SyncAcceptorTransaction tx,
-    ExchangeContext ctx,
-    SyncMutation m,
-    MutationPayload payload,
-    Map<String, Object?> stored,
-  ) async {
-    final entity = payload.entity;
-    // An edit replaces a waiting contender only when it names that contender
-    // as the edit it follows (the sending installation records the edit it
-    // built on). A revision number alone is not evidence: two installations
-    // reach the same revision independently.
-    ConflictRecord? successorOf;
-    final follows = payload.follows == null ? null : Id.parse(payload.follows!);
-    if (follows != null) {
-      for (final earlier in await _pending(tx, ctx)) {
-        if (earlier.entityId == m.entityId &&
-            earlier.competingMutationId == follows) {
-          successorOf = earlier;
-        }
-      }
-    }
-    if (successorOf == null && m.baseRevision == stored['revision']) {
-      return null;
-    }
-    if (successorOf != null) {
-      await _log.closeAutomatically(tx, ctx, successorOf);
-    }
-    final agree =
-        stored['participant_profile_id'] == entity['participant_profile_id'];
-    return _log.conflict(
-      tx,
-      ctx,
-      m,
-      reasonCode: agree
-          ? sameParticipantReason
-          : SyncReasonCode.uniqueViolation.code,
-      message: agree
-          ? 'Both devices linked this pilot to the same participant. The '
-                'saved GliderScore details are compared at the next import.'
-          : 'Two devices linked this GliderScore pilot to different '
-                'participants. Review the links.',
-      competing: payload,
-      accepted: stored,
-      currentRevision: stored['revision'] as int?,
-      requiresAction: !agree,
-      recordId: m.id,
-    );
-  }
-
-  /// The revision a decision publishes: above the stored link and, when the
-  /// competing link shares its id, above the optimistic revision its device
-  /// already holds, so every replica applies the decision.
-  static int settledRevision(
-    Map<String, Object?> stored,
-    Map<String, Object?>? competing,
-  ) {
-    final held = stored['revision'] as int;
-    final theirs = competing?['id'] == stored['id']
-        ? (competing?['revision'] as int? ?? 0)
-        : 0;
-    return (held > theirs ? held : theirs) + 1;
-  }
-
-  /// After the director kept the stored link of a review whose competing link
-  /// shares its id, publish the stored link again under a newer revision so
-  /// the installation that lost replaces its own edit.
-  Future<void> republishKept(
-    SyncAcceptorTransaction tx,
-    ExchangeContext ctx,
-    ConflictRecord conflict,
-  ) async {
-    if (conflict.competingPayload?['id'] != conflict.entityId.value) return;
-    final stored = await tx.findEntity(entityType, conflict.entityId);
-    if (stored == null) return;
-    final entity = {
-      ...stored,
-      'revision': settledRevision(stored, conflict.competingPayload),
-    };
-    await tx.writeEntity(entityType, entity);
-    await _log.accept(
-      tx,
-      ctx,
-      SyncMutation(
-        id: ctx.newId(),
-        clientMutationId: 'server:pilot-link-republished:${conflict.id.value}',
-        entityType: entityType,
-        entityId: conflict.entityId,
-        authority: Authority.system,
-        clientTime: ctx.clock(),
-        payload: MutationPayload.save(entity).toJson(),
-      ),
-      MutationPayload.save(entity),
-      revision: entity['revision'] as int?,
-    );
-    await storedLinkChanged(tx, ctx, conflict.entityId, except: conflict.id);
   }
 
   /// A participant was deleted. Its links go with it, and so do the reviews

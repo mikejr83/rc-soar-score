@@ -206,9 +206,9 @@ One list, shared by server and client, defined in `soar_score_core`:
 | `locked`                    | Rejected           | The score or contest state does not allow modification                         |
 | `unauthorized`              | Rejected           | The account lacks authority for the scope or the entity                        |
 | `director_over_participant` | Conflict (silent)  | A director's official value beat a participant submission                      |
-| `same_participant_link`     | Conflict (silent)  | Two installations linked a GliderScore pilot to the same participant           |
+| `not_link_manager`          | Rejected           | Another installation manages the director's remembered GliderScore pilot links |
 
-**Edits of a pilot link both devices hold.** A save of a `PilotImportLink` may carry `follows`, the id of the device's own unacknowledged edit of the same link that it was built on. The service opens a review (`unique_violation`) for a stale edit that names a different participant than the stored link, and replaces a waiting review only when the incoming edit's `follows` names that review's edit; a matching revision number or installation alone is no evidence, since two devices reach the same revision independently. An edit without `follows` is an ordinary edit. A decision (either choice) publishes the chosen link at a revision above the stored link and above the revision of the contender's device, so every replica applies it.
+**Remembered pilot links.** The first installation to write a `PilotImportLink` of a director manages the links. The service rejects link saves and deletes from any other installation with `not_link_manager`, whether live or queued, except the deletion of links that went with a deleted participant. Decisions and the service's own changes are never refused. A director's choice on an existing disagreement (`unique_violation`) may name another participant (`merged` with `participant_profile_id`), which is checked when the decision is saved.
 
 | `scored_assignment` | Rejected | A change would reinterpret an assignment that already has scores |
 | `dependency_failed` | Skipped | A mutation it depends on failed |

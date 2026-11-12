@@ -38,6 +38,7 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
   bool _editing = false;
   bool _sending = false;
   String? _error;
+  String? _picked;
   late final Future<List<ParticipantProfile>> _participants;
 
   bool get _isLinkReview => widget.conflict.entityType == 'PilotImportLink';
@@ -73,6 +74,16 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
     });
     final answer = await widget.onResolve(choice, payload);
     if (!mounted) return;
+    if (_isLinkReview &&
+        choice == ConflictResolutionChoice.merged &&
+        answer.refusal != null) {
+      // The participant picked is gone or no longer valid: pick another.
+      setState(() {
+        _sending = false;
+        _error = AppLocalizations.of(context).pilotLinkReviewPickRefused;
+      });
+      return;
+    }
     if (answer.resolved || (_isLinkReview && answer.refusal != null)) {
       // A refused link review was replaced while it was open: the page loads
       // the new comparison and the director decides again.
@@ -103,6 +114,45 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
       return;
     }
     _send(ConflictResolutionChoice.merged, payload: decoded);
+  }
+
+  /// Lets the director link the pilot to a participant of their own choosing.
+  Widget _picker(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return FutureBuilder<List<ParticipantProfile>>(
+      future: _participants,
+      builder: (context, snapshot) => Row(
+        children: [
+          Expanded(
+            child: DropdownButtonFormField<String>(
+              key: const ValueKey('conflict-pick-participant'),
+              isExpanded: true,
+              initialValue: _picked,
+              decoration: InputDecoration(labelText: l10n.pilotLinkReviewPick),
+              items: [
+                for (final p in snapshot.data ?? const <ParticipantProfile>[])
+                  DropdownMenuItem(
+                    value: p.id.value,
+                    child: Text('${p.firstName} ${p.lastName}'),
+                  ),
+              ],
+              onChanged: _sending ? null : (v) => setState(() => _picked = v),
+            ),
+          ),
+          const SizedBox(width: 8),
+          OutlinedButton(
+            key: const ValueKey('conflict-use-picked'),
+            onPressed: _sending || _picked == null
+                ? null
+                : () => _send(
+                    ConflictResolutionChoice.merged,
+                    payload: {'participant_profile_id': _picked},
+                  ),
+            child: Text(l10n.pilotLinkReviewUsePicked),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -141,7 +191,17 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
                   ),
                 ),
               ] else if (_isLinkReview)
-                PilotLinkReview(conflict: conflict, participants: _participants)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    PilotLinkReview(
+                      conflict: conflict,
+                      participants: _participants,
+                    ),
+                    const SizedBox(height: 12),
+                    _picker(context),
+                  ],
+                )
               else
                 PayloadComparison(
                   acceptedLabel: 'Accepted by the service',

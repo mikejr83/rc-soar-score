@@ -192,6 +192,10 @@ class MutationProcessor {
     }
 
     final links = PilotLinkCollisions.handles(ctx, m.entityType);
+    if (links) {
+      final writer = await _links.writerProblem(tx, ctx, m);
+      if (writer != null) return reject(writer.$1, writer.$2);
+    }
     if (links && !payload.isDelete) {
       final problem = await _links.targetProblem(tx, ctx, payload.entity);
       if (problem != null) return reject(problem.$1, problem.$2);
@@ -207,7 +211,6 @@ class MutationProcessor {
     if (result.outcome == MutationOutcome.accepted) {
       if (links) {
         // A change to the stored link ends the reviews that compared it.
-        if (payload.isDelete) await _links.withdrawn(tx, ctx, m.entityId);
         await _links.storedLinkChanged(tx, ctx, m.entityId);
       } else if (payload.isDelete && m.entityType == 'ParticipantProfile') {
         await _links.participantDeleted(tx, ctx, m, m.entityId);
@@ -228,14 +231,6 @@ class MutationProcessor {
     final base = s.m.baseRevision;
 
     if (stored == null) {
-      if (PilotLinkCollisions.handles(s.ctx, s.m.entityType)) {
-        // A pilot link is created on the installation that first meets the
-        // pilot, so its later edits can reach the service before it holds
-        // the link: they take the pilot or compete for it like the first.
-        final taken = await _links.collide(s.tx, s.ctx, s.m, s.payload);
-        if (taken != null) return taken;
-        return _store_(s, {...entity, 'revision': entity['revision'] ?? 1});
-      }
       if (base != null) {
         return _log.reject(
           s.tx,
@@ -250,18 +245,6 @@ class MutationProcessor {
     }
 
     final current = stored['revision'] as int;
-    if (PilotLinkCollisions.handles(s.ctx, s.m.entityType) &&
-        !jsonEquals(_comparable(stored), _comparable(entity)) &&
-        (base == null || base <= current)) {
-      final competed = await _links.competeOnShared(
-        s.tx,
-        s.ctx,
-        s.m,
-        s.payload,
-        stored,
-      );
-      if (competed != null) return competed;
-    }
     if (base == null) {
       if (jsonEquals(_comparable(stored), _comparable(entity))) {
         return _acceptStored(s, stored);

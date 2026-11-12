@@ -138,6 +138,7 @@ class ConflictResolver {
       clock: _clock,
       newId: _newId,
     );
+    Map<String, Object?>? chosen;
     final isLinkReview =
         conflict.entityType == PilotLinkCollisions.entityType &&
         conflict.reasonCode == SyncReasonCode.uniqueViolation.code;
@@ -152,7 +153,12 @@ class ConflictResolver {
         return refuse(SyncReasonCode.staleBase);
       }
       if (choice == ConflictResolutionChoice.merged) {
-        return refuse(SyncReasonCode.invalidPayload);
+        // The director picked another participant for the pilot.
+        final picked = merged?['participant_profile_id'];
+        if (picked is! String) return refuse(SyncReasonCode.invalidPayload);
+        chosen = {...current, 'participant_profile_id': picked};
+        final problem = await _links.targetProblem(tx, ctx, chosen);
+        if (problem != null) return refuse(problem.$1);
       }
       final competing = conflict.competingPayload;
       if (choice == ConflictResolutionChoice.tookCompeting &&
@@ -202,7 +208,6 @@ class ConflictResolver {
         clientMutationId: clientMutationId,
       );
       await tx.saveConflict(resolved);
-      if (isLinkReview) await _links.republishKept(tx, ctx, conflict);
       await _audit(tx, ctx, decision, AuditAction.conflictRejected);
       return emitted;
     }
@@ -222,7 +227,7 @@ class ConflictResolver {
     }
 
     final taken = choice == ConflictResolutionChoice.merged
-        ? MutationPayload.save(merged!)
+        ? MutationPayload.save(chosen ?? merged!)
         : _competing(conflict);
     final result = await _apply(tx, ctx, conflict, decision, taken);
     await tx.saveConflict(resolved);
@@ -298,14 +303,7 @@ class ConflictResolver {
     }
     switch (kind.shape) {
       case SyncEntityShape.revisioned:
-        entity['revision'] = stored == null
-            ? 1
-            : type == PilotLinkCollisions.entityType
-            ? PilotLinkCollisions.settledRevision(
-                stored,
-                conflict.competingPayload,
-              )
-            : (stored['revision'] as int) + 1;
+        entity['revision'] = ((stored?['revision'] as int?) ?? 0) + 1;
       case SyncEntityShape.appendOnly:
       case SyncEntityShape.unrevisioned:
         await _renumber(tx, ctx, type, entity);

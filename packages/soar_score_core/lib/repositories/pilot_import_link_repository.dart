@@ -16,10 +16,14 @@ abstract interface class PilotImportLinkRepository {
 
   /// The source pilot numbers whose link is not settled: two installations
   /// linked the pilot differently and the director has not decided which link
-  /// is right, or this installation's own link for it was set aside and its
-  /// choice has not been sent yet. A link for such a pilot must not be reused
-  /// by an import.
+  /// is right. A link for such a pilot must not be reused by an import.
   Future<Set<int>> pilotsUnderReview(Id ownerAccountId);
+
+  /// Whether another installation manages the remembered links: a link here
+  /// came from the service and not from this installation, or the service
+  /// refused a link written here because another installation manages them.
+  /// An import on this installation then leaves the links alone.
+  Future<bool> managedElsewhere(Id ownerAccountId);
   Future<PilotImportLink> save(
     PilotImportLink link, {
     required MutationMetadata metadata,

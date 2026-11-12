@@ -1603,6 +1603,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'A pilot in this import was linked to different participants on two devices. Decide the link in Account sync, then review again.';
 
   @override
+  String get pilotImportManagedElsewhere =>
+      'Another computer manages the remembered GliderScore pilot links for this account, so this import cannot reuse or change them. You can import without remembered links: you confirm each match yourself and the saved links stay as they are.';
+
+  @override
+  String get pilotImportWithoutLinks => 'Import without remembered links';
+
+  @override
+  String get pilotImportWithoutLinksActive =>
+      'Importing without remembered links: confirm each match below. The saved links stay as they are.';
+
+  @override
+  String get pilotLinkReviewPick => 'Or choose another participant';
+
+  @override
+  String get pilotLinkReviewUsePicked => 'Use this participant';
+
+  @override
+  String get pilotLinkReviewPickRefused =>
+      'That participant is no longer available. Pick another participant.';
+
+  @override
   String get shellNavAccountSync => 'Account sync';
 
   @override

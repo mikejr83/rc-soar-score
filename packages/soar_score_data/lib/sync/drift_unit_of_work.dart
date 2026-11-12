@@ -73,7 +73,6 @@ class _Context implements core.WriteContext {
     final saved = store.decode(json) as T;
 
     final scope = _scopeOf(entity, json);
-    final follows = await _editFollowed(entity, storedRevision);
     await store.upsertJson(store.encode(saved));
     await _recordMutation(
       entityType: entity.entityType,
@@ -81,36 +80,9 @@ class _Context implements core.WriteContext {
       scope: scope,
       baseRevision: storedRevision,
       metadata: metadata,
-      payload: savePayload(store.encode(saved), follows: follows),
+      payload: savePayload(store.encode(saved)),
     );
     return saved;
-  }
-
-  /// The unacknowledged edit of a pilot link that produced the revision this
-  /// edit builds on, so the service can tell a follow-up of a waiting edit
-  /// from an independent edit that reached the same revision.
-  Future<core.Id?> _editFollowed(
-    core.Synchronizable entity,
-    int? storedRevision,
-  ) async {
-    if (entity.entityType != 'PilotImportLink' ||
-        storedRevision == null ||
-        _uow._db.profile == DatabaseProfile.server) {
-      return null;
-    }
-    final rows = await _uow._mutations.where(
-      "entity_type = 'PilotImportLink' AND entity_id = ? AND "
-      "outcome IN ('Pending', 'Conflict')",
-      [Variable<String>(entity.id.value)],
-      orderBy: 'client_time DESC, id',
-    );
-    for (final row in rows) {
-      final data = (row['payload'] as Map?)?['data'];
-      final entity = data is Map ? data['entity'] : null;
-      final made = entity is Map ? entity['revision'] : null;
-      if (made == storedRevision) return core.Id.parse(row['id']! as String);
-    }
-    return null;
   }
 
   @override

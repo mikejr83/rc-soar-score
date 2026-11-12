@@ -192,21 +192,15 @@ class AcceptorHarness {
     String? clientMutationId,
     core.Authority authority = core.Authority.director,
     String? supersedes,
-    core.Id? follows,
-    core.Id? id,
   }) => SyncMutation(
-    id: id ?? core.Id.create(),
+    id: core.Id.create(),
     clientMutationId: clientMutationId ?? 'test-${_requests++}',
     entityType: type,
     entityId: core.Id.parse(entity['id']! as String),
     baseRevision: base,
     authority: authority,
     clientTime: DateTime.utc(2026, 10, 14),
-    payload: MutationPayload.save(
-      entity,
-      supersedes: supersedes,
-      follows: follows?.value,
-    ).toJson(),
+    payload: MutationPayload.save(entity, supersedes: supersedes).toJson(),
   );
 
   /// A deletion of one entity as one mutation.

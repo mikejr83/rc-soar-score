@@ -32,6 +32,7 @@ abstract class PilotImportStore {
   Future<PilotImportOutcome> apply(
     List<PilotImportSelection> selections, {
     required Map<Id, int> reviewedRevisions,
+    bool rememberLinks = true,
   });
 }
 
@@ -42,6 +43,10 @@ abstract interface class PilotImportLinkStore {
   /// The GliderScore pilot numbers whose link still waits for the director's
   /// decision in Account sync. An import holds those pilots back.
   Future<Set<int>> pilotsUnderReview();
+
+  /// Whether another installation manages the remembered links of this
+  /// director. This one then imports without them.
+  Future<bool> linksManagedElsewhere();
 }
 
 /// The system file dialog the import uses. A journey cannot drive it, so it
@@ -158,6 +163,24 @@ class PilotImportController extends ChangeNotifier {
 
   Object? _error;
 
+  bool _managedElsewhere = false;
+
+  /// True when another installation manages the remembered links, so this
+  /// import cannot reuse or change them.
+  bool get linksManagedElsewhere => _managedElsewhere;
+
+  bool _oneTime = false;
+
+  /// True when the director chose to import without remembered links: every
+  /// match is confirmed by hand and the saved links stay as they are.
+  bool get importingWithoutLinks => _oneTime;
+
+  /// Reviews the same file again without the remembered links.
+  Future<void> importWithoutRememberedLinks() async {
+    _oneTime = true;
+    await reviewAgain();
+  }
+
   /// What went wrong when [step] is [PilotImportStep.failed].
   Object? get error => _error;
 
@@ -227,10 +250,10 @@ class PilotImportController extends ChangeNotifier {
     final linked = linkStore is PilotImportLinkStore
         ? linkStore as PilotImportLinkStore
         : null;
-    final links = linked == null
-        ? <PilotImportLink>[]
-        : await linked.existingLinks();
-    final held = linked == null ? <int>{} : await linked.pilotsUnderReview();
+    _managedElsewhere = linked != null && await linked.linksManagedElsewhere();
+    final useLinks = linked != null && !_oneTime;
+    final links = useLinks ? await linked.existingLinks() : <PilotImportLink>[];
+    final held = useLinks ? await linked.pilotsUnderReview() : <int>{};
     final filter = pilotFilter;
     final matches = _matcher.match(
       filter == null ? draft.pilots : draft.pilots.where(filter).toList(),
@@ -244,7 +267,16 @@ class PilotImportController extends ChangeNotifier {
       existing: existing,
     );
     _selections = [
-      for (final match in matches) PilotImportSelection.defaultFor(match),
+      for (final match in matches)
+        _oneTime && match.candidateIds.isNotEmpty
+            ? PilotImportSelection(
+                match: match,
+                choice: PilotImportChoice.skip,
+                targetProfileId: match.candidateIds.length == 1
+                    ? match.candidateIds.single
+                    : null,
+              )
+            : PilotImportSelection.defaultFor(match),
     ];
     _set(PilotImportStep.review);
   }
@@ -322,6 +354,7 @@ class PilotImportController extends ChangeNotifier {
         reviewedRevisions: {
           for (final p in _review!.existing) p.id: p.revision,
         },
+        rememberLinks: !_oneTime,
       );
       _set(PilotImportStep.done);
     } on Object catch (e) {

@@ -3,441 +3,114 @@ import 'package:test/test.dart';
 
 import '../../support/acceptor_harness.dart';
 import '../../support/backends.dart';
+import 'acceptor_pilot_link_support.dart';
 
 void main() => forEachBackend(_tests);
 
-/// Two installations of one director link the same GliderScore pilot while
-/// offline: the service keeps the first link and asks the director about the
-/// other, and a deleted participant stays deleted.
+/// One installation manages the remembered pilot links of a director: the
+/// service refuses link writes from any other, live or queued, and the
+/// participant a link names must still exist.
 void _tests(Backend backend) {
   late AcceptorHarness harness;
-  late core.DirectorScopeKey scope;
-  late core.Id p1, p2, p3;
-  late core.Id linkA, linkB;
-  const pilot = 12;
-
-  tearDown(() => harness.close());
-
-  Future<core.Id> addProfile(String name) async {
-    final now = DateTime.utc(2026, 10);
-    final profile = core.ParticipantProfile(
-      id: core.Id.create(),
-      ownerAccountId: harness.account,
-      firstName: name,
-      lastName: 'Pilot',
-      createdAt: now,
-      updatedAt: now,
-    );
-    final out = await harness.exchange(
-      scope,
-      mutations: [harness.save('ParticipantProfile', profile.toJson())],
-    );
-    expect(out.results.single.outcome, core.MutationOutcome.accepted);
-    return profile.id;
-  }
+  late PilotLinkFixture f;
 
   setUp(() async {
     harness = await AcceptorHarness.open(backend);
-    await harness.register(harness.installationB, 'Tablet');
-    scope = core.DirectorScopeKey(harness.account);
-    p1 = await addProfile('Ada');
-    p2 = await addProfile('Grace');
-    p3 = await addProfile('Edith');
-    linkA = core.Id.create();
-    linkB = core.Id.create();
+    f = PilotLinkFixture(harness);
+    await f.setUp();
   });
-  Map<String, Object?> link(
-    core.Id id,
-    core.Id profile, {
-    int revision = 0,
-    int number = pilot,
-    Map<String, Object?> values = const {},
-  }) => core.PilotImportLink(
-    id: id,
-    ownerAccountId: harness.account,
-    sourcePilotNo: number,
-    participantProfileId: profile,
-    sourceValues: values,
-    createdAt: DateTime.utc(2026, 10),
-    updatedAt: DateTime.utc(2026, 10, 1, revision),
-    revision: revision,
-  ).toJson();
+  tearDown(() => harness.close());
 
-  Future<List<core.MutationResult>> send(
-    core.Id installation,
-    List<core.SyncMutation> mutations,
-  ) async => (await harness.exchange(
-    scope,
-    installation: installation,
-    mutations: mutations,
-  )).results;
+  group('the installation that wrote the first link manages the links', () {
+    setUp(() => f.managerLinks());
 
-  Future<List<core.ConflictRecord>> pending() => harness
-      .serverRepository
-      .syncAcceptorStore
-      .transaction((tx) => tx.conflictsNeedingAction(scope));
-
-  Future<core.MutationResult> resolve(
-    core.Id conflictId,
-    core.ConflictResolutionChoice choice, [
-    String id = 'decide',
-  ]) => harness.service.resolveConflict(
-    accountId: harness.account,
-    conflictId: conflictId,
-    clientMutationId: id,
-    choice: choice,
-  );
-
-  Future<void> offlineLinks({Map<String, Object?> values = const {}}) async {
-    final a = await send(harness.installationA, [
-      harness.save('PilotImportLink', link(linkA, p1)),
-    ]);
-    expect(a.single.outcome, core.MutationOutcome.accepted);
-  }
-
-  group('devices that link the pilot to different participants', () {
-    setUp(offlineLinks);
-
-    test('the second link waits for the director, naming both', () async {
-      final result = await send(harness.installationB, [
-        harness.save('PilotImportLink', link(linkB, p2)),
-      ]);
-
-      expect(result.single.outcome, core.MutationOutcome.conflict);
-      expect(result.single.reasonCode, 'unique_violation');
-      final conflict = (await pending()).single;
-      expect(conflict.entityId, linkA);
-      expect(conflict.acceptedPayload!['participant_profile_id'], p1.value);
-      expect(conflict.competingPayload!['participant_profile_id'], p2.value);
-      expect(conflict.acceptedPayload!['source_pilot_no'], pilot);
-      expect(conflict.entityRevision, 0);
-      final stored = await harness.stored('PilotImportLink', linkA);
-      expect(stored!['participant_profile_id'], p1.value);
-      expect(await harness.stored('PilotImportLink', linkB), isNull);
-    });
-
-    test('several queued edits leave one review of the latest', () async {
-      final queue = [
+    test('keeps writing and correcting its links', () async {
+      final edit = await f.send(harness.installationA, [
         harness.save(
           'PilotImportLink',
-          link(linkB, p2),
-          clientMutationId: 'b1',
-        ),
-        harness.save(
-          'PilotImportLink',
-          link(linkB, p2, revision: 1, values: {'club': 'north'}),
-          base: 0,
-          clientMutationId: 'b2',
-        ),
-        harness.save(
-          'PilotImportLink',
-          link(linkB, p3, revision: 2, values: {'club': 'north'}),
-          base: 1,
-          clientMutationId: 'b3',
-        ),
-      ];
-
-      final results = await send(harness.installationB, queue);
-
-      expect(
-        results.map((r) => r.outcome),
-        everyElement(core.MutationOutcome.conflict),
-      );
-      final open = await pending();
-      expect(open, hasLength(1));
-      expect(open.single.competingPayload!['participant_profile_id'], p3.value);
-      expect(open.single.competingPayload!['revision'], 2);
-      expect(open.single.competingPayload!['source_values'], {'club': 'north'});
-      expect(open.single.acceptedPayload!['participant_profile_id'], p1.value);
-    });
-
-    test('sending the queue again changes nothing', () async {
-      final queue = [
-        harness.save(
-          'PilotImportLink',
-          link(linkB, p2),
-          clientMutationId: 'b1',
-        ),
-        harness.save(
-          'PilotImportLink',
-          link(linkB, p3, revision: 1),
-          base: 0,
-          clientMutationId: 'b2',
-        ),
-      ];
-      final first = await send(harness.installationB, queue);
-      final mutations = await harness.serverMutationCount();
-      final conflicts = await harness.server.count('conflict_records');
-      final review = (await pending()).single;
-
-      final retry = await send(harness.installationB, queue);
-
-      expect(retry.map((r) => r.outcome), first.map((r) => r.outcome));
-      expect(await harness.serverMutationCount(), mutations);
-      expect(await harness.server.count('conflict_records'), conflicts);
-      expect((await pending()).single.id, review.id);
-    });
-
-    test(
-      'an interrupted exchange keeps every edit once it is resumed',
-      () async {
-        final first = harness.save(
-          'PilotImportLink',
-          link(linkB, p2),
-          clientMutationId: 'b1',
-        );
-        final second = harness.save(
-          'PilotImportLink',
-          link(linkB, p3, revision: 1),
-          base: 0,
-          clientMutationId: 'b2',
-        );
-        await send(harness.installationB, [first]);
-        expect(
-          (await pending()).single.competingPayload!['participant_profile_id'],
-          p2.value,
-        );
-
-        final resumed = await send(harness.installationB, [first, second]);
-
-        expect(
-          resumed.map((r) => r.outcome),
-          everyElement(core.MutationOutcome.conflict),
-        );
-        final open = await pending();
-        expect(open, hasLength(1));
-        expect(
-          open.single.competingPayload!['participant_profile_id'],
-          p3.value,
-        );
-      },
-    );
-
-    test('a link deleted before the decision no longer competes', () async {
-      await send(harness.installationB, [
-        harness.save(
-          'PilotImportLink',
-          link(linkB, p2),
-          clientMutationId: 'b1',
-        ),
-      ]);
-
-      final result = await send(harness.installationB, [
-        harness.delete(
-          'PilotImportLink',
-          linkB,
-          base: 0,
-          clientMutationId: 'b2',
-        ),
-      ]);
-
-      expect(result.single.outcome, core.MutationOutcome.accepted);
-      expect(await pending(), isEmpty);
-    });
-
-    test('a change to the stored link replaces the review', () async {
-      await send(harness.installationB, [
-        harness.save('PilotImportLink', link(linkB, p2)),
-      ]);
-      final shown = (await pending()).single;
-
-      final edit = await send(harness.installationA, [
-        harness.save(
-          'PilotImportLink',
-          link(linkA, p1, revision: 1, values: {'club': 'south'}),
+          f.link(f.linkA, f.p2, revision: 1),
           base: 0,
         ),
       ]);
+
       expect(edit.single.outcome, core.MutationOutcome.accepted);
-
-      final open = (await pending()).single;
-      expect(open.id, isNot(shown.id));
-      expect(open.entityRevision, 1);
-      expect(open.acceptedPayload!['source_values'], {'club': 'south'});
-      expect(open.competingPayload!['participant_profile_id'], p2.value);
-      final stale = await resolve(
-        shown.id,
-        core.ConflictResolutionChoice.tookCompeting,
-      );
-      expect(stale.outcome, core.MutationOutcome.rejected);
-      expect(stale.reasonCode, 'stale_base');
-      expect(
-        (await harness.stored(
-          'PilotImportLink',
-          linkA,
-        ))!['participant_profile_id'],
-        p1.value,
-      );
-      final fresh = await resolve(
-        open.id,
-        core.ConflictResolutionChoice.tookCompeting,
-        'decide-2',
-      );
-      expect(fresh.outcome, core.MutationOutcome.accepted);
+      final stored = await harness.stored('PilotImportLink', f.linkA);
+      expect(stored!['participant_profile_id'], f.p2.value);
     });
 
-    test('devices that come to agree need no decision', () async {
-      await send(harness.installationB, [
-        harness.save('PilotImportLink', link(linkB, p2)),
+    test('another installation cannot add a link', () async {
+      final result = await f.send(harness.installationB, [
+        harness.save('PilotImportLink', f.link(f.linkB, f.p2, number: 13)),
       ]);
 
-      await send(harness.installationA, [
-        harness.save('PilotImportLink', link(linkA, p2, revision: 1), base: 0),
-      ]);
-
-      expect(await pending(), isEmpty);
+      expect(result.single.outcome, core.MutationOutcome.rejected);
+      expect(result.single.reasonCode, 'not_link_manager');
+      expect(await harness.stored('PilotImportLink', f.linkB), isNull);
     });
 
-    test('a newer edit of the other device replaces the review too', () async {
-      await send(harness.installationB, [
+    test('another installation cannot correct or delete one', () async {
+      final edit = await f.send(harness.installationB, [
         harness.save(
           'PilotImportLink',
-          link(linkB, p2),
-          clientMutationId: 'b1',
+          f.link(f.linkA, f.p3, revision: 1),
+          base: 0,
         ),
       ]);
-      final shown = (await pending()).single;
+      final delete = await f.send(harness.installationB, [
+        harness.delete('PilotImportLink', f.linkA, base: 0),
+      ]);
 
-      await send(harness.installationB, [
+      expect(edit.single.reasonCode, 'not_link_manager');
+      expect(delete.single.reasonCode, 'not_link_manager');
+      final stored = await harness.stored('PilotImportLink', f.linkA);
+      expect(stored!['participant_profile_id'], f.p1.value);
+    });
+
+    test('queued edits sent after reconnecting are all refused', () async {
+      final queue = [
         harness.save(
           'PilotImportLink',
-          link(linkB, p3, revision: 1),
+          f.link(f.linkB, f.p2, number: 13),
+          clientMutationId: 'b1',
+        ),
+        harness.save(
+          'PilotImportLink',
+          f.link(f.linkB, f.p3, number: 13, revision: 1),
           base: 0,
           clientMutationId: 'b2',
         ),
-      ]);
+      ];
 
-      final open = (await pending()).single;
-      expect(open.id, isNot(shown.id));
-      expect(open.competingPayload!['participant_profile_id'], p3.value);
-      final stale = await resolve(
-        shown.id,
-        core.ConflictResolutionChoice.tookCompeting,
-      );
-      expect(stale.outcome, core.MutationOutcome.rejected);
-    });
+      final first = await f.send(harness.installationB, queue);
+      final again = await f.send(harness.installationB, queue);
 
-    group('the director decides', () {
-      late core.Id reviewId;
-      setUp(() async {
-        await send(harness.installationB, [
-          harness.save(
-            'PilotImportLink',
-            link(linkB, p2, values: {'club': 'b'}),
-          ),
-        ]);
-        reviewId = (await pending()).single.id;
-      });
-
-      test('for the competing link: it becomes the stored one', () async {
-        final result = await resolve(
-          reviewId,
-          core.ConflictResolutionChoice.tookCompeting,
-        );
-
-        expect(result.outcome, core.MutationOutcome.accepted);
-        final stored = await harness.stored('PilotImportLink', linkA);
-        expect(stored!['participant_profile_id'], p2.value);
-        expect(stored['source_values'], {'club': 'b'});
-        expect(stored['revision'], 1);
-        expect(await pending(), isEmpty);
-        // Both installations pull the same decision.
-        final pulled = await harness.exchange(scope, after: 0);
-        final change = pulled.changes.lastWhere(
-          (c) => c.entityType == 'PilotImportLink',
-        );
-        expect(change.entityId, linkA);
-        expect(change.payload['participant_profile_id'], p2.value);
-      });
-
-      test('for the stored link: nothing changes', () async {
-        final result = await resolve(
-          reviewId,
-          core.ConflictResolutionChoice.keptAccepted,
-        );
-
-        expect(result.outcome, core.MutationOutcome.accepted);
-        final stored = await harness.stored('PilotImportLink', linkA);
-        expect(stored!['participant_profile_id'], p1.value);
-        expect(stored['revision'], 0);
-        expect(await pending(), isEmpty);
-      });
-
-      test('a late edit of the other device is reviewed again', () async {
-        await resolve(reviewId, core.ConflictResolutionChoice.keptAccepted);
-
-        final late = await send(harness.installationB, [
-          harness.save(
-            'PilotImportLink',
-            link(linkB, p3, revision: 1),
-            base: 0,
-          ),
-        ]);
-
-        expect(late.single.outcome, core.MutationOutcome.conflict);
-        final open = (await pending()).single;
-        expect(open.id, isNot(reviewId));
-        expect(open.competingPayload!['participant_profile_id'], p3.value);
-      });
-
-      test(
-        'a late edit that agrees with the decision is not reviewed',
-        () async {
-          await resolve(reviewId, core.ConflictResolutionChoice.tookCompeting);
-
-          final late = await send(harness.installationB, [
-            harness.save(
-              'PilotImportLink',
-              link(linkB, p2, revision: 1, values: {'club': 'later'}),
-              base: 0,
-            ),
-          ]);
-
-          expect(late.single.outcome, core.MutationOutcome.conflict);
-          expect(late.single.reasonCode, 'same_participant_link');
-          expect(await pending(), isEmpty);
-        },
-      );
-
-      test('the same decision sent twice is applied once', () async {
-        await resolve(reviewId, core.ConflictResolutionChoice.tookCompeting);
-        final again = await resolve(
-          reviewId,
-          core.ConflictResolutionChoice.tookCompeting,
-        );
-
-        expect(again.outcome, core.MutationOutcome.accepted);
+      for (final results in [first, again]) {
         expect(
-          (await harness.stored('PilotImportLink', linkA))!['revision'],
-          1,
+          results.map((r) => r.reasonCode),
+          everyElement('not_link_manager'),
         );
-      });
+      }
+      expect(await harness.stored('PilotImportLink', f.linkB), isNull);
+      expect(await f.pending(), isEmpty);
     });
   });
 
-  group('devices that link the pilot to the same participant', () {
-    setUp(offlineLinks);
+  test('the first installation to write a link becomes the manager', () async {
+    final b = await f.send(harness.installationB, [
+      harness.save('PilotImportLink', f.link(f.linkB, f.p2)),
+    ]);
+    final a = await f.send(harness.installationA, [
+      harness.save('PilotImportLink', f.link(f.linkA, f.p1, number: 13)),
+    ]);
 
-    test('keeps the stored link; the next import compares details', () async {
-      final result = await send(harness.installationB, [
-        harness.save('PilotImportLink', link(linkB, p1, values: {'club': 'b'})),
-      ]);
-
-      expect(result.single.reasonCode, 'same_participant_link');
-      expect(await pending(), isEmpty);
-      final stored = await harness.stored('PilotImportLink', linkA);
-      expect(stored!['source_values'], isEmpty);
-      expect(await harness.stored('PilotImportLink', linkB), isNull);
-      final record = await harness.serverRepository.syncAcceptorStore
-          .transaction((tx) => tx.conflictsNeedingAction(scope));
-      expect(record, isEmpty);
-    });
+    expect(b.single.outcome, core.MutationOutcome.accepted);
+    expect(a.single.reasonCode, 'not_link_manager');
   });
 
   group('a deleted participant', () {
     Future<void> deleteProfile(core.Id id) async {
       final out = await harness.exchange(
-        scope,
+        f.scope,
         mutations: [
           harness.delete(
             'ParticipantProfile',
@@ -451,339 +124,44 @@ void _tests(Backend backend) {
       expect(out.results.single.outcome, core.MutationOutcome.accepted);
     }
 
-    test('stays deleted when an offline device links it', () async {
-      await deleteProfile(p2);
+    test('stays deleted when the manager links it offline', () async {
+      await deleteProfile(f.p2);
 
-      final result = await send(harness.installationB, [
-        harness.save('PilotImportLink', link(linkB, p2)),
+      final result = await f.send(harness.installationA, [
+        harness.save('PilotImportLink', f.link(f.linkA, f.p2)),
       ]);
 
-      expect(result.single.outcome, core.MutationOutcome.rejected);
       expect(result.single.reasonCode, 'entity_deleted');
-      expect(await harness.stored('PilotImportLink', linkB), isNull);
-      expect(await harness.stored('ParticipantProfile', p2), isNull);
+      expect(await harness.stored('PilotImportLink', f.linkA), isNull);
+      expect(await harness.stored('ParticipantProfile', f.p2), isNull);
     });
 
-    test(
-      'takes its link with it, and a repeated delete is not refused',
-      () async {
-        await offlineLinks();
+    test('takes its link with it, and a repeated delete is fine', () async {
+      await f.managerLinks();
 
-        await deleteProfile(p1);
+      await deleteProfile(f.p1);
 
-        expect(await harness.stored('PilotImportLink', linkA), isNull);
-        final pulled = await harness.exchange(scope, after: 0);
-        expect(
-          pulled.changes.any(
-            (c) =>
-                c.entityType == 'PilotImportLink' &&
-                c.payload['deleted'] == true,
-          ),
-          isTrue,
-        );
-        final again = await send(harness.installationA, [
-          harness.delete('PilotImportLink', linkA, base: 0),
-        ]);
-        expect(again.single.outcome, core.MutationOutcome.accepted);
-      },
-    );
+      expect(await harness.stored('PilotImportLink', f.linkA), isNull);
+      final again = await f.send(harness.installationA, [
+        harness.delete('PilotImportLink', f.linkA, base: 0),
+      ]);
+      expect(again.single.outcome, core.MutationOutcome.accepted);
+    });
 
-    test('refuses an offline edit of a link that went with it', () async {
-      await offlineLinks();
-      await deleteProfile(p1);
+    test('refuses a queued edit of a link that went with it', () async {
+      await f.managerLinks();
+      await deleteProfile(f.p1);
 
-      final result = await send(harness.installationB, [
+      final result = await f.send(harness.installationA, [
         harness.save(
           'PilotImportLink',
-          link(linkA, p1, revision: 1, values: {'club': 'x'}),
+          f.link(f.linkA, f.p1, revision: 1),
           base: 0,
         ),
       ]);
 
       expect(result.single.outcome, core.MutationOutcome.rejected);
-      expect(await harness.stored('PilotImportLink', linkA), isNull);
+      expect(await harness.stored('PilotImportLink', f.linkA), isNull);
     });
-
-    test('closes the review that named the competing participant', () async {
-      await offlineLinks();
-      await send(harness.installationB, [
-        harness.save('PilotImportLink', link(linkB, p2)),
-      ]);
-
-      await deleteProfile(p2);
-
-      expect(await pending(), isEmpty);
-      expect(
-        (await harness.stored(
-          'PilotImportLink',
-          linkA,
-        ))!['participant_profile_id'],
-        p1.value,
-      );
-    });
-
-    test('lets the other link stand when the stored link goes', () async {
-      await offlineLinks();
-      await send(harness.installationB, [
-        harness.save('PilotImportLink', link(linkB, p2)),
-      ]);
-
-      await deleteProfile(p1);
-
-      expect(await pending(), isEmpty);
-      expect(await harness.stored('PilotImportLink', linkA), isNull);
-      expect(
-        (await harness.stored(
-          'PilotImportLink',
-          linkB,
-        ))!['participant_profile_id'],
-        p2.value,
-      );
-    });
-  });
-
-  group('devices that edit one shared link to different participants', () {
-    late core.Id b1;
-    setUp(() async {
-      await offlineLinks();
-      // Both installations hold the link at revision 1.
-      await send(harness.installationA, [
-        harness.save(
-          'PilotImportLink',
-          link(linkA, p1, revision: 1, values: {'club': 'a'}),
-          base: 0,
-          clientMutationId: 'shared',
-        ),
-      ]);
-      // A relinks the pilot at revision 2.
-      final a = await send(harness.installationA, [
-        harness.save(
-          'PilotImportLink',
-          link(linkA, p2, revision: 2),
-          base: 1,
-          clientMutationId: 'a-edit',
-        ),
-      ]);
-      expect(a.single.outcome, core.MutationOutcome.accepted);
-      b1 = core.Id.create();
-    });
-
-    Future<core.MutationResult> bEdits() async =>
-        (await send(harness.installationB, [
-          harness.save(
-            'PilotImportLink',
-            link(linkA, p3, revision: 2),
-            base: 1,
-            clientMutationId: 'b-edit',
-            id: b1,
-          ),
-        ])).single;
-
-    Future<core.MutationResult> bSecondEdit() async =>
-        (await send(harness.installationB, [
-          harness.save(
-            'PilotImportLink',
-            link(linkA, p3, revision: 3, values: {'club': 'north'}),
-            base: 2,
-            clientMutationId: 'b-edit-2',
-            follows: b1,
-          ),
-        ])).single;
-
-    test('the second edit is a review the director decides', () async {
-      final b = await bEdits();
-
-      expect(b.outcome, core.MutationOutcome.conflict);
-      expect(b.reasonCode, 'unique_violation');
-      final conflict = (await pending()).single;
-      expect(conflict.entityId, linkA);
-      expect(conflict.acceptedPayload!['participant_profile_id'], p2.value);
-      expect(conflict.competingPayload!['participant_profile_id'], p3.value);
-    });
-
-    test('a follow-up of the same contender replaces the review', () async {
-      await bEdits();
-      final second = await bSecondEdit();
-
-      expect(second.outcome, core.MutationOutcome.conflict);
-      final conflict = (await pending()).single;
-      expect(conflict.competingPayload!['source_values'], {'club': 'north'});
-      expect(conflict.competingPayload!['revision'], 3);
-    });
-
-    test(
-      'keeping the stored link supersedes the optimistic revisions',
-      () async {
-        await bEdits();
-        await bSecondEdit();
-        final review = (await pending()).single;
-
-        await resolve(review.id, core.ConflictResolutionChoice.keptAccepted);
-
-        final stored = await harness.stored('PilotImportLink', linkA);
-        expect(stored!['participant_profile_id'], p2.value);
-        expect(stored['revision'], 4);
-        final pulled = await harness.exchange(scope, after: 0);
-        final change = pulled.changes.lastWhere(
-          (c) => c.entityType == 'PilotImportLink',
-        );
-        expect(change.payload['revision'], 4);
-        expect(change.payload['participant_profile_id'], p2.value);
-        expect(await pending(), isEmpty);
-      },
-    );
-
-    test('taking the competing link supersedes them too', () async {
-      await bEdits();
-      await bSecondEdit();
-      final review = (await pending()).single;
-
-      await resolve(review.id, core.ConflictResolutionChoice.tookCompeting);
-
-      final stored = await harness.stored('PilotImportLink', linkA);
-      expect(stored!['participant_profile_id'], p3.value);
-      expect(stored['revision'], 4);
-      expect(await pending(), isEmpty);
-    });
-
-    test('a decision sent twice publishes once', () async {
-      await bEdits();
-      final review = (await pending()).single;
-
-      await resolve(review.id, core.ConflictResolutionChoice.keptAccepted);
-      await resolve(review.id, core.ConflictResolutionChoice.keptAccepted);
-
-      expect((await harness.stored('PilotImportLink', linkA))!['revision'], 3);
-    });
-
-    group('an independent follow-up of the accepted revision', () {
-      test('that changes the participant keeps the contender', () async {
-        await bEdits();
-
-        final result = await send(harness.installationA, [
-          harness.save(
-            'PilotImportLink',
-            link(linkA, p1, revision: 3),
-            base: 2,
-            clientMutationId: 'a-edit-2',
-          ),
-        ]);
-
-        expect(result.single.outcome, core.MutationOutcome.accepted);
-        final open = (await pending()).single;
-        expect(open.competingPayload!['participant_profile_id'], p3.value);
-        expect(open.acceptedPayload!['participant_profile_id'], p1.value);
-      });
-
-      test('that changes only source details is not lost', () async {
-        await bEdits();
-
-        final result = await send(harness.installationA, [
-          harness.save(
-            'PilotImportLink',
-            link(linkA, p2, revision: 3, values: {'club': 'south'}),
-            base: 2,
-            clientMutationId: 'a-edit-2',
-          ),
-        ]);
-
-        expect(result.single.outcome, core.MutationOutcome.accepted);
-        final stored = await harness.stored('PilotImportLink', linkA);
-        expect(stored!['source_values'], {'club': 'south'});
-        final open = (await pending()).single;
-        expect(open.competingPayload!['participant_profile_id'], p3.value);
-        expect(open.acceptedPayload!['source_values'], {'club': 'south'});
-      });
-    });
-
-    test('a follow-up of the contender replaces only that contender', () async {
-      await bEdits();
-      await send(harness.installationA, [
-        harness.save(
-          'PilotImportLink',
-          link(linkA, p1, revision: 3),
-          base: 2,
-          clientMutationId: 'a-edit-2',
-        ),
-      ]);
-
-      final second = await bSecondEdit();
-
-      expect(second.outcome, core.MutationOutcome.conflict);
-      final open = (await pending()).single;
-      expect(open.acceptedPayload!['participant_profile_id'], p1.value);
-      expect(open.competingPayload!['revision'], 3);
-      expect(open.competingPayload!['source_values'], {'club': 'north'});
-    });
-
-    test('an edit that names no predecessor is an ordinary edit', () async {
-      await bEdits();
-      final second = await send(harness.installationB, [
-        harness.save(
-          'PilotImportLink',
-          link(linkA, p3, revision: 3, values: {'club': 'north'}),
-          base: 2,
-          clientMutationId: 'no-lineage',
-        ),
-      ]);
-
-      // Every client of this version records the edit it follows. Without it
-      // the edit builds on the stored revision like any other, and the
-      // waiting review is compared again with the result.
-      expect(second.single.outcome, core.MutationOutcome.accepted);
-      expect(
-        (await harness.stored(
-          'PilotImportLink',
-          linkA,
-        ))!['participant_profile_id'],
-        p3.value,
-      );
-      expect(await pending(), isEmpty);
-    });
-  });
-
-  group('three devices that link the pilot differently', () {
-    test(
-      'the surviving links are reviewed after the stored one goes',
-      () async {
-        await offlineLinks();
-        final linkC = core.Id.create();
-        await send(harness.installationB, [
-          harness.save(
-            'PilotImportLink',
-            link(linkB, p2),
-            clientMutationId: 'b1',
-          ),
-          harness.save(
-            'PilotImportLink',
-            link(linkC, p3),
-            clientMutationId: 'c1',
-          ),
-        ]);
-        expect(await pending(), hasLength(2));
-
-        await send(harness.installationA, [
-          harness.delete(
-            'PilotImportLink',
-            linkA,
-            base: 0,
-            clientMutationId: 'a-delete',
-          ),
-        ]);
-
-        final waiting = await pending();
-        expect(waiting, hasLength(1));
-        expect(waiting.single.entityId, linkB);
-        expect(
-          waiting.single.acceptedPayload!['participant_profile_id'],
-          p2.value,
-        );
-        expect(
-          waiting.single.competingPayload!['participant_profile_id'],
-          p3.value,
-        );
-        expect(await harness.stored('PilotImportLink', linkC), isNull);
-      },
-    );
   });
 }
