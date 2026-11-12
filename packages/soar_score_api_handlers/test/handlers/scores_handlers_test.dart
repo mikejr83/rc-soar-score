@@ -295,6 +295,28 @@ void main() {
       expect((await api.errorOf(response))['code'], 'group_locked');
     });
 
+    test('a locked round is 409 round_locked', () async {
+      await drawnContest(api);
+      final slot = await assignmentOf(1);
+      final index = api.repository.rounds.rounds.indexWhere(
+        (r) => r.id.value == slot['scheduled_round_id'],
+      );
+      final round = api.repository.rounds.rounds[index];
+      api.repository.rounds.rounds[index] = Round(
+        id: round.id,
+        contestId: round.contestId,
+        matrixRevisionId: round.matrixRevisionId,
+        ordinal: round.ordinal,
+        groupCount: round.groupCount,
+        status: RoundStatus.locked,
+      );
+
+      final response = await enter(slot);
+
+      expect(response.statusCode, 409);
+      expect((await api.errorOf(response))['code'], 'round_locked');
+    });
+
     test('an unknown slot is 404', () async {
       await drawnContest(api);
 

@@ -1,6 +1,7 @@
 import 'package:logging/logging.dart';
 
 import '../enums/admin_lock.dart';
+import '../enums/round_status.dart';
 import '../enums/authority.dart';
 import '../enums/discipline_type.dart';
 import '../enums/lifecycle_state.dart';
@@ -464,6 +465,12 @@ class ScoresService {
       throw ContestStateError(
         'round_not_current',
         'the assignment belongs to a round that is no longer current',
+      );
+    }
+    if (round.status == RoundStatus.locked) {
+      throw ContestStateError(
+        'round_locked',
+        'round ${round.ordinal} is locked; unlock it first',
       );
     }
     final groups = await repository.roundGroupRepository.listForRound(round.id);
