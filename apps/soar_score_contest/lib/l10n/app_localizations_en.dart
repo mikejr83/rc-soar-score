@@ -1607,6 +1607,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Another computer manages the remembered GliderScore pilot links for this account, so this import cannot reuse or change them. You can import without remembered links: you confirm each match yourself and the saved links stay as they are.';
 
   @override
+  String get pilotImportManagedElsewhereNow =>
+      'Another computer now manages the remembered pilot links, so nothing was saved. Review again, then import without remembered links.';
+
+  @override
   String get pilotImportWithoutLinks => 'Import without remembered links';
 
   @override

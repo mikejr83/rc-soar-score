@@ -36,6 +36,15 @@ abstract class PilotImportStore {
   });
 }
 
+/// This installation does not manage the remembered links, so a save that
+/// remembers them is not allowed; the import must run without them.
+class PilotImportLinksManagedElsewhere implements Exception {
+  const PilotImportLinksManagedElsewhere();
+
+  @override
+  String toString() => 'The remembered pilot links are managed elsewhere';
+}
+
 /// Optional remembered-link capability of a pilot import store.
 abstract interface class PilotImportLinkStore {
   Future<List<PilotImportLink>> existingLinks();
@@ -169,6 +178,10 @@ class PilotImportController extends ChangeNotifier {
   /// import cannot reuse or change them.
   bool get linksManagedElsewhere => _managedElsewhere;
 
+  /// True while the director still has to choose the one-time import before
+  /// anything is saved, because another installation manages the links.
+  bool get needsOneTimeChoice => _managedElsewhere && !_oneTime;
+
   bool _oneTime = false;
 
   /// True when the director chose to import without remembered links: every
@@ -188,7 +201,13 @@ class PilotImportController extends ChangeNotifier {
   bool get changedDuringReview =>
       _error is StaleRevisionError ||
       _error is PilotImportReviewChangedError ||
-      _error is PilotImportLinkReviewError;
+      _error is PilotImportLinkReviewError ||
+      _error is PilotImportLinksManagedElsewhere;
+
+  /// True when the save was refused because another installation manages the
+  /// remembered links and this import has not been made a one-time import.
+  bool get managedElsewhereRefused =>
+      _error is PilotImportLinksManagedElsewhere;
 
   /// True when the failure is that a pilot's link needs a decision in Account
   /// sync first.
@@ -251,9 +270,12 @@ class PilotImportController extends ChangeNotifier {
         ? linkStore as PilotImportLinkStore
         : null;
     _managedElsewhere = linked != null && await linked.linksManagedElsewhere();
-    final useLinks = linked != null && !_oneTime;
+    // A computer that does not manage the links never reads or reuses them.
+    final useLinks = linked != null && !_oneTime && !_managedElsewhere;
     final links = useLinks ? await linked.existingLinks() : <PilotImportLink>[];
-    final held = useLinks ? await linked.pilotsUnderReview() : <int>{};
+    // Pilots whose link is still being decided stay out of automatic matching
+    // in every mode, so an unresolved link cannot lead to a duplicate.
+    final held = linked == null ? <int>{} : await linked.pilotsUnderReview();
     final filter = pilotFilter;
     final matches = _matcher.match(
       filter == null ? draft.pilots : draft.pilots.where(filter).toList(),
@@ -349,6 +371,15 @@ class PilotImportController extends ChangeNotifier {
   Future<void> apply() async {
     _set(PilotImportStep.applying);
     try {
+      // Management can change while the review is open: check it again
+      // before anything is saved.
+      final linked = store is PilotImportLinkStore
+          ? store as PilotImportLinkStore
+          : null;
+      if (linked != null && !_oneTime && await linked.linksManagedElsewhere()) {
+        _managedElsewhere = true;
+        throw const PilotImportLinksManagedElsewhere();
+      }
       _outcome = await store.apply(
         _selections,
         reviewedRevisions: {

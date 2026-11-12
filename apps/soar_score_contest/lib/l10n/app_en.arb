@@ -1820,6 +1820,10 @@
   "@pilotImportManagedElsewhere": {
     "description": "Shown above the pilot review when another installation manages the remembered pilot links."
   },
+  "pilotImportManagedElsewhereNow": "Another computer now manages the remembered pilot links, so nothing was saved. Review again, then import without remembered links.",
+  "@pilotImportManagedElsewhereNow": {
+    "description": "Shown when a save was stopped because another installation manages the remembered pilot links."
+  },
   "pilotImportWithoutLinks": "Import without remembered links",
   "@pilotImportWithoutLinks": {
     "description": "Button that reviews the same file without the remembered pilot links."

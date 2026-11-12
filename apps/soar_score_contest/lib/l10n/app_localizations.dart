@@ -2322,6 +2322,12 @@ abstract class AppLocalizations {
   /// **'Another computer manages the remembered GliderScore pilot links for this account, so this import cannot reuse or change them. You can import without remembered links: you confirm each match yourself and the saved links stay as they are.'**
   String get pilotImportManagedElsewhere;
 
+  /// Shown when a save was stopped because another installation manages the remembered pilot links.
+  ///
+  /// In en, this message translates to:
+  /// **'Another computer now manages the remembered pilot links, so nothing was saved. Review again, then import without remembered links.'**
+  String get pilotImportManagedElsewhereNow;
+
   /// Button that reviews the same file without the remembered pilot links.
   ///
   /// In en, this message translates to:

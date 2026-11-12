@@ -165,19 +165,46 @@ void main() {
       updatedAt: DateTime.utc(2026),
     );
 
-    test('the review says so and still uses the links by default', () async {
+    test('nothing is saved until the one-time import is chosen', () async {
+      store.links.add(linkTo(sam, 3));
       final c = controller();
       await c.chooseAndRead();
 
       expect(c.linksManagedElsewhere, isTrue);
-      expect(c.importingWithoutLinks, isFalse);
+      expect(c.needsOneTimeChoice, isTrue);
+      // The remembered links are not reused on this computer.
+      expect(c.review!.matches.any((m) => m.remembered), isFalse);
+
+      await c.apply();
+
+      expect(c.step, PilotImportStep.failed);
+      expect(c.managedElsewhereRefused, isTrue);
+      expect(store.applied, isEmpty);
+
+      await c.importWithoutRememberedLinks();
+      expect(c.needsOneTimeChoice, isFalse);
     });
+
+    test(
+      'management that changed during the review is checked again',
+      () async {
+        final c = controller();
+        store.managedElsewhere = false;
+        await c.chooseAndRead();
+        expect(c.needsOneTimeChoice, isFalse);
+
+        store.managedElsewhere = true;
+        await c.apply();
+
+        expect(c.managedElsewhereRefused, isTrue);
+        expect(store.applied, isEmpty);
+      },
+    );
 
     test('importing without remembered links confirms every match', () async {
       store.links.add(linkTo(sam, 3));
       final c = controller();
       await c.chooseAndRead();
-      expect(c.review!.matches[2].remembered, isTrue);
 
       await c.importWithoutRememberedLinks();
 
@@ -205,14 +232,16 @@ void main() {
       expect(store.rememberedLinks, [false]);
     });
 
-    test('a link under review no longer holds the pilot back', () async {
+    test('a pilot whose link is under review stays held back', () async {
       store.links.add(linkTo(sam, 3));
       store.underReview = {3};
       final c = controller();
       await c.chooseAndRead();
       await c.importWithoutRememberedLinks();
 
-      expect(c.review!.matches[2].linkReview, isFalse);
+      final held = c.review!.matches[2];
+      expect(held.linkReview, isTrue);
+      expect(c.selections[2].choice, PilotImportChoice.skip);
     });
   });
 

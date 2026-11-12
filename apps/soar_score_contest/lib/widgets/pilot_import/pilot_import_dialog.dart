@@ -119,7 +119,9 @@ class _PilotImportDialogState extends State<PilotImportDialog> {
   Widget _failed(AppLocalizations l10n) {
     final error = _c.error!;
     final String text;
-    if (_c.linkReviewPending) {
+    if (_c.managedElsewhereRefused) {
+      text = l10n.pilotImportManagedElsewhereNow;
+    } else if (_c.linkReviewPending) {
       text = l10n.pilotImportLinkReviewPending;
     } else if (_c.changedDuringReview) {
       text = l10n.pilotImportChangedDuringReview;
@@ -159,7 +161,7 @@ class _PilotImportDialogState extends State<PilotImportDialog> {
           TextButton(onPressed: close, child: Text(l10n.cancelButton)),
           FilledButton(
             key: const ValueKey('pilot-import-confirm'),
-            onPressed: any ? _c.apply : null,
+            onPressed: any && !_c.needsOneTimeChoice ? _c.apply : null,
             child: Text(l10n.pilotImportConfirm),
           ),
         ];
@@ -248,7 +250,10 @@ class PilotImportReviewList extends StatelessWidget {
           if (updates.isNotEmpty) ...[
             _heading(context, l10n.pilotImportUpdateHeading(updates.length)),
             for (final i in updates)
-              _CheckRow(controller: controller, index: i),
+              if (review.matches[i].remembered)
+                _MaybeRow(controller: controller, index: i)
+              else
+                _CheckRow(controller: controller, index: i),
           ],
           if (news.isNotEmpty) ...[
             _heading(context, l10n.pilotImportNewHeading(news.length)),
@@ -425,7 +430,13 @@ class _MaybeRow extends StatelessWidget {
       PilotImportChoice.add => _add,
       PilotImportChoice.update => 'update:${selection.targetProfileId?.value}',
     };
+    final linked = match.remembered && match.candidateIds.isNotEmpty
+        ? review.profile(match.candidateIds.first)
+        : null;
     final notes = [
+      if (linked != null)
+        l10n.pilotImportLinkedTo('${linked.firstName} ${linked.lastName}'),
+      if (match.sourceChanged) l10n.pilotImportSourceChanged,
       if (match.linkReview) l10n.pilotImportLinkReview,
       if (match.conflict) l10n.pilotImportConflict,
       if (match.isDuplicateInFile) l10n.pilotImportDuplicateInFile,
@@ -483,7 +494,7 @@ class _MaybeRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  for (final id in match.candidateIds)
+                  for (final id in _options(match, review))
                     DropdownMenuItem(
                       value: 'update:${id.value}',
                       child: Tooltip(
@@ -502,6 +513,18 @@ class _MaybeRow extends StatelessWidget {
               ),
             ),
     );
+  }
+
+  /// The participants the pilot can be linked to. A remembered match offers
+  /// every participant, so a wrong link can be corrected; the others offer
+  /// the candidates the file matched.
+  static List<Id> _options(PilotMatch match, PilotImportReview review) {
+    if (!match.remembered) return match.candidateIds;
+    final others = [
+      for (final p in review.existing)
+        if (!match.candidateIds.contains(p.id)) p,
+    ]..sort((a, b) => _name(a).compareTo(_name(b)));
+    return [...match.candidateIds, for (final p in others) p.id];
   }
 
   static String _name(ParticipantProfile? p) =>

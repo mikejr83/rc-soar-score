@@ -273,4 +273,43 @@ void main() {
     expect(after.single.participantProfileId, first.id);
     expect((await linksOn(b)).where((l) => l.sourcePilotNo == 40), isEmpty);
   });
+
+  test('the manager corrects a match and a later import reuses it', () async {
+    final x = await addProfile(a, 'Xavier');
+    final y = await addProfile(a, 'Yolanda');
+    final store = NativePilotImportStore(a);
+    const draft = core.PilotDraft(
+      sourcePilotNo: 40,
+      firstName: 'Pat',
+      lastName: 'Pilot',
+    );
+    const matcher = core.PilotImportMatcher();
+
+    Future<void> importTo(core.Id target) async {
+      final profiles = await store.existing();
+      final links = await store.existingLinks();
+      final match = matcher.match([draft], profiles, links: links).single;
+      await store.apply(
+        [
+          core.PilotImportSelection(
+            match: match,
+            choice: core.PilotImportChoice.update,
+            targetProfileId: target,
+          ),
+        ],
+        reviewedRevisions: {for (final p in profiles) p.id: p.revision},
+      );
+    }
+
+    await importTo(x.id);
+    await importTo(y.id);
+
+    final links = await store.existingLinks();
+    expect(links.single.participantProfileId, y.id);
+    final later = matcher
+        .match([draft], await store.existing(), links: links)
+        .single;
+    expect(later.remembered, isTrue);
+    expect(later.candidateIds, [y.id]);
+  });
 }

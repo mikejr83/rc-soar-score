@@ -4,7 +4,6 @@ import 'drift_repository.dart';
 import '../sync/drift_sync_store.dart';
 import '../sync/table_mapper.dart';
 
-
 class PilotImportLinkRepository extends DriftRepository
     implements core.PilotImportLinkRepository {
   PilotImportLinkRepository(super.db, {super.stores});
@@ -37,8 +36,11 @@ class PilotImportLinkRepository extends DriftRepository
 
   @override
   Future<bool> managedElsewhere(core.Id ownerAccountId) async {
-    // Mutation records may still carry the Local account's id from before the
-    // sign-in claim, so they are matched by entity, not by owner.
+    // Only this account's links count: the database can still hold the data
+    // of an account that signed in earlier.
+    final mine = {
+      for (final link in await listForOwner(ownerAccountId)) link.id.value,
+    };
     final mutations = await TableMapper(
       db,
       db.mutationRecords,
@@ -47,12 +49,11 @@ class PilotImportLinkRepository extends DriftRepository
     final refused = mutations.any(
       (row) =>
           row['outcome'] == 'Rejected' &&
-          row['reason_code'] == core.SyncReasonCode.notLinkManager.code,
+          row['reason_code'] == core.SyncReasonCode.notLinkManager.code &&
+          mine.contains(row['entity_id']),
     );
-    if (refused) return true;
     // A link this installation never wrote came down from the service.
-    return (await listForOwner(ownerAccountId))
-        .any((link) => !written.contains(link.id.value));
+    return refused || mine.any((id) => !written.contains(id));
   }
 
   @override

@@ -141,6 +141,54 @@ void _tests(Backend backend) {
   );
 
   group('managing the links', () {
+    test('a refusal on another account does not count for this one', () async {
+      final other = core.Id.create();
+      final stranger = core.ParticipantProfile(
+        id: core.Id.create(),
+        ownerAccountId: other,
+        firstName: 'Old',
+        lastName: 'Account',
+        createdAt: now,
+        updatedAt: now,
+      );
+      await repo.participantProfileRepository.save(
+        stranger,
+        metadata: metadata(),
+      );
+      final theirs = await repo.pilotImportLinkRepository.save(
+        core.PilotImportLink(
+          id: core.Id.create(),
+          ownerAccountId: other,
+          sourcePilotNo: 5,
+          participantProfileId: stranger.id,
+          sourceValues: const {},
+          createdAt: now,
+          updatedAt: now,
+        ),
+        metadata: metadata(),
+      );
+      await saveLocal(profile('Ada'));
+      for (final m in await inst.syncStore.pendingMutations(
+        core.DirectorScopeKey(other),
+      )) {
+        if (m.entityId != theirs.id) continue;
+        await inst.syncStore.recordOutcome(
+          mutationId: m.id,
+          outcome: core.MutationOutcome.rejected,
+          reasonCode: 'not_link_manager',
+        );
+      }
+
+      expect(
+        await repo.pilotImportLinkRepository.managedElsewhere(other),
+        isTrue,
+      );
+      expect(
+        await repo.pilotImportLinkRepository.managedElsewhere(owner),
+        isFalse,
+      );
+    });
+
     test('an installation that wrote its links manages them', () async {
       await saveLocal(profile('Ada'));
 
