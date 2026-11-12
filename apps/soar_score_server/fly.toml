@@ -5,9 +5,11 @@
 #   fly deploy --remote-only --ha=false --config apps/soar_score_server/fly.toml \
 #     --dockerfile apps/soar_score_server/Dockerfile
 #
-# `--ha=false` keeps a single machine (the database is a single Neon instance
-# and one machine is enough for the cost cap). See docs/deploying.md. Secrets (DATABASE_URL) are never stored here;
-# set them with `fly secrets set`.
+# `--ha=false` stops a first deploy from creating spare machines; a deploy
+# updates every machine the app already has, including the stopped burst
+# machines (docs/deploy-api-fly.md, "Machines and bursts"). See
+# docs/deploying.md. Secrets (DATABASE_URL) are never stored here; set them
+# with `fly secrets set`.
 app = "rc-soar-score-api"
 primary_region = "iad"
 
@@ -24,11 +26,20 @@ primary_region = "iad"
 [http_service]
   internal_port = 8080
   force_https = true
-  # Alpha: stop the machine when idle to keep the bill near zero. For the MVP
-  # release set min_machines_running = 1 and auto_stop_machines = "off".
+  # One machine is always on (no cold start). Extra machines, created stopped
+  # with `fly machine clone`, are started by Fly's proxy when load passes the
+  # soft limit below and stopped again when it falls, so a burst costs only the
+  # hours they run. See docs/deploy-api-fly.md, "Machines and bursts".
   auto_stop_machines = "stop"
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
+
+  # Each machine runs database statements one at a time over a single
+  # connection, so start help early instead of letting requests queue.
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 10
+    hard_limit = 25
 
   [[http_service.checks]]
     method = "GET"
@@ -39,4 +50,4 @@ primary_region = "iad"
 
 [[vm]]
   size = "shared-cpu-1x"
-  memory = "256mb"
+  memory = "512mb"
