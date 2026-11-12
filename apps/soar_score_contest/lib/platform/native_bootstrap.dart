@@ -159,7 +159,8 @@ class NativeBootstrap extends AppBootstrap {
   /// per-user application-support directory
   /// (`%APPDATA%\<organization>\<app>` on Windows, the Roaming profile,
   /// resolved per-user by `path_provider`). A non-release build can override
-  /// the directory with `--dart-define=SOAR_SCORE_LOCAL_DATA_DIRECTORY=<path>`.
+  /// the directory with `--dart-define=SOAR_SCORE_LOCAL_DATA_DIRECTORY=<path>`
+  /// (an absolute path; ignored in release builds, like the demo flags).
   /// Demo mode uses `soar_score_demo.db` beside it instead, so the real
   /// database is never touched.
   static Future<String> databasePath({
@@ -176,7 +177,7 @@ class NativeBootstrap extends AppBootstrap {
       directory.path,
       demo ? demoDatabaseName : standardDatabaseName,
     );
-    _logger.info('Using local database: $database');
+    _logger.fine('Using local database: $database');
     return database;
   }
 

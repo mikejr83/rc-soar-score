@@ -206,6 +206,7 @@ flutter run -d windows --dart-define=SOAR_SCORE_DEMO=true
 - Add `--dart-define=SOAR_SCORE_DEMO_RESET=true` to delete the demo database first and load the example data again.
 - No scores are loaded yet, because nothing in the app records them. The Running and Completed contests only have their state and drawn matrix.
 - The defines are ignored in release builds and have no effect on web builds or the server.
+- `--dart-define=SOAR_SCORE_LOCAL_DATA_DIRECTORY=<path>` puts the databases in that folder instead (created if missing; ignored in release builds). The VS Code launch configurations and tasks for the Windows app set it to `.local-data` in the workspace (git-ignored), so they never touch the databases in `%APPDATA%`. To start over, delete `.local-data`; to use your `%APPDATA%` data, run `flutter run` without the define. Sign-in is not separated: the stored Auth0 session is per Windows user, so a run on `.local-data` shares your sign-in.
 - In VS Code, use the launch configurations **soar_score_contest (Windows, demo data)** and **(Windows, fresh demo data)**, or the tasks **contest app: run with demo data (Windows)** and **contest app: run with fresh demo data (Windows)**.
 
 #### Public Site
