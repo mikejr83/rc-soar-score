@@ -219,6 +219,19 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
         findsOneWidget,
       );
       expect(find.textContaining('in round 1'), findsOneWidget);
+
+      // View all opens the full activity page, which lists the correction too
+      // and narrows to one kind of event.
+      await tapVisible(tester, _key('activity-view-all'));
+      await pumpUntilFound(tester, _key('activity-list'));
+      expect(find.textContaining('in round 1'), findsOneWidget);
+      await tapVisible(tester, _key('activity-filter-matrix'));
+      await pumpUntilFound(tester, find.textContaining('matrix'));
+      expect(find.textContaining('in round 1'), findsNothing);
+      await tapVisible(tester, _key('activity-filter-scores'));
+      await pumpUntilFound(tester, find.textContaining('in round 1'));
+      await tapRail(tester, 'Workspace');
+      await pumpUntilFound(tester, _key('activity-card'));
     }),
   );
 

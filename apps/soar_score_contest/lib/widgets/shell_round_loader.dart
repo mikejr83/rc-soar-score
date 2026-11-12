@@ -86,7 +86,7 @@ class _ShellRoundLoaderState extends State<ShellRoundLoader> {
       widget.contest,
       publicationClient: publicationClientOf(context),
       isOffline: offline,
-      actingAccountId: uiAccountIdOf(context),
+      actingAccountId: auditActorIdOf(context),
     ).then(
       (facts) {
         if (mounted && _loadedFor == key && _generation == generation) {

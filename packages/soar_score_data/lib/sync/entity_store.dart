@@ -96,7 +96,8 @@ class EntityStore<T extends Object> {
   ];
 
   /// The entities whose id [idColumn] equals [id] and text [textColumn]
-  /// equals [text] (when given), in [orderBy] order, at most [limit].
+  /// equals [text] (when given), in [orderBy] order, from [offset], at most
+  /// [limit].
   ///
   /// Column names come from the schema, never user input.
   Future<List<T>> whereIdAndText(
@@ -106,6 +107,7 @@ class EntityStore<T extends Object> {
     String? text,
     String? orderBy,
     int? limit,
+    int? offset,
   }) async => [
     for (final json in await _mapper.where(
       textColumn == null
@@ -117,6 +119,7 @@ class EntityStore<T extends Object> {
       ],
       orderBy: orderBy,
       limit: limit,
+      offset: offset,
     ))
       _decode(json),
   ];

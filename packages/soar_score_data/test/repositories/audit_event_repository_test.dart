@@ -113,6 +113,23 @@ void _tests(Backend backend) {
           [third, first],
         );
         expect(await audits.listForContest(contest, limit: 2), [third, second]);
+        expect(await audits.listForContest(contest, limit: 2, offset: 1), [
+          second,
+          first,
+        ]);
+        expect(
+          await audits.listForContest(
+            contest,
+            action: core.AuditAction.stateTransition,
+            limit: 1,
+            offset: 1,
+          ),
+          [first],
+        );
+        expect(
+          await audits.listForContest(contest, limit: 2, offset: 5),
+          isEmpty,
+        );
         expect(await audits.listForContest(core.Id.create()), isEmpty);
       },
     );

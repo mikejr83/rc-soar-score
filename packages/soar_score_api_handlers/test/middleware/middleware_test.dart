@@ -309,6 +309,30 @@ void securityHeadersTests() {
       expect(cached.headers['cache-control'], 'public, max-age=30');
     });
 
+    test(
+      '/public errors are no-store, successes keep their own header',
+      () async {
+        final notFound = await call((r) => Response.notFound('x'), '/public/x');
+        final forbidden = await call(
+          (r) => Response.forbidden('x'),
+          '/public/x',
+        );
+        final cached = await call(
+          (r) => Response.ok(
+            'x',
+            headers: {'cache-control': 'public, max-age=30'},
+          ),
+          '/public/x',
+        );
+        final outside = await call((r) => Response.notFound('x'), '/health');
+
+        expect(notFound.headers['cache-control'], 'no-store');
+        expect(forbidden.headers['cache-control'], 'no-store');
+        expect(cached.headers['cache-control'], 'public, max-age=30');
+        expect(outside.headers['cache-control'], isNull);
+      },
+    );
+
     test('robots.txt disallows everything', () async {
       final response = robotsTxtHandler(
         Request('GET', Uri.parse('http://localhost/robots.txt')),

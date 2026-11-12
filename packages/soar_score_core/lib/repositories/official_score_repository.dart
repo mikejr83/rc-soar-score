@@ -47,6 +47,18 @@ abstract interface class OfficialScoreRepository {
     required MutationMetadata metadata,
   });
 
+  /// Stores the adoption of a participant submission as the official score:
+  /// the official version, the placeholder in its new state, the superseded
+  /// reviews and their audit events, in one transaction.
+  ///
+  /// Throws an `ArgumentError` if the parts do not belong together, and a
+  /// `StaleRevisionError` when the placeholder or a review changed since it
+  /// was read. Nothing is stored then.
+  Future<PromotedScore> recordPromotion(
+    PromotedScore promotion, {
+    required MutationMetadata metadata,
+  });
+
   /// Stores a director's score entry: the [RecordedScore.attempt], the
   /// official score taken from it, the placeholder in its new state and, when
   /// given, the contest, in one transaction.

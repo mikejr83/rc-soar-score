@@ -36,27 +36,40 @@ class ActivityFacts extends Equatable {
       });
     final entries = <ActivityEntry>[];
     for (final event in newestFirst) {
-      final kind = _kindOf(event);
-      if (kind == null) {
+      final entry = entryOf(event, actingAccountId: actingAccountId);
+      if (entry == null) {
         continue;
       }
-      final (pilot, round) = _where(event);
-      final actor = event.actorId?.value;
-      entries.add(
-        ActivityEntry(
-          id: event.id.value,
-          kind: kind,
-          byYou: actor != null && actor == actingAccountId,
-          at: event.serverTimestamp,
-          pilot: pilot,
-          round: round,
-        ),
-      );
+      entries.add(entry);
       if (entries.length == shown) {
         break;
       }
     }
     return ActivityFacts(entries: List.unmodifiable(entries));
+  }
+
+  /// The line [event] makes, or null when it is not one the activity lists
+  /// show (a failed attempt, a routine first score entry, results hiding).
+  static ActivityEntry? entryOf(
+    AuditEventDto event, {
+    String? actingAccountId,
+  }) {
+    final kind = _kindOf(event);
+    if (kind == null) {
+      return null;
+    }
+    final (pilot, round) = _where(event);
+    final actor = event.actorId?.value;
+    return ActivityEntry(
+      id: event.id.value,
+      kind: kind,
+      byYou: actor != null && actor == actingAccountId,
+      at: event.serverTimestamp,
+      actorId: actor,
+      system: event.authority == Authority.system,
+      pilot: pilot,
+      round: round,
+    );
   }
 
   /// The pilot and round a score correction or a retirement names.

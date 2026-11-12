@@ -46,12 +46,14 @@ void main() {
         kind: ActivityKind.lock,
         byYou: true,
         at: t2,
+        actorId: _me.value,
       ),
       ActivityEntry(
         id: open.id.value,
         kind: ActivityKind.openScoring,
         byYou: false,
         at: t1,
+        actorId: _other.value,
       ),
     ]);
   });

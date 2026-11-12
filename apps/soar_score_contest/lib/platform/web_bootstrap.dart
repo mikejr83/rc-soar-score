@@ -29,7 +29,10 @@ const String defaultApiBaseUrl = 'http://localhost:8080';
 /// is compiled out of the web artifact entirely.
 class WebBootstrap extends AppBootstrap {
   WebBootstrap(this._client, this._auth, this.localUiStore)
-    : uiAccount = AuthUiAccount(_auth),
+    : uiAccount = AuthUiAccount(
+        _auth,
+        lookupActor: () async => (await _client.accountId()).value,
+      ),
       _refresh = RevisionAppSync(
         fetch: _client.syncRevision,
         isSignedIn: () => _auth.isSignedIn,
@@ -109,11 +112,16 @@ class WebBootstrap extends AppBootstrap {
     // the first frame, so the router starts with the right signed-in state.
     final auth = createAuthSession();
     await auth.restore();
-    return WebBootstrap(
+    final bootstrap = WebBootstrap(
       ApiClient(baseUrl: baseUrl, tokenProvider: auth.accessToken),
       auth,
       await openLocalUiStore(),
     );
+    // The activity lists tell the signed-in director's own events from
+    // others' by the account id the audit trail records, which only the
+    // service knows.
+    await (bootstrap.uiAccount as AuthUiAccount).refreshActor();
+    return bootstrap;
   }
 }
 

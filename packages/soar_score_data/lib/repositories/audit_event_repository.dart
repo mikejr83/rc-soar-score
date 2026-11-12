@@ -53,6 +53,7 @@ class AuditEventRepository extends DriftRepository
     core.Id contestId, {
     core.AuditAction? action,
     int? limit,
+    int? offset,
   }) => _store.whereIdAndText(
     'contest_id',
     contestId,
@@ -60,6 +61,7 @@ class AuditEventRepository extends DriftRepository
     text: action?.text,
     orderBy: 'server_timestamp DESC, id DESC',
     limit: limit,
+    offset: offset,
   );
 
   @override

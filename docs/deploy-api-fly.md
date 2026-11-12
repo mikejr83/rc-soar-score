@@ -243,6 +243,33 @@ sets no body limit of its own; the Next.js `/api` rewrite on the public site
 has its own cap, so check it before sending the largest sync uploads through
 that path.
 
+## Public read cache policy
+
+The `/public` reads are the only API responses meant to be cached (#906):
+
+| Response                                                     | `Cache-Control`      |
+| ------------------------------------------------------------ | -------------------- |
+| `GET /public/publications` and `/public/publications/{id}`   | `public, max-age=30` |
+| Any `/public` error (404 unknown, 403 `contest_not_visible`) | `no-store`           |
+| `/api/v1/*` (signed-in data)                                 | `no-store`           |
+
+For the next API read, a new publication, a delisting, or a change to hidden
+results shows within **30 seconds** and no later. A results page that is
+already open does not read again until it is reloaded or another contest is
+opened (`ContestProvider` fetches once per contest id), so an open page can
+keep showing what it loaded until the reader refreshes. The site's Refresh
+button bypasses the browser cache for the listing. Errors are never cached, so
+a contest that becomes visible shows at once.
+
+The Next.js `/api` rewrite on the public site passes these headers through
+unchanged (`proxy-config.test.ts` runs the real Next.js server against a stub
+upstream and checks status, headers and body). Vercel's CDN ignores `max-age` and only caches on `s-maxage`, so the
+browser is the only cache between a reader and the API.
+
+An unknown id (404) and an id that exists but is not shown (403
+`contest_not_visible`) are deliberately different answers (#463); the 403
+body carries nothing about the contest.
+
 ## Rollback
 
 ```sh

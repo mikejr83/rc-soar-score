@@ -93,6 +93,12 @@ class StubOfficialScoreRepository implements OfficialScoreRepository {
   }
 
   @override
+  Future<PromotedScore> recordPromotion(
+    PromotedScore promotion, {
+    required MutationMetadata metadata,
+  }) => throw UnimplementedError('recordPromotion is not stubbed');
+
+  @override
   Future<RecordedScore> recordEntry(
     RecordedScore entry, {
     required MutationMetadata metadata,
