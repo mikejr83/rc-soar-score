@@ -92,6 +92,52 @@ class OfficialScoreRepository extends DriftRepository
   }
 
   @override
+  Future<core.PromotedScore> recordPromotion(
+    core.PromotedScore promotion, {
+    required core.MutationMetadata metadata,
+  }) {
+    final score = promotion.officialScore;
+    final placeholder = promotion.placeholder;
+    if (placeholder.id != score.scorePlaceholderId) {
+      throw ArgumentError('the placeholder is not the score\'s');
+    }
+    if (placeholder.scoreRevision != score.scoreRevision) {
+      throw ArgumentError(
+        'the placeholder carries score revision ${placeholder.scoreRevision}, '
+        'the score is revision ${score.scoreRevision}',
+      );
+    }
+    for (final review in promotion.supersededReviews) {
+      if (review.scorePlaceholderId != placeholder.id) {
+        throw ArgumentError('a superseded review is not the slot\'s');
+      }
+    }
+    return unitOfWork.run((context) async {
+      await context.append(score, metadata: metadata);
+      final saved = await context.save(
+        placeholder,
+        metadata: metadata.forPart(placeholder.id.value),
+      );
+      final reviews = <core.ReviewRequest>[
+        for (final review in promotion.supersededReviews)
+          await context.save(
+            review,
+            metadata: metadata.forPart(review.id.value),
+          ),
+      ];
+      for (final audit in promotion.audits) {
+        await _audits.append(audit);
+      }
+      return core.PromotedScore(
+        officialScore: score,
+        placeholder: saved,
+        supersededReviews: reviews,
+        audits: promotion.audits,
+      );
+    });
+  }
+
+  @override
   Future<core.RecordedScore> recordEntry(
     core.RecordedScore entry, {
     required core.MutationMetadata metadata,
