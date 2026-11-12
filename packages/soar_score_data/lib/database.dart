@@ -8,6 +8,7 @@ import 'package:soar_score_data/postgres_config.dart';
 
 import 'contests_table.dart';
 import 'migrate.dart';
+import 'sync/current_attempt_pointer.dart';
 import 'schema/database_profile.dart';
 import 'schema/enum_values.dart';
 import 'schema/tables/audit_events_table.dart';
@@ -191,9 +192,29 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
         } else {
           await m.createTable(pilotImportLinks);
         }
+        await _addCurrentAttemptId();
       });
     },
   );
+
+  /// Adds `score_placeholders.current_attempt_id` (unreleased version 2) and
+  /// fills it: the attempt behind the current official score, else the
+  /// latest accepted attempt of the slot.
+  Future<void> _addCurrentAttemptId() async {
+    final sqlite = executor.dialect == SqlDialect.sqlite;
+    final has = sqlite
+        ? await customSelect(
+            "SELECT 1 AS x FROM pragma_table_info('score_placeholders') WHERE name = 'current_attempt_id'",
+          ).get()
+        : await customSelect(
+            "SELECT 1 AS x FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'score_placeholders' AND column_name = 'current_attempt_id'",
+          ).get();
+    if (has.isNotEmpty) return;
+    await customStatement(
+      'ALTER TABLE score_placeholders ADD COLUMN current_attempt_id TEXT',
+    );
+    await fillCurrentAttemptIds(this);
+  }
 
   /// Recognizes the alpha version of the table without changing its rows.
   Future<bool> _compatiblePilotImportLinks() async {

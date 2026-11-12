@@ -17,6 +17,7 @@ class ScorePlaceholders extends Table {
   TextColumn get state =>
       text().check(state.isIn(scorePlaceholderStateValues))();
   IntColumn get scoreRevision => integer()();
+  TextColumn get currentAttemptId => text().nullable()();
   TextColumn get lockedBy => text().nullable()();
   TextColumn get lockedAt => text().nullable()();
   IntColumn get revision => integer().withDefault(const Constant(0))();

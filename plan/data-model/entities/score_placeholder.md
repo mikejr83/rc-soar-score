@@ -17,17 +17,18 @@
 
 ## Fields/Properties
 
-| Field                      | Type        | Required | Default    | Description                                                                                                               |
-| -------------------------- | ----------- | -------- | ---------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `id`                       | UUIDv7      | Yes      | -          | Stable identity                                                                                                           |
-| `contest_id`               | UUIDv7      | Yes      | -          | FK Contest (denormalized; must match the assignment's contest)                                                            |
-| `contest_participation_id` | UUIDv7      | Yes      | -          | FK ContestParticipation; must match the assignment's participation                                                        |
-| `assignment_id`            | UUIDv7      | Yes      | -          | FK MatrixAssignment this placeholder scores. Never changes after creation                                                 |
-| `state`                    | enum        | Yes      | NotEntered | Summary of the score workflow: `NotEntered`, `Submitted`, `InReview`, or `Official`                                       |
-| `score_revision`           | int         | Yes      | 0          | Counter of accepted score mutations: incremented each time an attempt is accepted or an official score version is created |
-| `locked_by`                | UUIDv7      | No       | -          | FK Account that locked this score. Null while it is not locked individually                                               |
-| `locked_at`                | timestamptz | No       | -          | When this score was locked. Set exactly when `locked_by` is set                                                           |
-| `revision`                 | int         | Yes      | 0          | Row-level sync counter, incremented on any change to the row, including state changes that are not score mutations        |
+| Field                      | Type        | Required | Default    | Description                                                                                                                                                                              |
+| -------------------------- | ----------- | -------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                       | UUIDv7      | Yes      | -          | Stable identity                                                                                                                                                                          |
+| `contest_id`               | UUIDv7      | Yes      | -          | FK Contest (denormalized; must match the assignment's contest)                                                                                                                           |
+| `contest_participation_id` | UUIDv7      | Yes      | -          | FK ContestParticipation; must match the assignment's participation                                                                                                                       |
+| `assignment_id`            | UUIDv7      | Yes      | -          | FK MatrixAssignment this placeholder scores. Never changes after creation                                                                                                                |
+| `state`                    | enum        | Yes      | NotEntered | Summary of the score workflow: `NotEntered`, `Submitted`, `InReview`, or `Official`                                                                                                      |
+| `score_revision`           | int         | Yes      | 0          | Counter of accepted score mutations: incremented each time an attempt is accepted or an official score version is created                                                                |
+| `current_attempt_id`       | UUIDv7      | No       | -          | The accepted attempt whose values are the slot's current submission. Advanced in the same transaction as `score_revision`; never inferred from UUID order. Null while nothing is entered |
+| `locked_by`                | UUIDv7      | No       | -          | FK Account that locked this score. Null while it is not locked individually                                                                                                              |
+| `locked_at`                | timestamptz | No       | -          | When this score was locked. Set exactly when `locked_by` is set                                                                                                                          |
+| `revision`                 | int         | Yes      | 0          | Row-level sync counter, incremented on any change to the row, including state changes that are not score mutations                                                                       |
 
 ## Invariants and Constraints
 

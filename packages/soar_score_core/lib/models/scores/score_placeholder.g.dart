@@ -20,6 +20,10 @@ ScorePlaceholder _$ScorePlaceholderFromJson(Map<String, dynamic> json) =>
           $enumDecodeNullable(_$ScorePlaceholderStateEnumMap, json['state']) ??
           ScorePlaceholderState.notEntered,
       scoreRevision: (json['score_revision'] as num?)?.toInt() ?? 0,
+      currentAttemptId: _$JsonConverterFromJson<String, Id>(
+        json['current_attempt_id'],
+        const IdConverter().fromJson,
+      ),
       lockedBy: _$JsonConverterFromJson<String, Id>(
         json['locked_by'],
         const IdConverter().fromJson,
@@ -41,6 +45,10 @@ Map<String, dynamic> _$ScorePlaceholderToJson(ScorePlaceholder instance) =>
       'assignment_id': const IdConverter().toJson(instance.assignmentId),
       'state': _$ScorePlaceholderStateEnumMap[instance.state]!,
       'score_revision': instance.scoreRevision,
+      'current_attempt_id': _$JsonConverterToJson<String, Id>(
+        instance.currentAttemptId,
+        const IdConverter().toJson,
+      ),
       'locked_by': _$JsonConverterToJson<String, Id>(
         instance.lockedBy,
         const IdConverter().toJson,

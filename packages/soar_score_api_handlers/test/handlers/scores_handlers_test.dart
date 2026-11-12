@@ -68,6 +68,10 @@ void main() {
       final attempt = api.repository.scoreAttempts.stored.single;
       expect(attempt.authority, Authority.director);
       expect(attempt.rawComponents['launch_height'], 200);
+      final slot = api.repository.scorePlaceholders.stored.singleWhere(
+        (p) => p.scoreRevision > 0,
+      );
+      expect(slot.currentAttemptId, attempt.id);
     });
 
     test('a cumulative penalty is accepted and stored', () async {

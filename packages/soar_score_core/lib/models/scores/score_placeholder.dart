@@ -23,6 +23,7 @@ class ScorePlaceholder extends Equatable implements Synchronizable {
     required this.assignmentId,
     this.state = ScorePlaceholderState.notEntered,
     this.scoreRevision = 0,
+    this.currentAttemptId,
     this.lockedBy,
     DateTime? lockedAt,
     this.revision = 0,
@@ -51,6 +52,12 @@ class ScorePlaceholder extends Equatable implements Synchronizable {
   /// versions created.
   final int scoreRevision;
 
+  /// The attempt whose values are the slot's current submission: the
+  /// authoritative frontier of accepted attempts, advanced in the same
+  /// transaction as [scoreRevision]. Null while nothing is entered. Never
+  /// inferred from attempt id order.
+  final Id? currentAttemptId;
+
   /// Set when this score is locked on its own.
   final Id? lockedBy;
   final DateTime? lockedAt;
@@ -76,6 +83,7 @@ class ScorePlaceholder extends Equatable implements Synchronizable {
     assignmentId,
     state,
     scoreRevision,
+    currentAttemptId,
     lockedBy,
     lockedAt,
     revision,

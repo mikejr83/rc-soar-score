@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:drift/drift.dart' show Variable;
+
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:test/test.dart';
@@ -993,6 +995,71 @@ void main() {
       final legacy = ExchangeFile.decode(utf8.encode(jsonEncode(json)));
       final result = await importInspection(legacy);
       expect(result.contestId.value, file.header.contestId);
+    });
+
+    test('an export from before slot pointers fills them on import', () async {
+      final file = await source.exportNamed(_autumn);
+      final current = {
+        for (final row in file.rows('score_placeholders'))
+          row['id']! as String: row['current_attempt_id'] as String?,
+      };
+      expect(current.values.whereType<String>(), isNotEmpty);
+      final officials = {
+        for (final row in file.rows('official_scores'))
+          row['score_placeholder_id']! as String: row['score_attempt_id'],
+      };
+      for (final row in file.rows('score_placeholders')) {
+        row.remove('current_attempt_id');
+      }
+      final json = file.toJson();
+      (json['header'] as Map)['schema_version'] = 1;
+      final legacy = ExchangeFile.decode(utf8.encode(jsonEncode(json)));
+
+      final result = await importInspection(legacy);
+
+      expect(result.contestId.value, file.header.contestId);
+      final rows = await target.db
+          .customSelect(
+            'SELECT id, score_revision, current_attempt_id '
+            'FROM score_placeholders WHERE contest_id = ?',
+            variables: [Variable.withString(file.header.contestId)],
+          )
+          .get();
+      expect(rows, hasLength(current.length));
+      var scored = 0;
+      for (final row in rows) {
+        final id = row.read<String>('id');
+        final pointer = row.read<String?>('current_attempt_id');
+        if (officials.containsKey(id)) {
+          scored++;
+          expect(pointer, officials[id], reason: 'scored slot $id');
+        } else if (row.read<int>('score_revision') == 0) {
+          expect(pointer, isNull, reason: 'unscored slot $id');
+        }
+      }
+      expect(scored, greaterThan(0));
+    });
+
+    test('a current export keeps the pointers it carries', () async {
+      final file = await source.exportNamed(_autumn);
+      final carried = {
+        for (final row in file.rows('score_placeholders'))
+          if (row['current_attempt_id'] != null)
+            row['id']! as String: row['current_attempt_id']! as String,
+      };
+      expect(carried, isNotEmpty);
+
+      await importInspection(file);
+
+      for (final entry in carried.entries) {
+        final row = await target.db
+            .customSelect(
+              'SELECT current_attempt_id FROM score_placeholders WHERE id = ?',
+              variables: [Variable.withString(entry.key)],
+            )
+            .getSingle();
+        expect(row.read<String?>('current_attempt_id'), entry.value);
+      }
     });
 
     test('too much nesting is refused', () {

@@ -5,6 +5,7 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../database.dart';
 import 'assignment_markers.dart';
+import 'current_attempt_pointer.dart';
 import 'entity_stores.dart';
 import 'sql_placeholders.dart';
 
@@ -122,8 +123,26 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
           if (!_same(before, await results.findJson(id))) changed = true;
         }
       }
+      await _reconcileCurrentAttempt(change.entityType, json);
       return changed;
     });
+  }
+
+  /// Fills the slot pointer for scores that arrive without one: changes
+  /// written before the pointer existed carry none, and the rows they depend
+  /// on may come in separate batches. A slot whose placeholder already holds a
+  /// pointer, or has no score yet, is left alone, so newer snapshots win.
+  Future<void> _reconcileCurrentAttempt(
+    String entityType,
+    Map<String, Object?> json,
+  ) async {
+    final placeholderId = switch (entityType) {
+      'ScorePlaceholder' => json['id'],
+      'ScoreAttempt' || 'OfficialScore' => json['score_placeholder_id'],
+      _ => null,
+    };
+    if (placeholderId is! String) return;
+    await fillCurrentAttemptIds(_db, placeholderId: placeholderId);
   }
 
   /// Whether two stored rows hold the same values.
