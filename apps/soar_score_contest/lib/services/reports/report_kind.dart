@@ -1,10 +1,10 @@
 /// The two groups the reports page sorts its cards into.
 enum ReportGroup {
-  results('Results', 'Calculated from the scores entered so far.'),
   documents(
-    'Documents to print',
-    'Built from the drawn matrix. Usually printed before the contest.',
-  );
+    'Scoring',
+    'Flight matrix, scoring sheets for pilots and officials, and other scoring documents.',
+  ),
+  results('Results', 'Produce reports from preliminary or official scores.');
 
   const ReportGroup(this.title, this.subtitle);
 
@@ -22,6 +22,13 @@ enum ReportKind {
     group: ReportGroup.results,
     needsScores: true,
   ),
+  // flightDetails(
+  //   key: 'flightDetails',
+  //   title: 'Flight Details',
+  //   brief: 'Detailed information about each flight group or round.',
+  //   group: ReportGroup.results,
+  //   needsScores: true,
+  // ),
   matrix(
     key: 'matrix',
     title: 'Draw Matrix',

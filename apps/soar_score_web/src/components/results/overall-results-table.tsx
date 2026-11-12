@@ -46,7 +46,7 @@ export function OverallResultsTable({
           <span aria-hidden="true" className={styles.droppedMark}>
             *
           </span>{" "}
-          Dropped round: shaded and struck through, not counted in the score.
+          Dropped round: shaded to indicate not counted in the score.
         </p>
       )}
     </>
