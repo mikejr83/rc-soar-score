@@ -41,6 +41,7 @@ createHandlers(
   String displayName,
   String version,
   Repository repository, {
+  int? schemaRevision,
   bool publishingEnabled = false,
   RecalculationService? recalculation,
   SyncVersions? syncVersions,
@@ -96,7 +97,13 @@ createHandlers(
   );
 
   return (
-    healthHandler: createHealthHandler(name, displayName, version, repository),
+    healthHandler: createHealthHandler(
+      name,
+      displayName,
+      version,
+      repository,
+      schemaRevision: schemaRevision,
+    ),
     apiHandler: router.call,
     publicHandler: buildPublicHandler(repository, enabled: publishingEnabled),
     participantHandler: buildParticipantHandler(

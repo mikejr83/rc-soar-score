@@ -137,6 +137,7 @@ void main() {
       name: 'hosted',
       displayName: 'Hosted',
       version: '0.0.0',
+      schemaRevision: hostedDatabase.schemaVersion,
       repository: hosted,
       authMiddleware: fixedPrincipal(Principal(accountId: director)),
     );

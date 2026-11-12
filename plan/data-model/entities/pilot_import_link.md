@@ -1,0 +1,18 @@
+# PilotImportLink
+
+**Purpose:** Remembers a director's confirmed association between a GliderScore 6 pilot and a participant profile. Both pilot and competition imports use the same association.
+
+**Identifier:** `id` (UUIDv7). The unique source key is (`owner_account_id`, `source_system`, `source_pilot_no`).
+
+| Field                      | Description                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------- |
+| `id`                       | Link identifier.                                                                                  |
+| `owner_account_id`         | Director who owns and synchronizes the link.                                                      |
+| `source_system`            | Currently `gliderscore6`, one logical source per director.                                        |
+| `source_pilot_no`          | Pilot number in GliderScore.                                                                      |
+| `participant_profile_id`   | Confirmed participant profile.                                                                    |
+| `source_values`            | Normalized pilot details from the last confirmed import, used to detect changes requiring review. |
+| `created_at`, `updated_at` | UTC timestamps.                                                                                   |
+| `revision`                 | Revision used for synchronization and stale-write detection.                                      |
+
+The link is director-scoped and travels through the director synchronization stream. Participant deletion removes active links through the synchronized unit of work. One installation manages a director's links (the first to write one); the service refuses link writes from any other installation with `not_link_manager`, queued writes included. A disagreement that already exists is a `ConflictRecord` (`unique_violation`) the director decides in Account sync, replaced whenever either link changes, so a decision always refers to the comparison that was shown; a link whose participant was deleted is refused or removed. Historical import provenance remains separate. Distinguishing a transferred database from an independent database on another computer is deferred.

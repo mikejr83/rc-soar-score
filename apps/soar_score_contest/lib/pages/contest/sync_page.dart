@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../app_sync_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/sync/app_sync.dart';
 import '../../services/sync/conflict_answer.dart';
 import '../../services/sync/open_conflict.dart';
@@ -69,6 +71,63 @@ class ContestSyncPage extends StatelessWidget {
   }
 }
 
+/// The account's own sync page: what its devices could not decide alone,
+/// such as which participant a GliderScore pilot is linked to, what was
+/// refused, and a button to sync now.
+class AccountSyncPage extends StatelessWidget {
+  const AccountSyncPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scope = appSyncOf(context).accountScope;
+    return Scaffold(
+      body: scope == null
+          ? Center(child: Text(l10n.accountSyncIntro))
+          : SyncSummaryBuilder(
+              scope: scope,
+              builder: (context, sync, summary, syncing) => ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      l10n.shellNavAccountSync,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(l10n.accountSyncIntro),
+                  const SizedBox(height: 16),
+                  SyncDetailsCard(
+                    summary: summary,
+                    syncing: syncing,
+                    onSyncNow: syncing || (summary?.localOnly ?? true)
+                        ? null
+                        : () => unawaited(sync.syncNow(scope)),
+                  ),
+                  const SizedBox(height: 16),
+                  _Conflicts(
+                    sync: sync,
+                    scope: scope,
+                    version: Object.hash(
+                      summary?.conflicts ?? 0,
+                      summary?.dataRevision ?? 0,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _Refused(
+                    sync: sync,
+                    scope: scope,
+                    version: summary?.rejectedChanges ?? 0,
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+}
+
 /// Loads the refused changes and reloads them when [version] changes.
 class _Refused extends StatefulWidget {
   const _Refused({
@@ -120,7 +179,9 @@ class _Conflicts extends StatefulWidget {
 
   final AppSync sync;
   final SyncScopeKey scope;
-  final int version;
+
+  /// Changes whenever the open conflicts may have changed.
+  final Object version;
 
   @override
   State<_Conflicts> createState() => _ConflictsState();
@@ -176,6 +237,20 @@ class _ConflictsState extends State<_Conflicts> {
     );
     _reviewing = false;
     if (!mounted) return;
+    if (answer != null &&
+        !answer.resolved &&
+        conflict.entityType == 'PilotImportLink') {
+      // The link changed while the director looked at it: the review was
+      // replaced. Bring the new comparison down and ask again.
+      final l10n = AppLocalizations.of(context);
+      final messenger = ScaffoldMessenger.of(context);
+      await widget.sync.syncNow(widget.scope);
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.pilotLinkReviewChanged)),
+      );
+      if (!mounted) return;
+      unawaited(_load());
+    }
     if (answer != null && answer.resolved) {
       _decided.add(conflict.id);
       final problem = answer.refreshProblem;

@@ -14,7 +14,7 @@ import 'journey.dart';
 Finder _key(String key) => find.byKey(ValueKey(key));
 
 /// Imports pilots from a GliderScore file into the participants manager,
-/// twice. Native only: the web build holds no local participants.
+/// repeatedly, including a changed pilot. Native only: the web build holds no local participants.
 ///
 /// The file chooser and the GliderScore reader are replaced because a journey
 /// cannot drive the system dialog or has an `.mdb` to read; everything after
@@ -28,6 +28,7 @@ Future<void> importPilotsFromGliderScore(
   final milo = data.roster[1];
   const newPilot = (first: 'Gina', last: 'Glidertest');
   const gsEmail = 'gina.glidertest@e2e.example';
+  var sourceClub = 'E2E GS Club';
 
   final original = GliderScoreFiles.current;
   addTearDown(() => GliderScoreFiles.current = original);
@@ -47,7 +48,7 @@ Future<void> importPilotsFromGliderScore(
               'FirstName': newPilot.first,
               'LastName': newPilot.last,
               'Email': gsEmail,
-              'Club': 'E2E GS Club',
+              'Club': sourceClub,
               'Country': 'USA',
             },
             // The same person as a participant the journey made, found by email.
@@ -97,10 +98,9 @@ Future<void> importPilotsFromGliderScore(
 
   await pickChoice(l10n.pilotImportChoiceAdd);
   await pickChoice(l10n.pilotImportChoiceUpdate('${milo.first} ${milo.last}'));
-  await pickChoice(l10n.pilotImportChoiceSkip);
   await tapVisible(tester, _key('pilot-import-confirm'));
   await pumpUntilFound(tester, _key('pilot-import-result'));
-  expect(find.text(l10n.pilotImportDone(1, 1, 0, 1)), findsOneWidget);
+  expect(find.text(l10n.pilotImportDone(1, 1, 1, 0)), findsOneWidget);
   await tapVisible(tester, _key('pilot-import-done'));
   await pumpUntilGone(tester, _key('pilot-import-dialog'));
 
@@ -116,10 +116,29 @@ Future<void> importPilotsFromGliderScore(
   await tapVisible(tester, _key('import-pilots'));
   await pumpUntilFound(tester, _key('pilot-import-confirm'));
   expect(find.text(l10n.pilotImportNewHeading(1)), findsNothing);
-  expect(find.text(l10n.pilotImportUpdateHeading(2)), findsOneWidget);
+  expect(find.text(l10n.pilotImportUpdateHeading(3)), findsOneWidget);
+  expect(
+    find.textContaining(l10n.pilotImportLinkedTo('${milo.first} ${milo.last}')),
+    findsOneWidget,
+  );
   await tapVisible(tester, _key('pilot-import-confirm'));
   await pumpUntilFound(tester, _key('pilot-import-result'));
-  expect(find.text(l10n.pilotImportDone(0, 0, 2, 1)), findsOneWidget);
+  expect(find.text(l10n.pilotImportDone(0, 0, 3, 0)), findsOneWidget);
+  await tapVisible(tester, _key('pilot-import-done'));
+  await pumpUntilGone(tester, _key('pilot-import-dialog'));
+
+  // A source change is shown and requires explicit selection before saving.
+  sourceClub = 'Updated GS Club';
+  await tapVisible(tester, _key('import-pilots'));
+  await pumpUntilFound(tester, _key('pilot-import-row-1'));
+  expect(find.textContaining(l10n.pilotImportSourceChanged), findsOneWidget);
+  expect(
+    tester.widget<CheckboxListTile>(_key('pilot-import-row-1')).value,
+    isFalse,
+  );
+  await tapVisible(tester, _key('pilot-import-row-1'));
+  await tapVisible(tester, _key('pilot-import-confirm'));
+  await pumpUntilFound(tester, _key('pilot-import-result'));
   await tapVisible(tester, _key('pilot-import-done'));
   await pumpUntilGone(tester, _key('pilot-import-dialog'));
 }

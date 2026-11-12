@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
+import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:soar_score_server/handler.dart';
 import 'package:test/test.dart';
@@ -16,6 +18,47 @@ import 'package:test/test.dart';
 /// `soar_score_api_handlers`' own test suite.
 void main() {
   final config = PostgresConfig.fromEnvironment();
+
+  test('reports and enforces the actual database schema version', () async {
+    final database = createInMemoryDatabase();
+    addTearDown(database.close);
+    final account = Id.create();
+    final handler = createServerHandler(
+      database,
+      authMiddleware: fixedPrincipal(Principal(accountId: account)),
+    );
+    final health = await handler(
+      Request('GET', Uri.parse('http://localhost/health')),
+    );
+    expect(
+      (jsonDecode(await health.readAsString()) as Map)['schemaRevision'],
+      database.schemaVersion,
+    );
+    final versions = await handler(
+      Request('GET', Uri.parse('http://localhost/api/v1/sync/info')),
+    );
+    expect(versions.statusCode, 200);
+    final body = jsonDecode(await versions.readAsString()) as Map;
+    expect(body['min_schema_version'], database.schemaVersion);
+    expect(body['max_schema_version'], database.schemaVersion);
+    final oldClient = await handler(
+      Request(
+        'POST',
+        Uri.parse('http://localhost/api/v1/sync/exchange'),
+        body: jsonEncode({
+          'protocol_version': 1,
+          'schema_version': 1,
+          'installation_id': Id.create().value,
+          'scope': {'owner_account_id': account.value},
+          'last_acknowledged_sequence': 0,
+          'mutations': <Object?>[],
+        }),
+      ),
+    );
+    expect(oldClient.statusCode, 426);
+    final refusal = jsonDecode(await oldClient.readAsString()) as Map;
+    expect((refusal['error'] as Map)['code'], 'schema_too_old');
+  });
 
   group(
     'createServerHandler wiring',
@@ -41,7 +84,7 @@ void main() {
           'name': 'soar_score_server',
           'displayName': 'Soar Score API Server',
           'version': '0.1.0',
-          'schemaRevision': null,
+          'schemaRevision': 2,
         });
       });
     },

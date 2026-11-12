@@ -27,6 +27,7 @@ const tableGroupByName = <String, TableGroup>{
   'model_catalogs': TableGroup.director,
   'contest_model_links': TableGroup.contest,
   'import_provenance': TableGroup.director,
+  'pilot_import_links': TableGroup.director,
   'matrix_revisions': TableGroup.contest,
   'rounds': TableGroup.contest,
   'round_groups': TableGroup.contest,

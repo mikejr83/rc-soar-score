@@ -29,6 +29,7 @@ Handler createServerHandler(
     name: serverName,
     displayName: serverDisplayName,
     version: serverVersion,
+    schemaRevision: database.schemaVersion,
     repository: repository,
     authMiddleware: authMiddleware,
     publishingEnabled: true,

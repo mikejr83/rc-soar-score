@@ -309,6 +309,12 @@ One row per pilot.
 
 Three stamps of one GliderScore import by Dana (`…0001`): a contest (with its dedupe key and source values), a participation, and a profile (no contest). The imported contest `…00e1` is illustrative and is not part of the shared scenario.
 
+### PilotImportLink
+
+[`pilot_import_link.json`](pilot_import_link.json) · [specification](../../entities/pilot_import_link.md)
+
+An example confirmed link from GliderScore pilot 98 to Sam's participant profile.
+
 ### InstallationActivation
 
 [`installation_activation.json`](installation_activation.json) · [specification](../../entities/installation_activation.md)

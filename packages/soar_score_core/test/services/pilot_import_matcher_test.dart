@@ -60,6 +60,85 @@ void main() {
   PilotMatch one(PilotDraft d, List<ParticipantProfile> existing) =>
       matcher.match([d], existing).single;
 
+  group('remembered links', () {
+    late ParticipantProfile profile;
+    late PilotImportLink link;
+    setUp(() {
+      profile = _profile();
+      link = PilotImportLink(
+        id: Id.create(),
+        ownerAccountId: _owner,
+        sourcePilotNo: 1,
+        participantProfileId: profile.id,
+        sourceValues: PilotImportMatcher.sourceValues(_draft()),
+        createdAt: _now,
+        updatedAt: _now,
+      );
+    });
+    test('previous name-only decision is selected automatically', () {
+      final m = matcher.match([_draft()], [profile], links: [link]).single;
+      expect(m.remembered, isTrue);
+      expect(m.candidateIds, [profile.id]);
+      expect(m.defaultAction, PilotImportAction.update);
+    });
+    test('changed source data needs approval', () {
+      final m = matcher
+          .match([_draft(club: 'New Club')], [profile], links: [link])
+          .single;
+      expect(m.sourceChanged, isTrue);
+      expect(m.defaultAction, PilotImportAction.ask);
+      expect(PilotImportSelection.defaultFor(m).targetProfileId, profile.id);
+    });
+    test('format-only source differences do not require approval', () {
+      final m = matcher
+          .match(
+            [_draft(first: ' ALEX ', last: 'ashdown')],
+            [profile],
+            links: [link],
+          )
+          .single;
+      expect(m.sourceChanged, isFalse);
+      expect(m.defaultAction, PilotImportAction.update);
+    });
+    test('extra or absent empty snapshot fields do not invent a change', () {
+      final incomplete = PilotImportLink(
+        id: link.id,
+        ownerAccountId: link.ownerAccountId,
+        sourcePilotNo: link.sourcePilotNo,
+        participantProfileId: link.participantProfileId,
+        sourceValues: const {
+          'firstName': 'alex',
+          'lastName': 'ashdown',
+          'futureField': 'retained',
+        },
+        createdAt: link.createdAt,
+        updatedAt: link.updatedAt,
+      );
+      final match = matcher
+          .match([_draft()], [profile], links: [incomplete])
+          .single;
+      expect(match.sourceChanged, isFalse);
+      expect(match.sourceChanges, isEmpty);
+    });
+    test('deleted participant cannot be resolved', () {
+      final m = matcher.match([_draft()], [], links: [link]).single;
+      expect(m.remembered, isFalse);
+      expect(m.kind, PilotMatchKind.newPilot);
+    });
+    test('conflicting identifier is not selected automatically', () {
+      final other = _profile(email: 'other@example.com');
+      final m = matcher
+          .match(
+            [_draft(email: 'other@example.com')],
+            [profile, other],
+            links: [link],
+          )
+          .single;
+      expect(m.conflict, isTrue);
+      expect(m.defaultAction, PilotImportAction.ask);
+    });
+  });
+
   group('kinds', () {
     test('nobody in the list means new, added by default', () {
       final m = one(_draft(), const []);
@@ -302,6 +381,61 @@ void main() {
           if (m.isDuplicateInFile) m.draft.sourcePilotNo,
       ];
       expect(flagged, [1002, 1004]);
+    });
+  });
+
+  group('a pilot whose link is under review', () {
+    PilotImportLink linkFor(ParticipantProfile profile, int no) =>
+        PilotImportLink(
+          id: Id.create(),
+          ownerAccountId: _owner,
+          sourcePilotNo: no,
+          participantProfileId: profile.id,
+          sourceValues: PilotImportMatcher.sourceValues(
+            _draft(no: no, first: profile.firstName, last: profile.lastName),
+          ),
+          createdAt: _now,
+          updatedAt: _now,
+        );
+
+    test('is held back: no link and no guess from the file is used', () {
+      final ada = _profile(first: 'Ada', last: 'Lovelace', email: 'a@x.test');
+      final held = matcher
+          .match(
+            [_draft(no: 7, first: 'Ada', last: 'Lovelace', email: 'a@x.test')],
+            [ada],
+            links: [linkFor(ada, 7)],
+            pilotsUnderReview: {7},
+          )
+          .single;
+
+      expect(held.linkReview, isTrue);
+      expect(held.remembered, isFalse);
+      expect(held.candidateIds, isEmpty);
+      expect(held.defaultAction, PilotImportAction.ask);
+      final selection = PilotImportSelection.defaultFor(held);
+      expect(selection.choice, PilotImportChoice.skip);
+      expect(selection.targetProfileId, isNull);
+    });
+
+    test('leaves the other pilots of the file alone', () {
+      final ada = _profile(first: 'Ada', last: 'Lovelace');
+      final grace = _profile(first: 'Grace', last: 'Hopper');
+      final matches = matcher.match(
+        [
+          _draft(no: 7, first: 'Ada', last: 'Lovelace'),
+          _draft(no: 8, first: 'Grace', last: 'Hopper'),
+        ],
+        [ada, grace],
+        links: [linkFor(ada, 7), linkFor(grace, 8)],
+        pilotsUnderReview: {7},
+      );
+
+      expect(matches[0].linkReview, isTrue);
+      expect(matches[1].linkReview, isFalse);
+      expect(matches[1].remembered, isTrue);
+      expect(matches[1].candidateIds, [grace.id]);
+      expect(matches[1].defaultAction, PilotImportAction.update);
     });
   });
 }

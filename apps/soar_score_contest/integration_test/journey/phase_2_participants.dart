@@ -46,7 +46,7 @@ Future<void> runParticipantsPhase(Journey journey, JourneyContext data) async {
     () => inManager(() => _deleteAsksFirst(tester)),
   );
   await journey.step(
-    'Pilots are imported from a GliderScore file, twice (native)',
+    'Pilots are imported and source changes reviewed (native)',
     () => importPilotsFromGliderScore(tester, data),
     nativeOnly: true,
   );

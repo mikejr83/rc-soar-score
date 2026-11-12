@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../app_sync_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../router.dart';
 import '../../services/preferences/director_time.dart';
 import '../../services/sync/sync_status_text.dart';
 import 'sync_summary_builder.dart';
@@ -72,7 +74,16 @@ class ShellSyncStatus extends StatelessWidget {
             child: InkWell(
               key: const ValueKey('shell-sync-status'),
               borderRadius: BorderRadius.circular(8),
-              onTap: syncing ? null : () => unawaited(sync.syncNow(scope)),
+              onTap: syncing
+                  ? null
+                  : () {
+                      if (contest == null &&
+                          (summary?.needsAttention ?? 0) > 0) {
+                        context.go(accountSyncPath);
+                      } else {
+                        unawaited(sync.syncNow(scope));
+                      }
+                    },
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

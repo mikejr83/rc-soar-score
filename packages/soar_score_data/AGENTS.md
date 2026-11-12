@@ -19,8 +19,8 @@ Drift database schema and the repository implementations for both SQLite (native
 - Repositories are contracts in `soar_score_core`; this package only implements them. Add or change the contract in core first.
 - **No business logic.** Persistence, mapping and constraints only. Scoring, ranking and rules belong in `soar_score_core`.
 - One table per entity, with UTC ISO timestamps. Fields trace to `plan/data-model/entities/`.
-- Schema changes stay in schema version 1, edited in place. A stale local `soar_score.db` must be deleted afterwards.
-- Keep SQL working on both backends. `build.yaml` generates SQL for both dialects; do not add SQLite-only or PostgreSQL-only SQL.
+- Preserve existing databases. Increment the schema version for every persistent schema change and add a tested, transactional upgrade for SQLite and PostgreSQL. Never require deleting a user's database to apply a schema change. Keep versioned schema snapshots and migration tests, including representative data preservation, rollback, fresh installs, and upgrades from supported versions. Review sync version compatibility and contest-export compatibility for each version change.
+- Keep migrations working on both backends. `build.yaml` generates SQL for both dialects; use portable SQL where possible and isolate necessary dialect-specific introspection, with tests on both databases.
 
 ## Generated Code
 

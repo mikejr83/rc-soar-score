@@ -32,7 +32,30 @@ abstract class PilotImportStore {
   Future<PilotImportOutcome> apply(
     List<PilotImportSelection> selections, {
     required Map<Id, int> reviewedRevisions,
+    bool rememberLinks = true,
   });
+}
+
+/// This installation does not manage the remembered links, so a save that
+/// remembers them is not allowed; the import must run without them.
+class PilotImportLinksManagedElsewhere implements Exception {
+  const PilotImportLinksManagedElsewhere();
+
+  @override
+  String toString() => 'The remembered pilot links are managed elsewhere';
+}
+
+/// Optional remembered-link capability of a pilot import store.
+abstract interface class PilotImportLinkStore {
+  Future<List<PilotImportLink>> existingLinks();
+
+  /// The GliderScore pilot numbers whose link still waits for the director's
+  /// decision in Account sync. An import holds those pilots back.
+  Future<Set<int>> pilotsUnderReview();
+
+  /// Whether another installation manages the remembered links of this
+  /// director. This one then imports without them.
+  Future<bool> linksManagedElsewhere();
 }
 
 /// The system file dialog the import uses. A journey cannot drive it, so it
@@ -149,12 +172,46 @@ class PilotImportController extends ChangeNotifier {
 
   Object? _error;
 
+  bool _managedElsewhere = false;
+
+  /// True when another installation manages the remembered links, so this
+  /// import cannot reuse or change them.
+  bool get linksManagedElsewhere => _managedElsewhere;
+
+  /// True while the director still has to choose the one-time import before
+  /// anything is saved, because another installation manages the links.
+  bool get needsOneTimeChoice => _managedElsewhere && !_oneTime;
+
+  bool _oneTime = false;
+
+  /// True when the director chose to import without remembered links: every
+  /// match is confirmed by hand and the saved links stay as they are.
+  bool get importingWithoutLinks => _oneTime;
+
+  /// Reviews the same file again without the remembered links.
+  Future<void> importWithoutRememberedLinks() async {
+    _oneTime = true;
+    await reviewAgain();
+  }
+
   /// What went wrong when [step] is [PilotImportStep.failed].
   Object? get error => _error;
 
   /// True when the failure is that a participant changed during the review.
   bool get changedDuringReview =>
-      _error is StaleRevisionError || _error is PilotImportReviewChangedError;
+      _error is StaleRevisionError ||
+      _error is PilotImportReviewChangedError ||
+      _error is PilotImportLinkReviewError ||
+      _error is PilotImportLinksManagedElsewhere;
+
+  /// True when the save was refused because another installation manages the
+  /// remembered links and this import has not been made a one-time import.
+  bool get managedElsewhereRefused =>
+      _error is PilotImportLinksManagedElsewhere;
+
+  /// True when the failure is that a pilot's link needs a decision in Account
+  /// sync first.
+  bool get linkReviewPending => _error is PilotImportLinkReviewError;
 
   /// True when nothing was read yet, so a failure can be retried by choosing
   /// a file again.
@@ -208,10 +265,23 @@ class PilotImportController extends ChangeNotifier {
     final result = _result!;
     final draft = _mapper.map(result);
     final existing = await store.existing();
+    final linkStore = store;
+    final linked = linkStore is PilotImportLinkStore
+        ? linkStore as PilotImportLinkStore
+        : null;
+    _managedElsewhere = linked != null && await linked.linksManagedElsewhere();
+    // A computer that does not manage the links never reads or reuses them.
+    final useLinks = linked != null && !_oneTime && !_managedElsewhere;
+    final links = useLinks ? await linked.existingLinks() : <PilotImportLink>[];
+    // Pilots whose link is still being decided stay out of automatic matching
+    // in every mode, so an unresolved link cannot lead to a duplicate.
+    final held = linked == null ? <int>{} : await linked.pilotsUnderReview();
     final filter = pilotFilter;
     final matches = _matcher.match(
       filter == null ? draft.pilots : draft.pilots.where(filter).toList(),
       existing,
+      links: links,
+      pilotsUnderReview: held,
     );
     _review = PilotImportReview(
       draft: draft,
@@ -219,7 +289,16 @@ class PilotImportController extends ChangeNotifier {
       existing: existing,
     );
     _selections = [
-      for (final match in matches) PilotImportSelection.defaultFor(match),
+      for (final match in matches)
+        _oneTime && match.candidateIds.isNotEmpty
+            ? PilotImportSelection(
+                match: match,
+                choice: PilotImportChoice.skip,
+                targetProfileId: match.candidateIds.length == 1
+                    ? match.candidateIds.single
+                    : null,
+              )
+            : PilotImportSelection.defaultFor(match),
     ];
     _set(PilotImportStep.review);
   }
@@ -245,6 +324,8 @@ class PilotImportController extends ChangeNotifier {
   /// candidate).
   void choose(int index, PilotImportChoice choice, {Id? target}) {
     final old = _selections[index];
+    // A pilot whose link is under review stays out until it is decided.
+    if (old.match.linkReview) return;
     _selections = [..._selections]
       ..[index] = PilotImportSelection(
         match: old.match,
@@ -290,11 +371,21 @@ class PilotImportController extends ChangeNotifier {
   Future<void> apply() async {
     _set(PilotImportStep.applying);
     try {
+      // Management can change while the review is open: check it again
+      // before anything is saved.
+      final linked = store is PilotImportLinkStore
+          ? store as PilotImportLinkStore
+          : null;
+      if (linked != null && !_oneTime && await linked.linksManagedElsewhere()) {
+        _managedElsewhere = true;
+        throw const PilotImportLinksManagedElsewhere();
+      }
       _outcome = await store.apply(
         _selections,
         reviewedRevisions: {
           for (final p in _review!.existing) p.id: p.revision,
         },
+        rememberLinks: !_oneTime,
       );
       _set(PilotImportStep.done);
     } on Object catch (e) {

@@ -1480,6 +1480,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pilotImportNothingNew => 'Nothing new to add';
 
   @override
+  String pilotImportLinkedTo(String name) {
+    return 'Linked to $name';
+  }
+
+  @override
+  String get pilotImportSourceChanged =>
+      'GliderScore details changed. Select to approve this import.';
+
+  @override
+  String pilotImportSourceFieldChange(
+    String field,
+    String before,
+    String after,
+  ) {
+    return '$field: $before → $after';
+  }
+
+  @override
+  String get pilotImportFieldFirstName => 'first name';
+
+  @override
+  String get pilotImportFieldLastName => 'last name';
+
+  @override
   String get pilotImportConflict =>
       'Their email and registration numbers match different people in your list.';
 
@@ -1592,6 +1616,83 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pilotImportUnavailable =>
       'Importing from GliderScore is not available on this computer.';
+
+  @override
+  String get pilotImportLinkReview =>
+      'Waiting for your decision in Account sync: two devices linked this pilot to different participants.';
+
+  @override
+  String get pilotImportLinkReviewPending =>
+      'A pilot in this import was linked to different participants on two devices. Decide the link in Account sync, then review again.';
+
+  @override
+  String get pilotImportManagedElsewhere =>
+      'Another computer manages the remembered GliderScore pilot links for this account, so this import cannot reuse or change them. You can import without remembered links: you confirm each match yourself and the saved links stay as they are.';
+
+  @override
+  String get pilotImportManagedElsewhereNow =>
+      'Another computer now manages the remembered pilot links, so nothing was saved. Review again, then import without remembered links.';
+
+  @override
+  String get pilotImportWithoutLinks => 'Import without remembered links';
+
+  @override
+  String get pilotImportWithoutLinksActive =>
+      'Importing without remembered links: confirm each match below. The saved links stay as they are.';
+
+  @override
+  String get pilotLinkReviewPick => 'Or choose another participant';
+
+  @override
+  String get pilotLinkReviewUsePicked => 'Use this participant';
+
+  @override
+  String get pilotLinkReviewPickRefused =>
+      'That participant is no longer available. Pick another participant.';
+
+  @override
+  String get shellNavAccountSync => 'Account sync';
+
+  @override
+  String get accountSyncIntro =>
+      'Decisions your devices could not make on their own wait here.';
+
+  @override
+  String pilotLinkReviewTitle(int number) {
+    return 'GliderScore pilot $number';
+  }
+
+  @override
+  String get pilotLinkReviewIntro =>
+      'Two devices linked this pilot to different participants. Choose the participant this pilot is linked to on every device.';
+
+  @override
+  String pilotLinkReviewKept(String name) {
+    return 'Link the account has now: $name';
+  }
+
+  @override
+  String pilotLinkReviewOther(String name) {
+    return 'Link from the other device: $name';
+  }
+
+  @override
+  String get pilotLinkReviewNoParticipant =>
+      'a participant who is not in your list';
+
+  @override
+  String pilotLinkReviewKeep(String name) {
+    return 'Keep $name';
+  }
+
+  @override
+  String pilotLinkReviewUse(String name) {
+    return 'Use $name';
+  }
+
+  @override
+  String get pilotLinkReviewChanged =>
+      'This pilot\'s link changed while you were reviewing. The comparison is refreshed; decide again.';
 
   @override
   String get pilotImportChangedDuringReview =>

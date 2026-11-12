@@ -35,7 +35,7 @@ void main() {
           .customSelect('PRAGMA user_version')
           .get()
           .then((rows) => rows.single);
-      expect(versionRow.read<int>('user_version'), 1);
+      expect(versionRow.read<int>('user_version'), database.schemaVersion);
 
       final tables = await database
           .customSelect(

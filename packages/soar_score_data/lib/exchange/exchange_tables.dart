@@ -6,6 +6,9 @@ enum ExchangeClass {
   /// The director's rows the contest points at (only those it references).
   director,
 
+  /// Director-scoped data that is not part of a contest export.
+  directorPrivate,
+
   /// Calculated rows: kept in the file's diagnostics, recomputed on import.
   derived,
 
@@ -104,6 +107,7 @@ final exchangeClassByTable = <String, ExchangeClass>{
   'discipline_validations': ExchangeClass.system,
   'discipline_formulas': ExchangeClass.system,
   'discipline_rules': ExchangeClass.system,
+  'pilot_import_links': ExchangeClass.directorPrivate,
   'local_sync_positions': ExchangeClass.installationState,
   'local_account': ExchangeClass.installationState,
   'invitations': ExchangeClass.serviceIssued,

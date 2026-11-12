@@ -81,6 +81,144 @@ void main() {
     expect(result, isFalse);
   });
 
+  testWidgets('a pilot whose link waits for a decision cannot be imported', (
+    tester,
+  ) async {
+    store.underReview = {3};
+    await open(tester);
+
+    expect(
+      find.textContaining('Waiting for your decision in Account sync'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('pilot-import-held-3')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pilot-import-choice-3')), findsNothing);
+  });
+
+  testWidgets('another installation managing the links offers a one-time '
+      'import', (tester) async {
+    store.managedElsewhere = true;
+    await open(tester);
+
+    expect(
+      find.byKey(const ValueKey('pilot-import-managed-elsewhere')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('pilot-import-without-links')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('Importing without remembered links'),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('pilot-import-without-links')),
+      findsNothing,
+    );
+    await tester.tap(find.byKey(const ValueKey('pilot-import-confirm')));
+    await tester.pumpAndSettle();
+    expect(store.rememberedLinks, [false]);
+  });
+
+  testWidgets('the managing installation sees no restriction', (tester) async {
+    await open(tester);
+
+    expect(
+      find.byKey(const ValueKey('pilot-import-managed-elsewhere')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('remembered pilot with changed source requires approval', (
+    tester,
+  ) async {
+    final sam = store.profiles[1];
+    final now = DateTime.utc(2026);
+    store.links.add(
+      PilotImportLink(
+        id: Id.create(),
+        ownerAccountId: sam.ownerAccountId,
+        sourcePilotNo: 3,
+        participantProfileId: sam.id,
+        sourceValues: PilotImportMatcher.sourceValues(
+          const PilotDraft(
+            sourcePilotNo: 3,
+            firstName: 'Sam',
+            lastName: 'Samename',
+            club: 'Old Club',
+          ),
+        ),
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+    await open(tester);
+    expect(find.textContaining('Linked to Sam Samename'), findsOneWidget);
+    expect(find.textContaining('GliderScore details changed.'), findsOneWidget);
+    expect(find.textContaining('club: old club → —'), findsOneWidget);
+    // A changed pilot waits for approval, and the link can be corrected.
+    expect(
+      tester
+          .widget<DropdownButton<String>>(
+            find.byKey(const ValueKey('pilot-import-choice-3')),
+          )
+          .value,
+      'skip',
+    );
+    await tester.tap(find.byKey(const ValueKey('pilot-import-choice-3')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Erin Existing'), findsWidgets);
+    await tester.tap(find.textContaining('Link to Sam Samename').last);
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<DropdownButton<String>>(
+            find.byKey(const ValueKey('pilot-import-choice-3')),
+          )
+          .value,
+      'update:${sam.id.value}',
+    );
+  });
+
+  testWidgets('a remembered match can be corrected to another participant', (
+    tester,
+  ) async {
+    final sam = store.profiles[1];
+    final erin = store.profiles[0];
+    final now = DateTime.utc(2026);
+    store.links.add(
+      PilotImportLink(
+        id: Id.create(),
+        ownerAccountId: sam.ownerAccountId,
+        sourcePilotNo: 3,
+        participantProfileId: sam.id,
+        sourceValues: PilotImportMatcher.sourceValues(
+          const PilotDraft(
+            sourcePilotNo: 3,
+            firstName: 'Sam',
+            lastName: 'Samename',
+          ),
+        ),
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+    await open(tester);
+
+    await tester.tap(find.byKey(const ValueKey('pilot-import-choice-3')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('Link to Erin Existing').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pilot-import-confirm')));
+    await tester.pumpAndSettle();
+
+    final saved = store.applied.single.singleWhere(
+      (s) => s.match.draft.sourcePilotNo == 3,
+    );
+    expect(saved.choice, PilotImportChoice.update);
+    expect(saved.targetProfileId, erin.id);
+  });
+
   testWidgets('shows new pilots, matches and maybes, with the notes', (
     tester,
   ) async {

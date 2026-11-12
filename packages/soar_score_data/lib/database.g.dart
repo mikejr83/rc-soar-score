@@ -12690,6 +12690,599 @@ class ImportProvenancesCompanion extends UpdateCompanion<ImportProvenanceData> {
   }
 }
 
+class $PilotImportLinksTable extends PilotImportLinks
+    with TableInfo<$PilotImportLinksTable, PilotImportLinkData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PilotImportLinksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerAccountIdMeta = const VerificationMeta(
+    'ownerAccountId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerAccountId = GeneratedColumn<String>(
+    'owner_account_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceSystemMeta = const VerificationMeta(
+    'sourceSystem',
+  );
+  @override
+  late final GeneratedColumn<String> sourceSystem = GeneratedColumn<String>(
+    'source_system',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourcePilotNoMeta = const VerificationMeta(
+    'sourcePilotNo',
+  );
+  @override
+  late final GeneratedColumn<int> sourcePilotNo = GeneratedColumn<int>(
+    'source_pilot_no',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _participantProfileIdMeta =
+      const VerificationMeta('participantProfileId');
+  @override
+  late final GeneratedColumn<String> participantProfileId =
+      GeneratedColumn<String>(
+        'participant_profile_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _sourceValuesMeta = const VerificationMeta(
+    'sourceValues',
+  );
+  @override
+  late final GeneratedColumn<String> sourceValues = GeneratedColumn<String>(
+    'source_values',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerAccountId,
+    sourceSystem,
+    sourcePilotNo,
+    participantProfileId,
+    sourceValues,
+    createdAt,
+    updatedAt,
+    revision,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pilot_import_links';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PilotImportLinkData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_account_id')) {
+      context.handle(
+        _ownerAccountIdMeta,
+        ownerAccountId.isAcceptableOrUnknown(
+          data['owner_account_id']!,
+          _ownerAccountIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerAccountIdMeta);
+    }
+    if (data.containsKey('source_system')) {
+      context.handle(
+        _sourceSystemMeta,
+        sourceSystem.isAcceptableOrUnknown(
+          data['source_system']!,
+          _sourceSystemMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceSystemMeta);
+    }
+    if (data.containsKey('source_pilot_no')) {
+      context.handle(
+        _sourcePilotNoMeta,
+        sourcePilotNo.isAcceptableOrUnknown(
+          data['source_pilot_no']!,
+          _sourcePilotNoMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourcePilotNoMeta);
+    }
+    if (data.containsKey('participant_profile_id')) {
+      context.handle(
+        _participantProfileIdMeta,
+        participantProfileId.isAcceptableOrUnknown(
+          data['participant_profile_id']!,
+          _participantProfileIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_participantProfileIdMeta);
+    }
+    if (data.containsKey('source_values')) {
+      context.handle(
+        _sourceValuesMeta,
+        sourceValues.isAcceptableOrUnknown(
+          data['source_values']!,
+          _sourceValuesMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceValuesMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {ownerAccountId, sourceSystem, sourcePilotNo},
+  ];
+  @override
+  PilotImportLinkData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PilotImportLinkData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerAccountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_account_id'],
+      )!,
+      sourceSystem: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_system'],
+      )!,
+      sourcePilotNo: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}source_pilot_no'],
+      )!,
+      participantProfileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}participant_profile_id'],
+      )!,
+      sourceValues: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_values'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+    );
+  }
+
+  @override
+  $PilotImportLinksTable createAlias(String alias) {
+    return $PilotImportLinksTable(attachedDatabase, alias);
+  }
+}
+
+class PilotImportLinkData extends DataClass
+    implements Insertable<PilotImportLinkData> {
+  final String id;
+  final String ownerAccountId;
+  final String sourceSystem;
+  final int sourcePilotNo;
+  final String participantProfileId;
+  final String sourceValues;
+  final String createdAt;
+  final String updatedAt;
+  final int revision;
+  const PilotImportLinkData({
+    required this.id,
+    required this.ownerAccountId,
+    required this.sourceSystem,
+    required this.sourcePilotNo,
+    required this.participantProfileId,
+    required this.sourceValues,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.revision,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_account_id'] = Variable<String>(ownerAccountId);
+    map['source_system'] = Variable<String>(sourceSystem);
+    map['source_pilot_no'] = Variable<int>(sourcePilotNo);
+    map['participant_profile_id'] = Variable<String>(participantProfileId);
+    map['source_values'] = Variable<String>(sourceValues);
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    map['revision'] = Variable<int>(revision);
+    return map;
+  }
+
+  PilotImportLinksCompanion toCompanion(bool nullToAbsent) {
+    return PilotImportLinksCompanion(
+      id: Value(id),
+      ownerAccountId: Value(ownerAccountId),
+      sourceSystem: Value(sourceSystem),
+      sourcePilotNo: Value(sourcePilotNo),
+      participantProfileId: Value(participantProfileId),
+      sourceValues: Value(sourceValues),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      revision: Value(revision),
+    );
+  }
+
+  factory PilotImportLinkData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PilotImportLinkData(
+      id: serializer.fromJson<String>(json['id']),
+      ownerAccountId: serializer.fromJson<String>(json['ownerAccountId']),
+      sourceSystem: serializer.fromJson<String>(json['sourceSystem']),
+      sourcePilotNo: serializer.fromJson<int>(json['sourcePilotNo']),
+      participantProfileId: serializer.fromJson<String>(
+        json['participantProfileId'],
+      ),
+      sourceValues: serializer.fromJson<String>(json['sourceValues']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      revision: serializer.fromJson<int>(json['revision']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerAccountId': serializer.toJson<String>(ownerAccountId),
+      'sourceSystem': serializer.toJson<String>(sourceSystem),
+      'sourcePilotNo': serializer.toJson<int>(sourcePilotNo),
+      'participantProfileId': serializer.toJson<String>(participantProfileId),
+      'sourceValues': serializer.toJson<String>(sourceValues),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'revision': serializer.toJson<int>(revision),
+    };
+  }
+
+  PilotImportLinkData copyWith({
+    String? id,
+    String? ownerAccountId,
+    String? sourceSystem,
+    int? sourcePilotNo,
+    String? participantProfileId,
+    String? sourceValues,
+    String? createdAt,
+    String? updatedAt,
+    int? revision,
+  }) => PilotImportLinkData(
+    id: id ?? this.id,
+    ownerAccountId: ownerAccountId ?? this.ownerAccountId,
+    sourceSystem: sourceSystem ?? this.sourceSystem,
+    sourcePilotNo: sourcePilotNo ?? this.sourcePilotNo,
+    participantProfileId: participantProfileId ?? this.participantProfileId,
+    sourceValues: sourceValues ?? this.sourceValues,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    revision: revision ?? this.revision,
+  );
+  PilotImportLinkData copyWithCompanion(PilotImportLinksCompanion data) {
+    return PilotImportLinkData(
+      id: data.id.present ? data.id.value : this.id,
+      ownerAccountId: data.ownerAccountId.present
+          ? data.ownerAccountId.value
+          : this.ownerAccountId,
+      sourceSystem: data.sourceSystem.present
+          ? data.sourceSystem.value
+          : this.sourceSystem,
+      sourcePilotNo: data.sourcePilotNo.present
+          ? data.sourcePilotNo.value
+          : this.sourcePilotNo,
+      participantProfileId: data.participantProfileId.present
+          ? data.participantProfileId.value
+          : this.participantProfileId,
+      sourceValues: data.sourceValues.present
+          ? data.sourceValues.value
+          : this.sourceValues,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      revision: data.revision.present ? data.revision.value : this.revision,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PilotImportLinkData(')
+          ..write('id: $id, ')
+          ..write('ownerAccountId: $ownerAccountId, ')
+          ..write('sourceSystem: $sourceSystem, ')
+          ..write('sourcePilotNo: $sourcePilotNo, ')
+          ..write('participantProfileId: $participantProfileId, ')
+          ..write('sourceValues: $sourceValues, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('revision: $revision')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ownerAccountId,
+    sourceSystem,
+    sourcePilotNo,
+    participantProfileId,
+    sourceValues,
+    createdAt,
+    updatedAt,
+    revision,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PilotImportLinkData &&
+          other.id == this.id &&
+          other.ownerAccountId == this.ownerAccountId &&
+          other.sourceSystem == this.sourceSystem &&
+          other.sourcePilotNo == this.sourcePilotNo &&
+          other.participantProfileId == this.participantProfileId &&
+          other.sourceValues == this.sourceValues &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.revision == this.revision);
+}
+
+class PilotImportLinksCompanion extends UpdateCompanion<PilotImportLinkData> {
+  final Value<String> id;
+  final Value<String> ownerAccountId;
+  final Value<String> sourceSystem;
+  final Value<int> sourcePilotNo;
+  final Value<String> participantProfileId;
+  final Value<String> sourceValues;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<int> revision;
+  final Value<int> rowid;
+  const PilotImportLinksCompanion({
+    this.id = const Value.absent(),
+    this.ownerAccountId = const Value.absent(),
+    this.sourceSystem = const Value.absent(),
+    this.sourcePilotNo = const Value.absent(),
+    this.participantProfileId = const Value.absent(),
+    this.sourceValues = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PilotImportLinksCompanion.insert({
+    required String id,
+    required String ownerAccountId,
+    required String sourceSystem,
+    required int sourcePilotNo,
+    required String participantProfileId,
+    required String sourceValues,
+    required String createdAt,
+    required String updatedAt,
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ownerAccountId = Value(ownerAccountId),
+       sourceSystem = Value(sourceSystem),
+       sourcePilotNo = Value(sourcePilotNo),
+       participantProfileId = Value(participantProfileId),
+       sourceValues = Value(sourceValues),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<PilotImportLinkData> custom({
+    Expression<String>? id,
+    Expression<String>? ownerAccountId,
+    Expression<String>? sourceSystem,
+    Expression<int>? sourcePilotNo,
+    Expression<String>? participantProfileId,
+    Expression<String>? sourceValues,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<int>? revision,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerAccountId != null) 'owner_account_id': ownerAccountId,
+      if (sourceSystem != null) 'source_system': sourceSystem,
+      if (sourcePilotNo != null) 'source_pilot_no': sourcePilotNo,
+      if (participantProfileId != null)
+        'participant_profile_id': participantProfileId,
+      if (sourceValues != null) 'source_values': sourceValues,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (revision != null) 'revision': revision,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PilotImportLinksCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerAccountId,
+    Value<String>? sourceSystem,
+    Value<int>? sourcePilotNo,
+    Value<String>? participantProfileId,
+    Value<String>? sourceValues,
+    Value<String>? createdAt,
+    Value<String>? updatedAt,
+    Value<int>? revision,
+    Value<int>? rowid,
+  }) {
+    return PilotImportLinksCompanion(
+      id: id ?? this.id,
+      ownerAccountId: ownerAccountId ?? this.ownerAccountId,
+      sourceSystem: sourceSystem ?? this.sourceSystem,
+      sourcePilotNo: sourcePilotNo ?? this.sourcePilotNo,
+      participantProfileId: participantProfileId ?? this.participantProfileId,
+      sourceValues: sourceValues ?? this.sourceValues,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      revision: revision ?? this.revision,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerAccountId.present) {
+      map['owner_account_id'] = Variable<String>(ownerAccountId.value);
+    }
+    if (sourceSystem.present) {
+      map['source_system'] = Variable<String>(sourceSystem.value);
+    }
+    if (sourcePilotNo.present) {
+      map['source_pilot_no'] = Variable<int>(sourcePilotNo.value);
+    }
+    if (participantProfileId.present) {
+      map['participant_profile_id'] = Variable<String>(
+        participantProfileId.value,
+      );
+    }
+    if (sourceValues.present) {
+      map['source_values'] = Variable<String>(sourceValues.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PilotImportLinksCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerAccountId: $ownerAccountId, ')
+          ..write('sourceSystem: $sourceSystem, ')
+          ..write('sourcePilotNo: $sourcePilotNo, ')
+          ..write('participantProfileId: $participantProfileId, ')
+          ..write('sourceValues: $sourceValues, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('revision: $revision, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $AccountsTable extends Accounts
     with TableInfo<$AccountsTable, AccountData> {
   @override
@@ -38211,6 +38804,9 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
       $ContestModelLinksTable(this);
   late final $ImportProvenancesTable importProvenances =
       $ImportProvenancesTable(this);
+  late final $PilotImportLinksTable pilotImportLinks = $PilotImportLinksTable(
+    this,
+  );
   late final $AccountsTable accounts = $AccountsTable(this);
   late final $AccountAliasesTable accountAliases = $AccountAliasesTable(this);
   late final $AccountIdentitiesTable accountIdentities =
@@ -38287,6 +38883,7 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
     modelCatalogs,
     contestModelLinks,
     importProvenances,
+    pilotImportLinks,
     accounts,
     accountAliases,
     accountIdentities,
@@ -52389,6 +52986,313 @@ typedef $$ImportProvenancesTableProcessedTableManager =
         >,
       ),
       ImportProvenanceData,
+      PrefetchHooks Function()
+    >;
+typedef $$PilotImportLinksTableCreateCompanionBuilder =
+    PilotImportLinksCompanion Function({
+      required String id,
+      required String ownerAccountId,
+      required String sourceSystem,
+      required int sourcePilotNo,
+      required String participantProfileId,
+      required String sourceValues,
+      required String createdAt,
+      required String updatedAt,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+typedef $$PilotImportLinksTableUpdateCompanionBuilder =
+    PilotImportLinksCompanion Function({
+      Value<String> id,
+      Value<String> ownerAccountId,
+      Value<String> sourceSystem,
+      Value<int> sourcePilotNo,
+      Value<String> participantProfileId,
+      Value<String> sourceValues,
+      Value<String> createdAt,
+      Value<String> updatedAt,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+
+class $$PilotImportLinksTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $PilotImportLinksTable> {
+  $$PilotImportLinksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerAccountId => $composableBuilder(
+    column: $table.ownerAccountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceSystem => $composableBuilder(
+    column: $table.sourceSystem,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sourcePilotNo => $composableBuilder(
+    column: $table.sourcePilotNo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get participantProfileId => $composableBuilder(
+    column: $table.participantProfileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceValues => $composableBuilder(
+    column: $table.sourceValues,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PilotImportLinksTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $PilotImportLinksTable> {
+  $$PilotImportLinksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerAccountId => $composableBuilder(
+    column: $table.ownerAccountId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceSystem => $composableBuilder(
+    column: $table.sourceSystem,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sourcePilotNo => $composableBuilder(
+    column: $table.sourcePilotNo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get participantProfileId => $composableBuilder(
+    column: $table.participantProfileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceValues => $composableBuilder(
+    column: $table.sourceValues,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PilotImportLinksTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $PilotImportLinksTable> {
+  $$PilotImportLinksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerAccountId => $composableBuilder(
+    column: $table.ownerAccountId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceSystem => $composableBuilder(
+    column: $table.sourceSystem,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sourcePilotNo => $composableBuilder(
+    column: $table.sourcePilotNo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get participantProfileId => $composableBuilder(
+    column: $table.participantProfileId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceValues => $composableBuilder(
+    column: $table.sourceValues,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+}
+
+class $$PilotImportLinksTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $PilotImportLinksTable,
+          PilotImportLinkData,
+          $$PilotImportLinksTableFilterComposer,
+          $$PilotImportLinksTableOrderingComposer,
+          $$PilotImportLinksTableAnnotationComposer,
+          $$PilotImportLinksTableCreateCompanionBuilder,
+          $$PilotImportLinksTableUpdateCompanionBuilder,
+          (
+            PilotImportLinkData,
+            BaseReferences<
+              _$SoarScoreDatabase,
+              $PilotImportLinksTable,
+              PilotImportLinkData
+            >,
+          ),
+          PilotImportLinkData,
+          PrefetchHooks Function()
+        > {
+  $$PilotImportLinksTableTableManager(
+    _$SoarScoreDatabase db,
+    $PilotImportLinksTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PilotImportLinksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PilotImportLinksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PilotImportLinksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerAccountId = const Value.absent(),
+                Value<String> sourceSystem = const Value.absent(),
+                Value<int> sourcePilotNo = const Value.absent(),
+                Value<String> participantProfileId = const Value.absent(),
+                Value<String> sourceValues = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PilotImportLinksCompanion(
+                id: id,
+                ownerAccountId: ownerAccountId,
+                sourceSystem: sourceSystem,
+                sourcePilotNo: sourcePilotNo,
+                participantProfileId: participantProfileId,
+                sourceValues: sourceValues,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                revision: revision,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ownerAccountId,
+                required String sourceSystem,
+                required int sourcePilotNo,
+                required String participantProfileId,
+                required String sourceValues,
+                required String createdAt,
+                required String updatedAt,
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PilotImportLinksCompanion.insert(
+                id: id,
+                ownerAccountId: ownerAccountId,
+                sourceSystem: sourceSystem,
+                sourcePilotNo: sourcePilotNo,
+                participantProfileId: participantProfileId,
+                sourceValues: sourceValues,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                revision: revision,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PilotImportLinksTable, PilotImportLinkData>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$SoarScoreDatabase,
+                    $PilotImportLinksTable,
+                    PilotImportLinkData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PilotImportLinksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $PilotImportLinksTable,
+      PilotImportLinkData,
+      $$PilotImportLinksTableFilterComposer,
+      $$PilotImportLinksTableOrderingComposer,
+      $$PilotImportLinksTableAnnotationComposer,
+      $$PilotImportLinksTableCreateCompanionBuilder,
+      $$PilotImportLinksTableUpdateCompanionBuilder,
+      (
+        PilotImportLinkData,
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $PilotImportLinksTable,
+          PilotImportLinkData
+        >,
+      ),
+      PilotImportLinkData,
       PrefetchHooks Function()
     >;
 typedef $$AccountsTableCreateCompanionBuilder = AccountsCompanion Function({
@@ -75458,6 +76362,8 @@ class $SoarScoreDatabaseManager {
       $$ContestModelLinksTableTableManager(_db, _db.contestModelLinks);
   $$ImportProvenancesTableTableManager get importProvenances =>
       $$ImportProvenancesTableTableManager(_db, _db.importProvenances);
+  $$PilotImportLinksTableTableManager get pilotImportLinks =>
+      $$PilotImportLinksTableTableManager(_db, _db.pilotImportLinks);
   $$AccountsTableTableManager get accounts =>
       $$AccountsTableTableManager(_db, _db.accounts);
   $$AccountAliasesTableTableManager get accountAliases =>

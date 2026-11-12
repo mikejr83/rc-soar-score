@@ -189,6 +189,27 @@ void main() {
     expect(outcome!.open, outcome!.imported.single);
   });
 
+  testWidgets('another installation managing the links offers a one-time '
+      'import', (tester) async {
+    store.managedElsewhere = true;
+    await open(tester);
+    await tester.tap(key('competition-import-row-1'));
+    await tester.pump();
+    await tester.tap(key('competition-import-continue'));
+    await tester.pumpAndSettle();
+
+    expect(key('pilot-import-managed-elsewhere'), findsOneWidget);
+    await tester.tap(key('pilot-import-without-links'));
+    await tester.pumpAndSettle();
+    expect(controller.pilots.importingWithoutLinks, isTrue);
+
+    await tester.tap(key('competition-import-continue'));
+    await tester.pumpAndSettle();
+    await tester.tap(key('competition-import-confirm'));
+    await tester.pumpAndSettle();
+    expect(store.rememberedLinks, [false]);
+  });
+
   testWidgets('a long list of contests is counted, not named', (tester) async {
     await open(tester);
     await tester.tap(key('competition-import-row-1'));

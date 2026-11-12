@@ -94,6 +94,7 @@ Handler buildApiHandler({
     displayName,
     version,
     repository,
+    schemaRevision: schemaRevision,
     publishingEnabled: publishingEnabled,
     recalculation: recalculation,
     syncVersions: SyncVersions.exactly(schemaRevision ?? 1),

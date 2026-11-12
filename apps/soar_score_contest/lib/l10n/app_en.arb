@@ -1650,6 +1650,24 @@
   "@pilotImportNothingNew": {
     "description": "Row text when an existing participant already has everything the file holds."
   },
+  "pilotImportLinkedTo": "Linked to {name}",
+  "@pilotImportLinkedTo": {
+    "description": "A previously confirmed GliderScore pilot link.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "pilotImportSourceChanged": "GliderScore details changed. Select to approve this import.",
+  "@pilotImportSourceChanged": {
+    "description": "Explains why a remembered pilot needs approval again."
+  },
+  "pilotImportSourceFieldChange": "{field}: {before} → {after}",
+  "@pilotImportSourceFieldChange": {
+    "description": "A source pilot field changed since the last confirmed import.",
+    "placeholders": {"field": {"type": "String"}, "before": {"type": "String"}, "after": {"type": "String"}}
+  },
+  "pilotImportFieldFirstName": "first name",
+  "@pilotImportFieldFirstName": {"description": "Name of the first-name field in a pilot import review."},
+  "pilotImportFieldLastName": "last name",
+  "@pilotImportFieldLastName": {"description": "Name of the last-name field in a pilot import review."},
   "pilotImportConflict": "Their email and registration numbers match different people in your list.",
   "@pilotImportConflict": {
     "description": "Row text when the identifiers of a pilot point at different participants."
@@ -1807,6 +1825,87 @@
   "pilotImportUnavailable": "Importing from GliderScore is not available on this computer.",
   "@pilotImportUnavailable": {
     "description": "Shown when the GliderScore reader is missing."
+  },
+  "pilotImportLinkReview": "Waiting for your decision in Account sync: two devices linked this pilot to different participants.",
+  "@pilotImportLinkReview": {
+    "description": "Row text for a GliderScore pilot whose remembered link is under review, so it cannot be imported yet."
+  },
+  "pilotImportLinkReviewPending": "A pilot in this import was linked to different participants on two devices. Decide the link in Account sync, then review again.",
+  "@pilotImportLinkReviewPending": {
+    "description": "Shown when an import is stopped because a pilot's link needs a decision first."
+  },
+  "pilotImportManagedElsewhere": "Another computer manages the remembered GliderScore pilot links for this account, so this import cannot reuse or change them. You can import without remembered links: you confirm each match yourself and the saved links stay as they are.",
+  "@pilotImportManagedElsewhere": {
+    "description": "Shown above the pilot review when another installation manages the remembered pilot links."
+  },
+  "pilotImportManagedElsewhereNow": "Another computer now manages the remembered pilot links, so nothing was saved. Review again, then import without remembered links.",
+  "@pilotImportManagedElsewhereNow": {
+    "description": "Shown when a save was stopped because another installation manages the remembered pilot links."
+  },
+  "pilotImportWithoutLinks": "Import without remembered links",
+  "@pilotImportWithoutLinks": {
+    "description": "Button that reviews the same file without the remembered pilot links."
+  },
+  "pilotImportWithoutLinksActive": "Importing without remembered links: confirm each match below. The saved links stay as they are.",
+  "@pilotImportWithoutLinksActive": {
+    "description": "Shown above the pilot review during a one-time import without remembered links."
+  },
+  "pilotLinkReviewPick": "Or choose another participant",
+  "@pilotLinkReviewPick": {
+    "description": "Label of the participant picker in the pilot link review."
+  },
+  "pilotLinkReviewUsePicked": "Use this participant",
+  "@pilotLinkReviewUsePicked": {
+    "description": "Button that links the pilot to the participant picked in the review."
+  },
+  "pilotLinkReviewPickRefused": "That participant is no longer available. Pick another participant.",
+  "@pilotLinkReviewPickRefused": {
+    "description": "Shown when the participant picked for a pilot link was deleted before the choice was saved."
+  },
+  "shellNavAccountSync": "Account sync",
+  "@shellNavAccountSync": {
+    "description": "Breadcrumb and heading of the page that lists what the account's sync needs from the director."
+  },
+  "accountSyncIntro": "Decisions your devices could not make on their own wait here.",
+  "@accountSyncIntro": {
+    "description": "Introduction under the Account sync heading."
+  },
+  "pilotLinkReviewTitle": "GliderScore pilot {number}",
+  "@pilotLinkReviewTitle": {
+    "description": "Names the GliderScore pilot whose link is being reviewed.",
+    "placeholders": {"number": {"type": "int"}}
+  },
+  "pilotLinkReviewIntro": "Two devices linked this pilot to different participants. Choose the participant this pilot is linked to on every device.",
+  "@pilotLinkReviewIntro": {
+    "description": "Explains the pilot link review."
+  },
+  "pilotLinkReviewKept": "Link the account has now: {name}",
+  "@pilotLinkReviewKept": {
+    "description": "The participant the account's link names.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "pilotLinkReviewOther": "Link from the other device: {name}",
+  "@pilotLinkReviewOther": {
+    "description": "The participant the other device's latest link names.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "pilotLinkReviewNoParticipant": "a participant who is not in your list",
+  "@pilotLinkReviewNoParticipant": {
+    "description": "Shown instead of a name when the participant is not in the list."
+  },
+  "pilotLinkReviewKeep": "Keep {name}",
+  "@pilotLinkReviewKeep": {
+    "description": "Button that keeps the account's link.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "pilotLinkReviewUse": "Use {name}",
+  "@pilotLinkReviewUse": {
+    "description": "Button that takes the other device's link.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "pilotLinkReviewChanged": "This pilot's link changed while you were reviewing. The comparison is refreshed; decide again.",
+  "@pilotLinkReviewChanged": {
+    "description": "Shown when the link under review changed before the decision arrived."
   },
   "pilotImportChangedDuringReview": "Your participants changed while you were reviewing. Review again before importing.",
   "@pilotImportChangedDuringReview": {

@@ -19,6 +19,7 @@ import 'json_equality.dart';
 import 'mutation_payloads.dart';
 import 'mutation_replay.dart';
 import 'mutation_result.dart';
+import 'pilot_link_collisions.dart';
 import 'sync_entity_catalog.dart';
 import 'sync_log.dart';
 import 'sync_mutation.dart';
@@ -30,10 +31,13 @@ import 'sync_scope_ids.dart';
 /// valid siblings. The decision is recorded, so a retry of the same
 /// `client_mutation_id` returns it unchanged and applies nothing twice.
 class MutationProcessor {
-  MutationProcessor(this._store, {SyncLog? log}) : _log = log ?? SyncLog();
+  MutationProcessor(this._store, {SyncLog? log})
+    : _log = log ?? SyncLog(),
+      _links = PilotLinkCollisions(log ?? SyncLog());
 
   final SyncAcceptorStore _store;
   final SyncLog _log;
+  final PilotLinkCollisions _links;
 
   /// Authorities a director's installation may send. A participant's
   /// submissions and the service's own changes never arrive in an exchange.
@@ -152,6 +156,10 @@ class MutationProcessor {
     }
 
     if (await tx.findTombstone(m.entityType, m.entityId) != null) {
+      if (payload.isDelete && PilotLinkCollisions.handles(ctx, m.entityType)) {
+        // The link already went with its participant: the same wish twice.
+        return _log.accept(tx, ctx, m, MutationPayload.delete);
+      }
       return reject(
         SyncReasonCode.entityDeleted,
         'The ${m.entityType} was deleted.',
@@ -183,12 +191,31 @@ class MutationProcessor {
       if (refused != null) return reject(refused.$1, refused.$2);
     }
 
+    final links = PilotLinkCollisions.handles(ctx, m.entityType);
+    if (links) {
+      final writer = await _links.writerProblem(tx, ctx, m);
+      if (writer != null) return reject(writer.$1, writer.$2);
+    }
+    if (links && !payload.isDelete) {
+      final problem = await _links.targetProblem(tx, ctx, payload.entity);
+      if (problem != null) return reject(problem.$1, problem.$2);
+    }
+
     final step = _Step(tx, ctx, m, kind, payload, stored, contest);
     final result = payload.isDelete
         ? await _delete(step)
         : kind.shape == SyncEntityShape.revisioned
         ? await _saveRevisioned(step)
         : await _saveImmutable(step);
+
+    if (result.outcome == MutationOutcome.accepted) {
+      if (links) {
+        // A change to the stored link ends the reviews that compared it.
+        await _links.storedLinkChanged(tx, ctx, m.entityId);
+      } else if (payload.isDelete && m.entityType == 'ParticipantProfile') {
+        await _links.participantDeleted(tx, ctx, m, m.entityId);
+      }
+    }
 
     if (bootstrap && result.outcome == MutationOutcome.accepted) {
       await _openInitialActivation(tx, ctx, scope as ContestScopeKey);

@@ -28,8 +28,9 @@ Handler createHealthHandler(
   String name,
   String displayName,
   String version,
-  Repository repository,
-) {
+  Repository repository, {
+  int? schemaRevision,
+}) {
   final router = Router()
     ..get('/health', (Request request) {
       // Here you would typically gather health information.
@@ -37,6 +38,7 @@ Handler createHealthHandler(
         name: name,
         displayName: displayName,
         version: version,
+        schemaRevision: schemaRevision,
       );
       _logger.fine('Health check requested: ${healthInfo.toJson()}');
       return jsonResponse(healthInfo.toJson());

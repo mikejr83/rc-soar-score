@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:drift/drift.dart' show Variable;
+import 'package:drift/drift.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../database.dart';
@@ -45,6 +45,13 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
               .removeWhereId('landing_table_id', change.entityId);
         }
         await store.remove(change.entityId);
+        if (change.entityType == 'ParticipantProfile') {
+          // A deleted participant keeps no link: the pilot is linked again at
+          // the next import.
+          await _stores
+              .of('PilotImportLink')
+              .removeWhereId('participant_profile_id', change.entityId);
+        }
         if (change.entityType == 'MatrixAssignment') {
           await clearSupersededMarkers(_db, change.entityId);
         }
@@ -58,6 +65,24 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
       }
       final json = {...change.payload}..remove('supersedes');
       if (store.hasRevision) json['revision'] = change.revision;
+      if (change.entityType == 'PilotImportLink' && stored == null) {
+        final incoming = core.PilotImportLink.fromJson(json);
+        final links = await _stores
+            .of('PilotImportLink')
+            .whereId('owner_account_id', incoming.ownerAccountId);
+        for (final row in links) {
+          final local = row as core.PilotImportLink;
+          if (local.sourceSystem != incoming.sourceSystem ||
+              local.sourcePilotNo != incoming.sourcePilotNo ||
+              local.id == incoming.id)
+            continue;
+          // The service holds another link for this pilot. This installation's
+          // own link leaves the unique index so the service's can come in; its
+          // mutations stay in the outbox (or already sit in the service's
+          // conflict), which keeps the director's choice for the review.
+          await store.remove(local.id);
+        }
+      }
       final supersedes = change.payload['supersedes'];
       // A store with revisions only gets here for a newer one, which is a
       // change. Without revisions an identical payload (a replayed page) is

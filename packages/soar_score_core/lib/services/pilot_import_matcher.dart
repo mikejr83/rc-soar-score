@@ -1,5 +1,6 @@
 import '../models/imports/pilot_import_draft.dart';
 import '../models/imports/pilot_import_match.dart';
+import '../models/imports/pilot_import_link.dart';
 import '../models/participants/participant_profile.dart';
 
 /// Matches drafted pilots against a director's existing participants.
@@ -16,8 +17,10 @@ class PilotImportMatcher {
 
   List<PilotMatch> match(
     List<PilotDraft> drafts,
-    List<ParticipantProfile> existing,
-  ) {
+    List<ParticipantProfile> existing, {
+    List<PilotImportLink> links = const [],
+    Set<int> pilotsUnderReview = const {},
+  }) {
     final result = <PilotMatch>[];
     final seen = <PilotDraft>[];
 
@@ -25,6 +28,74 @@ class PilotImportMatcher {
       final found = _find(draft, existing);
       final duplicateOf = _earlierSamePerson(draft, seen);
       seen.add(draft);
+
+      final number = draft.sourcePilotNo;
+      if (number != null && pilotsUnderReview.contains(number)) {
+        // Which participant this pilot is linked to is still being decided in
+        // Account sync, so neither the link nor a guess from the file is used.
+        result.add(
+          PilotMatch(
+            draft: draft,
+            kind: PilotMatchKind.likely,
+            candidateIds: const [],
+            candidateRevisions: const {},
+            duplicateOfSourcePilotNo: duplicateOf?.sourcePilotNo,
+            linkReview: true,
+          ),
+        );
+        continue;
+      }
+
+      final remembered = links.where(
+        (l) =>
+            l.sourceSystem == PilotImportLink.gliderScore6 &&
+            l.sourcePilotNo == draft.sourcePilotNo,
+      );
+      final link = remembered.length == 1 ? remembered.single : null;
+      final target = link == null
+          ? <ParticipantProfile>[]
+          : existing.where((p) => p.id == link.participantProfileId).toList();
+      if (target.length == 1) {
+        final profile = target.single;
+        final identifierConflict =
+            found.rule != null &&
+            found.rule != PilotMatchRule.name &&
+            found.profiles.any((p) => p.id != profile.id);
+        final candidates = <ParticipantProfile>[
+          profile,
+          if (identifierConflict)
+            ...found.profiles.where((p) => p.id != profile.id),
+        ];
+        final values = sourceValues(draft);
+        final sourceChanges = [
+          for (final e in values.entries)
+            if (link!.sourceValues[e.key] != e.value)
+              PilotFieldChange(
+                field: e.key,
+                from: link.sourceValues[e.key] as String?,
+                to: e.value as String? ?? '—',
+              ),
+        ];
+        final changed = sourceChanges.isNotEmpty;
+        result.add(
+          PilotMatch(
+            draft: draft,
+            kind: identifierConflict
+                ? PilotMatchKind.likely
+                : PilotMatchKind.exact,
+            candidateIds: [for (final p in candidates) p.id],
+            candidateRevisions: {for (final p in candidates) p.id: p.revision},
+            rule: PilotMatchRule.name,
+            conflict: identifierConflict,
+            changes: _changes(draft, profile, PilotMatchRule.name),
+            duplicateOfSourcePilotNo: duplicateOf?.sourcePilotNo,
+            remembered: true,
+            sourceChanged: changed,
+            sourceChanges: sourceChanges,
+          ),
+        );
+        continue;
+      }
 
       final exactOne =
           found.rule != null &&
@@ -54,6 +125,26 @@ class PilotImportMatcher {
       );
     }
     return result;
+  }
+
+  /// Normalized source values used to detect changes since confirmation.
+  static Map<String, Object?> sourceValues(PilotDraft d) {
+    String? value(String? s) {
+      final v = s?.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+      return v == null || v.isEmpty ? null : v;
+    }
+
+    return {
+      'firstName': value(d.firstName),
+      'lastName': value(d.lastName),
+      'email': normalizeEmail(d.email),
+      'faiNumber': normalizeNumber(d.faiNumber),
+      'nationalOrgId': normalizeNumber(d.nationalOrgId),
+      'club': value(d.club),
+      'city': value(d.city),
+      'state': value(d.state),
+      'country': value(d.country),
+    };
   }
 
   /// Every strong identifier the draft has (email, FAI number, national

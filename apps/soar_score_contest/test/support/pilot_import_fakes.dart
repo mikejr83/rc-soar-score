@@ -36,10 +36,26 @@ ParticipantProfile profile({
 );
 
 /// An in-memory [PilotImportStore] that records what it was asked to save.
-class FakePilotImportStore implements PilotImportStore {
+class FakePilotImportStore implements PilotImportStore, PilotImportLinkStore {
   FakePilotImportStore(this.profiles);
 
   List<ParticipantProfile> profiles;
+  List<PilotImportLink> links = [];
+  @override
+  Future<List<PilotImportLink>> existingLinks() async => links;
+
+  /// The pilot numbers an import holds back.
+  Set<int> underReview = {};
+  @override
+  Future<Set<int>> pilotsUnderReview() async => underReview;
+
+  /// Whether another installation manages the links.
+  bool managedElsewhere = false;
+  @override
+  Future<bool> linksManagedElsewhere() async => managedElsewhere;
+
+  /// Whether each applied import remembered its links.
+  final rememberedLinks = <bool>[];
   final applied = <List<PilotImportSelection>>[];
   final appliedRevisions = <Map<Id, int>>[];
   Object? applyError;
@@ -51,8 +67,10 @@ class FakePilotImportStore implements PilotImportStore {
   Future<PilotImportOutcome> apply(
     List<PilotImportSelection> selections, {
     required Map<Id, int> reviewedRevisions,
+    bool rememberLinks = true,
   }) async {
     if (applyError != null) throw applyError!;
+    rememberedLinks.add(rememberLinks);
     applied.add(selections);
     appliedRevisions.add(reviewedRevisions);
     var added = <ParticipantProfile>[], updated = <ParticipantProfile>[];

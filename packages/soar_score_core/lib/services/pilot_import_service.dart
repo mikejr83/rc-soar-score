@@ -2,10 +2,12 @@ import '../errors/entity_not_found_error.dart';
 import '../models/id.dart';
 import '../models/imports/pilot_import_draft.dart';
 import '../models/imports/pilot_import_outcome.dart';
+import '../models/imports/pilot_import_link.dart';
 import '../models/participants/participant_profile.dart';
 import '../repositories/already_stored_error.dart';
 import '../repositories/mutation_metadata.dart';
 import '../repositories/participant_profile_repository.dart';
+import '../repositories/pilot_import_link_repository.dart';
 import '../repositories/stale_revision_error.dart';
 import 'pilot_import_matcher.dart';
 
@@ -21,6 +23,22 @@ class PilotImportReviewChangedError extends Error {
   String toString() =>
       'PilotImportReviewChangedError: ${changedIds.length} participant(s) '
       'changed since the review';
+}
+
+/// An import touches a pilot whose link is still being decided: two devices
+/// linked it differently and the director has not chosen in Account sync.
+class PilotImportLinkReviewError extends Error {
+  PilotImportLinkReviewError(Set<int> pilotNumbers)
+    : pilotNumbers = Set.unmodifiable(pilotNumbers);
+
+  /// The GliderScore pilot numbers waiting for a decision.
+  final Set<int> pilotNumbers;
+
+  @override
+  String toString() =>
+      'PilotImportLinkReviewError: the link of pilot(s) '
+      '${(pilotNumbers.toList()..sort()).join(', ')} needs review in '
+      'Account sync';
 }
 
 /// Stores the pilots a director chose to import from GliderScore.
@@ -39,10 +57,18 @@ class PilotImportReviewChangedError extends Error {
 /// still match them, so an edit to a participant the import does not touch
 /// (which could turn a "new" pilot into a duplicate) also refuses the import.
 class PilotImportService {
-  PilotImportService(this.profiles, {DateTime Function()? clock})
-    : _clock = clock ?? DateTime.now;
+  PilotImportService(
+    this.profiles, {
+    DateTime Function()? clock,
+    this.links,
+    this.reviewedLinks,
+  }) : _clock = clock ?? DateTime.now;
 
   final ParticipantProfileRepository profiles;
+
+  /// Optional atomic persistence for both profiles and remembered links.
+  final PilotImportLinkRepository? links;
+  final Map<Id, int>? reviewedLinks;
   final DateTime Function() _clock;
 
   Future<PilotImportOutcome> apply(
@@ -126,7 +152,17 @@ class PilotImportService {
       }
     }
 
-    final saved = toSave.isEmpty
+    final linkRepository = links;
+    final saved = linkRepository != null
+        ? await _saveWithLinks(
+            linkRepository,
+            ownerAccountId,
+            toSave,
+            selections,
+            metadata,
+            now,
+          )
+        : toSave.isEmpty
         ? const <ParticipantProfile>[]
         : await profiles.saveAll(toSave, metadata: metadata);
     return PilotImportOutcome(
@@ -140,6 +176,66 @@ class PilotImportService {
       ],
       unchanged: unchanged,
       skipped: skipped,
+    );
+  }
+
+  Future<List<ParticipantProfile>> _saveWithLinks(
+    PilotImportLinkRepository repository,
+    Id owner,
+    List<ParticipantProfile> profilesToSave,
+    List<PilotImportSelection> selections,
+    MutationMetadata metadata,
+    DateTime now,
+  ) async {
+    final existing = await repository.listForOwner(owner);
+    final writes = <PilotImportLink>[];
+    for (final selection in selections) {
+      final no = selection.match.draft.sourcePilotNo;
+      if (no == null || selection.choice == PilotImportChoice.skip) continue;
+      final target = selection.choice == PilotImportChoice.add
+          ? selection.newProfileId
+          : _target(selection);
+      final known = existing
+          .where(
+            (link) =>
+                link.sourceSystem == PilotImportLink.gliderScore6 &&
+                link.sourcePilotNo == no,
+          )
+          .toList();
+      final old = known.isEmpty ? null : known.single;
+      final values = PilotImportMatcher.sourceValues(selection.match.draft);
+      final same =
+          old != null &&
+          old.participantProfileId == target &&
+          values.entries.every(
+            (entry) => old.sourceValues[entry.key] == entry.value,
+          );
+      if (same) continue;
+      writes.add(
+        PilotImportLink(
+          id: old?.id ?? Id.create(),
+          ownerAccountId: owner,
+          sourcePilotNo: no,
+          participantProfileId: target,
+          sourceValues: values,
+          createdAt: old?.createdAt ?? now,
+          updatedAt: now,
+          revision: old?.revision ?? 0,
+        ),
+      );
+    }
+    return repository.saveImport(
+      profilesToSave,
+      writes,
+      metadata: metadata,
+      reviewedOwner: owner,
+      reviewedLinks: reviewedLinks,
+      reviewedPilotNumbers: {
+        for (final selection in selections)
+          if (selection.choice != PilotImportChoice.skip &&
+              selection.match.draft.sourcePilotNo != null)
+            selection.match.draft.sourcePilotNo!,
+      },
     );
   }
 

@@ -42,6 +42,10 @@ ExampleRegistry buildExampleRegistry() => ExampleRegistry()
     'ImportProvenance',
     (json) => ImportProvenance.fromJson(json).toJson(),
   )
+  ..register(
+    'PilotImportLink',
+    (json) => PilotImportLink.fromJson(json).toJson(),
+  )
   ..register('LandingResult', (json) => LandingResult.fromJson(json).toJson())
   ..register('LandingTable', (json) => LandingTable.fromJson(json).toJson())
   ..register(

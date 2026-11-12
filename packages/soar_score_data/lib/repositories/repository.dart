@@ -113,6 +113,10 @@ class Repository implements core.Repository {
         database,
         stores: stores,
       ),
+      pilotImportLinkRepository = PilotImportLinkRepository(
+        database,
+        stores: stores,
+      ),
       importProvenanceRepository = ImportProvenanceRepository(
         database,
         stores: stores,
@@ -250,6 +254,9 @@ class Repository implements core.Repository {
 
   @override
   final core.ImportProvenanceRepository importProvenanceRepository;
+
+  @override
+  final PilotImportLinkRepository pilotImportLinkRepository;
 
   @override
   final core.ContestImportRepository contestImportRepository;

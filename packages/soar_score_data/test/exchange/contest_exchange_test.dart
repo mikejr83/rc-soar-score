@@ -972,7 +972,7 @@ void main() {
     test('a different schema version is refused naming both', () async {
       final file = await source.exportNamed(_autumn);
       final json = file.toJson();
-      (json['header'] as Map)['schema_version'] = 2;
+      (json['header'] as Map)['schema_version'] = 3;
       final changed = ExchangeFile.decode(utf8.encode(jsonEncode(json)));
       final preview = await target.importer.preview(
         changed,
@@ -982,8 +982,17 @@ void main() {
       expect(refusal.code, 'schema_mismatch');
       expect(
         refusal.message,
-        allOf(contains('2'), contains('${target.db.schemaVersion}')),
+        allOf(contains('3'), contains('${target.db.schemaVersion}')),
       );
+    });
+
+    test('a version 1 contest export imports into version 2', () async {
+      final file = await source.exportNamed(_autumn);
+      final json = file.toJson();
+      (json['header'] as Map)['schema_version'] = 1;
+      final legacy = ExchangeFile.decode(utf8.encode(jsonEncode(json)));
+      final result = await importInspection(legacy);
+      expect(result.contestId.value, file.header.contestId);
     });
 
     test('too much nesting is refused', () {

@@ -59,6 +59,10 @@ const String rolesPath = '$landingPath/roles';
 /// The roles page with its name dialog open, for the `New role` action.
 const String newRolePath = '$rolesPath?new=1';
 
+/// The account's own sync page (system scope): the decisions its devices
+/// could not make, such as which participant a GliderScore pilot is linked to.
+const String accountSyncPath = '$landingPath/account-sync';
+
 /// The settings page (system scope), opened from the account control.
 const String settingsPath = '$landingPath/settings';
 
@@ -238,6 +242,11 @@ GoRouter buildAppRouter({
             builder: (context, state) => RolesPage(
               createRequested: state.uri.queryParameters['new'] == '1',
             ),
+          ),
+          _shellRoute(
+            path: accountSyncPath,
+            name: 'accountSync',
+            builder: (context, state) => const AccountSyncPage(),
           ),
           _shellRoute(
             path: settingsPath,

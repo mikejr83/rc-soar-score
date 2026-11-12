@@ -305,7 +305,11 @@ class _CompetitionImportDialogState extends State<CompetitionImportDialog> {
   }
 
   Widget _failed(BuildContext context, AppLocalizations l10n) {
-    final text = _c.changedDuringReview
+    final text = _c.pilots.managedElsewhereRefused
+        ? l10n.pilotImportManagedElsewhereNow
+        : _c.pilots.linkReviewPending
+        ? l10n.pilotImportLinkReviewPending
+        : _c.changedDuringReview
         ? l10n.pilotImportChangedDuringReview
         : l10n.competitionImportFailed(apiErrorText(_c.error!));
     return Text(
@@ -357,7 +361,9 @@ class _CompetitionImportDialogState extends State<CompetitionImportDialog> {
           ),
           FilledButton(
             key: const ValueKey('competition-import-continue'),
-            onPressed: _c.continueToConfirm,
+            onPressed: _c.pilots.needsOneTimeChoice
+                ? null
+                : _c.continueToConfirm,
             child: Text(l10n.competitionImportContinue),
           ),
         ];

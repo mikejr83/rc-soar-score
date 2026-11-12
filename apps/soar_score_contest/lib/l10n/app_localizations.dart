@@ -2156,6 +2156,40 @@ abstract class AppLocalizations {
   /// **'Nothing new to add'**
   String get pilotImportNothingNew;
 
+  /// A previously confirmed GliderScore pilot link.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked to {name}'**
+  String pilotImportLinkedTo(String name);
+
+  /// Explains why a remembered pilot needs approval again.
+  ///
+  /// In en, this message translates to:
+  /// **'GliderScore details changed. Select to approve this import.'**
+  String get pilotImportSourceChanged;
+
+  /// A source pilot field changed since the last confirmed import.
+  ///
+  /// In en, this message translates to:
+  /// **'{field}: {before} → {after}'**
+  String pilotImportSourceFieldChange(
+    String field,
+    String before,
+    String after,
+  );
+
+  /// Name of the first-name field in a pilot import review.
+  ///
+  /// In en, this message translates to:
+  /// **'first name'**
+  String get pilotImportFieldFirstName;
+
+  /// Name of the last-name field in a pilot import review.
+  ///
+  /// In en, this message translates to:
+  /// **'last name'**
+  String get pilotImportFieldLastName;
+
   /// Row text when the identifiers of a pilot point at different participants.
   ///
   /// In en, this message translates to:
@@ -2305,6 +2339,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Importing from GliderScore is not available on this computer.'**
   String get pilotImportUnavailable;
+
+  /// Row text for a GliderScore pilot whose remembered link is under review, so it cannot be imported yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your decision in Account sync: two devices linked this pilot to different participants.'**
+  String get pilotImportLinkReview;
+
+  /// Shown when an import is stopped because a pilot's link needs a decision first.
+  ///
+  /// In en, this message translates to:
+  /// **'A pilot in this import was linked to different participants on two devices. Decide the link in Account sync, then review again.'**
+  String get pilotImportLinkReviewPending;
+
+  /// Shown above the pilot review when another installation manages the remembered pilot links.
+  ///
+  /// In en, this message translates to:
+  /// **'Another computer manages the remembered GliderScore pilot links for this account, so this import cannot reuse or change them. You can import without remembered links: you confirm each match yourself and the saved links stay as they are.'**
+  String get pilotImportManagedElsewhere;
+
+  /// Shown when a save was stopped because another installation manages the remembered pilot links.
+  ///
+  /// In en, this message translates to:
+  /// **'Another computer now manages the remembered pilot links, so nothing was saved. Review again, then import without remembered links.'**
+  String get pilotImportManagedElsewhereNow;
+
+  /// Button that reviews the same file without the remembered pilot links.
+  ///
+  /// In en, this message translates to:
+  /// **'Import without remembered links'**
+  String get pilotImportWithoutLinks;
+
+  /// Shown above the pilot review during a one-time import without remembered links.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing without remembered links: confirm each match below. The saved links stay as they are.'**
+  String get pilotImportWithoutLinksActive;
+
+  /// Label of the participant picker in the pilot link review.
+  ///
+  /// In en, this message translates to:
+  /// **'Or choose another participant'**
+  String get pilotLinkReviewPick;
+
+  /// Button that links the pilot to the participant picked in the review.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this participant'**
+  String get pilotLinkReviewUsePicked;
+
+  /// Shown when the participant picked for a pilot link was deleted before the choice was saved.
+  ///
+  /// In en, this message translates to:
+  /// **'That participant is no longer available. Pick another participant.'**
+  String get pilotLinkReviewPickRefused;
+
+  /// Breadcrumb and heading of the page that lists what the account's sync needs from the director.
+  ///
+  /// In en, this message translates to:
+  /// **'Account sync'**
+  String get shellNavAccountSync;
+
+  /// Introduction under the Account sync heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Decisions your devices could not make on their own wait here.'**
+  String get accountSyncIntro;
+
+  /// Names the GliderScore pilot whose link is being reviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'GliderScore pilot {number}'**
+  String pilotLinkReviewTitle(int number);
+
+  /// Explains the pilot link review.
+  ///
+  /// In en, this message translates to:
+  /// **'Two devices linked this pilot to different participants. Choose the participant this pilot is linked to on every device.'**
+  String get pilotLinkReviewIntro;
+
+  /// The participant the account's link names.
+  ///
+  /// In en, this message translates to:
+  /// **'Link the account has now: {name}'**
+  String pilotLinkReviewKept(String name);
+
+  /// The participant the other device's latest link names.
+  ///
+  /// In en, this message translates to:
+  /// **'Link from the other device: {name}'**
+  String pilotLinkReviewOther(String name);
+
+  /// Shown instead of a name when the participant is not in the list.
+  ///
+  /// In en, this message translates to:
+  /// **'a participant who is not in your list'**
+  String get pilotLinkReviewNoParticipant;
+
+  /// Button that keeps the account's link.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep {name}'**
+  String pilotLinkReviewKeep(String name);
+
+  /// Button that takes the other device's link.
+  ///
+  /// In en, this message translates to:
+  /// **'Use {name}'**
+  String pilotLinkReviewUse(String name);
+
+  /// Shown when the link under review changed before the decision arrived.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot\'s link changed while you were reviewing. The comparison is refreshed; decide again.'**
+  String get pilotLinkReviewChanged;
 
   /// Shown when a participant was edited during the pilot import review.
   ///

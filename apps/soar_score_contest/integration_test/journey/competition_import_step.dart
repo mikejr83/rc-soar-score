@@ -14,6 +14,7 @@ import 'journey.dart';
 Finder _key(String key) => find.byKey(ValueKey(key));
 
 const _spring = 'E2E GS Spring Open';
+const _autumn = 'E2E GS Autumn Open';
 
 GliderScoreImportResult _snapshot({int scoredRounds = 2}) {
   Map<String, Object?> comp(int no, String name, String cls, String date) => {
@@ -27,54 +28,58 @@ GliderScoreImportResult _snapshot({int scoredRounds = 2}) {
       comp(1, _spring, 'F5J', '06/14/26 00:00:00'),
       comp(2, 'E2E GS Old F3J', 'F3J', '05/01/25 00:00:00'),
       comp(3, 'E2E GS Empty Cup', 'F5J', '08/09/26 00:00:00'),
+      comp(4, _autumn, 'F5J', '04/09/24 00:00:00'),
     ],
     'CompPilots': [
-      {'CompNo': 1, 'PilotNo': 1},
-      {'CompNo': 1, 'PilotNo': 2},
-      {'CompNo': 2, 'PilotNo': 1},
+      {'CompNo': 1, 'PilotNo': 101},
+      {'CompNo': 1, 'PilotNo': 102},
+      {'CompNo': 2, 'PilotNo': 101},
+      {'CompNo': 4, 'PilotNo': 101},
+      {'CompNo': 4, 'PilotNo': 102},
     ],
     'Pilots': [
       {
-        'PilotNo': 1,
+        'PilotNo': 101,
         'FirstName': 'Hal',
         'LastName': 'Hangtime',
         'Email': 'hal.hangtime@e2e.example',
       },
       {
-        'PilotNo': 2,
+        'PilotNo': 102,
         'FirstName': 'Ida',
         'LastName': 'Ironwing',
         'Email': 'ida.ironwing@e2e.example',
       },
     ],
     'Dur': [
-      for (final no in [1, 3]) {'CompNo': no, 'durTargetTime': 600},
+      for (final no in [1, 3, 4]) {'CompNo': no, 'durTargetTime': 600},
     ],
     // The Spring Open: two rounds, one group of two. The scores are what the
     // F5J calculator gives for these flights, so the check against
     // GliderScore's own score passes: 9:00 and 100 m high with a 50 point
     // landing is 540, 8:50 and 60 m with a 30 point landing is 510.
     'Scores': [
-      for (var round = 1; round <= 2; round++)
-        for (final pilot in [1, 2])
-          {
-            'CompNo': 1,
-            'TaskNo': 1,
-            'RoundNo': round,
-            'GroupNo': 1,
-            'ReFlightNo': 0,
-            'PilotNo': pilot,
-            'SeqNo': pilot,
-            'OriginalRoundNo': round,
-            if (round <= scoredRounds) ...{
-              'Updated': 'True',
-              'Time1Mins': pilot == 1 ? 900 : 830,
-              'FlightScoreDeduction': pilot == 1 ? 100 : 60,
-              'Landing': pilot == 1 ? 50 : 30,
-              'RawScore': pilot == 1 ? 540 : 510,
-            } else
-              'Updated': 'False',
-          },
+      for (final compNo in [1, 4])
+        for (var round = 1; round <= 2; round++)
+          for (final pilot in [1, 2])
+            {
+              'CompNo': compNo,
+              'TaskNo': 1,
+              'RoundNo': round,
+              'GroupNo': 1,
+              'ReFlightNo': 0,
+              'PilotNo': pilot + 100,
+              'SeqNo': pilot,
+              'OriginalRoundNo': round,
+              if (round <= scoredRounds) ...{
+                'Updated': 'True',
+                'Time1Mins': pilot == 1 ? 900 : 830,
+                'FlightScoreDeduction': pilot == 1 ? 100 : 60,
+                'Landing': pilot == 1 ? 50 : 30,
+                'RawScore': pilot == 1 ? 540 : 510,
+              } else
+                'Updated': 'False',
+            },
     ],
   };
   return GliderScoreImportResult(
@@ -118,7 +123,7 @@ Future<void> importCompetitionsFromGliderScore(
 
   Future<void> toResults() async {
     await tapVisible(tester, _key('competition-import-continue'));
-    await pumpUntilFound(tester, _key('pilot-import-row-1'));
+    await pumpUntilFound(tester, _key('pilot-import-row-101'));
     await tapVisible(tester, _key('competition-import-continue'));
     await pumpUntilFound(tester, _key('competition-import-confirm'));
     await tapVisible(tester, _key('competition-import-confirm'));
@@ -161,7 +166,7 @@ Future<void> importCompetitionsFromGliderScore(
     isTrue,
   );
   await tapVisible(tester, _key('competition-import-continue'));
-  await pumpUntilFound(tester, _key('pilot-import-row-1'));
+  await pumpUntilFound(tester, _key('pilot-import-row-101'));
   await tapVisible(tester, _key('competition-import-continue'));
   await pumpUntilFound(tester, _key('competition-import-confirm'));
   // The summary names the scores and the check against GliderScore.
@@ -203,12 +208,41 @@ Future<void> importCompetitionsFromGliderScore(
     await pumpUntilFound(tester, row);
   }
 
+  // A second competition shares the same pilots. Their earlier selections
+  // are remembered even though the director chose a different competition.
+  await tapVisible(tester, _key('import-competitions'));
+  await pumpUntilFound(tester, _key('competition-import-row-4'));
+  await tapVisible(tester, _key('competition-import-row-4'));
+  await tapVisible(tester, _key('competition-import-continue'));
+  await pumpUntilFound(tester, _key('pilot-import-row-101'));
+  expect(
+    find.textContaining(l10n.pilotImportLinkedTo('Hal Hangtime')),
+    findsOneWidget,
+  );
+  expect(
+    find.textContaining(l10n.pilotImportLinkedTo('Ida Ironwing')),
+    findsOneWidget,
+  );
+  await tapVisible(tester, _key('competition-import-continue'));
+  await pumpUntilFound(tester, _key('competition-import-confirm'));
+  await tapVisible(tester, _key('competition-import-confirm'));
+  await pumpUntilFound(tester, _key('competition-import-result'));
+  expect(
+    find.text(l10n.competitionImportResultRestored(_autumn, 4)),
+    findsOneWidget,
+  );
+  await tapVisible(tester, _key('competition-import-done'));
+  await pumpUntilGone(tester, _key('competition-import-dialog'));
+
   // Second run of the same file: the contest is up to date, nothing is
   // written again.
   await tapVisible(tester, _key('import-competitions'));
   await pumpUntilFound(tester, _key('competition-import-row-1'));
   expect(
-    find.textContaining(l10n.competitionImportTargetUnchanged),
+    find.descendant(
+      of: _key('competition-import-row-1'),
+      matching: find.textContaining(l10n.competitionImportTargetUnchanged),
+    ),
     findsOneWidget,
   );
   await tapVisible(tester, _key('competition-import-row-1'));

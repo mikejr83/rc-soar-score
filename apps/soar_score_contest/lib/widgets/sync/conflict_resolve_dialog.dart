@@ -3,9 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/sync/conflict_answer.dart';
 import '../../services/sync/open_conflict.dart';
+import '../../services/pilot_import/pilot_import.dart';
 import 'payload_comparison.dart';
+import 'pilot_link_review.dart';
 
 /// Sends the director's decision: one of the two versions, or an edited one.
 typedef ResolveConflict = Future<ConflictAnswer> Function(
@@ -35,10 +38,17 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
   bool _editing = false;
   bool _sending = false;
   String? _error;
+  String? _picked;
+  late final Future<List<ParticipantProfile>> _participants;
+
+  bool get _isLinkReview => widget.conflict.entityType == 'PilotImportLink';
 
   @override
   void initState() {
     super.initState();
+    _participants =
+        PilotImportStore.current?.existing() ??
+        Future.value(const <ParticipantProfile>[]);
     final start =
         widget.conflict.acceptedPayload ??
         widget.conflict.competingPayload ??
@@ -64,7 +74,19 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
     });
     final answer = await widget.onResolve(choice, payload);
     if (!mounted) return;
-    if (answer.resolved) {
+    if (_isLinkReview &&
+        choice == ConflictResolutionChoice.merged &&
+        answer.refusal != null) {
+      // The participant picked is gone or no longer valid: pick another.
+      setState(() {
+        _sending = false;
+        _error = AppLocalizations.of(context).pilotLinkReviewPickRefused;
+      });
+      return;
+    }
+    if (answer.resolved || (_isLinkReview && answer.refusal != null)) {
+      // A refused link review was replaced while it was open: the page loads
+      // the new comparison and the director decides again.
       Navigator.of(context).pop(answer);
       return;
     }
@@ -94,13 +116,56 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
     _send(ConflictResolutionChoice.merged, payload: decoded);
   }
 
+  /// Lets the director link the pilot to a participant of their own choosing.
+  Widget _picker(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return FutureBuilder<List<ParticipantProfile>>(
+      future: _participants,
+      builder: (context, snapshot) => Row(
+        children: [
+          Expanded(
+            child: DropdownButtonFormField<String>(
+              key: const ValueKey('conflict-pick-participant'),
+              isExpanded: true,
+              initialValue: _picked,
+              decoration: InputDecoration(labelText: l10n.pilotLinkReviewPick),
+              items: [
+                for (final p in snapshot.data ?? const <ParticipantProfile>[])
+                  DropdownMenuItem(
+                    value: p.id.value,
+                    child: Text('${p.firstName} ${p.lastName}'),
+                  ),
+              ],
+              onChanged: _sending ? null : (v) => setState(() => _picked = v),
+            ),
+          ),
+          const SizedBox(width: 8),
+          OutlinedButton(
+            key: const ValueKey('conflict-use-picked'),
+            onPressed: _sending || _picked == null
+                ? null
+                : () => _send(
+                    ConflictResolutionChoice.merged,
+                    payload: {'participant_profile_id': _picked},
+                  ),
+            child: Text(l10n.pilotLinkReviewUsePicked),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final conflict = widget.conflict;
     return AlertDialog(
       key: const ValueKey('conflict-dialog'),
-      title: Text('Resolve ${conflict.entityType} conflict'),
+      title: Text(
+        _isLinkReview
+            ? AppLocalizations.of(context).shellNavAccountSync
+            : 'Resolve ${conflict.entityType} conflict',
+      ),
       content: SizedBox(
         width: 640,
         child: SingleChildScrollView(
@@ -125,7 +190,19 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-              ] else
+              ] else if (_isLinkReview)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    PilotLinkReview(
+                      conflict: conflict,
+                      participants: _participants,
+                    ),
+                    const SizedBox(height: 12),
+                    _picker(context),
+                  ],
+                )
+              else
                 PayloadComparison(
                   acceptedLabel: 'Accepted by the service',
                   competingLabel: 'Competing change',
@@ -162,27 +239,71 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
             child: const Text('Keep edited value'),
           ),
         ] else ...[
-          OutlinedButton(
-            key: const ValueKey('conflict-edit'),
-            onPressed: _sending ? null : () => setState(() => _editing = true),
-            child: const Text('Edit'),
-          ),
+          if (conflict.entityType != 'PilotImportLink')
+            OutlinedButton(
+              key: const ValueKey('conflict-edit'),
+              onPressed: _sending
+                  ? null
+                  : () => setState(() => _editing = true),
+              child: const Text('Edit'),
+            ),
           OutlinedButton(
             key: const ValueKey('conflict-take-competing'),
             onPressed: _sending
                 ? null
                 : () => _send(ConflictResolutionChoice.tookCompeting),
-            child: const Text('Use competing change'),
+            child: _isLinkReview
+                ? _LinkChoiceLabel(
+                    participants: _participants,
+                    payload: conflict.competingPayload,
+                    label: AppLocalizations.of(context).pilotLinkReviewUse,
+                  )
+                : const Text('Use competing change'),
           ),
           FilledButton(
             key: const ValueKey('conflict-keep-accepted'),
             onPressed: _sending
                 ? null
                 : () => _send(ConflictResolutionChoice.keptAccepted),
-            child: const Text('Keep accepted value'),
+            child: _isLinkReview
+                ? _LinkChoiceLabel(
+                    participants: _participants,
+                    payload: conflict.acceptedPayload,
+                    label: AppLocalizations.of(context).pilotLinkReviewKeep,
+                  )
+                : const Text('Keep accepted value'),
           ),
         ],
       ],
     );
   }
+}
+
+/// A button label that names the participant of one link.
+class _LinkChoiceLabel extends StatelessWidget {
+  const _LinkChoiceLabel({
+    required this.participants,
+    required this.payload,
+    required this.label,
+  });
+
+  final Future<List<ParticipantProfile>> participants;
+  final Map<String, Object?>? payload;
+  final String Function(String name) label;
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<List<ParticipantProfile>>(
+    future: participants,
+    builder: (context, snapshot) {
+      final id = PilotLinkReview.participantId(payload);
+      for (final p in snapshot.data ?? const <ParticipantProfile>[]) {
+        if (p.id.value == id) {
+          return Text(label('${p.firstName} ${p.lastName}'));
+        }
+      }
+      return Text(
+        label(AppLocalizations.of(context).pilotLinkReviewNoParticipant),
+      );
+    },
+  );
 }

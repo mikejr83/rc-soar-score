@@ -119,7 +119,11 @@ class _PilotImportDialogState extends State<PilotImportDialog> {
   Widget _failed(AppLocalizations l10n) {
     final error = _c.error!;
     final String text;
-    if (_c.changedDuringReview) {
+    if (_c.managedElsewhereRefused) {
+      text = l10n.pilotImportManagedElsewhereNow;
+    } else if (_c.linkReviewPending) {
+      text = l10n.pilotImportLinkReviewPending;
+    } else if (_c.changedDuringReview) {
       text = l10n.pilotImportChangedDuringReview;
     } else if (error is ApiHttpError &&
         error.error?.code == 'import_unavailable') {
@@ -157,7 +161,7 @@ class _PilotImportDialogState extends State<PilotImportDialog> {
           TextButton(onPressed: close, child: Text(l10n.cancelButton)),
           FilledButton(
             key: const ValueKey('pilot-import-confirm'),
-            onPressed: any ? _c.apply : null,
+            onPressed: any && !_c.needsOneTimeChoice ? _c.apply : null,
             child: Text(l10n.pilotImportConfirm),
           ),
         ];
@@ -232,6 +236,7 @@ class PilotImportReviewList extends StatelessWidget {
         shrinkWrap: true,
         children: [
           Text(l10n.pilotImportReviewIntro),
+          if (controller.linksManagedElsewhere) _managedElsewhere(l10n),
           ...notes,
           if (maybes.isNotEmpty) ...[
             _heading(context, l10n.pilotImportMaybeHeading(maybes.length)),
@@ -245,7 +250,10 @@ class PilotImportReviewList extends StatelessWidget {
           if (updates.isNotEmpty) ...[
             _heading(context, l10n.pilotImportUpdateHeading(updates.length)),
             for (final i in updates)
-              _CheckRow(controller: controller, index: i),
+              if (review.matches[i].remembered)
+                _MaybeRow(controller: controller, index: i)
+              else
+                _CheckRow(controller: controller, index: i),
           ],
           if (news.isNotEmpty) ...[
             _heading(context, l10n.pilotImportNewHeading(news.length)),
@@ -255,6 +263,32 @@ class PilotImportReviewList extends StatelessWidget {
       ),
     );
   }
+
+  /// Another installation manages the remembered links: say so, and offer
+  /// the import that leaves them alone.
+  Widget _managedElsewhere(AppLocalizations l10n) => Padding(
+    padding: const EdgeInsets.only(top: 8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      key: const ValueKey('pilot-import-managed-elsewhere'),
+      children: [
+        Text(
+          controller.importingWithoutLinks
+              ? l10n.pilotImportWithoutLinksActive
+              : l10n.pilotImportManagedElsewhere,
+        ),
+        if (!controller.importingWithoutLinks)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: OutlinedButton(
+              key: const ValueKey('pilot-import-without-links'),
+              onPressed: controller.importWithoutRememberedLinks,
+              child: Text(l10n.pilotImportWithoutLinks),
+            ),
+          ),
+      ],
+    ),
+  );
 
   static Widget _heading(BuildContext context, String text) => Padding(
     padding: const EdgeInsets.only(top: 16, bottom: 4),
@@ -303,6 +337,8 @@ String _details(PilotDraft p) => [
 ].where((s) => s.isNotEmpty).join(' · ');
 
 String _fieldName(AppLocalizations l10n, String field) => switch (field) {
+  'firstName' => l10n.pilotImportFieldFirstName,
+  'lastName' => l10n.pilotImportFieldLastName,
   'email' => l10n.pilotImportFieldEmail,
   'faiNumber' => l10n.pilotImportFieldFai,
   'nationalOrgId' => l10n.pilotImportFieldNationalId,
@@ -330,6 +366,9 @@ class _CheckRow extends StatelessWidget {
     final exact = match.kind == PilotMatchKind.exact;
     final included = selection.choice != PilotImportChoice.skip;
     final details = _details(draft);
+    final linked = match.remembered && match.candidateIds.length == 1
+        ? controller.review!.profile(match.candidateIds.single)
+        : null;
     final note = !exact
         ? null
         : match.changes.isEmpty
@@ -349,7 +388,21 @@ class _CheckRow extends StatelessWidget {
             : PilotImportChoice.skip,
       ),
       title: Text('${draft.firstName} ${draft.lastName}'),
-      subtitle: Text([?note, if (details.isNotEmpty) details].join('\n')),
+      subtitle: Text(
+        [
+          if (linked != null)
+            l10n.pilotImportLinkedTo('${linked.firstName} ${linked.lastName}'),
+          if (match.sourceChanged) l10n.pilotImportSourceChanged,
+          for (final change in match.sourceChanges)
+            l10n.pilotImportSourceFieldChange(
+              _fieldName(l10n, change.field),
+              change.from ?? '—',
+              change.to,
+            ),
+          ?note,
+          if (details.isNotEmpty) details,
+        ].join('\n'),
+      ),
     );
   }
 }
@@ -377,9 +430,22 @@ class _MaybeRow extends StatelessWidget {
       PilotImportChoice.add => _add,
       PilotImportChoice.update => 'update:${selection.targetProfileId?.value}',
     };
+    final linked = match.remembered && match.candidateIds.isNotEmpty
+        ? review.profile(match.candidateIds.first)
+        : null;
     final notes = [
+      if (linked != null)
+        l10n.pilotImportLinkedTo('${linked.firstName} ${linked.lastName}'),
+      if (match.sourceChanged) l10n.pilotImportSourceChanged,
+      if (match.linkReview) l10n.pilotImportLinkReview,
       if (match.conflict) l10n.pilotImportConflict,
       if (match.isDuplicateInFile) l10n.pilotImportDuplicateInFile,
+      for (final change in match.sourceChanges)
+        l10n.pilotImportSourceFieldChange(
+          _fieldName(l10n, change.field),
+          change.from ?? '—',
+          change.to,
+        ),
       _details(draft),
     ].where((s) => s.isNotEmpty).join('\n');
     return ListTile(
@@ -387,58 +453,78 @@ class _MaybeRow extends StatelessWidget {
       dense: true,
       title: Text('${draft.firstName} ${draft.lastName}'),
       subtitle: notes.isEmpty ? null : Text(notes),
-      trailing: SizedBox(
-        width: 180,
-        child: DropdownButton<String>(
-          key: ValueKey('pilot-import-choice-$no'),
-          isExpanded: true,
-          value: current,
-          onChanged: (value) {
-            if (value == null) return;
-            if (value == _skip) {
-              controller.choose(index, PilotImportChoice.skip);
-            } else if (value == _add) {
-              controller.choose(index, PilotImportChoice.add);
-            } else {
-              controller.choose(
-                index,
-                PilotImportChoice.update,
-                target: Id.parse(value.substring('update:'.length)),
-              );
-            }
-          },
-          items: [
-            DropdownMenuItem(
-              value: _skip,
-              child: Text(
-                l10n.pilotImportChoiceSkip,
-                overflow: TextOverflow.ellipsis,
+      // A pilot whose link waits for a decision cannot be chosen for.
+      trailing: match.linkReview
+          ? Text(
+              l10n.pilotImportChoiceSkip,
+              key: ValueKey('pilot-import-held-$no'),
+            )
+          : SizedBox(
+              width: 180,
+              child: DropdownButton<String>(
+                key: ValueKey('pilot-import-choice-$no'),
+                isExpanded: true,
+                value: current,
+                onChanged: (value) {
+                  if (value == null) return;
+                  if (value == _skip) {
+                    controller.choose(index, PilotImportChoice.skip);
+                  } else if (value == _add) {
+                    controller.choose(index, PilotImportChoice.add);
+                  } else {
+                    controller.choose(
+                      index,
+                      PilotImportChoice.update,
+                      target: Id.parse(value.substring('update:'.length)),
+                    );
+                  }
+                },
+                items: [
+                  DropdownMenuItem(
+                    value: _skip,
+                    child: Text(
+                      l10n.pilotImportChoiceSkip,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: _add,
+                    child: Text(
+                      l10n.pilotImportChoiceAdd,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  for (final id in _options(match, review))
+                    DropdownMenuItem(
+                      value: 'update:${id.value}',
+                      child: Tooltip(
+                        message: l10n.pilotImportChoiceUpdate(
+                          _name(review.profile(id)),
+                        ),
+                        child: Text(
+                          l10n.pilotImportChoiceUpdate(
+                            _name(review.profile(id)),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
-            DropdownMenuItem(
-              value: _add,
-              child: Text(
-                l10n.pilotImportChoiceAdd,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            for (final id in match.candidateIds)
-              DropdownMenuItem(
-                value: 'update:${id.value}',
-                child: Tooltip(
-                  message: l10n.pilotImportChoiceUpdate(
-                    _name(review.profile(id)),
-                  ),
-                  child: Text(
-                    l10n.pilotImportChoiceUpdate(_name(review.profile(id))),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
     );
+  }
+
+  /// The participants the pilot can be linked to. A remembered match offers
+  /// every participant, so a wrong link can be corrected; the others offer
+  /// the candidates the file matched.
+  static List<Id> _options(PilotMatch match, PilotImportReview review) {
+    if (!match.remembered) return match.candidateIds;
+    final others = [
+      for (final p in review.existing)
+        if (!match.candidateIds.contains(p.id)) p,
+    ]..sort((a, b) => _name(a).compareTo(_name(b)));
+    return [...match.candidateIds, for (final p in others) p.id];
   }
 
   static String _name(ParticipantProfile? p) =>

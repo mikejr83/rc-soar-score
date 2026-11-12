@@ -52,6 +52,14 @@ class ParticipantProfileRepository extends DriftRepository
       unitOfWork.run((context) async {
         final profile = await _store.find(id);
         if (profile == null) return false;
+        final links = await store<core.PilotImportLink>('PilotImportLink')
+            .whereId('participant_profile_id', id);
+        for (final link in links) {
+          await context.delete(
+            link,
+            metadata: metadata.forPart('pilot-link-${link.id.value}'),
+          );
+        }
         await context.delete(profile, metadata: metadata);
         return true;
       });

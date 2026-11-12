@@ -1,8 +1,8 @@
 # Import pilots from GliderScore
 
 The Windows contest app can add the pilots in a GliderScore database to your
-participants list. It reads the file on your computer; nothing is sent
-anywhere. Only pilots are imported: not contests, draws or scores. To import
+participants list. It reads the file on your computer. Your participants and
+remembered links sync with your account. Only pilots are imported: not contests, draws or scores. To import
 competitions as contests, see
 [import competitions](import-competitions-from-gliderscore.md).
 
@@ -26,6 +26,14 @@ The review has three groups:
 
 The review also tells you how many GliderScore test pilots were left out and
 which details were not imported.
+
+Once you confirm a pilot, the app remembers the link for both pilot and competition imports. A remembered pilot shows “Linked to” the participant. If the link is wrong, open the pilot's choice and link the pilot to a different participant; later imports use the correction. If GliderScore details change later, select the pilot to approve importing the changes. Deleting a participant removes its remembered links.
+
+Links identify the director's GliderScore 6 database and pilot number; saving the database or adding competitions does not break them. Distinguishing an independent GliderScore database on a different computer from a transferred database is not yet supported. Release limit: pilot numbers from two different GliderScore databases share one set of links per account. Earlier imports establish links when next confirmed.
+
+One computer manages the remembered links for your account: the first one that confirms a pilot. Other computers can still import GliderScore pilots and competitions, but they show a notice and nothing is saved until you choose **Import without remembered links**. You confirm each match yourself for that import, and the saved links stay as they are. The account refuses link changes from a computer that does not manage them, even ones made offline and sent later. Moving the links to a replacement computer is not supported yet.
+
+If a link was already confirmed differently on two computers, importing that pilot is held back (the other pilots in the file import normally) until you decide in **Account sync** (the sync status at the bottom of the window opens it). You can keep the saved link, use the other one, or choose a different participant; if that participant was deleted in the meantime you are asked to pick another. If the link changes while you are reviewing, the comparison is refreshed and you decide again. Deleting a participant removes its link, and the pilot is linked again the next time you import it.
 
 ## What is imported
 
