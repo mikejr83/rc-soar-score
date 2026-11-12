@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../database.dart';
@@ -35,12 +34,9 @@ class ContestRepository implements core.ContestRepository {
 
   @override
   Future<Map<core.Id, core.Contest>> findByIds(Iterable<core.Id> ids) async {
-    final wanted = ids.toSet().toList();
-    if (wanted.isEmpty) return {};
-    final found = await _store.whereSql(
-      'id IN (${List.filled(wanted.length, '?').join(', ')})',
-      [for (final id in wanted) Variable<String>(id.value)],
-    );
+    // Read in chunks: one bound variable per id would pass the database's
+    // limit for a long list.
+    final found = await _store.whereIdIn('id', ids);
     return {for (final contest in found) contest.id: contest};
   }
 

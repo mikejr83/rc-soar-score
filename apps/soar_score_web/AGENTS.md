@@ -6,7 +6,7 @@ The public web site: product marketing and information, documentation and help, 
 
 - `npm install` once, then `npm run dev` (http://localhost:3000), `npm run build`, `npm run lint`, `npm test` (vitest, `src/**/*.test.ts`).
 - CI runs lint, test and build in the `public-site` job of `.github/workflows/ci.yml`. Melos does not manage this app.
-- Deployed to Vercel by the Deploy workflow when a GitHub release is published (docs/deploying.md); the app is a standard Next.js build (no static export, the contest routes are dynamic). Hosts are set per deployment with `SOAR_SCORE_API_URL` (server-side proxy target for `/api/*`), `NEXT_PUBLIC_SOAR_SCORE_API_BASE_URL`, `NEXT_PUBLIC_CONTEST_APP_URL`, `NEXT_PUBLIC_SELF_SCORE_APP_URL` and `NEXT_PUBLIC_DOWNLOAD_URL` (`src/lib/site.ts` holds the ADR 0003 defaults).
+- Deployed to Vercel by the Deploy workflow when a GitHub release is published (docs/deploying.md); the app is a standard Next.js build (no static export, the contest routes are dynamic). Hosts are set per deployment with `SOAR_SCORE_API_URL` (server-side proxy target for `/api/*`, in `src/proxy.ts`), `TRUSTED_PROXY_SECRET` (the visitor's address is forwarded to the API with it, #904), `NEXT_PUBLIC_SOAR_SCORE_API_BASE_URL`, `NEXT_PUBLIC_CONTEST_APP_URL`, `NEXT_PUBLIC_SELF_SCORE_APP_URL` and `NEXT_PUBLIC_DOWNLOAD_URL` (`src/lib/site.ts` holds the ADR 0003 defaults).
 
 ## Structure (`src/`)
 

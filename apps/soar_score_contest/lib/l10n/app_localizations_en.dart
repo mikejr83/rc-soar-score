@@ -799,10 +799,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activityViewAll => 'View all';
 
   @override
-  String get activityViewAllUnavailable =>
-      'The full activity log is not available yet.';
-
-  @override
   String get activityEmpty => 'Nothing has happened yet';
 
   @override
@@ -813,6 +809,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get activityRetry => 'Retry';
+
+  @override
+  String get activityPageIntro =>
+      'Everything the contest\'s directors did, newest first. Times are in the contest\'s time zone.';
+
+  @override
+  String get activityFilterLabel => 'Show';
+
+  @override
+  String get activityFilterAll => 'Everything';
+
+  @override
+  String get activityFilterContest => 'Contest and pilots';
+
+  @override
+  String get activityFilterScores => 'Score corrections';
+
+  @override
+  String get activityFilterConfiguration => 'Configuration';
+
+  @override
+  String get activityFilterMatrix => 'Matrix';
+
+  @override
+  String get activityFilterPublication => 'Publication';
+
+  @override
+  String get activityPageLoading => 'Loading activity…';
+
+  @override
+  String get activityPageEmpty => 'Nothing has happened yet';
+
+  @override
+  String get activityPageEmptyFiltered => 'No activity of this kind';
+
+  @override
+  String get activityPageEmptyFilteredBody =>
+      'Choose another kind, or show everything.';
+
+  @override
+  String get activityPageShowEverything => 'Show everything';
+
+  @override
+  String get activityPageFailed => 'Activity could not be loaded';
+
+  @override
+  String get activityPageMoreFailed => 'More activity could not be loaded.';
+
+  @override
+  String get activityPageOffline =>
+      'You are offline. Showing what was loaded; Retry works once you are back online.';
+
+  @override
+  String get activityPageIncomplete =>
+      'Published results could not be loaded, so publications may be missing from this list.';
+
+  @override
+  String get activityPageLoadMore => 'Load more';
+
+  @override
+  String get activityPageEnd => 'That is everything';
+
+  @override
+  String get activityPageNotFound => 'This contest was not found';
+
+  @override
+  String get activityActorYou => 'You';
+
+  @override
+  String get activityActorSystem => 'System';
+
+  @override
+  String activityActorAccount(String id) {
+    return 'Account $id';
+  }
 
   @override
   String activityComplete(String actor) {
@@ -963,6 +1034,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shellNavReports => 'Reports';
+
+  @override
+  String get shellNavActivity => 'Activity';
 
   @override
   String get shellNavSync => 'Sync';

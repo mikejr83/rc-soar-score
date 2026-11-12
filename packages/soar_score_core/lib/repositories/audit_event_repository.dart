@@ -22,11 +22,13 @@ abstract interface class AuditEventRepository {
 
   /// The events of [contestId], newest first by server time.
   ///
-  /// [action] keeps only events of that kind and [limit] the first that many.
+  /// [action] keeps only events of that kind, [offset] skips that many of
+  /// the matching events and [limit] keeps the first that many after them.
   Future<List<AuditEvent>> listForContest(
     Id contestId, {
     AuditAction? action,
     int? limit,
+    int? offset,
   });
 
   /// Stores a new [event].

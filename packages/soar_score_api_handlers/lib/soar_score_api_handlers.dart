@@ -18,5 +18,7 @@ export 'draw/isolate_draw_runner.dart';
 export 'handler.dart';
 export 'handlers/invitation_handlers.dart' show defaultSelfScoringBaseUrl;
 export 'handlers/participant_handlers.dart';
+export 'middleware/client_address.dart';
 export 'middleware/failure_rate_limiter.dart';
+export 'middleware/invitation_throttle.dart';
 export 'middleware/middleware.dart';

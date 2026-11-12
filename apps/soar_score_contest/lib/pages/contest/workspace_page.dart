@@ -291,7 +291,7 @@ class _ContestWorkspacePageState extends State<ContestWorkspacePage> {
       contest,
       publicationClient: publicationClientOf(context),
       isOffline: offline,
-      actingAccountId: uiAccountIdOf(context),
+      actingAccountId: auditActorIdOf(context),
     ).then(
       (facts) {
         _logger.info(

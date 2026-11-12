@@ -21,3 +21,12 @@ UiAccount? uiAccountOf(BuildContext context) =>
 /// no [UiAccount] is provided. Rebuilds the caller when the account changes.
 String uiAccountIdOf(BuildContext context) =>
     uiAccountOf(context)?.id ?? localUiAccountId;
+
+/// The id the audit trail records as the signed-in account's actor, to tell
+/// its own events from another account's: not [uiAccountIdOf], which names
+/// UI-only state and on web is the sign-in identity's subject. `null` when
+/// the account's audit id is not known.
+String? auditActorIdOf(BuildContext context) {
+  final account = uiAccountOf(context);
+  return account == null ? localUiAccountId : account.auditActorId;
+}

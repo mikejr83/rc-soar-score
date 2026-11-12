@@ -251,16 +251,19 @@ class ApiClient {
   }
 
   /// `GET /api/v1/contests/{id}/audit-events` — the contest's audit events,
-  /// newest first, optionally only those of [action] and at most [limit].
+  /// newest first, optionally only those of [action], at most [limit], after
+  /// the first [offset] (which needs a [limit]).
   Future<List<AuditEventDto>> auditEvents(
     Id id, {
     AuditAction? action,
     int? limit,
+    int? offset,
   }) async {
     final uri = _resolve('/api/v1/contests/${id.value}/audit-events').replace(
       queryParameters: {
         if (action != null) 'action': action.text,
         if (limit != null) 'limit': '$limit',
+        if (offset != null) 'offset': '$offset',
       },
     );
     final response = await _send('GET', uri);
@@ -539,6 +542,19 @@ class ApiClient {
       response,
       uri,
       LocalAccountClaimDto.fromJson,
+    );
+  }
+
+  /// `GET /api/v1/account` — the id of the account the caller acts as: the
+  /// id the audit trail records as the actor of the caller's actions. It is
+  /// not the sign-in identity's subject.
+  Future<Id> accountId() async {
+    final uri = _resolve('/api/v1/account');
+    final response = await _send('GET', uri);
+    return _decode<Id>(
+      response,
+      uri,
+      (json) => Id.parse(json['account_id'] as String),
     );
   }
 

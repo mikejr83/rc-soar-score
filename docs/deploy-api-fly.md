@@ -15,6 +15,7 @@ enough. No secret lives in the repository: `DATABASE_URL` is a Fly secret.
 | --------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DATABASE_URL`                    | Fly secret            | Neon **direct** (not pooled) connection string; it ends in `sslmode=require`                                                                                  |
 | `INVITATION_SECRET`               | Fly secret            | 32+ random characters (`openssl rand -base64 48`); signs invitation links and guest sessions. Set it once: changing it ends every printed QR code and session |
+| `TRUSTED_PROXY_SECRET`            | Fly secret            | 32+ random characters; the same value as in Vercel. Lets the site's `/api` proxy tell the server which visitor a request is for (see "Throttling invitation links") |
 | `AUTH0_DOMAIN`                    | `fly.toml`            | `login.rcsoarscore.com` (the token issuer; not the `dev-...` tenant name)                                                                                     |
 | `SELF_SCORING_BASE_URL`           | `fly.toml`            | not set in production, so invitation links point at `https://score.rcsoarscore.com`; only local runs override it                                              |
 | `API_AUDIENCE`                    | `fly.toml`            | `https://soar-score.com/server`                                                                                                                               |
@@ -69,6 +70,59 @@ lists report those pilots as having no usable link instead of serving a wrong
 one, and sessions in pilots' browsers stop working. Regenerating links for
 them is tracked in #791; until it exists, avoid rotating the secret once
 cards are printed. A leaked secret is the one reason to rotate it.
+
+## Throttling invitation links
+
+`POST /api/v1/self-scoring/invitations/resolve` (opening a link) is limited
+per caller address, with the counts kept in the database (`request_throttles`)
+so every machine, burst clone and restart counts together. Two counters, each
+a 10 minute window:
+
+| Counter  | Counts                                                                                       | Blocked from                      |
+| -------- | -------------------------------------------------------------------------------------------- | --------------------------------- |
+| Attempts | every request, before its body is read: valid links, wrong ones and malformed bodies         | the 301st attempt in the window   |
+| Failures | requests that did not open a link: unknown or expired link, malformed or non-JSON body       | the 20th failure in the window    |
+
+A blocked address gets 429 `rate_limited` with `Retry-After` until its window
+ends; every link that does not open is still the same 404 `invalid_invitation`.
+The limits leave room for a venue: 100 pilots on one Wi-Fi network opening
+their card two or three times each is about 300 attempts, and an expired card
+scanned a few times is a few failures. IPv6 callers are counted by /64, and
+the database holds only a keyed hash of the address (never the address),
+deleted when its window is over. If the database fails, each machine counts in
+memory instead and logs a warning, so pilots at the field are not refused
+because of it.
+
+Which address is counted:
+
+- **Direct** (the self-scoring app calling `api.rcsoarscore.com`): the address
+  Fly's proxy saw (`Fly-Client-IP`), which a caller cannot set.
+- **Through the public site's `/api` proxy** (Vercel): Fly sees Vercel, so the
+  proxy (`apps/soar_score_web/src/proxy.ts`) sends the visitor's address
+  (from Vercel's `x-vercel-forwarded-for`) in `X-Soar-Client-Ip` with
+  `X-Soar-Proxy-Secret`. The server believes that address only when the
+  secret equals `TRUSTED_PROXY_SECRET`; otherwise it counts the Fly address.
+  Without `TRUSTED_PROXY_SECRET` set on Fly, every request through the proxy
+  counts as Vercel's address, so set it on both sides:
+
+  ```sh
+  secret="$(openssl rand -base64 48)"
+  fly secrets set TRUSTED_PROXY_SECRET="$secret" --app rc-soar-score-api
+  # and in Vercel: TRUSTED_PROXY_SECRET (Production), the same value
+  ```
+
+To check it after a deploy, send junk links from one network: the answer is
+404 `invalid_invitation` until the 20th failure, then 429 `rate_limited` with
+`Retry-After`, while another network still gets 404. Do it on both paths. The
+site proxy strips one `/api` before forwarding, and the server mounts the route
+under `/api/v1`, so the site URL has `/api` twice:
+
+- direct: `POST https://api.rcsoarscore.com/api/v1/self-scoring/invitations/resolve`
+- via the site: `POST https://rcsoarscore.com/api/api/v1/self-scoring/invitations/resolve`
+
+with the body `{"credential": "nope"}`.
+
+Changing the limits is a code change (`InvitationThrottle`).
 
 To check that it is in effect, post any junk link; the answer is 404
 `invalid_invitation`, not 409 `invitations_not_available`:
@@ -219,6 +273,33 @@ Things to know:
 - Neon's free plan suspends the database after 5 minutes idle; the first
   request after that waits for it to wake. Before a contest, load any API
   page a few minutes ahead.
+
+## Public read cache policy
+
+The `/public` reads are the only API responses meant to be cached (#906):
+
+| Response                                                     | `Cache-Control`      |
+| ------------------------------------------------------------ | -------------------- |
+| `GET /public/publications` and `/public/publications/{id}`   | `public, max-age=30` |
+| Any `/public` error (404 unknown, 403 `contest_not_visible`) | `no-store`           |
+| `/api/v1/*` (signed-in data)                                 | `no-store`           |
+
+For the next API read, a new publication, a delisting, or a change to hidden
+results shows within **30 seconds** and no later. A results page that is
+already open does not read again until it is reloaded or another contest is
+opened (`ContestProvider` fetches once per contest id), so an open page can
+keep showing what it loaded until the reader refreshes. The site's Refresh
+button bypasses the browser cache for the listing. Errors are never cached, so
+a contest that becomes visible shows at once.
+
+The Next.js `/api` rewrite on the public site passes these headers through
+unchanged (`proxy-config.test.ts` runs the real Next.js server against a stub
+upstream and checks status, headers and body). Vercel's CDN ignores `max-age` and only caches on `s-maxage`, so the
+browser is the only cache between a reader and the API.
+
+An unknown id (404) and an id that exists but is not shown (403
+`contest_not_visible`) are deliberately different answers (#463); the 403
+body carries nothing about the contest.
 
 ## Rollback
 

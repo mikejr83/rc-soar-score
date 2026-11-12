@@ -5,6 +5,7 @@ import 'package:soar_score_api_handlers/draw/isolate_draw_runner.dart';
 import 'package:soar_score_core/repositories/repository.dart';
 import 'package:soar_score_core/services/matrix/draw_job.dart';
 import 'package:soar_score_core/services/sync/sync_versions.dart';
+import 'package:soar_score_api_handlers/handlers/account_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/account_claim_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/account_preferences_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/configuration_handlers.dart';
@@ -15,7 +16,7 @@ import 'package:soar_score_api_handlers/handlers/models_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/invitation_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participant_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/participants_handlers.dart';
-import 'package:soar_score_api_handlers/middleware/failure_rate_limiter.dart';
+import 'package:soar_score_api_handlers/middleware/invitation_throttle.dart';
 import 'package:soar_score_core/soar_score_core.dart' show InvitationService;
 import 'package:soar_score_api_handlers/handlers/participations_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/roles_handlers.dart';
@@ -48,7 +49,8 @@ createHandlers(
   GliderScoreImportRunner? gliderScoreImport,
   DrawRunner? drawRunner,
   InvitationService? invitations,
-  FailureRateLimiter? invitationRateLimiter,
+  InvitationThrottle? invitationThrottle,
+  String? trustedProxySecret,
   Set<String> corsAllowedOrigins = const {},
   String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
 }) {
@@ -58,6 +60,7 @@ createHandlers(
       (Request request) => jsonResponse(<String, Object>{'status': 'ok'}),
     );
   addAccountClaimRoutes(router, repository);
+  addAccountRoutes(router);
   addAccountPreferencesRoutes(router, repository);
   addContestRoutes(router, repository, publishingEnabled: publishingEnabled);
   addConfigurationRoutes(router, repository, recalculation: recalculation);
@@ -109,7 +112,8 @@ createHandlers(
     participantHandler: buildParticipantHandler(
       repository,
       service: invitations,
-      limiter: invitationRateLimiter,
+      throttle: invitationThrottle,
+      trustedProxySecret: trustedProxySecret,
       allowedOrigins: corsAllowedOrigins,
       selfScoringBaseUrl: selfScoringBaseUrl,
     ),

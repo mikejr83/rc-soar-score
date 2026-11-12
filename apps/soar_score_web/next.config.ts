@@ -19,16 +19,7 @@ const nextConfig: NextConfig = {
       { source: '/help', destination: '/docs', permanent: false },
     ];
   },
-  // Same-origin proxy to the API server (Fly.io). SOAR_SCORE_API_URL is set
-  // in Vercel for production; see docs/deploying.md.
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.SOAR_SCORE_API_URL ?? 'http://localhost:8080'}/:path*`,
-      },
-    ];
-  },
+  // `/api/*` is proxied to the API server by src/proxy.ts.
 };
 
 export default nextConfig;

@@ -44,6 +44,21 @@ void _tests(Backend backend) {
       updatedAt: DateTime.utc(2026, 4),
     );
 
+    test('findByIds takes more ids than one query could bind', () async {
+      final first = await save(makeContest(name: 'First'));
+      final second = await save(makeContest(name: 'Second'));
+      final ids = [
+        first.id,
+        for (var i = 0; i < 40000; i++) core.Id.create(),
+        second.id,
+      ];
+
+      final found = await repo.findByIds(ids);
+
+      expect(found.keys, unorderedEquals([first.id, second.id]));
+      expect(await repo.findByIds(const []), isEmpty);
+    });
+
     test('save then findById round-trips the domain type', () async {
       final saved = await save(makeContest());
       final loaded = await repo.findById(saved.id);
