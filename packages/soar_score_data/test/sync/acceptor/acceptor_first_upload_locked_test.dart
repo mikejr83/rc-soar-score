@@ -1,5 +1,4 @@
 import 'package:soar_score_core/services/services.dart';
-import 'package:soar_score_core/services/sync/sync_exchange.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:test/test.dart';
 
