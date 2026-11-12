@@ -87,6 +87,7 @@ Future<RunningServer> startServer(
         corsAllowedOrigins: config.corsAllowedOrigins,
         invitationSecret: config.invitationSecret,
         selfScoringBaseUrl: config.selfScoringBaseUrl,
+        trustedProxySecret: config.trustedProxySecret,
       ),
       address ?? InternetAddress.anyIPv4,
       config.port,

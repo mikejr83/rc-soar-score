@@ -8,7 +8,8 @@ import '../auth/guest_session_auth.dart';
 import '../auth/guest_session_cookie.dart';
 import '../auth/participant_principal.dart';
 import '../middleware/error_mapping.dart';
-import '../middleware/failure_rate_limiter.dart';
+import '../middleware/client_address.dart';
+import '../middleware/invitation_throttle.dart';
 import '../middleware/request_id.dart';
 import '../middleware/request_limits.dart';
 import 'health_handler.dart';
@@ -28,7 +29,8 @@ final _logger = Logger('ParticipantHandlers');
 ///   a [ResolveInvitationResponse]: the guest session and the contest and
 ///   pilot the link is for.
 ///   Every link that does not open is the same 404 `invalid_invitation`;
-///   too many failures from one address is a 429 `rate_limited`.
+///   too many attempts or failures from one address is a 429 `rate_limited`
+///   (see [InvitationThrottle]).
 /// - `POST /session/end` removes the session cookie (204).
 /// - `GET /session` is the session's own context, behind the guest session
 ///   layer: the call the app makes to check a stored session.
@@ -59,13 +61,14 @@ final _logger = Logger('ParticipantHandlers');
 Handler buildParticipantHandler(
   Repository repository, {
   required InvitationService? service,
-  FailureRateLimiter? limiter,
+  InvitationThrottle? throttle,
+  String? trustedProxySecret,
   Set<String> allowedOrigins = const {},
   DateTime Function()? clock,
   String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
 }) {
   final now = clock ?? DateTime.now;
-  final rateLimiter = limiter ?? FailureRateLimiter();
+  final limits = throttle ?? InvitationThrottle();
   final router = Router();
   // Group and overall results calculate from every score of the contest.
   final resultsLimiter = RequestRateLimiter(maxRequests: 60);
@@ -79,10 +82,13 @@ Handler buildParticipantHandler(
 
   router.post('/invitations/resolve', (Request request) async {
     final invitations = requireService();
-    final key = clientKey(request);
-    final wait = rateLimiter.blockedFor(key);
+    final address = clientAddressOf(
+      request,
+      trustedProxySecret: trustedProxySecret,
+    );
+    final wait = await limits.admit(address);
     if (wait != null) {
-      _logger.warning('Too many failed invitation links from one address.');
+      _logger.warning('Too many invitation attempts from one address.');
       return errorResponse(
         429,
         'rate_limited',
@@ -90,7 +96,14 @@ Handler buildParticipantHandler(
         requestId: requestIdOf(request),
       ).change(headers: {'retry-after': '${wait.inSeconds + 1}'});
     }
-    final body = await readJsonBody(request, ResolveInvitationRequest.fromJson);
+    final ResolveInvitationRequest body;
+    try {
+      body = await readJsonBody(request, ResolveInvitationRequest.fromJson);
+    } on ArgumentError {
+      // A body that is not a request counts like a wrong credential.
+      await limits.recordFailure(address);
+      rethrow;
+    }
     try {
       final resolution = await invitations.resolve(body.credential.trim());
       final answer = await _resolution(repository, resolution);
@@ -110,7 +123,7 @@ Handler buildParticipantHandler(
         },
       );
     } on InvitationAccessError {
-      rateLimiter.recordFailure(key);
+      await limits.recordFailure(address);
       rethrow;
     }
   });
@@ -242,11 +255,6 @@ Handler buildParticipantHandler(
   );
   return router.call;
 }
-
-/// What identifies the caller for rate limiting: the address Fly's proxy
-/// saw, which a client cannot set; one shared key where there is no proxy.
-String clientKey(Request request) =>
-    request.headers['fly-client-ip'] ?? 'unknown';
 
 Future<ResolveInvitationResponse> _resolution(
   Repository repository,

@@ -18,6 +18,7 @@ import 'package:soar_score_core/config/log_format.dart';
 /// | `API_AUDIENCE` | API identifier access tokens must be issued for | required |
 /// | `CORS_ALLOWED_ORIGINS` | comma-separated browser origins allowed to call the API, such as `http://127.0.0.1:8091` | none |
 /// | `INVITATION_SECRET` | at least 32 characters; signs invitation links and guest sessions. Without it the participant routes answer 409 `invitations_not_available`. Changing it ends every link and session | none |
+/// | `TRUSTED_PROXY_SECRET` | at least 32 characters; the secret the web site's `/api` proxy sends with the visitor's address, so rate limits count visitors and not the proxy. Without it the proxy's own address is counted (docs/deploy-api-fly.md) | none |
 /// | `SELF_SCORING_BASE_URL` | the self-scoring site invitation links point at, an `https://` URL (or `http://` for local use) with no path | `https://score.rcsoarscore.com` |
 /// | `LOG_DB_STATEMENT_DURATIONS` | `true` logs one line per database statement with its duration, SQL text and argument count (never values); `false` or unset is off | off |
 /// | `DATABASE_URL` | a `postgresql://` connection URL (authority with password, database in the path, `sslmode` optional) | none — the URL wins over the discrete variables |
@@ -34,6 +35,7 @@ class ServerConfig {
     this.corsAllowedOrigins = const {},
     this.invitationSecret,
     this.selfScoringBaseUrl,
+    this.trustedProxySecret,
     this.logStatementDurations = false,
   });
 
@@ -47,6 +49,7 @@ class ServerConfig {
     'CORS_ALLOWED_ORIGINS',
     'INVITATION_SECRET',
     'SELF_SCORING_BASE_URL',
+    'TRUSTED_PROXY_SECRET',
     'LOG_DB_STATEMENT_DURATIONS',
     'DATABASE_URL',
     'POSTGRES_PASSWORD',
@@ -77,6 +80,9 @@ class ServerConfig {
   /// The self-scoring site invitation links point at, or null for the
   /// default.
   final String? selfScoringBaseUrl;
+
+  /// The secret the site's `/api` proxy proves itself with, or null.
+  final String? trustedProxySecret;
 
   /// Whether each database statement's duration is logged (off by default).
   final bool logStatementDurations;
@@ -174,6 +180,11 @@ class ServerConfig {
       problems.add('INVITATION_SECRET must be at least 32 characters.');
     }
 
+    final proxySecret = value('TRUSTED_PROXY_SECRET');
+    if (proxySecret != null && utf8.encode(proxySecret).length < 32) {
+      problems.add('TRUSTED_PROXY_SECRET must be at least 32 characters.');
+    }
+
     final selfScoring = value('SELF_SCORING_BASE_URL');
     if (selfScoring != null) {
       final uri = Uri.tryParse(selfScoring);
@@ -252,6 +263,7 @@ class ServerConfig {
       corsAllowedOrigins: origins,
       invitationSecret: secret,
       selfScoringBaseUrl: selfScoring,
+      trustedProxySecret: proxySecret,
       logStatementDurations: logStatementDurations,
     );
   }

@@ -938,4 +938,141 @@ void _tests(SliceBackend backend) {
       expect((body['error']! as Map)['code'], 'invitations_not_available');
     });
   });
+
+  group('throttling (counted in the database)', () {
+    const proxySecret = 'a-proxy-secret-that-is-at-least-32-bytes';
+
+    Future<int> open(
+      Handler to,
+      Map<String, String> headers, {
+      String body = '{"credential": "nope"}',
+    }) async {
+      final response = await to(
+        Request(
+          'POST',
+          Uri.parse('http://localhost/api/v1/self-scoring/invitations/resolve'),
+          body: body,
+          headers: headers,
+        ),
+      );
+      await response.readAsString();
+      return response.statusCode;
+    }
+
+    Handler machine({String? trustedProxySecret}) => createServerHandler(
+      api.database,
+      authMiddleware: fixedPrincipal(Principal(accountId: api.director)),
+      invitationSecret: _secret,
+      trustedProxySecret: trustedProxySecret,
+    );
+
+    test('a direct burst reaches the limit, one address only', () async {
+      final fly = {'fly-client-ip': '203.0.113.7'};
+      for (var i = 0; i < 19; i++) {
+        expect(await open(handler, fly), 404, reason: 'attempt $i');
+      }
+      expect(await open(handler, fly), 404, reason: 'the 20th failure');
+      expect(await open(handler, fly), 429);
+      expect(await open(handler, {'fly-client-ip': '203.0.113.8'}), 404);
+      final stored = await api.database
+          .customSelect('SELECT bucket, caller FROM request_throttles')
+          .get();
+      expect(stored, isNotEmpty);
+      expect(
+        jsonEncode([for (final r in stored) r.data]),
+        isNot(contains('203.0.113')),
+      );
+    });
+
+    test('successful redemptions count against the attempt limit', () async {
+      await configureAndAddPilots();
+      final issued = await issue();
+      final capped = createServerHandler(
+        api.database,
+        authMiddleware: fixedPrincipal(Principal(accountId: api.director)),
+        invitationSecret: _secret,
+        invitationThrottle: InvitationThrottle(
+          store: RequestThrottleStore(api.database),
+          maxAttempts: 3,
+        ),
+      );
+      final fly = {'fly-client-ip': '203.0.113.12'};
+      final body = jsonEncode({'credential': issued.credential});
+      for (var i = 0; i < 3; i++) {
+        expect(await open(capped, fly, body: body), 200, reason: 'redeem $i');
+      }
+      expect(await open(capped, fly, body: body), 429);
+      expect(
+        await open(capped, {'fly-client-ip': '203.0.113.13'}, body: body),
+        200,
+      );
+    });
+
+    test('malformed bodies are counted too', () async {
+      final fly = {'fly-client-ip': '203.0.113.9'};
+      for (var i = 0; i < 20; i++) {
+        expect(await open(handler, fly, body: 'not json'), 400);
+      }
+      expect(await open(handler, fly), 429);
+    });
+
+    test('machines sharing the database count together', () async {
+      final one = machine();
+      final two = machine();
+      final fly = {'fly-client-ip': '203.0.113.10'};
+      for (var i = 0; i < 10; i++) {
+        expect(await open(one, fly), 404);
+        expect(await open(two, fly), 404);
+      }
+      expect(await open(one, fly), 429);
+      expect(await open(two, fly), 429);
+    });
+
+    test(
+      'through the site proxy it counts the visitor, not the proxy',
+      () async {
+        final proxied = machine(trustedProxySecret: proxySecret);
+        Map<String, String> via(
+          String visitor, [
+          String secret = proxySecret,
+        ]) => {
+          'fly-client-ip': '76.76.21.21',
+          forwardedClientHeader: visitor,
+          proxySecretHeader: secret,
+        };
+        for (var i = 0; i < 20; i++) {
+          expect(await open(proxied, via('198.51.100.1')), 404);
+        }
+        expect(await open(proxied, via('198.51.100.1')), 429);
+        // Another visitor behind the same proxy is not locked out.
+        expect(await open(proxied, via('198.51.100.2')), 404);
+        // A caller who guesses the header but not the secret is counted as the
+        // proxy's address, not as the visitor it names.
+        expect(await open(proxied, via('198.51.100.3', 'wrong')), 404);
+        expect(await open(proxied, {'fly-client-ip': '76.76.21.21'}), 404);
+      },
+    );
+
+    test('a refused link keeps the uniform answer', () async {
+      final fly = {'fly-client-ip': '203.0.113.11'};
+      final (status, body) = await resolve('nope');
+      expect(status, 404);
+      final response = await handler(
+        Request(
+          'POST',
+          Uri.parse('http://localhost/api/v1/self-scoring/invitations/resolve'),
+          body: '{"credential": "nope"}',
+          headers: fly,
+        ),
+      );
+      expect(response.statusCode, 404);
+      final again = jsonDecode(await response.readAsString()) as Map;
+      expect((again['error']! as Map)['code'], 'invalid_invitation');
+      expect((body['error']! as Map)['code'], 'invalid_invitation');
+      expect(
+        (again['error']! as Map)['message'],
+        (body['error']! as Map)['message'],
+      );
+    });
+  });
 }

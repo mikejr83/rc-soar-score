@@ -54,6 +54,7 @@ const tableGroupByName = <String, TableGroup>{
   'publication_projections': TableGroup.backendOnly,
   'publication_participants': TableGroup.backendOnly,
   'delist_requests': TableGroup.backendOnly,
+  'request_throttles': TableGroup.backendOnly,
   'invitations': TableGroup.issued,
   'mutation_records': TableGroup.contest,
   'conflict_records': TableGroup.contest,

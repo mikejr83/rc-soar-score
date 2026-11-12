@@ -124,4 +124,5 @@ final exchangeClassByTable = <String, ExchangeClass>{
   'publication_projections': ExchangeClass.serviceOnly,
   'publication_participants': ExchangeClass.serviceOnly,
   'delist_requests': ExchangeClass.serviceOnly,
+  'request_throttles': ExchangeClass.serviceOnly,
 };

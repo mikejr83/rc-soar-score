@@ -21458,6 +21458,328 @@ class DelistRequestsCompanion extends UpdateCompanion<DelistRequestData> {
   }
 }
 
+class $RequestThrottlesTable extends RequestThrottles
+    with TableInfo<$RequestThrottlesTable, RequestThrottleData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RequestThrottlesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _bucketMeta = const VerificationMeta('bucket');
+  @override
+  late final GeneratedColumn<String> bucket = GeneratedColumn<String>(
+    'bucket',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _callerMeta = const VerificationMeta('caller');
+  @override
+  late final GeneratedColumn<String> caller = GeneratedColumn<String>(
+    'caller',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _windowStartMeta = const VerificationMeta(
+    'windowStart',
+  );
+  @override
+  late final GeneratedColumn<String> windowStart = GeneratedColumn<String>(
+    'window_start',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _countMeta = const VerificationMeta('count');
+  @override
+  late final GeneratedColumn<int> count = GeneratedColumn<int>(
+    'count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [bucket, caller, windowStart, count];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'request_throttles';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RequestThrottleData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('bucket')) {
+      context.handle(
+        _bucketMeta,
+        bucket.isAcceptableOrUnknown(data['bucket']!, _bucketMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bucketMeta);
+    }
+    if (data.containsKey('caller')) {
+      context.handle(
+        _callerMeta,
+        caller.isAcceptableOrUnknown(data['caller']!, _callerMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_callerMeta);
+    }
+    if (data.containsKey('window_start')) {
+      context.handle(
+        _windowStartMeta,
+        windowStart.isAcceptableOrUnknown(
+          data['window_start']!,
+          _windowStartMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_windowStartMeta);
+    }
+    if (data.containsKey('count')) {
+      context.handle(
+        _countMeta,
+        count.isAcceptableOrUnknown(data['count']!, _countMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_countMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {bucket, caller};
+  @override
+  RequestThrottleData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RequestThrottleData(
+      bucket: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bucket'],
+      )!,
+      caller: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}caller'],
+      )!,
+      windowStart: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}window_start'],
+      )!,
+      count: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}count'],
+      )!,
+    );
+  }
+
+  @override
+  $RequestThrottlesTable createAlias(String alias) {
+    return $RequestThrottlesTable(attachedDatabase, alias);
+  }
+}
+
+class RequestThrottleData extends DataClass
+    implements Insertable<RequestThrottleData> {
+  /// What is counted, such as `invitation-attempts`.
+  final String bucket;
+
+  /// The caller, as a keyed hash.
+  final String caller;
+
+  /// When the current window began, UTC, ISO 8601 with milliseconds.
+  final String windowStart;
+
+  /// Requests counted in the current window.
+  final int count;
+  const RequestThrottleData({
+    required this.bucket,
+    required this.caller,
+    required this.windowStart,
+    required this.count,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['bucket'] = Variable<String>(bucket);
+    map['caller'] = Variable<String>(caller);
+    map['window_start'] = Variable<String>(windowStart);
+    map['count'] = Variable<int>(count);
+    return map;
+  }
+
+  RequestThrottlesCompanion toCompanion(bool nullToAbsent) {
+    return RequestThrottlesCompanion(
+      bucket: Value(bucket),
+      caller: Value(caller),
+      windowStart: Value(windowStart),
+      count: Value(count),
+    );
+  }
+
+  factory RequestThrottleData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RequestThrottleData(
+      bucket: serializer.fromJson<String>(json['bucket']),
+      caller: serializer.fromJson<String>(json['caller']),
+      windowStart: serializer.fromJson<String>(json['windowStart']),
+      count: serializer.fromJson<int>(json['count']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'bucket': serializer.toJson<String>(bucket),
+      'caller': serializer.toJson<String>(caller),
+      'windowStart': serializer.toJson<String>(windowStart),
+      'count': serializer.toJson<int>(count),
+    };
+  }
+
+  RequestThrottleData copyWith({
+    String? bucket,
+    String? caller,
+    String? windowStart,
+    int? count,
+  }) => RequestThrottleData(
+    bucket: bucket ?? this.bucket,
+    caller: caller ?? this.caller,
+    windowStart: windowStart ?? this.windowStart,
+    count: count ?? this.count,
+  );
+  RequestThrottleData copyWithCompanion(RequestThrottlesCompanion data) {
+    return RequestThrottleData(
+      bucket: data.bucket.present ? data.bucket.value : this.bucket,
+      caller: data.caller.present ? data.caller.value : this.caller,
+      windowStart: data.windowStart.present
+          ? data.windowStart.value
+          : this.windowStart,
+      count: data.count.present ? data.count.value : this.count,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RequestThrottleData(')
+          ..write('bucket: $bucket, ')
+          ..write('caller: $caller, ')
+          ..write('windowStart: $windowStart, ')
+          ..write('count: $count')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(bucket, caller, windowStart, count);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RequestThrottleData &&
+          other.bucket == this.bucket &&
+          other.caller == this.caller &&
+          other.windowStart == this.windowStart &&
+          other.count == this.count);
+}
+
+class RequestThrottlesCompanion extends UpdateCompanion<RequestThrottleData> {
+  final Value<String> bucket;
+  final Value<String> caller;
+  final Value<String> windowStart;
+  final Value<int> count;
+  final Value<int> rowid;
+  const RequestThrottlesCompanion({
+    this.bucket = const Value.absent(),
+    this.caller = const Value.absent(),
+    this.windowStart = const Value.absent(),
+    this.count = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RequestThrottlesCompanion.insert({
+    required String bucket,
+    required String caller,
+    required String windowStart,
+    required int count,
+    this.rowid = const Value.absent(),
+  }) : bucket = Value(bucket),
+       caller = Value(caller),
+       windowStart = Value(windowStart),
+       count = Value(count);
+  static Insertable<RequestThrottleData> custom({
+    Expression<String>? bucket,
+    Expression<String>? caller,
+    Expression<String>? windowStart,
+    Expression<int>? count,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (bucket != null) 'bucket': bucket,
+      if (caller != null) 'caller': caller,
+      if (windowStart != null) 'window_start': windowStart,
+      if (count != null) 'count': count,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RequestThrottlesCompanion copyWith({
+    Value<String>? bucket,
+    Value<String>? caller,
+    Value<String>? windowStart,
+    Value<int>? count,
+    Value<int>? rowid,
+  }) {
+    return RequestThrottlesCompanion(
+      bucket: bucket ?? this.bucket,
+      caller: caller ?? this.caller,
+      windowStart: windowStart ?? this.windowStart,
+      count: count ?? this.count,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (bucket.present) {
+      map['bucket'] = Variable<String>(bucket.value);
+    }
+    if (caller.present) {
+      map['caller'] = Variable<String>(caller.value);
+    }
+    if (windowStart.present) {
+      map['window_start'] = Variable<String>(windowStart.value);
+    }
+    if (count.present) {
+      map['count'] = Variable<int>(count.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RequestThrottlesCompanion(')
+          ..write('bucket: $bucket, ')
+          ..write('caller: $caller, ')
+          ..write('windowStart: $windowStart, ')
+          ..write('count: $count, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $InvitationsTable extends Invitations
     with TableInfo<$InvitationsTable, InvitationData> {
   @override
@@ -38936,6 +39258,9 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
   late final $PublicationParticipantsTable publicationParticipants =
       $PublicationParticipantsTable(this);
   late final $DelistRequestsTable delistRequests = $DelistRequestsTable(this);
+  late final $RequestThrottlesTable requestThrottles = $RequestThrottlesTable(
+    this,
+  );
   late final $InvitationsTable invitations = $InvitationsTable(this);
   late final $MatrixRevisionsTable matrixRevisions = $MatrixRevisionsTable(
     this,
@@ -39005,6 +39330,7 @@ abstract class _$SoarScoreDatabase extends GeneratedDatabase {
     publicationProjections,
     publicationParticipants,
     delistRequests,
+    requestThrottles,
     invitations,
     matrixRevisions,
     rounds,
@@ -61165,6 +61491,210 @@ typedef $$DelistRequestsTableProcessedTableManager =
         bool decidedBy,
       })
     >;
+typedef $$RequestThrottlesTableCreateCompanionBuilder =
+    RequestThrottlesCompanion Function({
+      required String bucket,
+      required String caller,
+      required String windowStart,
+      required int count,
+      Value<int> rowid,
+    });
+typedef $$RequestThrottlesTableUpdateCompanionBuilder =
+    RequestThrottlesCompanion Function({
+      Value<String> bucket,
+      Value<String> caller,
+      Value<String> windowStart,
+      Value<int> count,
+      Value<int> rowid,
+    });
+
+class $$RequestThrottlesTableFilterComposer
+    extends Composer<_$SoarScoreDatabase, $RequestThrottlesTable> {
+  $$RequestThrottlesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get bucket => $composableBuilder(
+    column: $table.bucket,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get caller => $composableBuilder(
+    column: $table.caller,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get windowStart => $composableBuilder(
+    column: $table.windowStart,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get count => $composableBuilder(
+    column: $table.count,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$RequestThrottlesTableOrderingComposer
+    extends Composer<_$SoarScoreDatabase, $RequestThrottlesTable> {
+  $$RequestThrottlesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get bucket => $composableBuilder(
+    column: $table.bucket,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get caller => $composableBuilder(
+    column: $table.caller,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get windowStart => $composableBuilder(
+    column: $table.windowStart,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get count => $composableBuilder(
+    column: $table.count,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$RequestThrottlesTableAnnotationComposer
+    extends Composer<_$SoarScoreDatabase, $RequestThrottlesTable> {
+  $$RequestThrottlesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get bucket =>
+      $composableBuilder(column: $table.bucket, builder: (column) => column);
+
+  GeneratedColumn<String> get caller =>
+      $composableBuilder(column: $table.caller, builder: (column) => column);
+
+  GeneratedColumn<String> get windowStart => $composableBuilder(
+    column: $table.windowStart,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get count =>
+      $composableBuilder(column: $table.count, builder: (column) => column);
+}
+
+class $$RequestThrottlesTableTableManager
+    extends
+        RootTableManager<
+          _$SoarScoreDatabase,
+          $RequestThrottlesTable,
+          RequestThrottleData,
+          $$RequestThrottlesTableFilterComposer,
+          $$RequestThrottlesTableOrderingComposer,
+          $$RequestThrottlesTableAnnotationComposer,
+          $$RequestThrottlesTableCreateCompanionBuilder,
+          $$RequestThrottlesTableUpdateCompanionBuilder,
+          (
+            RequestThrottleData,
+            BaseReferences<
+              _$SoarScoreDatabase,
+              $RequestThrottlesTable,
+              RequestThrottleData
+            >,
+          ),
+          RequestThrottleData,
+          PrefetchHooks Function()
+        > {
+  $$RequestThrottlesTableTableManager(
+    _$SoarScoreDatabase db,
+    $RequestThrottlesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RequestThrottlesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RequestThrottlesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RequestThrottlesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> bucket = const Value.absent(),
+                Value<String> caller = const Value.absent(),
+                Value<String> windowStart = const Value.absent(),
+                Value<int> count = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RequestThrottlesCompanion(
+                bucket: bucket,
+                caller: caller,
+                windowStart: windowStart,
+                count: count,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String bucket,
+                required String caller,
+                required String windowStart,
+                required int count,
+                Value<int> rowid = const Value.absent(),
+              }) => RequestThrottlesCompanion.insert(
+                bucket: bucket,
+                caller: caller,
+                windowStart: windowStart,
+                count: count,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$RequestThrottlesTable, RequestThrottleData>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$SoarScoreDatabase,
+                    $RequestThrottlesTable,
+                    RequestThrottleData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$RequestThrottlesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$SoarScoreDatabase,
+      $RequestThrottlesTable,
+      RequestThrottleData,
+      $$RequestThrottlesTableFilterComposer,
+      $$RequestThrottlesTableOrderingComposer,
+      $$RequestThrottlesTableAnnotationComposer,
+      $$RequestThrottlesTableCreateCompanionBuilder,
+      $$RequestThrottlesTableUpdateCompanionBuilder,
+      (
+        RequestThrottleData,
+        BaseReferences<
+          _$SoarScoreDatabase,
+          $RequestThrottlesTable,
+          RequestThrottleData
+        >,
+      ),
+      RequestThrottleData,
+      PrefetchHooks Function()
+    >;
 typedef $$InvitationsTableCreateCompanionBuilder =
     InvitationsCompanion Function({
       required String id,
@@ -76556,6 +77086,8 @@ class $SoarScoreDatabaseManager {
       );
   $$DelistRequestsTableTableManager get delistRequests =>
       $$DelistRequestsTableTableManager(_db, _db.delistRequests);
+  $$RequestThrottlesTableTableManager get requestThrottles =>
+      $$RequestThrottlesTableTableManager(_db, _db.requestThrottles);
   $$InvitationsTableTableManager get invitations =>
       $$InvitationsTableTableManager(_db, _db.invitations);
   $$MatrixRevisionsTableTableManager get matrixRevisions =>
