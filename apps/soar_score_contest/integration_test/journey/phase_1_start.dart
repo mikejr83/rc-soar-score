@@ -55,12 +55,16 @@ Future<void> runStartPhase(Journey journey, JourneyContext data) async {
       // not leave the page. The web build has no sync but refreshes from the
       // service, so its entry reads "Refresh" and a click reloads the page.
       final sync = find.byKey(const ValueKey('shell-sync-status'));
-      if (sync.evaluate().isEmpty) return;
       if (kIsWeb) {
-        expect(
+        // Opening a contest starts a check, which reads "Refreshing" until it
+        // answers; the click comes once the entry is ready, and its absence
+        // is a failure here.
+        await pumpUntilFound(
+          tester,
           find.descendant(of: sync, matching: find.text('Refresh')),
-          findsOneWidget,
         );
+      } else if (sync.evaluate().isEmpty) {
+        return;
       }
       expect(
         find.descendant(
@@ -72,11 +76,13 @@ Future<void> runStartPhase(Journey journey, JourneyContext data) async {
       await tapVisible(tester, sync);
       expect(find.text('Workspace'), findsWidgets);
       if (kIsWeb) {
-        // The refresh finishes and the entry offers it again.
+        // The refresh finishes, successfully, and the entry offers it again.
+        await tester.pump();
         await pumpUntilFound(
           tester,
           find.descendant(of: sync, matching: find.text('Refresh')),
         );
+        expect(find.text('Refresh failed'), findsNothing);
         await pumpUntilFound(tester, find.text('Workspace'));
       }
     },

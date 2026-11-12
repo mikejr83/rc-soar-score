@@ -25,9 +25,11 @@ class _Service {
   final calls = <Id?>[];
   final sequences = <Id?, int>{};
   Object? failure;
+  bool stall = false;
 
   Future<SyncRevisionDto> fetch({Id? contestId}) async {
     calls.add(contestId);
+    if (stall) return Completer<SyncRevisionDto>().future;
     final failure = this.failure;
     if (failure != null) throw failure;
     return SyncRevisionDto(
@@ -264,6 +266,27 @@ void main() {
       expect(summary.problem, SyncProblem.offline);
       expect(summary.dataRevision, 1);
       expect(summary.lastSyncedAt, isNotNull);
+    });
+  });
+
+  test('a stalled answer fails after the deadline and Refresh works again', () {
+    withSync((async) {
+      async.flushMicrotasks();
+      service.stall = true;
+
+      unawaited(sync.syncNow(accountScope()));
+      async.flushMicrotasks();
+      expect(sync.state.syncing, isTrue);
+
+      async.elapse(const Duration(seconds: 16));
+
+      expect(sync.state.syncing, isFalse);
+      expect(sync.state.of(accountScope())!.problem, SyncProblem.offline);
+
+      service.stall = false;
+      unawaited(sync.syncNow(accountScope()));
+      async.flushMicrotasks();
+      expect(sync.state.of(accountScope())!.problem, isNull);
     });
   });
 

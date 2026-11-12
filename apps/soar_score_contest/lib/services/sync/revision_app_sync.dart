@@ -39,6 +39,7 @@ class RevisionAppSync implements AppSync {
     DateTime Function()? now,
     SyncTimerFactory? timerFactory,
     double jitter = 0.1,
+    this.requestTimeout = const Duration(seconds: 15),
   }) : _now = now ?? DateTime.now {
     _poller = SyncPoller(
       onPoll: _poll,
@@ -49,6 +50,10 @@ class RevisionAppSync implements AppSync {
     _signInChanges.addListener(_signInChanged);
     _signInChanged();
   }
+
+  /// How long a check waits for the service before it counts as failed, so a
+  /// stalled answer never leaves the Refresh entry busy for good.
+  final Duration requestTimeout;
 
   final FetchRevision _fetch;
   final bool Function() _isSignedIn;
@@ -197,7 +202,9 @@ class RevisionAppSync implements AppSync {
   }) async {
     final SyncRevisionDto revision;
     try {
-      revision = await _fetch(contestId: contestId);
+      revision = await _fetch(contestId: contestId).timeout(requestTimeout);
+    } on TimeoutException {
+      return _failed(contestId, SyncProblem.offline, session);
     } on ApiNetworkError {
       return _failed(contestId, SyncProblem.offline, session);
     } on ApiHttpError catch (error) {
