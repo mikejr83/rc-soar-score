@@ -32,6 +32,14 @@ import 'sync_scope_ids.dart';
 /// Each mutation commits or fails alone, so a rejection never rolls back its
 /// valid siblings. The decision is recorded, so a retry of the same
 /// `client_mutation_id` returns it unchanged and applies nothing twice.
+/// How long after its activation a first upload sent in several exchanges may
+/// keep going. An upload not finished by then falls under the ordinary rules.
+const firstUploadWindow = Duration(hours: 24);
+
+/// How far past the activation a client clock may read for a mutation to
+/// still count as history of the upload (the client and the service differ).
+const firstUploadClockSkew = Duration(minutes: 10);
+
 class MutationProcessor {
   MutationProcessor(this._store, {SyncLog? log})
     : _log = log ?? SyncLog(),
@@ -139,6 +147,7 @@ class MutationProcessor {
     if (problem != null) return reject(problem.$1, problem.$2);
 
     var bootstrap = false;
+    var continuingUpload = false;
     final scope = ctx.scope;
     if (scope is ContestScopeKey) {
       final activations = await tx.listActivations(scope.contestId);
@@ -147,14 +156,22 @@ class MutationProcessor {
       );
       // A later batch of a first upload: the contest was created by an earlier
       // exchange of the same upload, so its history is still exempt from the
-      // lock and completed rules. That holds only while the upload is open
-      // (saved on the contest's one `Initial` activation until the client
-      // finishes it) and only for the installation that holds it.
+      // lock and completed rules. The exemption is finite and checked here:
+      // the upload must be open (saved on the contest's one `Initial`
+      // activation until the client finishes it), still inside
+      // [firstUploadWindow] of the activation, held by the sending
+      // installation, and the mutation must be history, made no later than
+      // the upload began (with [firstUploadClockSkew] to spare). A change made
+      // after that falls under the ordinary rules.
       if (holds && ctx.firstUpload != null) {
         final current = activations.where((a) => a.isOpen).single;
-        if (current.uploadOpen && current.kind == ActivationKind.initial) {
-          ctx.createdContestId = scope.contestId;
-        }
+        continuingUpload =
+            current.uploadOpen &&
+            current.kind == ActivationKind.initial &&
+            !ctx.clock().isAfter(current.activatedAt.add(firstUploadWindow)) &&
+            !m.clientTime.isAfter(
+              current.activatedAt.add(firstUploadClockSkew),
+            );
       }
       if (!holds) {
         final firstUpload =
@@ -193,6 +210,7 @@ class MutationProcessor {
       if (m.entityType != 'Contest' &&
           contest != null &&
           ctx.createdContestId != scope.contestId &&
+          !continuingUpload &&
           (contest['admin_lock'] == 'Locked' ||
               contest['lifecycle_state'] == 'Completed')) {
         return reject(

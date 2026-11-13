@@ -20,6 +20,7 @@ class AcceptorHarness {
     Backend backend, {
     int pageSize = 500,
     bool recalculates = false,
+    DateTime Function()? clock,
   }) async {
     // The client and the server are two databases on purpose.
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -46,6 +47,7 @@ class AcceptorHarness {
       harness.serverRepository,
       versions: const SyncVersions.exactly(1),
       pageSize: pageSize,
+      clock: clock,
       recalculation: recalculates
           ? RecalculationService(ResultsService(harness.serverRepository))
           : null,

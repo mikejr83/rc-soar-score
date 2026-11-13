@@ -210,16 +210,13 @@ class SyncEngine {
         : const <MutationRecord>[];
     final heldCreation = creation.isEmpty ? null : creation.first;
     final firstUpload = heldCreation != null;
+    // What the data requests carry, so sizes are measured on the real thing.
+    final openFlag = firstUpload ? _openUpload : null;
 
     final envelope = utf8
         .encode(
           jsonEncode(
-            _request(
-              scope,
-              cursor,
-              const [],
-              firstUpload: _openUpload,
-            ).toJson(),
+            _request(scope, cursor, const [], firstUpload: openFlag).toJson(),
           ),
         )
         .length;
@@ -231,7 +228,7 @@ class SyncEngine {
             jsonEncode(
               _request(scope, cursor, [
                 mutationToDto(m),
-              ], firstUpload: _openUpload).toJson(),
+              ], firstUpload: openFlag).toJson(),
             ),
           )
           .length,
@@ -273,7 +270,7 @@ class SyncEngine {
         scope,
         sequence,
         sendable.map(mutationToDto).toList(),
-        firstUpload: firstUpload ? _openUpload : null,
+        firstUpload: openFlag,
       );
       final accepted = <String>{
         for (final r in response.results)

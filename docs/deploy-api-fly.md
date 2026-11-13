@@ -11,17 +11,17 @@ enough. No secret lives in the repository: `DATABASE_URL` is a Fly secret.
 
 ## Environment variables
 
-| Variable                          | Where                 | Value                                                                                                                                                         |
-| --------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`                    | Fly secret            | Neon **direct** (not pooled) connection string; it ends in `sslmode=require`                                                                                  |
-| `INVITATION_SECRET`               | Fly secret            | 32+ random characters (`openssl rand -base64 48`); signs invitation links and guest sessions. Set it once: changing it ends every printed QR code and session |
+| Variable                          | Where                 | Value                                                                                                                                                               |
+| --------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                    | Fly secret            | Neon **direct** (not pooled) connection string; it ends in `sslmode=require`                                                                                        |
+| `INVITATION_SECRET`               | Fly secret            | 32+ random characters (`openssl rand -base64 48`); signs invitation links and guest sessions. Set it once: changing it ends every printed QR code and session       |
 | `TRUSTED_PROXY_SECRET`            | Fly secret            | 32+ random characters; the same value as in Vercel. Lets the site's `/api` proxy tell the server which visitor a request is for (see "Throttling invitation links") |
-| `AUTH0_DOMAIN`                    | `fly.toml`            | `login.rcsoarscore.com` (the token issuer; not the `dev-...` tenant name)                                                                                     |
-| `SELF_SCORING_BASE_URL`           | `fly.toml`            | not set in production, so invitation links point at `https://score.rcsoarscore.com`; only local runs override it                                              |
-| `API_AUDIENCE`                    | `fly.toml`            | `https://soar-score.com/server`                                                                                                                               |
-| `CORS_ALLOWED_ORIGINS`            | `fly.toml`            | app, score and public site origins                                                                                                                            |
-| `PORT`, `LOG_LEVEL`, `LOG_FORMAT` | `fly.toml`            | `8080`, `INFO`, `json`                                                                                                                                        |
-| `LOG_DB_STATEMENT_DURATIONS`      | Fly secret (optional) | off. `true` logs every database statement's duration while you measure (see [Measuring statement durations](#measuring-statement-durations))                  |
+| `AUTH0_DOMAIN`                    | `fly.toml`            | `login.rcsoarscore.com` (the token issuer; not the `dev-...` tenant name)                                                                                           |
+| `SELF_SCORING_BASE_URL`           | `fly.toml`            | not set in production, so invitation links point at `https://score.rcsoarscore.com`; only local runs override it                                                    |
+| `API_AUDIENCE`                    | `fly.toml`            | `https://soar-score.com/server`                                                                                                                                     |
+| `CORS_ALLOWED_ORIGINS`            | `fly.toml`            | app, score and public site origins                                                                                                                                  |
+| `PORT`, `LOG_LEVEL`, `LOG_FORMAT` | `fly.toml`            | `8080`, `INFO`, `json`                                                                                                                                              |
+| `LOG_DB_STATEMENT_DURATIONS`      | Fly secret (optional) | off. `true` logs every database statement's duration while you measure (see [Measuring statement durations](#measuring-statement-durations))                        |
 
 The full list is in `apps/soar_score_server/lib/config/server_config.dart`.
 
@@ -78,10 +78,10 @@ per caller address, with the counts kept in the database (`request_throttles`)
 so every machine, burst clone and restart counts together. Two counters, each
 a 10 minute window:
 
-| Counter  | Counts                                                                                       | Blocked from                      |
-| -------- | -------------------------------------------------------------------------------------------- | --------------------------------- |
-| Attempts | every request, before its body is read: valid links, wrong ones and malformed bodies         | the 301st attempt in the window   |
-| Failures | requests that did not open a link: unknown or expired link, malformed or non-JSON body       | the 20th failure in the window    |
+| Counter  | Counts                                                                                 | Blocked from                    |
+| -------- | -------------------------------------------------------------------------------------- | ------------------------------- |
+| Attempts | every request, before its body is read: valid links, wrong ones and malformed bodies   | the 301st attempt in the window |
+| Failures | requests that did not open a link: unknown or expired link, malformed or non-JSON body | the 20th failure in the window  |
 
 A blocked address gets 429 `rate_limited` with `Retry-After` until its window
 ends; every link that does not open is still the same 404 `invalid_invitation`.
@@ -298,7 +298,9 @@ with `payload_too_large` and stays in the outbox with that reason. The first
 upload of a contest may span several exchanges: each says `first_upload`, the
 creating exchange opens the upload on the contest's activation, and a final
 empty exchange saying `finish` closes it. The contest's history is exempt from
-the lock and completed rules only while the upload is open. The contest's own
+the lock and completed rules only while the upload is open, for at most 24
+hours after the activation, and only for changes made no later than the
+activation (plus 10 minutes of clock difference). The contest's own
 creation stays pending on the client until the finish is sent, so an
 interrupted upload resumes.
 

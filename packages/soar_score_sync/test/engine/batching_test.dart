@@ -244,6 +244,38 @@ void main() {
     );
   });
 
+  test('an ordinary push is measured without the first-upload flag', () async {
+    final payload = {'blob': 'x' * 2000};
+    // The request this sync really sends: no first_upload at all.
+    final exact = utf8
+        .encode(
+          jsonEncode(
+            SyncExchangeRequest(
+              protocolVersion: 1,
+              schemaVersion: 1,
+              installationId: installationId,
+              scope: SyncScopeDto.contest(contestId),
+              lastAcknowledgedSequence: 0,
+              mutations: [
+                SyncMutationDto.fromJson(
+                  mutationToDtoForTest(mutation(1, payload: payload)),
+                ),
+              ],
+            ).toJson(),
+          ),
+        )
+        .length;
+    final rig = Rig(maxBytes: exact);
+    rig.store.mutations.add(mutation(1, payload: payload));
+    rig.gateway.onExchange = acceptAll();
+
+    await rig.engine.syncScope(scope);
+
+    expect(rig.store.mutations.single.outcome, MutationOutcome.accepted);
+    final sent = rig.gateway.exchanges.last;
+    expect(utf8.encode(jsonEncode(sent.toJson())).length, exact);
+  });
+
   group('first upload of a contest', () {
     test('every batch says so and the creation is decided last', () async {
       final rig = Rig(maxMutations: 2);

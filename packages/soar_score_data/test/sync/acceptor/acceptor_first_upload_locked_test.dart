@@ -1,4 +1,6 @@
 import 'package:soar_score_core/services/services.dart';
+import 'package:soar_score_core/services/sync/mutation_processor.dart'
+    show firstUploadWindow;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:test/test.dart';
 
@@ -17,8 +19,15 @@ void _tests(Backend backend) {
 
   /// Opens a client with one score entered and the contest finished: always
   /// Completed, and Locked when [lock] says so.
-  Future<void> prepare(core.AdminLock lock) async {
-    harness = await AcceptorHarness.open(backend, recalculates: true);
+  Future<void> prepare(
+    core.AdminLock lock, {
+    DateTime Function()? clock,
+  }) async {
+    harness = await AcceptorHarness.open(
+      backend,
+      recalculates: true,
+      clock: clock,
+    );
     contestId = await harness.drawContestOnClient();
     scope = core.ContestScopeKey(contestId);
     final matrix = await MatrixService(harness.clientRepository)
@@ -184,6 +193,45 @@ void _tests(Backend backend) {
         after: afterHead,
         firstUpload: FirstUploadPhase.finish,
       );
+
+      final out = await sendTail(FirstUploadPhase.open);
+
+      expect(out.results.map((r) => r.reasonCode), contains('locked'));
+    });
+
+    test('a change made after the upload began is not history', () async {
+      await prepare(core.AdminLock.locked);
+      await sendHead(phase: FirstUploadPhase.open);
+      // The Contest row is never subject to the lock rule; take another.
+      final index = tail.indexWhere((m) => m.entityType != 'Contest');
+      final original = tail[index];
+      final later = SyncMutation(
+        id: original.id,
+        clientMutationId: original.clientMutationId,
+        entityType: original.entityType,
+        entityId: original.entityId,
+        baseRevision: original.baseRevision,
+        authority: original.authority,
+        clientTime: DateTime.now().toUtc().add(const Duration(days: 1)),
+        dependsOnMutationId: original.dependsOnMutationId,
+        payload: original.payload,
+      );
+      tail = [...tail]..[index] = later;
+
+      final out = await sendTail(FirstUploadPhase.open);
+
+      expect(out.results[index].reasonCode, 'locked');
+      expect([
+        for (final (i, r) in out.results.indexed)
+          if (i != index) r.reasonCode,
+      ], isNot(contains('locked')));
+    });
+
+    test('the exemption ends after the window', () async {
+      var now = DateTime.now().toUtc();
+      await prepare(core.AdminLock.locked, clock: () => now);
+      await sendHead(phase: FirstUploadPhase.open);
+      now = now.add(firstUploadWindow + const Duration(minutes: 1));
 
       final out = await sendTail(FirstUploadPhase.open);
 
