@@ -28,7 +28,22 @@ class PromoteScoreRequest {
       _$PromoteScoreRequestFromJson(json);
 
   final String sourceAttemptId;
+  @JsonKey(fromJson: _wholeNumber)
   final int expectedScoreRevision;
 
   Map<String, dynamic> toJson() => _$PromoteScoreRequestToJson(this);
+}
+
+/// A JSON whole number as an int; a fraction such as 1.9, which the generated
+/// decoder would truncate, or any other type is refused.
+int _wholeNumber(Object? value) {
+  if (value is int) return value;
+  if (value is double && value == value.truncateToDouble() && value.isFinite) {
+    return value.toInt();
+  }
+  throw ArgumentError.value(
+    value,
+    'expected_score_revision',
+    'not a whole number',
+  );
 }

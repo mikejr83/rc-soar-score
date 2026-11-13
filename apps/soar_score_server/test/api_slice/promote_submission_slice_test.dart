@@ -365,6 +365,29 @@ void _tests(SliceBackend backend) {
     );
   });
 
+  test(
+    'overlapping identical requests agree: one adopts, one replays',
+    () async {
+      await submitFirst();
+      final results = await Future.wait([
+        promote(id: 'race-1'),
+        promote(id: 'race-2'),
+        promote(id: 'race-3'),
+      ]);
+
+      expect(results.where((r) => !r.replayed), hasLength(1));
+      expect(results.where((r) => r.replayed), hasLength(2));
+      expect({for (final r in results) r.entry.officialScore.id}, hasLength(1));
+      final placeholder = await placeholderOf(1, 1);
+      expect(
+        await repository.officialScoreRepository.listForPlaceholder(
+          placeholder.id,
+        ),
+        hasLength(1),
+      );
+    },
+  );
+
   group('over HTTP', () {
     Future<Map<String, Object?>> post(
       Map<String, Object?> body, {
@@ -398,6 +421,28 @@ void _tests(SliceBackend backend) {
         (first['official_score']! as Map)['id'],
       );
     });
+
+    test(
+      'a fractional or non-numeric revision is 400 and stores nothing',
+      () async {
+        await submitFirst();
+        for (final revision in <Object>[1.9, '1', true]) {
+          final response = await api.send(
+            'POST',
+            '/contests/$_contestId/assignments/${slotId.value}/scores/official',
+            body: {
+              'source_attempt_id': attemptId.value,
+              'expected_score_revision': revision,
+            },
+          );
+          expect(response.status, 400, reason: '$revision');
+        }
+        expect(
+          (await placeholderOf(1, 1)).state,
+          core.ScorePlaceholderState.submitted,
+        );
+      },
+    );
 
     test('a stale revision is 409 and stores nothing', () async {
       await submitFirst();

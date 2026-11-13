@@ -18,7 +18,7 @@ PromoteScoreRequest _$PromoteScoreRequestFromJson(Map<String, dynamic> json) =>
           ),
           expectedScoreRevision: $checkedConvert(
             'expected_score_revision',
-            (v) => (v as num).toInt(),
+            (v) => _wholeNumber(v),
           ),
         );
         return val;

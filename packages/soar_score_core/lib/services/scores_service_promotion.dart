@@ -62,18 +62,19 @@ extension PromoteSubmissionService on ScoresService {
         entityId: assignmentId,
       );
     }
-    final official = await repository.officialScoreRepository
-        .currentForPlaceholder(current.id);
-    if (official != null) {
+    Future<ScorePromotionResult?> replayOf(ScorePlaceholder slot) async {
+      final official = await repository.officialScoreRepository
+          .currentForPlaceholder(slot.id);
+      if (official == null) return null;
       // Only an exact retry of this adoption is a success; it reads state and
       // writes nothing, whatever locks were set since.
       if (official.scoreAttemptId == sourceAttemptId &&
-          current.currentAttemptId == sourceAttemptId &&
+          slot.currentAttemptId == sourceAttemptId &&
           official.scoreRevision - 1 == expectedScoreRevision) {
         return ScorePromotionResult(
           entry: ScoreEntryResult(
             officialScore: official,
-            placeholder: current,
+            placeholder: slot,
             contest: contest,
             calculated: await _calculate(context, official.components),
           ),
@@ -82,11 +83,14 @@ extension PromoteSubmissionService on ScoresService {
       }
       throw StaleRevisionError(
         entityType: 'ScorePlaceholder',
-        entityId: current.id,
+        entityId: slot.id,
         expectedRevision: expectedScoreRevision,
-        storedRevision: current.scoreRevision,
+        storedRevision: slot.scoreRevision,
       );
     }
+
+    final earlier = await replayOf(current);
+    if (earlier != null) return earlier;
 
     _requireScoringAllowed(contest);
     final slot = await _requireSlot(contestId, assignmentId);
@@ -194,15 +198,36 @@ extension PromoteSubmissionService on ScoresService {
       );
     }
 
-    final stored = await repository.officialScoreRepository.recordPromotion(
-      PromotedScore(
-        officialScore: adopted,
-        placeholder: updated,
-        supersededReviews: superseded,
-        audits: audits,
-      ),
-      metadata: metadata,
-    );
+    final PromotedScore stored;
+    try {
+      stored = await repository.officialScoreRepository.recordPromotion(
+        PromotedScore(
+          officialScore: adopted,
+          placeholder: updated,
+          supersededReviews: superseded,
+          audits: audits,
+        ),
+        metadata: metadata,
+      );
+    } on Object {
+      // Another request may have adopted the same submission between the
+      // checks above and the write (the database refuses the second official
+      // revision). Nothing of this write was kept; if the slot now holds
+      // exactly the adoption asked for, this request is its replay. Anything
+      // else is the original failure.
+      final slot = await repository.scorePlaceholderRepository
+          .findForAssignment(assignmentId);
+      ScorePromotionResult? won;
+      if (slot != null) {
+        try {
+          won = await replayOf(slot);
+        } on Object {
+          won = null;
+        }
+      }
+      if (won != null) return won;
+      rethrow;
+    }
     return ScorePromotionResult(
       entry: ScoreEntryResult(
         officialScore: stored.officialScore,
