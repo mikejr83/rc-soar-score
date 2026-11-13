@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -16,14 +17,19 @@ import '../middleware/request_limits.dart';
 /// A body over [maxBytes] is a [PayloadTooLargeError] (413), refused from the
 /// declared length or, for a body without one, as soon as the bytes read pass
 /// the limit: nothing is decoded or parsed first.
+///
+/// With [within], a body not complete by then throws a [TimeoutException]
+/// and the read of the request stream is cancelled, so nothing keeps reading
+/// it after the caller has moved on.
 Future<T> readJsonBody<T>(
   Request request,
   T Function(Map<String, dynamic> json) fromJson, {
   int maxBytes = defaultMaxBodyBytes,
+  Duration? within,
 }) async {
   final Object? decoded;
   try {
-    decoded = jsonDecode(await _readText(request, maxBytes));
+    decoded = jsonDecode(await _readText(request, maxBytes, within));
   } on FormatException {
     throw ArgumentError('The request body is not valid JSON.');
   }
@@ -43,17 +49,44 @@ Future<T> readJsonBody<T>(
   }
 }
 
-Future<String> _readText(Request request, int maxBytes) async {
+Future<String> _readText(Request request, int maxBytes, Duration? within) {
   final declared = request.contentLength;
   if (declared != null && declared > maxBytes) {
     throw PayloadTooLargeError(maxBytes);
   }
   final bytes = BytesBuilder(copy: false);
-  await for (final chunk in request.read()) {
-    if (bytes.length + chunk.length > maxBytes) {
-      throw PayloadTooLargeError(maxBytes);
-    }
-    bytes.add(chunk);
+  final done = Completer<String>();
+  late final StreamSubscription<List<int>> subscription;
+  Timer? timer;
+
+  void fail(Object error) {
+    timer?.cancel();
+    subscription.cancel();
+    if (!done.isCompleted) done.completeError(error);
   }
-  return (request.encoding ?? utf8).decode(bytes.takeBytes());
+
+  subscription = request.read().listen(
+    (chunk) {
+      if (bytes.length + chunk.length > maxBytes) {
+        fail(PayloadTooLargeError(maxBytes));
+        return;
+      }
+      bytes.add(chunk);
+    },
+    onError: fail,
+    onDone: () {
+      timer?.cancel();
+      if (!done.isCompleted) {
+        done.complete((request.encoding ?? utf8).decode(bytes.takeBytes()));
+      }
+    },
+    cancelOnError: true,
+  );
+  if (within != null) {
+    timer = Timer(
+      within,
+      () => fail(TimeoutException('The request body took too long.', within)),
+    );
+  }
+  return done.future;
 }

@@ -69,7 +69,8 @@ void addPublicationRoutes(
         final attempt = await readJsonBody(
           request,
           PublishContestRequest.fromJson,
-        ).timeout(_deniedBodyWait);
+          within: _deniedBodyWait,
+        );
         await service.publish(
           Id.parse(id),
           actorId: principal.accountId,

@@ -173,7 +173,10 @@ void main() {
         publishingEnabled: true,
         contests: api.contests,
       );
-      final never = StreamController<List<int>>();
+      var cancelled = false;
+      final never = StreamController<List<int>>(
+        onCancel: () => cancelled = true,
+      );
       addTearDown(never.close);
 
       final response = await stranger.handler(
@@ -185,6 +188,7 @@ void main() {
       );
 
       expect(response.statusCode, 403);
+      expect(cancelled, isTrue, reason: 'the body read is cancelled');
     });
   });
 }
