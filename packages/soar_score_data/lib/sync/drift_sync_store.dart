@@ -54,7 +54,10 @@ class DriftSyncStore implements core.SyncStore {
     if (scope is core.SystemScopeKey) return const {};
     final (column, id) = _scopeColumn(scope);
     final rows = await _mutations.where(
-      "outcome IN ('Rejected', 'Conflict') AND $column = ?",
+      "(outcome = 'Rejected' OR (outcome = 'Conflict' AND NOT EXISTS ("
+      'SELECT 1 FROM conflict_records c '
+      'WHERE c.competing_mutation_id = mutation_records.id '
+      "AND c.resolution <> 'Pending'))) AND $column = ?",
       [Variable<String>(id)],
       orderBy: 'client_time, id',
     );

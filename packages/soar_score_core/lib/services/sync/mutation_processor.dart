@@ -27,19 +27,15 @@ import 'sync_mutation.dart';
 import 'sync_scope_guard.dart';
 import 'sync_scope_ids.dart';
 
+/// How far past the activation a client clock may read for a mutation to
+/// still count as history of the upload (the client and the service differ).
+const firstUploadClockSkew = Duration(minutes: 10);
+
 /// Decides one mutation: applies it, rejects it, or turns it into a conflict.
 ///
 /// Each mutation commits or fails alone, so a rejection never rolls back its
 /// valid siblings. The decision is recorded, so a retry of the same
 /// `client_mutation_id` returns it unchanged and applies nothing twice.
-/// How long after its activation a first upload sent in several exchanges may
-/// keep going. An upload not finished by then falls under the ordinary rules.
-const firstUploadWindow = Duration(hours: 24);
-
-/// How far past the activation a client clock may read for a mutation to
-/// still count as history of the upload (the client and the service differ).
-const firstUploadClockSkew = Duration(minutes: 10);
-
 class MutationProcessor {
   MutationProcessor(this._store, {SyncLog? log})
     : _log = log ?? SyncLog(),
@@ -156,19 +152,19 @@ class MutationProcessor {
       );
       // A later batch of a first upload: the contest was created by an earlier
       // exchange of the same upload, so its history is still exempt from the
-      // lock and completed rules. The exemption is finite and checked here:
-      // the upload must be open (saved on the contest's one `Initial`
-      // activation until the client finishes it), still inside
-      // [firstUploadWindow] of the activation, held by the sending
-      // installation, and the mutation must be history, made no later than
-      // the upload began (with [firstUploadClockSkew] to spare). A change made
-      // after that falls under the ordinary rules.
+      // lock and completed rules. The exemption is bounded by what it covers, not
+      // by time, so an interrupted upload can always be finished: the upload
+      // must be open (saved on the contest's one `Initial` activation until
+      // the client finishes it), held by the sending installation, and the
+      // mutation must be history, made no later than the upload began (with
+      // [firstUploadClockSkew] to spare). The history is fixed when the upload
+      // begins, so the set of exempt changes is finite; a change made after
+      // that falls under the ordinary rules.
       if (holds && ctx.firstUpload != null) {
         final current = activations.where((a) => a.isOpen).single;
         continuingUpload =
             current.uploadOpen &&
             current.kind == ActivationKind.initial &&
-            !ctx.clock().isAfter(current.activatedAt.add(firstUploadWindow)) &&
             !m.clientTime.isAfter(
               current.activatedAt.add(firstUploadClockSkew),
             );

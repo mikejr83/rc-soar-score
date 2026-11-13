@@ -298,9 +298,9 @@ with `payload_too_large` and stays in the outbox with that reason. The first
 upload of a contest may span several exchanges: each says `first_upload`, the
 creating exchange opens the upload on the contest's activation, and a final
 empty exchange saying `finish` closes it. The contest's history is exempt from
-the lock and completed rules only while the upload is open, for at most 24
-hours after the activation, and only for changes made no later than the
-activation (plus 10 minutes of clock difference). The contest's own
+the lock and completed rules only while the upload is open, and only for
+changes made no later than the activation (plus 10 minutes of clock
+difference), so an interrupted upload can be finished later. The contest's own
 creation stays pending on the client until the finish is sent, so an
 interrupted upload resumes.
 

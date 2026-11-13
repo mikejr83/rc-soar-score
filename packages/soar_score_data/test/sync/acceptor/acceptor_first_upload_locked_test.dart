@@ -1,6 +1,4 @@
 import 'package:soar_score_core/services/services.dart';
-import 'package:soar_score_core/services/sync/mutation_processor.dart'
-    show firstUploadWindow;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:test/test.dart';
 
@@ -227,15 +225,17 @@ void _tests(Backend backend) {
       ], isNot(contains('locked')));
     });
 
-    test('the exemption ends after the window', () async {
+    test('an upload interrupted for days can still finish', () async {
       var now = DateTime.now().toUtc();
       await prepare(core.AdminLock.locked, clock: () => now);
       await sendHead(phase: FirstUploadPhase.open);
-      now = now.add(firstUploadWindow + const Duration(minutes: 1));
+      now = now.add(const Duration(days: 3));
 
       final out = await sendTail(FirstUploadPhase.open);
 
-      expect(out.results.map((r) => r.reasonCode), contains('locked'));
+      expect(out.results.map((r) => r.outcome).toSet(), {
+        core.MutationOutcome.accepted,
+      });
     });
 
     test('an upload sent whole never opens the exemption', () async {
