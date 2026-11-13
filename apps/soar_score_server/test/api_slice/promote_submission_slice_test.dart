@@ -582,6 +582,30 @@ void _tests(SliceBackend backend) {
       },
     );
 
+    test('a malformed source id is refused alone', () async {
+      final one = await submitAs(1);
+      final two = await submitAs(2);
+
+      final response = await promoteGroup([
+        item(one),
+        {...item(two), 'source_attempt_id': 'not-a-uuid'},
+      ]);
+
+      expect(response.status, 200, reason: '${response.body}');
+      final outcomes = (response.body['outcomes']! as List).cast<Map>();
+      expect(outcomes[0]['result'], isNotNull);
+      expect((outcomes[1]['error']! as Map)['status'], 400);
+      expect((outcomes[1]['error']! as Map)['code'], 'invalid_request');
+      expect(
+        (await placeholderOf(1, 1)).state,
+        core.ScorePlaceholderState.official,
+      );
+      expect(
+        (await placeholderOf(1, 2)).state,
+        core.ScorePlaceholderState.submitted,
+      );
+    });
+
     test(
       'a repeated, foreign or missing slot is 400 and stores nothing',
       () async {

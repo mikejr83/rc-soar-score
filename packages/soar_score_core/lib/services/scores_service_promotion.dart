@@ -283,17 +283,28 @@ class PromotionItem extends Equatable {
     required this.assignmentId,
     required this.sourceAttemptId,
     required this.expectedScoreRevision,
-  });
+  }) : invalidMessage = null;
+
+  /// A slot whose request cannot be carried out as written (for example a
+  /// malformed source id); it is refused on its own with [invalidMessage]
+  /// while its peers are processed.
+  const PromotionItem.invalid({
+    required this.assignmentId,
+    required String this.invalidMessage,
+  }) : sourceAttemptId = null,
+       expectedScoreRevision = 0;
 
   final Id assignmentId;
-  final Id sourceAttemptId;
+  final Id? sourceAttemptId;
   final int expectedScoreRevision;
+  final String? invalidMessage;
 
   @override
   List<Object?> get props => [
     assignmentId,
     sourceAttemptId,
     expectedScoreRevision,
+    invalidMessage,
   ];
 }
 
@@ -454,6 +465,18 @@ extension PromoteGroupService on ScoresService {
 
     final outcomes = <PromotionOutcome>[];
     for (final item in items) {
+      final invalid = item.invalidMessage;
+      if (invalid != null) {
+        outcomes.add(
+          PromotionOutcome.refused(
+            item.assignmentId,
+            statusCode: 400,
+            code: 'invalid_request',
+            message: invalid,
+          ),
+        );
+        continue;
+      }
       try {
         outcomes.add(
           PromotionOutcome.adopted(
@@ -461,7 +484,7 @@ extension PromoteGroupService on ScoresService {
             await promoteSubmission(
               contestId,
               item.assignmentId,
-              sourceAttemptId: item.sourceAttemptId,
+              sourceAttemptId: item.sourceAttemptId!,
               expectedScoreRevision: item.expectedScoreRevision,
               actorId: actorId,
               metadata: metadata.forPart(item.assignmentId.value),

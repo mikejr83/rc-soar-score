@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -263,14 +266,7 @@ void addScoreRoutes(
         contestId,
         Id.parse(roundId),
         groupNumber,
-        [
-          for (final item in body.items)
-            PromotionItem(
-              assignmentId: Id.parse(item.assignmentId),
-              sourceAttemptId: Id.parse(item.sourceAttemptId),
-              expectedScoreRevision: item.expectedScoreRevision,
-            ),
-        ],
+        [for (final item in body.items) _promotionItem(item)],
         actorId: principal.accountId,
         metadata: writeMetadata(principal),
       );
@@ -289,8 +285,7 @@ void addScoreRoutes(
             await publicUpdates.afterScoreEntry(
               contestId,
               assignmentId: adopted.last.assignmentId,
-              entryMutationId:
-                  adopted.last.promotion!.entry.officialScore.id.value,
+              entryMutationId: _batchKey(adopted),
             );
           } on Object catch (error, stackTrace) {
             _logger.warning(
@@ -368,4 +363,36 @@ void addScoreRoutes(
     }
     return jsonResponse(result.toJson(), statusCode: 201);
   });
+}
+
+/// One requested slot; a malformed id becomes a refusal of that slot alone.
+PromotionItem _promotionItem(PromoteGroupItem item) {
+  final Id assignmentId;
+  try {
+    assignmentId = Id.parse(item.assignmentId);
+  } on Object {
+    throw ArgumentError('an assignment id is not valid');
+  }
+  try {
+    return PromotionItem(
+      assignmentId: assignmentId,
+      sourceAttemptId: Id.parse(item.sourceAttemptId),
+      expectedScoreRevision: item.expectedScoreRevision,
+    );
+  } on Object {
+    return PromotionItem.invalid(
+      assignmentId: assignmentId,
+      invalidMessage: 'the source attempt id is not valid',
+    );
+  }
+}
+
+/// Publication key for a batch: derived from every adopted official score, so
+/// a corrected retry publishes anew and an exact retry reuses the projection.
+String _batchKey(List<PromotionOutcome> adopted) {
+  final ids = [
+    for (final outcome in adopted)
+      outcome.promotion!.entry.officialScore.id.value,
+  ]..sort();
+  return 'group-${sha256.convert(utf8.encode(ids.join(','))).toString()}';
 }
