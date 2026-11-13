@@ -74,6 +74,30 @@ void _tests(Backend backend) {
       }
     });
 
+    test('a rejection stops blocking once the entity is corrected', () async {
+      final scope = core.ContestScopeKey(a.id);
+      await inst.unitOfWork.run((c) => c.save(a, metadata: metadata()));
+      final pending = await inst.syncStore.pendingMutations(scope);
+      expect(pending, hasLength(2));
+      await inst.syncStore.recordOutcome(
+        mutationId: pending.first.id,
+        outcome: core.MutationOutcome.rejected,
+        reasonCode: 'invalid_payload',
+      );
+      expect(await inst.syncStore.refusedMutationIds(scope), {
+        pending.first.id,
+      });
+
+      await inst.syncStore.recordOutcome(
+        mutationId: pending.last.id,
+        outcome: core.MutationOutcome.accepted,
+        sequence: 9,
+        serverAcceptanceTime: DateTime.utc(2026, 5, 1, 13),
+      );
+
+      expect(await inst.syncStore.refusedMutationIds(scope), isEmpty);
+    });
+
     test('a conflict blocks dependents only until it is resolved', () async {
       final scope = core.ContestScopeKey(a.id);
       final mutation = (await inst.syncStore.pendingMutations(scope)).single;
