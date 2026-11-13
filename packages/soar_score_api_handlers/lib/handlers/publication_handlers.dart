@@ -56,7 +56,7 @@ void addPublicationRoutes(
     final principal = available(request);
     try {
       await requireContestDirector(request, repository, Id.parse(id));
-    } on ForbiddenError catch (denied) {
+    } on ForbiddenError {
       // The refusal is audited: a well-formed attempt by someone who is not
       // the director is recorded by the service, which refuses it. A body
       // that cannot be read, or any other failure, leaves the plain 403.
@@ -75,7 +75,7 @@ void addPublicationRoutes(
       } on Object {
         // Falls through to the refusal below.
       }
-      throw denied;
+      rethrow;
     }
     final body = await readJsonBody(request, PublishContestRequest.fromJson);
     final result = await service.publish(
