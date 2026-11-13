@@ -11,6 +11,7 @@ import '../middleware/error_mapping.dart';
 import '../middleware/client_address.dart';
 import '../middleware/invitation_throttle.dart';
 import '../middleware/request_id.dart';
+import '../middleware/request_limits.dart';
 import 'health_handler.dart';
 import 'invitation_handlers.dart' show defaultSelfScoringBaseUrl;
 import 'participant_score_handlers.dart';
@@ -69,6 +70,8 @@ Handler buildParticipantHandler(
   final now = clock ?? DateTime.now;
   final limits = throttle ?? InvitationThrottle();
   final router = Router();
+  // Group and overall results calculate from every score of the contest.
+  final resultsLimiter = RequestRateLimiter(maxRequests: 60);
 
   InvitationService requireService() =>
       service ??
@@ -177,6 +180,7 @@ Handler buildParticipantHandler(
       String round,
     ) async {
       final access = requireParticipant(request).access;
+      resultsLimiter.check(access.guestAccountId.toString());
       final ordinal = int.tryParse(round);
       final group = ordinal == null
           ? null
@@ -194,6 +198,7 @@ Handler buildParticipantHandler(
     })
     ..get('/results', (Request request) async {
       final access = requireParticipant(request).access;
+      resultsLimiter.check(access.guestAccountId.toString());
       final params = request.url.queryParametersAll['round'] ?? const [];
       final param = params.length == 1 ? params.single : null;
       final asOf = param == null ? null : int.tryParse(param);

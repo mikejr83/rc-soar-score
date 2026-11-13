@@ -50,6 +50,29 @@ class DriftSyncStore implements core.SyncStore {
   }
 
   @override
+  Future<Set<core.Id>> refusedMutationIds(core.SyncScopeKey scope) async {
+    if (scope is core.SystemScopeKey) return const {};
+    final (column, id) = _scopeColumn(scope);
+    final rows = await _mutations.where(
+      "((outcome = 'Rejected' AND NOT EXISTS ("
+      'SELECT 1 FROM mutation_records n '
+      'WHERE n.entity_type = mutation_records.entity_type '
+      'AND n.entity_id = mutation_records.entity_id '
+      "AND n.outcome = 'Accepted' "
+      'AND (n.client_time > mutation_records.client_time '
+      'OR (n.client_time = mutation_records.client_time '
+      'AND n.id > mutation_records.id)))) '
+      "OR (outcome = 'Conflict' AND NOT EXISTS ("
+      'SELECT 1 FROM conflict_records c '
+      'WHERE c.competing_mutation_id = mutation_records.id '
+      "AND c.resolution <> 'Pending'))) AND $column = ?",
+      [Variable<String>(id)],
+      orderBy: 'client_time, id',
+    );
+    return {for (final row in rows) core.Id.parse(row['id']! as String)};
+  }
+
+  @override
   Future<void> recordOutcome({
     required core.Id mutationId,
     required core.MutationOutcome outcome,

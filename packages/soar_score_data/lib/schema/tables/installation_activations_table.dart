@@ -14,6 +14,7 @@ class InstallationActivations extends Table {
   TextColumn get kind => text().check(kind.isIn(activationKindValues))();
   TextColumn get activatedAt => text()();
   TextColumn get endedAt => text().nullable()();
+  BoolColumn get uploadOpen => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};

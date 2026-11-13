@@ -29,6 +29,14 @@ class FakeSyncStore implements SyncStore {
   ];
 
   @override
+  Future<Set<Id>> refusedMutationIds(SyncScopeKey scope) async => {
+    for (final m in mutations)
+      if (m.outcome == MutationOutcome.rejected ||
+          m.outcome == MutationOutcome.conflict)
+        m.id,
+  };
+
+  @override
   Future<void> recordOutcome({
     required Id mutationId,
     required MutationOutcome outcome,

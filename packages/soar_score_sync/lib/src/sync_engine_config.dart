@@ -1,3 +1,4 @@
+import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 /// Settings for one [SyncEngine].
@@ -10,6 +11,8 @@ class SyncEngineConfig {
     this.protocolVersion = SyncProtocol.protocolVersion,
     this.isSyncable,
     this.now = _systemNow,
+    this.maxExchangeBytes = syncExchangeMaxBodyBytes,
+    this.maxExchangeMutations = syncExchangeMaxMutations,
   });
 
   /// This installation's own identifier, generated once and kept.
@@ -28,6 +31,10 @@ class SyncEngineConfig {
   /// Whether the engine may sync [scope]. Null means every scope. Return
   /// false for an accountless contest.
   final Future<bool> Function(SyncScopeKey scope)? isSyncable;
+
+  /// The service's limits on one exchange; a push is cut to fit them.
+  final int maxExchangeBytes;
+  final int maxExchangeMutations;
 
   /// The clock, replaceable in tests.
   final DateTime Function() now;

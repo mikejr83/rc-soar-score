@@ -156,13 +156,23 @@ void addSyncRoutes(
 
   router.post('/sync/exchange', (Request request) async {
     final principal = requirePrincipal(request);
-    final body = await readJsonBody(request, SyncExchangeRequest.fromJson);
+    final body = await readJsonBody(
+      request,
+      SyncExchangeRequest.fromJson,
+      maxBytes: syncExchangeMaxBodyBytes,
+    );
+    if (body.mutations.length > syncExchangeMaxMutations) {
+      throw ArgumentError(
+        'an exchange takes at most $syncExchangeMaxMutations mutations',
+      );
+    }
     final output = await acceptor.exchange(
       accountId: principal.accountId,
       input: SyncExchangeInput(
         protocolVersion: body.protocolVersion,
         schemaVersion: body.schemaVersion,
         installationId: body.installationId,
+        firstUpload: _firstUploadOf(body.firstUpload),
         scope: _scopeOf(body.scope),
         lastAcknowledgedSequence: body.lastAcknowledgedSequence,
         pageToken: body.pageToken,
@@ -261,3 +271,13 @@ SyncChangeDto _changeOf(AcceptedChange c) => SyncChangeDto(
   revision: c.revision,
   payload: c.payload,
 );
+
+FirstUploadPhase? _firstUploadOf(String? wire) {
+  if (wire == null) return null;
+  return FirstUploadPhase.tryParse(wire) ??
+      (throw ArgumentError.value(
+        wire,
+        'first_upload',
+        'is not open or finish',
+      ));
+}

@@ -74,6 +74,79 @@ void _tests(Backend backend) {
       }
     });
 
+    test('a rejection stops blocking once the entity is corrected', () async {
+      final scope = core.ContestScopeKey(a.id);
+      await inst.unitOfWork.run((c) => c.save(a, metadata: metadata()));
+      final pending = await inst.syncStore.pendingMutations(scope);
+      expect(pending, hasLength(2));
+      await inst.syncStore.recordOutcome(
+        mutationId: pending.first.id,
+        outcome: core.MutationOutcome.rejected,
+        reasonCode: 'invalid_payload',
+      );
+      expect(await inst.syncStore.refusedMutationIds(scope), {
+        pending.first.id,
+      });
+
+      await inst.syncStore.recordOutcome(
+        mutationId: pending.last.id,
+        outcome: core.MutationOutcome.accepted,
+        sequence: 9,
+        serverAcceptanceTime: DateTime.utc(2026, 5, 1, 13),
+      );
+
+      expect(await inst.syncStore.refusedMutationIds(scope), isEmpty);
+    });
+
+    test('a conflict blocks dependents only until it is resolved', () async {
+      final scope = core.ContestScopeKey(a.id);
+      final mutation = (await inst.syncStore.pendingMutations(scope)).single;
+      await inst.syncStore.recordOutcome(
+        mutationId: mutation.id,
+        outcome: core.MutationOutcome.conflict,
+        reasonCode: 'stale_base',
+      );
+      expect(await inst.syncStore.refusedMutationIds(scope), {mutation.id});
+
+      core.ConflictRecord record(core.ConflictResolution resolution) =>
+          core.ConflictRecord(
+            id: core.Id.parse('019c0000-0000-7000-8000-0000000000c4'),
+            contestId: a.id,
+            entityType: mutation.entityType,
+            entityId: mutation.entityId,
+            competingMutationId: mutation.id,
+            reasonCode: 'stale_base',
+            requiresAction: true,
+            resolution: resolution,
+            resolutionChoice: resolution == core.ConflictResolution.pending
+                ? null
+                : core.ConflictResolutionChoice.keptAccepted,
+            createdAt: DateTime.utc(2026, 5, 1, 13),
+            resolvedAt: resolution == core.ConflictResolution.pending
+                ? null
+                : DateTime.utc(2026, 5, 1, 14),
+          );
+      core.ReplicatedChange change(core.ConflictRecord r, int sequence) =>
+          core.ReplicatedChange(
+            scope: scope,
+            sequence: sequence,
+            entityType: 'ConflictRecord',
+            entityId: r.id,
+            revision: 0,
+            payload: r.toJson(),
+          );
+
+      await inst.applier.apply(
+        change(record(core.ConflictResolution.pending), 1),
+      );
+      expect(await inst.syncStore.refusedMutationIds(scope), {mutation.id});
+
+      await inst.applier.apply(
+        change(record(core.ConflictResolution.manual), 2),
+      );
+      expect(await inst.syncStore.refusedMutationIds(scope), isEmpty);
+    });
+
     test('an accepted outcome needs a sequence', () async {
       final mutation = (await inst.syncStore.pendingMutations(
         core.ContestScopeKey(a.id),

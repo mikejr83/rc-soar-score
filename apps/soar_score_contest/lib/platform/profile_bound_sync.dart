@@ -137,6 +137,10 @@ class ProfileBoundSyncStore implements core.SyncStore {
   ) => _inner.rejectedMutations(scope);
 
   @override
+  Future<Set<core.Id>> refusedMutationIds(core.SyncScopeKey scope) =>
+      _inner.refusedMutationIds(scope);
+
+  @override
   Future<void> recordOutcome({
     required core.Id mutationId,
     required core.MutationOutcome outcome,
