@@ -111,6 +111,39 @@ void main() {
     expect(jsonDecode(seen.body), request.toJson());
   });
 
+  test('promoteScore POSTs the source and decodes the entry', () async {
+    final result = ScorePromotionResult(
+      entry: ScoreEntryResult(
+        officialScore: official,
+        placeholder: placeholder,
+        contest: contest,
+        calculated: calculated,
+      ),
+      replayed: true,
+    );
+    final client = clientFor((_) => body(result.toJson(), 200));
+    const request = PromoteScoreRequest(
+      sourceAttemptId: '019c0000-0000-7000-8000-000000000077',
+      expectedScoreRevision: 1,
+    );
+
+    final promoted = await client.promoteScore(
+      contestId,
+      assignmentId,
+      request,
+    );
+
+    expect(promoted.replayed, isTrue);
+    expect(promoted.entry, result.entry);
+    expect(seen.method, 'POST');
+    expect(
+      seen.url.path,
+      '/api/v1/contests/${contestId.value}/assignments/${assignmentId.value}'
+      '/scores/official',
+    );
+    expect(jsonDecode(seen.body), request.toJson());
+  });
+
   test('scoreHistory(id, assignmentId) GETs the slot history', () async {
     final history = ScoreHistory(
       assignmentId: assignmentId,

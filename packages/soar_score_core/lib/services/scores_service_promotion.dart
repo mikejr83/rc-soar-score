@@ -7,6 +7,9 @@ const directorAcceptedSubmissionReason = 'director_accepted_submission';
 /// Reason code of a review superseded by an official selection.
 const supersededByOfficialSelectionReason = 'superseded_by_official_selection';
 
+/// Raised inside a promotion pass that read a slot another request changed.
+class _SlotMoved implements Exception {}
+
 /// The outcome of adopting a stored submission as official.
 class ScorePromotionResult {
   const ScorePromotionResult({required this.entry, required this.replayed});
@@ -16,6 +19,15 @@ class ScorePromotionResult {
 
   /// True when this exact adoption was already done and nothing was stored.
   final bool replayed;
+
+  factory ScorePromotionResult.fromJson(Map<String, Object?> json) =>
+      ScorePromotionResult(
+        entry: ScoreEntryResult.fromJson(json),
+        replayed: json['replayed']! as bool,
+      );
+
+  /// The entry's JSON plus `replayed`.
+  Map<String, Object?> toJson() => {...entry.toJson(), 'replayed': replayed};
 }
 
 /// Director adoption of a participant submission ("mark official").
@@ -34,6 +46,14 @@ extension PromoteSubmissionService on ScoresService {
   /// Throws a [ContestStateError] for a locked contest, round, group or score,
   /// a [ScoringValidationError] for stored values the discipline now refuses,
   /// and an [EntityNotFoundError] for an unknown contest, slot or source.
+  ///
+  /// The checks read several rows and the write is its own transaction, so
+  /// another request can commit in between. Whenever a pass fails or reads a
+  /// slot that moved underneath it, the whole operation runs again from fresh
+  /// reads (a few times at most): the retry of an adoption that won then
+  /// replays, and one made stale by a competing entry is a
+  /// [StaleRevisionError]. A failure with the slot unchanged is thrown as it
+  /// is.
   Future<ScorePromotionResult> promoteSubmission(
     Id contestId,
     Id assignmentId, {
@@ -41,6 +61,48 @@ extension PromoteSubmissionService on ScoresService {
     required int expectedScoreRevision,
     required Id actorId,
     required MutationMetadata metadata,
+  }) async {
+    const passes = 4;
+    for (var pass = 1; ; pass++) {
+      final seen = <ScorePlaceholder>[];
+      try {
+        return await _promoteOnce(
+          contestId,
+          assignmentId,
+          sourceAttemptId: sourceAttemptId,
+          expectedScoreRevision: expectedScoreRevision,
+          actorId: actorId,
+          metadata: metadata,
+          seen: seen,
+        );
+      } on Object catch (error) {
+        var moved = error is _SlotMoved;
+        if (!moved && seen.isNotEmpty) {
+          final after = await repository.scorePlaceholderRepository
+              .findForAssignment(assignmentId);
+          moved = after != null && after.revision != seen.first.revision;
+        }
+        if (!moved) rethrow;
+        if (pass >= passes) {
+          throw StaleRevisionError(
+            entityType: 'ScorePlaceholder',
+            entityId: seen.isEmpty ? assignmentId : seen.first.id,
+            expectedRevision: expectedScoreRevision,
+            storedRevision: seen.isEmpty ? 0 : seen.first.scoreRevision,
+          );
+        }
+      }
+    }
+  }
+
+  Future<ScorePromotionResult> _promoteOnce(
+    Id contestId,
+    Id assignmentId, {
+    required Id sourceAttemptId,
+    required int expectedScoreRevision,
+    required Id actorId,
+    required MutationMetadata metadata,
+    required List<ScorePlaceholder> seen,
   }) async {
     final contest = await _requireContest(contestId);
     final context = await _configuration(contest);
@@ -53,18 +115,23 @@ extension PromoteSubmissionService on ScoresService {
         entityId: assignmentId,
       );
     }
-    final official = await repository.officialScoreRepository
-        .currentForPlaceholder(current.id);
-    if (official != null) {
+    seen.add(current);
+    Future<ScorePromotionResult?> replayOf(ScorePlaceholder slot) async {
+      final official = await repository.officialScoreRepository
+          .currentForPlaceholder(slot.id);
+      if (official == null) return null;
+      // The placeholder was read before a commit that this official score
+      // belongs to: the two reads are not one state.
+      if (official.scoreRevision != slot.scoreRevision) throw _SlotMoved();
       // Only an exact retry of this adoption is a success; it reads state and
       // writes nothing, whatever locks were set since.
       if (official.scoreAttemptId == sourceAttemptId &&
-          current.currentAttemptId == sourceAttemptId &&
+          slot.currentAttemptId == sourceAttemptId &&
           official.scoreRevision - 1 == expectedScoreRevision) {
         return ScorePromotionResult(
           entry: ScoreEntryResult(
             officialScore: official,
-            placeholder: current,
+            placeholder: slot,
             contest: contest,
             calculated: await _calculate(context, official.components),
           ),
@@ -73,15 +140,19 @@ extension PromoteSubmissionService on ScoresService {
       }
       throw StaleRevisionError(
         entityType: 'ScorePlaceholder',
-        entityId: current.id,
+        entityId: slot.id,
         expectedRevision: expectedScoreRevision,
-        storedRevision: current.scoreRevision,
+        storedRevision: slot.scoreRevision,
       );
     }
+
+    final earlier = await replayOf(current);
+    if (earlier != null) return earlier;
 
     _requireScoringAllowed(contest);
     final slot = await _requireSlot(contestId, assignmentId);
     final placeholder = slot.placeholder;
+    if (placeholder.revision != current.revision) throw _SlotMoved();
     if (placeholder.isLocked) {
       throw ContestStateError(
         'score_locked',

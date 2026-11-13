@@ -33,6 +33,7 @@ import '../dto/participant_invitation_dto.dart';
 import '../dto/participant_overview_dto.dart';
 import '../dto/participant_results_dto.dart';
 import '../dto/participant_submit_dto.dart';
+import '../dto/promote_score_request.dart';
 import '../dto/public_publication_dto.dart';
 import '../dto/public_publication_summary_dto.dart';
 import '../dto/publication_history_entry_dto.dart';
@@ -1072,6 +1073,27 @@ class ApiClient {
     );
     final response = await _send('POST', uri, body: request.toJson());
     return _decode<ScoreEntryResult>(response, uri, ScoreEntryResult.fromJson);
+  }
+
+  /// `POST /api/v1/contests/{id}/assignments/{assignmentId}/scores/official`
+  /// — accepts the stored participant submission named by [request] as the
+  /// official score. A source or score revision that is no longer current is
+  /// an [ApiHttpError] with status 409; a locked slot is 409 as well.
+  Future<ScorePromotionResult> promoteScore(
+    Id contestId,
+    Id assignmentId,
+    PromoteScoreRequest request,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${contestId.value}/assignments/'
+      '${assignmentId.value}/scores/official',
+    );
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<ScorePromotionResult>(
+      response,
+      uri,
+      ScorePromotionResult.fromJson,
+    );
   }
 
   /// `POST /api/v1/contests/{id}/scores/bulk` — enters the scores of several

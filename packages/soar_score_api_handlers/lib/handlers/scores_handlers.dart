@@ -29,6 +29,14 @@ final _logger = Logger('Scores');
 ///   publishes, the contest's public update mode then decides whether the
 ///   entry also reaches the public projection; a failed publish is logged
 ///   and audited, never an error;
+/// - `POST /contests/{id}/assignments/{assignmentId}/scores/official`
+///   accepts the stored participant submission named in the body
+///   (`source_attempt_id`, `expected_score_revision`) as the official score
+///   (201, or 200 with `replayed: true` for an exact repeat). No components
+///   are taken from the request. A source or revision that is no longer
+///   current, or a newer official score, is 409; locks are 409 as in an
+///   entry. Open reviews of the slot are superseded. The recalculation and
+///   public update then follow as for an entry;
 /// - `POST /contests/{id}/scores/bulk` enters the scores of 1 to
 ///   [EnterScoresRequest.maxEntries] slots of ONE round in one request (200;
 ///   more or none is a 400; an entry for another round, a second entry for a
@@ -156,6 +164,66 @@ void addScoreRoutes(
         results: outcomes,
         recalculationWarning: warning,
       ).toJson(),
+    );
+  });
+
+  router.post('/contests/<id>/assignments/<assignmentId>/scores/official', (
+    Request request,
+    String id,
+    String assignmentId,
+  ) async {
+    final principal = requirePrincipal(request);
+    final contestId = Id.parse(id);
+    await requireContestDirector(request, repository, contestId);
+    final body = await readJsonBody(request, PromoteScoreRequest.fromJson);
+    final metadata = writeMetadata(principal);
+
+    _logger.fine('Marking assignment $assignmentId official in contest $id');
+
+    final promoted = await service.promoteSubmission(
+      contestId,
+      Id.parse(assignmentId),
+      sourceAttemptId: Id.parse(body.sourceAttemptId),
+      expectedScoreRevision: body.expectedScoreRevision,
+      actorId: principal.accountId,
+      metadata: metadata,
+    );
+    var entry = promoted.entry;
+    // A replay still finishes the recalculation and publish a request that
+    // stopped after the adoption may have missed.
+    final warning = await recalculationService.recalculateAfterEntry(contestId);
+    if (warning != null) {
+      _logger.info(
+        'Recalculation warning after marking assignment $assignmentId '
+        'official in contest $id: $warning',
+      );
+      entry = ScoreEntryResult(
+        officialScore: entry.officialScore,
+        placeholder: entry.placeholder,
+        contest: entry.contest,
+        calculated: entry.calculated,
+        recalculationWarning: warning,
+      );
+    }
+    if (publishingEnabled) {
+      try {
+        await publicUpdates.afterScoreEntry(
+          contestId,
+          assignmentId: Id.parse(assignmentId),
+          entryMutationId: entry.officialScore.id.value,
+        );
+      } on Object catch (error, stackTrace) {
+        _logger.warning(
+          'Public update after marking a score official failed; the last '
+          'projection stays public',
+          error,
+          stackTrace,
+        );
+      }
+    }
+    return jsonResponse(
+      ScorePromotionResult(entry: entry, replayed: promoted.replayed).toJson(),
+      statusCode: promoted.replayed ? 200 : 201,
     );
   });
 

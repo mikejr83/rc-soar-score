@@ -23,6 +23,35 @@ const _goodScore = {
   'landing': 'points_50',
 };
 
+/// Runs [before] ahead of, and [after] once behind, chosen reads of a slot's
+/// placeholder (1-based), to make another request commit mid-operation.
+class _HookedPlaceholders extends ScorePlaceholderRepository {
+  _HookedPlaceholders(super.db);
+
+  final before = <int, Future<void> Function()>{};
+  final after = <int, Future<void> Function()>{};
+  var _calls = 0;
+
+  @override
+  Future<core.ScorePlaceholder?> findForAssignment(core.Id assignmentId) async {
+    final call = ++_calls;
+    await before.remove(call)?.call();
+    final found = await super.findForAssignment(assignmentId);
+    await after.remove(call)?.call();
+    return found;
+  }
+}
+
+class _HookedRepository extends Repository {
+  _HookedRepository(super.database, this.placeholders);
+
+  final _HookedPlaceholders placeholders;
+
+  @override
+  core.ScorePlaceholderRepository get scorePlaceholderRepository =>
+      placeholders;
+}
+
 /// A director adopting a pilot's submission as official, over a real
 /// database.
 void main() {
@@ -363,5 +392,172 @@ void _tests(SliceBackend backend) {
       ),
       isNull,
     );
+  });
+
+  test(
+    'overlapping identical requests agree: one adopts, one replays',
+    () async {
+      await submitFirst();
+      final results = await Future.wait([
+        promote(id: 'race-1'),
+        promote(id: 'race-2'),
+        promote(id: 'race-3'),
+      ]);
+
+      expect(results.where((r) => !r.replayed), hasLength(1));
+      expect(results.where((r) => r.replayed), hasLength(2));
+      expect({for (final r in results) r.entry.officialScore.id}, hasLength(1));
+      final placeholder = await placeholderOf(1, 1);
+      expect(
+        await repository.officialScoreRepository.listForPlaceholder(
+          placeholder.id,
+        ),
+        hasLength(1),
+      );
+    },
+  );
+
+  group('another request commits mid-operation', () {
+    late _HookedPlaceholders hooks;
+    late core.ScoresService racing;
+
+    setUp(() async {
+      await submitFirst();
+      hooks = _HookedPlaceholders(api.database);
+      racing = core.ScoresService(_HookedRepository(api.database, hooks));
+    });
+
+    Future<core.ScorePromotionResult> retry() => racing.promoteSubmission(
+      core.Id.parse(_contestId),
+      slotId,
+      sourceAttemptId: attemptId,
+      expectedScoreRevision: 1,
+      actorId: api.director,
+      metadata: meta('retry'),
+    );
+
+    test('after the placeholder read, a retry still replays', () async {
+      hooks.after[1] = () async {
+        await promote(id: 'winner');
+      };
+
+      final result = await retry();
+
+      expect(result.replayed, isTrue);
+      expect(
+        result.entry.placeholder.state,
+        core.ScorePlaceholderState.official,
+      );
+      expect(result.entry.placeholder.scoreRevision, 2);
+    });
+
+    test('before the slot gate, a retry replays instead of 409', () async {
+      hooks.before[2] = () async {
+        await promote(id: 'winner');
+      };
+
+      final result = await retry();
+
+      expect(result.replayed, isTrue);
+      expect(
+        result.entry.placeholder.state,
+        core.ScorePlaceholderState.official,
+      );
+    });
+
+    test('a competing director entry makes the promotion stale', () async {
+      hooks.after[2] = () async {
+        await scores.enterOfficialScore(
+          core.Id.parse(_contestId),
+          slotId,
+          clientMutationId: 'director-wins',
+          baseScoreRevision: 1,
+          components: {..._goodScore, 'time_flown': 500},
+          reason: 'Checked the logger',
+          actorId: api.director,
+          metadata: meta('director-wins'),
+        );
+      };
+
+      await expectLater(retry(), throwsA(isA<core.StaleRevisionError>()));
+      final current = await repository.officialScoreRepository
+          .currentForPlaceholder((await placeholderOf(1, 1)).id);
+      expect(current!.components['time_flown'], 500);
+      expect(current.scoreAttemptId, isNot(attemptId));
+    });
+  });
+
+  group('over HTTP', () {
+    Future<Map<String, Object?>> post(
+      Map<String, Object?> body, {
+      int status = 201,
+    }) => api.expectOk(
+      'POST',
+      '/contests/$_contestId/assignments/${slotId.value}/scores/official',
+      status: status,
+      body: body,
+    );
+
+    test('marks the submission official, then answers a repeat 200', () async {
+      await submitFirst();
+      final body = {
+        'source_attempt_id': attemptId.value,
+        'expected_score_revision': 1,
+      };
+
+      final first = await post(body);
+      expect(first['replayed'], false);
+      expect(
+        (first['official_score']! as Map)['score_attempt_id'],
+        attemptId.value,
+      );
+      expect((first['placeholder']! as Map)['state'], 'Official');
+
+      final again = await post(body, status: 200);
+      expect(again['replayed'], true);
+      expect(
+        (again['official_score']! as Map)['id'],
+        (first['official_score']! as Map)['id'],
+      );
+    });
+
+    test(
+      'a fractional or non-numeric revision is 400 and stores nothing',
+      () async {
+        await submitFirst();
+        for (final revision in <Object>[1.9, '1', true]) {
+          final response = await api.send(
+            'POST',
+            '/contests/$_contestId/assignments/${slotId.value}/scores/official',
+            body: {
+              'source_attempt_id': attemptId.value,
+              'expected_score_revision': revision,
+            },
+          );
+          expect(response.status, 400, reason: '$revision');
+        }
+        expect(
+          (await placeholderOf(1, 1)).state,
+          core.ScorePlaceholderState.submitted,
+        );
+      },
+    );
+
+    test('a stale revision is 409 and stores nothing', () async {
+      await submitFirst();
+      final response = await api.send(
+        'POST',
+        '/contests/$_contestId/assignments/${slotId.value}/scores/official',
+        body: {
+          'source_attempt_id': attemptId.value,
+          'expected_score_revision': 0,
+        },
+      );
+      expect(response.status, 409);
+      expect(
+        (await placeholderOf(1, 1)).state,
+        core.ScorePlaceholderState.submitted,
+      );
+    });
   });
 }
