@@ -341,7 +341,7 @@ void main() {
       );
     });
 
-    test('a refused mutation keeps the upload open for repairs', () async {
+    test('a refused mutation does not keep the upload open', () async {
       final rig = Rig(maxMutations: 2);
       rig.store.mutations
         ..add(creation())
@@ -362,15 +362,12 @@ void main() {
 
       await rig.engine.syncScope(scope);
 
-      expect(
-        rig.gateway.exchanges.any((r) => r.firstUpload == 'finish'),
-        isFalse,
-      );
+      expect(rig.gateway.exchanges.last.firstUpload, 'finish');
       expect(
         rig.store.mutations
             .firstWhere((m) => m.clientMutationId == 'create')
             .outcome,
-        MutationOutcome.pending,
+        MutationOutcome.accepted,
       );
     });
 

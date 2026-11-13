@@ -313,14 +313,10 @@ class SyncEngine {
       if (accepted.isNotEmpty) _bumpRevision(scope);
       sequence = (await _pull(scope, response, from: sequence)).cursor;
     }
-    if (heldCreation != null &&
-        heldAccepted != null &&
-        left == 0 &&
-        blocked.isEmpty) {
-      // Everything of the upload is accepted: tell the service, which then
+    if (heldCreation != null && heldAccepted != null && left == 0) {
+      // Everything of the upload is decided: tell the service, which then
       // ends the contest's exemption from the lock rules, and only then
-      // let go of the creation. While any change is refused (or too large)
-      // the upload stays open, so the history can still be completed.
+      // let go of the creation.
       final done = await _exchange(
         scope,
         sequence,
