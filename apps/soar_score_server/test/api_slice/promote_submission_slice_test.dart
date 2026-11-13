@@ -487,6 +487,122 @@ void _tests(SliceBackend backend) {
     });
   });
 
+  group('a whole group over HTTP', () {
+    Future<core.ScorePlaceholder> submitAs(int pilot) async {
+      final issued = await service.issue(
+        contestId: core.Id.parse(_contestId),
+        participationId: core.Id.parse(_participationId(pilot)),
+        issuedBy: api.director,
+        clientMutationId: 'issue-p$pilot',
+      );
+      final pilotToken = (await service.resolve(issued.credential))
+          .sessionToken;
+      final response = await handler(
+        Request(
+          'POST',
+          Uri.parse('http://localhost/api/v1/self-scoring/rounds/1/scores'),
+          body: jsonEncode({
+            'client_mutation_id': 'm-p$pilot',
+            'matrix_revision': matrixRevision,
+            'components': _goodScore,
+          }),
+          headers: {'authorization': 'Bearer $pilotToken'},
+        ),
+      );
+      expect(response.statusCode, 201, reason: await response.readAsString());
+      return placeholderOf(1, pilot);
+    }
+
+    Map<String, Object?> item(core.ScorePlaceholder p, {int? revision}) => {
+      'assignment_id': p.assignmentId.value,
+      'source_attempt_id': p.currentAttemptId!.value,
+      'expected_score_revision': revision ?? p.scoreRevision,
+    };
+
+    Future<SliceResponse> promoteGroup(List<Map<String, Object?>> items) {
+      return api.send(
+        'POST',
+        '/contests/$_contestId/rounds/${rounds[0]['id']}/groups/1/scores/official',
+        body: {'items': items},
+      );
+    }
+
+    test('adopts the named rows and leaves the others alone', () async {
+      final one = await submitAs(1);
+      final two = await submitAs(2);
+      final three = await submitAs(3);
+
+      final response = await promoteGroup([item(one), item(two)]);
+
+      expect(response.status, 200, reason: '${response.body}');
+      final outcomes = (response.body['outcomes']! as List).cast<Map>();
+      expect(outcomes, hasLength(2));
+      expect(outcomes.every((o) => o['result'] != null), isTrue);
+      expect((response.body['not_requested']! as List), [
+        three.assignmentId.value,
+      ]);
+      expect(
+        (await placeholderOf(1, 1)).state,
+        core.ScorePlaceholderState.official,
+      );
+      expect(
+        (await placeholderOf(1, 2)).state,
+        core.ScorePlaceholderState.official,
+      );
+      expect(
+        (await placeholderOf(1, 3)).state,
+        core.ScorePlaceholderState.submitted,
+      );
+    });
+
+    test(
+      'a stale row is refused alone and a repeat replays the rest',
+      () async {
+        final one = await submitAs(1);
+        final two = await submitAs(2);
+
+        final response = await promoteGroup([
+          item(one),
+          item(two, revision: 0),
+        ]);
+
+        final outcomes = (response.body['outcomes']! as List).cast<Map>();
+        expect(outcomes[0]['result'], isNotNull);
+        expect((outcomes[1]['error']! as Map)['status'], 409);
+        expect((outcomes[1]['error']! as Map)['code'], 'stale_revision');
+        expect(
+          (await placeholderOf(1, 2)).state,
+          core.ScorePlaceholderState.submitted,
+        );
+
+        final again = await promoteGroup([item(one), item(two)]);
+        final repeated = (again.body['outcomes']! as List).cast<Map>();
+        expect((repeated[0]['result']! as Map)['replayed'], true);
+        expect((repeated[1]['result']! as Map)['replayed'], false);
+      },
+    );
+
+    test(
+      'a repeated, foreign or missing slot is 400 and stores nothing',
+      () async {
+        final one = await submitAs(1);
+        expect((await promoteGroup([item(one), item(one)])).status, 400);
+        expect((await promoteGroup([])).status, 400);
+        final foreign = {
+          ...item(one),
+          'assignment_id': assignments.firstWhere(
+            (a) => a['scheduled_round_id'] == rounds[1]['id'],
+          )['id'],
+        };
+        expect((await promoteGroup([foreign])).status, 400);
+        expect(
+          (await placeholderOf(1, 1)).state,
+          core.ScorePlaceholderState.submitted,
+        );
+      },
+    );
+  });
+
   group('over HTTP', () {
     Future<Map<String, Object?>> post(
       Map<String, Object?> body, {

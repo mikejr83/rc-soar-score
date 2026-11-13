@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:equatable/equatable.dart';
 import 'package:logging/logging.dart';
 
 import '../enums/admin_lock.dart';
