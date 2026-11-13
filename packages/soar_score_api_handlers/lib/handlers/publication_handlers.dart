@@ -54,7 +54,29 @@ void addPublicationRoutes(
 
   router.post('/contests/<id>/publication', (Request request, String id) async {
     final principal = available(request);
-    await requireContestDirector(request, repository, Id.parse(id));
+    try {
+      await requireContestDirector(request, repository, Id.parse(id));
+    } on ForbiddenError catch (denied) {
+      // The refusal is audited: a well-formed attempt by someone who is not
+      // the director is recorded by the service, which refuses it. A body
+      // that cannot be read, or any other failure, leaves the plain 403.
+      try {
+        final attempt = await readJsonBody(
+          request,
+          PublishContestRequest.fromJson,
+        );
+        await service.publish(
+          Id.parse(id),
+          actorId: principal.accountId,
+          authority: principal.authority,
+          clientMutationId: attempt.clientMutationId,
+          sourceContestRevision: attempt.sourceContestRevision,
+        );
+      } on Object {
+        // Falls through to the refusal below.
+      }
+      throw denied;
+    }
     final body = await readJsonBody(request, PublishContestRequest.fromJson);
     final result = await service.publish(
       Id.parse(id),

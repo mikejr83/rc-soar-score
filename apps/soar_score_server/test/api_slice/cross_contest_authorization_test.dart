@@ -178,6 +178,22 @@ void _tests(SliceBackend backend) {
     }
   });
 
+  test('a denied publish attempt is still audited', () async {
+    await api.expectForeignDenied(
+      outsider,
+      'POST',
+      '/contests/$_contestId/publication',
+      body: {'client_mutation_id': 'm-1', 'source_contest_revision': 1},
+    );
+
+    final events = await Repository(api.database).auditEventRepository
+        .listForContest(core.Id.parse(_contestId));
+    final denied = events.where((e) => e.reason == 'not_director');
+    expect(denied, hasLength(1));
+    expect(denied.single.outcome, core.AuditOutcome.rejected);
+    expect(denied.single.actorId, outsider);
+  });
+
   test('an unknown contest or conflict is a 404 before the body', () async {
     const unparseable = 'not an object';
     const unknown = '019c0000-0000-7000-8000-0000000009ff';
