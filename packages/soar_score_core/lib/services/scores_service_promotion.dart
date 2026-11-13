@@ -66,14 +66,17 @@ extension PromoteSubmissionService on ScoresService {
     for (var pass = 1; ; pass++) {
       final seen = <ScorePlaceholder>[];
       try {
-        return await _promoteOnce(
+        return await repository.officialScoreRepository.withContestGate(
           contestId,
-          assignmentId,
-          sourceAttemptId: sourceAttemptId,
-          expectedScoreRevision: expectedScoreRevision,
-          actorId: actorId,
-          metadata: metadata,
-          seen: seen,
+          () => _promoteOnce(
+            contestId,
+            assignmentId,
+            sourceAttemptId: sourceAttemptId,
+            expectedScoreRevision: expectedScoreRevision,
+            actorId: actorId,
+            metadata: metadata,
+            seen: seen,
+          ),
         );
       } on Object catch (error) {
         var moved = error is _SlotMoved;

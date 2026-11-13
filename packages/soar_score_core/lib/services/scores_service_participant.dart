@@ -31,6 +31,25 @@ extension ParticipantScoresService on ScoresService {
     required int matrixRevision,
     required Map<String, Object?> components,
     String? sourceDevice,
+  }) => repository.officialScoreRepository.withContestGate(
+    access.contestId,
+    () => _submitParticipantScore(
+      access,
+      round,
+      clientMutationId: clientMutationId,
+      matrixRevision: matrixRevision,
+      components: components,
+      sourceDevice: sourceDevice,
+    ),
+  );
+
+  Future<ParticipantSubmission> _submitParticipantScore(
+    ParticipantAccess access,
+    int round, {
+    required String clientMutationId,
+    required int matrixRevision,
+    required Map<String, Object?> components,
+    String? sourceDevice,
   }) async {
     final contest = await _requireContest(access.contestId);
     final context = await _configuration(contest);
