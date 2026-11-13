@@ -17,8 +17,15 @@ void _tests(Backend backend) {
 
   /// Opens a client with one score entered and the contest finished: always
   /// Completed, and Locked when [lock] says so.
-  Future<void> prepare(core.AdminLock lock) async {
-    harness = await AcceptorHarness.open(backend, recalculates: true);
+  Future<void> prepare(
+    core.AdminLock lock, {
+    DateTime Function()? clock,
+  }) async {
+    harness = await AcceptorHarness.open(
+      backend,
+      recalculates: true,
+      clock: clock,
+    );
     contestId = await harness.drawContestOnClient();
     scope = core.ContestScopeKey(contestId);
     final matrix = await MatrixService(harness.clientRepository)
@@ -131,5 +138,111 @@ void _tests(Backend backend) {
     );
 
     expect(out.results.single.reasonCode, 'locked');
+  });
+
+  group('a first upload sent in several exchanges', () {
+    late List<SyncMutation> tail;
+    late int afterHead;
+
+    /// Uploads the director's scope, then the contest's creation and a few
+    /// mutations in the first exchange, leaving the rest in [tail].
+    Future<void> sendHead({FirstUploadPhase? phase}) async {
+      final director = core.DirectorScopeKey(harness.account);
+      final owned = await harness.outbox(director);
+      final accepted = await harness.exchange(director, mutations: owned);
+      await harness.acknowledge(owned, accepted.results);
+      final sent = await harness.outbox(scope);
+      final first = await harness.exchange(
+        scope,
+        mutations: sent.take(3).toList(),
+        firstUpload: phase,
+      );
+      expect(first.results.map((r) => r.outcome).toSet(), {
+        core.MutationOutcome.accepted,
+      });
+      tail = sent.skip(3).toList();
+      afterHead = first.serverSequence;
+    }
+
+    Future<SyncExchangeOutput> sendTail(FirstUploadPhase? phase) => harness
+        .exchange(scope, mutations: tail, after: afterHead, firstUpload: phase);
+
+    test('the later batches are accepted while the upload is open', () async {
+      await prepare(core.AdminLock.locked);
+      await sendHead(phase: FirstUploadPhase.open);
+      final out = await sendTail(FirstUploadPhase.open);
+      expect(out.results.map((r) => r.outcome).toSet(), {
+        core.MutationOutcome.accepted,
+      });
+    });
+
+    test('without the flag they are refused as locked', () async {
+      await prepare(core.AdminLock.locked);
+      await sendHead(phase: FirstUploadPhase.open);
+      final out = await sendTail(null);
+      expect(out.results.map((r) => r.reasonCode), contains('locked'));
+    });
+
+    test('finishing the upload ends the exemption', () async {
+      await prepare(core.AdminLock.locked);
+      await sendHead(phase: FirstUploadPhase.open);
+      await harness.exchange(
+        scope,
+        after: afterHead,
+        firstUpload: FirstUploadPhase.finish,
+      );
+
+      final out = await sendTail(FirstUploadPhase.open);
+
+      expect(out.results.map((r) => r.reasonCode), contains('locked'));
+    });
+
+    test('a change made after the upload began is not history', () async {
+      await prepare(core.AdminLock.locked);
+      await sendHead(phase: FirstUploadPhase.open);
+      // The Contest row is never subject to the lock rule; take another.
+      final index = tail.indexWhere((m) => m.entityType != 'Contest');
+      final original = tail[index];
+      final later = SyncMutation(
+        id: original.id,
+        clientMutationId: original.clientMutationId,
+        entityType: original.entityType,
+        entityId: original.entityId,
+        baseRevision: original.baseRevision,
+        authority: original.authority,
+        clientTime: DateTime.now().toUtc().add(const Duration(days: 1)),
+        dependsOnMutationId: original.dependsOnMutationId,
+        payload: original.payload,
+      );
+      tail = [...tail]..[index] = later;
+
+      final out = await sendTail(FirstUploadPhase.open);
+
+      expect(out.results[index].reasonCode, 'locked');
+      expect([
+        for (final (i, r) in out.results.indexed)
+          if (i != index) r.reasonCode,
+      ], isNot(contains('locked')));
+    });
+
+    test('an upload interrupted for days can still finish', () async {
+      var now = DateTime.now().toUtc();
+      await prepare(core.AdminLock.locked, clock: () => now);
+      await sendHead(phase: FirstUploadPhase.open);
+      now = now.add(const Duration(days: 3));
+
+      final out = await sendTail(FirstUploadPhase.open);
+
+      expect(out.results.map((r) => r.outcome).toSet(), {
+        core.MutationOutcome.accepted,
+      });
+    });
+
+    test('an upload sent whole never opens the exemption', () async {
+      await prepare(core.AdminLock.locked);
+      await sendHead();
+      final out = await sendTail(FirstUploadPhase.open);
+      expect(out.results.map((r) => r.reasonCode), contains('locked'));
+    });
   });
 }

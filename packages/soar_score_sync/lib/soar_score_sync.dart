@@ -4,6 +4,7 @@
 library;
 
 export 'src/api_client_sync_gateway.dart';
+export 'src/outbox_batches.dart';
 export 'src/resolve_conflict_outcome.dart';
 export 'src/sync_engine.dart';
 export 'src/sync_engine_config.dart';

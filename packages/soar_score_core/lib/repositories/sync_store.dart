@@ -14,6 +14,10 @@ abstract interface class SyncStore {
   /// so the director can see what was refused and why.
   Future<List<MutationRecord>> rejectedMutations(SyncScopeKey scope);
 
+  /// The ids of the mutations of [scope] the service refused (`Rejected` or
+  /// `Conflict`). A mutation that depends on one of them must not be sent.
+  Future<Set<Id>> refusedMutationIds(SyncScopeKey scope);
+
   /// Records the service's answer for a mutation in the outbox.
   ///
   /// [sequence] accompanies an `Accepted` outcome only.

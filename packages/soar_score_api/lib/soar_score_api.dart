@@ -7,6 +7,7 @@ library;
 
 export 'client/api_client.dart';
 export 'dto/activate_installation_request.dart';
+export 'sync_limits.dart';
 export 'dto/add_model_link_request.dart';
 export 'dto/add_participation_request.dart';
 export 'dto/add_profile_model_request.dart';

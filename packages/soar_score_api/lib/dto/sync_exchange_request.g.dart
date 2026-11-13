@@ -44,6 +44,7 @@ SyncExchangeRequest _$SyncExchangeRequestFromJson(Map<String, dynamic> json) =>
                     .toList() ??
                 const [],
           ),
+          firstUpload: $checkedConvert('first_upload', (v) => v as String?),
         );
         return val;
       },
@@ -53,6 +54,7 @@ SyncExchangeRequest _$SyncExchangeRequestFromJson(Map<String, dynamic> json) =>
         'installationId': 'installation_id',
         'lastAcknowledgedSequence': 'last_acknowledged_sequence',
         'pageToken': 'page_token',
+        'firstUpload': 'first_upload',
       },
     );
 
@@ -66,4 +68,5 @@ Map<String, dynamic> _$SyncExchangeRequestToJson(
   'last_acknowledged_sequence': instance.lastAcknowledgedSequence,
   'page_token': instance.pageToken,
   'mutations': instance.mutations.map((e) => e.toJson()).toList(),
+  'first_upload': instance.firstUpload,
 };

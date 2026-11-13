@@ -21,7 +21,8 @@
 | `activated_by`    | UUIDv7      | Yes      | -       | FK Account of the director who activated it                                                                                  |
 | `kind`            | enum        | Yes      | -       | `Initial` (first activation), `Replacement` (moved to another device), or `Reclaim` (the earlier device took authority back) |
 | `activated_at`    | timestamptz | Yes      | -       | When authority was granted (server time)                                                                                     |
-| `ended_at`        | timestamptz | No       | -       | When authority ended. Null while this is the active row. The only column that changes after creation                         |
+| `ended_at`        | timestamptz | No       | -       | When authority ended. Null while this is the active row                                                                      |
+| `upload_open`     | boolean     | Yes      | false   | True while the contest's first upload is still being sent in several exchanges; closed when the client finishes it           |
 
 ## Invariants and Constraints
 
@@ -34,6 +35,8 @@
 - Rows are never deleted
 
 ## Lifecycle
+
+`ended_at` and `upload_open` are the columns that change after creation. `upload_open` is set only on the `Initial` row, by the exchange that creates the contest when it says the upload continues, and cleared when the client finishes the upload.
 
 Created on activation, closed (`ended_at` set) when another installation is activated. A contest that has never been synchronized has no row; it is administered locally.
 

@@ -7,6 +7,7 @@ import 'package:soar_score_api_handlers/handlers/contest_authorization.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_api_handlers/handlers/write_metadata.dart';
+import 'package:soar_score_api_handlers/middleware/request_limits.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 /// The flight matrix routes (all inside `/api/v1`):
@@ -49,6 +50,9 @@ void addMatrixRoutes(
   RecalculationService? recalculation,
 }) {
   final jobs = DrawJobs();
+  // A draw or redraw (a preview included) is the costliest request a director
+  // makes; this stops one account from queueing them back to back.
+  final drawLimiter = RequestRateLimiter(maxRequests: 20);
   final service = MatrixService(repository, runner: drawRunner, jobs: jobs);
   final moves = AssignmentMoveService(repository);
   final lateAdds = LateAddService(repository);
@@ -101,6 +105,7 @@ void addMatrixRoutes(
     final principal = requirePrincipal(request);
     final contestId = Id.parse(id);
     await requireContestDirector(request, repository, contestId);
+    drawLimiter.check(principal.accountId.toString());
     final body = await readJsonBody(request, DrawMatrixRequest.fromJson);
 
     final matrix = await service.drawFirst(
@@ -236,6 +241,7 @@ void addMatrixRoutes(
     final principal = requirePrincipal(request);
     final contestId = Id.parse(id);
     await requireContestDirector(request, repository, contestId);
+    drawLimiter.check(principal.accountId.toString());
     final body = await readJsonBody(request, RedrawMatrixRequest.fromJson);
     final attemptsPerRound =
         body.attemptsPerRound ?? BasicDraw.defaultAttemptsPerRound;

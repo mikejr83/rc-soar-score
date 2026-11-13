@@ -27,6 +27,7 @@ class SyncExchangeRequest {
     required this.lastAcknowledgedSequence,
     this.pageToken,
     this.mutations = const [],
+    this.firstUpload,
   });
 
   factory SyncExchangeRequest.fromJson(Map<String, dynamic> json) =>
@@ -39,6 +40,12 @@ class SyncExchangeRequest {
   final int lastAcknowledgedSequence;
   final String? pageToken;
   final List<SyncMutationDto> mutations;
+
+  /// `open` when [mutations] belong to the upload of a contest the
+  /// installation created, sent in more than one exchange; the service then
+  /// keeps the contest's history exempt from the lock and completed rules
+  /// while that upload is open. `finish` ends it. Null for any other request.
+  final String? firstUpload;
 
   Map<String, dynamic> toJson() => _$SyncExchangeRequestToJson(this);
 }

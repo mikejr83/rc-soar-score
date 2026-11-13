@@ -6,6 +6,7 @@
     "activated_by": "019c0000-0000-7000-8000-000000000001",
     "kind": "Initial",
     "activated_at": "2026-09-01T18:05:00Z",
-    "ended_at": null
+    "ended_at": null,
+    "upload_open": false
   }
 ]
