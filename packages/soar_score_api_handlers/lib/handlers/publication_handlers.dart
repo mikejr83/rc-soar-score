@@ -7,6 +7,10 @@ import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+/// How long a refused publish request may take to deliver its body, so the
+/// attempt can still be audited. A slower caller gets the 403 without it.
+const _deniedBodyWait = Duration(seconds: 2);
+
 /// The publication routes (all inside `/api/v1`, for the contest's director):
 ///
 /// - `POST /contests/{id}/publication` publishes the contest (201). The first
@@ -58,13 +62,14 @@ void addPublicationRoutes(
       await requireContestDirector(request, repository, Id.parse(id));
     } on ForbiddenError {
       // The refusal is audited: a well-formed attempt by someone who is not
-      // the director is recorded by the service, which refuses it. A body
-      // that cannot be read, or any other failure, leaves the plain 403.
+      // the director is recorded by the service, which refuses it. The body
+      // is only waited for briefly ([_deniedBodyWait]); one that is slow,
+      // cannot be read, or any other failure, leaves the plain 403.
       try {
         final attempt = await readJsonBody(
           request,
           PublishContestRequest.fromJson,
-        );
+        ).timeout(_deniedBodyWait);
         await service.publish(
           Id.parse(id),
           actorId: principal.accountId,

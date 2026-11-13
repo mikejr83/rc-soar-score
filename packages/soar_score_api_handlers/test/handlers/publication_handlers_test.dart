@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:shelf/shelf.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:test/test.dart';
 
@@ -161,6 +164,27 @@ void main() {
       );
 
       expect(response.statusCode, 404);
+    });
+
+    test('a denied publish does not wait for a body that never ends', () async {
+      await _seed(api);
+      final stranger = HandlerHarness(
+        Id.parse('019c0000-0000-7000-8000-000000000002'),
+        publishingEnabled: true,
+        contests: api.contests,
+      );
+      final never = StreamController<List<int>>();
+      addTearDown(never.close);
+
+      final response = await stranger.handler(
+        Request(
+          'POST',
+          Uri.parse('http://localhost/api/v1/contests/$_contestId/publication'),
+          body: never.stream,
+        ),
+      );
+
+      expect(response.statusCode, 403);
     });
   });
 }
