@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
+import '../sync/contest_gate.dart';
 import 'audit_event_repository.dart';
 import 'drift_repository.dart';
 import 'latest_timestamps.dart';
@@ -14,6 +15,10 @@ class OfficialScoreRepository extends DriftRepository
 
   @override
   Future<core.OfficialScore?> findById(core.Id id) => _store.find(id);
+
+  @override
+  Future<T> withContestGate<T>(core.Id contestId, Future<T> Function() body) =>
+      withContestScoreGate(db, contestId.value, body);
 
   @override
   Future<List<core.OfficialScore>> listForPlaceholder(

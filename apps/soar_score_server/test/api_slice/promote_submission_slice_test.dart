@@ -42,10 +42,25 @@ class _HookedPlaceholders extends ScorePlaceholderRepository {
   }
 }
 
+/// Official scores without the contest gate: the interleaving tests stand
+/// in for a writer that does not take it (an accepted sync change).
+class _UngatedScores extends OfficialScoreRepository {
+  _UngatedScores(super.db);
+
+  @override
+  Future<T> withContestGate<T>(core.Id contestId, Future<T> Function() body) =>
+      body();
+}
+
 class _HookedRepository extends Repository {
-  _HookedRepository(super.database, this.placeholders);
+  _HookedRepository(super.database, this.placeholders)
+    : _ungated = _UngatedScores(database);
 
   final _HookedPlaceholders placeholders;
+  final OfficialScoreRepository _ungated;
+
+  @override
+  core.OfficialScoreRepository get officialScoreRepository => _ungated;
 
   @override
   core.ScorePlaceholderRepository get scorePlaceholderRepository =>
@@ -484,6 +499,64 @@ void _tests(SliceBackend backend) {
           .currentForPlaceholder((await placeholderOf(1, 1)).id);
       expect(current!.components['time_flown'], 500);
       expect(current.scoreAttemptId, isNot(attemptId));
+    });
+  });
+
+  group('writers of one contest run one after another', () {
+    test('overlapping identical requests adopt once and replay', () async {
+      await submitFirst();
+
+      final results = await Future.wait([
+        for (var i = 0; i < 6; i++) promote(id: 'racer-$i'),
+      ]);
+
+      expect(results.where((r) => !r.replayed), hasLength(1));
+      expect(results.where((r) => r.replayed), hasLength(5));
+      final placeholder = await placeholderOf(1, 1);
+      expect(placeholder.scoreRevision, 2);
+      expect(
+        await repository.officialScoreRepository.listForPlaceholder(
+          placeholder.id,
+        ),
+        hasLength(1),
+      );
+    });
+
+    test('a promotion racing a director entry never mixes the two', () async {
+      await submitFirst();
+
+      final outcomes = await Future.wait([
+        promote().then<Object>((r) => r, onError: (Object e) => e),
+        scores
+            .enterOfficialScore(
+              core.Id.parse(_contestId),
+              slotId,
+              clientMutationId: 'director-race',
+              baseScoreRevision: 1,
+              components: {..._goodScore, 'time_flown': 500},
+              reason: 'Checked the logger',
+              actorId: api.director,
+              metadata: meta('director-race'),
+            )
+            .then<Object>((r) => r, onError: (Object e) => e),
+      ]);
+
+      final placeholder = await placeholderOf(1, 1);
+      final history = await repository.officialScoreRepository
+          .listForPlaceholder(placeholder.id);
+      // Either the promotion went first and the entry corrected it (two
+      // versions), or the entry went first and the promotion was stale (one).
+      final promoted = outcomes[0] is core.ScorePromotionResult;
+      expect(history.map((s) => s.scoreRevision), [
+        for (var i = 2; i < 2 + history.length; i++) i,
+      ]);
+      expect(placeholder.scoreRevision, history.last.scoreRevision);
+      if (promoted) {
+        expect(history.first.scoreAttemptId, attemptId);
+      } else {
+        expect(outcomes[0], isA<core.StaleRevisionError>());
+        expect(history, hasLength(1));
+      }
     });
   });
 

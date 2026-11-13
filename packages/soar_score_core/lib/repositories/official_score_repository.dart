@@ -10,6 +10,16 @@ import 'recorded_score.dart';
 abstract interface class OfficialScoreRepository {
   Future<OfficialScore?> findById(Id id);
 
+  /// Runs [body] as the only score writer of [contestId], in one transaction.
+  ///
+  /// Every writer of a contest's score state (director entry, participant
+  /// submission, promotion) reads, checks and writes inside this gate, so a
+  /// competing writer waits for the commit and then reads its result. On
+  /// PostgreSQL the gate is the contest's advisory lock, taken before any
+  /// read; SQLite's writer transaction begins immediately. Nested use joins
+  /// the outer gate. Everything [body] writes commits or rolls back together.
+  Future<T> withContestGate<T>(Id contestId, Future<T> Function() body);
+
   /// The official scores of [scorePlaceholderId], by score revision.
   Future<List<OfficialScore>> listForPlaceholder(Id scorePlaceholderId);
 

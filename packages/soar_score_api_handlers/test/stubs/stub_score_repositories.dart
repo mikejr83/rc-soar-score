@@ -93,6 +93,10 @@ class StubOfficialScoreRepository implements OfficialScoreRepository {
   }
 
   @override
+  Future<T> withContestGate<T>(Id contestId, Future<T> Function() body) =>
+      body();
+
+  @override
   Future<PromotedScore> recordPromotion(
     PromotedScore promotion, {
     required MutationMetadata metadata,

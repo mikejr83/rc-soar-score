@@ -240,6 +240,29 @@ class ScoresService {
     String? reason,
     required Id actorId,
     required MutationMetadata metadata,
+  }) => repository.officialScoreRepository.withContestGate(
+    contestId,
+    () => _enterOfficialScore(
+      contestId,
+      assignmentId,
+      clientMutationId: clientMutationId,
+      baseScoreRevision: baseScoreRevision,
+      components: components,
+      reason: reason,
+      actorId: actorId,
+      metadata: metadata,
+    ),
+  );
+
+  Future<ScoreEntryResult> _enterOfficialScore(
+    Id contestId,
+    Id assignmentId, {
+    required String clientMutationId,
+    required int baseScoreRevision,
+    required Map<String, Object?> components,
+    String? reason,
+    required Id actorId,
+    required MutationMetadata metadata,
   }) async {
     final contest = await _requireContest(contestId);
     final context = await _configuration(contest);
