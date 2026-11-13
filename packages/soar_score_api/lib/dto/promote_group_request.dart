@@ -33,29 +33,39 @@ class PromoteGroupRequest {
 }
 
 /// One slot of a [PromoteGroupRequest].
-@JsonSerializable(
-  checked: true,
-  fieldRename: FieldRename.snake,
-  includeIfNull: true,
-)
+///
+/// Only the assignment id must be a string for the request to decode. The
+/// source id and revision are kept as sent, so a malformed value refuses its
+/// own row (see the handler) rather than the whole request.
 class PromoteGroupItem {
   const PromoteGroupItem({
     required this.assignmentId,
-    required this.sourceAttemptId,
-    required this.expectedScoreRevision,
-  });
+    required Object? sourceAttemptId,
+    required Object? expectedScoreRevision,
+  }) : rawSourceAttemptId = sourceAttemptId,
+       rawExpectedScoreRevision = expectedScoreRevision;
 
-  factory PromoteGroupItem.fromJson(Map<String, dynamic> json) =>
-      _$PromoteGroupItemFromJson(json);
+  factory PromoteGroupItem.fromJson(Map<String, dynamic> json) {
+    final assignmentId = json['assignment_id'];
+    if (assignmentId is! String) {
+      throw ArgumentError('an item needs a string assignment_id');
+    }
+    return PromoteGroupItem(
+      assignmentId: assignmentId,
+      sourceAttemptId: json['source_attempt_id'],
+      expectedScoreRevision: json['expected_score_revision'],
+    );
+  }
 
   final String assignmentId;
-  final String sourceAttemptId;
+  final Object? rawSourceAttemptId;
+  final Object? rawExpectedScoreRevision;
 
-  /// A whole JSON number; a fraction is refused, not truncated.
-  @JsonKey(fromJson: wholeNumber)
-  final int expectedScoreRevision;
-
-  Map<String, dynamic> toJson() => _$PromoteGroupItemToJson(this);
+  Map<String, dynamic> toJson() => {
+    'assignment_id': assignmentId,
+    'source_attempt_id': rawSourceAttemptId,
+    'expected_score_revision': rawExpectedScoreRevision,
+  };
 }
 
 /// A JSON whole number as an int; a fraction such as 1.9, which the generated

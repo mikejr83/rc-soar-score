@@ -373,18 +373,31 @@ PromotionItem _promotionItem(PromoteGroupItem item) {
   } on Object {
     throw ArgumentError('an assignment id is not valid');
   }
+  final Id sourceAttemptId;
   try {
-    return PromotionItem(
-      assignmentId: assignmentId,
-      sourceAttemptId: Id.parse(item.sourceAttemptId),
-      expectedScoreRevision: item.expectedScoreRevision,
-    );
+    final raw = item.rawSourceAttemptId;
+    if (raw is! String) throw const FormatException();
+    sourceAttemptId = Id.parse(raw);
   } on Object {
     return PromotionItem.invalid(
       assignmentId: assignmentId,
       invalidMessage: 'the source attempt id is not valid',
     );
   }
+  final int revision;
+  try {
+    revision = wholeNumber(item.rawExpectedScoreRevision);
+  } on Object {
+    return PromotionItem.invalid(
+      assignmentId: assignmentId,
+      invalidMessage: 'the expected score revision must be a whole number',
+    );
+  }
+  return PromotionItem(
+    assignmentId: assignmentId,
+    sourceAttemptId: sourceAttemptId,
+    expectedScoreRevision: revision,
+  );
 }
 
 /// Publication key for a batch: derived from every adopted official score, so

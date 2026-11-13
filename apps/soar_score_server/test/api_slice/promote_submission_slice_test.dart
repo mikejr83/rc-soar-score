@@ -606,6 +606,34 @@ void _tests(SliceBackend backend) {
       );
     });
 
+    test('a null source or fractional revision is refused alone', () async {
+      final one = await submitAs(1);
+      final two = await submitAs(2);
+      final three = await submitAs(3);
+
+      final response = await promoteGroup([
+        item(one),
+        {...item(two), 'source_attempt_id': null},
+        {...item(three), 'expected_score_revision': 1.5},
+      ]);
+
+      expect(response.status, 200, reason: '${response.body}');
+      final outcomes = (response.body['outcomes']! as List).cast<Map>();
+      expect(outcomes[0]['result'], isNotNull);
+      for (final i in [1, 2]) {
+        expect((outcomes[i]['error']! as Map)['status'], 400);
+        expect((outcomes[i]['error']! as Map)['code'], 'invalid_request');
+      }
+      expect(
+        (await placeholderOf(1, 1)).state,
+        core.ScorePlaceholderState.official,
+      );
+      expect(
+        (await placeholderOf(1, 3)).state,
+        core.ScorePlaceholderState.submitted,
+      );
+    });
+
     test(
       'a repeated, foreign or missing slot is 400 and stores nothing',
       () async {
