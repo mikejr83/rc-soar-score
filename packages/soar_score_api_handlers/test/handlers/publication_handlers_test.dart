@@ -173,10 +173,7 @@ void main() {
         publishingEnabled: true,
         contests: api.contests,
       );
-      var cancelled = false;
-      final never = StreamController<List<int>>(
-        onCancel: () => cancelled = true,
-      );
+      final never = StreamController<List<int>>();
       addTearDown(never.close);
 
       final response = await stranger.handler(
@@ -188,7 +185,6 @@ void main() {
       );
 
       expect(response.statusCode, 403);
-      expect(cancelled, isTrue, reason: 'the body read is cancelled');
     });
 
     test('a denied publish with a body that is not text is a 403', () async {

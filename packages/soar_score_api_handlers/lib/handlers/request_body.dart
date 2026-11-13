@@ -18,9 +18,11 @@ import '../middleware/request_limits.dart';
 /// declared length or, for a body without one, as soon as the bytes read pass
 /// the limit: nothing is decoded or parsed first.
 ///
-/// With [within], a body not complete by then throws a [TimeoutException]
-/// and the read of the request stream is cancelled, so nothing keeps reading
-/// it after the caller has moved on.
+/// With [within], a body not complete by then throws a [TimeoutException].
+/// A read that fails for being too slow stops keeping or parsing what arrives
+/// but is not cancelled: cancelling the request stream can close the
+/// connection before the error response is sent, so the rest is read and
+/// dropped, up to [maxBytes] in all (past that the read is cancelled).
 Future<T> readJsonBody<T>(
   Request request,
   T Function(Map<String, dynamic> json) fromJson, {
@@ -57,20 +59,24 @@ Future<String> _readText(Request request, int maxBytes, Duration? within) {
   final bytes = BytesBuilder(copy: false);
   final done = Completer<String>();
   late final StreamSubscription<List<int>> subscription;
+  var total = 0;
   Timer? timer;
 
   void fail(Object error) {
     timer?.cancel();
-    subscription.cancel();
+    bytes.clear();
     if (!done.isCompleted) done.completeError(error);
   }
 
   subscription = request.read().listen(
     (chunk) {
-      if (bytes.length + chunk.length > maxBytes) {
+      total += chunk.length;
+      if (total > maxBytes) {
         fail(PayloadTooLargeError(maxBytes));
+        subscription.cancel();
         return;
       }
+      if (done.isCompleted) return; // failed already: read and drop
       bytes.add(chunk);
     },
     onError: fail,
@@ -84,7 +90,7 @@ Future<String> _readText(Request request, int maxBytes, Duration? within) {
         done.completeError(e);
       }
     },
-    cancelOnError: true,
+    cancelOnError: false,
   );
   if (within != null) {
     timer = Timer(
