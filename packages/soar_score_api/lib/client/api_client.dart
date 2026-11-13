@@ -33,6 +33,7 @@ import '../dto/participant_invitation_dto.dart';
 import '../dto/participant_overview_dto.dart';
 import '../dto/participant_results_dto.dart';
 import '../dto/participant_submit_dto.dart';
+import '../dto/promote_group_request.dart';
 import '../dto/promote_score_request.dart';
 import '../dto/public_publication_dto.dart';
 import '../dto/public_publication_summary_dto.dart';
@@ -1093,6 +1094,29 @@ class ApiClient {
       response,
       uri,
       ScorePromotionResult.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/contests/{id}/rounds/{roundId}/groups/{group}/scores/official`
+  /// — accepts the stored submissions named by [request] as official. A slot
+  /// that is stale, locked or invalid is refused on its own outcome and the
+  /// others still go ahead; live slots the request did not name are listed in
+  /// [GroupPromotionResult.notRequested] and left alone.
+  Future<GroupPromotionResult> promoteGroup(
+    Id contestId,
+    Id roundId,
+    int group,
+    PromoteGroupRequest request,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/contests/${contestId.value}/rounds/${roundId.value}/groups/'
+      '$group/scores/official',
+    );
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<GroupPromotionResult>(
+      response,
+      uri,
+      GroupPromotionResult.fromJson,
     );
   }
 

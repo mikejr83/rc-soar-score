@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -37,6 +40,15 @@ final _logger = Logger('Scores');
 ///   current, or a newer official score, is 409; locks are 409 as in an
 ///   entry. Open reviews of the slot are superseded. The recalculation and
 ///   public update then follow as for an entry;
+/// - `POST /contests/{id}/rounds/{roundId}/groups/{group}/scores/official`
+///   accepts the stored submissions named in the body (1 to
+///   [PromoteGroupRequest.maxItems] items of `assignment_id`,
+///   `source_attempt_id`, `expected_score_revision`) for one group (200). A
+///   repeated slot or one outside the group is a 400. Each item is checked
+///   like a single promotion and answered on its own (adopted, replayed, or
+///   the refusal it would have got alone); live slots the request did not
+///   name are never promoted and are listed as `not_requested`. The results
+///   are recalculated ONCE and the public projection updated at most ONCE;
 /// - `POST /contests/{id}/scores/bulk` enters the scores of 1 to
 ///   [EnterScoresRequest.maxEntries] slots of ONE round in one request (200;
 ///   more or none is a 400; an entry for another round, a second entry for a
@@ -227,6 +239,68 @@ void addScoreRoutes(
     );
   });
 
+  router.post(
+    '/contests/<id>/rounds/<roundId>/groups/<group>/scores/official',
+    (Request request, String id, String roundId, String group) async {
+      final principal = requirePrincipal(request);
+      final contestId = Id.parse(id);
+      await requireContestDirector(request, repository, contestId);
+      final groupNumber = int.tryParse(group);
+      if (groupNumber == null || groupNumber < 1) {
+        throw ArgumentError('the group must be a positive whole number');
+      }
+      final body = await readJsonBody(request, PromoteGroupRequest.fromJson);
+      if (body.items.isEmpty ||
+          body.items.length > PromoteGroupRequest.maxItems) {
+        throw ArgumentError(
+          'a group promotion takes 1 to ${PromoteGroupRequest.maxItems} items',
+        );
+      }
+
+      _logger.fine(
+        'Marking ${body.items.length} slots of group $group of round $roundId '
+        'official in contest $id',
+      );
+
+      var result = await service.promoteGroup(
+        contestId,
+        Id.parse(roundId),
+        groupNumber,
+        [for (final item in body.items) _promotionItem(item)],
+        actorId: principal.accountId,
+        metadata: writeMetadata(principal),
+      );
+      final adopted = [
+        for (final outcome in result.outcomes)
+          if (outcome.isAdopted) outcome,
+      ];
+      if (adopted.isNotEmpty) {
+        // Once for the request; a replay counts, so a repeat finishes work an
+        // interrupted request left.
+        result = result.withWarning(
+          await recalculationService.recalculateAfterEntry(contestId),
+        );
+        if (publishingEnabled) {
+          try {
+            await publicUpdates.afterScoreEntry(
+              contestId,
+              assignmentId: adopted.last.assignmentId,
+              entryMutationId: _batchKey(adopted),
+            );
+          } on Object catch (error, stackTrace) {
+            _logger.warning(
+              'Public update after marking a group official failed; the last '
+              'projection stays public',
+              error,
+              stackTrace,
+            );
+          }
+        }
+      }
+      return jsonResponse(result.toJson());
+    },
+  );
+
   router.post('/contests/<id>/assignments/<assignmentId>/scores', (
     Request request,
     String id,
@@ -289,4 +363,49 @@ void addScoreRoutes(
     }
     return jsonResponse(result.toJson(), statusCode: 201);
   });
+}
+
+/// One requested slot; a malformed id becomes a refusal of that slot alone.
+PromotionItem _promotionItem(PromoteGroupItem item) {
+  final Id assignmentId;
+  try {
+    assignmentId = Id.parse(item.assignmentId);
+  } on Object {
+    throw ArgumentError('an assignment id is not valid');
+  }
+  final Id sourceAttemptId;
+  try {
+    final raw = item.rawSourceAttemptId;
+    if (raw is! String) throw const FormatException();
+    sourceAttemptId = Id.parse(raw);
+  } on Object {
+    return PromotionItem.invalid(
+      assignmentId: assignmentId,
+      invalidMessage: 'the source attempt id is not valid',
+    );
+  }
+  final int revision;
+  try {
+    revision = wholeNumber(item.rawExpectedScoreRevision);
+  } on Object {
+    return PromotionItem.invalid(
+      assignmentId: assignmentId,
+      invalidMessage: 'the expected score revision must be a whole number',
+    );
+  }
+  return PromotionItem(
+    assignmentId: assignmentId,
+    sourceAttemptId: sourceAttemptId,
+    expectedScoreRevision: revision,
+  );
+}
+
+/// Publication key for a batch: derived from every adopted official score, so
+/// a corrected retry publishes anew and an exact retry reuses the projection.
+String _batchKey(List<PromotionOutcome> adopted) {
+  final ids = [
+    for (final outcome in adopted)
+      outcome.promotion!.entry.officialScore.id.value,
+  ]..sort();
+  return 'group-${sha256.convert(utf8.encode(ids.join(','))).toString()}';
 }

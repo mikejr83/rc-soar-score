@@ -276,3 +276,240 @@ extension PromoteSubmissionService on ScoresService {
     );
   }
 }
+
+/// One slot of a group promotion: the submission the director saw.
+class PromotionItem extends Equatable {
+  const PromotionItem({
+    required this.assignmentId,
+    required this.sourceAttemptId,
+    required this.expectedScoreRevision,
+  }) : invalidMessage = null;
+
+  /// A slot whose request cannot be carried out as written (for example a
+  /// malformed source id); it is refused on its own with [invalidMessage]
+  /// while its peers are processed.
+  const PromotionItem.invalid({
+    required this.assignmentId,
+    required String this.invalidMessage,
+  }) : sourceAttemptId = null,
+       expectedScoreRevision = 0;
+
+  final Id assignmentId;
+  final Id? sourceAttemptId;
+  final int expectedScoreRevision;
+  final String? invalidMessage;
+
+  @override
+  List<Object?> get props => [
+    assignmentId,
+    sourceAttemptId,
+    expectedScoreRevision,
+    invalidMessage,
+  ];
+}
+
+/// What happened to one requested slot of a group promotion: it was adopted
+/// or replayed ([result]), or refused ([statusCode], [code], [message]) as a
+/// single promotion would have answered.
+class PromotionOutcome extends Equatable {
+  const PromotionOutcome.adopted(
+    this.assignmentId,
+    ScorePromotionResult this.promotion,
+  ) : statusCode = null,
+      code = null,
+      message = null;
+
+  const PromotionOutcome.refused(
+    this.assignmentId, {
+    required int this.statusCode,
+    required String this.code,
+    required String this.message,
+  }) : promotion = null;
+
+  factory PromotionOutcome.fromJson(Map<String, Object?> json) {
+    final assignmentId = Id.parse(json['assignment_id']! as String);
+    final result = json['result'];
+    if (result != null) {
+      return PromotionOutcome.adopted(
+        assignmentId,
+        ScorePromotionResult.fromJson(result as Map<String, Object?>),
+      );
+    }
+    final error = json['error']! as Map<String, Object?>;
+    return PromotionOutcome.refused(
+      assignmentId,
+      statusCode: error['status']! as int,
+      code: error['code']! as String,
+      message: error['message']! as String,
+    );
+  }
+
+  final Id assignmentId;
+
+  /// The adoption (or its replay), or null when the slot was refused.
+  final ScorePromotionResult? promotion;
+  final int? statusCode;
+  final String? code;
+  final String? message;
+
+  /// Whether the slot now holds the requested adoption.
+  bool get isAdopted => promotion != null;
+
+  Map<String, Object?> toJson() => {
+    'assignment_id': assignmentId.value,
+    if (promotion != null)
+      'result': promotion!.toJson()
+    else
+      'error': {'status': statusCode, 'code': code, 'message': message},
+  };
+
+  @override
+  List<Object?> get props => [
+    assignmentId,
+    promotion?.toJson(),
+    statusCode,
+    code,
+    message,
+  ];
+}
+
+/// The answer to a group promotion.
+class GroupPromotionResult extends Equatable {
+  const GroupPromotionResult({
+    required this.outcomes,
+    required this.notRequested,
+    this.recalculationWarning,
+  });
+
+  factory GroupPromotionResult.fromJson(Map<String, Object?> json) =>
+      GroupPromotionResult(
+        outcomes: [
+          for (final item in json['outcomes']! as List<Object?>)
+            PromotionOutcome.fromJson(item! as Map<String, Object?>),
+        ],
+        notRequested: [
+          for (final id in json['not_requested']! as List<Object?>)
+            Id.parse(id! as String),
+        ],
+        recalculationWarning: json['recalculation_warning'] as String?,
+      );
+
+  /// One outcome per requested slot, in request order.
+  final List<PromotionOutcome> outcomes;
+
+  /// Live slots of the group the request did not name; never promoted.
+  final List<Id> notRequested;
+
+  /// Set by the caller when the recalculation after the adoptions failed.
+  final String? recalculationWarning;
+
+  GroupPromotionResult withWarning(String? warning) => GroupPromotionResult(
+    outcomes: outcomes,
+    notRequested: notRequested,
+    recalculationWarning: warning,
+  );
+
+  Map<String, Object?> toJson() => {
+    'outcomes': [for (final outcome in outcomes) outcome.toJson()],
+    'not_requested': [for (final id in notRequested) id.value],
+    'recalculation_warning': recalculationWarning,
+  };
+
+  @override
+  List<Object?> get props => [outcomes, notRequested, recalculationWarning];
+}
+
+/// Director adoption of the submissions of one group.
+extension PromoteGroupService on ScoresService {
+  /// Adopts each of [items], the submissions the director saw in the group
+  /// [group] of round [roundId], with the rules of [promoteSubmission].
+  ///
+  /// A slot that is stale, locked or invalid is refused alone and the others
+  /// go on, each stored on its own. Live slots of the group that are not in
+  /// [items] are never promoted and are listed in
+  /// [GroupPromotionResult.notRequested]. Throws an [ArgumentError] for an
+  /// empty list, a repeated slot or a slot outside the group, and an
+  /// [EntityNotFoundError] for an unknown contest or round.
+  Future<GroupPromotionResult> promoteGroup(
+    Id contestId,
+    Id roundId,
+    int group,
+    List<PromotionItem> items, {
+    required Id actorId,
+    required MutationMetadata metadata,
+  }) async {
+    await _requireContest(contestId);
+    final round = await repository.roundRepository.findById(roundId);
+    if (round == null || round.contestId != contestId) {
+      throw EntityNotFoundError(entityType: 'Round', entityId: roundId);
+    }
+    if (items.isEmpty) {
+      throw ArgumentError('a group promotion needs at least one slot');
+    }
+    final live = [
+      for (final assignment
+          in await repository.matrixAssignmentRepository.listLiveForRound(
+            roundId,
+          ))
+        if (assignment.group == group) assignment.id,
+    ];
+    final requested = <Id>{};
+    for (final item in items) {
+      if (!requested.add(item.assignmentId)) {
+        throw ArgumentError('the request names a slot twice');
+      }
+      if (!live.contains(item.assignmentId)) {
+        throw ArgumentError('a slot is not in group $group of this round');
+      }
+    }
+
+    final outcomes = <PromotionOutcome>[];
+    for (final item in items) {
+      final invalid = item.invalidMessage;
+      if (invalid != null) {
+        outcomes.add(
+          PromotionOutcome.refused(
+            item.assignmentId,
+            statusCode: 400,
+            code: 'invalid_request',
+            message: invalid,
+          ),
+        );
+        continue;
+      }
+      try {
+        outcomes.add(
+          PromotionOutcome.adopted(
+            item.assignmentId,
+            await promoteSubmission(
+              contestId,
+              item.assignmentId,
+              sourceAttemptId: item.sourceAttemptId!,
+              expectedScoreRevision: item.expectedScoreRevision,
+              actorId: actorId,
+              metadata: metadata.forPart(item.assignmentId.value),
+            ),
+          ),
+        );
+      } on Object catch (error) {
+        final refused = _refusal(error);
+        if (refused == null) rethrow;
+        outcomes.add(
+          PromotionOutcome.refused(
+            item.assignmentId,
+            statusCode: refused.statusCode!,
+            code: refused.code!,
+            message: refused.message!,
+          ),
+        );
+      }
+    }
+    return GroupPromotionResult(
+      outcomes: outcomes,
+      notRequested: [
+        for (final id in live)
+          if (!requested.contains(id)) id,
+      ],
+    );
+  }
+}

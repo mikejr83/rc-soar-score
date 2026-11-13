@@ -144,6 +144,57 @@ void main() {
     expect(jsonDecode(seen.body), request.toJson());
   });
 
+  test('promoteGroup POSTs the items and decodes the outcomes', () async {
+    final result = GroupPromotionResult(
+      outcomes: [
+        PromotionOutcome.adopted(
+          assignmentId,
+          ScorePromotionResult(
+            entry: ScoreEntryResult(
+              officialScore: official,
+              placeholder: placeholder,
+              contest: contest,
+              calculated: calculated,
+            ),
+            replayed: false,
+          ),
+        ),
+        PromotionOutcome.refused(
+          Id.parse('019c0000-0000-7000-8000-000000000099'),
+          statusCode: 409,
+          code: 'stale_revision',
+          message: 'stale',
+        ),
+      ],
+      notRequested: [Id.parse('019c0000-0000-7000-8000-000000000098')],
+    );
+    final client = clientFor((_) => body(result.toJson(), 200));
+    final request = PromoteGroupRequest(
+      items: [
+        PromoteGroupItem(
+          assignmentId: assignmentId.value,
+          sourceAttemptId: '019c0000-0000-7000-8000-000000000077',
+          expectedScoreRevision: 1,
+        ),
+      ],
+    );
+
+    final answer = await client.promoteGroup(
+      contestId,
+      Id.parse('019c0000-0000-7000-8000-000000000050'),
+      2,
+      request,
+    );
+
+    expect(answer, result);
+    expect(
+      seen.url.path,
+      '/api/v1/contests/${contestId.value}/rounds/'
+      '019c0000-0000-7000-8000-000000000050/groups/2/scores/official',
+    );
+    expect(jsonDecode(seen.body), request.toJson());
+  });
+
   test('scoreHistory(id, assignmentId) GETs the slot history', () async {
     final history = ScoreHistory(
       assignmentId: assignmentId,
