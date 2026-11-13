@@ -76,8 +76,12 @@ Future<String> _readText(Request request, int maxBytes, Duration? within) {
     onError: fail,
     onDone: () {
       timer?.cancel();
-      if (!done.isCompleted) {
+      if (done.isCompleted) return;
+      try {
         done.complete((request.encoding ?? utf8).decode(bytes.takeBytes()));
+      } on FormatException catch (e) {
+        // Malformed text: the caller answers it like any other bad body.
+        done.completeError(e);
       }
     },
     cancelOnError: true,

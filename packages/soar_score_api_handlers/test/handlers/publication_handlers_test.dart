@@ -190,5 +190,38 @@ void main() {
       expect(response.statusCode, 403);
       expect(cancelled, isTrue, reason: 'the body read is cancelled');
     });
+
+    test('a denied publish with a body that is not text is a 403', () async {
+      await _seed(api);
+      final stranger = HandlerHarness(
+        Id.parse('019c0000-0000-7000-8000-000000000002'),
+        publishingEnabled: true,
+        contests: api.contests,
+      );
+
+      final response = await stranger.handler(
+        Request(
+          'POST',
+          Uri.parse('http://localhost/api/v1/contests/$_contestId/publication'),
+          body: [0xff, 0xfe, 0xfd],
+        ),
+      );
+
+      expect(response.statusCode, 403);
+    });
+
+    test('a publish with a body that is not text is a 400', () async {
+      await _seed(api);
+
+      final response = await api.handler(
+        Request(
+          'POST',
+          Uri.parse('http://localhost/api/v1/contests/$_contestId/publication'),
+          body: [0xff, 0xfe, 0xfd],
+        ),
+      );
+
+      expect(response.statusCode, 400);
+    });
   });
 }
