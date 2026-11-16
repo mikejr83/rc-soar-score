@@ -49,13 +49,11 @@ Future<void> phase3Entry(
         await tester.pumpAndSettle();
         final button = find.text('See group results');
         expect(button, findsOneWidget);
-        final bottom = tester.getRect(button).bottom;
-        expect(
-          bottom,
-          lessThanOrEqualTo(
-            tester.view.physicalSize.height / tester.view.devicePixelRatio,
-          ),
-        );
+        final rect = tester.getRect(button);
+        final viewHeight =
+            tester.view.physicalSize.height / tester.view.devicePixelRatio;
+        expect(rect.top, greaterThanOrEqualTo(0));
+        expect(rect.bottom, lessThanOrEqualTo(viewHeight));
       },
     );
     await journey.step('The overview shows the round as submitted', () async {

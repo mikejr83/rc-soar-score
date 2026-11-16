@@ -81,6 +81,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
   /// Keys the places the page scrolls to after a refusal or an accept.
   final _scroll = ScrollController();
   final _bannerKey = GlobalKey();
+  final _queuedKey = GlobalKey();
   final _groupResultsKey = GlobalKey();
 
   bool get _submitted => _phase == _Phase.accepted;
@@ -325,7 +326,10 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
             _rejectedFields = result.fields.toSet();
           });
           _saveDraft();
-          _scrollTo(bottom: false);
+          // A dead session goes home, so there is nothing to scroll to.
+          if (code != 'session_invalid') {
+            _scrollTo(bottom: false, key: _bannerKey);
+          }
       }
       if (_submitted) {
         drafts.clear(widget.contestId, widget.pilotId, widget.data.round);
@@ -333,6 +337,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
     } on SelfScoreOfflineException {
       if (!mounted) return;
       setState(() => _phase = _Phase.queued);
+      _scrollTo(bottom: false, key: _queuedKey);
       _retryTimer = Timer(const Duration(seconds: 10), () {
         if (mounted && _phase == _Phase.queued) {
           setState(() => _phase = _Phase.sending);
@@ -347,7 +352,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
         _rejection = error.message;
       });
       _saveDraft();
-      _scrollTo(bottom: false);
+      _scrollTo(bottom: false, key: _bannerKey);
     }
   }
 
@@ -365,7 +370,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
       _rejection = null;
     });
     scoreChanges.value++;
-    _scrollTo(bottom: true);
+    _scrollTo(bottom: true, key: _groupResultsKey);
   }
 
   /// Moves the page once the new layout is built. A refusal adds a banner
@@ -373,18 +378,28 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
   /// button; either leaves the old scroll offset pointing at nothing. The
   /// list builds lazily, so the target widget may not exist yet: scroll by
   /// offset first, then settle on the widget.
-  void _scrollTo({required bool bottom}) {
+  void _scrollTo({required bool bottom, required GlobalKey key}) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted || !_scroll.hasClients) return;
-      await _scroll.animateTo(
-        bottom ? _scroll.position.maxScrollExtent : 0,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-      );
+      final animate = !MediaQuery.disableAnimationsOf(context);
+      final offset = bottom ? _scroll.position.maxScrollExtent : 0.0;
+      if (animate) {
+        await _scroll.animateTo(
+          offset,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      } else {
+        _scroll.jumpTo(offset);
+      }
       if (!mounted) return;
-      final target = (bottom ? _groupResultsKey : _bannerKey).currentContext;
+      final target = key.currentContext;
       if (target == null || !target.mounted) return;
-      await Scrollable.ensureVisible(target, alignment: bottom ? 1 : 0);
+      await Scrollable.ensureVisible(
+        target,
+        alignment: bottom ? 1 : 0,
+        duration: animate ? const Duration(milliseconds: 100) : Duration.zero,
+      );
     });
   }
 
@@ -510,6 +525,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
         ],
         if (_phase == _Phase.queued) ...[
           Semantics(
+            key: _queuedKey,
             liveRegion: true,
             child: Card(
               child: Padding(
@@ -551,7 +567,9 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
           controller: _time,
           enabled: editable && !_zeroed,
           allowDecimal: true,
-          onChanged: (_) => _update(() {}),
+          onChanged: (_) => _update(
+            () => _rejectedFields = {..._rejectedFields}..remove('time_flown'),
+          ),
           errorText:
               timeError ??
               (_rejectedFields.contains('time_flown')
@@ -566,7 +584,10 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
           label: 'Launch height (m)',
           controller: _height,
           enabled: editable && !_zeroed,
-          onChanged: (_) => _update(() {}),
+          onChanged: (_) => _update(
+            () =>
+                _rejectedFields = {..._rejectedFields}..remove('launch_height'),
+          ),
           errorText:
               _heightError ??
               (_rejectedFields.contains('launch_height')

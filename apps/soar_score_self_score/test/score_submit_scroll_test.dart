@@ -52,7 +52,7 @@ Future<void> _pump(
   SelfScoreRepository repository, {
   ScoreDraftStore? drafts,
 }) async {
-  tester.view.physicalSize = const Size(400, 700);
+  tester.view.physicalSize = const Size(400, 550);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
@@ -133,6 +133,62 @@ void main() {
     await tester.tap(find.text('Submit score'));
     await tester.pumpAndSettle();
 
-    expect(_inView(tester, find.text('See group results')), isTrue);
+    final button = find.text('See group results');
+    expect(_inView(tester, button), isTrue);
+    // Settled at the bottom, not merely somewhere on screen.
+    expect(tester.getRect(button).bottom, greaterThan(550 - 80));
+  });
+
+  testWidgets('a queued score scrolls its card into view', (tester) async {
+    final repository = _ScriptedRepository([
+      const SelfScoreOfflineException('offline'),
+    ]);
+    await _pump(tester, repository);
+    await tester.enterText(find.byType(TextField).at(0), '630.4');
+    await tester.enterText(find.byType(TextField).at(1), '45');
+    await tester.tap(find.text('Choose landing'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Good'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Submit score'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Submit score'));
+    await tester.pumpAndSettle();
+
+    expect(_inView(tester, find.text('Not sent yet')), isTrue);
+  });
+
+  testWidgets('editing a refused field clears its message', (tester) async {
+    final repository = _ScriptedRepository([
+      const ScoreRejected(
+        code: 'validation_failed',
+        message: 'Check the highlighted fields.',
+        fields: ['time_flown'],
+      ),
+    ]);
+    await _pump(tester, repository);
+    await tester.enterText(find.byType(TextField).at(0), '630.4');
+    await tester.enterText(find.byType(TextField).at(1), '45');
+    await tester.tap(find.text('Choose landing'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Good'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Submit score'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Submit score'));
+    await tester.pumpAndSettle();
+    expect(find.text('The server did not accept this value.'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).at(0), '640');
+    await tester.pumpAndSettle();
+    expect(find.text('The server did not accept this value.'), findsNothing);
   });
 }
