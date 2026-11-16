@@ -117,11 +117,21 @@ class PilotCardsData {
       rowsByPilot[participation.value] ?? const [];
 
   static CardScore? scoreOf(ScoreSlot? slot, Map<String, int> points) {
+    // The official version, else the pilot's waiting submission, which
+    // prints with the asterisk. A review's proposed values never print.
     final official = slot?.officialScore;
-    if (slot == null || official == null) {
+    final pending = slot?.pendingAttempt;
+    final Map<String, Object?>? values = official != null
+        ? official.components
+        : switch (slot?.placeholder.state) {
+            ScorePlaceholderState.submitted ||
+            ScorePlaceholderState.inReview => pending?.rawComponents,
+            _ => null,
+          };
+    if (slot == null || values == null) {
       return null;
     }
-    final c = official.components;
+    final c = values;
     String number(Object? value) => value is num ? '${value.toInt()}' : '–';
     final landing = c['landing'];
     final penalty = c['flight_penalty'];
@@ -142,7 +152,9 @@ class PilotCardsData {
         CardField.over75: c['out_of_bounds'] == true,
         CardField.restart: c['motor_restart'] == true,
       },
-      official: slot.placeholder.state == ScorePlaceholderState.official,
+      official:
+          official != null &&
+          slot.placeholder.state == ScorePlaceholderState.official,
     );
   }
 }

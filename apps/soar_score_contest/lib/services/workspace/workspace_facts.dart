@@ -190,7 +190,7 @@ class WorkspaceFacts extends Equatable {
           : scores.slots
                 .where(
                   (slot) =>
-                      slot.officialScore != null &&
+                      _isEntered(slot) &&
                       assignmentIds.contains(slot.placeholder.assignmentId),
                 )
                 .length,
@@ -292,6 +292,12 @@ class WorkspaceFacts extends Equatable {
 
   /// The score with the largest `setAt`, with the assignment it belongs to.
   /// Scores of superseded or cancelled-round assignments are ignored.
+  /// Whether the slot has a score entered, official or waiting for the
+  /// director, the way the server's round progress counts it.
+  static bool _isEntered(ScoreSlot slot) =>
+      slot.officialScore != null ||
+      slot.placeholder.state != ScorePlaceholderState.notEntered;
+
   static (LatestScore, MatrixAssignment)? _latestScore(
     ContestScores scores,
     List<MatrixAssignment> assignments,
@@ -350,7 +356,7 @@ class WorkspaceFacts extends Equatable {
     final scored = scores.slots
         .where(
           (slot) =>
-              slot.officialScore != null &&
+              _isEntered(slot) &&
               inGroup.contains(slot.placeholder.assignmentId),
         )
         .length;
