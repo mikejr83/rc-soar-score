@@ -6,6 +6,7 @@ import '../schema/database_profile.dart';
 import 'assignment_markers.dart';
 import 'entity_stores.dart';
 import 'mutation_payload.dart';
+import 'contest_gate.dart';
 import 'pending_announcements.dart';
 import 'scope_sequence.dart';
 import 'sql_placeholders.dart';
@@ -41,7 +42,9 @@ class DriftUnitOfWork implements core.UnitOfWork {
   @override
   Future<T> run<T>(Future<T> Function(core.WriteContext context) body) async {
     final context = _Context(this);
-    final result = await _db.transaction(() => body(context));
+    final result = await mapContestBusy(
+      () => _db.transaction(() => body(context)),
+    );
     final enclosing = pendingAnnouncements;
     if (enclosing != null) {
       // Inside a contest score gate this transaction is only a savepoint: the

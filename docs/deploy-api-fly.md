@@ -71,6 +71,16 @@ one, and sessions in pilots' browsers stop working. Regenerating links for
 them is tracked in #791; until it exists, avoid rotating the secret once
 cards are printed. A leaked secret is the one reason to rotate it.
 
+## Contest score gate and 503 `contest_busy`
+
+Director score entry (single and bulk), participant submissions and promotions
+of one contest run one after another behind a per-contest gate on PostgreSQL.
+A writer waits at most 30 seconds (`lock_timeout`); a bulk entry of up to 100
+slots holds the gate while it is checked and stored, so a second writer of the
+same contest can wait for all of that. A timeout or deadlock is answered 503
+`contest_busy` with `retry-after`, and the request may be repeated as it is.
+Clients should allow a request timeout longer than the lock timeout.
+
 ## Throttling invitation links
 
 `POST /api/v1/self-scoring/invitations/resolve` (opening a link) is limited
