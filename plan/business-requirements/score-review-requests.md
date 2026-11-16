@@ -9,7 +9,7 @@ In this process the participant is the pilot or helper entering the score. The c
 ## Process
 
 1. The participant has entered a preliminary score in the self-scoring system (`Submitted` state).
-2. The score has not been marked `Official` by the contest director and is not locked (at the score, group, round, or contest level).
+2. The score is not locked (at the score, group, round, or contest level), and the contest director has not explicitly closed review for it. A score that the contest accepted automatically (see `contest-configuration.md`, Scores Become Official) can still be reviewed. A score the contest director marked official, corrected, or decided a review for cannot.
 3. The participant has no other pending review request for that flight assignment/round.
 4. The participant initiates a review by clicking "Request Review" in the self-scoring UI.
 5. The participant is presented with the editable scoring form, prepopulated with their originally submitted values.
@@ -19,7 +19,9 @@ In this process the participant is the pilot or helper entering the score. The c
 9. The contest director evaluates the request:
    - **Approved**: The proposed modifications are accepted as the new official score revision (`Official` state) and trigger score recalculation.
    - **Rejected**: The proposed modifications are rejected, and the existing score is confirmed as official (`Official` state). An optional rejection reason may be recorded.
-   - Once marked official through approval, rejection, or direct administrative entry, participant review requests are closed for that score.
+   - Once the director has decided the score through approval, rejection, marking it official, or direct administrative entry, participant review requests are closed for that score. Automatic acceptance does not close them.
+   - If the director marks a score official while a request is open, the request is superseded and its proposal is not applied.
+   - While a request is open, automatic acceptance holds that score. The other scores in the group or round are accepted as usual, and the results the held score affects stay preliminary.
 
 ## Auditing
 
