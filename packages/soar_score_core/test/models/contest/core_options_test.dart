@@ -24,6 +24,13 @@ void main() {
       expect(options.participantNumbersEnabled, isFalse);
       expect(options.reviewRequestsEnabled, isTrue);
       expect(options.publicUpdateMode, PublicUpdateMode.roundCompletion);
+      // A configuration with no stored value reads as Manually, so older
+      // contests do not change; a fresh contest stores End of round.
+      expect(options.scoresBecomeOfficial, OfficializationMode.manual);
+      expect(
+        CoreOptions.freshContestScoresBecomeOfficial,
+        OfficializationMode.endOfRound,
+      );
       expect(options.intendedTotalRounds, isNull);
     });
 
@@ -46,6 +53,34 @@ void main() {
       expect(options.groupScoreMode, GroupScoreMode.raw);
       expect(options.roundingMode, RoundingMode.truncate);
       expect(options.publicUpdateMode, PublicUpdateMode.manual);
+    });
+
+    test('scores_become_official reads each text and ignores publication', () {
+      for (final mode in OfficializationMode.values) {
+        final options = CoreOptions.fromMap({
+          'scores_become_official': mode.json,
+          'public_update_mode': 'Manual',
+        });
+        expect(options.scoresBecomeOfficial, mode);
+        expect(options.publicUpdateMode, PublicUpdateMode.manual);
+      }
+      expect(
+        [for (final m in OfficializationMode.values) m.json],
+        ['EndOfRound', 'EndOfGroup', 'Manual'],
+      );
+      expect(
+        CoreOptions.fromMap(const {'scores_become_official': null})
+            .scoresBecomeOfficial,
+        OfficializationMode.manual,
+      );
+      expect(
+        () => CoreOptions.fromMap(const {'scores_become_official': 'Never'}),
+        throwsArgumentError,
+      );
+      expect(
+        () => CoreOptions.fromMap(const {'scores_become_official': true}),
+        throwsArgumentError,
+      );
     });
 
     test('reject an unknown enum text or a wrong type', () {

@@ -1123,6 +1123,70 @@ void main() {
     });
   });
 
+  group('scores become official setting', () {
+    Map<String, Object?> coreOf(Object? config) {
+      final map = config is String ? jsonDecode(config) : config;
+      return Map<String, Object?>.from((map as Map)['core'] as Map);
+    }
+
+    Future<core.OfficializationMode> importedMode(
+      ExchangeFile file,
+      Site into,
+    ) async {
+      await into.importer.import(
+        file,
+        mode: ImportMode.inspection,
+        target: into.target,
+      );
+      final rows = await into.db
+          .customSelect(
+            'SELECT config FROM contest_configuration_revisions '
+            'WHERE contest_id IN (SELECT id FROM contests WHERE name = ?) '
+            'ORDER BY revision_number DESC',
+            variables: [Variable.withString(_autumn)],
+          )
+          .get();
+      return core.CoreOptions.fromMap(coreOf(rows.first.read<String>('config')))
+          .scoresBecomeOfficial;
+    }
+
+    test('the stored mode round trips through an export', () async {
+      for (final mode in core.OfficializationMode.values) {
+        final file = await source.exportNamed(_autumn);
+        for (final row in file.rows('contest_configuration_revisions')) {
+          final config = Map<String, Object?>.from(
+            (row['config'] is String
+                    ? jsonDecode(row['config']! as String)
+                    : row['config'])
+                as Map,
+          );
+          final options = Map<String, Object?>.from(config['core'] as Map)
+            ..['scores_become_official'] = mode.json;
+          row['config'] = {...config, 'core': options};
+        }
+        final fresh = await Site.open();
+        addTearDown(fresh.close);
+        expect(await importedMode(file, fresh), mode);
+      }
+    });
+
+    test('an export with no stored mode reads as Manual', () async {
+      final file = await source.exportNamed(_autumn);
+      for (final row in file.rows('contest_configuration_revisions')) {
+        final config = Map<String, Object?>.from(
+          (row['config'] is String
+                  ? jsonDecode(row['config']! as String)
+                  : row['config'])
+              as Map,
+        );
+        final options = Map<String, Object?>.from(config['core'] as Map)
+          ..remove('scores_become_official');
+        row['config'] = {...config, 'core': options};
+      }
+      expect(await importedMode(file, target), core.OfficializationMode.manual);
+    });
+  });
+
   group('untrusted files', () {
     test('a file that is not an export is refused', () {
       for (final text in ['not json', '[]', '{"format":"other"}']) {

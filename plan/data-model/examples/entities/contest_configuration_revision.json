@@ -22,7 +22,8 @@
         "models_enabled": true,
         "participant_numbers_enabled": true,
         "review_requests_enabled": true,
-        "public_update_mode": "RoundCompletion"
+        "public_update_mode": "RoundCompletion",
+        "scores_become_official": "EndOfRound"
       },
       "discipline": {
         "target_time": 600,

@@ -37,5 +37,6 @@ const Map<String, OptionGroup> coreOptionGroups = {
   'participant_numbers_enabled': OptionGroup.presentation,
   'review_requests_enabled': OptionGroup.presentation,
   'public_update_mode': OptionGroup.presentation,
+  'scores_become_official': OptionGroup.presentation,
   'intended_total_rounds': OptionGroup.presentation,
 };

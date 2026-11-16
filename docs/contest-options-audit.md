@@ -36,14 +36,15 @@ These change standings, so each has a test in `test/scoring/recalculation/option
 
 ## Presentation options
 
-| Key                           | Honoured by                                                          | Test                                                        | Status                   |
-| ----------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------ |
-| `classes_enabled`             | setup checklist row text only (app). No class field is shown or used | `contest_configuration_page_test.dart`                      | Stored only              |
-| `models_enabled`              | nowhere                                                              | none                                                        | Stored only              |
-| `participant_numbers_enabled` | matrix page and grid (app), configuration rules                      | `matrix_page_grid_test.dart`, `matrix_page_phone_test.dart` | Honoured                 |
-| `review_requests_enabled`     | nowhere. The review request flow does not read it                    | none                                                        | Stored only              |
-| `public_update_mode`          | `services/publication/public_update_service.dart`                    | `public_update_service_test.dart`                           | Honoured                 |
-| `intended_total_rounds`       | workspace progress and next-step resolver (app)                      | `next_step_precedence_test.dart`                            | Honoured in the app only |
+| Key                           | Honoured by                                                                                      | Test                                                        | Status                   |
+| ----------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- | ------------------------ |
+| `classes_enabled`             | setup checklist row text only (app). No class field is shown or used                             | `contest_configuration_page_test.dart`                      | Stored only              |
+| `models_enabled`              | nowhere                                                                                          | none                                                        | Stored only              |
+| `participant_numbers_enabled` | matrix page and grid (app), configuration rules                                                  | `matrix_page_grid_test.dart`, `matrix_page_phone_test.dart` | Honoured                 |
+| `review_requests_enabled`     | nowhere. The review request flow does not read it                                                | none                                                        | Stored only              |
+| `public_update_mode`          | `services/publication/public_update_service.dart`                                                | `public_update_service_test.dart`                           | Honoured                 |
+| `scores_become_official`      | nowhere yet. Stored, validated and round-tripped by export (#926 D2a); the evaluator comes later | `core_options_test.dart`                                    | Stored only              |
+| `intended_total_rounds`       | workspace progress and next-step resolver (app)                                                  | `next_step_precedence_test.dart`                            | Honoured in the app only |
 
 ## Participant options
 
