@@ -35,7 +35,17 @@ const contestGateLockTimeout = '30s';
 /// Do not await work on another database connection from [body]: that work
 /// cannot see this transaction's writes and, if it needs the same gate, waits
 /// for a lock this call holds. The lock wait is bounded by
-/// [contestGateLockTimeout].
+/// [contestGateLockTimeout]; a timeout (PostgreSQL 55P03) or a deadlock
+/// (40P01) surfaces as the database's own error, which the API answers as a
+/// server error; the caller may retry the request. `lock_timeout` is set with
+/// `SET LOCAL`, so it stays in force for the rest of an enclosing transaction
+/// that was not itself a gate.
+///
+/// A gate nested for a different contest takes a second lock; two writers
+/// taking two contests in opposite orders can deadlock, so a writer holds one
+/// contest's gate at a time. A rolled-back savepoint whose outer body carries
+/// on still lets its scopes be announced (a spurious wake-up, never a missed
+/// one).
 Future<T> withContestScoreGate<T>(
   SoarScoreDatabase db,
   String contestId,

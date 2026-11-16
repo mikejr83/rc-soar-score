@@ -512,7 +512,7 @@ void _tests(SliceBackend backend) {
     });
   });
 
-  group('writers of one contest run one after another', () {
+  group('competing writers of one contest end in a consistent state', () {
     test('overlapping identical requests adopt once and replay', () async {
       await submitFirst();
 

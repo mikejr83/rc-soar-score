@@ -144,4 +144,34 @@ void _twoConnections(Backend backend) {
 
     expect(events, ['holder-commit', 'waiter-done']);
   });
+
+  test('a row deleted while a writer waits is not brought back', () async {
+    final saved = await first.unitOfWork.run(
+      (c) => c.save(contest(), metadata: metadata(requestId: 'a')),
+    );
+    final release = Completer<void>();
+    final held = Completer<void>();
+
+    final holder = first.db.transaction(() async {
+      await first.stores.of('Contest').remove(saved.id);
+      held.complete();
+      await release.future;
+    });
+    await held.future;
+
+    final waiter = second.unitOfWork
+        .run(
+          (c) => c.save(
+            contest(name: 'Waiter', id: saved.id, revision: saved.revision),
+            metadata: metadata(requestId: 'c'),
+          ),
+        )
+        .then<Object>((r) => r, onError: (Object e) => e);
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    release.complete();
+    await holder;
+
+    expect(await waiter, isA<core.StaleRevisionError>());
+    expect(await first.stores.of('Contest').findJson(saved.id), isNull);
+  });
 }

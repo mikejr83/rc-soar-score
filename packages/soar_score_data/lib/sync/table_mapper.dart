@@ -113,33 +113,42 @@ class TableMapper {
   ///
   /// The revision is compared by the database in the same statement as the
   /// write, so a writer that did not take the contest gate cannot be
-  /// overwritten between a read and this write.
+  /// overwritten between a read and this write, and a row deleted in between
+  /// is not recreated.
   Future<bool> upsertIfRevision(
     Map<String, Object?> json,
     int? expectedRevision,
   ) async {
     final columns = [for (final c in _table.$columns) c.$name];
     final keys = [for (final c in _table.$primaryKey) c.$name];
-    final updates = [
-      for (final name in columns)
-        if (!keys.contains(name)) '"$name" = excluded."$name"',
-    ];
-    final conflict = expectedRevision == null || updates.isEmpty
-        ? 'DO NOTHING'
-        : 'DO UPDATE SET ${updates.join(', ')} '
-              'WHERE $_name."revision" = ?';
+    final values = [for (final c in columns.where((c) => !keys.contains(c))) c];
+    if (expectedRevision != null && values.isNotEmpty) {
+      // An existing row: a plain UPDATE, so a row another connection deleted
+      // meanwhile is not brought back at the next revision.
+      final changed = await _db.customUpdate(
+        portableSql(
+          _db,
+          'UPDATE $_name SET ${values.map((c) => '"$c" = ?').join(', ')} '
+          'WHERE ${keys.map((k) => '"$k" = ?').join(' AND ')} '
+          'AND "revision" = ?',
+        ),
+        variables: [
+          ..._toVariables(json, values),
+          ..._toVariables(json, keys),
+          Variable<int>(expectedRevision),
+        ],
+        updates: {_table},
+      );
+      return changed > 0;
+    }
     final changed = await _db.customUpdate(
       portableSql(
         _db,
         'INSERT INTO $_name (${columns.map((c) => '"$c"').join(', ')}) '
         'VALUES (${List.filled(columns.length, '?').join(', ')}) '
-        'ON CONFLICT (${keys.map((k) => '"$k"').join(', ')}) $conflict',
+        'ON CONFLICT (${keys.map((k) => '"$k"').join(', ')}) DO NOTHING',
       ),
-      variables: [
-        ..._toVariables(json, columns),
-        if (expectedRevision != null && updates.isNotEmpty)
-          Variable<int>(expectedRevision),
-      ],
+      variables: _toVariables(json, columns),
       updates: {_table},
     );
     return changed > 0;
