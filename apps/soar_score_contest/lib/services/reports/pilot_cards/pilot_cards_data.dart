@@ -152,6 +152,8 @@ class PilotCardsData {
         CardField.over75: c['out_of_bounds'] == true,
         CardField.restart: c['motor_restart'] == true,
       },
+      // The state check is a guard: an official version never sits in a
+      // waiting state, so the printed values and this flag agree.
       official:
           official != null &&
           slot.placeholder.state == ScorePlaceholderState.official,
