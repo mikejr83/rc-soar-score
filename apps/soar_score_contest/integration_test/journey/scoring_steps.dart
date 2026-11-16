@@ -336,6 +336,17 @@ Future<void> closeHistory(WidgetTester tester) async {
 
 final _stripCount = RegExp(r'^(\d+) of (\d+) entered · (\d+) official$');
 
+/// The counts in the open group's strip: (entered, total, official).
+(int entered, int total, int official) groupStripCounts(WidgetTester tester) {
+  for (final text in tester.widgetList<Text>(find.byType(Text))) {
+    final match = _stripCount.firstMatch(text.data ?? '');
+    if (match != null) {
+      return (int.parse(match[1]!), int.parse(match[2]!), int.parse(match[3]!));
+    }
+  }
+  fail('The group strip is not on screen.');
+}
+
 /// The official count in the group's strip.
 int _officialCount(WidgetTester tester) {
   for (final text in tester.widgetList<Text>(find.byType(Text))) {
