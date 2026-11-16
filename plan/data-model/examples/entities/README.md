@@ -247,7 +247,7 @@ A normal flight, a motor restart, and (last) an out of bounds landing. Sam, Rile
 
 [`official_score.json`](official_score.json) · [specification](../../entities/official_score.md)
 
-A zero reason is kept in the components as `zero_reason`.
+A zero reason is kept in the components as `zero_reason`. The last row is the contest's own acceptance of a participant submission: origin `Automatic`, no `set_by`, and a reason code. The others are `Manual`.
 
 ### FlightResult
 

@@ -2,8 +2,10 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../enums/score_placeholder_state.dart';
+import '../../enums/selection_origin.dart';
 import '../id.dart';
 import '../shared/shared.dart';
+import 'official_score.dart';
 
 part 'score_placeholder.g.dart';
 
@@ -26,6 +28,7 @@ class ScorePlaceholder extends Equatable implements Synchronizable {
     this.currentAttemptId,
     this.lockedBy,
     DateTime? lockedAt,
+    this.reviewClosedScoreRevision,
     this.revision = 0,
   }) : lockedAt = lockedAt?.toUtc() {
     requireNonNegative(scoreRevision, 'scoreRevision');
@@ -33,6 +36,9 @@ class ScorePlaceholder extends Equatable implements Synchronizable {
       throw ArgumentError('locked_by and locked_at are set together');
     }
     requireNonNegative(revision, 'revision');
+    if (reviewClosedScoreRevision != null) {
+      requirePositive(reviewClosedScoreRevision!, 'reviewClosedScoreRevision');
+    }
   }
 
   factory ScorePlaceholder.fromJson(Map<String, Object?> json) =>
@@ -62,10 +68,40 @@ class ScorePlaceholder extends Equatable implements Synchronizable {
   final Id? lockedBy;
   final DateTime? lockedAt;
 
+  /// The [scoreRevision] for which a director explicitly closed review
+  /// without a new official version, for example by confirming an
+  /// automatically accepted score. Null when no such decision was made. It
+  /// applies only while it equals the current [scoreRevision]: any newer
+  /// score starts open again.
+  final int? reviewClosedScoreRevision;
+
   @override
   final int revision;
 
   bool get isLocked => lockedAt != null;
+
+  /// True when a director's explicit decision closed review for the current
+  /// score by [reviewClosedScoreRevision]. Whether the official version
+  /// itself closes review depends on its origin; use [isReviewClosed].
+  bool get hasReviewClosure =>
+      reviewClosedScoreRevision != null &&
+      reviewClosedScoreRevision == scoreRevision;
+
+  /// Whether a participant can no longer ask for a review of the current
+  /// score because of a director's explicit decision: [current] is the
+  /// placeholder's current official version, if any.
+  ///
+  /// Official status alone does not close review. A score the contest
+  /// accepted automatically stays reviewable until it is locked (see
+  /// [isLocked], which callers check separately) or a director decides it.
+  /// A manual or review-decision version is itself the decision.
+  bool isReviewClosed(OfficialScore? current) {
+    if (current == null || current.scoreRevision != scoreRevision) {
+      return false;
+    }
+    return current.selectionOrigin != SelectionOrigin.automatic ||
+        hasReviewClosure;
+  }
 
   @override
   String get entityType => 'ScorePlaceholder';
@@ -86,6 +122,7 @@ class ScorePlaceholder extends Equatable implements Synchronizable {
     currentAttemptId,
     lockedBy,
     lockedAt,
+    reviewClosedScoreRevision,
     revision,
   ];
 }

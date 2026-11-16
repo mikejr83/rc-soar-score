@@ -25,8 +25,9 @@
 | `score_revision`       | int       | Yes      | -       | Revision number of this version                                                                                                                   |
 | `components`           | JSON      | Yes      | -       | Authoritative input components: duration_sec, penalties, adjustments, zero reason. Calculated values (e.g. base score) are stored in FlightResult |
 | `set_at`               | timestamp | Yes      | -       | When this score became official                                                                                                                   |
-| `set_by`               | UUIDv7    | Yes      | -       | FK; person/authority who made it official                                                                                                         |
-| `reason`               | string    | Yes      | -       | Explanation for selection                                                                                                                         |
+| `set_by`               | UUIDv7    | No       | -       | FK; the director who made it official. Null exactly when `selection_origin` is `Automatic`: the contest acted, with system authority              |
+| `reason`               | string    | Yes      | -       | Stable reason code for the selection, localized where it is shown (for example `director_accepted_submission`, `automatic_round_complete`)        |
+| `selection_origin`     | enum      | Yes      | Manual  | How this version was selected: `Manual`, `Automatic`, or `ReviewDecision`. Records written before the field existed read as `Manual`              |
 
 ## Invariants and Constraints
 
@@ -41,6 +42,9 @@
 - A landing selection in `components` is the selected LandingResult id, which fixes the key, points, and table
 - Components hold authoritative inputs only; values derived from the contest configuration are calculated and stored in FlightResult, so retroactive configuration changes never leave stale values here
 - `contest_id` must equal the contest of the referenced placeholder and attempt
+- `selection_origin` is `Automatic` exactly when `set_by` is null (database check). `Manual` is a director entering the score or marking the stored submission official, `Automatic` is the contest accepting the stored submission when its configured scope was fully scored, and `ReviewDecision` is a director deciding a review request
+- Official status alone never closes a participant's chance to ask for a review. An `Automatic` version stays reviewable until it is locked or a director decides it explicitly: marking it official records `ScorePlaceholder.review_closed_score_revision` and creates no second version. A `Manual` or `ReviewDecision` version is itself the decision
+- An automatic selection is audited with `System` authority and no actor; the audit never names the contest owner
 
 ## Lifecycle
 

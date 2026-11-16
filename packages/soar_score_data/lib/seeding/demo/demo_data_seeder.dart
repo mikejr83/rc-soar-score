@@ -4,6 +4,7 @@ import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'demo_configuration.dart';
 import 'demo_contest_plan.dart';
 import 'demo_ids.dart';
+import 'demo_pending_seeder.dart';
 import 'demo_pilot.dart';
 import 'demo_score_seeder.dart';
 
@@ -235,6 +236,11 @@ class DemoDataSeeder {
       actorId: _localAccountId,
       metadata: _metadata,
     ).score(plan);
+    await DemoPendingSeeder(
+      _repository,
+      metadata: _metadata,
+      clock: _clock,
+    ).add(plan);
     final action = switch (plan.finalState) {
       core.LifecycleState.running => core.ContestAction.openScoring,
       core.LifecycleState.completed => core.ContestAction.complete,

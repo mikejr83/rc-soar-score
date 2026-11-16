@@ -214,6 +214,26 @@ void main() {
     );
   });
 
+  testWidgets('a locked score is not queued and names the lock', (
+    tester,
+  ) async {
+    final repository = _ScriptedRepository([
+      const ScoreRejected(code: 'score_locked', message: ''),
+    ]);
+    await _pump(tester, repository);
+    await _fillAndSubmit(tester);
+    await tester.pumpAndSettle();
+
+    // The refusal, not the offline queue: the score was not sent and will not
+    // be retried, so there is no queued banner and no auto-resend.
+    expect(
+      find.text('This score is locked. Ask your contest director.'),
+      findsOneWidget,
+    );
+    expect(find.text('Not sent yet'), findsNothing);
+    expect(find.text('Submit score'), findsOneWidget);
+  });
+
   testWidgets('an ended session goes back to start and keeps the draft', (
     tester,
   ) async {

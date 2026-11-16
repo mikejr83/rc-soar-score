@@ -6,6 +6,7 @@ import '../enums/re_flight_status.dart';
 import '../enums/re_flight_type.dart';
 import '../enums/round_status.dart';
 import '../enums/score_placeholder_state.dart';
+import '../enums/selection_origin.dart';
 import '../enums/assignment_type.dart';
 import '../models/id.dart';
 import '../models/imports/import_provenance.dart';
@@ -211,6 +212,7 @@ class GliderScoreRestoreBuilder {
         setAt: now,
         setBy: actorId,
         reason: reason,
+        selectionOrigin: SelectionOrigin.manual,
       );
       return RestoredScoreRows(
         attempt: attempt,

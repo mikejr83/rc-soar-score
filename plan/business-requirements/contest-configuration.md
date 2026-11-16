@@ -160,6 +160,24 @@ The contest director will have the option to lock scoring. Participants cannot e
 
 An option is presented for the contest director to allow participants to make review requests for previously entered scores.
 
+### Scores Become Official
+
+A submitted score is preliminary until the contest accepts it as the official score. The contest director chooses when that happens:
+
+1. **At end of round.** The default for a new contest.
+2. **At end of flight group.**
+3. **Manually.** Only the contest director makes scores official.
+
+In the wizard the option is in the step for scoring and publication defaults, and the summary repeats the choice. The contest director can change it on the contest Configuration page, including while the contest is running. A contest that has no stored choice, such as one created before this option existed, behaves as **Manually**.
+
+"End" means that every required score in the round or group has been submitted. It does not depend on the clock. Retired pilots and reflights follow the usual contest rules, and a score nobody entered is never treated as a zero. When the end is reached, the contest accepts the submitted scores without the director, except scores with an open review request, which wait for the director. Results that depend on a waiting score stay preliminary.
+
+Enabling the option, or widening it, accepts the rounds and groups that are already complete. Switching to **Manually** stops further automatic acceptance but does not undo scores that are already official. The director can still mark any submitted score official at any time.
+
+A score accepted this way can still be reviewed until it is locked, or until the director decides it. See `score-review-requests.md`.
+
+This option is separate from **Score Updates On The Public Site**. Making a score official does not publish it, and a publication setting never makes a score official.
+
 ### Score Updates On The Public Site
 
 The contest director will have options to dictate how scores are displayed for the contest on the public site. Contest directors will use this to help control how scores and contest progression is presented. There will be the following options:

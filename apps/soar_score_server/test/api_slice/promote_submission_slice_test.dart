@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
@@ -591,6 +592,123 @@ void _tests(SliceBackend backend) {
       expect((await placeholderOf(1, 1)).scoreRevision, 2);
       final promotedFirst = outcomes[0] is core.ScorePromotionResult;
       expect(versions.single.scoreAttemptId == attemptId, promotedFirst);
+    });
+  });
+
+  group('a bulk director entry takes the contest gate', () {
+    Future<List<core.BulkScoreOutcome>> bulkEntry({
+      required int base,
+      String id = 'bulk',
+    }) => scores.enterOfficialScores(
+      core.Id.parse(_contestId),
+      [
+        core.BulkScoreEntry(
+          assignmentId: slotId,
+          clientMutationId: id,
+          baseScoreRevision: base,
+          components: {..._goodScore, 'time_flown': 500},
+          reason: 'Checked the logger',
+        ),
+      ],
+      actorId: api.director,
+      metadata: meta(id),
+    );
+
+    Future<List<core.OfficialScore>> history() async => repository
+        .officialScoreRepository
+        .listForPlaceholder((await placeholderOf(1, 1)).id);
+
+    test(
+      'a promotion then a bulk entry on the old revision is stale',
+      () async {
+        await submitFirst();
+
+        await promote();
+        final outcomes = await bulkEntry(base: 1);
+
+        expect(outcomes.single.isSaved, isFalse);
+        expect(outcomes.single.statusCode, 409);
+        expect(outcomes.single.code, 'stale_revision');
+        final versions = await history();
+        expect(versions, hasLength(1));
+        expect(versions.single.scoreAttemptId, attemptId);
+      },
+    );
+
+    test('a bulk entry then a promotion is stale', () async {
+      await submitFirst();
+
+      expect((await bulkEntry(base: 1)).single.isSaved, isTrue);
+      await expectLater(promote(), throwsA(isA<core.StaleRevisionError>()));
+
+      final versions = await history();
+      expect(versions, hasLength(1));
+      expect(versions.single.components['time_flown'], 500);
+    });
+
+    test('a promotion and a bulk entry from the same revision: one wins, '
+        'the other is stale', () async {
+      await submitFirst();
+
+      final outcomes = await Future.wait([
+        promote().then<Object>((r) => r, onError: (Object e) => e),
+        bulkEntry(base: 1)
+            .then<Object>((r) => r.single, onError: (Object e) => e),
+      ]);
+
+      final promotedFirst = outcomes[0] is core.ScorePromotionResult;
+      final bulkSaved =
+          outcomes[1] is core.BulkScoreOutcome &&
+          (outcomes[1] as core.BulkScoreOutcome).isSaved;
+      expect(promotedFirst != bulkSaved, isTrue, reason: '$outcomes');
+      if (promotedFirst) {
+        expect(outcomes[1], isA<core.BulkScoreOutcome>());
+        expect((outcomes[1] as core.BulkScoreOutcome).code, 'stale_revision');
+      } else {
+        expect(outcomes[0], isA<core.StaleRevisionError>());
+      }
+      final versions = await history();
+      expect(versions, hasLength(1));
+      expect((await placeholderOf(1, 1)).scoreRevision, 2);
+      expect(versions.single.scoreAttemptId == attemptId, promotedFirst);
+    });
+
+    test('waits while another writer holds the contest gate', () async {
+      await submitFirst();
+      final release = Completer<void>();
+      final held = Completer<void>();
+      final holder = repository.officialScoreRepository.withContestGate(
+        core.Id.parse(_contestId),
+        () async {
+          held.complete();
+          await release.future;
+        },
+      );
+      await held.future;
+
+      var done = false;
+      final waiting = bulkEntry(base: 1).whenComplete(() => done = true);
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(done, isFalse, reason: 'the bulk entry ran inside the gate');
+
+      release.complete();
+      await holder;
+      expect((await waiting).single.isSaved, isTrue);
+    });
+
+    test('overlapping identical bulk requests store once and replay', () async {
+      await submitFirst();
+
+      final results = await Future.wait([
+        for (var i = 0; i < 4; i++) bulkEntry(base: 1),
+      ]);
+
+      for (final outcomes in results) {
+        expect(outcomes.single.isSaved, isTrue, reason: '$outcomes');
+      }
+      final versions = await history();
+      expect(versions, hasLength(1));
+      expect((await placeholderOf(1, 1)).scoreRevision, 2);
     });
   });
 

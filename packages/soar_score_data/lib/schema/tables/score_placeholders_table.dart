@@ -20,6 +20,7 @@ class ScorePlaceholders extends Table {
   TextColumn get currentAttemptId => text().nullable()();
   TextColumn get lockedBy => text().nullable()();
   TextColumn get lockedAt => text().nullable()();
+  IntColumn get reviewClosedScoreRevision => integer().nullable()();
   IntColumn get revision => integer().withDefault(const Constant(0))();
 
   @override

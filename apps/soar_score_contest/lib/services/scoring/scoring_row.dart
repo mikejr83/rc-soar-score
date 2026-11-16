@@ -103,7 +103,14 @@ class ScoringRow {
     }
   }
 
-  bool get isScored => slot?.officialScore != null;
+  /// Whether a score is entered for this flight, official or still waiting
+  /// for the director: the server's round progress rule. Not a retired
+  /// pilot's missing flight.
+  bool get isEntered => countsAsScored;
+
+  /// Whether an official score version exists, whether or not a lock
+  /// presents the row as locked. A pending submission is not official.
+  bool get isOfficial => slot?.officialScore != null;
 
   /// This row with a new saved [slot], after a save.
   ScoringRow withSlot(ScoreSlot slot) => ScoringRow(

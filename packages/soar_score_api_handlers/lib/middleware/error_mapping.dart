@@ -56,6 +56,12 @@ Response handledError(
   return errorResponse(statusCode, code, message, requestId: requestId);
 }
 
+/// [wait] in whole seconds for `retry-after`, rounded up, at least one.
+int _retrySeconds(Duration wait) {
+  final seconds = (wait.inMilliseconds / 1000).ceil();
+  return seconds < 1 ? 1 : seconds;
+}
+
 /// Turns thrown errors and bare 404s into the standard JSON error body.
 ///
 /// - `SyncRefusal`: its own status and code (426, 409, 403, 410)
@@ -67,6 +73,8 @@ Response handledError(
 /// - `ForbiddenError`: 403
 /// - `EntityNotFoundError`: 404
 /// - `ArgumentError`, `FormatException`, `ScoringValidationError`: 400
+/// - `ContestBusyError`: 503 `contest_busy` with `retry-after`; nothing was
+///   kept, so the request is safe to repeat as it is
 /// - `PayloadTooLargeError`: 413; `TooManyRequestsError`: 429 with
 ///   `retry-after`
 /// - an unmatched route: 404
@@ -92,6 +100,14 @@ Middleware errorMappingMiddleware() =>
           'rate_limited',
           'Too many requests; try again shortly.',
         ).change(headers: {'retry-after': '${e.retryAfter.inSeconds + 1}'});
+      } on ContestBusyError catch (e) {
+        // Say nothing of the database's own error: it is in the log only.
+        return handledError(
+          request,
+          503,
+          'contest_busy',
+          'The contest is busy with another score write; try again shortly.',
+        ).change(headers: {'retry-after': '${_retrySeconds(e.retryAfter)}'});
       } on EntityNotFoundError catch (e) {
         return handledError(request, 404, 'not_found', '$e');
       } on ForbiddenError catch (e) {

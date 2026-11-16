@@ -4177,6 +4177,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only you make scores official, one pilot or one group at a time.'**
   String get scoresBecomeOfficialManualHelp;
+
+  /// Count in the scoring page's context strip: flights with a score entered (official or waiting for the director) out of the group's flights, then how many of them are official.
+  ///
+  /// In en, this message translates to:
+  /// **'{entered} of {total} entered · {official} official'**
+  String scoringEnteredOfficialCount(int entered, int total, int official);
+
+  /// Button on a scoring row that accepts the pilot's own entry as the official score.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark official'**
+  String get scoreMarkOfficial;
+
+  /// Tooltip of the Mark official button of a row.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept {pilot}\'s entry as the official score.'**
+  String scoreMarkOfficialTooltip(String pilot);
+
+  /// Label of the Mark official button while the request is out.
+  ///
+  /// In en, this message translates to:
+  /// **'Marking…'**
+  String get scoreMarkOfficialMarking;
+
+  /// Why Mark official is off on a row the director typed over.
+  ///
+  /// In en, this message translates to:
+  /// **'Save or revert your edits first.'**
+  String get scoreMarkOfficialEdited;
+
+  /// Why Mark official is off on a locked row.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry is closed for this row.'**
+  String get scoreMarkOfficialClosed;
+
+  /// Banner after Mark official was refused because the row changed meanwhile.
+  ///
+  /// In en, this message translates to:
+  /// **'Not marked official: the pilot\'s entry or the score changed since you opened this row. Check the values shown and mark it official again.'**
+  String get scoreMarkOfficialChanged;
+
+  /// Banner after the server refused Mark official (for example a locked score).
+  ///
+  /// In en, this message translates to:
+  /// **'Not marked official: {message}'**
+  String scoreMarkOfficialRefused(String message);
+
+  /// Banner after the server refused Mark official without a reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Not marked official: the server refused it.'**
+  String get scoreMarkOfficialRefusedNoReason;
+
+  /// Banner after Mark official met a busy or unreachable server; Retry asks again.
+  ///
+  /// In en, this message translates to:
+  /// **'Not marked official. The server is busy or could not be reached. Nothing was changed; try again.'**
+  String get scoreMarkOfficialTryAgain;
+
+  /// Button on the Mark official banner that asks the server again.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get scoreMarkOfficialRetry;
+
+  /// Button on the Mark official banner that reads the page again.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get scoreMarkOfficialRefresh;
+
+  /// Banner when Mark official was refused as changed and re-reading the row failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not marked official: the pilot\'s entry or the score changed, and the newer values could not be read. Refresh to see them.'**
+  String get scoreMarkOfficialReloadFailed;
+
+  /// Banner after Mark official failed with a server error.
+  ///
+  /// In en, this message translates to:
+  /// **'Not marked official. {message}'**
+  String scoreMarkOfficialFailed(String message);
 }
 
 class _AppLocalizationsDelegate

@@ -1,5 +1,6 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
+import '../sync/contest_gate.dart';
 import 'drift_repository.dart';
 
 /// Score placeholders in the database.
@@ -22,10 +23,8 @@ class ScorePlaceholderRepository extends DriftRepository
   Future<core.ScorePlaceholder?> findForAssignmentForUpdate(
     core.Id assignmentId,
   ) async {
-    final found = await _store.whereId(
-      'assignment_id',
-      assignmentId,
-      forUpdate: true,
+    final found = await mapContestBusy(
+      () => _store.whereId('assignment_id', assignmentId, forUpdate: true),
     );
     return found.isEmpty ? null : found.single;
   }

@@ -19,14 +19,32 @@ extension BulkScoresService on ScoresService {
   /// recalculation and the publish that follow run for a replay as well, so a
   /// request that stopped after storing its scores is finished by a repeat.
   ///
-  /// Bulk entry does not take the contest score gate, so it does not wait for
-  /// a gated writer; its stores are protected by the revision-conditional
-  /// writes, which refuse an entry whose slot moved (a follow-up may gate
-  /// the single transaction).
+  /// The whole request runs inside the contest's score gate, like a single
+  /// entry, so it waits for a gated writer (director entry, participant
+  /// submission, promotion) of the same contest and none can commit between
+  /// its checks and its stores. The revision-conditional writes still refuse
+  /// an entry whose slot moved through a writer outside the gate. A lock
+  /// timeout or deadlock is a [ContestBusyError] with nothing kept, and the
+  /// request may be repeated as it is.
   ///
   /// Returns one outcome per entry, in order. The recalculation and the
   /// publish that follow are the caller's, and run once for the request.
   Future<List<BulkScoreOutcome>> enterOfficialScores(
+    Id contestId,
+    List<BulkScoreEntry> entries, {
+    required Id actorId,
+    required MutationMetadata metadata,
+  }) => repository.officialScoreRepository.withContestGate(
+    contestId,
+    () => _enterOfficialScores(
+      contestId,
+      entries,
+      actorId: actorId,
+      metadata: metadata,
+    ),
+  );
+
+  Future<List<BulkScoreOutcome>> _enterOfficialScores(
     Id contestId,
     List<BulkScoreEntry> entries, {
     required Id actorId,
@@ -121,6 +139,10 @@ extension BulkScoresService on ScoresService {
               prepared[i]!.entry!,
               metadata: metadata.forPart(entries[i].clientMutationId),
             );
+          } on ContestBusyError {
+            // Not this entry's failure: the gate rolls back everything
+            // stored so far and the whole request is repeated.
+            rethrow;
           } on Object catch (error, stackTrace) {
             // The entries before this one are already stored, so report
             // this one as failed and go on instead of throwing.
@@ -199,6 +221,8 @@ extension BulkScoresService on ScoresService {
         );
       } on StaleRevisionError {
         current = await _requireContest(current.id);
+      } on ContestBusyError {
+        rethrow;
       } on Object catch (error, stackTrace) {
         // The scores are stored; a repeat of the request starts the contest.
         _logger.warning(

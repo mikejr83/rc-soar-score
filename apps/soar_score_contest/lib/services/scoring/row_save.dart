@@ -18,7 +18,13 @@ enum RowSaveKind {
 }
 
 class RowSave {
-  const RowSave(this.kind, {this.message, this.networkProblem = false});
+  const RowSave(
+    this.kind, {
+    this.message,
+    this.networkProblem = false,
+    this.promotion = false,
+    this.changed = false,
+  });
 
   static const idle = RowSave(RowSaveKind.idle);
   static const saving = RowSave(RowSaveKind.saving);
@@ -29,6 +35,16 @@ class RowSave {
   /// For [RowSaveKind.failed]: true when the server could not be reached, so
   /// Retry is the answer; false when a refresh is.
   final bool networkProblem;
+
+  /// True when the request was "mark official" (accepting the pilot's own
+  /// entry) rather than a save of typed values, so the row's banner words it
+  /// that way and Retry asks again for the same thing.
+  final bool promotion;
+
+  /// For a [promotion] that was refused: the pilot's entry or the score
+  /// changed since the director opened the row, and the row now shows the
+  /// newer values to check before asking again.
+  final bool changed;
 
   bool get isBusy => kind == RowSaveKind.saving;
 }
