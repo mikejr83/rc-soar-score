@@ -268,7 +268,9 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
 
       // All four reports are listed under their groups.
       expect(find.text('Results'), findsOneWidget);
-      expect(find.text('Documents to print'), findsOneWidget);
+      // The documents group is called Scoring (a7bd511); the rail has a
+      // Scoring entry too.
+      expect(find.text('Scoring'), findsAtLeastNWidgets(2));
       for (final title in [
         'Overall Standings',
         'Draw Matrix',
