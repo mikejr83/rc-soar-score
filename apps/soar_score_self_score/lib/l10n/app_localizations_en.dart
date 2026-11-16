@@ -154,6 +154,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Scoring is closed for this flight. Ask your contest director.';
 
   @override
+  String get scoreRejectedLocked =>
+      'This score is locked. Ask your contest director.';
+
+  @override
   String get scoreRejectedOutOfOrder => 'Score the earlier round first.';
 
   @override

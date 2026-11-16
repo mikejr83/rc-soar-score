@@ -494,6 +494,52 @@ void _tests(SliceBackend backend) {
     expect((await placeholderOf(1, 1)).scoreRevision, 0);
   });
 
+  test('a locked score is refused in the envelope the client reads', () async {
+    // Lock the pilot's own slot, the way a director's lock does: the
+    // placeholder carries lockedBy/lockedAt.
+    final slot = await placeholderOf(1, 1);
+    await repository.scorePlaceholderRepository.save(
+      core.ScorePlaceholder(
+        id: slot.id,
+        contestId: slot.contestId,
+        contestParticipationId: slot.contestParticipationId,
+        assignmentId: slot.assignmentId,
+        state: slot.state,
+        scoreRevision: slot.scoreRevision,
+        currentAttemptId: slot.currentAttemptId,
+        lockedBy: api.director,
+        lockedAt: DateTime.now().toUtc(),
+        revision: slot.revision,
+      ),
+      metadata: core.MutationMetadata(
+        clientMutationId: 'lock-1',
+        authority: core.Authority.director,
+        clientTime: DateTime.now().toUtc(),
+        actorId: api.director,
+      ),
+    );
+
+    // The contest is still open (no score yet: Ready, not locked or
+    // completed), so the refusal comes from the locked slot, not the
+    // session: the client must read it as a refusal, not go offline.
+    expect(await contestState(), 'Ready');
+    final (status, body) = await submit(1);
+    expect(status, 409);
+    expect((body['error']! as Map)['code'], 'score_locked');
+    expect((await placeholderOf(1, 1)).scoreRevision, 0);
+  });
+
+  test('an admin-locked contest is refused as scoring_closed', () async {
+    // An admin lock is refused at the guest-session check, before the score
+    // service runs, so the pilot never sees a distinct `contest_locked`
+    // code on this route.
+    await contestAction('lock');
+    final (locked, lockedBody) = await submit(1);
+    expect(locked, 409);
+    expect((lockedBody['error']! as Map)['code'], 'scoring_closed');
+    expect((await placeholderOf(1, 1)).scoreRevision, 0);
+  });
+
   group('results (#146)', () {
     Future<(int, Map<String, Object?>)> get(String path) async {
       final response = await handler(
