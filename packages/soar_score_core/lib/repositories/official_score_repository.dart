@@ -10,6 +10,24 @@ import 'recorded_score.dart';
 abstract interface class OfficialScoreRepository {
   Future<OfficialScore?> findById(Id id);
 
+  /// Runs [body] as the only gated score writer of [contestId], in one
+  /// transaction.
+  ///
+  /// The writers that take this gate (director entry, participant submission
+  /// and promotion of one slot) read, check and write inside it, so a
+  /// competing gated writer waits for the commit and then reads its result.
+  /// It does not cover a writer that does not take it (a change accepted from
+  /// sync), nor a group promotion as a whole: each slot of that is its own
+  /// gated promotion. On PostgreSQL the gate is the contest's advisory lock,
+  /// taken before any read, and assumes READ COMMITTED; SQLite's writer
+  /// transaction begins immediately. Nested use opens a savepoint of the
+  /// outer transaction, which holds the lock and decides the commit.
+  ///
+  /// Everything [body] writes commits or rolls back together. Do not await
+  /// work on another connection from [body]: it can wait for the lock this
+  /// call holds. The wait for the lock has a time limit.
+  Future<T> withContestGate<T>(Id contestId, Future<T> Function() body);
+
   /// The official scores of [scorePlaceholderId], by score revision.
   Future<List<OfficialScore>> listForPlaceholder(Id scorePlaceholderId);
 

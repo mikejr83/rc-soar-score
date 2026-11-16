@@ -19,6 +19,11 @@ extension BulkScoresService on ScoresService {
   /// recalculation and the publish that follow run for a replay as well, so a
   /// request that stopped after storing its scores is finished by a repeat.
   ///
+  /// Bulk entry does not take the contest score gate, so it does not wait for
+  /// a gated writer; its stores are protected by the revision-conditional
+  /// writes, which refuse an entry whose slot moved (a follow-up may gate
+  /// the single transaction).
+  ///
   /// Returns one outcome per entry, in order. The recalculation and the
   /// publish that follow are the caller's, and run once for the request.
   Future<List<BulkScoreOutcome>> enterOfficialScores(

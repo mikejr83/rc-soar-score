@@ -33,19 +33,44 @@ class _HookedPlaceholders extends ScorePlaceholderRepository {
   var _calls = 0;
 
   @override
-  Future<core.ScorePlaceholder?> findForAssignment(core.Id assignmentId) async {
+  Future<core.ScorePlaceholder?> findForAssignment(core.Id assignmentId) =>
+      _hooked(() => super.findForAssignment(assignmentId));
+
+  @override
+  Future<core.ScorePlaceholder?> findForAssignmentForUpdate(
+    core.Id assignmentId,
+  ) => _hooked(() => super.findForAssignmentForUpdate(assignmentId));
+
+  Future<core.ScorePlaceholder?> _hooked(
+    Future<core.ScorePlaceholder?> Function() read,
+  ) async {
     final call = ++_calls;
     await before.remove(call)?.call();
-    final found = await super.findForAssignment(assignmentId);
+    final found = await read();
     await after.remove(call)?.call();
     return found;
   }
 }
 
+/// Official scores without the contest gate: the interleaving tests stand
+/// in for a writer that does not take it (an accepted sync change).
+class _UngatedScores extends OfficialScoreRepository {
+  _UngatedScores(super.db);
+
+  @override
+  Future<T> withContestGate<T>(core.Id contestId, Future<T> Function() body) =>
+      body();
+}
+
 class _HookedRepository extends Repository {
-  _HookedRepository(super.database, this.placeholders);
+  _HookedRepository(super.database, this.placeholders)
+    : _ungated = _UngatedScores(database);
 
   final _HookedPlaceholders placeholders;
+  final OfficialScoreRepository _ungated;
+
+  @override
+  core.OfficialScoreRepository get officialScoreRepository => _ungated;
 
   @override
   core.ScorePlaceholderRepository get scorePlaceholderRepository =>
@@ -484,6 +509,88 @@ void _tests(SliceBackend backend) {
           .currentForPlaceholder((await placeholderOf(1, 1)).id);
       expect(current!.components['time_flown'], 500);
       expect(current.scoreAttemptId, isNot(attemptId));
+    });
+  });
+
+  group('competing writers of one contest end in a consistent state', () {
+    test('overlapping identical requests adopt once and replay', () async {
+      await submitFirst();
+
+      final results = await Future.wait([
+        for (var i = 0; i < 6; i++) promote(id: 'racer-$i'),
+      ]);
+
+      expect(results.where((r) => !r.replayed), hasLength(1));
+      expect(results.where((r) => r.replayed), hasLength(5));
+      final placeholder = await placeholderOf(1, 1);
+      expect(placeholder.scoreRevision, 2);
+      expect(
+        await repository.officialScoreRepository.listForPlaceholder(
+          placeholder.id,
+        ),
+        hasLength(1),
+      );
+    });
+
+    Future<core.ScoreEntryResult> directorEntry({required int base}) =>
+        scores.enterOfficialScore(
+          core.Id.parse(_contestId),
+          slotId,
+          clientMutationId: 'director-$base',
+          baseScoreRevision: base,
+          components: {..._goodScore, 'time_flown': 500},
+          reason: 'Checked the logger',
+          actorId: api.director,
+          metadata: meta('director-$base'),
+        );
+
+    Future<List<core.OfficialScore>> history() async => repository
+        .officialScoreRepository
+        .listForPlaceholder((await placeholderOf(1, 1)).id);
+
+    test('a promotion then a director entry on the old revision', () async {
+      await submitFirst();
+
+      await promote();
+      await expectLater(
+        directorEntry(base: 1),
+        throwsA(isA<core.StaleRevisionError>()),
+      );
+
+      final versions = await history();
+      expect(versions, hasLength(1));
+      expect(versions.single.scoreAttemptId, attemptId);
+    });
+
+    test('a director entry then a promotion is stale', () async {
+      await submitFirst();
+
+      await directorEntry(base: 1);
+      await expectLater(promote(), throwsA(isA<core.StaleRevisionError>()));
+
+      final versions = await history();
+      expect(versions, hasLength(1));
+      expect(versions.single.components['time_flown'], 500);
+      expect((await placeholderOf(1, 1)).scoreRevision, 2);
+    });
+
+    test('a promotion and an entry from the same revision: one wins, '
+        'the other is stale', () async {
+      await submitFirst();
+
+      final outcomes = await Future.wait([
+        promote().then<Object>((r) => r, onError: (Object e) => e),
+        directorEntry(base: 1).then<Object>((r) => r, onError: (Object e) => e),
+      ]);
+
+      expect(outcomes.whereType<core.StaleRevisionError>(), hasLength(1));
+      final winners = outcomes.where((o) => o is! core.StaleRevisionError);
+      expect(winners, hasLength(1));
+      final versions = await history();
+      expect(versions, hasLength(1));
+      expect((await placeholderOf(1, 1)).scoreRevision, 2);
+      final promotedFirst = outcomes[0] is core.ScorePromotionResult;
+      expect(versions.single.scoreAttemptId == attemptId, promotedFirst);
     });
   });
 

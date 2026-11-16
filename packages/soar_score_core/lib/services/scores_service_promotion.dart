@@ -47,13 +47,14 @@ extension PromoteSubmissionService on ScoresService {
   /// a [ScoringValidationError] for stored values the discipline now refuses,
   /// and an [EntityNotFoundError] for an unknown contest, slot or source.
   ///
-  /// The checks read several rows and the write is its own transaction, so
-  /// another request can commit in between. Whenever a pass fails or reads a
-  /// slot that moved underneath it, the whole operation runs again from fresh
-  /// reads (a few times at most): the retry of an adoption that won then
-  /// replays, and one made stale by a competing entry is a
-  /// [StaleRevisionError]. A failure with the slot unchanged is thrown as it
-  /// is.
+  /// The reads, checks and write run inside the contest's score gate, so a
+  /// gated writer (director entry, participant submission, another promotion)
+  /// cannot commit in between. A writer outside the gate, such as an accepted
+  /// sync change, still can: whenever a pass fails or reads a slot that moved
+  /// underneath it, the whole operation runs again from fresh reads (a few
+  /// times at most). The retry of an adoption that won then replays, and one
+  /// made stale by a competing entry is a [StaleRevisionError]. A failure
+  /// with the slot unchanged is thrown as it is.
   Future<ScorePromotionResult> promoteSubmission(
     Id contestId,
     Id assignmentId, {
@@ -66,14 +67,17 @@ extension PromoteSubmissionService on ScoresService {
     for (var pass = 1; ; pass++) {
       final seen = <ScorePlaceholder>[];
       try {
-        return await _promoteOnce(
+        return await repository.officialScoreRepository.withContestGate(
           contestId,
-          assignmentId,
-          sourceAttemptId: sourceAttemptId,
-          expectedScoreRevision: expectedScoreRevision,
-          actorId: actorId,
-          metadata: metadata,
-          seen: seen,
+          () => _promoteOnce(
+            contestId,
+            assignmentId,
+            sourceAttemptId: sourceAttemptId,
+            expectedScoreRevision: expectedScoreRevision,
+            actorId: actorId,
+            metadata: metadata,
+            seen: seen,
+          ),
         );
       } on Object catch (error) {
         var moved = error is _SlotMoved;
@@ -108,7 +112,7 @@ extension PromoteSubmissionService on ScoresService {
     final context = await _configuration(contest);
 
     final current = await repository.scorePlaceholderRepository
-        .findForAssignment(assignmentId);
+        .findForAssignmentForUpdate(assignmentId);
     if (current == null || current.contestId != contestId) {
       throw EntityNotFoundError(
         entityType: 'ScorePlaceholder',

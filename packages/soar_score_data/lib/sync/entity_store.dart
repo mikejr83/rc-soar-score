@@ -50,10 +50,14 @@ class EntityStore<T extends Object> {
     String column,
     core.Id value, {
     String? orderBy,
+    bool forUpdate = false,
   }) async => [
-    for (final json in await _mapper.where('$column = ?', [
-      Variable<String>(value.value),
-    ], orderBy: orderBy))
+    for (final json in await _mapper.where(
+      '$column = ?',
+      [Variable<String>(value.value)],
+      orderBy: orderBy,
+      forUpdate: forUpdate,
+    ))
       _decode(json),
   ];
 
@@ -159,6 +163,12 @@ class EntityStore<T extends Object> {
   ) => _mapper.where('$column = ?', [Variable<String>(value.value)]);
 
   Future<void> upsertJson(Map<String, Object?> json) => _mapper.upsert(json);
+
+  /// See [TableMapper.upsertIfRevision].
+  Future<bool> upsertJsonIfRevision(
+    Map<String, Object?> json,
+    int? expectedRevision,
+  ) => _mapper.upsertIfRevision(json, expectedRevision);
 
   Future<bool> remove(core.Id id) => _mapper.remove(id);
 
