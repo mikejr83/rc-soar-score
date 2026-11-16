@@ -73,6 +73,15 @@ void _tests(Backend backend) {
       final result = await enter(slot);
 
       expect(result.officialScore.scoreRevision, 1);
+      // A director's entry is a manual selection by that director, and it is
+      // the decision itself: review is closed for it.
+      expect(result.officialScore.selectionOrigin, core.SelectionOrigin.manual);
+      expect(result.officialScore.setBy, actor);
+      expect(result.placeholder.isReviewClosed(result.officialScore), isTrue);
+      expect(
+        (await service.history(contestId, slot)).entries.single.selectionOrigin,
+        core.SelectionOrigin.manual,
+      );
       expect(result.placeholder.state, core.ScorePlaceholderState.official);
       expect(result.placeholder.scoreRevision, 1);
       expect(result.calculated.rawScore, 490);

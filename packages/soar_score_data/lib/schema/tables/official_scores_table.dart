@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../contests_table.dart';
+import '../enum_values.dart';
 import 'score_attempts_table.dart';
 import 'score_placeholders_table.dart';
 
@@ -16,8 +17,11 @@ class OfficialScores extends Table {
   IntColumn get scoreRevision => integer()();
   TextColumn get components => text()();
   TextColumn get setAt => text()();
-  TextColumn get setBy => text()();
+  TextColumn get setBy => text().nullable()();
   TextColumn get reason => text()();
+  TextColumn get selectionOrigin => text()
+      .withDefault(const Constant('Manual'))
+      .check(selectionOrigin.isIn(selectionOriginValues))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -28,7 +32,10 @@ class OfficialScores extends Table {
   ];
 
   @override
-  List<String> get customConstraints => ['CHECK (score_revision >= 1)'];
+  List<String> get customConstraints => [
+    'CHECK (score_revision >= 1)',
+    "CHECK ((selection_origin = 'Automatic') = (set_by IS NULL))",
+  ];
 }
 
 /// Columns of `official_scores` that hold JSON as text.

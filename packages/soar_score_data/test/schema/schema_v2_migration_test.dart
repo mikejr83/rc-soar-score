@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -139,6 +140,37 @@ void main() => forEachBackend((backend) {
                   );
                   continue;
                 }
+                if (type == 'OfficialScore') {
+                  // Version 1 has no selection origin and every score names
+                  // the director who made it official.
+                  const keys = [
+                    'id',
+                    'contest_id',
+                    'score_placeholder_id',
+                    'score_attempt_id',
+                    'score_revision',
+                    'components',
+                    'set_at',
+                    'set_by',
+                    'reason',
+                  ];
+                  await old.customInsert(
+                    'INSERT INTO official_scores (${keys.join(', ')}) '
+                    'VALUES (${[for (var i = 1; i <= keys.length; i++) backend == Backend.sqlite ? '?' : '\$$i'].join(', ')})',
+                    variables: [
+                      for (final key in keys)
+                        Variable(
+                          key == 'components'
+                              ? jsonEncode(row[key])
+                              : key == 'set_by'
+                              ? row[key] ??
+                                    '019c0000-0000-7000-8000-000000000001'
+                              : row[key],
+                        ),
+                    ],
+                  );
+                  continue;
+                }
                 await stores.of(type).upsertJson(row);
               }
             }
@@ -264,9 +296,28 @@ void main() => forEachBackend((backend) {
             final scoresAfter = await upgraded
                 .customSelect('SELECT * FROM official_scores ORDER BY id')
                 .get();
+            // Every version 1 score was selected by a director: it reads
+            // Manual, and nothing else about the row changes.
             expect(
-              [for (final row in scoresAfter) row.data],
+              [
+                for (final row in scoresAfter)
+                  {...row.data}..remove('selection_origin'),
+              ],
               [for (final row in scoresBefore) row.data],
+            );
+            expect(
+              {for (final row in scoresAfter) row.data['selection_origin']},
+              {'Manual'},
+            );
+            expect(
+              (await upgraded
+                      .customSelect(
+                        'SELECT COUNT(*) AS n FROM score_placeholders '
+                        'WHERE review_closed_score_revision IS NOT NULL',
+                      )
+                      .getSingle())
+                  .read<int>('n'),
+              0,
             );
             final unfilled = await upgraded
                 .customSelect(

@@ -28768,6 +28768,17 @@ class $ScorePlaceholdersTable extends ScorePlaceholders
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _reviewClosedScoreRevisionMeta =
+      const VerificationMeta('reviewClosedScoreRevision');
+  @override
+  late final GeneratedColumn<int> reviewClosedScoreRevision =
+      GeneratedColumn<int>(
+        'review_closed_score_revision',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _revisionMeta = const VerificationMeta(
     'revision',
   );
@@ -28791,6 +28802,7 @@ class $ScorePlaceholdersTable extends ScorePlaceholders
     currentAttemptId,
     lockedBy,
     lockedAt,
+    reviewClosedScoreRevision,
     revision,
   ];
   @override
@@ -28880,6 +28892,15 @@ class $ScorePlaceholdersTable extends ScorePlaceholders
         lockedAt.isAcceptableOrUnknown(data['locked_at']!, _lockedAtMeta),
       );
     }
+    if (data.containsKey('review_closed_score_revision')) {
+      context.handle(
+        _reviewClosedScoreRevisionMeta,
+        reviewClosedScoreRevision.isAcceptableOrUnknown(
+          data['review_closed_score_revision']!,
+          _reviewClosedScoreRevisionMeta,
+        ),
+      );
+    }
     if (data.containsKey('revision')) {
       context.handle(
         _revisionMeta,
@@ -28935,6 +28956,10 @@ class $ScorePlaceholdersTable extends ScorePlaceholders
         DriftSqlType.string,
         data['${effectivePrefix}locked_at'],
       ),
+      reviewClosedScoreRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}review_closed_score_revision'],
+      ),
       revision: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}revision'],
@@ -28959,6 +28984,7 @@ class ScorePlaceholderData extends DataClass
   final String? currentAttemptId;
   final String? lockedBy;
   final String? lockedAt;
+  final int? reviewClosedScoreRevision;
   final int revision;
   const ScorePlaceholderData({
     required this.id,
@@ -28970,6 +28996,7 @@ class ScorePlaceholderData extends DataClass
     this.currentAttemptId,
     this.lockedBy,
     this.lockedAt,
+    this.reviewClosedScoreRevision,
     required this.revision,
   });
   @override
@@ -28989,6 +29016,11 @@ class ScorePlaceholderData extends DataClass
     }
     if (!nullToAbsent || lockedAt != null) {
       map['locked_at'] = Variable<String>(lockedAt);
+    }
+    if (!nullToAbsent || reviewClosedScoreRevision != null) {
+      map['review_closed_score_revision'] = Variable<int>(
+        reviewClosedScoreRevision,
+      );
     }
     map['revision'] = Variable<int>(revision);
     return map;
@@ -29011,6 +29043,10 @@ class ScorePlaceholderData extends DataClass
       lockedAt: lockedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lockedAt),
+      reviewClosedScoreRevision:
+          reviewClosedScoreRevision == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewClosedScoreRevision),
       revision: Value(revision),
     );
   }
@@ -29032,6 +29068,9 @@ class ScorePlaceholderData extends DataClass
       currentAttemptId: serializer.fromJson<String?>(json['currentAttemptId']),
       lockedBy: serializer.fromJson<String?>(json['lockedBy']),
       lockedAt: serializer.fromJson<String?>(json['lockedAt']),
+      reviewClosedScoreRevision: serializer.fromJson<int?>(
+        json['reviewClosedScoreRevision'],
+      ),
       revision: serializer.fromJson<int>(json['revision']),
     );
   }
@@ -29050,6 +29089,9 @@ class ScorePlaceholderData extends DataClass
       'currentAttemptId': serializer.toJson<String?>(currentAttemptId),
       'lockedBy': serializer.toJson<String?>(lockedBy),
       'lockedAt': serializer.toJson<String?>(lockedAt),
+      'reviewClosedScoreRevision': serializer.toJson<int?>(
+        reviewClosedScoreRevision,
+      ),
       'revision': serializer.toJson<int>(revision),
     };
   }
@@ -29064,6 +29106,7 @@ class ScorePlaceholderData extends DataClass
     Value<String?> currentAttemptId = const Value.absent(),
     Value<String?> lockedBy = const Value.absent(),
     Value<String?> lockedAt = const Value.absent(),
+    Value<int?> reviewClosedScoreRevision = const Value.absent(),
     int? revision,
   }) => ScorePlaceholderData(
     id: id ?? this.id,
@@ -29078,6 +29121,9 @@ class ScorePlaceholderData extends DataClass
         : this.currentAttemptId,
     lockedBy: lockedBy.present ? lockedBy.value : this.lockedBy,
     lockedAt: lockedAt.present ? lockedAt.value : this.lockedAt,
+    reviewClosedScoreRevision: reviewClosedScoreRevision.present
+        ? reviewClosedScoreRevision.value
+        : this.reviewClosedScoreRevision,
     revision: revision ?? this.revision,
   );
   ScorePlaceholderData copyWithCompanion(ScorePlaceholdersCompanion data) {
@@ -29099,6 +29145,9 @@ class ScorePlaceholderData extends DataClass
           : this.currentAttemptId,
       lockedBy: data.lockedBy.present ? data.lockedBy.value : this.lockedBy,
       lockedAt: data.lockedAt.present ? data.lockedAt.value : this.lockedAt,
+      reviewClosedScoreRevision: data.reviewClosedScoreRevision.present
+          ? data.reviewClosedScoreRevision.value
+          : this.reviewClosedScoreRevision,
       revision: data.revision.present ? data.revision.value : this.revision,
     );
   }
@@ -29115,6 +29164,7 @@ class ScorePlaceholderData extends DataClass
           ..write('currentAttemptId: $currentAttemptId, ')
           ..write('lockedBy: $lockedBy, ')
           ..write('lockedAt: $lockedAt, ')
+          ..write('reviewClosedScoreRevision: $reviewClosedScoreRevision, ')
           ..write('revision: $revision')
           ..write(')'))
         .toString();
@@ -29131,6 +29181,7 @@ class ScorePlaceholderData extends DataClass
     currentAttemptId,
     lockedBy,
     lockedAt,
+    reviewClosedScoreRevision,
     revision,
   );
   @override
@@ -29146,6 +29197,7 @@ class ScorePlaceholderData extends DataClass
           other.currentAttemptId == this.currentAttemptId &&
           other.lockedBy == this.lockedBy &&
           other.lockedAt == this.lockedAt &&
+          other.reviewClosedScoreRevision == this.reviewClosedScoreRevision &&
           other.revision == this.revision);
 }
 
@@ -29159,6 +29211,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
   final Value<String?> currentAttemptId;
   final Value<String?> lockedBy;
   final Value<String?> lockedAt;
+  final Value<int?> reviewClosedScoreRevision;
   final Value<int> revision;
   final Value<int> rowid;
   const ScorePlaceholdersCompanion({
@@ -29171,6 +29224,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
     this.currentAttemptId = const Value.absent(),
     this.lockedBy = const Value.absent(),
     this.lockedAt = const Value.absent(),
+    this.reviewClosedScoreRevision = const Value.absent(),
     this.revision = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -29184,6 +29238,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
     this.currentAttemptId = const Value.absent(),
     this.lockedBy = const Value.absent(),
     this.lockedAt = const Value.absent(),
+    this.reviewClosedScoreRevision = const Value.absent(),
     this.revision = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -29202,6 +29257,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
     Expression<String>? currentAttemptId,
     Expression<String>? lockedBy,
     Expression<String>? lockedAt,
+    Expression<int>? reviewClosedScoreRevision,
     Expression<int>? revision,
     Expression<int>? rowid,
   }) {
@@ -29216,6 +29272,8 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
       if (currentAttemptId != null) 'current_attempt_id': currentAttemptId,
       if (lockedBy != null) 'locked_by': lockedBy,
       if (lockedAt != null) 'locked_at': lockedAt,
+      if (reviewClosedScoreRevision != null)
+        'review_closed_score_revision': reviewClosedScoreRevision,
       if (revision != null) 'revision': revision,
       if (rowid != null) 'rowid': rowid,
     });
@@ -29231,6 +29289,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
     Value<String?>? currentAttemptId,
     Value<String?>? lockedBy,
     Value<String?>? lockedAt,
+    Value<int?>? reviewClosedScoreRevision,
     Value<int>? revision,
     Value<int>? rowid,
   }) {
@@ -29245,6 +29304,8 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
       currentAttemptId: currentAttemptId ?? this.currentAttemptId,
       lockedBy: lockedBy ?? this.lockedBy,
       lockedAt: lockedAt ?? this.lockedAt,
+      reviewClosedScoreRevision:
+          reviewClosedScoreRevision ?? this.reviewClosedScoreRevision,
       revision: revision ?? this.revision,
       rowid: rowid ?? this.rowid,
     );
@@ -29282,6 +29343,11 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
     if (lockedAt.present) {
       map['locked_at'] = Variable<String>(lockedAt.value);
     }
+    if (reviewClosedScoreRevision.present) {
+      map['review_closed_score_revision'] = Variable<int>(
+        reviewClosedScoreRevision.value,
+      );
+    }
     if (revision.present) {
       map['revision'] = Variable<int>(revision.value);
     }
@@ -29303,6 +29369,7 @@ class ScorePlaceholdersCompanion extends UpdateCompanion<ScorePlaceholderData> {
           ..write('currentAttemptId: $currentAttemptId, ')
           ..write('lockedBy: $lockedBy, ')
           ..write('lockedAt: $lockedAt, ')
+          ..write('reviewClosedScoreRevision: $reviewClosedScoreRevision, ')
           ..write('revision: $revision, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -30220,9 +30287,9 @@ class $OfficialScoresTable extends OfficialScores
   late final GeneratedColumn<String> setBy = GeneratedColumn<String>(
     'set_by',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
   @override
@@ -30232,6 +30299,19 @@ class $OfficialScoresTable extends OfficialScores
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _selectionOriginMeta = const VerificationMeta(
+    'selectionOrigin',
+  );
+  @override
+  late final GeneratedColumn<String> selectionOrigin = GeneratedColumn<String>(
+    'selection_origin',
+    aliasedName,
+    false,
+    check: () => selectionOrigin.isIn(selectionOriginValues),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('Manual'),
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -30244,6 +30324,7 @@ class $OfficialScoresTable extends OfficialScores
     setAt,
     setBy,
     reason,
+    selectionOrigin,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -30324,8 +30405,6 @@ class $OfficialScoresTable extends OfficialScores
         _setByMeta,
         setBy.isAcceptableOrUnknown(data['set_by']!, _setByMeta),
       );
-    } else if (isInserting) {
-      context.missing(_setByMeta);
     }
     if (data.containsKey('reason')) {
       context.handle(
@@ -30334,6 +30413,15 @@ class $OfficialScoresTable extends OfficialScores
       );
     } else if (isInserting) {
       context.missing(_reasonMeta);
+    }
+    if (data.containsKey('selection_origin')) {
+      context.handle(
+        _selectionOriginMeta,
+        selectionOrigin.isAcceptableOrUnknown(
+          data['selection_origin']!,
+          _selectionOriginMeta,
+        ),
+      );
     }
     return context;
   }
@@ -30379,10 +30467,14 @@ class $OfficialScoresTable extends OfficialScores
       setBy: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}set_by'],
-      )!,
+      ),
       reason: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}reason'],
+      )!,
+      selectionOrigin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}selection_origin'],
       )!,
     );
   }
@@ -30402,8 +30494,9 @@ class OfficialScoreData extends DataClass
   final int scoreRevision;
   final String components;
   final String setAt;
-  final String setBy;
+  final String? setBy;
   final String reason;
+  final String selectionOrigin;
   const OfficialScoreData({
     required this.id,
     required this.contestId,
@@ -30412,8 +30505,9 @@ class OfficialScoreData extends DataClass
     required this.scoreRevision,
     required this.components,
     required this.setAt,
-    required this.setBy,
+    this.setBy,
     required this.reason,
+    required this.selectionOrigin,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -30425,8 +30519,11 @@ class OfficialScoreData extends DataClass
     map['score_revision'] = Variable<int>(scoreRevision);
     map['components'] = Variable<String>(components);
     map['set_at'] = Variable<String>(setAt);
-    map['set_by'] = Variable<String>(setBy);
+    if (!nullToAbsent || setBy != null) {
+      map['set_by'] = Variable<String>(setBy);
+    }
     map['reason'] = Variable<String>(reason);
+    map['selection_origin'] = Variable<String>(selectionOrigin);
     return map;
   }
 
@@ -30439,8 +30536,11 @@ class OfficialScoreData extends DataClass
       scoreRevision: Value(scoreRevision),
       components: Value(components),
       setAt: Value(setAt),
-      setBy: Value(setBy),
+      setBy: setBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(setBy),
       reason: Value(reason),
+      selectionOrigin: Value(selectionOrigin),
     );
   }
 
@@ -30459,8 +30559,9 @@ class OfficialScoreData extends DataClass
       scoreRevision: serializer.fromJson<int>(json['scoreRevision']),
       components: serializer.fromJson<String>(json['components']),
       setAt: serializer.fromJson<String>(json['setAt']),
-      setBy: serializer.fromJson<String>(json['setBy']),
+      setBy: serializer.fromJson<String?>(json['setBy']),
       reason: serializer.fromJson<String>(json['reason']),
+      selectionOrigin: serializer.fromJson<String>(json['selectionOrigin']),
     );
   }
   @override
@@ -30474,8 +30575,9 @@ class OfficialScoreData extends DataClass
       'scoreRevision': serializer.toJson<int>(scoreRevision),
       'components': serializer.toJson<String>(components),
       'setAt': serializer.toJson<String>(setAt),
-      'setBy': serializer.toJson<String>(setBy),
+      'setBy': serializer.toJson<String?>(setBy),
       'reason': serializer.toJson<String>(reason),
+      'selectionOrigin': serializer.toJson<String>(selectionOrigin),
     };
   }
 
@@ -30487,8 +30589,9 @@ class OfficialScoreData extends DataClass
     int? scoreRevision,
     String? components,
     String? setAt,
-    String? setBy,
+    Value<String?> setBy = const Value.absent(),
     String? reason,
+    String? selectionOrigin,
   }) => OfficialScoreData(
     id: id ?? this.id,
     contestId: contestId ?? this.contestId,
@@ -30497,8 +30600,9 @@ class OfficialScoreData extends DataClass
     scoreRevision: scoreRevision ?? this.scoreRevision,
     components: components ?? this.components,
     setAt: setAt ?? this.setAt,
-    setBy: setBy ?? this.setBy,
+    setBy: setBy.present ? setBy.value : this.setBy,
     reason: reason ?? this.reason,
+    selectionOrigin: selectionOrigin ?? this.selectionOrigin,
   );
   OfficialScoreData copyWithCompanion(OfficialScoresCompanion data) {
     return OfficialScoreData(
@@ -30519,6 +30623,9 @@ class OfficialScoreData extends DataClass
       setAt: data.setAt.present ? data.setAt.value : this.setAt,
       setBy: data.setBy.present ? data.setBy.value : this.setBy,
       reason: data.reason.present ? data.reason.value : this.reason,
+      selectionOrigin: data.selectionOrigin.present
+          ? data.selectionOrigin.value
+          : this.selectionOrigin,
     );
   }
 
@@ -30533,7 +30640,8 @@ class OfficialScoreData extends DataClass
           ..write('components: $components, ')
           ..write('setAt: $setAt, ')
           ..write('setBy: $setBy, ')
-          ..write('reason: $reason')
+          ..write('reason: $reason, ')
+          ..write('selectionOrigin: $selectionOrigin')
           ..write(')'))
         .toString();
   }
@@ -30549,6 +30657,7 @@ class OfficialScoreData extends DataClass
     setAt,
     setBy,
     reason,
+    selectionOrigin,
   );
   @override
   bool operator ==(Object other) =>
@@ -30562,7 +30671,8 @@ class OfficialScoreData extends DataClass
           other.components == this.components &&
           other.setAt == this.setAt &&
           other.setBy == this.setBy &&
-          other.reason == this.reason);
+          other.reason == this.reason &&
+          other.selectionOrigin == this.selectionOrigin);
 }
 
 class OfficialScoresCompanion extends UpdateCompanion<OfficialScoreData> {
@@ -30573,8 +30683,9 @@ class OfficialScoresCompanion extends UpdateCompanion<OfficialScoreData> {
   final Value<int> scoreRevision;
   final Value<String> components;
   final Value<String> setAt;
-  final Value<String> setBy;
+  final Value<String?> setBy;
   final Value<String> reason;
+  final Value<String> selectionOrigin;
   final Value<int> rowid;
   const OfficialScoresCompanion({
     this.id = const Value.absent(),
@@ -30586,6 +30697,7 @@ class OfficialScoresCompanion extends UpdateCompanion<OfficialScoreData> {
     this.setAt = const Value.absent(),
     this.setBy = const Value.absent(),
     this.reason = const Value.absent(),
+    this.selectionOrigin = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   OfficialScoresCompanion.insert({
@@ -30596,8 +30708,9 @@ class OfficialScoresCompanion extends UpdateCompanion<OfficialScoreData> {
     required int scoreRevision,
     required String components,
     required String setAt,
-    required String setBy,
+    this.setBy = const Value.absent(),
     required String reason,
+    this.selectionOrigin = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        contestId = Value(contestId),
@@ -30606,7 +30719,6 @@ class OfficialScoresCompanion extends UpdateCompanion<OfficialScoreData> {
        scoreRevision = Value(scoreRevision),
        components = Value(components),
        setAt = Value(setAt),
-       setBy = Value(setBy),
        reason = Value(reason);
   static Insertable<OfficialScoreData> custom({
     Expression<String>? id,
@@ -30618,6 +30730,7 @@ class OfficialScoresCompanion extends UpdateCompanion<OfficialScoreData> {
     Expression<String>? setAt,
     Expression<String>? setBy,
     Expression<String>? reason,
+    Expression<String>? selectionOrigin,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -30631,6 +30744,7 @@ class OfficialScoresCompanion extends UpdateCompanion<OfficialScoreData> {
       if (setAt != null) 'set_at': setAt,
       if (setBy != null) 'set_by': setBy,
       if (reason != null) 'reason': reason,
+      if (selectionOrigin != null) 'selection_origin': selectionOrigin,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -30643,8 +30757,9 @@ class OfficialScoresCompanion extends UpdateCompanion<OfficialScoreData> {
     Value<int>? scoreRevision,
     Value<String>? components,
     Value<String>? setAt,
-    Value<String>? setBy,
+    Value<String?>? setBy,
     Value<String>? reason,
+    Value<String>? selectionOrigin,
     Value<int>? rowid,
   }) {
     return OfficialScoresCompanion(
@@ -30657,6 +30772,7 @@ class OfficialScoresCompanion extends UpdateCompanion<OfficialScoreData> {
       setAt: setAt ?? this.setAt,
       setBy: setBy ?? this.setBy,
       reason: reason ?? this.reason,
+      selectionOrigin: selectionOrigin ?? this.selectionOrigin,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -30691,6 +30807,9 @@ class OfficialScoresCompanion extends UpdateCompanion<OfficialScoreData> {
     if (reason.present) {
       map['reason'] = Variable<String>(reason.value);
     }
+    if (selectionOrigin.present) {
+      map['selection_origin'] = Variable<String>(selectionOrigin.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -30709,6 +30828,7 @@ class OfficialScoresCompanion extends UpdateCompanion<OfficialScoreData> {
           ..write('setAt: $setAt, ')
           ..write('setBy: $setBy, ')
           ..write('reason: $reason, ')
+          ..write('selectionOrigin: $selectionOrigin, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -68647,6 +68767,7 @@ typedef $$ScorePlaceholdersTableCreateCompanionBuilder =
       Value<String?> currentAttemptId,
       Value<String?> lockedBy,
       Value<String?> lockedAt,
+      Value<int?> reviewClosedScoreRevision,
       Value<int> revision,
       Value<int> rowid,
     });
@@ -68661,6 +68782,7 @@ typedef $$ScorePlaceholdersTableUpdateCompanionBuilder =
       Value<String?> currentAttemptId,
       Value<String?> lockedBy,
       Value<String?> lockedAt,
+      Value<int?> reviewClosedScoreRevision,
       Value<int> revision,
       Value<int> rowid,
     });
@@ -68853,6 +68975,11 @@ class $$ScorePlaceholdersTableFilterComposer
 
   ColumnFilters<String> get lockedAt => $composableBuilder(
     column: $table.lockedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reviewClosedScoreRevision => $composableBuilder(
+    column: $table.reviewClosedScoreRevision,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -69071,6 +69198,11 @@ class $$ScorePlaceholdersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get reviewClosedScoreRevision => $composableBuilder(
+    column: $table.reviewClosedScoreRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get revision => $composableBuilder(
     column: $table.revision,
     builder: (column) => ColumnOrderings(column),
@@ -69177,6 +69309,11 @@ class $$ScorePlaceholdersTableAnnotationComposer
 
   GeneratedColumn<String> get lockedAt =>
       $composableBuilder(column: $table.lockedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get reviewClosedScoreRevision => $composableBuilder(
+    column: $table.reviewClosedScoreRevision,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get revision =>
       $composableBuilder(column: $table.revision, builder: (column) => column);
@@ -69403,6 +69540,7 @@ class $$ScorePlaceholdersTableTableManager
                 Value<String?> currentAttemptId = const Value.absent(),
                 Value<String?> lockedBy = const Value.absent(),
                 Value<String?> lockedAt = const Value.absent(),
+                Value<int?> reviewClosedScoreRevision = const Value.absent(),
                 Value<int> revision = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ScorePlaceholdersCompanion(
@@ -69415,6 +69553,7 @@ class $$ScorePlaceholdersTableTableManager
                 currentAttemptId: currentAttemptId,
                 lockedBy: lockedBy,
                 lockedAt: lockedAt,
+                reviewClosedScoreRevision: reviewClosedScoreRevision,
                 revision: revision,
                 rowid: rowid,
               ),
@@ -69429,6 +69568,7 @@ class $$ScorePlaceholdersTableTableManager
                 Value<String?> currentAttemptId = const Value.absent(),
                 Value<String?> lockedBy = const Value.absent(),
                 Value<String?> lockedAt = const Value.absent(),
+                Value<int?> reviewClosedScoreRevision = const Value.absent(),
                 Value<int> revision = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ScorePlaceholdersCompanion.insert(
@@ -69441,6 +69581,7 @@ class $$ScorePlaceholdersTableTableManager
                 currentAttemptId: currentAttemptId,
                 lockedBy: lockedBy,
                 lockedAt: lockedAt,
+                reviewClosedScoreRevision: reviewClosedScoreRevision,
                 revision: revision,
                 rowid: rowid,
               ),
@@ -70610,8 +70751,9 @@ typedef $$OfficialScoresTableCreateCompanionBuilder =
       required int scoreRevision,
       required String components,
       required String setAt,
-      required String setBy,
+      Value<String?> setBy,
       required String reason,
+      Value<String> selectionOrigin,
       Value<int> rowid,
     });
 typedef $$OfficialScoresTableUpdateCompanionBuilder =
@@ -70623,8 +70765,9 @@ typedef $$OfficialScoresTableUpdateCompanionBuilder =
       Value<int> scoreRevision,
       Value<String> components,
       Value<String> setAt,
-      Value<String> setBy,
+      Value<String?> setBy,
       Value<String> reason,
+      Value<String> selectionOrigin,
       Value<int> rowid,
     });
 
@@ -70752,6 +70895,11 @@ class $$OfficialScoresTableFilterComposer
 
   ColumnFilters<String> get reason => $composableBuilder(
     column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get selectionOrigin => $composableBuilder(
+    column: $table.selectionOrigin,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -70889,6 +71037,11 @@ class $$OfficialScoresTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get selectionOrigin => $composableBuilder(
+    column: $table.selectionOrigin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ContestsTableOrderingComposer get contestId {
     final $$ContestsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -70989,6 +71142,11 @@ class $$OfficialScoresTableAnnotationComposer
 
   GeneratedColumn<String> get reason =>
       $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get selectionOrigin => $composableBuilder(
+    column: $table.selectionOrigin,
+    builder: (column) => column,
+  );
 
   $$ContestsTableAnnotationComposer get contestId {
     final $$ContestsTableAnnotationComposer composer = $composerBuilder(
@@ -71128,8 +71286,9 @@ class $$OfficialScoresTableTableManager
                 Value<int> scoreRevision = const Value.absent(),
                 Value<String> components = const Value.absent(),
                 Value<String> setAt = const Value.absent(),
-                Value<String> setBy = const Value.absent(),
+                Value<String?> setBy = const Value.absent(),
                 Value<String> reason = const Value.absent(),
+                Value<String> selectionOrigin = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => OfficialScoresCompanion(
                 id: id,
@@ -71141,6 +71300,7 @@ class $$OfficialScoresTableTableManager
                 setAt: setAt,
                 setBy: setBy,
                 reason: reason,
+                selectionOrigin: selectionOrigin,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -71152,8 +71312,9 @@ class $$OfficialScoresTableTableManager
                 required int scoreRevision,
                 required String components,
                 required String setAt,
-                required String setBy,
+                Value<String?> setBy = const Value.absent(),
                 required String reason,
+                Value<String> selectionOrigin = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => OfficialScoresCompanion.insert(
                 id: id,
@@ -71165,6 +71326,7 @@ class $$OfficialScoresTableTableManager
                 setAt: setAt,
                 setBy: setBy,
                 reason: reason,
+                selectionOrigin: selectionOrigin,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

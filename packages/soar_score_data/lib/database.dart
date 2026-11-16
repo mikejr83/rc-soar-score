@@ -195,6 +195,8 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
           await m.createTable(pilotImportLinks);
         }
         await _addCurrentAttemptId();
+        await _addReviewClosure();
+        await _addSelectionOrigin(m);
         await _addUploadOpen();
         // Service-only counters (unreleased version 2); IF NOT EXISTS.
         if (profileTables.contains(requestThrottles)) {
@@ -221,6 +223,65 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
       'ALTER TABLE score_placeholders ADD COLUMN current_attempt_id TEXT',
     );
     await fillCurrentAttemptIds(this);
+  }
+
+  /// Adds `score_placeholders.review_closed_score_revision` (unreleased
+  /// version 2): null for every existing slot, so no review was closed by a
+  /// separate decision.
+  Future<void> _addReviewClosure() async {
+    final sqlite = executor.dialect == SqlDialect.sqlite;
+    final has = sqlite
+        ? await customSelect(
+            "SELECT 1 AS x FROM pragma_table_info('score_placeholders') WHERE name = 'review_closed_score_revision'",
+          ).get()
+        : await customSelect(
+            "SELECT 1 AS x FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'score_placeholders' AND column_name = 'review_closed_score_revision'",
+          ).get();
+    if (has.isNotEmpty) return;
+    await customStatement(
+      'ALTER TABLE score_placeholders ADD COLUMN review_closed_score_revision '
+      '${sqlite ? 'INTEGER' : 'bigint'} NULL',
+    );
+  }
+
+  /// Gives `official_scores` its selection origin and lets `set_by` be null
+  /// (unreleased version 2). Every existing version was selected by a
+  /// director, so each reads `Manual`.
+  Future<void> _addSelectionOrigin(Migrator m) async {
+    final sqlite = executor.dialect == SqlDialect.sqlite;
+    final has = sqlite
+        ? await customSelect(
+            "SELECT 1 AS x FROM pragma_table_info('official_scores') WHERE name = 'selection_origin'",
+          ).get()
+        : await customSelect(
+            "SELECT 1 AS x FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'official_scores' AND column_name = 'selection_origin'",
+          ).get();
+    if (has.isNotEmpty) return;
+    if (sqlite) {
+      // SQLite cannot drop NOT NULL or add a CHECK in place: rebuild the
+      // table from its current definition, keeping every row.
+      await m.alterTable(
+        TableMigration(
+          officialScores,
+          newColumns: [officialScores.selectionOrigin],
+          columnTransformer: {
+            officialScores.selectionOrigin: const Constant('Manual'),
+          },
+        ),
+      );
+      return;
+    }
+    await customStatement(
+      'ALTER TABLE official_scores ALTER COLUMN set_by DROP NOT NULL',
+    );
+    await customStatement(
+      "ALTER TABLE official_scores ADD COLUMN selection_origin text NOT NULL DEFAULT 'Manual' "
+      "CHECK (selection_origin IN ('Manual', 'Automatic', 'ReviewDecision'))",
+    );
+    await customStatement(
+      'ALTER TABLE official_scores ADD CONSTRAINT official_scores_origin_actor '
+      "CHECK ((selection_origin = 'Automatic') = (set_by IS NULL))",
+    );
   }
 
   /// Adds `installation_activations.upload_open` (unreleased version 2): false

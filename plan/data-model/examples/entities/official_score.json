@@ -13,7 +13,8 @@
     },
     "set_at": "2026-10-17T15:10:00Z",
     "set_by": "019c0000-0000-7000-8000-000000000001",
-    "reason": "Accepted director entry"
+    "reason": "Accepted director entry",
+    "selection_origin": "Manual"
   },
   {
     "id": "019c0000-0000-7000-8000-000000000502",
@@ -29,7 +30,8 @@
     },
     "set_at": "2026-10-17T15:11:00Z",
     "set_by": "019c0000-0000-7000-8000-000000000001",
-    "reason": "Accepted director entry"
+    "reason": "Accepted director entry",
+    "selection_origin": "Manual"
   },
   {
     "id": "019c0000-0000-7000-8000-000000000503",
@@ -45,7 +47,8 @@
     },
     "set_at": "2026-10-17T15:12:00Z",
     "set_by": "019c0000-0000-7000-8000-000000000001",
-    "reason": "Accepted director entry"
+    "reason": "Accepted director entry",
+    "selection_origin": "Manual"
   },
   {
     "id": "019c0000-0000-7000-8000-000000000504",
@@ -61,7 +64,8 @@
     },
     "set_at": "2026-10-17T15:20:00Z",
     "set_by": "019c0000-0000-7000-8000-000000000001",
-    "reason": "Accepted director entry"
+    "reason": "Accepted director entry",
+    "selection_origin": "Manual"
   },
   {
     "id": "019c0000-0000-7000-8000-000000000505",
@@ -78,7 +82,8 @@
     },
     "set_at": "2026-10-17T15:21:00Z",
     "set_by": "019c0000-0000-7000-8000-000000000001",
-    "reason": "Accepted director entry"
+    "reason": "Accepted director entry",
+    "selection_origin": "Manual"
   },
   {
     "id": "019c0000-0000-7000-8000-000000000506",
@@ -94,7 +99,8 @@
       "zero_reason": "out_of_bounds"
     },
     "set_at": "2026-10-17T17:05:00Z",
-    "set_by": "019c0000-0000-7000-8000-000000000001",
-    "reason": "Accepted director entry"
+    "set_by": null,
+    "reason": "automatic_round_complete",
+    "selection_origin": "Automatic"
   }
 ]
