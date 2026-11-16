@@ -78,6 +78,11 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
   Timer? _retryTimer;
   bool _restored = false;
 
+  /// Keys the places the page scrolls to after a refusal or an accept.
+  final _scroll = ScrollController();
+  final _bannerKey = GlobalKey();
+  final _groupResultsKey = GlobalKey();
+
   bool get _submitted => _phase == _Phase.accepted;
 
   @override
@@ -172,6 +177,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
   @override
   void dispose() {
     _retryTimer?.cancel();
+    _scroll.dispose();
     _time.dispose();
     _height.dispose();
     _penalty.dispose();
@@ -319,6 +325,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
             _rejectedFields = result.fields.toSet();
           });
           _saveDraft();
+          _scrollTo(bottom: false);
       }
       if (_submitted) {
         drafts.clear(widget.contestId, widget.pilotId, widget.data.round);
@@ -340,6 +347,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
         _rejection = error.message;
       });
       _saveDraft();
+      _scrollTo(bottom: false);
     }
   }
 
@@ -357,6 +365,27 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
       _rejection = null;
     });
     scoreChanges.value++;
+    _scrollTo(bottom: true);
+  }
+
+  /// Moves the page once the new layout is built. A refusal adds a banner
+  /// above the fields and an accept swaps Submit for the group results
+  /// button; either leaves the old scroll offset pointing at nothing. The
+  /// list builds lazily, so the target widget may not exist yet: scroll by
+  /// offset first, then settle on the widget.
+  void _scrollTo({required bool bottom}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || !_scroll.hasClients) return;
+      await _scroll.animateTo(
+        bottom ? _scroll.position.maxScrollExtent : 0,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+      if (!mounted) return;
+      final target = (bottom ? _groupResultsKey : _bannerKey).currentContext;
+      if (target == null || !target.mounted) return;
+      await Scrollable.ensureVisible(target, alignment: bottom ? 1 : 0);
+    });
   }
 
   /// What the server made of the score, in its own numbers.
@@ -418,6 +447,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
     final l10n = AppLocalizations.of(context);
     final editable = _phase == _Phase.editing;
     return ListView(
+      controller: _scroll,
       padding: const EdgeInsets.all(16),
       children: [
         TextButton.icon(
@@ -452,6 +482,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
         ],
         if (_rejection case final message?) ...[
           Semantics(
+            key: _bannerKey,
             liveRegion: true,
             child: Card(
               color: scheme.errorContainer,
@@ -523,7 +554,9 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
           onChanged: (_) => _update(() {}),
           errorText:
               timeError ??
-              (_rejectedFields.contains('time_flown') ? ' ' : null),
+              (_rejectedFields.contains('time_flown')
+                  ? l10n.scoreFieldRefused
+                  : null),
           hint: timeSeconds == null
               ? 'Type 630 for 6:30. Type 630.4 for 6:30.4.'
               : 'Reads as ${FlightTimeInput.format(timeSeconds)}.',
@@ -536,7 +569,9 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
           onChanged: (_) => _update(() {}),
           errorText:
               _heightError ??
-              (_rejectedFields.contains('launch_height') ? ' ' : null),
+              (_rejectedFields.contains('launch_height')
+                  ? l10n.scoreFieldRefused
+                  : null),
           hint: _zeroed
               ? 'The flight scores zero, so no height is needed.'
               : 'Whole metres. Zero is not valid.',
@@ -676,6 +711,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
         ] else ...[
           const SizedBox(height: 16),
           FilledButton(
+            key: _groupResultsKey,
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(56),
               textStyle: theme.textTheme.titleMedium?.copyWith(

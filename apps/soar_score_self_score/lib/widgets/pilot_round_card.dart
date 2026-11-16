@@ -59,7 +59,8 @@ class PilotRoundCard extends StatelessWidget {
       PilotRoundStatus.nextToScore => const StatusChip(
         label: 'Next to score',
         icon: Icons.edit_outlined,
-        style: StatusChipStyle.filled,
+        // Outlined, not filled: a filled chip looked like the Enter button.
+        style: StatusChipStyle.outlined,
       ),
       PilotRoundStatus.upcoming => const StatusChip(
         label: 'Not open yet',

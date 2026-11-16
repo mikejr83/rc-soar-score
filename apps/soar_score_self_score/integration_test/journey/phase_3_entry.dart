@@ -45,8 +45,17 @@ Future<void> phase3Entry(
         expect(find.text('Score: 567.5'), findsOneWidget);
         expect(find.textContaining('Entered by '), findsOneWidget);
         expect(find.text('Submit score'), findsNothing);
-        await scrollTo(tester, find.text('See group results'));
-        expect(find.text('See group results'), findsOneWidget);
+        // The page follows the button: no scrolling needed to reach it.
+        await tester.pumpAndSettle();
+        final button = find.text('See group results');
+        expect(button, findsOneWidget);
+        final bottom = tester.getRect(button).bottom;
+        expect(
+          bottom,
+          lessThanOrEqualTo(
+            tester.view.physicalSize.height / tester.view.devicePixelRatio,
+          ),
+        );
       },
     );
     await journey.step('The overview shows the round as submitted', () async {
@@ -56,6 +65,18 @@ Future<void> phase3Entry(
       await pumpUntilFound(tester, find.text('2 rounds'));
       expect(find.text('Submitted'), findsWidgets);
       expect(find.text('Next to score'), findsOneWidget);
+      // The chip is outlined: only the Enter button is filled.
+      final chip = find.ancestor(
+        of: find.text('Next to score'),
+        matching: find.byWidgetPredicate(
+          (w) => w is Container && w.decoration is ShapeDecoration,
+        ),
+      );
+      expect(
+        (tester.widget<Container>(chip.first).decoration! as ShapeDecoration)
+            .color,
+        isNull,
+      );
       expect(find.textContaining(pilot), findsWidgets);
     });
     await journey.step('View opens the submitted round read-only', () async {

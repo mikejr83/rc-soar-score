@@ -169,6 +169,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'The score was not accepted. Ask your contest director.';
 
   @override
+  String get scoreFieldRefused => 'The server did not accept this value.';
+
+  @override
   String get unsupportedRoleTitle => 'This link is not for scoring yet';
 
   @override
