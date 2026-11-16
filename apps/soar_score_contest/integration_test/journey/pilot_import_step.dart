@@ -82,22 +82,25 @@ Future<void> importPilotsFromGliderScore(
   // The maybe pilot's dropdown shows each choice once picked, and ends back
   // on Skip so the counts below hold.
   expect(find.text(l10n.pilotImportMaybeHint), findsOneWidget);
-  Future<void> pickChoice(String label) async {
-    await tapVisible(tester, _key('pilot-import-choice-3'));
+  Future<void> pickChoice(int pilotNo, String label) async {
+    await tapVisible(tester, _key('pilot-import-choice-$pilotNo'));
     await pumpUntilFound(tester, find.text(label).last);
     await tester.tap(find.text(label).last);
     await tester.pumpAndSettle();
     expect(
       find.descendant(
-        of: _key('pilot-import-choice-3'),
+        of: _key('pilot-import-choice-$pilotNo'),
         matching: find.text(label),
       ),
       findsOneWidget,
     );
   }
 
-  await pickChoice(l10n.pilotImportChoiceAdd);
-  await pickChoice(l10n.pilotImportChoiceUpdate('${milo.first} ${milo.last}'));
+  await pickChoice(3, l10n.pilotImportChoiceAdd);
+  await pickChoice(
+    3,
+    l10n.pilotImportChoiceUpdate('${milo.first} ${milo.last}'),
+  );
   await tapVisible(tester, _key('pilot-import-confirm'));
   await pumpUntilFound(tester, _key('pilot-import-result'));
   expect(find.text(l10n.pilotImportDone(1, 1, 1, 0)), findsOneWidget);
@@ -127,16 +130,21 @@ Future<void> importPilotsFromGliderScore(
   await tapVisible(tester, _key('pilot-import-done'));
   await pumpUntilGone(tester, _key('pilot-import-dialog'));
 
-  // A source change is shown and requires explicit selection before saving.
+  // A source change is shown and requires an explicit choice before saving.
+  // The pilot is a remembered link, so its row is a dropdown (as for any
+  // remembered pilot), and it waits on Skip until the director picks.
   sourceClub = 'Updated GS Club';
   await tapVisible(tester, _key('import-pilots'));
   await pumpUntilFound(tester, _key('pilot-import-row-1'));
   expect(find.textContaining(l10n.pilotImportSourceChanged), findsOneWidget);
   expect(
-    tester.widget<CheckboxListTile>(_key('pilot-import-row-1')).value,
-    isFalse,
+    find.descendant(
+      of: _key('pilot-import-choice-1'),
+      matching: find.text(l10n.pilotImportChoiceSkip),
+    ),
+    findsOneWidget,
   );
-  await tapVisible(tester, _key('pilot-import-row-1'));
+  await pickChoice(1, l10n.pilotImportChoiceUpdate(name));
   await tapVisible(tester, _key('pilot-import-confirm'));
   await pumpUntilFound(tester, _key('pilot-import-result'));
   await tapVisible(tester, _key('pilot-import-done'));
