@@ -536,78 +536,6 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
     webOnly: true,
   );
 
-  // Same web-only hook: the pilot's own entry, accepted without retyping it.
-  await journey.step(
-    'Round 3: Mark official accepts a pilot\'s entry as it is',
-    () => inContest(() async {
-      final pilot = await submitAsPilot(
-        contestName: data.contestName,
-        candidates: [
-          for (final name in data.pilotNames)
-            if (name != 'Tess Valdez') name,
-        ],
-        round: 3,
-        timeFlown: 470,
-      );
-      await openGroupOf(tester, data, 3, pilot);
-      final row = (await rowOf(tester, pilot))!;
-      final mark = _key('score-mark-official-${row.id.value}');
-      await pumpUntilFound(tester, mark);
-      expect(row.hasPendingSubmission, isTrue);
-
-      // Typing over the pilot's values turns it off and says what to do;
-      // reverting brings it back.
-      await tapVisible(tester, _key('score-row-${row.id.value}'));
-      final height = fieldWithKey('score-height-${row.id.value}');
-      await pumpUntilFound(tester, height);
-      await enterIn(tester, height, '99');
-      await pumpUntilFound(
-        tester,
-        find.text('Save or revert your edits first.'),
-      );
-      expect(tester.widget<OutlinedButton>(mark).onPressed, isNull);
-      await tapVisible(tester, _key('score-revert-${row.id.value}'));
-      await pumpUntilGone(
-        tester,
-        find.text('Save or revert your edits first.'),
-      );
-
-      await tapVisible(tester, mark);
-      await pumpUntilGone(tester, mark);
-      final saved = await rowOf(tester, pilot);
-      expect(saved, isNotNull);
-      expect(saved!.hasPendingSubmission, isFalse);
-      expect(saved.status, RowStatus.official);
-    }),
-    webOnly: true,
-  );
-
-  await journey.step(
-    'Round 3: Mark all valid rows official accepts the group in one tap',
-    () => inContest(() async {
-      final pilot = await submitAsPilot(
-        contestName: data.contestName,
-        candidates: [
-          for (final name in data.pilotNames)
-            if (name != 'Tess Valdez') name,
-        ],
-        round: 3,
-        timeFlown: 460,
-      );
-      await openGroupOf(tester, data, 3, pilot);
-      final row = (await rowOf(tester, pilot))!;
-      await pumpUntilFound(tester, _key('score-mark-official-${row.id.value}'));
-
-      // One tap, no confirmation: the group request goes out.
-      await tapVisible(tester, _key('score-mark-all-official'));
-      await pumpUntilFound(tester, find.text('Marked 1 row official.'));
-      await pumpUntilGone(tester, _key('score-mark-all-official'));
-      final saved = await rowOf(tester, pilot);
-      expect(saved!.status, RowStatus.official);
-    }),
-    webOnly: true,
-  );
-
   await journey.step(
     'Round 3: a pilot retires, the rest of the round is scored',
     () => inContest(() async {
@@ -641,10 +569,11 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
   // journey's contest is not seeded: the E2E server's hooks store what a
   // pilot's invitation page would, through the real service, at this point of
   // the same contest. Web run only, like the step above.
+  var waiting = <String>[];
   await journey.step(
     'Round 4: pilots\' own entries wait, one of them under review',
     () => inContest(() async {
-      final pilots = await submitAsPilots(
+      final pilots = waiting = await submitAsPilots(
         contestName: data.contestName,
         candidates: [
           for (final name in data.pilotNames)
@@ -674,6 +603,65 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
           reason: name,
         );
       }
+    }),
+    webOnly: true,
+  );
+  await journey.step(
+    'Round 4: Mark official accepts a pilot\'s entry as it is',
+    () => inContest(() async {
+      final pilot = waiting.first;
+      await openGroupOf(tester, data, 4, pilot);
+      final row = (await rowOf(tester, pilot))!;
+      final mark = _key('score-mark-official-${row.id.value}');
+      await pumpUntilFound(tester, mark);
+
+      // Typing over the pilot's values turns it off and says what to do;
+      // reverting brings it back.
+      await tapVisible(tester, _key('score-row-${row.id.value}'));
+      final height = fieldWithKey('score-height-${row.id.value}');
+      await pumpUntilFound(tester, height);
+      await enterIn(tester, height, '99');
+      await pumpUntilFound(
+        tester,
+        find.text('Save or revert your edits first.'),
+      );
+      expect(tester.widget<OutlinedButton>(mark).onPressed, isNull);
+      await tapVisible(tester, _key('score-revert-${row.id.value}'));
+      await pumpUntilGone(
+        tester,
+        find.text('Save or revert your edits first.'),
+      );
+
+      await tapVisible(tester, mark);
+      await pumpUntilGone(tester, mark);
+      final saved = await rowOf(tester, pilot);
+      expect(saved, isNotNull);
+      expect(saved!.hasPendingSubmission, isFalse);
+      expect(saved.status, RowStatus.official);
+    }),
+    webOnly: true,
+  );
+
+  await journey.step(
+    'Round 4: Mark all valid rows official leaves the review for the director',
+    () => inContest(() async {
+      final plain = waiting[1];
+      final reviewed = waiting.last;
+      await openGroupOf(tester, data, 4, plain);
+      final row = (await rowOf(tester, plain))!;
+      await pumpUntilFound(tester, _key('score-mark-official-${row.id.value}'));
+
+      // One tap, no confirmation: the group request goes out.
+      await tapVisible(tester, _key('score-mark-all-official'));
+      await pumpUntilFound(tester, find.textContaining('Marked '));
+      final saved = await rowOf(tester, plain);
+      expect(saved!.status, RowStatus.official);
+
+      // A pilot under review is held back from the group action.
+      await openGroupOf(tester, data, 4, reviewed);
+      final held = (await rowOf(tester, reviewed))!;
+      expect(held.slot!.placeholder.state, ScorePlaceholderState.inReview);
+      expect(held.slot!.officialScore, isNull);
     }),
     webOnly: true,
   );
