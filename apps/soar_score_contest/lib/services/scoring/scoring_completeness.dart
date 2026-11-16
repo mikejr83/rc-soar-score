@@ -12,11 +12,11 @@ enum CompletenessState {
 }
 
 class Completeness {
-  const Completeness._(this.state, this.total, this.scored, this.official);
+  const Completeness._(this.state, this.total, this.entered, this.official);
 
   factory Completeness.of({
     required int total,
-    required int scored,
+    required int entered,
     required int official,
     required bool locked,
   }) {
@@ -25,21 +25,22 @@ class Completeness {
       state = CompletenessState.locked;
     } else if (total > 0 && official == total) {
       state = CompletenessState.official;
-    } else if (total > 0 && scored == total) {
+    } else if (total > 0 && entered == total) {
       state = CompletenessState.entered;
-    } else if (scored > 0) {
+    } else if (entered > 0) {
       state = CompletenessState.partial;
     } else {
       state = CompletenessState.empty;
     }
-    return Completeness._(state, total, scored, official);
+    return Completeness._(state, total, entered, official);
   }
 
   final CompletenessState state;
   final int total;
-  final int scored;
-  final int official;
 
-  /// "5 of 7 entered".
-  String get counts => '$scored of $total entered';
+  /// Flights with a score entered, official or pending.
+  final int entered;
+
+  /// Flights with an official score.
+  final int official;
 }

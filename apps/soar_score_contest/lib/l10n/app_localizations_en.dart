@@ -2958,4 +2958,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get scorePilotEntryTooltip =>
       'A pilot or helper submitted values. The submission is kept in history.';
+
+  @override
+  String scoringEnteredOfficialCount(int entered, int total, int official) {
+    return '$entered of $total entered · $official official';
+  }
 }

@@ -4129,6 +4129,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A pilot or helper submitted values. The submission is kept in history.'**
   String get scorePilotEntryTooltip;
+
+  /// Count in the scoring page's context strip: flights with a score entered (official or waiting for the director) out of the group's flights, then how many of them are official.
+  ///
+  /// In en, this message translates to:
+  /// **'{entered} of {total} entered · {official} official'**
+  String scoringEnteredOfficialCount(int entered, int total, int official);
 }
 
 class _AppLocalizationsDelegate

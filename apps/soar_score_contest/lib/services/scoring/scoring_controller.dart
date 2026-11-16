@@ -380,7 +380,7 @@ class ScoringController extends ChangeNotifier {
     }
     return reason ??
         _removalReasons[row.id] ??
-        (row.isScored
+        (row.isOfficial
             ? 'Corrected on the scoring page'
             : 'Entered on the scoring page');
   }
@@ -808,9 +808,9 @@ class ScoringController extends ChangeNotifier {
         CheckInput(
           rowKey: row.id.value,
           pilot: row.pilot.name,
-          components: _drafts[row.id]?.components ?? row.savedComponents,
+          components: _drafts[row.id]?.components ?? row.formComponents,
           entered:
-              row.isScored ||
+              row.isEntered ||
               (_drafts[row.id] != null && !_drafts[row.id]!.isBlank),
         ),
     ]);
