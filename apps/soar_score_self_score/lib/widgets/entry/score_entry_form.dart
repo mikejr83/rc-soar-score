@@ -437,6 +437,7 @@ class _ScoreEntryFormState extends State<ScoreEntryForm> {
     return switch (rejected.code) {
       'validation_failed' => l10n.scoreRejectedValidation,
       'scoring_closed' => l10n.scoreRejectedClosed,
+      'score_locked' => l10n.scoreRejectedLocked,
       'out_of_order' => l10n.scoreRejectedOutOfOrder,
       'stale_matrix' => l10n.scoreRejectedStaleDraw,
       'session_invalid' => l10n.scoreRejectedSession,

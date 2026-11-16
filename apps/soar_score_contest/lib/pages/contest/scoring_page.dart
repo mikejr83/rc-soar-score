@@ -258,6 +258,15 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     );
   }
 
+  Future<void> _markOfficial(ScoringRow row) async {
+    final c = _controller!;
+    final ok = await c.markOfficial(row);
+    // The banner with the reason sits in the row's band, so open it.
+    if (!ok && mounted && c.saveOf(row.id).kind != RowSaveKind.idle) {
+      c.activate(row.id);
+    }
+  }
+
   Future<void> _showHistory(ScoringRow row) {
     final c = _controller!;
     return showDialog<void>(
@@ -524,10 +533,12 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       findings: c.check?.of(row.id.value).toList() ?? const [],
       theirs: save.kind == RowSaveKind.stale ? c.theirsOf(row.id) : null,
       retireBlocked: c.retireBlocked,
+      markSkip: c.markOfficialSkip(row),
       focusField: _focusRow == row.id.value ? _focusField : null,
       actions: ScoreRowActions(
         onActivate: () => c.activate(row.id),
         onSave: () => _save(row),
+        onMarkOfficial: () => _markOfficial(row),
         onRevert: () => c.revert(row),
         onKeepMine: () => c.keepMine(row),
         onTakeTheirs: () => c.takeTheirs(row),

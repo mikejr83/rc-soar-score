@@ -6,6 +6,7 @@ import '../../l10n/app_localizations.dart';
 import '../../services/scoring/row_save.dart';
 import '../../services/scoring/score_check.dart';
 import '../../services/scoring/score_row_draft.dart';
+import '../../services/scoring/scoring_controller.dart' show MarkOfficialSkip;
 import '../../services/scoring/scoring_page_data.dart';
 import '../../services/scoring/scoring_row.dart';
 import '../../services/scoring/time_entry.dart';
@@ -22,6 +23,7 @@ class ScoreRowActions {
   const ScoreRowActions({
     required this.onActivate,
     required this.onSave,
+    required this.onMarkOfficial,
     required this.onRevert,
     required this.onKeepMine,
     required this.onTakeTheirs,
@@ -33,6 +35,9 @@ class ScoreRowActions {
 
   final VoidCallback onActivate;
   final VoidCallback onSave;
+
+  /// Accepts the pilot's waiting entry as the official score.
+  final VoidCallback onMarkOfficial;
   final VoidCallback onRevert;
   final VoidCallback onKeepMine;
   final VoidCallback onTakeTheirs;
@@ -71,6 +76,7 @@ class ScoreRowTile extends StatefulWidget {
     this.theirs,
     this.focusField,
     this.retireBlocked,
+    this.markSkip,
   });
 
   final ScoringRow row;
@@ -104,6 +110,10 @@ class ScoreRowTile extends StatefulWidget {
 
   /// Why the pilot cannot be retired or reinstated now, or null.
   final String? retireBlocked;
+
+  /// Why Mark official cannot be used on this row now, or null when it can
+  /// (see `ScoringController.markOfficialSkip`).
+  final MarkOfficialSkip? markSkip;
 
   @override
   State<ScoreRowTile> createState() => _ScoreRowTileState();
@@ -783,6 +793,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         children: [
           _label(context, 'Status', labels),
           RowStatusChip(status: widget.row.status, unsaved: dirty),
+          _markOfficial(context),
           for (final (icon, text, color) in subs)
             Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -798,6 +809,62 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
                     ),
                   ),
                 ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// The Mark official button under the status chip of a row whose pilot
+  /// entry waits, with the reason it is off when it is.
+  Widget _markOfficial(BuildContext context) {
+    final skip = widget.markSkip;
+    final row = widget.row;
+    if (!row.hasPendingSubmission ||
+        skip == MarkOfficialSkip.noSubmission ||
+        skip == MarkOfficialSkip.retired) {
+      return const SizedBox.shrink();
+    }
+    final words = AppLocalizations.of(context);
+    final busy = widget.save.isBusy && widget.save.promotion;
+    final why = switch (skip) {
+      MarkOfficialSkip.edited => words.scoreMarkOfficialEdited,
+      MarkOfficialSkip.closed => words.scoreMarkOfficialClosed,
+      _ => null,
+    };
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Tooltip(
+            message: why ?? words.scoreMarkOfficialTooltip(row.pilot.name),
+            child: OutlinedButton.icon(
+              key: ValueKey(_k('mark-official')),
+              onPressed: skip == null ? widget.actions.onMarkOfficial : null,
+              icon: busy
+                  ? const SizedBox.square(
+                      dimension: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.verified_outlined, size: 18),
+              label: Text(
+                busy ? words.scoreMarkOfficialMarking : words.scoreMarkOfficial,
+              ),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(0, 40),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+            ),
+          ),
+          if (why != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                why,
+                key: ValueKey(_k('mark-official-why')),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
         ],

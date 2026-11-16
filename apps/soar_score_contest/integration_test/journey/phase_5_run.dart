@@ -543,6 +543,52 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
     webOnly: true,
   );
 
+  // Same web-only hook: the pilot's own entry, accepted without retyping it.
+  await journey.step(
+    'Round 3: Mark official accepts a pilot\'s entry as it is',
+    () => inContest(() async {
+      final pilot = await submitAsPilot(
+        contestName: data.contestName,
+        candidates: [
+          for (final name in data.pilotNames)
+            if (name != 'Tess Valdez') name,
+        ],
+        round: 3,
+        timeFlown: 470,
+      );
+      await openGroupOf(tester, data, 3, pilot);
+      final row = (await rowOf(tester, pilot))!;
+      final mark = _key('score-mark-official-${row.id.value}');
+      await pumpUntilFound(tester, mark);
+      expect(row.hasPendingSubmission, isTrue);
+
+      // Typing over the pilot's values turns it off and says what to do;
+      // reverting brings it back.
+      await tapVisible(tester, _key('score-row-${row.id.value}'));
+      final height = fieldWithKey('score-height-${row.id.value}');
+      await pumpUntilFound(tester, height);
+      await enterIn(tester, height, '99');
+      await pumpUntilFound(
+        tester,
+        find.text('Save or revert your edits first.'),
+      );
+      expect(tester.widget<OutlinedButton>(mark).onPressed, isNull);
+      await tapVisible(tester, _key('score-revert-${row.id.value}'));
+      await pumpUntilGone(
+        tester,
+        find.text('Save or revert your edits first.'),
+      );
+
+      await tapVisible(tester, mark);
+      await pumpUntilGone(tester, mark);
+      final saved = await rowOf(tester, pilot);
+      expect(saved, isNotNull);
+      expect(saved!.hasPendingSubmission, isFalse);
+      expect(saved.status, RowStatus.official);
+    }),
+    webOnly: true,
+  );
+
   await journey.step(
     'Round 3: a pilot retires, the rest of the round is scored',
     () => inContest(() async {
