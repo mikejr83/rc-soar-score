@@ -1,3 +1,5 @@
+import 'dart:math' show min;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/scoring/scoring_row.dart';
@@ -582,6 +584,98 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
     webOnly: true,
   );
 
+  // The helpers the UI PRs for counts, the row action, the group action and
+  // automatic officialization use: several pending submissions and a review.
+  // The journey's contest is not seeded: the E2E server's hooks store what a
+  // pilot's invitation page would, through the real service, at this point of
+  // the same contest. Web run only, like the step above. The contest has three
+  // rounds, so this runs in round 3 before the rest of it is scored. The
+  // pilots are in one group and wait in [waiting] (the last one is under
+  // review) for the steps that follow, which decide them; the step after those
+  // adopts what is still pending so the round can be completed.
+  var waiting = <String>[];
+  await journey.step(
+    'Round 3: several pilot entries and a review wait for the director',
+    () => inContest(() async {
+      // All of them fly in one group, so the page never asks about unsaved
+      // rows of another one. Tess retires in the next step, so she stays out.
+      // The draw decides who flies where, so the first group with two open
+      // rows is used.
+      var group = 0;
+      var inGroup = <String>[];
+      for (var g = 1; g <= data.groupsPerRound && inGroup.length < 2; g++) {
+        await openRoundGroup(tester, 3, g);
+        inGroup = openRowNames(tester, skip: {'Tess Valdez'});
+        group = g;
+      }
+      expect(inGroup.length, greaterThanOrEqualTo(2), reason: 'rows to fill');
+      final pilots = waiting = await submitAsPilots(
+        contestName: data.contestName,
+        candidates: inGroup,
+        round: 3,
+        count: min(3, inGroup.length),
+        timeFlown: 470,
+      );
+      await requestReviewAsPilot(
+        contestName: data.contestName,
+        pilot: pilots.last,
+        round: 3,
+        timeFlown: 495,
+      );
+      // The status bar's Refresh loads the page again, as the poll does when
+      // pilots' scores arrive: an untouched form follows the reload.
+      await tapVisible(tester, find.text('Refresh'));
+      await tester.pump(const Duration(seconds: 2));
+      await openRoundGroup(tester, 3, group);
+      for (final name in pilots) {
+        final row = (await rowOf(tester, name))!;
+        expect(row.hasPendingSubmission, isTrue, reason: name);
+        expect(row.status, RowStatus.submitted, reason: name);
+        expect(row.slot!.officialScore, isNull, reason: name);
+        expect(
+          row.slot!.placeholder.state,
+          name == pilots.last
+              ? ScorePlaceholderState.inReview
+              : ScorePlaceholderState.submitted,
+          reason: name,
+        );
+      }
+      // A group opens with its pending rows filled in for the director, so
+      // leaving it asks about the unsaved rows. Discarding keeps the
+      // submissions: they stay pending on the server.
+      await tapRail(tester, 'Workspace');
+      await tester.pump(const Duration(seconds: 1));
+      if (find.text('Unsaved scores').evaluate().isNotEmpty) {
+        await tapVisible(tester, find.text('Discard'));
+      }
+      await pumpUntilFound(tester, _key('activity-card'));
+    }),
+    webOnly: true,
+    timeout: _longStep,
+  );
+
+  await journey.step(
+    'Round 3: what is still pending is adopted so the round can be completed',
+    () => inContest(() async {
+      // The director's "mark official" for everything left (a review is
+      // superseded with the adoption); the page follows the next Refresh.
+      await adoptPendingAsDirector(contestName: data.contestName, round: 3);
+      for (final name in waiting) {
+        await openGroupOf(tester, data, 3, name);
+        for (var i = 0; i < 30; i++) {
+          if ((await rowOf(tester, name))?.status == RowStatus.official) break;
+          await tapVisible(tester, find.text('Refresh'));
+          await tester.pump(const Duration(seconds: 1));
+        }
+        final saved = (await rowOf(tester, name))!;
+        expect(saved.status, RowStatus.official, reason: name);
+        expect(saved.hasPendingSubmission, isFalse, reason: name);
+      }
+    }),
+    webOnly: true,
+    timeout: _longStep,
+  );
+
   await journey.step(
     'Round 3: a pilot retires, the rest of the round is scored',
     () => inContest(() async {
@@ -608,48 +702,6 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await scoreRound(tester, data, 3);
     }),
     timeout: _longStep,
-  );
-
-  // The pending submissions (and the review) UI work for counts, the row
-  // action, the group action and automatic officialization checks. The
-  // journey's contest is not seeded: the E2E server's hooks store what a
-  // pilot's invitation page would, through the real service, at this point of
-  // the same contest. Web run only, like the step above.
-  await journey.step(
-    'Round 4: pilots\' own entries wait, one of them under review',
-    () => inContest(() async {
-      final pilots = await submitAsPilots(
-        contestName: data.contestName,
-        candidates: [
-          for (final name in data.pilotNames)
-            if (name != 'Tess Valdez') name,
-        ],
-        round: 4,
-        count: 3,
-        timeFlown: 470,
-      );
-      await requestReviewAsPilot(
-        contestName: data.contestName,
-        pilot: pilots.last,
-        round: 4,
-        timeFlown: 495,
-      );
-      for (final name in pilots) {
-        await openGroupOf(tester, data, 4, name);
-        final row = (await rowOf(tester, name))!;
-        expect(row.hasPendingSubmission, isTrue, reason: name);
-        expect(row.status, RowStatus.submitted, reason: name);
-        expect(row.slot!.officialScore, isNull, reason: name);
-        expect(
-          row.slot!.placeholder.state,
-          name == pilots.last
-              ? ScorePlaceholderState.inReview
-              : ScorePlaceholderState.submitted,
-          reason: name,
-        );
-      }
-    }),
-    webOnly: true,
   );
 }
 
