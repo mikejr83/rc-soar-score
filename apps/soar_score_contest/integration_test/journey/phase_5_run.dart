@@ -1,3 +1,5 @@
+import 'dart:math' show min;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/scoring/scoring_row.dart';
@@ -536,84 +538,24 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
     webOnly: true,
   );
 
+  // Same web-only hook: the pilot's own entry, accepted without retyping it.
   await journey.step(
-    'Round 3: a pilot retires, the rest of the round is scored',
+    'Round 3: Mark official accepts a pilot\'s entry as it is',
     () => inContest(() async {
-      const retiring = 'Tess Valdez';
-      await openGroupOf(tester, data, 3, retiring);
-      final row = (await rowOf(tester, retiring))!;
-      await tapVisible(tester, _key('row-menu-${row.id.value}'));
-      await pumpUntilFound(tester, _key('menu-retire'));
-      await tapVisible(tester, _key('menu-retire'));
-      await pumpUntilFound(tester, _key('retire-dialog'));
-      expect(find.textContaining('flights instead of'), findsWidgets);
-      await tapVisible(tester, _key('retire-confirm'));
-      await pumpUntilFound(tester, find.text('Retired'));
-      expect(find.text('Retired from round 3'), findsOneWidget);
-
-      // The retirement is on the Recent activity card too.
-      await tapRail(tester, 'Workspace');
-      // The Scoring page's snackbar can still be up, and it says the same, so
-      // count only the activity entry's own wording.
-      final retired = _either('was retired from round 3', 'You retired pilot');
-      await pumpUntilFound(tester, retired);
-      expect(retired, findsOneWidget);
-
-      await scoreRound(tester, data, 3);
-    }),
-    timeout: _longStep,
-  );
-
-  // The pending submissions (and the review) UI work for counts, the row
-  // action, the group action and automatic officialization checks. The
-  // journey's contest is not seeded: the E2E server's hooks store what a
-  // pilot's invitation page would, through the real service, at this point of
-  // the same contest. Web run only, like the step above.
-  var waiting = <String>[];
-  await journey.step(
-    'Round 4: pilots\' own entries wait, one of them under review',
-    () => inContest(() async {
-      final pilots = waiting = await submitAsPilots(
+      final pilot = await submitAsPilot(
         contestName: data.contestName,
         candidates: [
           for (final name in data.pilotNames)
             if (name != 'Tess Valdez') name,
         ],
-        round: 4,
-        count: 3,
+        round: 3,
         timeFlown: 470,
       );
-      await requestReviewAsPilot(
-        contestName: data.contestName,
-        pilot: pilots.last,
-        round: 4,
-        timeFlown: 495,
-      );
-      for (final name in pilots) {
-        await openGroupOf(tester, data, 4, name);
-        final row = (await rowOf(tester, name))!;
-        expect(row.hasPendingSubmission, isTrue, reason: name);
-        expect(row.status, RowStatus.submitted, reason: name);
-        expect(row.slot!.officialScore, isNull, reason: name);
-        expect(
-          row.slot!.placeholder.state,
-          name == pilots.last
-              ? ScorePlaceholderState.inReview
-              : ScorePlaceholderState.submitted,
-          reason: name,
-        );
-      }
-    }),
-    webOnly: true,
-  );
-  await journey.step(
-    'Round 4: Mark official accepts a pilot\'s entry as it is',
-    () => inContest(() async {
-      final pilot = waiting.first;
-      await openGroupOf(tester, data, 4, pilot);
+      await openGroupOf(tester, data, 3, pilot);
       final row = (await rowOf(tester, pilot))!;
       final mark = _key('score-mark-official-${row.id.value}');
       await pumpUntilFound(tester, mark);
+      expect(row.hasPendingSubmission, isTrue);
 
       // Typing over the pilot's values turns it off and says what to do;
       // reverting brings it back.
@@ -642,12 +584,120 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
     webOnly: true,
   );
 
+  // The helpers the UI PRs for counts, the row action, the group action and
+  // automatic officialization use: several pending submissions and a review.
+  // The journey's contest is not seeded: the E2E server's hooks store what a
+  // pilot's invitation page would, through the real service, at this point of
+  // the same contest. Web run only, like the step above. The contest has three
+  // rounds, so this runs in round 3 before the rest of it is scored. The
+  // pilots are in one group and wait in [waiting] (the last one is under
+  // review) for the steps that follow, which decide them; the step after those
+  // adopts what is still pending so the round can be completed.
+  var waiting = <String>[];
   await journey.step(
-    'Round 4: Mark all valid rows official leaves the review for the director',
+    'Round 3: several pilot entries and a review wait for the director',
     () => inContest(() async {
+      // All of them fly in one group, so the page never asks about unsaved
+      // rows of another one. Tess retires in the next step, so she stays out.
+      // The draw decides who flies where, so the first group with two open
+      // rows is used.
+      var group = 0;
+      var inGroup = <String>[];
+      for (var g = 1; g <= data.groupsPerRound && inGroup.length < 2; g++) {
+        await openRoundGroup(tester, 3, g);
+        inGroup = openRowNames(tester, skip: {'Tess Valdez'});
+        group = g;
+      }
+      expect(inGroup.length, greaterThanOrEqualTo(2), reason: 'rows to fill');
+      final pilots = waiting = await submitAsPilots(
+        contestName: data.contestName,
+        candidates: inGroup,
+        round: 3,
+        count: min(3, inGroup.length),
+        timeFlown: 470,
+      );
+      await requestReviewAsPilot(
+        contestName: data.contestName,
+        pilot: pilots.last,
+        round: 3,
+        timeFlown: 495,
+      );
+      // The status bar's Refresh loads the page again, as the poll does when
+      // pilots' scores arrive: an untouched form follows the reload.
+      await tapVisible(tester, find.text('Refresh'));
+      await tester.pump(const Duration(seconds: 2));
+      await openRoundGroup(tester, 3, group);
+      for (final name in pilots) {
+        final row = (await rowOf(tester, name))!;
+        expect(row.hasPendingSubmission, isTrue, reason: name);
+        expect(row.status, RowStatus.submitted, reason: name);
+        expect(row.slot!.officialScore, isNull, reason: name);
+        expect(
+          row.slot!.placeholder.state,
+          name == pilots.last
+              ? ScorePlaceholderState.inReview
+              : ScorePlaceholderState.submitted,
+          reason: name,
+        );
+      }
+      // A group opens with its pending rows filled in for the director, so
+      // leaving it asks about the unsaved rows. Discarding keeps the
+      // submissions: they stay pending on the server.
+      await tapRail(tester, 'Workspace');
+      await tester.pump(const Duration(seconds: 1));
+      if (find.text('Unsaved scores').evaluate().isNotEmpty) {
+        await tapVisible(tester, find.text('Discard'));
+      }
+      await pumpUntilFound(tester, _key('activity-card'));
+    }),
+    webOnly: true,
+    timeout: _longStep,
+  );
+
+  await journey.step(
+    'Round 3: Mark official accepts a waiting pilot entry from its row',
+    () => inContest(() async {
+      final pilot = waiting.first;
+      await openGroupOf(tester, data, 3, pilot);
+      final row = (await rowOf(tester, pilot))!;
+      final mark = _key('score-mark-official-${row.id.value}');
+      await pumpUntilFound(tester, mark);
+
+      // Typing over the pilot's values turns it off and says what to do;
+      // reverting brings it back.
+      await tapVisible(tester, _key('score-row-${row.id.value}'));
+      final height = fieldWithKey('score-height-${row.id.value}');
+      await pumpUntilFound(tester, height);
+      await enterIn(tester, height, '99');
+      await pumpUntilFound(
+        tester,
+        find.text('Save or revert your edits first.'),
+      );
+      expect(tester.widget<OutlinedButton>(mark).onPressed, isNull);
+      await tapVisible(tester, _key('score-revert-${row.id.value}'));
+      await pumpUntilGone(
+        tester,
+        find.text('Save or revert your edits first.'),
+      );
+
+      await tapVisible(tester, mark);
+      await pumpUntilGone(tester, mark);
+      final saved = await rowOf(tester, pilot);
+      expect(saved, isNotNull);
+      expect(saved!.hasPendingSubmission, isFalse);
+      expect(saved.status, RowStatus.official);
+      await leaveGroupDiscardingPending(tester);
+    }),
+    webOnly: true,
+  );
+
+  await journey.step(
+    'Round 3: Mark all valid rows official leaves the review for the director',
+    () => inContest(() async {
+      expect(waiting.length, 3, reason: 'a plain, a second plain, a review');
       final plain = waiting[1];
       final reviewed = waiting.last;
-      await openGroupOf(tester, data, 4, plain);
+      await openGroupOf(tester, data, 3, plain);
       final row = (await rowOf(tester, plain))!;
       await pumpUntilFound(tester, _key('score-mark-official-${row.id.value}'));
 
@@ -658,12 +708,62 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       expect(saved!.status, RowStatus.official);
 
       // A pilot under review is held back from the group action.
-      await openGroupOf(tester, data, 4, reviewed);
       final held = (await rowOf(tester, reviewed))!;
       expect(held.slot!.placeholder.state, ScorePlaceholderState.inReview);
       expect(held.slot!.officialScore, isNull);
+      await leaveGroupDiscardingPending(tester);
     }),
     webOnly: true,
+  );
+
+  await journey.step(
+    'Round 3: what is still pending is adopted so the round can be completed',
+    () => inContest(() async {
+      // The director's "mark official" for everything left (a review is
+      // superseded with the adoption); the page follows the next Refresh.
+      await adoptPendingAsDirector(contestName: data.contestName, round: 3);
+      for (final name in waiting) {
+        await openGroupOf(tester, data, 3, name);
+        for (var i = 0; i < 30; i++) {
+          if ((await rowOf(tester, name))?.status == RowStatus.official) break;
+          await tapVisible(tester, find.text('Refresh'));
+          await tester.pump(const Duration(seconds: 1));
+        }
+        final saved = (await rowOf(tester, name))!;
+        expect(saved.status, RowStatus.official, reason: name);
+        expect(saved.hasPendingSubmission, isFalse, reason: name);
+      }
+    }),
+    webOnly: true,
+    timeout: _longStep,
+  );
+
+  await journey.step(
+    'Round 3: a pilot retires, the rest of the round is scored',
+    () => inContest(() async {
+      const retiring = 'Tess Valdez';
+      await openGroupOf(tester, data, 3, retiring);
+      final row = (await rowOf(tester, retiring))!;
+      await tapVisible(tester, _key('row-menu-${row.id.value}'));
+      await pumpUntilFound(tester, _key('menu-retire'));
+      await tapVisible(tester, _key('menu-retire'));
+      await pumpUntilFound(tester, _key('retire-dialog'));
+      expect(find.textContaining('flights instead of'), findsWidgets);
+      await tapVisible(tester, _key('retire-confirm'));
+      await pumpUntilFound(tester, find.text('Retired'));
+      expect(find.text('Retired from round 3'), findsOneWidget);
+
+      // The retirement is on the Recent activity card too.
+      await tapRail(tester, 'Workspace');
+      // The Scoring page's snackbar can still be up, and it says the same, so
+      // count only the activity entry's own wording.
+      final retired = _either('was retired from round 3', 'You retired pilot');
+      await pumpUntilFound(tester, retired);
+      expect(retired, findsOneWidget);
+
+      await scoreRound(tester, data, 3);
+    }),
+    timeout: _longStep,
   );
 }
 
@@ -674,3 +774,15 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
 Finder _either(String anonymous, String you) => find.textContaining(
   RegExp('${RegExp.escape(anonymous)}|${RegExp.escape(you)}'),
 );
+
+/// Leaves the scoring page for the workspace. A group opens with its pending
+/// rows filled in for the director, so leaving asks about the unsaved rows;
+/// discarding keeps the submissions pending on the server.
+Future<void> leaveGroupDiscardingPending(WidgetTester tester) async {
+  await tapRail(tester, 'Workspace');
+  await tester.pump(const Duration(seconds: 1));
+  if (find.text('Unsaved scores').evaluate().isNotEmpty) {
+    await tapVisible(tester, find.text('Discard'));
+  }
+  await pumpUntilFound(tester, _key('activity-card'));
+}

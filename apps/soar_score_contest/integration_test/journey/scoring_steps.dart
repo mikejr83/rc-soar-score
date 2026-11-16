@@ -68,6 +68,16 @@ Future<ScoringRow?> rowOf(WidgetTester tester, String name) async {
   return built();
 }
 
+/// The pilots of the open group's built rows that have no score yet, leaving
+/// out [skip].
+List<String> openRowNames(WidgetTester tester, {Set<String> skip = const {}}) =>
+    [
+      for (final tile in _built(tester))
+        if (tile.row.status == RowStatus.notEntered &&
+            !skip.contains(tile.row.pilot.name))
+          tile.row.pilot.name,
+    ];
+
 /// Any row of the open group (the tree does not list them in screen order).
 ScoringRow anyRow(WidgetTester tester) => _built(tester).first.row;
 
