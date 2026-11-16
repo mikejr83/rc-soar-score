@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/scoring/scoring_row.dart';
@@ -65,13 +64,12 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await pumpUntilFound(tester, _key('activity-card'));
       await pumpUntilFound(
         tester,
-        find.text(kIsWeb ? 'The matrix was drawn' : 'You drew the matrix'),
+        _either('The matrix was drawn', 'You drew the matrix'),
       );
       expect(
-        find.text(
-          kIsWeb
-              ? 'The contest configuration was saved'
-              : 'You saved the contest configuration',
+        _either(
+          'The contest configuration was saved',
+          'You saved the contest configuration',
         ),
         findsWidgets,
       );
@@ -210,14 +208,10 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await tapRail(tester, 'Workspace');
       await pumpUntilFound(
         tester,
-        find.textContaining(
-          kIsWeb ? 'A score was corrected for pilot' : 'You corrected a score',
-        ),
+        _either('A score was corrected for pilot', 'You corrected a score'),
       );
       expect(
-        find.textContaining(
-          kIsWeb ? 'A score was corrected' : 'You corrected a score',
-        ),
+        _either('A score was corrected', 'You corrected a score'),
         findsOneWidget,
       );
       expect(find.textContaining('in round 1'), findsOneWidget);
@@ -332,15 +326,12 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
           .widgetList<RichText>(blocked)
           .map((w) => w.text.toPlainText())
           .join(' | ');
-      // Only the native app knows which account it acts as, so only it can
-      // say "by you"; the web app names the time alone.
+      // The wording depends on whether the app knows its own account ("by
+      // you") or only names the time.
       expect(
-        reason,
-        contains(
-          kIsWeb
-              ? 'administration locked at'
-              : 'administration locked by you at',
-        ),
+        RegExp(r'administration locked (by you )?at').hasMatch(reason),
+        isTrue,
+        reason: reason,
       );
       await tapVisible(tester, _key('control-unlock'));
       await pumpUntilFound(tester, _key('control-lock'));
@@ -564,9 +555,7 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await tapRail(tester, 'Workspace');
       // The Scoring page's snackbar can still be up, and it says the same, so
       // count only the activity entry's own wording.
-      final retired = find.textContaining(
-        kIsWeb ? 'was retired from round 3' : 'You retired pilot',
-      );
+      final retired = _either('was retired from round 3', 'You retired pilot');
       await pumpUntilFound(tester, retired);
       expect(retired, findsOneWidget);
 
@@ -617,3 +606,11 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
     webOnly: true,
   );
 }
+
+/// Text that contains either wording: the activity card and the lock status
+/// say "You ..." where the app knows which account it acts as and name the
+/// event alone where it does not, and which one a run gets depends on the
+/// sign-in of that run.
+Finder _either(String anonymous, String you) => find.textContaining(
+  RegExp('${RegExp.escape(anonymous)}|${RegExp.escape(you)}'),
+);
