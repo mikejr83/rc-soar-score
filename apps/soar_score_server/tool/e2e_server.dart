@@ -20,6 +20,7 @@ import 'package:soar_score_core/soar_score_core.dart'
         ScorePlaceholder,
         ScorePlaceholderState,
         ParticipantScoresService,
+        PromoteSubmissionService,
         ParticipantSubmissionRefusal,
         ScoresService;
 import 'package:soar_score_data/soar_score_data.dart';
@@ -83,6 +84,15 @@ const e2eInvitationSecret = 'e2e-invitation-secret-at-least-32-bytes-long';
 /// Answers 409 when the pilot has no submission in that round. Test-only,
 /// like the rest of this server.
 ///
+/// `POST /__e2e/director-adopt` makes every pending submission of a round
+/// official the way the director's "mark official" does
+/// (`ScoresService.promoteSubmission`, acting as the Local account), so a
+/// journey that put pending submissions into its contest can finish the round
+/// without driving the UI for each row. An open review on a slot is
+/// superseded, as in a real adoption. The body is `{"contest_id", "round"}`;
+/// the answer says how many were adopted. Test-only, like the rest of this
+/// server.
+///
 /// Invitations (the self-scoring app's links and guest sessions) are on, signed
 /// with the fixed [e2eInvitationSecret]. `POST /__e2e/advance-clock?hours=N`
 /// moves the invitation service's clock forward by N hours, so a journey can
@@ -124,6 +134,7 @@ Future<void> main(List<String> args) async {
       .addMiddleware(_advanceClock(clock))
       .addMiddleware(_pilotSubmission(repository))
       .addMiddleware(_pilotReview(repository))
+      .addMiddleware(_directorAdopt(repository, localAccountId))
       .addHandler(
         buildApiHandler(
           name: 'soar_score_e2e',
@@ -418,4 +429,49 @@ Middleware _pilotReview(Repository repository) =>
         metadata: metadata(),
       );
       return Response(201, body: 'The review request is stored.');
+    };
+
+/// See `POST /__e2e/director-adopt` in the library comment.
+Middleware _directorAdopt(Repository repository, Id accountId) =>
+    (inner) => (request) async {
+      if (request.method != 'POST' ||
+          request.url.path != '__e2e/director-adopt') {
+        return inner(request);
+      }
+      final body =
+          jsonDecode(await request.readAsString()) as Map<String, dynamic>;
+      final contestId = Id.parse(body['contest_id'] as String);
+      final round = body['round'] as int;
+      var adopted = 0;
+      for (final r in (await repository.roundRepository.listForContest(
+        contestId,
+      )).where((r) => r.isCurrent && r.ordinal == round)) {
+        for (final assignment
+            in await repository.matrixAssignmentRepository.listLiveForRound(
+              r.id,
+            )) {
+          final slot = await repository.scorePlaceholderRepository
+              .findForAssignment(assignment.id);
+          if (slot == null ||
+              (slot.state != ScorePlaceholderState.submitted &&
+                  slot.state != ScorePlaceholderState.inReview)) {
+            continue;
+          }
+          await ScoresService(repository).promoteSubmission(
+            contestId,
+            assignment.id,
+            sourceAttemptId: slot.currentAttemptId!,
+            expectedScoreRevision: slot.scoreRevision,
+            actorId: accountId,
+            metadata: MutationMetadata(
+              clientMutationId: 'e2e-adopt-${Id.create().value}',
+              authority: Authority.director,
+              clientTime: DateTime.now().toUtc(),
+              actorId: accountId,
+            ),
+          );
+          adopted++;
+        }
+      }
+      return Response(200, body: '$adopted');
     };
