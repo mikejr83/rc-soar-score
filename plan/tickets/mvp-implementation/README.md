@@ -51,6 +51,7 @@ Tickets for getting the repository basics in place: toolchain, Melos workspace, 
 | [035](035-create-data-models.md)                     | Implement canonical domain models (48 entities)                                                                                                            | High     | Done              |
 | [036](036-create-drift-schema.md)                    | Implement the Drift schema for the 48-entity model                                                                                                         | High     | Tracked in issues |
 | [037](037-sync-protocol-and-engine.md)               | Synchronization protocol, server service and client engine (tracked in GitHub issues #83 to #92)                                                           | High     | Tracked in issues |
+| [038](038-redis-caching-and-throttling.md)           | Redis caching and volatile throttling architecture for hosted server (tracked in GitHub issues #942 to #949)                                               | High     | Tracked in issues |
 
 ## Suggested execution order
 
