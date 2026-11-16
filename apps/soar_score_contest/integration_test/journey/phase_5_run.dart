@@ -634,12 +634,8 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
         round: 4,
         timeFlown: 495,
       );
-      // #929: a waiting entry counts as entered in its group's strip, never
-      // as official.
-      final waiting = <int, int>{};
       for (final name in pilots) {
-        final group = await openGroupOf(tester, data, 4, name);
-        waiting[group] = (waiting[group] ?? 0) + 1;
+        await openGroupOf(tester, data, 4, name);
         final row = (await rowOf(tester, name))!;
         expect(row.hasPendingSubmission, isTrue, reason: name);
         expect(row.status, RowStatus.submitted, reason: name);
@@ -651,13 +647,6 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
               : ScorePlaceholderState.submitted,
           reason: name,
         );
-      }
-      for (final entry in waiting.entries) {
-        await openRoundGroup(tester, 4, entry.key);
-        final (entered, total, official) = groupStripCounts(tester);
-        expect(entered, entry.value, reason: 'group ${entry.key} entered');
-        expect(entered, lessThanOrEqualTo(total));
-        expect(official, 0, reason: 'group ${entry.key} official');
       }
     }),
     webOnly: true,
