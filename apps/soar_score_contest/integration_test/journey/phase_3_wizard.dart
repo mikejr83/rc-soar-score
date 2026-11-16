@@ -118,6 +118,8 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
 
   await journey.step('Wizard: create the contest', () async {
     await wizardPrimary(tester);
+    // The wizard's summary has the label too: wait until Create has left it.
+    await pumpUntilGone(tester, find.byKey(const ValueKey('summary-Details')));
     await pumpUntilFound(tester, find.text('Scoring pilots'));
     expect(find.text(data.contestName), findsWidgets);
     expect(
@@ -182,6 +184,8 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
     await pumpUntilFound(tester, find.byKey(const ValueKey('summary-Details')));
     expect(find.textContaining('1 entered'), findsOneWidget);
     await wizardPrimary(tester);
+    // The wizard's summary has the label too: wait until Create has left it.
+    await pumpUntilGone(tester, find.byKey(const ValueKey('summary-Details')));
     await pumpUntilFound(tester, find.text('Scoring pilots'));
 
     // The Participants page shows what was saved, and the pilot without a
@@ -284,6 +288,8 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
     await pumpUntilFound(tester, find.byKey(const ValueKey('summary-Details')));
     await wizardPrimary(tester);
 
+    // The wizard's summary has the label too: wait until Create has left it.
+    await pumpUntilGone(tester, find.byKey(const ValueKey('summary-Details')));
     await pumpUntilFound(tester, find.text('Scoring pilots'));
     expect(find.text('E2E Copied Classes'), findsWidgets);
     expect(configurationCount(tester, 'Scoring pilots'), sourcePilots);
@@ -351,6 +357,8 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
     );
     await wizardPrimary(tester);
 
+    // The wizard's summary has the label too: wait until Create has left it.
+    await pumpUntilGone(tester, find.byKey(const ValueKey('summary-Details')));
     await pumpUntilFound(tester, find.text('Scoring pilots'));
     expect(find.text('E2E Copied Teams'), findsWidgets);
     expect(configurationCount(tester, 'Scoring pilots'), sourcePilots);

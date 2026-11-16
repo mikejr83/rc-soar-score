@@ -200,3 +200,37 @@ Future<void> requestReviewAsPilot({
     client.close();
   }
 }
+
+/// Makes every pending submission of [round] official as the director's
+/// "mark official" does, through `POST /__e2e/director-adopt`, so a journey
+/// can finish a round it put pending submissions into without driving the
+/// page for each row. Returns how many were adopted. Web run only.
+Future<int> adoptPendingAsDirector({
+  required String contestName,
+  required int round,
+}) async {
+  final client = http.Client();
+  try {
+    final contests = await _json(
+      await client.get(_uri('/contests')),
+      status: 200,
+      what: 'GET /contests',
+    );
+    final contestId = (contests['contests']! as List).cast<Map>().singleWhere(
+      (c) => c['name'] == contestName,
+    )['id']!;
+    final response = await client.post(
+      Uri.parse(_apiBase).replace(path: '/__e2e/director-adopt'),
+      headers: {'content-type': 'application/json'},
+      body: jsonEncode({'contest_id': contestId, 'round': round}),
+    );
+    if (response.statusCode != 200) {
+      throw StateError(
+        'director-adopt answered ${response.statusCode}: ${response.body}',
+      );
+    }
+    return int.parse(response.body);
+  } finally {
+    client.close();
+  }
+}
