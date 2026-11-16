@@ -58,15 +58,26 @@ Future<T> withContestScoreGate<T>(
 }) async {
   final outer = pendingAnnouncements;
   final pending = outer ?? <SyncScopeKey>{};
-  final T result;
+  final result = await mapContestBusy(
+    () => _gated(db, contestId, body, lockTimeout, pending, outer),
+  );
+  if (outer == null) pending.forEach(db.announceLocalChange);
+  return result;
+}
+
+/// Runs [body] and throws a [ContestBusyError] for a PostgreSQL lock timeout
+/// (55P03) or deadlock (40P01) it raises; every other error passes through.
+///
+/// Used where a statement can wait on a lock (the gate, a unit of work, a row
+/// lock), so callers inside a gate see the retryable error itself and can let
+/// it escape instead of reporting a failed entry.
+Future<T> mapContestBusy<T>(Future<T> Function() body) async {
   try {
-    result = await _gated(db, contestId, body, lockTimeout, pending, outer);
+    return await body();
   } on ServerException catch (error) {
     if (_busyCodes.contains(error.code)) throw ContestBusyError(cause: error);
     rethrow;
   }
-  if (outer == null) pending.forEach(db.announceLocalChange);
-  return result;
 }
 
 /// PostgreSQL's lock timeout (`lock_not_available`) and deadlock

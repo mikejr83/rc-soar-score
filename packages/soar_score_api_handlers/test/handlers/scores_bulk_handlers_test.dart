@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:test/test.dart';
 
@@ -434,6 +436,7 @@ void main() {
       final entries = [entry(await assignmentOfPilot(api, 1), 'bulk-1')];
       api.repository.officialScores.gateFailure = const ContestBusyError(
         retryAfter: Duration(milliseconds: 1500),
+        cause: 'relation score_placeholders lock 55P03',
       );
 
       final response = await bulk(api, entries);
@@ -442,6 +445,11 @@ void main() {
       expect(response.statusCode, 503);
       expect(response.headers['retry-after'], '2');
       expect((body['error'] as Map)['code'], 'contest_busy');
+      expect(
+        jsonEncode(body),
+        isNot(anyOf(contains('55P03'), contains('score_placeholders'))),
+        reason: 'the database text stays in the log',
+      );
       expect(api.repository.officialScores.stored, isEmpty);
 
       // The same request goes through once the contest is free.

@@ -139,6 +139,10 @@ extension BulkScoresService on ScoresService {
               prepared[i]!.entry!,
               metadata: metadata.forPart(entries[i].clientMutationId),
             );
+          } on ContestBusyError {
+            // Not this entry's failure: the gate rolls back everything
+            // stored so far and the whole request is repeated.
+            rethrow;
           } on Object catch (error, stackTrace) {
             // The entries before this one are already stored, so report
             // this one as failed and go on instead of throwing.
@@ -217,6 +221,8 @@ extension BulkScoresService on ScoresService {
         );
       } on StaleRevisionError {
         current = await _requireContest(current.id);
+      } on ContestBusyError {
+        rethrow;
       } on Object catch (error, stackTrace) {
         // The scores are stored; a repeat of the request starts the contest.
         _logger.warning(
