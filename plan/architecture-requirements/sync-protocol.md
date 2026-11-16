@@ -30,6 +30,8 @@ The service publishes the supported range of each in the response to `GET /sync/
 | `schema_version` above the maximum   | `409`, reason `unsupported_protocol_version` | Stop syncing, tell the director to update later |
 | Both within the range                | Request is processed                         | None                                            |
 
+`GET /sync/info` also lists `capabilities`, the optional operations the service implements (today `promote_score`). A client sends an operation only when the service lists it; a service that lacks it never receives it (see [Promote score operation](#promote-score-operation)). Adding a capability does not change `protocol_version`.
+
 Adding an optional field does not change `protocol_version`. Removing or changing the meaning of a field does. The service supports the current version and at least the one before it.
 
 ## Routes
@@ -129,7 +131,7 @@ System data (shipped profiles, system roles, landing tables) is not a scope. It 
 }
 ```
 
-- `results` has exactly one entry per submitted mutation, in request order.
+- `results` has exactly one entry per submitted mutation, in request order. An entry may carry `replayed: true` (a repeated operation answered from its record).
 - `outcome` is one of `Accepted`, `Rejected`, `Conflict` or `Skipped`.
   - `Accepted` carries the new `revision` and the assigned `sequence`.
   - `Rejected` and `Conflict` carry a `reason_code` and the entity's `current_revision`. A `Conflict` also creates a `ConflictRecord` listed in `conflicts`.
@@ -163,6 +165,68 @@ A client that reconnects after being offline always starts with step 4. It never
 
 A deactivated installation (no open `InstallationActivation` for the contest) can pull and export but its administrative mutations are rejected with `inactive_installation`.
 
+## Promote score operation
+
+A director who marks a participant's stored submission official on an installation needs the same guarded adoption as on the service (`ScoresService.promoteSubmission`). Generic entity mutations cannot carry it: director precedence would let an offline "official A" overwrite a newer submission B, and the official score, placeholder and reviews would travel as unrelated writes. The promotion therefore travels as one **operation**.
+
+### Capability
+
+The capability name is `promote_score`, version 1. The service lists it in `GET /sync/info` `capabilities`. The client:
+
+- never sends the operation to a service that does not list it; the intent stays queued as blocked (reason `unsupported_peer`, shown to the director as waiting for a newer service) and nothing is written;
+- treats a refusal of the operation by an older service (`invalid_payload`, because it does not know the entity type) the same way, so a stale capability cache also fails closed.
+
+### Intent
+
+The intent is a mutation with `entity_type` `ScorePromotion`, `entity_id` the new operation id, `base_revision` null, authority `Director`, and this payload:
+
+```json
+{
+  "operation": "promote_score",
+  "operation_version": 1,
+  "assignment_id": "…",
+  "source_attempt_id": "…",
+  "expected_score_revision": 3
+}
+```
+
+It carries no score components, actor, authority or reason: the service takes the actor from the session, the components from the stored source and the reason code `director_accepted_submission`. It depends on no other mutation. Because it is an ordinary outbox row (`client_mutation_id`, ordering, retry, `results`), it is durable across restarts and idempotent. `ScorePromotion` is not stored as an entity and is not exportable data; in an export it is a pending, rejected or accepted mutation like any other.
+
+The same operation id with a different payload is refused (`operation_mismatch`).
+
+### Decision on the service
+
+The service decides the intent inside the contest's score gate, in one transaction, with the checks of the hosted route: contest and slot exist, `current_attempt_id` is the source, the placeholder's score revision is the expected one, the contest, round, group and score are not locked, and the stored values pass the discipline's validation. If all hold, the service stores the official version (selection origin `Manual`, `set_by` the session's account), updates the placeholder, supersedes the slot's open reviews and writes the audit events, then records the intent as `Accepted` with a sequence. No generic merge, no renumbering of the official revision.
+
+| Situation                                                   | Result                                                                                                  |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| All checks hold                                             | `Accepted` with the new `revision` and `sequence`                                                       |
+| Another submission B (or a newer official score) is current | `Rejected`, `stale_source`. Nothing is written: B and all reviews stay, no placeholder counter advances |
+| Contest, round, group or score locked                       | `Rejected`, `locked`                                                                                    |
+| Slot or source unknown, or stored values invalid            | `Rejected`, `invalid_payload`                                                                           |
+| Installation without an open activation                     | `Rejected`, `inactive_installation`                                                                     |
+| Operation or version unknown                                | `Rejected`, `unsupported_operation`                                                                     |
+| Same id, different payload                                  | `Rejected`, `operation_mismatch`                                                                        |
+
+A refusal is recorded and is final: a retry of the same `client_mutation_id` returns it and can never turn it into an override. After `stale_source` the director inspects B and makes a new promotion with a new operation id. There is no "keep mine".
+
+### Replay
+
+A retry of an accepted intent writes nothing. It is answered `Accepted` with `replayed: true` only while the slot still shows the adoption (the current official score cites the source attempt and has the recorded score revision). If a newer source or official version is current, the answer is `Rejected` `stale_source` with the current data in `changes`; an earlier receipt never rewinds current state. The result of a replay needs no new official version, even if the slot was locked afterwards.
+
+### Atomic aggregate
+
+The service marks every mutation record written by one adoption (official score, placeholder, superseded reviews, audit events and the intent's own receipt) with the same `aggregate_id`. This applies to adoptions made by the service's own routes too. When the service builds a page of changes it never splits an aggregate: it adds the rest of the aggregate to the page, which may then exceed the page size. The client applies an aggregate in one local transaction, with the intent's state change, in the order given by sequence, and advances the cursor only after it. Entities in an aggregate keep their own revisions and the usual skip rule for an equal or higher stored revision.
+
+### Client behavior
+
+- **Which path.** When the contest syncs and its first upload has finished, marking official on the installation records the intent and writes no official score, placeholder or review. Otherwise (accountless, never uploaded, first upload still open) it writes directly as before and the first upload carries it.
+- **Pending projection.** The slot shows the adoption as waiting to sync, derived from the pending intent and the stored source attempt, never as an official score. Results and counts do not include it. Drafts of other rows are untouched.
+- **Blocking.** While an intent for a slot is unresolved, saving or promoting that slot is refused locally (`promotion_pending`); other slots work.
+- **Accepted.** The receipt arrives in the pulled aggregate. Installing the aggregate and clearing the intent happen in one transaction, so no reader sees the projection gone with the base unchanged.
+- **Refused.** The intent is kept as rejected with its reason and leaves the projection. The response's `changes` install the service's current state for the slot. The director sees that the source changed, and the draft is preserved.
+- **Restart.** An intent is never lost or sent twice with different ids: the id is stored with the intent. A crash between sending and recording is healed by the next pull, which returns the receipt if the service committed.
+
 ## Conflict Resolution
 
 `POST /sync/conflicts/{conflictId}/resolve` carries `client_mutation_id`, `choice` (`KeptAccepted`, `TookCompeting` or `Merged`) and, for `Merged`, the merged `payload`. It is itself a mutation: it is idempotent, ordered in the scope's sequence and audited. It returns the same `results` entry shape. Only conflicts with `requires_action` true are offered for a decision. Silent records (a director's value beating a participant submission) are returned in `changes` and `conflicts` with `requires_action` false and are never discarded.
@@ -193,20 +257,23 @@ Both are recovery operations, not the normal conflict mechanism. Large responses
 
 One list, shared by server and client, defined in `soar_score_core`:
 
-| Code                        | Used with          | Meaning                                                                        |
-| --------------------------- | ------------------ | ------------------------------------------------------------------------------ |
-| `stale_base`                | Conflict, Rejected | `base_revision` is not current and the change cannot be merged automatically   |
-| `config_revision_conflict`  | Conflict           | Configuration changed on a stale revision; side-by-side resolution is required |
-| `inactive_installation`     | Rejected           | No open activation for the contest, or the installation is revoked             |
-| `unknown_matrix_revision`   | Rejected           | A score references a matrix revision the service does not have yet             |
-| `unknown_flight_group`      | Rejected           | A score references a group the service does not have yet                       |
-| `entity_deleted`            | Rejected           | The entity has a tombstone                                                     |
-| `unique_violation`          | Conflict           | For example two moves into the same lane                                       |
-| `invalid_payload`           | Rejected           | The payload is malformed, names a derived value, or is not a stored entity     |
-| `locked`                    | Rejected           | The score or contest state does not allow modification                         |
-| `unauthorized`              | Rejected           | The account lacks authority for the scope or the entity                        |
-| `director_over_participant` | Conflict (silent)  | A director's official value beat a participant submission                      |
-| `not_link_manager`          | Rejected           | Another installation manages the director's remembered GliderScore pilot links |
+| Code                        | Used with          | Meaning                                                                             |
+| --------------------------- | ------------------ | ----------------------------------------------------------------------------------- |
+| `stale_base`                | Conflict, Rejected | `base_revision` is not current and the change cannot be merged automatically        |
+| `config_revision_conflict`  | Conflict           | Configuration changed on a stale revision; side-by-side resolution is required      |
+| `inactive_installation`     | Rejected           | No open activation for the contest, or the installation is revoked                  |
+| `unknown_matrix_revision`   | Rejected           | A score references a matrix revision the service does not have yet                  |
+| `unknown_flight_group`      | Rejected           | A score references a group the service does not have yet                            |
+| `entity_deleted`            | Rejected           | The entity has a tombstone                                                          |
+| `unique_violation`          | Conflict           | For example two moves into the same lane                                            |
+| `invalid_payload`           | Rejected           | The payload is malformed, names a derived value, or is not a stored entity          |
+| `locked`                    | Rejected           | The score or contest state does not allow modification                              |
+| `unauthorized`              | Rejected           | The account lacks authority for the scope or the entity                             |
+| `director_over_participant` | Conflict (silent)  | A director's official value beat a participant submission                           |
+| `stale_source`              | Rejected           | The promotion's source is no longer the slot's current submission or official score |
+| `unsupported_operation`     | Rejected           | The service does not know the operation or its version                              |
+| `operation_mismatch`        | Rejected           | The operation id was used before with a different payload                           |
+| `not_link_manager`          | Rejected           | Another installation manages the director's remembered GliderScore pilot links      |
 
 **Remembered pilot links.** The first installation to write a `PilotImportLink` of a director manages the links. The service rejects link saves and deletes from any other installation with `not_link_manager`, whether live or queued, except the deletion of links that went with a deleted participant. Decisions and the service's own changes are never refused. A director's choice on an existing disagreement (`unique_violation`) may name another participant (`merged` with `participant_profile_id`), which is checked when the decision is saved.
 

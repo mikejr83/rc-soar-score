@@ -62,6 +62,10 @@ Created when score made official. New version created on each officialization/sc
 - Mutations: creation only (append-only version history)
 - Idempotent creation guarded by score_revision counter
 
+### Native promotion
+
+An installation that syncs the contest does not write an official score when the director marks a submission official. It queues a `promote_score` intent and shows a pending projection; the service creates the single official version when it decides the intent, and the installation receives it as an aggregate. See sync-protocol.md (Promote score operation).
+
 ### Bulk entry
 
 The director's scoring page can save many rows at once (`POST /contests/{id}/scores/bulk`, 1 to 100 entries for the slots of one round). Every entry is checked like a single one and refused alone if it fails. The accepted entries (attempt, official score, placeholder and correction audit of each) are stored in ONE transaction (`OfficialScoreRepository.recordEntries`); if a revision moved while storing, nothing of it is kept and the entries are stored one by one, so only real conflicts are refused. Afterwards a `Ready` contest is moved to `Running` in its own save, the results are recalculated once in their own transaction, and the public projection is updated at most once. A repeated request replays each entry by its `client_mutation_id` and runs those follow-up steps again, so a request that stopped after storing is finished by a repeat.
