@@ -10,6 +10,12 @@ abstract interface class ScorePlaceholderRepository {
   /// one.
   Future<ScorePlaceholder?> findForAssignment(Id assignmentId);
 
+  /// Like [findForAssignment], and keeps the row locked until the enclosing
+  /// transaction ends (PostgreSQL `FOR UPDATE`), so a writer outside the
+  /// contest gate waits for it. Call it first, before any other read of the
+  /// slot, inside `OfficialScoreRepository.withContestGate`.
+  Future<ScorePlaceholder?> findForAssignmentForUpdate(Id assignmentId);
+
   /// The placeholders of [contestId], in the order they were created.
   Future<List<ScorePlaceholder>> listForContest(Id contestId);
 

@@ -522,7 +522,7 @@ class ScoresService {
       );
     }
     final placeholder = await repository.scorePlaceholderRepository
-        .findForAssignment(assignmentId);
+        .findForAssignmentForUpdate(assignmentId);
     if (placeholder == null) {
       throw EntityNotFoundError(
         entityType: 'ScorePlaceholder',

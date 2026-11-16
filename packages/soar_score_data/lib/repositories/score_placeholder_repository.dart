@@ -19,6 +19,18 @@ class ScorePlaceholderRepository extends DriftRepository
   }
 
   @override
+  Future<core.ScorePlaceholder?> findForAssignmentForUpdate(
+    core.Id assignmentId,
+  ) async {
+    final found = await _store.whereId(
+      'assignment_id',
+      assignmentId,
+      forUpdate: true,
+    );
+    return found.isEmpty ? null : found.single;
+  }
+
+  @override
   Future<List<core.ScorePlaceholder>> listForContest(core.Id contestId) =>
       _store.whereId('contest_id', contestId, orderBy: 'id');
 

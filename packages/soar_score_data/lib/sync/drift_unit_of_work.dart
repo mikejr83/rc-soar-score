@@ -82,7 +82,19 @@ class _Context implements core.WriteContext {
     final saved = store.decode(json) as T;
 
     final scope = _scopeOf(entity, json);
-    await store.upsertJson(store.encode(saved));
+    if (!await store.upsertJsonIfRevision(
+      store.encode(saved),
+      storedRevision,
+    )) {
+      // Another writer got in between the read above and this write.
+      final now = await store.findJson(entity.id);
+      throw core.StaleRevisionError(
+        entityType: entity.entityType,
+        entityId: entity.id,
+        expectedRevision: entity.revision,
+        storedRevision: now?['revision'] as int? ?? 0,
+      );
+    }
     await _recordMutation(
       entityType: entity.entityType,
       entityId: entity.id,

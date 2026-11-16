@@ -33,10 +33,20 @@ class _HookedPlaceholders extends ScorePlaceholderRepository {
   var _calls = 0;
 
   @override
-  Future<core.ScorePlaceholder?> findForAssignment(core.Id assignmentId) async {
+  Future<core.ScorePlaceholder?> findForAssignment(core.Id assignmentId) =>
+      _hooked(() => super.findForAssignment(assignmentId));
+
+  @override
+  Future<core.ScorePlaceholder?> findForAssignmentForUpdate(
+    core.Id assignmentId,
+  ) => _hooked(() => super.findForAssignmentForUpdate(assignmentId));
+
+  Future<core.ScorePlaceholder?> _hooked(
+    Future<core.ScorePlaceholder?> Function() read,
+  ) async {
     final call = ++_calls;
     await before.remove(call)?.call();
-    final found = await super.findForAssignment(assignmentId);
+    final found = await read();
     await after.remove(call)?.call();
     return found;
   }

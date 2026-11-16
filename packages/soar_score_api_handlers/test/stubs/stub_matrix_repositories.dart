@@ -203,6 +203,10 @@ class StubScorePlaceholderRepository implements ScorePlaceholderRepository {
       .firstOrNull;
 
   @override
+  Future<ScorePlaceholder?> findForAssignmentForUpdate(Id assignmentId) =>
+      findForAssignment(assignmentId);
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not stubbed');
 }

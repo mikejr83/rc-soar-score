@@ -35,14 +35,23 @@ class TableMapper {
     String? orderBy,
     int? limit,
     int? offset,
+    bool forUpdate = false,
   }) async {
     final order = orderBy == null ? '' : ' ORDER BY $orderBy';
     final cap =
         (limit == null ? '' : ' LIMIT $limit') +
         (offset == null ? '' : ' OFFSET $offset');
+    // PostgreSQL locks the rows until the transaction ends; SQLite has one
+    // writer, which the transaction already holds.
+    final lock = forUpdate && _db.executor.dialect == SqlDialect.postgres
+        ? ' FOR UPDATE'
+        : '';
     final rows = await _db
         .customSelect(
-          portableSql(_db, 'SELECT * FROM $_name WHERE $whereSql$order$cap'),
+          portableSql(
+            _db,
+            'SELECT * FROM $_name WHERE $whereSql$order$cap$lock',
+          ),
           variables: variables,
           readsFrom: {_table},
         )
@@ -95,6 +104,45 @@ class TableMapper {
       variables: _toVariables(json, columns),
       updates: {_table},
     );
+  }
+
+  /// Writes [json] as the next revision of the row stored at
+  /// [expectedRevision], or inserts it when [expectedRevision] is null; the
+  /// write is refused (returns false) when the stored row is not at that
+  /// revision any more, or exists although none was expected.
+  ///
+  /// The revision is compared by the database in the same statement as the
+  /// write, so a writer that did not take the contest gate cannot be
+  /// overwritten between a read and this write.
+  Future<bool> upsertIfRevision(
+    Map<String, Object?> json,
+    int? expectedRevision,
+  ) async {
+    final columns = [for (final c in _table.$columns) c.$name];
+    final keys = [for (final c in _table.$primaryKey) c.$name];
+    final updates = [
+      for (final name in columns)
+        if (!keys.contains(name)) '"$name" = excluded."$name"',
+    ];
+    final conflict = expectedRevision == null || updates.isEmpty
+        ? 'DO NOTHING'
+        : 'DO UPDATE SET ${updates.join(', ')} '
+              'WHERE $_name."revision" = ?';
+    final changed = await _db.customUpdate(
+      portableSql(
+        _db,
+        'INSERT INTO $_name (${columns.map((c) => '"$c"').join(', ')}) '
+        'VALUES (${List.filled(columns.length, '?').join(', ')}) '
+        'ON CONFLICT (${keys.map((k) => '"$k"').join(', ')}) $conflict',
+      ),
+      variables: [
+        ..._toVariables(json, columns),
+        if (expectedRevision != null && updates.isNotEmpty)
+          Variable<int>(expectedRevision),
+      ],
+      updates: {_table},
+    );
+    return changed > 0;
   }
 
   /// Removes the row with [id]; returns whether one existed.

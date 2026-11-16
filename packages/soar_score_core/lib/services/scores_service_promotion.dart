@@ -112,7 +112,7 @@ extension PromoteSubmissionService on ScoresService {
     final context = await _configuration(contest);
 
     final current = await repository.scorePlaceholderRepository
-        .findForAssignment(assignmentId);
+        .findForAssignmentForUpdate(assignmentId);
     if (current == null || current.contestId != contestId) {
       throw EntityNotFoundError(
         entityType: 'ScorePlaceholder',
