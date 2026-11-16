@@ -65,9 +65,45 @@ void main() {
     expect(find.text('Pilot entry'), findsNothing);
   });
 
+  testWidgets('Mark all marks the valid rows at once and says what it left', (
+    tester,
+  ) async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(scoringAssignmentId(1, 1), _flight)
+      ..seedPendingSubmission(scoringAssignmentId(1, 2), _flight);
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    // No confirmation: one tap sends the group request.
+    await tester.tap(_key('score-mark-all-official'));
+    await tester.pumpAndSettle();
+
+    expect(server.promoteRequests, 1);
+    expect(find.text('Marked 2 rows official.'), findsOneWidget);
+    expect(find.text('Pilot entry'), findsNothing);
+    // Nothing waits any more, so the group action is gone.
+    expect(_key('score-mark-all-official'), findsNothing);
+  });
+
+  testWidgets('Mark all with every row edited is off and says why', (
+    tester,
+  ) async {
+    final first = scoringAssignmentId(1, 1);
+    final server = ScoringServer()..seedPendingSubmission(first, _flight);
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    await tester.tap(_key('score-row-${first.value}'));
+    await tester.pumpAndSettle();
+    await tester.enterText(_key('score-height-${first.value}'), '99');
+    await tester.pumpAndSettle();
+
+    final button = tester.widget<OutlinedButton>(
+      _key('score-mark-all-official'),
+    );
+    expect(button.onPressed, isNull);
+  });
   testWidgets('no waiting entry, no Mark official', (tester) async {
     final server = ScoringServer();
     await pumpScoringPage(tester, server, round: 1, group: 1);
+    expect(_key('score-mark-all-official'), findsNothing);
     expect(find.text('Mark official'), findsNothing);
   });
 

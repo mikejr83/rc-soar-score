@@ -732,7 +732,10 @@ class ScoringController extends ChangeNotifier {
 
   /// Why [row] cannot be marked official now, or null when it can.
   ///
-  MarkOfficialSkip? markOfficialSkip(ScoringRow row) {
+  /// A row with a review open can be marked on its own (the director decides
+  /// that row), but "Mark all valid rows" holds it back: [forGroup] says
+  /// which of the two is asked.
+  MarkOfficialSkip? markOfficialSkip(ScoringRow row, {bool forGroup = false}) {
     if (!row.hasPendingSubmission || row.slot?.pendingAttempt == null) {
       return MarkOfficialSkip.noSubmission;
     }
@@ -740,7 +743,33 @@ class ScoringController extends ChangeNotifier {
     if (block != null || row.isLocked) return MarkOfficialSkip.closed;
     if (saveOf(row.id).isBusy) return MarkOfficialSkip.busy;
     if (hasEdits(row)) return MarkOfficialSkip.edited;
+    if (forGroup &&
+        row.slot?.placeholder.state == ScorePlaceholderState.inReview) {
+      return MarkOfficialSkip.inReview;
+    }
     return null;
+  }
+
+  /// The rows "Mark all valid rows official" would send.
+  List<ScoringRow> get markAllRows => [
+    for (final row in rows)
+      if (markOfficialSkip(row, forGroup: true) == null) row,
+  ];
+
+  /// How many rows of the group hold a waiting submission, valid or not.
+  int get waitingCount => rows.where((r) => r.hasPendingSubmission).length;
+
+  /// Rows with a waiting submission that "Mark all" leaves out, by reason.
+  Map<MarkOfficialSkip, int> get markAllSkipped {
+    final skipped = <MarkOfficialSkip, int>{};
+    for (final row in rows) {
+      if (!row.hasPendingSubmission) continue;
+      final why = markOfficialSkip(row, forGroup: true);
+      if (why != null && why != MarkOfficialSkip.noSubmission) {
+        skipped.update(why, (n) => n + 1, ifAbsent: () => 1);
+      }
+    }
+    return skipped;
   }
 
   /// Accepts the pilot's waiting submission of [row] as its official score.
@@ -825,6 +854,115 @@ class ScoringController extends ChangeNotifier {
       RowSaveKind.failed,
       message: message ?? 'The server failed ($status).',
       promotion: true,
+    );
+  }
+
+  /// Marks every valid row of the group official in one request (several of
+  /// 100 at most), each row on its own outcome: a row that changed, is locked
+  /// or hit a busy server keeps its message and the others still go through.
+  Future<MarkAllSummary> markAllOfficial() async {
+    final batch = markAllRows;
+    final skipped = markAllSkipped;
+    if (batch.isEmpty) return MarkAllSummary(skipped: skipped);
+    final current = currentRound;
+    if (current == null) return MarkAllSummary(skipped: skipped);
+    for (final row in batch) {
+      _saves[row.id] = const RowSave(RowSaveKind.saving, promotion: true);
+    }
+    notifyListeners();
+    var adopted = 0;
+    var replayed = 0;
+    var changed = 0;
+    var refused = 0;
+    var retry = 0;
+    final moved = <ScoringRow>[];
+    for (
+      var from = 0;
+      from < batch.length;
+      from += PromoteGroupRequest.maxItems
+    ) {
+      final chunk = batch.sublist(
+        from,
+        min(from + PromoteGroupRequest.maxItems, batch.length),
+      );
+      try {
+        final answer = await client.promoteGroup(
+          contestId,
+          current.id,
+          group,
+          PromoteGroupRequest(
+            items: [
+              for (final row in chunk)
+                PromoteGroupItem(
+                  assignmentId: row.id.value,
+                  sourceAttemptId: row.slot!.pendingAttempt!.id.value,
+                  expectedScoreRevision: row.baseRevision,
+                ),
+            ],
+          ),
+        );
+        final byId = {for (final o in answer.outcomes) o.assignmentId: o};
+        for (final row in chunk) {
+          final outcome = byId[row.id];
+          final promotion = outcome?.promotion;
+          if (promotion != null) {
+            _applySaved(row, promotion.entry);
+            promotion.replayed ? replayed++ : adopted++;
+          } else if (outcome == null) {
+            _saves[row.id] = const RowSave(
+              RowSaveKind.failed,
+              networkProblem: true,
+              promotion: true,
+            );
+            retry++;
+          } else {
+            final refusal = _promotionRefusal(
+              outcome.statusCode,
+              outcome.code,
+              outcome.message,
+            );
+            _saves[row.id] = refusal;
+            if (refusal.changed) {
+              moved.add(row);
+              changed++;
+            } else if (refusal.kind == RowSaveKind.failed) {
+              retry++;
+            } else {
+              refused++;
+            }
+          }
+        }
+        if (answer.recalculationWarning != null) {
+          recalculationWarning = answer.recalculationWarning;
+        }
+      } on Object catch (error) {
+        final unreachable =
+            error is ApiNetworkError ||
+            (error is ApiHttpError && error.statusCode == 503);
+        for (final row in chunk) {
+          _saves[row.id] = RowSave(
+            RowSaveKind.failed,
+            message: unreachable ? null : '$error',
+            networkProblem: unreachable,
+            promotion: true,
+          );
+        }
+        retry += chunk.length;
+      }
+    }
+    if (moved.isNotEmpty) await _refreshSlots(moved);
+    if (adopted + replayed > 0) {
+      notifyListeners();
+      await _loadResults();
+    }
+    notifyListeners();
+    return MarkAllSummary(
+      adopted: adopted,
+      replayed: replayed,
+      changed: changed,
+      refused: refused,
+      retry: retry,
+      skipped: skipped,
     );
   }
 
@@ -970,4 +1108,43 @@ enum MarkOfficialSkip {
 
   /// The director typed over the pilot's values; save or revert first.
   edited,
+
+  /// A review of the submission is open ("Mark all" holds it back).
+  inReview,
+}
+
+/// What one "Mark all valid rows official" did.
+class MarkAllSummary {
+  const MarkAllSummary({
+    this.adopted = 0,
+    this.replayed = 0,
+    this.changed = 0,
+    this.refused = 0,
+    this.retry = 0,
+    this.skipped = const {},
+  });
+
+  /// Rows made official now.
+  final int adopted;
+
+  /// Rows that already were official from this very submission.
+  final int replayed;
+
+  /// Rows whose submission or score changed since the page loaded.
+  final int changed;
+
+  /// Rows the server refused (locked, invalid).
+  final int refused;
+
+  /// Rows to try again: the server was busy or unreachable.
+  final int retry;
+
+  /// Rows left out before asking, by reason.
+  final Map<MarkOfficialSkip, int> skipped;
+
+  /// Rows that are official after the request.
+  int get official => adopted + replayed;
+
+  /// Whether no row is official after the request.
+  bool get nothingAccepted => official == 0;
 }

@@ -3012,4 +3012,102 @@ class AppLocalizationsEn extends AppLocalizations {
   String scoreMarkOfficialFailed(String message) {
     return 'Not marked official. $message';
   }
+
+  @override
+  String get scoreMarkAllOfficial => 'Mark all valid rows official';
+
+  @override
+  String get scoreMarkAllNoneValid =>
+      'No row is ready to mark official. Save or revert edited rows, or open a review first.';
+
+  @override
+  String scoreMarkAllSkipEdited(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rows with unsaved edits are left out.',
+      one: '1 row with unsaved edits is left out.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scoreMarkAllSkipReview(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rows with an open review are left out.',
+      one: '1 row with an open review is left out.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scoreMarkAllSkipClosed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count locked rows are left out.',
+      one: '1 locked row is left out.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scoreMarkAllSkipRetired(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count retired pilots are left out.',
+      one: '1 retired pilot is left out.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scoreMarkAllDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Marked $count rows official.',
+      one: 'Marked 1 row official.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scoreMarkAllNothing => 'Nothing was marked official.';
+
+  @override
+  String scoreMarkAllChanged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rows changed since you opened them.',
+      one: '1 row changed since you opened it.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scoreMarkAllRefused(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rows were refused.',
+      one: '1 row was refused.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scoreMarkAllRetry(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rows could not be reached; try them again.',
+      one: '1 row could not be reached; try it again.',
+    );
+    return '$_temp0';
+  }
 }

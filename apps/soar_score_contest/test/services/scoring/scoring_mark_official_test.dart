@@ -28,6 +28,9 @@ ScoringRow _row(ScoringController c, int pilot) =>
 
 void main() {
   final first = scoringAssignmentId(1, 1);
+  final second = scoringAssignmentId(1, 2);
+  final third = scoringAssignmentId(1, 3);
+  final fourth = scoringAssignmentId(1, 4);
   const a = {'time_flown': 540, 'launch_height': 120};
   const b = {'time_flown': 500, 'launch_height': 130};
 
@@ -66,12 +69,19 @@ void main() {
       expect(c.markOfficialSkip(_row(c, 1)), isNull);
     });
 
-    test('a review does not stop a single row', () async {
-      final server = ScoringServer()
-        ..seedPendingSubmission(first, a, inReview: true);
-      final c = await _open(server);
-      expect(c.markOfficialSkip(_row(c, 1)), isNull);
-    });
+    test(
+      'a review does not stop a single row, only the group action',
+      () async {
+        final server = ScoringServer()
+          ..seedPendingSubmission(first, a, inReview: true);
+        final c = await _open(server);
+        expect(c.markOfficialSkip(_row(c, 1)), isNull);
+        expect(
+          c.markOfficialSkip(_row(c, 1), forGroup: true),
+          MarkOfficialSkip.inReview,
+        );
+      },
+    );
 
     test('a changed submission shows the newer values to check', () async {
       final server = ScoringServer()..seedPendingSubmission(first, a);
@@ -153,6 +163,103 @@ void main() {
 
       expect(await c.markOfficial(_row(c, 1)), isFalse);
       expect(c.saveOf(first).networkProblem, isTrue);
+    });
+  });
+
+  group('mark all', () {
+    test('adopts every valid row in one request, row by row', () async {
+      final server = ScoringServer()
+        ..seedPendingSubmission(first, a)
+        ..seedPendingSubmission(second, b);
+      final c = await _open(server);
+      c.draftOf(_row(c, 2)).setHeight('99');
+
+      final summary = await c.markAllOfficial();
+
+      expect(server.promoteRequests, 1);
+      expect(summary.adopted, 1);
+      expect(summary.skipped, {MarkOfficialSkip.edited: 1});
+      expect(_row(c, 1).status, RowStatus.official);
+      expect(_row(c, 2).status, RowStatus.submitted);
+      expect(c.draftOf(_row(c, 2)).heightText, '99');
+    });
+
+    test('holds back a row with an open review', () async {
+      final server = ScoringServer()
+        ..seedPendingSubmission(third, a, inReview: true)
+        ..seedPendingSubmission(fourth, b);
+      final c = await _open(server, group: 2);
+
+      final summary = await c.markAllOfficial();
+
+      expect(summary.adopted, 1);
+      expect(summary.skipped, {MarkOfficialSkip.inReview: 1});
+      expect(_row(c, 3).hasPendingSubmission, isTrue);
+      expect(_row(c, 4).status, RowStatus.official);
+    });
+
+    test(
+      'a row that changed or was refused does not stop the others',
+      () async {
+        final server = ScoringServer()
+          ..seedPendingSubmission(first, a)
+          ..seedPendingSubmission(second, a);
+        final c = await _open(server);
+        server.seedPendingSubmission(first, b);
+        server.promoteFailures[second] = (409, 'score_locked');
+
+        final summary = await c.markAllOfficial();
+
+        expect(summary.adopted, 0);
+        expect(summary.changed, 1);
+        expect(summary.refused, 1);
+        expect(summary.retry, 0);
+        expect(summary.nothingAccepted, isTrue);
+        expect(c.saveOf(first).changed, isTrue);
+        expect(c.saveOf(second).kind, RowSaveKind.refused);
+        expect(c.draftOf(_row(c, 1)).timeText, '8:20');
+      },
+    );
+
+    test('one busy row does not stop the rest', () async {
+      final server = ScoringServer()
+        ..seedPendingSubmission(first, a)
+        ..seedPendingSubmission(second, a);
+      server.promoteFailures[second] = (503, 'contest_busy');
+      final c = await _open(server);
+
+      final summary = await c.markAllOfficial();
+
+      expect(summary.adopted, 1);
+      expect(summary.retry, 1);
+      expect(c.saveOf(second).networkProblem, isTrue);
+    });
+
+    test(
+      'busy rows are counted to try again; nothing accepted says so',
+      () async {
+        final server = ScoringServer()..seedPendingSubmission(first, a);
+        server.promoteFailures[first] = (503, 'contest_busy');
+        final c = await _open(server);
+
+        final summary = await c.markAllOfficial();
+
+        expect(summary.retry, 1);
+        expect(summary.nothingAccepted, isTrue);
+        expect(c.saveOf(first).networkProblem, isTrue);
+      },
+    );
+
+    test('with no valid row nothing is sent', () async {
+      final server = ScoringServer()..seedPendingSubmission(first, a);
+      final c = await _open(server);
+      c.draftOf(_row(c, 1)).setHeight('99');
+
+      final summary = await c.markAllOfficial();
+
+      expect(server.promoteRequests, 0);
+      expect(summary.nothingAccepted, isTrue);
+      expect(summary.skipped, {MarkOfficialSkip.edited: 1});
     });
   });
 }

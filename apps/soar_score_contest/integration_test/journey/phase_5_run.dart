@@ -590,6 +590,32 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
   );
 
   await journey.step(
+    'Round 3: Mark all valid rows official accepts the group in one tap',
+    () => inContest(() async {
+      final pilot = await submitAsPilot(
+        contestName: data.contestName,
+        candidates: [
+          for (final name in data.pilotNames)
+            if (name != 'Tess Valdez') name,
+        ],
+        round: 3,
+        timeFlown: 460,
+      );
+      await openGroupOf(tester, data, 3, pilot);
+      final row = (await rowOf(tester, pilot))!;
+      await pumpUntilFound(tester, _key('score-mark-official-${row.id.value}'));
+
+      // One tap, no confirmation: the group request goes out.
+      await tapVisible(tester, _key('score-mark-all-official'));
+      await pumpUntilFound(tester, find.text('Marked 1 row official.'));
+      await pumpUntilGone(tester, _key('score-mark-all-official'));
+      final saved = await rowOf(tester, pilot);
+      expect(saved!.status, RowStatus.official);
+    }),
+    webOnly: true,
+  );
+
+  await journey.step(
     'Round 3: a pilot retires, the rest of the round is scored',
     () => inContest(() async {
       const retiring = 'Tess Valdez';
