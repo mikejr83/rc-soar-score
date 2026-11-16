@@ -26,7 +26,10 @@ final _logger = Logger('ParticipantScores');
 ///
 /// The score is preliminary: an attempt and a `Submitted` slot, no official
 /// score, so the official results and the public projection are unchanged
-/// and nothing is recalculated or published.
+/// and nothing is recalculated or published. The exception is a contest that
+/// accepts scores on its own ("Scores become official"): a submission that
+/// completes its round or group makes it and the waiting ones official in the
+/// same transaction, and the results are then recalculated once.
 void addParticipantScoreRoutes(
   Router router,
   Repository repository, {
@@ -54,6 +57,18 @@ void addParticipantScoreRoutes(
         components: body.components,
         sourceDevice: _sourceDevice(request),
       );
+      if (stored.scoresChanged) {
+        // The contest accepted submissions on its own: the official results
+        // change, so they are recalculated once. Publication follows its
+        // own policy (a later change of this feature).
+        final warning = await RecalculationService(ResultsService(repository))
+            .recalculateAfterEntry(principal.access.contestId);
+        if (warning != null) {
+          _logger.info(
+            'Recalculation warning after an automatic acceptance: $warning',
+          );
+        }
+      }
       final name = await _pilotName(repository, principal);
       return _json(
         SubmitParticipantScoreResponse(

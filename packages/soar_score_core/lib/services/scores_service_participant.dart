@@ -14,6 +14,11 @@ extension ParticipantScoresService on ScoresService {
   /// contest moves to `Running` in the same transaction. The director's own
   /// entry for the slot is what makes it official.
   ///
+  /// When the contest accepts scores on its own and this submission completes
+  /// its round or group, the same transaction makes it (and the other waiting
+  /// submissions of the round or group) official; see
+  /// [AutomaticOfficializationService.evaluateAutomaticOfficialization].
+  ///
   /// A repeat of [clientMutationId] with the same components returns the
   /// first answer ([ParticipantSubmission.replayed]); with other components
   /// it is a `mutation_conflict`.
@@ -33,14 +38,38 @@ extension ParticipantScoresService on ScoresService {
     String? sourceDevice,
   }) => repository.officialScoreRepository.withContestGate(
     access.contestId,
-    () => _submitParticipantScore(
-      access,
-      round,
-      clientMutationId: clientMutationId,
-      matrixRevision: matrixRevision,
-      components: components,
-      sourceDevice: sourceDevice,
-    ),
+    () async {
+      final stored = await _submitParticipantScore(
+        access,
+        round,
+        clientMutationId: clientMutationId,
+        matrixRevision: matrixRevision,
+        components: components,
+        sourceDevice: sourceDevice,
+      );
+      if (stored.replayed) return stored;
+      // The submission may complete its round or group. The run is part of the
+      // same transaction, so the pilot's score and its acceptance commit
+      // together; a busy contest escapes to the caller, any other failure
+      // leaves the submission waiting.
+      try {
+        final automatic = await _evaluateAutomaticOfficialization(
+          access.contestId,
+        );
+        return stored.copyWithOfficialization(
+          automatic.promoted.contains(stored.assignmentId),
+          anyOfficial: automatic.changedScores,
+        );
+      } on ContestBusyError {
+        rethrow;
+      } on Object catch (error) {
+        _logger.warning(
+          'Automatic officialization failed after a submission in contest '
+          '${access.contestId}: ${error.runtimeType}',
+        );
+        return stored;
+      }
+    },
   );
 
   Future<ParticipantSubmission> _submitParticipantScore(

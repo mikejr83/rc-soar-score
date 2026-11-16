@@ -17,6 +17,8 @@ class ParticipantSubmission extends Equatable {
     required this.authority,
     this.nextRound,
     this.replayed = false,
+    this.becameOfficial = false,
+    this.scoresChanged = false,
   });
 
   final Id assignmentId;
@@ -45,6 +47,32 @@ class ParticipantSubmission extends Equatable {
   /// mutation id): nothing was stored again.
   final bool replayed;
 
+  /// True when the contest made this submission official on its own in the
+  /// request that stored it. Not part of the API answer.
+  final bool becameOfficial;
+
+  /// True when that run made any submission official (this one or another
+  /// of its round or group), so the results need a recalculation.
+  final bool scoresChanged;
+
+  /// This submission with the outcome of the automatic run.
+  ParticipantSubmission copyWithOfficialization(
+    bool becameOfficial, {
+    required bool anyOfficial,
+  }) => ParticipantSubmission(
+    assignmentId: assignmentId,
+    round: round,
+    components: components,
+    revision: revision,
+    enteredAt: enteredAt,
+    calculated: calculated,
+    authority: authority,
+    nextRound: nextRound,
+    replayed: replayed,
+    becameOfficial: becameOfficial,
+    scoresChanged: anyOfficial,
+  );
+
   @override
   List<Object?> get props => [
     assignmentId,
@@ -56,6 +84,8 @@ class ParticipantSubmission extends Equatable {
     authority,
     nextRound,
     replayed,
+    becameOfficial,
+    scoresChanged,
   ];
 }
 

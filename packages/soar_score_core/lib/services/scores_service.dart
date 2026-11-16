@@ -11,6 +11,7 @@ import '../enums/round_status.dart';
 import '../enums/authority.dart';
 import '../enums/discipline_type.dart';
 import '../enums/lifecycle_state.dart';
+import '../enums/officialization_mode.dart';
 import '../enums/score_placeholder_state.dart';
 import '../enums/selection_origin.dart';
 import '../errors/contest_state_error.dart';
@@ -44,6 +45,7 @@ import 'score_correction_audit.dart';
 import 'score_entry_result.dart';
 import 'score_history.dart';
 
+part 'scores_service_automatic.dart';
 part 'scores_service_bulk.dart';
 part 'scores_service_participant.dart';
 part 'scores_service_promotion.dart';
