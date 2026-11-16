@@ -22,6 +22,8 @@ class DemoContestPlan {
     this.groupsPerRound = 0,
     this.scoredRounds = 0,
     this.partialSlots = 0,
+    this.pendingSlots = 0,
+    this.reviewedSlots = 0,
     this.configured = true,
   });
 
@@ -67,6 +69,12 @@ class DemoContestPlan {
   final int scoredRounds;
   final int partialSlots;
 
+  /// Slots after the partly scored ones that hold a pilot's own submission
+  /// (`Submitted`, no official score), and how many of them (the last) also
+  /// have an open review request.
+  final int pendingSlots;
+  final int reviewedSlots;
+
   /// Whether the contest gets a configuration.
   final bool configured;
 
@@ -105,6 +113,8 @@ class DemoContestPlan {
       groupsPerRound: 3,
       scoredRounds: 4,
       partialSlots: 5,
+      pendingSlots: 4,
+      reviewedSlots: 1,
     ),
     DemoContestPlan(
       number: 3,

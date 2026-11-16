@@ -26,6 +26,9 @@ abstract final class DemoIds {
 
   static core.Id matrix(int contest) => _id('b000', contest, 0);
 
+  /// The made-up guest account of a pilot's pending demo submission.
+  static core.Id guest(int contest, int slot) => _id('9100', contest, slot);
+
   static core.Id _id(String kind, int major, int minor) {
     String two(int n) => n.toRadixString(16).padLeft(2, '0');
     return core.Id.parse(
