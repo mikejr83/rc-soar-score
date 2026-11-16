@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/scoring/scoring_row.dart';
+import 'package:soar_score_core/soar_score_core.dart'
+    show ScorePlaceholderState;
 
 import '../support/interact.dart';
 import '../support/launch_app.dart';
@@ -571,5 +573,47 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await scoreRound(tester, data, 3);
     }),
     timeout: _longStep,
+  );
+
+  // The pending submissions (and the review) UI work for counts, the row
+  // action, the group action and automatic officialization checks. The
+  // journey's contest is not seeded: the E2E server's hooks store what a
+  // pilot's invitation page would, through the real service, at this point of
+  // the same contest. Web run only, like the step above.
+  await journey.step(
+    'Round 4: pilots\' own entries wait, one of them under review',
+    () => inContest(() async {
+      final pilots = await submitAsPilots(
+        contestName: data.contestName,
+        candidates: [
+          for (final name in data.pilotNames)
+            if (name != 'Tess Valdez') name,
+        ],
+        round: 4,
+        count: 3,
+        timeFlown: 470,
+      );
+      await requestReviewAsPilot(
+        contestName: data.contestName,
+        pilot: pilots.last,
+        round: 4,
+        timeFlown: 495,
+      );
+      for (final name in pilots) {
+        await openGroupOf(tester, data, 4, name);
+        final row = (await rowOf(tester, name))!;
+        expect(row.hasPendingSubmission, isTrue, reason: name);
+        expect(row.status, RowStatus.submitted, reason: name);
+        expect(row.slot!.officialScore, isNull, reason: name);
+        expect(
+          row.slot!.placeholder.state,
+          name == pilots.last
+              ? ScorePlaceholderState.inReview
+              : ScorePlaceholderState.submitted,
+          reason: name,
+        );
+      }
+    }),
+    webOnly: true,
   );
 }
