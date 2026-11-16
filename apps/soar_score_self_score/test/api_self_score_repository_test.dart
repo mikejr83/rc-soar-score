@@ -129,6 +129,55 @@ void main() {
       expect((result as ScoreRejected).code, 'scoring_closed');
     });
 
+    test('a locked score in the director envelope is a refusal', () async {
+      final result = await _repository(
+        (_) => _json(
+          '{"error":{"code":"score_locked","message":"locked by the director"}}',
+          409,
+        ),
+      ).submitScore(_submission);
+      expect(result, isA<ScoreRejected>());
+      expect((result as ScoreRejected).code, 'score_locked');
+    });
+
+    test(
+      'an unknown envelope code is still a refusal, not a lost connection',
+      () async {
+        final result = await _repository(
+          (_) => _json(
+            '{"error":{"code":"scoring_not_available","message":"no scores yet"}}',
+            409,
+          ),
+        ).submitScore(_submission);
+        expect(result, isA<ScoreRejected>());
+        expect((result as ScoreRejected).code, 'scoring_not_available');
+      },
+    );
+
+    test('a bare 409 with no readable code stays a lost connection', () {
+      // A 409 the client cannot read is not proven to be a refusal, so it is
+      // kept retryable: the server answers a refusal in one of the two
+      // formats above, anything else is a failure, not a "do not retry".
+      expect(
+        _repository((_) => _json('locked', 409)).submitScore(_submission),
+        throwsA(isA<SelfScoreOfflineException>()),
+      );
+    });
+
+    test('a transient answer is offline even when it carries an envelope', () {
+      for (final status in [408, 429]) {
+        expect(
+          _repository(
+            (_) => _json(
+              '{"error":{"code":"scoring_closed","message":"x"}}',
+              status,
+            ),
+          ).submitScore(_submission),
+          throwsA(isA<SelfScoreOfflineException>()),
+        );
+      }
+    });
+
     test('a 401 with no body ends the session instead of queueing', () async {
       for (final body in ['', '<html>']) {
         final result = await _repository((_) => _json(body, 401))

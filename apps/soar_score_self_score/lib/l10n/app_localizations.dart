@@ -328,6 +328,12 @@ abstract class AppLocalizations {
   /// **'Scoring is closed for this flight. Ask your contest director.'**
   String get scoreRejectedClosed;
 
+  /// Shown when this one score is locked on its own.
+  ///
+  /// In en, this message translates to:
+  /// **'This score is locked. Ask your contest director.'**
+  String get scoreRejectedLocked;
+
   /// Shown when an earlier round has no score yet.
   ///
   /// In en, this message translates to:
