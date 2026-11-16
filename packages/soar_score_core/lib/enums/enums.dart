@@ -35,6 +35,7 @@ export 'participant_link_origin.dart';
 export 'participant_link_status.dart';
 export 'platform.dart';
 export 'profile_status.dart';
+export 'officialization_mode.dart';
 export 'public_update_mode.dart';
 export 'publication_visibility.dart';
 export 're_flight_participant_role.dart';

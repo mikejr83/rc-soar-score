@@ -4129,6 +4129,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A pilot or helper submitted values. The submission is kept in history.'**
   String get scorePilotEntryTooltip;
+
+  /// Name of the contest setting that chooses when submitted scores become official: the wizard option, its summary line and the Configuration page row.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores become official'**
+  String get scoresBecomeOfficialLabel;
+
+  /// Help text under the Scores become official setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted scores are preliminary until they become official. This does not change when results are published.'**
+  String get scoresBecomeOfficialHelp;
+
+  /// Option of the Scores become official setting: the contest accepts a round's submitted scores once every required score of the round is submitted.
+  ///
+  /// In en, this message translates to:
+  /// **'At end of round'**
+  String get scoresBecomeOfficialEndOfRound;
+
+  /// Explains the At end of round option.
+  ///
+  /// In en, this message translates to:
+  /// **'When every score of a round has been submitted, the contest accepts them. This is the default for a new contest.'**
+  String get scoresBecomeOfficialEndOfRoundHelp;
+
+  /// Option of the Scores become official setting: the contest accepts a flight group's submitted scores once every required score of the group is submitted.
+  ///
+  /// In en, this message translates to:
+  /// **'At end of flight group'**
+  String get scoresBecomeOfficialEndOfGroup;
+
+  /// Explains the At end of flight group option.
+  ///
+  /// In en, this message translates to:
+  /// **'When every score of a flight group has been submitted, the contest accepts them.'**
+  String get scoresBecomeOfficialEndOfGroupHelp;
+
+  /// Option of the Scores become official setting: only the director makes scores official.
+  ///
+  /// In en, this message translates to:
+  /// **'Manually'**
+  String get scoresBecomeOfficialManual;
+
+  /// Explains the Manually option.
+  ///
+  /// In en, this message translates to:
+  /// **'Only you make scores official, one pilot or one group at a time.'**
+  String get scoresBecomeOfficialManualHelp;
 }
 
 class _AppLocalizationsDelegate

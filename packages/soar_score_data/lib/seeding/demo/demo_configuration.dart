@@ -25,6 +25,9 @@ abstract final class DemoConfiguration {
         'participant_numbers_enabled': plan.classes || teams,
         'review_requests_enabled': true,
         'public_update_mode': core.PublicUpdateMode.roundCompletion.json,
+        // Demo directors accept scores themselves, so the demo shows manual
+        // acceptance and keeps its pending submissions pending.
+        'scores_become_official': core.OfficializationMode.manual.json,
       },
       discipline: _disciplineDefaults(plan.disciplineProfileId),
     );

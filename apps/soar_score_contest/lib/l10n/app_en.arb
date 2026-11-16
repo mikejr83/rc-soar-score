@@ -2806,5 +2806,21 @@
   "scorePilotEntryChip": "Pilot entry",
   "@scorePilotEntryChip": {"description": "Chip on a score row whose values a pilot or helper submitted and the director has not saved yet."},
   "scorePilotEntryTooltip": "A pilot or helper submitted values. The submission is kept in history.",
-  "@scorePilotEntryTooltip": {"description": "Tooltip of the Pilot entry chip."}
+  "@scorePilotEntryTooltip": {"description": "Tooltip of the Pilot entry chip."},
+  "scoresBecomeOfficialLabel": "Scores become official",
+  "@scoresBecomeOfficialLabel": {"description": "Name of the contest setting that chooses when submitted scores become official: the wizard option, its summary line and the Configuration page row."},
+  "scoresBecomeOfficialHelp": "Submitted scores are preliminary until they become official. This does not change when results are published.",
+  "@scoresBecomeOfficialHelp": {"description": "Help text under the Scores become official setting."},
+  "scoresBecomeOfficialEndOfRound": "At end of round",
+  "@scoresBecomeOfficialEndOfRound": {"description": "Option of the Scores become official setting: the contest accepts a round's submitted scores once every required score of the round is submitted."},
+  "scoresBecomeOfficialEndOfRoundHelp": "When every score of a round has been submitted, the contest accepts them. This is the default for a new contest.",
+  "@scoresBecomeOfficialEndOfRoundHelp": {"description": "Explains the At end of round option."},
+  "scoresBecomeOfficialEndOfGroup": "At end of flight group",
+  "@scoresBecomeOfficialEndOfGroup": {"description": "Option of the Scores become official setting: the contest accepts a flight group's submitted scores once every required score of the group is submitted."},
+  "scoresBecomeOfficialEndOfGroupHelp": "When every score of a flight group has been submitted, the contest accepts them.",
+  "@scoresBecomeOfficialEndOfGroupHelp": {"description": "Explains the At end of flight group option."},
+  "scoresBecomeOfficialManual": "Manually",
+  "@scoresBecomeOfficialManual": {"description": "Option of the Scores become official setting: only the director makes scores official."},
+  "scoresBecomeOfficialManualHelp": "Only you make scores official, one pilot or one group at a time.",
+  "@scoresBecomeOfficialManualHelp": {"description": "Explains the Manually option."}
 }

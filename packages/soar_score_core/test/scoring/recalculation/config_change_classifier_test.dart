@@ -199,6 +199,7 @@ void main() {
       'participant_numbers_enabled',
       'review_requests_enabled',
       'public_update_mode',
+      'scores_become_official',
       'intended_total_rounds',
     };
     expect(coreOptionGroups.keys.toSet(), keys);

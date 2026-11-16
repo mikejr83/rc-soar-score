@@ -2958,4 +2958,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get scorePilotEntryTooltip =>
       'A pilot or helper submitted values. The submission is kept in history.';
+
+  @override
+  String get scoresBecomeOfficialLabel => 'Scores become official';
+
+  @override
+  String get scoresBecomeOfficialHelp =>
+      'Submitted scores are preliminary until they become official. This does not change when results are published.';
+
+  @override
+  String get scoresBecomeOfficialEndOfRound => 'At end of round';
+
+  @override
+  String get scoresBecomeOfficialEndOfRoundHelp =>
+      'When every score of a round has been submitted, the contest accepts them. This is the default for a new contest.';
+
+  @override
+  String get scoresBecomeOfficialEndOfGroup => 'At end of flight group';
+
+  @override
+  String get scoresBecomeOfficialEndOfGroupHelp =>
+      'When every score of a flight group has been submitted, the contest accepts them.';
+
+  @override
+  String get scoresBecomeOfficialManual => 'Manually';
+
+  @override
+  String get scoresBecomeOfficialManualHelp =>
+      'Only you make scores official, one pilot or one group at a time.';
 }
