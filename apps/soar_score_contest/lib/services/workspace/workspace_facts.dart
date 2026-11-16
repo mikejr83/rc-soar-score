@@ -291,7 +291,10 @@ class WorkspaceFacts extends Equatable {
   }
 
   /// Whether the slot has a score entered, official or waiting for the
-  /// director, the way the server's round progress counts it.
+  /// director, the way the server's round progress counts it. A waiting slot
+  /// counts here even when its submission is not loaded; [_enteredAt] and the
+  /// Score check need the values, so they leave such a slot out. `pendingAttempt`
+  /// is always loaded for a Submitted or InReview slot, so this is transient.
   static bool _isEntered(ScoreSlot slot) =>
       slot.officialScore != null ||
       slot.placeholder.state != ScorePlaceholderState.notEntered;
@@ -448,7 +451,8 @@ class WorkspaceFacts extends Equatable {
   /// when an earlier round's score was corrected most recently.
   final CurrentGroupFacts? frontierGroup;
 
-  /// How many slots of the current matrix have an official score.
+  /// How many slots of the current matrix have a score entered, official or
+  /// waiting for the director, the way the server's round progress counts it.
   final int scoreCount;
 
   /// Settings that differ from those the matrix was drawn with.
