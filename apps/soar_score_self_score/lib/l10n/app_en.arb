@@ -201,6 +201,10 @@
   "@scoreRejectedClosed": {
     "description": "Shown when the contest or round no longer takes scores."
   },
+  "scoreRejectedLocked": "This score is locked. Ask your contest director.",
+  "@scoreRejectedLocked": {
+    "description": "Shown when this one score is locked on its own."
+  },
   "scoreRejectedOutOfOrder": "Score the earlier round first.",
   "@scoreRejectedOutOfOrder": {
     "description": "Shown when an earlier round has no score yet."

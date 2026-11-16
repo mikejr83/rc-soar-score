@@ -60,7 +60,10 @@ final _logger = Logger('Scores');
 ///   projection is updated at most ONCE. A repeat is safe and finishes an
 ///   interrupted request: each entry keeps its `client_mutation_id`, so it
 ///   replays, and the contest start, recalculation and publish run again
-///   whenever any entry is saved, replayed or new;
+///   whenever any entry is saved, replayed or new. The whole request runs in
+///   the contest's score gate: it waits for other score writers of the
+///   contest (up to the 30 s lock timeout on PostgreSQL), and a timeout or
+///   deadlock is a 503 `contest_busy` with `retry-after` and nothing kept;
 /// - `GET /contests/{id}/assignments/{assignmentId}/scores/history` is every
 ///   submission to a slot, oldest first: the official revisions with their
 ///   reasons, and the attempts that never became official.

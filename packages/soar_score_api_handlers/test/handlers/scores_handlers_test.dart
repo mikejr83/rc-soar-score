@@ -119,6 +119,19 @@ void main() {
       );
     });
 
+    test('a lock timeout or deadlock is a retryable 503, not a 500', () async {
+      await drawnContest(api);
+      final slot = await assignmentOf(1);
+      api.repository.officialScores.gateFailure = const ContestBusyError();
+
+      final response = await enter(slot);
+
+      expect(response.statusCode, 503);
+      expect(response.headers['retry-after'], '2');
+      expect((await api.errorOf(response))['code'], 'contest_busy');
+      expect(api.repository.officialScores.stored, isEmpty);
+    });
+
     test('a negative cumulative penalty is 400', () async {
       await drawnContest(api);
 

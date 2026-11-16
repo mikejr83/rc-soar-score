@@ -55,6 +55,13 @@ class StubOfficialScoreRepository implements OfficialScoreRepository {
 
   final List<OfficialScore> stored = [];
 
+  /// The contests whose gate was taken, in order.
+  final List<Id> gated = [];
+
+  /// When set, the gate is refused with this error, as the database does when
+  /// a lock wait times out or a deadlock is found.
+  Object? gateFailure;
+
   /// When set, the next [recordEntries] is refused as if a revision moved
   /// underneath it, with nothing stored.
   bool conflictOnNextBulk = false;
@@ -93,8 +100,12 @@ class StubOfficialScoreRepository implements OfficialScoreRepository {
   }
 
   @override
-  Future<T> withContestGate<T>(Id contestId, Future<T> Function() body) =>
-      body();
+  Future<T> withContestGate<T>(Id contestId, Future<T> Function() body) async {
+    gated.add(contestId);
+    final failure = gateFailure;
+    if (failure != null) throw failure;
+    return body();
+  }
 
   @override
   Future<PromotedScore> recordPromotion(
