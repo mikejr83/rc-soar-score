@@ -95,13 +95,23 @@ When the user is entering scoring parameters the view will show a button to subm
 
 A submitted score shows who entered it, the pilot or a helper by name, and when.
 
+### Preliminary and official scores
+
+A submitted score is preliminary until the contest makes it official. The score view says which it is, and why:
+
+- While preliminary, it says when the contest accepts scores: at the end of the round, at the end of the flight group, or when the director marks them official, following the contest's **Scores become official** setting.
+- When a review request is holding it, it says so. The other scores in the round or group are still accepted.
+- Once official, it says so, and says whether the contest accepted it automatically or the director did.
+
+The pilot does nothing to make a score official. An automatically accepted score appears the same way to the pilot who submitted last as to those who submitted first.
+
 ### Pilot and helper entering the same score
 
 The first valid submission the server accepts is the pilot's score. Neither the pilot nor a helper can overwrite it. A second, different submission is turned away, and the person is shown the score that was accepted together with the option to request a review.
 
 ### Review Request
 
-A button labeled "Request Review" is available if review requests are enabled in the contest configuration, the score is in the preliminary `Submitted` state, and the score is not locked (at the score, group, round, or contest level). If the contest director has already marked the score as `Official` or if the score is locked, the "Request Review" button is hidden.
+A button labeled "Request Review" is available if review requests are enabled in the contest configuration, the score is either preliminary (`Submitted`) or official by automatic acceptance, and the score is not locked (at the score, group, round, or contest level). If the contest director has already decided the score (marked it official, corrected it, or decided a review) or if the score is locked, the "Request Review" button is hidden. A score the contest accepted automatically still shows the button until then.
 
 Both a pilot and a helper can request a review of a pilot's score. Only one review request can be open for a flight at a time, so when one is pending the other person sees the pending state instead of the form.
 
