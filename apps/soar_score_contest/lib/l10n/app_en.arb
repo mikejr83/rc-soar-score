@@ -2806,5 +2806,14 @@
   "scorePilotEntryChip": "Pilot entry",
   "@scorePilotEntryChip": {"description": "Chip on a score row whose values a pilot or helper submitted and the director has not saved yet."},
   "scorePilotEntryTooltip": "A pilot or helper submitted values. The submission is kept in history.",
-  "@scorePilotEntryTooltip": {"description": "Tooltip of the Pilot entry chip."}
+  "@scorePilotEntryTooltip": {"description": "Tooltip of the Pilot entry chip."},
+  "scoringEnteredOfficialCount": "{entered} of {total} entered · {official} official",
+  "@scoringEnteredOfficialCount": {
+    "description": "Count in the scoring page's context strip: flights with a score entered (official or waiting for the director) out of the group's flights, then how many of them are official.",
+    "placeholders": {
+      "entered": {"type": "int"},
+      "total": {"type": "int"},
+      "official": {"type": "int"}
+    }
+  }
 }

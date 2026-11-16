@@ -73,13 +73,13 @@ class ScoreEntryPanel extends StatelessWidget {
     final canSave =
         enabled &&
         problems.isEmpty &&
-        (draft.isDirty || !row.isScored) &&
+        (draft.isDirty || !row.isOfficial) &&
         (!draft.needsZeroConfirmation || draft.zeroConfirmed);
     final landingReason = draft.landingOffReason;
     final awaitingZeroConfirm =
         enabled &&
         problems.isEmpty &&
-        (draft.isDirty || !row.isScored) &&
+        (draft.isDirty || !row.isOfficial) &&
         draft.needsZeroConfirmation &&
         !draft.zeroConfirmed;
 
@@ -162,7 +162,7 @@ class ScoreEntryPanel extends StatelessWidget {
             ),
           if (draft.needsZeroConfirmation &&
               !readOnly &&
-              (draft.isDirty || !row.isScored))
+              (draft.isDirty || !row.isOfficial))
             _zeroConfirm(context, enabled),
           if (save.kind != RowSaveKind.idle && !busy)
             ScoreSaveBanner(
