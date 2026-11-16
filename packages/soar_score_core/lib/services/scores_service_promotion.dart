@@ -4,6 +4,18 @@ part of 'scores_service.dart';
 /// official score's `reason` and localized where it is shown.
 const directorAcceptedSubmissionReason = 'director_accepted_submission';
 
+/// Reason code of a submission the contest made official on its own because
+/// its round was fully scored (selection origin `Automatic`).
+const automaticRoundCompleteReason = 'automatic_round_complete';
+
+/// Reason code of a submission the contest made official on its own because
+/// its flight group was fully scored (selection origin `Automatic`).
+const automaticGroupCompleteReason = 'automatic_group_complete';
+
+/// Reason code of a director's explicit confirmation of an automatically
+/// accepted score. It closes review without a second official version.
+const directorConfirmedAutomaticReason = 'director_confirmed_automatic';
+
 /// Reason code of a review superseded by an official selection.
 const supersededByOfficialSelectionReason = 'superseded_by_official_selection';
 
@@ -196,6 +208,7 @@ extension PromoteSubmissionService on ScoresService {
       setAt: now,
       setBy: actorId,
       reason: directorAcceptedSubmissionReason,
+      selectionOrigin: SelectionOrigin.manual,
     );
     final updated = ScorePlaceholder(
       id: placeholder.id,

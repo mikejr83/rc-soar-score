@@ -222,6 +222,9 @@ const scorePlaceholderStateValues = [
   'Official',
 ];
 
+/// `SelectionOrigin`.
+const selectionOriginValues = ['Manual', 'Automatic', 'ReviewDecision'];
+
 /// `AccountKind`.
 const accountKindValues = ['registered', 'guest', 'local', 'deleted'];
 
@@ -302,6 +305,7 @@ const enumValueLists = {
   'ReviewRequestState': reviewRequestStateValues,
   'RoundStatus': roundStatusValues,
   'ScorePlaceholderState': scorePlaceholderStateValues,
+  'SelectionOrigin': selectionOriginValues,
   'AccountKind': accountKindValues,
   'AccountStatus': accountStatusValues,
   'ActivationKind': activationKindValues,

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../enums/authority.dart';
+import '../enums/selection_origin.dart';
 import '../models/id.dart';
 
 /// What became of one submission to a score slot.
@@ -34,6 +35,12 @@ String _authorityWire(Authority authority) =>
 Authority _parseAuthority(String wire) =>
     Authority.values.firstWhere((a) => _authorityWire(a) == wire);
 
+String _originWire(SelectionOrigin origin) =>
+    origin.name[0].toUpperCase() + origin.name.substring(1);
+
+SelectionOrigin _parseOrigin(String wire) =>
+    SelectionOrigin.values.firstWhere((o) => _originWire(o) == wire);
+
 /// One submission to a score slot: an official revision, or an attempt that
 /// did not become one.
 class ScoreHistoryEntry extends Equatable {
@@ -43,6 +50,7 @@ class ScoreHistoryEntry extends Equatable {
     required this.components,
     required this.actorId,
     required this.authority,
+    this.selectionOrigin,
     this.scoreRevision,
     this.reason,
     this.at,
@@ -57,8 +65,13 @@ class ScoreHistoryEntry extends Equatable {
           json['components']! as Map<Object?, Object?>,
         ),
         reason: json['reason'] as String?,
-        actorId: Id.parse(json['actor_id']! as String),
+        actorId: json['actor_id'] == null
+            ? null
+            : Id.parse(json['actor_id']! as String),
         authority: _parseAuthority(json['authority']! as String),
+        selectionOrigin: json['selection_origin'] == null
+            ? null
+            : _parseOrigin(json['selection_origin']! as String),
         at: json['at'] == null ? null : DateTime.parse(json['at']! as String),
       );
 
@@ -75,8 +88,16 @@ class ScoreHistoryEntry extends Equatable {
   /// Why the revision was set; null for a submission that was not adopted.
   final String? reason;
 
-  final Id actorId;
+  /// Who made the revision official; null when the contest accepted it on
+  /// its own, and for an attempt that has no actor.
+  final Id? actorId;
+
+  /// The authority of the submission itself, not of whoever adopted it.
   final Authority authority;
+
+  /// How the revision was selected; null for a submission that did not
+  /// become official.
+  final SelectionOrigin? selectionOrigin;
 
   /// When the revision was set (UTC); null for a submission that was not
   /// adopted, which carries no time.
@@ -88,8 +109,11 @@ class ScoreHistoryEntry extends Equatable {
     'score_revision': scoreRevision,
     'components': components,
     'reason': reason,
-    'actor_id': actorId.value,
+    'actor_id': actorId?.value,
     'authority': _authorityWire(authority),
+    'selection_origin': selectionOrigin == null
+        ? null
+        : _originWire(selectionOrigin!),
     'at': at?.toUtc().toIso8601String(),
   };
 
@@ -102,6 +126,7 @@ class ScoreHistoryEntry extends Equatable {
     reason,
     actorId,
     authority,
+    selectionOrigin,
     at,
   ];
 }
