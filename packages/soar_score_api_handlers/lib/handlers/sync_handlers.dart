@@ -107,13 +107,17 @@ void addSyncRoutes(
     String contestId,
   ) async {
     final principal = requirePrincipal(request);
+    final id = Id.parse(contestId);
+    // The contest's director, before the body is read. The installation's
+    // owner is a different check and stays in the service.
+    await requireContestDirector(request, repository, id);
     final body = await readJsonBody(
       request,
       ActivateInstallationRequest.fromJson,
     );
     final activation = await installations.activate(
       accountId: principal.accountId,
-      contestId: Id.parse(contestId),
+      contestId: id,
       installationId: body.installationId,
       kind: body.kind,
     );
@@ -225,13 +229,19 @@ void addSyncRoutes(
     String conflictId,
   ) async {
     final principal = requirePrincipal(request);
+    final id = Id.parse(conflictId);
+    // The decider of the conflict's scope, before the body is read.
+    await acceptor.requireConflictDecider(
+      accountId: principal.accountId,
+      conflictId: id,
+    );
     final body = await readJsonBody(request, ResolveConflictRequest.fromJson);
     _logger.info(
       'Resolving conflict $conflictId for account ${principal.accountId}',
     );
     final result = await acceptor.resolveConflict(
       accountId: principal.accountId,
-      conflictId: Id.parse(conflictId),
+      conflictId: id,
       clientMutationId: body.clientMutationId,
       choice: body.choice,
       payload: body.payload,

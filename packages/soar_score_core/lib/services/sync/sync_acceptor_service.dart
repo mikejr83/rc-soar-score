@@ -150,6 +150,19 @@ class SyncAcceptorService {
     });
   }
 
+  /// Checks that [accountId] may decide the conflict [conflictId], so a
+  /// route can refuse a foreign or unknown id before it reads a body.
+  ///
+  /// Throws an [EntityNotFoundError] for an unknown conflict and a
+  /// [ForbiddenError] unless the account directs the conflict's scope.
+  /// [resolveConflict] repeats the check inside the decision.
+  Future<void> requireConflictDecider({
+    required Id accountId,
+    required Id conflictId,
+  }) async {
+    await _resolver.find(conflictId, accountId: accountId);
+  }
+
   /// Ends the open first upload of [scope], when [installationId] holds it:
   /// the contest's history is then under the ordinary lock rules.
   Future<void> _closeFirstUpload(ContestScopeKey scope, Id installationId) =>
