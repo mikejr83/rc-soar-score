@@ -6,6 +6,7 @@ import '../schema/database_profile.dart';
 import 'assignment_markers.dart';
 import 'entity_stores.dart';
 import 'mutation_payload.dart';
+import 'pending_announcements.dart';
 import 'scope_sequence.dart';
 import 'sql_placeholders.dart';
 import 'table_mapper.dart';
@@ -41,6 +42,14 @@ class DriftUnitOfWork implements core.UnitOfWork {
   Future<T> run<T>(Future<T> Function(core.WriteContext context) body) async {
     final context = _Context(this);
     final result = await _db.transaction(() => body(context));
+    final enclosing = pendingAnnouncements;
+    if (enclosing != null) {
+      // Inside a contest score gate this transaction is only a savepoint: the
+      // rows are not committed yet. The gate announces after its commit, and
+      // not at all if it rolls back.
+      enclosing.addAll(context.written);
+      return result;
+    }
     // Told only after the transaction committed, so a listener that starts a
     // sync sees the new mutation records.
     context.written.forEach(_db.announceLocalChange);

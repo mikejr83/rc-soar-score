@@ -522,41 +522,65 @@ void _tests(SliceBackend backend) {
       );
     });
 
-    test('a promotion racing a director entry never mixes the two', () async {
+    Future<core.ScoreEntryResult> directorEntry({required int base}) =>
+        scores.enterOfficialScore(
+          core.Id.parse(_contestId),
+          slotId,
+          clientMutationId: 'director-$base',
+          baseScoreRevision: base,
+          components: {..._goodScore, 'time_flown': 500},
+          reason: 'Checked the logger',
+          actorId: api.director,
+          metadata: meta('director-$base'),
+        );
+
+    Future<List<core.OfficialScore>> history() async => repository
+        .officialScoreRepository
+        .listForPlaceholder((await placeholderOf(1, 1)).id);
+
+    test('a promotion then a director entry on the old revision', () async {
+      await submitFirst();
+
+      await promote();
+      await expectLater(
+        directorEntry(base: 1),
+        throwsA(isA<core.StaleRevisionError>()),
+      );
+
+      final versions = await history();
+      expect(versions, hasLength(1));
+      expect(versions.single.scoreAttemptId, attemptId);
+    });
+
+    test('a director entry then a promotion is stale', () async {
+      await submitFirst();
+
+      await directorEntry(base: 1);
+      await expectLater(promote(), throwsA(isA<core.StaleRevisionError>()));
+
+      final versions = await history();
+      expect(versions, hasLength(1));
+      expect(versions.single.components['time_flown'], 500);
+      expect((await placeholderOf(1, 1)).scoreRevision, 2);
+    });
+
+    test('a promotion and an entry from the same revision: one wins, '
+        'the other is stale', () async {
       await submitFirst();
 
       final outcomes = await Future.wait([
         promote().then<Object>((r) => r, onError: (Object e) => e),
-        scores
-            .enterOfficialScore(
-              core.Id.parse(_contestId),
-              slotId,
-              clientMutationId: 'director-race',
-              baseScoreRevision: 1,
-              components: {..._goodScore, 'time_flown': 500},
-              reason: 'Checked the logger',
-              actorId: api.director,
-              metadata: meta('director-race'),
-            )
-            .then<Object>((r) => r, onError: (Object e) => e),
+        directorEntry(base: 1).then<Object>((r) => r, onError: (Object e) => e),
       ]);
 
-      final placeholder = await placeholderOf(1, 1);
-      final history = await repository.officialScoreRepository
-          .listForPlaceholder(placeholder.id);
-      // Either the promotion went first and the entry corrected it (two
-      // versions), or the entry went first and the promotion was stale (one).
-      final promoted = outcomes[0] is core.ScorePromotionResult;
-      expect(history.map((s) => s.scoreRevision), [
-        for (var i = 2; i < 2 + history.length; i++) i,
-      ]);
-      expect(placeholder.scoreRevision, history.last.scoreRevision);
-      if (promoted) {
-        expect(history.first.scoreAttemptId, attemptId);
-      } else {
-        expect(outcomes[0], isA<core.StaleRevisionError>());
-        expect(history, hasLength(1));
-      }
+      expect(outcomes.whereType<core.StaleRevisionError>(), hasLength(1));
+      final winners = outcomes.where((o) => o is! core.StaleRevisionError);
+      expect(winners, hasLength(1));
+      final versions = await history();
+      expect(versions, hasLength(1));
+      expect((await placeholderOf(1, 1)).scoreRevision, 2);
+      final promotedFirst = outcomes[0] is core.ScorePromotionResult;
+      expect(versions.single.scoreAttemptId == attemptId, promotedFirst);
     });
   });
 
