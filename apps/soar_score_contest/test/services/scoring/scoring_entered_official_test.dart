@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_contest/services/scoring/scoring_completeness.dart';
 import 'package:soar_score_contest/services/scoring/scoring_controller.dart';
 import 'package:soar_score_contest/services/scoring/scoring_row.dart';
@@ -74,4 +75,88 @@ void main() {
       expect((completeness.entered, completeness.official), (2, 0));
     },
   );
+
+  test(
+    'an official version is always entered, whatever the state says',
+    () async {
+      final c = await _open(ScoringServer());
+      final base = _row(c, 1);
+      final row = ScoringRow(
+        assignment: base.assignment,
+        pilot: base.pilot,
+        slot: ScoreSlot(
+          placeholder: ScorePlaceholder(
+            id: Id.create(),
+            contestId: contestId,
+            contestParticipationId: base.assignment.contestParticipationId,
+            assignmentId: base.assignment.id,
+          ),
+          officialScore: OfficialScore(
+            id: Id.create(),
+            contestId: contestId,
+            scorePlaceholderId: Id.create(),
+            scoreAttemptId: Id.create(),
+            scoreRevision: 1,
+            components: flight,
+            setAt: DateTime.utc(2026, 10, 17),
+            setBy: Id.create(),
+            reason: 'seeded',
+          ),
+        ),
+      );
+      expect((row.isEntered, row.isOfficial), (true, true));
+    },
+  );
+
+  test('the score check does not pass a submission without values', () async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(scoringAssignmentId(1, 1), flight)
+      ..seedPendingSubmission(scoringAssignmentId(1, 2), const {});
+    final c = await _open(server);
+    c.runCheck();
+    final findings = c.check!.findings;
+    expect(findings.where((f) => f.rowKey == _row(c, 2).id.value), isNotEmpty);
+    expect(findings.where((f) => f.rowKey == _row(c, 1).id.value), isEmpty);
+  });
+
+  test('a pending flight of a retired pilot is entered, not missed', () async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(scoringAssignmentId(1, 1), flight);
+    final c = await _open(server);
+    final pending = _row(c, 1);
+    final retired = ScoringRow(
+      assignment: pending.assignment,
+      pilot: pending.pilot,
+      slot: pending.slot,
+      retired: true,
+    );
+    expect(retired.isMissed, isFalse);
+    expect(retired.isEntered, isTrue);
+    final unscored = ScoringRow(
+      assignment: pending.assignment,
+      pilot: pending.pilot,
+      slot: null,
+      retired: true,
+    );
+    expect(unscored.isMissed, isTrue);
+  });
+
+  test('a locked group still counts its waiting submissions', () async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(scoringAssignmentId(1, 1), flight)
+      ..seedScore(scoringAssignmentId(1, 2), flight);
+    final c = await _open(server);
+    final locked = [
+      for (final r in c.rows)
+        ScoringRow(
+          assignment: r.assignment,
+          pilot: r.pilot,
+          slot: r.slot,
+          locked: true,
+        ),
+    ];
+    expect(locked.map((r) => r.isEntered), everyElement(isTrue));
+    expect(locked.where((r) => r.isOfficial), hasLength(1));
+    expect(locked.first.status, RowStatus.locked);
+  });
 }

@@ -803,17 +803,24 @@ class ScoringController extends ChangeNotifier {
   // Score check.
 
   void runCheck() {
-    check = runScoreCheck([
-      for (final row in rows.where((r) => !r.isMissed))
+    final inputs = <CheckInput>[];
+    for (final row in rows.where((r) => !r.isMissed)) {
+      final draft = _drafts[row.id];
+      final components = draft?.components ?? row.formComponents;
+      // A waiting submission with no values (its attempt not loaded) is not
+      // an entry.
+      inputs.add(
         CheckInput(
           rowKey: row.id.value,
           pilot: row.pilot.name,
-          components: _drafts[row.id]?.components ?? row.formComponents,
+          components: components,
           entered:
-              row.isEntered ||
-              (_drafts[row.id] != null && !_drafts[row.id]!.isBlank),
+              (row.isEntered && components.isNotEmpty) ||
+              (draft != null && !draft.isBlank),
         ),
-    ]);
+      );
+    }
+    check = runScoreCheck(inputs);
     notifyListeners();
   }
 
