@@ -137,6 +137,59 @@ void _twoConnections(Backend backend) {
     expect(events, ['first-in', 'first-out', 'second-in']);
   });
 
+  test('a wait past the lock timeout is a ContestBusyError, and the '
+      'waiter keeps nothing', () async {
+    final release = Completer<void>();
+    final firstIn = Completer<void>();
+    final holder = withContestScoreGate(first.db, _contestId, () async {
+      firstIn.complete();
+      await release.future;
+    });
+    await firstIn.future;
+
+    var ran = false;
+    await expectLater(
+      withContestScoreGate(second.db, _contestId, () async {
+        ran = true;
+      }, lockTimeout: '200ms'),
+      throwsA(isA<core.ContestBusyError>()),
+    );
+    expect(ran, isFalse);
+
+    release.complete();
+    await holder;
+    // The gate is free again, and the loser's connection is usable.
+    await withContestScoreGate(second.db, _contestId, () async {});
+  });
+
+  test('a deadlock between two contests\' gates is a ContestBusyError for '
+      'one of them', () async {
+    final firstHolds = Completer<void>();
+    final secondHolds = Completer<void>();
+    // Open both before they compete: a first use races on the schema table.
+    await second.db.customSelect('SELECT 1').get();
+
+    Future<Object?> crossing(
+      Installation inst,
+      String mine,
+      String theirs,
+      Completer<void> iHold,
+      Completer<void> theyHold,
+    ) => withContestScoreGate(inst.db, mine, () async {
+      iHold.complete();
+      await theyHold.future;
+      await withContestScoreGate(inst.db, theirs, () async {});
+    }).then<Object?>((_) => null, onError: (Object e) => e);
+
+    final outcomes = await Future.wait([
+      crossing(first, 'deadlock-a', 'deadlock-b', firstHolds, secondHolds),
+      crossing(second, 'deadlock-b', 'deadlock-a', secondHolds, firstHolds),
+    ]);
+
+    expect(outcomes.whereType<core.ContestBusyError>(), hasLength(1));
+    expect(outcomes.where((o) => o == null), hasLength(1));
+  });
+
   test('gates of different contests do not wait for each other', () async {
     final release = Completer<void>();
     final firstIn = Completer<void>();
