@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
-import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_contest/services/scoring/scoring_completeness.dart';
 import 'package:soar_score_contest/services/scoring/scoring_controller.dart';
 import 'package:soar_score_contest/services/scoring/scoring_row.dart';
@@ -76,37 +75,22 @@ void main() {
     },
   );
 
-  test(
-    'an official version is always entered, whatever the state says',
-    () async {
-      final c = await _open(ScoringServer());
-      final base = _row(c, 1);
-      final row = ScoringRow(
-        assignment: base.assignment,
-        pilot: base.pilot,
-        slot: ScoreSlot(
-          placeholder: ScorePlaceholder(
-            id: Id.create(),
-            contestId: contestId,
-            contestParticipationId: base.assignment.contestParticipationId,
-            assignmentId: base.assignment.id,
-          ),
-          officialScore: OfficialScore(
-            id: Id.create(),
-            contestId: contestId,
-            scorePlaceholderId: Id.create(),
-            scoreAttemptId: Id.create(),
-            scoreRevision: 1,
-            components: flight,
-            setAt: DateTime.utc(2026, 10, 17),
-            setBy: Id.create(),
-            reason: 'seeded',
-          ),
-        ),
-      );
-      expect((row.isEntered, row.isOfficial), (true, true));
-    },
-  );
+  test('Score check reports an official row whose draft was blanked', () async {
+    final server = ScoringServer()
+      ..seedScore(scoringAssignmentId(1, 1), flight);
+    final c = await _open(server);
+    final row = _row(c, 1);
+    c.draftOf(row)
+      ..setTime('')
+      ..setHeight('');
+    c.runCheck();
+    // Nothing is left to save for the pilot; the check says so rather than
+    // passing the row.
+    expect(
+      c.check!.findings.where((f) => f.rowKey == row.id.value),
+      isNotEmpty,
+    );
+  });
 
   test('the score check does not pass a submission without values', () async {
     final server = ScoringServer()

@@ -284,6 +284,28 @@ void _tests(Backend backend) {
       },
     );
 
+    test(
+      'the last official entry of a round publishes while a slot waits',
+      () async {
+        await publishFirst();
+
+        // One slot has only a participant submission. The director enters
+        // the rest; the entry that finishes the round publishes, because the
+        // waiting slot already counts as entered.
+        await submitPending(round1.last);
+        for (var i = 0; i < round1.length - 2; i++) {
+          expect(await enter(round1[i], 500 + i), isNull);
+        }
+        expect(await projections(), hasLength(1));
+
+        final published = await enter(round1[round1.length - 2], 590);
+
+        expect(published, isNotNull);
+        expect(published!.view.current!.projectionRevision, 2);
+        expect(published.view.current!.scores, hasLength(round1.length - 1));
+      },
+    );
+
     test('a retried entry publishes once', () async {
       await useMode(core.PublicUpdateMode.automatic);
       await publishFirst();

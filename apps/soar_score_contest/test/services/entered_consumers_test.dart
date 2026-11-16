@@ -55,13 +55,24 @@ void main() {
     expect(score.text[CardField.height], '120');
   });
 
-  test('a review never prints values without a submission', () {
+  test('nothing prints without an official score or a submission', () {
     final slot = scoreSlot(drawnMatrix().assignments.first);
+    // A slot in review whose submission is not loaded has no values.
     final inReview = ScoreSlot(
       placeholder: _pending(slot, inReview: true).placeholder,
     );
     expect(PilotCardsData.scoreOf(inReview, const {}), isNull);
     expect(PilotCardsData.scoreOf(slot, const {}), isNull);
+  });
+
+  test('a slot in review prints the pilot submission as not official', () {
+    final slot = scoreSlot(drawnMatrix().assignments.first);
+    final score = PilotCardsData.scoreOf(
+      _pending(slot, inReview: true),
+      const {},
+    );
+    expect(score, isNotNull);
+    expect(score!.official, isFalse);
   });
 
   test('the workspace counts waiting submissions as scores', () {
@@ -79,5 +90,34 @@ void main() {
       scores: ContestScores(slots: slots, rounds: base.rounds),
     );
     expect(facts.scoreCount, 2);
+  });
+
+  test('the current and frontier group follow entered scores', () {
+    final matrix = drawnMatrix();
+    // Round 1 group 1: pilots 1 and 2 official. Group 2: pilot 3 waiting.
+    final base = scoresFor(matrix, {(1, 1): at(0), (1, 2): at(1)});
+    final slots = [
+      for (final s in base.slots)
+        s.placeholder.assignmentId ==
+                matrix.assignments
+                    .singleWhere(
+                      (a) =>
+                          a.contestParticipationId == participationId(3) &&
+                          a.scheduledRoundId == matrix.rounds.first.id,
+                    )
+                    .id
+            ? _pending(s)
+            : s,
+    ];
+    final facts = WorkspaceFacts.derive(
+      data: workspaceData(matrix: matrix),
+      scores: ContestScores(slots: slots, rounds: base.rounds),
+    );
+    // The waiting submission is the latest accepted score (2026-10-17 15:00
+    // is after the official ones), so group 2 is current and has 1 of 2.
+    expect(facts.latestScore?.groupNumber, 2);
+    expect((facts.currentGroup!.scored, facts.currentGroup!.total), (1, 2));
+    expect(facts.frontierGroup!.groupNumber, 2);
+    expect(facts.scoreCount, 3);
   });
 }

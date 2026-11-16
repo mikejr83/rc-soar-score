@@ -290,14 +290,22 @@ class WorkspaceFacts extends Equatable {
     return null;
   }
 
-  /// The score with the largest `setAt`, with the assignment it belongs to.
-  /// Scores of superseded or cancelled-round assignments are ignored.
   /// Whether the slot has a score entered, official or waiting for the
   /// director, the way the server's round progress counts it.
   static bool _isEntered(ScoreSlot slot) =>
       slot.officialScore != null ||
       slot.placeholder.state != ScorePlaceholderState.notEntered;
 
+  /// When the slot's score was accepted: the official version's `setAt`, else
+  /// the waiting submission's acceptance time. Null when nothing is entered
+  /// or a waiting slot has no attempt.
+  static DateTime? _enteredAt(ScoreSlot slot) =>
+      slot.officialScore?.setAt ?? slot.pendingAttempt?.acceptedAt;
+
+  /// The entered score with the latest acceptance time, with the assignment
+  /// it belongs to. Waiting submissions count, so the current group, the
+  /// frontier and the counts all follow the same entered rule. Scores of
+  /// superseded or cancelled-round assignments are ignored.
   static (LatestScore, MatrixAssignment)? _latestScore(
     ContestScores scores,
     List<MatrixAssignment> assignments,
@@ -307,20 +315,20 @@ class WorkspaceFacts extends Equatable {
     final byId = {
       for (final assignment in assignments) assignment.id: assignment,
     };
-    OfficialScore? best;
+    DateTime? best;
     MatrixAssignment? bestAssignment;
     for (final slot in scores.slots) {
-      final score = slot.officialScore;
+      final at = _enteredAt(slot);
       final assignment = byId[slot.placeholder.assignmentId];
-      if (score == null || assignment == null) {
+      if (at == null || assignment == null) {
         continue;
       }
       if (onlyRoundOrdinal != null &&
           roundById[assignment.scheduledRoundId]!.ordinal != onlyRoundOrdinal) {
         continue;
       }
-      if (best == null || score.setAt.isAfter(best.setAt)) {
-        best = score;
+      if (best == null || at.isAfter(best)) {
+        best = at;
         bestAssignment = assignment;
       }
     }
@@ -332,7 +340,7 @@ class WorkspaceFacts extends Equatable {
       LatestScore(
         roundOrdinal: round.ordinal,
         groupNumber: bestAssignment.group,
-        setAt: best.setAt,
+        setAt: best,
       ),
       bestAssignment,
     );

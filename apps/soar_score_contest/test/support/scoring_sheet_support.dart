@@ -2,11 +2,14 @@ import 'package:flutter/painting.dart';
 import 'package:soar_score_contest/services/reports/pilot_cards/card_columns.dart';
 import 'package:soar_score_contest/services/reports/pilot_cards/pilot_cards_data.dart';
 import 'package:soar_score_contest/services/reports/report_pilot.dart';
+import 'package:soar_score_contest/services/reports/reports_facts.dart';
 import 'package:soar_score_contest/services/reports/scoring_sheet/scoring_sheet_data.dart';
 import 'package:soar_score_contest/services/reports/scoring_sheet/scoring_sheet_options.dart';
+import 'package:soar_score_contest/services/workspace/workspace_facts.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'draw_matrix_support.dart';
+import 'workspace_facts_support.dart';
 
 /// The body of a Letter landscape page between the running header and footer.
 const letterLandscapeBody = Size(1024, 666);
@@ -17,11 +20,27 @@ const letterPortraitBody = Size(784, 906);
 final _facts = factsOfPage(drawnPage());
 
 /// The sheet's options for [filters] on the fixture contest.
-ScoringSheetOptions sheetOptions([Map<String, String> filters = const {}]) =>
-    ScoringSheetOptions.of({
-      ...ScoringSheetOptions.defaults(_facts),
-      ...filters,
-    }, _facts);
+ScoringSheetOptions sheetOptions([
+  Map<String, String> filters = const {},
+  bool withScores = false,
+]) {
+  final facts = withScores ? _scoredFacts : _facts;
+  return ScoringSheetOptions.of({
+    ...ScoringSheetOptions.defaults(facts),
+    ...filters,
+  }, facts);
+}
+
+/// The fixture contest with one official score, so pre-fill is offered.
+final _scoredFacts = () {
+  final page = drawnPage();
+  final scores = scoresFor(page.matrix, {(1, 1): at(0)});
+  return ReportsFacts.derive(
+    data: page,
+    scores: scores,
+    workspace: WorkspaceFacts.derive(data: page, scores: scores),
+  );
+}();
 
 /// A pilot named "Pilot NN, Given N"; [retiredAtRound] is the first round they
 /// no longer fly.
