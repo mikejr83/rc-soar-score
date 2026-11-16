@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/matrix_test_support.dart';
 import '../support/scoring_test_support.dart';
 
 const _flight = {'time_flown': 540, 'launch_height': 120};
@@ -47,7 +48,7 @@ void main() {
   testWidgets('a busy server shows Retry, which asks again', (tester) async {
     final first = scoringAssignmentId(1, 1);
     final server = ScoringServer()..seedPendingSubmission(first, _flight);
-    server.promoteFailures[first] = (503, 'service_busy');
+    server.promoteFailures[first] = (503, 'contest_busy');
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
     await tester.tap(_key('score-mark-official-${first.value}'));
@@ -64,9 +65,37 @@ void main() {
     expect(find.text('Pilot entry'), findsNothing);
   });
 
-  testWidgets('no waiting entry, no Mark all', (tester) async {
+  testWidgets('no waiting entry, no Mark official', (tester) async {
     final server = ScoringServer();
     await pumpScoringPage(tester, server, round: 1, group: 1);
     expect(find.text('Mark official'), findsNothing);
+  });
+
+  testWidgets('a changed entry says to check the new values and mark again', (
+    tester,
+  ) async {
+    final first = scoringAssignmentId(1, 1);
+    final server = ScoringServer()..seedPendingSubmission(first, _flight);
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    server.seedPendingSubmission(first, {'time_flown': 500});
+
+    await tester.tap(_key('score-mark-official-${first.value}'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('mark it official again'), findsOneWidget);
+    expect(_key('score-mark-official-${first.value}'), findsOneWidget);
+  });
+
+  testWidgets('a locked group says entry is closed on the row', (tester) async {
+    final first = scoringAssignmentId(1, 1);
+    final server = ScoringServer(matrix: drawnMatrix(lockedGroups: {(1, 1)}))
+      ..seedPendingSubmission(first, _flight);
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    final button = tester.widget<OutlinedButton>(
+      _key('score-mark-official-${first.value}'),
+    );
+    expect(button.onPressed, isNull);
+    expect(find.text('Entry is closed for this row.'), findsOneWidget);
   });
 }

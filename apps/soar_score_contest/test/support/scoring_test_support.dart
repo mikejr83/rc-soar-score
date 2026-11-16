@@ -185,6 +185,9 @@ class ScoringServer {
   /// Items of the group promotion requests, in order.
   final List<Map<String, dynamic>> promotedItems = [];
 
+  /// The bodies of single-row promotion requests, as sent.
+  final List<Map<String, dynamic>> promotedBodies = [];
+
   /// Stores the adoption of the waiting submission like the server does:
   /// the submission and score revision must be the ones now on the slot.
   (int, Map<String, Object?>) _promote(
@@ -494,6 +497,7 @@ class ScoringServer {
           'recalculation_warning': null,
         });
       }
+      promotedBodies.add(body);
       final segments = path.split('/');
       final (status, answer) = _promote(
         Id.parse(segments[segments.length - 3]),

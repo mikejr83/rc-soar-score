@@ -2999,6 +2999,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Not marked official. The server is busy or could not be reached. Nothing was changed; try again.';
 
   @override
+  String get scoreMarkOfficialRetry => 'Retry';
+
+  @override
+  String get scoreMarkOfficialRefresh => 'Refresh';
+
+  @override
+  String get scoreMarkOfficialReloadFailed =>
+      'Not marked official: the pilot\'s entry or the score changed, and the newer values could not be read. Refresh to see them.';
+
+  @override
   String scoreMarkOfficialFailed(String message) {
     return 'Not marked official. $message';
   }

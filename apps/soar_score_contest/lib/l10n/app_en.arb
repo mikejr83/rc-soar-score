@@ -2840,6 +2840,12 @@
   "@scoreMarkOfficialRefusedNoReason": {"description": "Banner after the server refused Mark official without a reason."},
   "scoreMarkOfficialTryAgain": "Not marked official. The server is busy or could not be reached. Nothing was changed; try again.",
   "@scoreMarkOfficialTryAgain": {"description": "Banner after Mark official met a busy or unreachable server; Retry asks again."},
+  "scoreMarkOfficialRetry": "Retry",
+  "@scoreMarkOfficialRetry": {"description": "Button on the Mark official banner that asks the server again."},
+  "scoreMarkOfficialRefresh": "Refresh",
+  "@scoreMarkOfficialRefresh": {"description": "Button on the Mark official banner that reads the page again."},
+  "scoreMarkOfficialReloadFailed": "Not marked official: the pilot's entry or the score changed, and the newer values could not be read. Refresh to see them.",
+  "@scoreMarkOfficialReloadFailed": {"description": "Banner when Mark official was refused as changed and re-reading the row failed."},
   "scoreMarkOfficialFailed": "Not marked official. {message}",
   "@scoreMarkOfficialFailed": {
     "description": "Banner after Mark official failed with a server error.",

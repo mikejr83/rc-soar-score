@@ -40,7 +40,11 @@ void main() {
       expect(await c.markOfficial(_row(c, 1)), isTrue);
 
       expect(server.entries, isEmpty);
-      expect(server.promotedItems, hasLength(1));
+      // Only what the director saw is sent; the server adopts its own copy.
+      expect(server.promotedBodies.single.keys.toSet(), {
+        'source_attempt_id',
+        'expected_score_revision',
+      });
       expect(_row(c, 1).status, RowStatus.official);
       expect(_row(c, 1).hasPendingSubmission, isFalse);
       expect(c.saveOf(first).kind, RowSaveKind.idle);
@@ -88,6 +92,31 @@ void main() {
       expect(_row(c, 1).status, RowStatus.official);
     });
 
+    test('a change that cannot be re-read offers Refresh', () async {
+      final server = ScoringServer()..seedPendingSubmission(first, a);
+      final c = await _open(server);
+      server.seedPendingSubmission(first, b);
+      server.readFailure = 500;
+
+      expect(await c.markOfficial(_row(c, 1)), isFalse);
+
+      final save = c.saveOf(first);
+      expect(save.kind, RowSaveKind.failed);
+      expect(save.networkProblem, isFalse);
+      expect(save.message, isNull);
+    });
+
+    test('a change that already made it official leaves no banner', () async {
+      final server = ScoringServer()..seedPendingSubmission(first, a);
+      final c = await _open(server);
+      server.seedScore(first, b);
+
+      expect(await c.markOfficial(_row(c, 1)), isFalse);
+
+      expect(c.saveOf(first).kind, RowSaveKind.idle);
+      expect(_row(c, 1).status, RowStatus.official);
+    });
+
     test('a locked slot is refused with the server reason', () async {
       final server = ScoringServer()..seedPendingSubmission(first, a);
       server.promoteFailures[first] = (409, 'score_locked');
@@ -103,7 +132,7 @@ void main() {
 
     test('a busy server (503) means try again, not a failed save', () async {
       final server = ScoringServer()..seedPendingSubmission(first, a);
-      server.promoteFailures[first] = (503, 'service_busy');
+      server.promoteFailures[first] = (503, 'contest_busy');
       final c = await _open(server);
 
       expect(await c.markOfficial(_row(c, 1)), isFalse);

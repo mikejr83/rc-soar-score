@@ -4190,6 +4190,24 @@ abstract class AppLocalizations {
   /// **'Not marked official. The server is busy or could not be reached. Nothing was changed; try again.'**
   String get scoreMarkOfficialTryAgain;
 
+  /// Button on the Mark official banner that asks the server again.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get scoreMarkOfficialRetry;
+
+  /// Button on the Mark official banner that reads the page again.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get scoreMarkOfficialRefresh;
+
+  /// Banner when Mark official was refused as changed and re-reading the row failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not marked official: the pilot\'s entry or the score changed, and the newer values could not be read. Refresh to see them.'**
+  String get scoreMarkOfficialReloadFailed;
+
   /// Banner after Mark official failed with a server error.
   ///
   /// In en, this message translates to:

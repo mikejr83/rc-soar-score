@@ -194,10 +194,14 @@ class ScoreSaveBanner extends StatelessWidget {
           icon: Icons.error_outline,
           text: save.networkProblem
               ? words.scoreMarkOfficialTryAgain
-              : words.scoreMarkOfficialFailed(save.message ?? ''),
+              : save.message == null
+              ? words.scoreMarkOfficialReloadFailed
+              : words.scoreMarkOfficialFailed(save.message!),
           actions: [
             PageBannerAction(
-              save.networkProblem ? 'Retry' : 'Refresh',
+              save.networkProblem
+                  ? words.scoreMarkOfficialRetry
+                  : words.scoreMarkOfficialRefresh,
               save.networkProblem ? onRetry : onRefresh,
               emphasis: PageBannerEmphasis.filled,
               key: ValueKey(

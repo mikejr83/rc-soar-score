@@ -777,8 +777,18 @@ class ScoringController extends ChangeNotifier {
         error.error?.code,
         error.error?.message,
       );
-      if (refusal.changed) await _refreshSlots([row]);
-      _saves[row.id] = refusal;
+      if (!refusal.changed) {
+        _saves[row.id] = refusal;
+      } else if (!await _refreshSlots([row])) {
+        // The newer values could not be read, so the row cannot say to
+        // check them: it offers Refresh instead.
+        _saves[row.id] = const RowSave(RowSaveKind.failed, promotion: true);
+      } else if (_rowOf(row.id)?.hasPendingSubmission ?? false) {
+        _saves[row.id] = refusal;
+      } else {
+        // Another operator already made it official: nothing to ask again.
+        _saves.remove(row.id);
+      }
     } on ApiNetworkError {
       _saves[row.id] = const RowSave(
         RowSaveKind.failed,
@@ -820,7 +830,9 @@ class ScoringController extends ChangeNotifier {
 
   /// Reads the slots of [stale] again and shows their newer values, keeping
   /// whatever the director typed in a row.
-  Future<void> _refreshSlots(List<ScoringRow> stale) async {
+  ///
+  /// Returns false when the read failed and the rows are as they were.
+  Future<bool> _refreshSlots(List<ScoringRow> stale) async {
     try {
       final fresh = await client.scores(contestId);
       final ids = {for (final row in stale) row.id};
@@ -832,10 +844,13 @@ class ScoringController extends ChangeNotifier {
         if (!ids.contains(row.id) || hasEdits(row)) continue;
         _drafts[row.id]?.resetTo(row.savedComponents, shown: _shown(row));
       }
+      return true;
     } on Object {
-      // The row still says it changed; Refresh reads the page again.
+      return false;
     }
   }
+
+  ScoringRow? _rowOf(Id id) => rows.where((r) => r.id == id).firstOrNull;
 
   // History.
 
