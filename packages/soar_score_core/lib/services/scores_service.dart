@@ -30,6 +30,7 @@ import '../repositories/already_stored_error.dart';
 import '../repositories/mutation_metadata.dart';
 import '../repositories/recorded_score.dart';
 import '../repositories/repository.dart';
+import '../repositories/contest_busy_error.dart';
 import '../repositories/stale_revision_error.dart';
 import '../scoring/f5j/f5j_profile.dart';
 import '../scoring/profile/scoring_issue.dart';

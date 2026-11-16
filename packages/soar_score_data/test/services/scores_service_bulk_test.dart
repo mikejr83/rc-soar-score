@@ -9,6 +9,28 @@ import '../support/fixtures.dart';
 
 void main() => forEachBackend(_tests);
 
+/// A contest store whose save is refused as the database does when a lock wait
+/// times out.
+class _BusyContests extends ContestRepository {
+  _BusyContests(super.db);
+
+  @override
+  Future<core.Contest> save(
+    core.Contest contest, {
+    required core.MutationMetadata metadata,
+    core.AuditEvent? audit,
+  }) => throw const core.ContestBusyError();
+}
+
+class _BusyContestRepository extends Repository {
+  _BusyContestRepository(super.database) : _busy = _BusyContests(database);
+
+  final _BusyContests _busy;
+
+  @override
+  ContestRepository get contestRepository => _busy;
+}
+
 /// Bulk entry of scores against the real repositories, on SQLite and
 /// PostgreSQL: one transaction, per-entry refusals, replays and the contest
 /// start.
@@ -244,6 +266,33 @@ void _tests(Backend backend) {
           again.single.result!.contest.lifecycleState,
           core.LifecycleState.running,
         );
+      });
+
+      test('a busy contest while starting it fails the whole request, which '
+          'a repeat then completes', () async {
+        final busy = ScoresService(_BusyContestRepository(inst.db));
+
+        await expectLater(
+          busy.enterOfficialScores(
+            contestId,
+            [bulkEntry(slots[0], 'bulk-0')],
+            actorId: actor,
+            metadata: meta(),
+          ),
+          throwsA(isA<core.ContestBusyError>()),
+        );
+
+        expect(
+          await repository.officialScoreRepository.currentForPlaceholder(
+            (await repository.scorePlaceholderRepository.findForAssignment(
+              slots[0],
+            ))!.id,
+          ),
+          isNull,
+          reason: 'the gate rolled the stored score back',
+        );
+        final again = await enterMany([bulkEntry(slots[0], 'bulk-0')]);
+        expect(again.single.isSaved, isTrue);
       });
 
       test('a second entry for one slot is refused', () async {

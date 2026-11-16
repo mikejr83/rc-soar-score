@@ -178,8 +178,8 @@ class ScoringPageData {
     final rows = rowsOf(round, group).where((r) => !r.isMissed).toList();
     return Completeness.of(
       total: rows.length,
-      scored: rows.where((r) => r.isScored).length,
-      official: rows.where((r) => r.status == RowStatus.official).length,
+      entered: rows.where((r) => r.isEntered).length,
+      official: rows.where((r) => r.isOfficial).length,
       locked: block(round, group) != null && rows.isNotEmpty,
     );
   }
@@ -187,19 +187,19 @@ class ScoringPageData {
   /// How complete [round] is, from every group.
   Completeness roundCompleteness(Round round) {
     var total = 0;
-    var scored = 0;
+    var entered = 0;
     var official = 0;
     var allLocked = round.groupCount > 0;
     for (final group in groupNumbers(round)) {
       final rows = rowsOf(round, group).where((r) => !r.isMissed).toList();
       total += rows.length;
-      scored += rows.where((r) => r.isScored).length;
-      official += rows.where((r) => r.status == RowStatus.official).length;
+      entered += rows.where((r) => r.isEntered).length;
+      official += rows.where((r) => r.isOfficial).length;
       if (block(round, group) == null) allLocked = false;
     }
     return Completeness.of(
       total: total,
-      scored: scored,
+      entered: entered,
       official: official,
       locked: allLocked && total > 0,
     );
@@ -239,12 +239,13 @@ class ScoringPageData {
   );
 
   /// The round and group to open when the route names none: the first group
-  /// that is not completely scored, else the first.
+  /// that is not completely official (a pending submission still needs the
+  /// director), else the first.
   (int round, int group) get firstOpen {
     for (final round in rounds) {
       for (final group in groupNumbers(round)) {
         final c = groupCompleteness(round, group);
-        if (c.total > 0 && c.scored < c.total) return (round.ordinal, group);
+        if (c.total > 0 && c.official < c.total) return (round.ordinal, group);
       }
     }
     final first = rounds.isEmpty ? null : rounds.first;

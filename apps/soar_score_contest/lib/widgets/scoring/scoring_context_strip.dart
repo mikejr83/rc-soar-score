@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/scoring/scoring_completeness.dart';
 import '../../services/scoring/scoring_controller.dart';
-import '../../services/scoring/scoring_row.dart';
 import '../matrix/matrix_colors.dart';
 import 'status_chips.dart';
 
@@ -22,12 +22,8 @@ class ScoringContextStrip extends StatelessWidget {
     final round = controller.currentRound;
     // A retired pilot's unscored flight is not missing, so it is not counted.
     final rows = controller.rows.where((r) => !r.isMissed).toList();
-    final entered = rows.where((r) => r.isScored).length;
-    final official = rows
-        .where(
-          (r) => r.status == RowStatus.official || r.isLocked && r.isScored,
-        )
-        .length;
+    final entered = rows.where((r) => r.isEntered).length;
+    final official = rows.where((r) => r.isOfficial).length;
     final dirty = controller.dirtyCount;
     final block = controller.block;
     final roundState = round == null
@@ -88,7 +84,9 @@ class ScoringContextStrip extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 4),
               child: Text(
-                '$entered of ${rows.length} entered · $official official',
+                AppLocalizations.of(
+                  context,
+                ).scoringEnteredOfficialCount(entered, rows.length, official),
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                   fontFeatures: const [FontFeature.tabularFigures()],

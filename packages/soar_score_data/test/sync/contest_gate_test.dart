@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:postgres/postgres.dart' show ServerException;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/sync/contest_gate.dart';
 import 'package:test/test.dart';
@@ -135,6 +136,108 @@ void _twoConnections(Backend backend) {
     await Future.wait([holder, waiter]);
 
     expect(events, ['first-in', 'first-out', 'second-in']);
+  });
+
+  test('a wait past the lock timeout is a ContestBusyError, and the '
+      'waiter keeps nothing', () async {
+    final release = Completer<void>();
+    final firstIn = Completer<void>();
+    final holder = withContestScoreGate(first.db, _contestId, () async {
+      firstIn.complete();
+      await release.future;
+    });
+    await firstIn.future;
+
+    var ran = false;
+    await expectLater(
+      withContestScoreGate(second.db, _contestId, () async {
+        ran = true;
+      }, lockTimeout: '200ms'),
+      throwsA(isA<core.ContestBusyError>()),
+    );
+    expect(ran, isFalse);
+
+    release.complete();
+    await holder;
+    // The gate is free again, and the loser's connection is usable.
+    await withContestScoreGate(second.db, _contestId, () async {});
+  });
+
+  test('a deadlock between two contests\' gates is a ContestBusyError for '
+      'one of them', () async {
+    final firstHolds = Completer<void>();
+    final secondHolds = Completer<void>();
+    // Open both before they compete: a first use races on the schema table.
+    await second.db.customSelect('SELECT 1').get();
+    await first.db.customStatement(
+      'CREATE TABLE IF NOT EXISTS gate_probe (id integer PRIMARY KEY)',
+    );
+
+    Future<Object?> crossing(
+      Installation inst,
+      String mine,
+      String theirs,
+      Completer<void> iHold,
+      Completer<void> theyHold,
+    ) => withContestScoreGate(inst.db, mine, () async {
+      await inst.db.customStatement(
+        'INSERT INTO gate_probe VALUES (${mine.hashCode})',
+      );
+      iHold.complete();
+      await theyHold.future;
+      await withContestScoreGate(inst.db, theirs, () async {});
+    }).then<Object?>((_) => null, onError: (Object e) => e);
+
+    final outcomes = await Future.wait([
+      crossing(first, 'deadlock-a', 'deadlock-b', firstHolds, secondHolds),
+      crossing(second, 'deadlock-b', 'deadlock-a', secondHolds, firstHolds),
+    ]);
+
+    expect(outcomes.whereType<core.ContestBusyError>(), hasLength(1));
+    expect(outcomes.where((o) => o == null), hasLength(1));
+    expect(
+      await first.db.customSelect('SELECT id FROM gate_probe').get(),
+      hasLength(1),
+      reason: 'only the winner kept its row; the loser rolled back whole',
+    );
+  });
+
+  test('another database error is not a ContestBusyError', () async {
+    await expectLater(
+      withContestScoreGate(first.db, _contestId, () async {
+        await first.db.customSelect('SELECT 1 / 0 AS boom').get();
+      }),
+      throwsA(
+        allOf(isNot(isA<core.ContestBusyError>()), isA<ServerException>()),
+      ),
+    );
+  });
+
+  test('a row-lock timeout inside the gate is a ContestBusyError', () async {
+    await first.db.customStatement(
+      'CREATE TABLE gate_probe (id integer PRIMARY KEY)',
+    );
+    await first.db.customStatement('INSERT INTO gate_probe VALUES (1)');
+    final release = Completer<void>();
+    final locked = Completer<void>();
+    final holder = first.db.transaction(() async {
+      await first.db.customSelect('SELECT id FROM gate_probe FOR UPDATE').get();
+      locked.complete();
+      await release.future;
+    });
+    await locked.future;
+
+    await expectLater(
+      withContestScoreGate(second.db, _contestId, () async {
+        await second.db
+            .customSelect('SELECT id FROM gate_probe FOR UPDATE')
+            .get();
+      }, lockTimeout: '200ms'),
+      throwsA(isA<core.ContestBusyError>()),
+    );
+
+    release.complete();
+    await holder;
   });
 
   test('gates of different contests do not wait for each other', () async {

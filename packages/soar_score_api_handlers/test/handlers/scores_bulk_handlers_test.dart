@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:test/test.dart';
 
@@ -412,6 +414,48 @@ void main() {
 
       expect((await bulk(api, [])).statusCode, 400);
       expect((await bulk(api, List.filled(101, one))).statusCode, 400);
+    });
+
+    test('takes the contest score gate once for the whole request', () async {
+      final api = HandlerHarness(_owner);
+      await drawnContest(api);
+
+      final response = await bulk(api, [
+        entry(await assignmentOfPilot(api, 1), 'bulk-1'),
+        entry(await assignmentOfPilot(api, 2), 'bulk-2'),
+      ]);
+
+      expect(response.statusCode, 200);
+      expect(api.repository.officialScores.gated, [Id.parse(_contestId)]);
+    });
+
+    test('a lock timeout or deadlock is a retryable 503 with nothing '
+        'kept', () async {
+      final api = HandlerHarness(_owner);
+      await drawnContest(api);
+      final entries = [entry(await assignmentOfPilot(api, 1), 'bulk-1')];
+      api.repository.officialScores.gateFailure = const ContestBusyError(
+        retryAfter: Duration(milliseconds: 1500),
+        cause: 'relation score_placeholders lock 55P03',
+      );
+
+      final response = await bulk(api, entries);
+      final body = await api.json(response);
+
+      expect(response.statusCode, 503);
+      expect(response.headers['retry-after'], '2');
+      expect((body['error'] as Map)['code'], 'contest_busy');
+      expect(
+        jsonEncode(body),
+        isNot(anyOf(contains('55P03'), contains('score_placeholders'))),
+        reason: 'the database text stays in the log',
+      );
+      expect(api.repository.officialScores.stored, isEmpty);
+
+      // The same request goes through once the contest is free.
+      api.repository.officialScores.gateFailure = null;
+      expect((await bulk(api, entries)).statusCode, 200);
+      expect(api.repository.officialScores.stored, hasLength(1));
     });
   });
 }
