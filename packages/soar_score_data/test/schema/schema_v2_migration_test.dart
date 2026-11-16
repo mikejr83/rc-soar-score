@@ -109,6 +109,9 @@ void main() => forEachBackend((backend) {
               'ScorePlaceholder',
               'ScoreAttempt',
               'OfficialScore',
+              // A derived row that points at an official score, so the
+              // rebuild of official_scores meets a real referrer.
+              'FlightResult',
               'ImportProvenance',
             };
             final stores = EntityStores.forDatabase(old);
@@ -304,6 +307,13 @@ void main() => forEachBackend((backend) {
                   {...row.data}..remove('selection_origin'),
               ],
               [for (final row in scoresBefore) row.data],
+            );
+            expect(
+              (await upgraded
+                      .customSelect('SELECT COUNT(*) AS n FROM flight_results')
+                      .getSingle())
+                  .read<int>('n'),
+              greaterThan(0),
             );
             expect(
               {for (final row in scoresAfter) row.data['selection_origin']},

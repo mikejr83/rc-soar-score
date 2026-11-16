@@ -180,6 +180,35 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
           'Schema upgrade from $from to $to is not supported.',
         );
       }
+      // Rebuilding official_scores on SQLite drops a table other tables point
+      // at. Foreign keys cannot be switched off inside a transaction, so do
+      // it before one (they are already off while Drift upgrades, but do not
+      // rely on that) and restore them afterwards.
+      final sqlite = executor.dialect == SqlDialect.sqlite;
+      final keysWereOn =
+          sqlite &&
+          (await customSelect(
+            'PRAGMA foreign_keys',
+          ).getSingle()).read<bool>('foreign_keys');
+      if (keysWereOn) await customStatement('PRAGMA foreign_keys = OFF');
+      try {
+        await _upgradeFromVersion1(m);
+        if (sqlite) {
+          final broken = await customSelect('PRAGMA foreign_key_check').get();
+          if (broken.isNotEmpty) {
+            throw StateError(
+              'The upgrade left ${broken.length} broken foreign keys.',
+            );
+          }
+        }
+      } finally {
+        if (keysWereOn) await customStatement('PRAGMA foreign_keys = ON');
+      }
+    },
+  );
+
+  Future<void> _upgradeFromVersion1(Migrator m) async {
+    {
       await transaction(() async {
         final tableLookup = executor.dialect == SqlDialect.sqlite
             ? "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'pilot_import_links'"
@@ -203,8 +232,8 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
           await m.createTable(requestThrottles);
         }
       });
-    },
-  );
+    }
+  }
 
   /// Adds `score_placeholders.current_attempt_id` (unreleased version 2) and
   /// fills it: the attempt behind the current official score, else the
