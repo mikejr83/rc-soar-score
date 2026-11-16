@@ -217,6 +217,10 @@
   "@scoreRejectedOther": {
     "description": "Shown for any other refusal."
   },
+  "scoreFieldRefused": "The server did not accept this value.",
+  "@scoreFieldRefused": {
+    "description": "Shown under a field the server refused when a score was submitted."
+  },
   "unsupportedRoleTitle": "This link is not for scoring yet",
   "@unsupportedRoleTitle": {
     "description": "Heading when an invitation link is valid but for a role this release does not support."

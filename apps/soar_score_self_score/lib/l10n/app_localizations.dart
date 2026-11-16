@@ -352,6 +352,12 @@ abstract class AppLocalizations {
   /// **'The score was not accepted. Ask your contest director.'**
   String get scoreRejectedOther;
 
+  /// Shown under a field the server refused when a score was submitted.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not accept this value.'**
+  String get scoreFieldRefused;
+
   /// Heading when an invitation link is valid but for a role this release does not support.
   ///
   /// In en, this message translates to:
