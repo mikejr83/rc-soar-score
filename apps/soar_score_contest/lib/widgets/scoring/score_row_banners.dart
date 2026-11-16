@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/scoring/row_save.dart';
 import '../page_states/page_banner.dart';
 
@@ -116,6 +117,7 @@ class ScoreSaveBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (save.promotion) return _promotion(context);
     switch (save.kind) {
       case RowSaveKind.stale:
         return _RowBanner(
@@ -172,6 +174,48 @@ class ScoreSaveBanner extends StatelessWidget {
               'Your values are kept.',
           actionLabel: 'Refresh',
           onAction: onRefresh,
+        );
+      case RowSaveKind.idle:
+      case RowSaveKind.saving:
+        return const SizedBox.shrink();
+    }
+  }
+
+  /// What a refused or failed "Mark official" says. Nothing was typed over,
+  /// so there is no Keep mine: the row shows the newer values, or Retry asks
+  /// again.
+  Widget _promotion(BuildContext context) {
+    final words = AppLocalizations.of(context);
+    switch (save.kind) {
+      case RowSaveKind.failed:
+        return _RowBanner(
+          bannerKey: const ValueKey('score-mark-official-failed'),
+          kind: PageBannerKind.alert,
+          icon: Icons.error_outline,
+          text: save.networkProblem
+              ? words.scoreMarkOfficialTryAgain
+              : words.scoreMarkOfficialFailed(save.message ?? ''),
+          actions: [
+            PageBannerAction(
+              save.networkProblem ? 'Retry' : 'Refresh',
+              save.networkProblem ? onRetry : onRefresh,
+              emphasis: PageBannerEmphasis.filled,
+              key: ValueKey(
+                save.networkProblem ? 'score-retry' : 'score-refresh',
+              ),
+            ),
+          ],
+        );
+      case RowSaveKind.refused:
+      case RowSaveKind.stale:
+        return ScoreInlineNote(
+          icon: save.changed ? Icons.sync_problem : Icons.error_outline,
+          kind: save.changed ? PageBannerKind.status : PageBannerKind.alert,
+          text: save.changed
+              ? words.scoreMarkOfficialChanged
+              : save.message == null
+              ? words.scoreMarkOfficialRefusedNoReason
+              : words.scoreMarkOfficialRefused(save.message!),
         );
       case RowSaveKind.idle:
       case RowSaveKind.saving:

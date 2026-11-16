@@ -2815,5 +2815,34 @@
       "total": {"type": "int"},
       "official": {"type": "int"}
     }
+  },
+  "scoreMarkOfficial": "Mark official",
+  "@scoreMarkOfficial": {"description": "Button on a scoring row that accepts the pilot's own entry as the official score."},
+  "scoreMarkOfficialTooltip": "Accept {pilot}'s entry as the official score.",
+  "@scoreMarkOfficialTooltip": {
+    "description": "Tooltip of the Mark official button of a row.",
+    "placeholders": {"pilot": {"type": "String"}}
+  },
+  "scoreMarkOfficialMarking": "Marking…",
+  "@scoreMarkOfficialMarking": {"description": "Label of the Mark official button while the request is out."},
+  "scoreMarkOfficialEdited": "Save or revert your edits first.",
+  "@scoreMarkOfficialEdited": {"description": "Why Mark official is off on a row the director typed over."},
+  "scoreMarkOfficialClosed": "Entry is closed for this row.",
+  "@scoreMarkOfficialClosed": {"description": "Why Mark official is off on a locked row."},
+  "scoreMarkOfficialChanged": "Not marked official: the pilot's entry or the score changed since you opened this row. Check the values shown and mark it official again.",
+  "@scoreMarkOfficialChanged": {"description": "Banner after Mark official was refused because the row changed meanwhile."},
+  "scoreMarkOfficialRefused": "Not marked official: {message}",
+  "@scoreMarkOfficialRefused": {
+    "description": "Banner after the server refused Mark official (for example a locked score).",
+    "placeholders": {"message": {"type": "String"}}
+  },
+  "scoreMarkOfficialRefusedNoReason": "Not marked official: the server refused it.",
+  "@scoreMarkOfficialRefusedNoReason": {"description": "Banner after the server refused Mark official without a reason."},
+  "scoreMarkOfficialTryAgain": "Not marked official. The server is busy or could not be reached. Nothing was changed; try again.",
+  "@scoreMarkOfficialTryAgain": {"description": "Banner after Mark official met a busy or unreachable server; Retry asks again."},
+  "scoreMarkOfficialFailed": "Not marked official. {message}",
+  "@scoreMarkOfficialFailed": {
+    "description": "Banner after Mark official failed with a server error.",
+    "placeholders": {"message": {"type": "String"}}
   }
 }

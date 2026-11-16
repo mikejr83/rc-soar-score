@@ -2963,4 +2963,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String scoringEnteredOfficialCount(int entered, int total, int official) {
     return '$entered of $total entered · $official official';
   }
+
+  @override
+  String get scoreMarkOfficial => 'Mark official';
+
+  @override
+  String scoreMarkOfficialTooltip(String pilot) {
+    return 'Accept $pilot\'s entry as the official score.';
+  }
+
+  @override
+  String get scoreMarkOfficialMarking => 'Marking…';
+
+  @override
+  String get scoreMarkOfficialEdited => 'Save or revert your edits first.';
+
+  @override
+  String get scoreMarkOfficialClosed => 'Entry is closed for this row.';
+
+  @override
+  String get scoreMarkOfficialChanged =>
+      'Not marked official: the pilot\'s entry or the score changed since you opened this row. Check the values shown and mark it official again.';
+
+  @override
+  String scoreMarkOfficialRefused(String message) {
+    return 'Not marked official: $message';
+  }
+
+  @override
+  String get scoreMarkOfficialRefusedNoReason =>
+      'Not marked official: the server refused it.';
+
+  @override
+  String get scoreMarkOfficialTryAgain =>
+      'Not marked official. The server is busy or could not be reached. Nothing was changed; try again.';
+
+  @override
+  String scoreMarkOfficialFailed(String message) {
+    return 'Not marked official. $message';
+  }
 }

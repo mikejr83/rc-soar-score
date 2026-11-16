@@ -721,6 +721,122 @@ class ScoringController extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Marking official.
+
+  /// Whether the director typed over the form of [row], as opposed to the
+  /// form still holding what the pilot submitted.
+  bool hasEdits(ScoringRow row) {
+    final draft = _drafts[row.id];
+    return draft != null && draft.isDirty && !draft.isUntouchedPrefill;
+  }
+
+  /// Why [row] cannot be marked official now, or null when it can.
+  ///
+  MarkOfficialSkip? markOfficialSkip(ScoringRow row) {
+    if (!row.hasPendingSubmission || row.slot?.pendingAttempt == null) {
+      return MarkOfficialSkip.noSubmission;
+    }
+    if (row.retired) return MarkOfficialSkip.retired;
+    if (block != null || row.isLocked) return MarkOfficialSkip.closed;
+    if (saveOf(row.id).isBusy) return MarkOfficialSkip.busy;
+    if (hasEdits(row)) return MarkOfficialSkip.edited;
+    return null;
+  }
+
+  /// Accepts the pilot's waiting submission of [row] as its official score.
+  /// Returns whether the row is official now (a repeat of an accepted
+  /// adoption counts).
+  ///
+  /// The request names the submission and score revision the director saw, so
+  /// a pilot who changed their entry, or a score saved meanwhile, is refused
+  /// and the row shows the newer values. A busy server (503) is "try again",
+  /// not a failed save.
+  Future<bool> markOfficial(ScoringRow row) async {
+    if (markOfficialSkip(row) != null) return false;
+    final attempt = row.slot!.pendingAttempt!;
+    _saves[row.id] = const RowSave(RowSaveKind.saving, promotion: true);
+    notifyListeners();
+    try {
+      final promoted = await client.promoteScore(
+        contestId,
+        row.id,
+        PromoteScoreRequest(
+          sourceAttemptId: attempt.id.value,
+          expectedScoreRevision: row.baseRevision,
+        ),
+      );
+      _applySaved(row, promoted.entry);
+      recalculationWarning = promoted.entry.recalculationWarning;
+      notifyListeners();
+      await _loadResults();
+      notifyListeners();
+      return true;
+    } on ApiHttpError catch (error) {
+      final refusal = _promotionRefusal(
+        error.statusCode,
+        error.error?.code,
+        error.error?.message,
+      );
+      if (refusal.changed) await _refreshSlots([row]);
+      _saves[row.id] = refusal;
+    } on ApiNetworkError {
+      _saves[row.id] = const RowSave(
+        RowSaveKind.failed,
+        networkProblem: true,
+        promotion: true,
+      );
+    } on Object catch (error) {
+      _saves[row.id] = RowSave(
+        RowSaveKind.failed,
+        message: '$error',
+        promotion: true,
+      );
+    }
+    notifyListeners();
+    return false;
+  }
+
+  static RowSave _promotionRefusal(int? status, String? code, String? message) {
+    if (status == 409 && code == 'stale_revision') {
+      return const RowSave(RowSaveKind.refused, promotion: true, changed: true);
+    }
+    if (status == 503) {
+      // A lock the server could not take in time: nothing was stored.
+      return const RowSave(
+        RowSaveKind.failed,
+        networkProblem: true,
+        promotion: true,
+      );
+    }
+    if (status == 409 || status == 400) {
+      return RowSave(RowSaveKind.refused, message: message, promotion: true);
+    }
+    return RowSave(
+      RowSaveKind.failed,
+      message: message ?? 'The server failed ($status).',
+      promotion: true,
+    );
+  }
+
+  /// Reads the slots of [stale] again and shows their newer values, keeping
+  /// whatever the director typed in a row.
+  Future<void> _refreshSlots(List<ScoringRow> stale) async {
+    try {
+      final fresh = await client.scores(contestId);
+      final ids = {for (final row in stale) row.id};
+      for (final slot in fresh.slots) {
+        if (!ids.contains(slot.placeholder.assignmentId)) continue;
+        data = data!.withSlot(slot);
+      }
+      for (final row in rows) {
+        if (!ids.contains(row.id) || hasEdits(row)) continue;
+        _drafts[row.id]?.resetTo(row.savedComponents, shown: _shown(row));
+      }
+    } on Object {
+      // The row still says it changed; Refresh reads the page again.
+    }
+  }
+
   // History.
 
   // Removal reasons.
@@ -821,4 +937,22 @@ class ScoringController extends ChangeNotifier {
     check = null;
     notifyListeners();
   }
+}
+
+/// Why a row is not marked official.
+enum MarkOfficialSkip {
+  /// No pilot submission waits on the row.
+  noSubmission,
+
+  /// The pilot retired from the round.
+  retired,
+
+  /// Entry is closed or the score is locked.
+  closed,
+
+  /// A save or promotion of the row is in flight.
+  busy,
+
+  /// The director typed over the pilot's values; save or revert first.
+  edited,
 }

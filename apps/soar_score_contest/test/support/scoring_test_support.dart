@@ -175,6 +175,72 @@ class ScoringServer {
     _record(assignmentId, components, revision, reason);
   }
 
+  /// Per slot, a status and code the promotion routes answer instead of
+  /// adopting the submission (for example 503 or 409 `locked`).
+  final Map<Id, (int, String)> promoteFailures = {};
+
+  /// Promotion requests that arrived: a group request counts once.
+  int promoteRequests = 0;
+
+  /// Items of the group promotion requests, in order.
+  final List<Map<String, dynamic>> promotedItems = [];
+
+  /// Stores the adoption of the waiting submission like the server does:
+  /// the submission and score revision must be the ones now on the slot.
+  (int, Map<String, Object?>) _promote(
+    Id assignmentId,
+    String sourceAttemptId,
+    int expectedRevision,
+  ) {
+    promotedItems.add({
+      'assignment_id': assignmentId.value,
+      'source_attempt_id': sourceAttemptId,
+      'expected_score_revision': expectedRevision,
+    });
+    final failure = promoteFailures[assignmentId];
+    if (failure != null) {
+      return (
+        failure.$1,
+        {
+          'error': {
+            'status': failure.$1,
+            'code': failure.$2,
+            'message': 'The adoption was ${failure.$2}.',
+          },
+        },
+      );
+    }
+    final pending = _pendingAttempt(assignmentId);
+    final revision = _score[assignmentId]?.scoreRevision ?? 0;
+    if (pending == null ||
+        pending.id.value != sourceAttemptId ||
+        revision != expectedRevision) {
+      return (
+        409,
+        {
+          'error': {
+            'status': 409,
+            'code': 'stale_revision',
+            'message': 'The slot changed.',
+          },
+        },
+      );
+    }
+    final components = Map<String, Object?>.from(pending.rawComponents);
+    _score[assignmentId] = _official(assignmentId, components, revision + 1);
+    _record(assignmentId, components, revision + 1, 'director_accepted');
+    final result = ScoreEntryResult(
+      officialScore: _score[assignmentId]!,
+      placeholder: _placeholder(assignmentId),
+      contest: matrixServer.contest,
+      calculated: const CalculatedFlight(
+        outcome: FlightOutcome.scored,
+        rawScore: 0,
+      ),
+    ).toJson();
+    return (200, {...result, 'replayed': false});
+  }
+
   final Set<Id> _submitted = {};
   final Set<Id> _inReview = {};
 
@@ -396,6 +462,49 @@ class ScoringServer {
       return _json({
         'error': {'code': 'not_calculated', 'message': 'none'},
       }, 400);
+    }
+    if (request.method == 'POST' && path.endsWith('/scores/official')) {
+      promoteRequests++;
+      if (offlineOnEntry) {
+        throw http.ClientException('offline', request.url);
+      }
+      final body = jsonDecode(request.body) as Map<String, dynamic>;
+      if (path.contains('/groups/')) {
+        return _json({
+          'outcomes': [
+            for (final raw in body['items'] as List<dynamic>)
+              () {
+                final item = raw as Map<String, dynamic>;
+                final id = Id.parse(item['assignment_id'] as String);
+                final (status, answer) = _promote(
+                  id,
+                  item['source_attempt_id'] as String,
+                  item['expected_score_revision'] as int,
+                );
+                return {
+                  'assignment_id': id.value,
+                  if (status == 200)
+                    'result': answer
+                  else
+                    'error': (answer['error']! as Map<String, Object?>),
+                };
+              }(),
+          ],
+          'not_requested': <String>[],
+          'recalculation_warning': null,
+        });
+      }
+      final segments = path.split('/');
+      final (status, answer) = _promote(
+        Id.parse(segments[segments.length - 3]),
+        body['source_attempt_id'] as String,
+        body['expected_score_revision'] as int,
+      );
+      if (status == 200) return _json(answer);
+      final error = (answer['error']! as Map<String, Object?>);
+      return _json({
+        'error': {'code': error['code'], 'message': error['message']},
+      }, status);
     }
     if (request.method == 'POST' && path.endsWith('/scores/bulk')) {
       entryRequests++;
