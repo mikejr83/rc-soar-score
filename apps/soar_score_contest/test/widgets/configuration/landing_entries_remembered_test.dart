@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/collapsible_areas_provider.dart';
 import 'package:soar_score_contest/pages/contest/configuration_page.dart';
@@ -22,6 +23,8 @@ Future<void> _pump(
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   Widget page = const MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
     home: Scaffold(body: ContestConfigurationPage(contestId: configContestId)),
   );
   if (areas != null) {

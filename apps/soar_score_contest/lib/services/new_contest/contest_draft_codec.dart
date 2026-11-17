@@ -197,6 +197,7 @@ class ContestDraftCodec {
     'second_drop': s.secondDrop,
     'review_requests': s.reviewRequests,
     'public_update_mode': s.publicUpdateMode.name,
+    'scores_become_official': s.scoresBecomeOfficial.json,
   };
 
   static ScoringSettings _decodeScoring(Map<String, Object?> map) =>
@@ -214,6 +215,12 @@ class ContestDraftCodec {
         reviewRequests: map['review_requests']! as bool,
         publicUpdateMode: PublicUpdateMode.values.byName(
           map['public_update_mode']! as String,
+        ),
+        // A draft saved before the setting existed takes the default of a
+        // new contest, which step 5 and the summary show.
+        scoresBecomeOfficial: OfficializationMode.values.firstWhere(
+          (mode) => mode.json == map['scores_become_official'],
+          orElse: () => CoreOptions.freshContestScoresBecomeOfficial,
         ),
       );
 

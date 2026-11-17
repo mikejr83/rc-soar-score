@@ -77,6 +77,7 @@ ContestDraft richDraft() {
       secondDrop: 'x',
       reviewRequests: false,
       publicUpdateMode: PublicUpdateMode.roundCompletion,
+      scoresBecomeOfficial: OfficializationMode.endOfGroup,
     ),
     draw: const DrawSettings(
       drawMode: DrawMode.seededManOnMan,

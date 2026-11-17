@@ -82,6 +82,7 @@ Decide whether the wizard takes over the content area inside the shell (rail sti
   - Rounding vs. truncation, plus decimal precision (0–3).
   - Dropped-round policy.
   - Participant score-review requests: on or off.
+  - Scores become official: at end of round (default) / at end of flight group / manually.
   - Public update policy: automatic / on round completion / manual.
 - Say clearly that the contest is created **unpublished and private**. Publishing happens later on the contest configuration page.
 

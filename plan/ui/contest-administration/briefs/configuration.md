@@ -91,6 +91,7 @@ Counts of scoring pilots, other participants, teams, and classes when enabled, w
 
 ### 8. Public updates and reviews
 
+- **Scores become official:** At end of round (the default of a new contest), At end of flight group, or Manually. A contest with no stored value reads Manually. Editable while the contest runs, like the other presentation settings; it does not recalculate results. One line each on when the contest accepts submitted scores.
 - **Public update policy:** Automatic, At round completion (default), or Manual. One line each on when the public site updates.
 - **Review requests:** on/off (participants can request a review of a submitted score).
 
@@ -106,12 +107,12 @@ Configuration no longer draws the matrix. Instead, show a compact **matrix readi
 
 Settings fall into four kinds, and the kind decides what saving does and when the setting can change. Show this per section (a compact label next to the section title, plus per-setting detail where a section mixes kinds), and roll it up in the save bar.
 
-| Kind          | Settings                                                                                           | Before the draw | After the draw, before any score | Running (first score accepted)             | Completed |
-| ------------- | -------------------------------------------------------------------------------------------------- | --------------- | -------------------------------- | ------------------------------------------ | --------- |
-| Structural    | Teams, team protection, roles, draw mode, preliminary rounds, lanes                                | Free            | Allowed; matrix becomes outdated | Fixed                                      | Fixed     |
-| Scoring rules | Discipline options, landing table                                                                  | Free            | Free                             | Fixed (landing table: first landing score) | Fixed     |
-| Recalculating | Group score, rounding, decimal places, drop rounds, tie-breakers, team score count                 | Free            | Free                             | Allowed; results are recalculated          | Fixed     |
-| Presentation  | Classes, models, participant numbers, review requests, public update policy, intended total rounds | Free            | Free                             | Free                                       | Fixed     |
+| Kind          | Settings                                                                                                                   | Before the draw | After the draw, before any score | Running (first score accepted)             | Completed |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- | --------------- | -------------------------------- | ------------------------------------------ | --------- |
+| Structural    | Teams, team protection, roles, draw mode, preliminary rounds, lanes                                                        | Free            | Allowed; matrix becomes outdated | Fixed                                      | Fixed     |
+| Scoring rules | Discipline options, landing table                                                                                          | Free            | Free                             | Fixed (landing table: first landing score) | Fixed     |
+| Recalculating | Group score, rounding, decimal places, drop rounds, tie-breakers, team score count                                         | Free            | Free                             | Allowed; results are recalculated          | Fixed     |
+| Presentation  | Classes, models, participant numbers, review requests, scores become official, public update policy, intended total rounds | Free            | Free                             | Free                                       | Fixed     |
 
 - **Fixed** settings are shown disabled with the reason beside them (for example "Fixed once scoring has started"). Not hidden.
 - **Administration locked:** the whole page is read-only, with one notice at the top and a link to the Workspace control that unlocks it.

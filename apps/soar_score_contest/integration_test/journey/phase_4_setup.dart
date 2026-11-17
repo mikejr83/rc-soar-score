@@ -552,9 +552,15 @@ Future<void> _editConfiguration(WidgetTester tester) async {
   final tiebreaker = toggleValue(tester, 'tiebreaker_enabled');
   await flipToggle(tester, 'tiebreaker_enabled');
 
+  // The wizard's default was saved with the contest. The journey's later
+  // rounds keep pilots' entries waiting for the director, so the director
+  // takes over: scores become official manually.
+  expect(radioValue(tester, 'scores_become_official'), 'EndOfRound');
+  await tapRadio(tester, 'scores_become_official', 'Manually');
+
   // The save bar counts the changes. A contest with no drawn matrix and no
   // scores has nothing to lose, so Save needs no confirmation.
-  expect(find.text('3 unsaved changes'), findsOneWidget);
+  expect(find.text('4 unsaved changes'), findsOneWidget);
   await tapVisible(
     tester,
     find.widgetWithText(FilledButton, 'Save configuration'),
@@ -573,6 +579,7 @@ Future<void> _editConfiguration(WidgetTester tester) async {
   expect(segmentedValue(tester, 'rounding_mode'), newRounding);
   expect(segmentedValue(tester, 'decimal_places'), newDecimals);
   expect(toggleValue(tester, 'tiebreaker_enabled'), !tiebreaker);
+  expect(radioValue(tester, 'scores_become_official'), 'Manual');
   expect(find.text('Discard changes'), findsNothing);
 
   // Saving the configuration never draws the matrix.

@@ -38,6 +38,7 @@ abstract final class SettingKeys {
   static const allowBackToBack = 'allow_back_to_back';
   static const laneMode = 'lane_mode';
 
+  static const scoresBecomeOfficial = 'scores_become_official';
   static const publicUpdateMode = 'public_update_mode';
   static const reviewRequests = 'review_requests_enabled';
 

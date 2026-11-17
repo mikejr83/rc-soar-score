@@ -1,5 +1,8 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
+import '../../l10n/app_localizations_en.dart';
+
 import 'discipline_label.dart';
 import 'discipline_settings.dart';
 import 'section_id.dart';
@@ -14,7 +17,14 @@ class SettingCatalog {
 
   /// The catalog for a contest of [profile]; without a known profile the
   /// discipline section has no options to edit.
-  factory SettingCatalog.forProfile(DisciplineProfileWithRules? profile) {
+  ///
+  /// The texts of the settings that are localized come from [l10n] (English
+  /// when it is not given).
+  factory SettingCatalog.forProfile(
+    DisciplineProfileWithRules? profile, {
+    AppLocalizations? l10n,
+  }) {
+    final text = l10n ?? AppLocalizationsEn();
     final defaults = {
       ..._platformDefaults,
       ...?profile?.profile.defaultOptions,
@@ -297,6 +307,34 @@ class SettingCatalog {
         ],
       ),
       SettingDef(
+        key: SettingKeys.scoresBecomeOfficial,
+        section: SectionId.publicUpdates,
+        kind: SettingKind.present,
+        label: text.scoresBecomeOfficialLabel,
+        help: text.scoresBecomeOfficialHelp,
+        type: SettingType.radio,
+        options: [
+          option(
+            OfficializationMode.endOfRound.json,
+            text.scoresBecomeOfficialEndOfRound,
+            text.scoresBecomeOfficialEndOfRoundHelp,
+            SettingKeys.scoresBecomeOfficial,
+          ),
+          option(
+            OfficializationMode.endOfGroup.json,
+            text.scoresBecomeOfficialEndOfGroup,
+            text.scoresBecomeOfficialEndOfGroupHelp,
+            SettingKeys.scoresBecomeOfficial,
+          ),
+          option(
+            OfficializationMode.manual.json,
+            text.scoresBecomeOfficialManual,
+            text.scoresBecomeOfficialManualHelp,
+            SettingKeys.scoresBecomeOfficial,
+          ),
+        ],
+      ),
+      SettingDef(
         key: SettingKeys.publicUpdateMode,
         section: SectionId.publicUpdates,
         kind: SettingKind.present,
@@ -340,6 +378,9 @@ class SettingCatalog {
   static const _platformDefaults = {
     SettingKeys.drawMode: SettingKeys.standard,
     SettingKeys.publicUpdateMode: 'RoundCompletion',
+    // The default of a new contest; a stored contest without the setting
+    // reads Manually (see CoreOptions.scoresBecomeOfficial).
+    SettingKeys.scoresBecomeOfficial: 'EndOfRound',
   };
 
   static const _details = [
