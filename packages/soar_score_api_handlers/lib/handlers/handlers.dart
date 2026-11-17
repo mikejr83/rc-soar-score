@@ -56,6 +56,13 @@ createHandlers(
   String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
   PromotionIntentPolicy? promotionIntents,
 }) {
+  // One recalculation service for every route that triggers the automatic
+  // officialization, so an installation whose contest syncs never accepts
+  // scores on its own.
+  recalculation ??= RecalculationService.automatic(
+    repository,
+    promotionIntents: promotionIntents,
+  );
   final router = Router()
     ..get(
       '/ping',

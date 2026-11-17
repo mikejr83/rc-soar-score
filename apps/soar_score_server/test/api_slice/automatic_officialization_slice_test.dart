@@ -878,6 +878,65 @@ void _tests(SliceBackend backend) {
     });
   });
 
+  group('on an installation whose contest syncs', () {
+    setUp(() => open('EndOfRound'));
+
+    test('nothing is accepted here; the service decides later', () async {
+      await submit(1, 1);
+      await submit(2, 1);
+      final queuing = createServerHandler(
+        api.database,
+        authMiddleware: fixedPrincipal(Principal(accountId: api.director)),
+        promotionIntents: const _Always(),
+      );
+      // The director enters the last score on the installation: the round is
+      // complete, but the installation leaves the waiting scores as they are.
+      final response = await queuing(
+        Request(
+          'POST',
+          Uri.parse('http://localhost/api/v1/contests/$_contestId/scores/bulk'),
+          body: jsonEncode({
+            'entries': [
+              {
+                'assignment_id': assignmentOf(1, 3)['id'],
+                'client_mutation_id': 'bulk-3',
+                'base_score_revision': 0,
+                'components': _score,
+              },
+            ],
+          }),
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      expect(response.statusCode, 200, reason: await response.readAsString());
+      await expectWaiting(1, 1);
+      await expectWaiting(1, 2);
+      expect(
+        (await officialOf(1, 3))!.selectionOrigin,
+        core.SelectionOrigin.manual,
+      );
+
+      final installation = core.ScoresService(
+        repository,
+        promotionIntents: const _Always(),
+      );
+      final none = await installation.evaluateAutomaticOfficialization(
+        core.Id.parse(_contestId),
+      );
+      expect(none.promoted, isEmpty);
+      await expectWaiting(1, 1);
+
+      // The service, which has no such policy, accepts them on its next
+      // trigger (an accepted sync) as the system.
+      final run = await scores.officializeAndRecalculate(
+        core.Id.parse(_contestId),
+      );
+      expect(run.promoted, hasLength(2));
+      await expectAutomatic(1, 1, core.automaticRoundCompleteReason);
+      await expectAutomatic(1, 2, core.automaticRoundCompleteReason);
+    });
+  });
+
   group('manually', () {
     for (final policy in <String?>['Manual', null]) {
       test(
@@ -898,4 +957,11 @@ void _tests(SliceBackend backend) {
       );
     }
   });
+}
+
+class _Always implements core.PromotionIntentPolicy {
+  const _Always();
+
+  @override
+  Future<bool> queuesPromotions(core.Id contestId) async => true;
 }
