@@ -89,13 +89,39 @@ jobs:
         run: gh run cancel ${{ github.run_id }} --repo ${{ github.repository }} || true
 
   test:
-    name: Test
+    name: Test (${{ matrix.name }})
     needs: quick-checks
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
     permissions:
       contents: read
       actions: write
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: contest-app
+            flags: --scope="soar_score_contest"
+          - name: data-and-server
+            flags: --scope="soar_score_data" --scope="soar_score_server"
+          - name: packages
+            flags: --ignore="soar_score_contest" --ignore="soar_score_data" --ignore="soar_score_server"
+    env:
+      POSTGRES_PASSWORD: dev
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
     steps:
       - uses: actions/checkout@v4
 
@@ -113,17 +139,10 @@ jobs:
         run: melos bootstrap
 
       - name: Test
-        # Runs test/ in every project. The contest app's integration_test/
+        # Runs test/ in scoped projects. The contest app's integration_test/
         # E2E journeys are not run here (they need the Windows desktop app);
         # run them locally with scripts/e2e-contest.ps1.
-        run: melos test -c 3
-
-      - name: Data package and server slice tests against PostgreSQL
-        # Spin up a throwaway postgres:17 container, run the data package
-        # suite and the server's API slice tests against it (SQLite + PostgreSQL groups), then remove the
-        # container even when the tests fail. Without POSTGRES_PASSWORD the
-        # PostgreSQL group is skipped, which is not a pass.
-        run: bash scripts/test-postgres.sh
+        run: melos test ${{ matrix.flags }} -c 2
 
       - name: Cancel the rest of the run
         # Fail fast: stop sibling jobs instead of letting them run to the end.

@@ -368,8 +368,8 @@ To do it all in one step (needs Docker), run the script. It starts a throwaway c
 ./scripts/test-postgres.ps1 -- -n "unit of work"
 ```
 
-CI runs the same flow with `scripts/test-postgres.sh` (a shell port of the
-PowerShell script).
+CI runs the PostgreSQL test group against a `postgres:17` service container
+in the `test (data-and-server)` job.
 
 To manage the server yourself instead:
 
