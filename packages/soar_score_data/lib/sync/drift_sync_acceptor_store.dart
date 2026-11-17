@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../database.dart';
+import '../repositories/unique_violation.dart';
 import '../schema/table_group.dart';
 import '../schema/tables/conflict_records_table.dart';
 import 'assignment_markers.dart';
@@ -40,19 +41,17 @@ class DriftSyncAcceptorStore implements core.SyncAcceptorStore {
 /// foreign-key rule on either backend, else null.
 core.SyncConstraintError? asConstraintError(Object error) {
   if (error is core.SyncConstraintError) return error;
-  final text = '$error'.toLowerCase();
-  if (text.contains('unique constraint') ||
-      text.contains('duplicate key') ||
-      text.contains('23505')) {
-    return core.SyncConstraintError(core.SyncConstraintKind.unique, '$error');
-  }
-  if (text.contains('foreign key') || text.contains('23503')) {
-    return core.SyncConstraintError(
+  return switch (constraintViolationKind(error)) {
+    ConstraintViolationKind.unique => core.SyncConstraintError(
+      core.SyncConstraintKind.unique,
+      '$error',
+    ),
+    ConstraintViolationKind.foreignKey => core.SyncConstraintError(
       core.SyncConstraintKind.foreignKey,
       '$error',
-    );
-  }
-  return null;
+    ),
+    null => null,
+  };
 }
 
 class _DriftSyncAcceptorTransaction implements core.SyncAcceptorTransaction {
