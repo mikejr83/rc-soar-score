@@ -189,6 +189,9 @@ class ScoringServer {
   final Set<Id> queuePromotions = {};
   final Map<Id, Map<String, Object?>> _queued = {};
 
+  /// While true, reading the score list fails (a server error).
+  bool failScoreReads = false;
+
   /// Promotion requests that arrived: a group request counts once.
   int promoteRequests = 0;
 
@@ -476,6 +479,11 @@ class ScoringServer {
       );
     }
     if (request.method == 'GET' && path.endsWith('/scores')) {
+      if (failScoreReads) {
+        return _json({
+          'error': {'code': 'server_error', 'message': 'Failed.'},
+        }, 500);
+      }
       final matrix = matrixServer.matrix!;
       return _json({
         'scores': [

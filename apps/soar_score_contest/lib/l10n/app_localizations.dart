@@ -4343,19 +4343,19 @@ abstract class AppLocalizations {
   /// Why Mark official is off on a row whose adoption is queued for the service.
   ///
   /// In en, this message translates to:
-  /// **'Waiting to sync; the service decides it when this device connects.'**
+  /// **'Queued; the service decides it when this device syncs.'**
   String get scoreMarkOfficialWaiting;
 
   /// Snackbar after Mark official was queued instead of applied.
   ///
   /// In en, this message translates to:
-  /// **'{pilot}\'s entry will be marked official when this device syncs.'**
+  /// **'Mark official for {pilot} is queued and will be reviewed when this device syncs.'**
   String scoreMarkOfficialQueued(String pilot);
 
   /// Line under the status chip of a row whose Mark official is queued until the service decides it.
   ///
   /// In en, this message translates to:
-  /// **'Mark official is waiting to sync'**
+  /// **'Mark official is queued'**
   String get scoreAdoptionWaiting;
 
   /// Row on the sync page: queued changes the service cannot take until it is updated.

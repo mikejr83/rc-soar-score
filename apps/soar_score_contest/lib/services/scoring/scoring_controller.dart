@@ -402,6 +402,20 @@ class ScoringController extends ChangeNotifier {
     _clearRemovalReason(row.id);
   }
 
+  /// Shows [queued] on [row]: the pilot's entry and the score stay as they
+  /// were, and the slot holds the adoption waiting for the service.
+  void _applyQueued(ScoringRow row, PendingPromotion queued) {
+    final slot = row.slot!;
+    data = data!.withSlot(
+      ScoreSlot(
+        placeholder: slot.placeholder,
+        officialScore: slot.officialScore,
+        pendingAttempt: slot.pendingAttempt,
+        pendingPromotion: queued,
+      ),
+    );
+  }
+
   /// Saves one row as its own official revision. Returns whether it saved.
   ///
   /// When the save removed an applied cumulative penalty, any earlier
@@ -797,10 +811,10 @@ class ScoringController extends ChangeNotifier {
       );
       final adopted = promoted.adopted;
       if (adopted == null) {
-        // Queued for the service to decide: nothing changed on this slot yet.
-        // Read it again so the row shows the waiting adoption.
+        // Queued for the service to decide: only the waiting adoption shows.
+        // The receipt carries it, so a failed score read cannot hide it.
         _saves.remove(row.id);
-        await _refreshSlots([row]);
+        _applyQueued(row, promoted.queued!);
         notifyListeners();
         return true;
       }
@@ -912,8 +926,9 @@ class ScoringController extends ChangeNotifier {
             _applySaved(row, promotion.entry);
             promotion.replayed ? replayed++ : adopted++;
           } else if (outcome?.isQueued ?? false) {
-            // Waiting for the service: nothing changed on the row yet.
+            // Waiting for the service: show the adoption from its receipt.
             _saves.remove(row.id);
+            _applyQueued(row, outcome!.queued!);
             waiting.add(row);
           } else if (outcome == null) {
             _saves[row.id] = const RowSave(
@@ -965,8 +980,6 @@ class ScoringController extends ChangeNotifier {
     if (moved.isNotEmpty) {
       changed -= _settleChanged(moved, await _refreshSlots(moved));
     }
-    // Rows queued for the service show their waiting adoption once read.
-    if (waiting.isNotEmpty) await _refreshSlots(waiting);
     if (adopted + replayed > 0) {
       notifyListeners();
       await _loadResults();

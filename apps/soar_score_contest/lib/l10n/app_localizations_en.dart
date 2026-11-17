@@ -3163,15 +3163,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scoreMarkOfficialWaiting =>
-      'Waiting to sync; the service decides it when this device connects.';
+      'Queued; the service decides it when this device syncs.';
 
   @override
   String scoreMarkOfficialQueued(String pilot) {
-    return '$pilot\'s entry will be marked official when this device syncs.';
+    return 'Mark official for $pilot is queued and will be reviewed when this device syncs.';
   }
 
   @override
-  String get scoreAdoptionWaiting => 'Mark official is waiting to sync';
+  String get scoreAdoptionWaiting => 'Mark official is queued';
 
   @override
   String get syncWaitingForNewerService => 'Waiting for a newer service';
