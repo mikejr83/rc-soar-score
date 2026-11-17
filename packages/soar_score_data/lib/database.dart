@@ -227,6 +227,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
         await _addReviewClosure();
         await _addSelectionOrigin(m);
         await _addUploadOpen();
+        await _addAggregateId();
         // Service-only counters (unreleased version 2); IF NOT EXISTS.
         if (profileTables.contains(requestThrottles)) {
           await m.createTable(requestThrottles);
@@ -310,6 +311,23 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     await customStatement(
       'ALTER TABLE official_scores ADD CONSTRAINT official_scores_origin_actor '
       "CHECK ((selection_origin = 'Automatic') = (set_by IS NULL))",
+    );
+  }
+
+  /// Adds `mutation_records.aggregate_id` (unreleased version 2): null for
+  /// every existing record, which is a plain change.
+  Future<void> _addAggregateId() async {
+    final sqlite = executor.dialect == SqlDialect.sqlite;
+    final has = sqlite
+        ? await customSelect(
+            "SELECT 1 AS x FROM pragma_table_info('mutation_records') WHERE name = 'aggregate_id'",
+          ).get()
+        : await customSelect(
+            "SELECT 1 AS x FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'mutation_records' AND column_name = 'aggregate_id'",
+          ).get();
+    if (has.isNotEmpty) return;
+    await customStatement(
+      'ALTER TABLE mutation_records ADD COLUMN aggregate_id TEXT',
     );
   }
 

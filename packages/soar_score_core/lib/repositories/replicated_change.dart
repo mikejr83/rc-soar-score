@@ -13,6 +13,7 @@ class ReplicatedChange extends Equatable {
     required this.revision,
     required this.payload,
     this.isDelete = false,
+    this.aggregateId,
   });
 
   final SyncScopeKey scope;
@@ -31,6 +32,9 @@ class ReplicatedChange extends Equatable {
 
   final bool isDelete;
 
+  /// Changes with the same aggregate are applied together.
+  final Id? aggregateId;
+
   @override
   List<Object?> get props => [
     scope,
@@ -40,5 +44,6 @@ class ReplicatedChange extends Equatable {
     revision,
     payload,
     isDelete,
+    aggregateId,
   ];
 }

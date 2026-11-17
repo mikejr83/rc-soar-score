@@ -31,6 +31,10 @@ SyncInfoDto _$SyncInfoDtoFromJson(Map<String, dynamic> json) => $checkedCreate(
         'server_time',
         (v) => DateTime.parse(v as String),
       ),
+      capabilities: $checkedConvert(
+        'capabilities',
+        (v) => (v as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      ),
     );
     return val;
   },
@@ -50,4 +54,5 @@ Map<String, dynamic> _$SyncInfoDtoToJson(SyncInfoDto instance) =>
       'min_schema_version': instance.minSchemaVersion,
       'max_schema_version': instance.maxSchemaVersion,
       'server_time': instance.serverTime.toIso8601String(),
+      'capabilities': instance.capabilities,
     };

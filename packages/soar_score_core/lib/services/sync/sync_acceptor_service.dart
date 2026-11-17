@@ -5,6 +5,8 @@ import '../../enums/mutation_outcome.dart';
 import '../../errors/forbidden_error.dart';
 import '../../errors/sync_refusal.dart';
 import '../../models/id.dart';
+import '../../models/shared/versioned_payload.dart';
+import '../../repositories/recorded_score.dart';
 import '../../models/sync/installation.dart';
 import '../../models/sync/mutation_record.dart';
 import '../../models/sync/sync_cursor.dart';
@@ -21,6 +23,9 @@ import 'mutation_payloads.dart';
 import 'mutation_processor.dart';
 import '../recalculation/recalculation_service.dart';
 import 'mutation_result.dart';
+import 'promotion_operation.dart';
+import '../scores_service.dart';
+import 'sync_log.dart';
 import 'sync_entity_catalog.dart';
 import 'sync_exchange.dart';
 import 'sync_scope_ids.dart';
@@ -31,6 +36,9 @@ import 'sync_versions.dart';
 ///
 /// Specified in `plan/architecture-requirements/sync-protocol.md`. The
 /// service is domain logic; the routes only translate to and from the wire.
+/// The most records of one aggregate a page may add past its size.
+const _aggregateLimit = 1000;
+
 class SyncAcceptorService {
   SyncAcceptorService(
     this._repository, {
@@ -60,13 +68,25 @@ class SyncAcceptorService {
 
   // Built on first use, so building the service does not touch the store.
   late final SyncAcceptorStore _store = _repository.syncAcceptorStore;
-  late final MutationProcessor _processor = MutationProcessor(_store);
+  late final SyncLog _log = SyncLog();
+  late final MutationProcessor _processor = MutationProcessor(
+    _store,
+    log: _log,
+    promotion: PromotionOperation(
+      _store,
+      ScoresService(_repository, clock: _clock, newId: _newId),
+      _log,
+    ),
+  );
   late final ConflictResolver _resolver = ConflictResolver(
     _store,
     _clock,
     _newId,
   );
   final KeyedLock _locks = KeyedLock();
+
+  /// The optional operations this service implements, for `GET /sync/info`.
+  List<String> get capabilities => const [SyncCapabilities.promoteScore];
 
   /// The service's clock, for `GET /sync/info`.
   DateTime get serverTime => _clock();
@@ -273,8 +293,21 @@ class SyncAcceptorService {
       after,
       limit: pageSize + 1,
     );
-    final more = records.length > pageSize;
-    final page = more ? records.sublist(0, pageSize) : records;
+    var more = records.length > pageSize;
+    var page = more ? records.sublist(0, pageSize) : records;
+    final tail = page.isEmpty ? null : page.last.aggregateId;
+    if (more && tail != null) {
+      // Never split an aggregate: its records all belong to this page, which
+      // may then run past the page size.
+      final rest = await tx.acceptedAfter(
+        ctx.scope,
+        page.last.sequence!,
+        limit: _aggregateLimit + 1,
+      );
+      final same = rest.takeWhile((r) => r.aggregateId == tail).toList();
+      page = [...page, ...same];
+      more = rest.length > same.length;
+    }
     final changes = [for (final record in page) _change(record)];
 
     final conflicts = [...ctx.conflicts];
@@ -341,6 +374,16 @@ class SyncAcceptorService {
   }
 
   AcceptedChange _change(MutationRecord record) {
+    if (record.entityType == promotionReceiptEntityType) {
+      return AcceptedChange(
+        sequence: record.sequence!,
+        entityType: record.entityType,
+        entityId: record.entityId,
+        revision: 0,
+        payload: VersionedPayload.fromJson(record.payload).data,
+        aggregateId: record.aggregateId,
+      );
+    }
     final payload = MutationPayload.parse(record.payload);
     return AcceptedChange(
       sequence: record.sequence!,
@@ -350,6 +393,7 @@ class SyncAcceptorService {
       payload: payload.isDelete
           ? const {'deleted': true}
           : {...payload.entity, 'supersedes': ?payload.supersedes},
+      aggregateId: record.aggregateId,
     );
   }
 

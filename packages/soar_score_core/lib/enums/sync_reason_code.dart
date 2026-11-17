@@ -23,7 +23,10 @@ enum SyncReasonCode {
   reclaimRequiresSync('reclaim_requires_sync'),
   contestExists('contest_exists'),
   invalidPayload('invalid_payload'),
-  payloadTooLarge('payload_too_large');
+  payloadTooLarge('payload_too_large'),
+  staleSource('stale_source'),
+  unsupportedOperation('unsupported_operation'),
+  operationMismatch('operation_mismatch');
 
   const SyncReasonCode(this.code);
 

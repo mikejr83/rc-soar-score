@@ -10,6 +10,7 @@ class AcceptedChange extends Equatable {
     required this.entityId,
     required this.revision,
     required this.payload,
+    this.aggregateId,
   });
 
   final int sequence;
@@ -22,6 +23,9 @@ class AcceptedChange extends Equatable {
   /// The entity as stored, or `{"deleted": true}` for a deletion.
   final Map<String, Object?> payload;
 
+  /// Groups the changes of one operation; null for a plain change.
+  final Id? aggregateId;
+
   @override
   List<Object?> get props => [
     sequence,
@@ -29,5 +33,6 @@ class AcceptedChange extends Equatable {
     entityId,
     revision,
     payload,
+    aggregateId,
   ];
 }
