@@ -240,4 +240,48 @@ void main() {
 
     expect(c.draftOf(_row(c, 1)).timeText, '9:00');
   });
+
+  for (final bulk in [false, true]) {
+    test('an older refresh does not clear a queued mark official '
+        '(${bulk ? 'Mark all' : 'single'})', () async {
+      final server = ScoringServer()
+        ..seedPendingSubmission(first, a)
+        ..queuePromotions.add(first);
+      final gate = Completer<void>();
+      var hold = false;
+      final c = ScoringController(
+        client: ApiClient(
+          baseUrl: Uri.parse('http://localhost'),
+          httpClient: MockClient((request) async {
+            final answer = await server.handle(request);
+            if (hold && request.method == 'GET') {
+              hold = false;
+              await gate.future;
+            }
+            return answer;
+          }),
+        ),
+        contestId: contestId,
+        round: 1,
+        group: 1,
+      );
+      addTearDown(c.dispose);
+      await c.load();
+
+      hold = true;
+      final refresh = c.refreshAfterSync(); // its read predates the queue
+      await Future<void>.delayed(Duration.zero);
+      if (bulk) {
+        await c.markAllOfficial();
+      } else {
+        await c.markOfficial(_row(c, 1));
+      }
+      expect(_row(c, 1).isAdoptionPending, isTrue);
+      gate.complete();
+      await refresh;
+
+      expect(_row(c, 1).isAdoptionPending, isTrue);
+      expect(c.markOfficialSkip(_row(c, 1)), MarkOfficialSkip.waitingToSync);
+    });
+  }
 }

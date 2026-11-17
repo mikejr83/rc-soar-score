@@ -405,6 +405,9 @@ class ScoringController extends ChangeNotifier {
   /// Shows [queued] on [row]: the pilot's entry and the score stay as they
   /// were, and the slot holds the adoption waiting for the service.
   void _applyQueued(ScoringRow row, PendingPromotion queued) {
+    // A sync read that began before the intent was queued is older than the
+    // page now; the epoch makes it be read again instead of put over this.
+    _savedEpoch++;
     final slot = row.slot!;
     data = data!.withSlot(
       ScoreSlot(
