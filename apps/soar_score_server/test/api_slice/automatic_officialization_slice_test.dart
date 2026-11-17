@@ -750,6 +750,56 @@ void _tests(SliceBackend backend) {
       });
     }
 
+    test(
+      'a team change accepts a complete round that is only waiting',
+      () async {
+        await open('EndOfRound');
+        for (final pilot in [1, 2]) {
+          await submit(pilot, 1);
+        }
+        final broken = _NoResultsRepository(api.database);
+        final access = await core.InvitationService(
+          repository,
+          core.InvitationCodec.fromText(_secret),
+        ).authorize(tokens[3]!, write: true);
+        // The last submission completes the round, but its evaluation fails.
+        await core.ScoresService(broken).submitParticipantScore(
+          access,
+          1,
+          clientMutationId: 'm-3-1',
+          matrixRevision: matrixRevision,
+          components: _score,
+        );
+        for (final pilot in [1, 2, 3]) {
+          await expectWaiting(1, pilot);
+        }
+
+        await api.expectOk(
+          'POST',
+          '/contests/$_contestId/teams',
+          status: 201,
+          body: {
+            'id': '019c0000-0000-7000-8000-000000000711',
+            'name': 'Gators',
+          },
+        );
+        await api.expectOk(
+          'POST',
+          '/contests/$_contestId/team-memberships',
+          status: 201,
+          body: {
+            'id': '019c0000-0000-7000-8000-000000000712',
+            'team_id': '019c0000-0000-7000-8000-000000000711',
+            'contest_participation_id': _participationId(1),
+          },
+        );
+
+        for (final pilot in [1, 2, 3]) {
+          await expectAutomatic(1, pilot, core.automaticRoundCompleteReason);
+        }
+      },
+    );
+
     test('choosing the policy accepts the rounds already complete', () async {
       await open('Manual');
       for (final pilot in [1, 2, 3]) {
