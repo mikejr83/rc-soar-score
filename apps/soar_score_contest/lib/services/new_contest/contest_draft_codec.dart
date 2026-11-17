@@ -218,10 +218,15 @@ class ContestDraftCodec {
         ),
         // A draft saved before the setting existed takes the default of a
         // new contest, which step 5 and the summary show.
-        scoresBecomeOfficial: OfficializationMode.values.firstWhere(
-          (mode) => mode.json == map['scores_become_official'],
-          orElse: () => CoreOptions.freshContestScoresBecomeOfficial,
-        ),
+        scoresBecomeOfficial: map.containsKey('scores_become_official')
+            ? OfficializationMode.values.firstWhere(
+                (mode) => mode.json == map['scores_become_official'],
+                orElse: () => throw FormatException(
+                  'Unknown scores_become_official: '
+                  '${map['scores_become_official']}',
+                ),
+              )
+            : CoreOptions.freshContestScoresBecomeOfficial,
       );
 
   static Map<String, Object?> _encodeDraw(DrawSettings d) => {

@@ -54,6 +54,19 @@ void main() {
     );
   });
 
+  test('an unknown acceptance policy is unreadable, not the default', () {
+    final data = Map<String, Object?>.from(
+      throughJson(ContestDraftCodec.encode(richDraft()))! as Map,
+    );
+    final scoring = Map<String, Object?>.from(data['scoring']! as Map)
+      ..['scores_become_official'] = 'SomeNewMode';
+
+    expect(
+      () => ContestDraftCodec.decode({...data, 'scoring': scoring}),
+      throwsFormatException,
+    );
+  });
+
   test('a new draft round trips and stays blank', () {
     final restored = ContestDraftCodec.decode(
       throughJson(ContestDraftCodec.encode(const ContestDraft())),
