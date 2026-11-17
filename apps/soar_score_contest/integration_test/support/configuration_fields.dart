@@ -37,3 +37,20 @@ Future<void> flipToggle(WidgetTester tester, String key) => tapVisible(
   tester,
   find.descendant(of: settingField(key), matching: find.byType(Switch)),
 );
+
+/// The value selected in the radio setting [key].
+Object? radioValue(WidgetTester tester, String key) => tester
+    .widget<RadioGroup<Object>>(
+      find.descendant(
+        of: settingField(key),
+        matching: find.byType(RadioGroup<Object>),
+      ),
+    )
+    .groupValue;
+
+/// Chooses the option labelled [label] of the radio setting [key].
+Future<void> tapRadio(WidgetTester tester, String key, String label) =>
+    tapVisible(
+      tester,
+      find.descendant(of: settingField(key), matching: find.text(label)),
+    );

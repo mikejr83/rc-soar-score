@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/new_contest/copy_mode.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/interact.dart';
 import '../support/launch_app.dart';
@@ -68,6 +69,20 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
 
   await journey.step('Wizard: scoring defaults and draw options', () async {
     await pumpUntilStep(tester, 'Scoring & publication');
+    // A new contest accepts submitted scores at the end of each round.
+    final official = find.byKey(
+      const ValueKey('scores-become-official-endOfRound'),
+    );
+    await tester.ensureVisible(official);
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<RadioGroup<OfficializationMode>>(
+            find.byType(RadioGroup<OfficializationMode>),
+          )
+          .groupValue,
+      OfficializationMode.endOfRound,
+    );
     await wizardPrimary(tester);
 
     await pumpUntilStep(tester, 'Draw options');
@@ -80,6 +95,8 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
     await wizardPrimary(tester);
     await pumpUntilStep(tester, 'Summary & create');
     expect(find.byKey(const ValueKey('wizard-blocked-reason')), findsNothing);
+    expect(find.text('Scores become official'), findsOneWidget);
+    expect(find.text('At end of round'), findsOneWidget);
   });
 
   await journey.step(

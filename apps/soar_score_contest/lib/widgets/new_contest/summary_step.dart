@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/contest_draft.dart';
 import '../../services/new_contest/copy_mode.dart';
 import '../../services/new_contest/draft_validation.dart';
@@ -40,7 +41,7 @@ class SummaryStep extends StatelessWidget {
 
   static const double _minSectionWidth = 340;
 
-  List<_Section> _sections() {
+  List<_Section> _sections(AppLocalizations l10n) {
     final d = draft;
     final details = DraftValidation.details(d).length;
     final source = d.source;
@@ -188,6 +189,13 @@ class SummaryStep extends StatelessWidget {
         ('Dropped rounds', ScoringLabels.drops(scoring)),
         ('Review requests', scoring.reviewRequests ? 'On' : 'Off'),
         (
+          l10n.scoresBecomeOfficialLabel,
+          ScoringLabels.scoresBecomeOfficial(
+            l10n,
+            scoring.scoresBecomeOfficial,
+          ),
+        ),
+        (
           'Public updates',
           ScoringLabels.publicUpdate(scoring.publicUpdateMode),
         ),
@@ -243,7 +251,7 @@ class SummaryStep extends StatelessWidget {
                 ((constraints.maxWidth + 16) / (_minSectionWidth + 16))
                     .floor()
                     .clamp(1, 3);
-            final sections = _sections();
+            final sections = _sections(AppLocalizations.of(context));
             // Each row of cards is as tall as its tallest card.
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -79,6 +79,7 @@ The wizard displays discipline defaults for review and permits values that are e
 - Rounding or truncation and decimal precision from 0 through 3.
 - Dropped-round policy.
 - Participant score-review requests enabled or disabled.
+- Scores become official: at end of round (the default of a new contest), at end of flight group, or manually. It says when the contest accepts pilots' submitted scores on its own, and is independent of the public update policy below.
 - Public update policy: automatic, round completion, or manual.
 
 The contest is created unpublished with private visibility. Publication and visibility changes are performed on the contest configuration page. This step does not send data to the public site.

@@ -177,6 +177,7 @@ class ContestCreator {
       'models_enabled': draft.has(ParticipantOption.models),
       'participant_numbers_enabled': draft.has(ParticipantOption.pilotNumbers),
       'review_requests_enabled': scoring.reviewRequests,
+      'scores_become_official': scoring.scoresBecomeOfficial.json,
       'public_update_mode': scoring.publicUpdateMode.json,
       'intended_total_rounds': draw.seeded
           ? int.tryParse(draft.roundsText.trim())

@@ -26,6 +26,7 @@ class ScoringSettings {
     required this.secondDrop,
     required this.reviewRequests,
     required this.publicUpdateMode,
+    required this.scoresBecomeOfficial,
   });
 
   /// The defaults for [discipline]: the platform defaults, then the
@@ -53,6 +54,9 @@ class ScoringSettings {
       secondDrop: '12',
       reviewRequests: platform.reviewRequestsEnabled,
       publicUpdateMode: platform.publicUpdateMode,
+      // A new contest accepts submitted scores at the end of each round; a
+      // stored contest without the setting reads Manually instead.
+      scoresBecomeOfficial: CoreOptions.freshContestScoresBecomeOfficial,
     );
   }
 
@@ -72,6 +76,7 @@ class ScoringSettings {
       secondDrop: drops.length > 1 ? '${drops[1]}' : '12',
       reviewRequests: options.reviewRequestsEnabled,
       publicUpdateMode: options.publicUpdateMode,
+      scoresBecomeOfficial: options.scoresBecomeOfficial,
     );
   }
 
@@ -86,6 +91,9 @@ class ScoringSettings {
   final String secondDrop;
   final bool reviewRequests;
   final PublicUpdateMode publicUpdateMode;
+
+  /// When submitted scores become official on their own.
+  final OfficializationMode scoresBecomeOfficial;
 
   /// The rounds after which a round is dropped, when valid.
   List<int>? get dropAfterRounds {
@@ -110,6 +118,7 @@ class ScoringSettings {
     String? secondDrop,
     bool? reviewRequests,
     PublicUpdateMode? publicUpdateMode,
+    OfficializationMode? scoresBecomeOfficial,
   }) => ScoringSettings(
     groupScoreMode: groupScoreMode ?? this.groupScoreMode,
     roundingMode: roundingMode ?? this.roundingMode,
@@ -119,5 +128,6 @@ class ScoringSettings {
     secondDrop: secondDrop ?? this.secondDrop,
     reviewRequests: reviewRequests ?? this.reviewRequests,
     publicUpdateMode: publicUpdateMode ?? this.publicUpdateMode,
+    scoresBecomeOfficial: scoresBecomeOfficial ?? this.scoresBecomeOfficial,
   );
 }

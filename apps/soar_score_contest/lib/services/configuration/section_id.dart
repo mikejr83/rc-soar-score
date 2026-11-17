@@ -62,7 +62,8 @@ enum SectionId {
     title: 'Public updates and reviews',
     short: 'Public updates',
     purpose:
-        'When the public site changes, and whether pilots can ask for reviews.',
+        'When submitted scores become official, when the public site '
+        'changes, and whether pilots can ask for reviews.',
     kinds: [SettingKind.present],
   );
 

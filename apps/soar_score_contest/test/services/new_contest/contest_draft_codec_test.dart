@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_codec.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../support/rich_contest_draft.dart';
 
@@ -30,8 +31,40 @@ void main() {
     expect(models.first.contestIdentifier, 'A7');
     expect(models.last.catalogId, isNull);
     expect(restored.scoring!.secondDrop, 'x');
+    expect(
+      restored.scoring!.scoresBecomeOfficial,
+      OfficializationMode.endOfGroup,
+    );
     expect(restored.draw.seededRounds, '2');
     expect(restored.visitedThrough, 5);
+  });
+
+  test('a draft saved before the setting existed gets the new default', () {
+    final data = Map<String, Object?>.from(
+      throughJson(ContestDraftCodec.encode(richDraft()))! as Map,
+    );
+    final scoring = Map<String, Object?>.from(data['scoring']! as Map)
+      ..remove('scores_become_official');
+
+    final restored = ContestDraftCodec.decode({...data, 'scoring': scoring});
+
+    expect(
+      restored.scoring!.scoresBecomeOfficial,
+      OfficializationMode.endOfRound,
+    );
+  });
+
+  test('an unknown acceptance policy is unreadable, not the default', () {
+    final data = Map<String, Object?>.from(
+      throughJson(ContestDraftCodec.encode(richDraft()))! as Map,
+    );
+    final scoring = Map<String, Object?>.from(data['scoring']! as Map)
+      ..['scores_become_official'] = 'SomeNewMode';
+
+    expect(
+      () => ContestDraftCodec.decode({...data, 'scoring': scoring}),
+      throwsFormatException,
+    );
   });
 
   test('a new draft round trips and stays blank', () {

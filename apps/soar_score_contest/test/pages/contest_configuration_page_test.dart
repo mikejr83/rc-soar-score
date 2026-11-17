@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/contest/configuration_page.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
 import 'package:soar_score_contest/widgets/configuration/fixed_chip.dart';
@@ -27,6 +28,8 @@ Future<void> _pump(
         httpClient: MockClient(handler ?? server.handle),
       ),
       child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: ContestConfigurationPage(contestId: configContestId),
         ),
@@ -153,6 +156,93 @@ void main() {
     expect((server.saved!['config'] as Map)['core']['decimal_places'], 2);
     expect(find.text('Discard changes'), findsNothing);
     expect(server.updatedContest, isNull);
+  });
+
+  testWidgets('scores become official: three options, the default tagged', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      ConfigServer(
+        revision: configRevision(
+          1,
+          core: {'scores_become_official': 'EndOfRound'},
+        ),
+      ),
+    );
+    final field = find.byKey(
+      const ValueKey('field-scores_become_official'),
+      skipOffstage: false,
+    );
+    expect(field, findsOneWidget);
+    for (final title in [
+      'At end of round',
+      'At end of flight group',
+      'Manually',
+    ]) {
+      expect(
+        find.descendant(
+          of: field,
+          matching: find.text(title, skipOffstage: false),
+        ),
+        findsOneWidget,
+      );
+    }
+    // Only the option new contests start with is tagged as the default.
+    expect(
+      find.descendant(
+        of: field,
+        matching: find.text('F5J default', skipOffstage: false),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a contest with no stored setting reads Manually', (
+    tester,
+  ) async {
+    final server = ConfigServer(revision: configRevision(1));
+    await _pump(tester, server);
+
+    final field = find.byKey(const ValueKey('field-scores_become_official'));
+    await _scrollTo(tester, field);
+    final selected = tester
+        .widget<RadioGroup<Object>>(
+          find.descendant(of: field, matching: find.byType(RadioGroup<Object>)),
+        )
+        .groupValue;
+    expect(selected, 'Manual');
+    // Nothing differs from what is stored, so there is nothing to save.
+    expect(find.text('Discard changes'), findsNothing);
+  });
+
+  testWidgets('scores become official is saved with the next revision, also '
+      'while the contest is running', (tester) async {
+    final server = ConfigServer(
+      contest: configContest(state: LifecycleState.running),
+      revision: configRevision(1, core: {'scores_become_official': 'Manual'}),
+    );
+    await _pump(tester, server);
+
+    final choice = find.descendant(
+      of: find.byKey(const ValueKey('field-scores_become_official')),
+      matching: find.text('At end of flight group'),
+    );
+    await _scrollTo(tester, choice);
+    await tester.tap(choice);
+    await tester.pumpAndSettle();
+    await tester.tap(_saveButton);
+    await tester.pumpAndSettle();
+    if (_confirmSave.evaluate().isNotEmpty) {
+      await tester.tap(_confirmSave);
+      await tester.pumpAndSettle();
+    }
+
+    expect(server.saved!['base_revision_number'], 1);
+    expect(
+      (server.saved!['config'] as Map)['core']['scores_become_official'],
+      'EndOfGroup',
+    );
   });
 
   testWidgets('a failed recalculation after saving is reported', (

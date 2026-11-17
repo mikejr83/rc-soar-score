@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/contest_draft.dart';
 import '../../services/new_contest/draft_validation.dart';
 import '../../services/new_contest/scoring_settings.dart';
@@ -40,6 +41,24 @@ abstract final class ScoringLabels {
               'publish.',
       };
 
+  static String scoresBecomeOfficial(
+    AppLocalizations l10n,
+    OfficializationMode mode,
+  ) => switch (mode) {
+    OfficializationMode.endOfRound => l10n.scoresBecomeOfficialEndOfRound,
+    OfficializationMode.endOfGroup => l10n.scoresBecomeOfficialEndOfGroup,
+    OfficializationMode.manual => l10n.scoresBecomeOfficialManual,
+  };
+
+  static String scoresBecomeOfficialDescription(
+    AppLocalizations l10n,
+    OfficializationMode mode,
+  ) => switch (mode) {
+    OfficializationMode.endOfRound => l10n.scoresBecomeOfficialEndOfRoundHelp,
+    OfficializationMode.endOfGroup => l10n.scoresBecomeOfficialEndOfGroupHelp,
+    OfficializationMode.manual => l10n.scoresBecomeOfficialManualHelp,
+  };
+
   static String drops(ScoringSettings settings) =>
       switch (settings.dropPolicy) {
         DropPolicy.disabled => 'Disabled',
@@ -72,6 +91,7 @@ class ScoringStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final settings = draft.scoringSettings;
@@ -336,6 +356,38 @@ class ScoringStep extends StatelessWidget {
                 value: settings.reviewRequests,
                 onChanged: (value) =>
                     set(settings.copyWith(reviewRequests: value)),
+              ),
+            ),
+          ),
+          SettingRow(
+            label: l10n.scoresBecomeOfficialLabel,
+            description: l10n.scoresBecomeOfficialHelp,
+            control: const SizedBox.shrink(),
+            below: RadioGroup<OfficializationMode>(
+              groupValue: settings.scoresBecomeOfficial,
+              onChanged: (value) {
+                if (value != null) {
+                  set(settings.copyWith(scoresBecomeOfficial: value));
+                }
+              },
+              child: Column(
+                children: [
+                  for (final value in OfficializationMode.values)
+                    RadioListTile<OfficializationMode>(
+                      key: ValueKey('scores-become-official-${value.name}'),
+                      value: value,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        ScoringLabels.scoresBecomeOfficial(l10n, value),
+                      ),
+                      subtitle: Text(
+                        ScoringLabels.scoresBecomeOfficialDescription(
+                          l10n,
+                          value,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),

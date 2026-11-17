@@ -68,6 +68,7 @@ abstract final class ConfigurationValues {
       SettingKeys.teamProtection: core.teamProtection,
       SettingKeys.allowBackToBack: core.allowBackToBack,
       SettingKeys.laneMode: core.laneMode.json,
+      SettingKeys.scoresBecomeOfficial: core.scoresBecomeOfficial.json,
       SettingKeys.publicUpdateMode: core.publicUpdateMode.json,
       SettingKeys.reviewRequests: core.reviewRequestsEnabled,
     };
@@ -105,6 +106,8 @@ abstract final class ConfigurationValues {
       ..[SettingKeys.models] = flag(SettingKeys.models)
       ..[SettingKeys.participantNumbers] = flag(SettingKeys.participantNumbers)
       ..[SettingKeys.reviewRequests] = flag(SettingKeys.reviewRequests)
+      ..[SettingKeys.scoresBecomeOfficial] =
+          draft[SettingKeys.scoresBecomeOfficial]
       ..[SettingKeys.publicUpdateMode] = draft[SettingKeys.publicUpdateMode]
       ..[SettingKeys.teamProtection] = teams && flag(SettingKeys.teamProtection)
       ..['drop_after_rounds'] = [

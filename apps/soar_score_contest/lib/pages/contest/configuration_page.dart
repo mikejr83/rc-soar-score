@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../api_client_provider.dart';
 import '../../router.dart';
 import '../../services/configuration/config_phase.dart';
@@ -121,7 +122,10 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
     final draft = ConfigurationDraft.fromSaved(
       contest: data.contest,
       revision: revision,
-      catalog: SettingCatalog.forProfile(data.profile),
+      catalog: SettingCatalog.forProfile(
+        data.profile,
+        l10n: AppLocalizations.of(context),
+      ),
       phase: data.phase,
       lastDrawnRound: data.matrix?.lastRound,
     );

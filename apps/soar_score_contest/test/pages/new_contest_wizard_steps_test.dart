@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/services/new_contest/scoring_settings.dart';
 import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
 import 'package:soar_score_contest/widgets/new_contest/wizard_dot_stepper.dart';
 import 'package:soar_score_contest/widgets/new_contest/wizard_step_list.dart';
+
+import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/new_contest_test_support.dart';
 
@@ -157,6 +160,59 @@ void main() {
     expect(
       find.text('Discipline changed to F3J. Incompatible values were cleared.'),
       findsOneWidget,
+    );
+  });
+
+  testWidgets('changing the discipline keeps the choices it does not own', (
+    tester,
+  ) async {
+    final wizard = await pumpWizard(tester, respond: emptyApi);
+    await fillDetails(tester);
+    await next(tester);
+    await _pick(tester, 'F5J');
+    await wizard.store.update(
+      wizard.store.draft.copyWith(
+        scoring: ScoringSettings.defaultsFor(WizardDiscipline.f5j).copyWith(
+          groupScoreMode: GroupScoreMode.time,
+          reviewRequests: false,
+          publicUpdateMode: PublicUpdateMode.manual,
+          scoresBecomeOfficial: OfficializationMode.manual,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _pick(tester, 'F3J');
+    await tester.tap(find.text('Change and clear'));
+    await tester.pumpAndSettle();
+
+    final scoring = wizard.store.draft.scoringSettings;
+    // The discipline's own values are back to the new defaults.
+    expect(
+      scoring.groupScoreMode,
+      ScoringSettings.defaultsFor(WizardDiscipline.f3j).groupScoreMode,
+    );
+    // The director's other choices are kept, so a contest set to accept
+    // scores manually stays that way.
+    expect(scoring.scoresBecomeOfficial, OfficializationMode.manual);
+    expect(scoring.publicUpdateMode, PublicUpdateMode.manual);
+    expect(scoring.reviewRequests, isFalse);
+  });
+
+  testWidgets('changing the discipline with untouched scoring uses defaults', (
+    tester,
+  ) async {
+    final wizard = await pumpWizard(tester, respond: emptyApi);
+    await fillDetails(tester);
+    await next(tester);
+    await _pick(tester, 'F5J');
+    await _pick(tester, 'F3J');
+    await tester.tap(find.text('Change and clear'));
+    await tester.pumpAndSettle();
+
+    expect(
+      wizard.store.draft.scoringSettings.scoresBecomeOfficial,
+      OfficializationMode.endOfRound,
     );
   });
 

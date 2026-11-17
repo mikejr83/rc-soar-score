@@ -50,6 +50,48 @@ void main() {
     expect(find.text('No longer a traditional ALES contest'), findsNothing);
   });
 
+  testWidgets('scores become official: a new contest starts at end of round', (
+    tester,
+  ) async {
+    final store = await storeAtStep4(
+      participants: [row(0), row(1)],
+      options: const {},
+      visitedThrough: 5,
+    );
+    await pumpWizard(tester, respond: stepApi, store: store);
+
+    expect(find.text('Scores become official'), findsOneWidget);
+    expect(
+      store.draft.scoringSettings.scoresBecomeOfficial,
+      OfficializationMode.endOfRound,
+    );
+
+    final choice = find.byKey(
+      const ValueKey('scores-become-official-endOfGroup'),
+    );
+    await tester.ensureVisible(choice);
+    await tester.tap(choice);
+    await tester.pumpAndSettle();
+    expect(
+      store.draft.scoringSettings.scoresBecomeOfficial,
+      OfficializationMode.endOfGroup,
+    );
+
+    final manual = find.byKey(const ValueKey('scores-become-official-manual'));
+    await tester.ensureVisible(manual);
+    await tester.tap(manual);
+    await tester.pumpAndSettle();
+    expect(
+      store.draft.scoringSettings.scoresBecomeOfficial,
+      OfficializationMode.manual,
+    );
+    // It does not touch the public update policy.
+    expect(
+      store.draft.scoringSettings.publicUpdateMode,
+      PublicUpdateMode.roundCompletion,
+    );
+  });
+
   testWidgets('the precision example follows rounding and places', (
     tester,
   ) async {
@@ -115,6 +157,21 @@ void main() {
     expect(thermal.decimalPlaces, 0);
     expect(thermal.reviewRequests, isTrue);
     expect(thermal.publicUpdateMode, PublicUpdateMode.roundCompletion);
+    for (final discipline in WizardDiscipline.values) {
+      expect(
+        ScoringSettings.defaultsFor(discipline).scoresBecomeOfficial,
+        OfficializationMode.endOfRound,
+      );
+    }
+  });
+
+  test('a copied contest keeps its mode, and none stored reads Manually', () {
+    final stored = ScoringSettings.fromOptions(
+      CoreOptions(scoresBecomeOfficial: OfficializationMode.endOfGroup),
+    );
+    expect(stored.scoresBecomeOfficial, OfficializationMode.endOfGroup);
+    final none = ScoringSettings.fromOptions(CoreOptions.fromMap(const {}));
+    expect(none.scoresBecomeOfficial, OfficializationMode.manual);
   });
 
   test('copied options carry their dropped rounds', () {
