@@ -166,6 +166,19 @@ class ProfileBoundSyncStore implements core.SyncStore {
   );
 
   @override
+  Future<void> reissueIntent(
+    core.Id mutationId, {
+    required String clientMutationId,
+    required core.Id operationId,
+  }) => _binding.write(
+    () => _inner.reissueIntent(
+      mutationId,
+      clientMutationId: clientMutationId,
+      operationId: operationId,
+    ),
+  );
+
+  @override
   Future<int> readCursor(core.SyncScopeKey scope) => _inner.readCursor(scope);
 
   @override

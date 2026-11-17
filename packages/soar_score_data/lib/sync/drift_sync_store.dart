@@ -128,6 +128,30 @@ class DriftSyncStore implements core.SyncStore {
   });
 
   @override
+  Future<void> reissueIntent(
+    core.Id mutationId, {
+    required String clientMutationId,
+    required core.Id operationId,
+  }) => _db.transaction(() async {
+    final row = await _mutations.find(mutationId);
+    final current = row == null ? null : core.MutationRecord.fromJson(row);
+    if (current == null ||
+        current.entityType != core.promotionReceiptEntityType ||
+        current.outcome != core.MutationOutcome.pending) {
+      throw ArgumentError.value(
+        mutationId,
+        'mutationId',
+        'is not a pending promote_score intent',
+      );
+    }
+    await _mutations.upsert({
+      ...current.toJson(),
+      'client_mutation_id': clientMutationId,
+      'entity_id': operationId.value,
+    });
+  });
+
+  @override
   Future<int> readCursor(core.SyncScopeKey scope) async =>
       (await _position(scope))?.lastSyncedSequence ?? 0;
 

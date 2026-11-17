@@ -62,6 +62,21 @@ class FakeSyncStore implements SyncStore {
     });
   }
 
+  @override
+  Future<void> reissueIntent(
+    Id mutationId, {
+    required String clientMutationId,
+    required Id operationId,
+  }) async {
+    log.add('reissue');
+    final index = mutations.indexWhere((m) => m.id == mutationId);
+    mutations[index] = MutationRecord.fromJson({
+      ...mutations[index].toJson(),
+      'client_mutation_id': clientMutationId,
+      'entity_id': operationId.value,
+    });
+  }
+
   /// Settles the pending intent [operationId] as accepted, like a receipt.
   bool settle(Id operationId, int sequence) {
     final index = mutations.indexWhere(

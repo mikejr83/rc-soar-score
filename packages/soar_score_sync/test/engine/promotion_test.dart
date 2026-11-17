@@ -224,10 +224,42 @@ void main() {
     await rig.engine.syncScope(scope);
 
     expect(rig.store.mutations.single.outcome, MutationOutcome.pending);
+    // The older service recorded its refusal under the old ids, so the intent
+    // now carries new ones: a service that learns the operation later cannot
+    // replay that refusal as final.
+    final held = rig.store.mutations.single;
+    expect(held.clientMutationId, isNot('p-1'));
+    expect(held.entityId, isNot(idN(5001)));
     // The next sync does not send it again.
     final before = rig.gateway.exchanges.expand((r) => r.mutations).length;
     await rig.engine.syncScope(scope);
     expect(rig.gateway.exchanges.expand((r) => r.mutations).length, before);
+
+    // The service is upgraded: the same intent goes out under its new ids
+    // and is settled.
+    rig.gateway.info = infoWithPromotion();
+    rig.clock = rig.clock.add(const Duration(minutes: 2));
+    rig.gateway.onExchange = (request) async => request.mutations.isEmpty
+        ? FakeGateway.response()
+        : FakeGateway.response(
+            results: [accepted(held.clientMutationId, 12)],
+            changes: [
+              ...adoption(1, from: 10).take(2),
+              SyncChangeDto(
+                sequence: 12,
+                entityType: promotionReceiptEntityType,
+                entityId: held.entityId,
+                revision: 0,
+                payload: {'version': 1, 'data': {}},
+                aggregateId: idN(8001),
+              ),
+            ],
+          );
+    await rig.engine.syncScope(scope);
+    final resent = rig.gateway.exchanges.expand((r) => r.mutations).last;
+    expect(resent.clientMutationId, held.clientMutationId);
+    expect(resent.entityId, held.entityId);
+    expect(rig.store.mutations.single.outcome, MutationOutcome.accepted);
   });
 
   test(

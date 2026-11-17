@@ -31,6 +31,21 @@ abstract interface class SyncStore {
     String? errorMessage,
   });
 
+  /// Gives the pending `promote_score` intent [mutationId] a new client
+  /// mutation id and a new operation id, nothing else changing.
+  ///
+  /// Used when a service that did not know the operation refused the intent
+  /// and recorded that refusal under the old ids: the refusal was a decision
+  /// about an unknown entity type, not about the slot, so the intent is asked
+  /// again under ids the service has no decision for. Never used on an intent
+  /// the service may have adopted. Throws an [ArgumentError] for a mutation
+  /// that is not a pending `ScorePromotion`.
+  Future<void> reissueIntent(
+    Id mutationId, {
+    required String clientMutationId,
+    required Id operationId,
+  });
+
   /// The highest sequence of [scope] stored locally; 0 before any sync.
   Future<int> readCursor(SyncScopeKey scope);
 

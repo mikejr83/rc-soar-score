@@ -373,4 +373,64 @@ void _tests(Backend backend) {
     // The adoption was never written locally.
     expect(await clientOfficials(), isEmpty);
   });
+
+  test('a reissued intent keeps its request and gets ids the service has not decided', () async {
+    final intent = await queue();
+    final old = (await intents()).single;
+
+    // A service that did not know the operation refused and recorded it.
+    final unknown = SyncMutation(
+      id: old.id,
+      clientMutationId: old.clientMutationId,
+      entityType: old.entityType,
+      entityId: old.entityId,
+      authority: old.authority,
+      clientTime: old.clientTime,
+      payload: {
+        'version': 1,
+        'data': {
+          ...((old.payload['data']! as Map).cast<String, Object?>()),
+          'operation': 'not_a_known_operation',
+        },
+      },
+    );
+    final refused = (await harness.exchange(
+      scope,
+      mutations: [unknown],
+    )).results.single;
+    expect(refused.outcome, core.MutationOutcome.rejected);
+
+    final newOperation = core.Id.create();
+    await harness.client.syncStore.reissueIntent(
+      old.id,
+      clientMutationId: 'reissued-1',
+      operationId: newOperation,
+    );
+
+    final after = (await intents()).single;
+    expect(after.id, old.id);
+    expect(after.clientMutationId, 'reissued-1');
+    expect(after.entityId, newOperation);
+    expect(after.payload, old.payload);
+    expect(
+      (await harness.clientRepository.promotionIntentRepository
+              .pendingForAssignment(contestId, slot.assignmentId))!
+          .sourceAttemptId,
+      intent.sourceAttemptId,
+    );
+    // The service has no decision for the new ids: it adopts.
+    final out = await sendIntents();
+    expect(out.results.single.outcome, core.MutationOutcome.accepted);
+  });
+
+  test('only a pending intent can be reissued', () async {
+    await expectLater(
+      harness.client.syncStore.reissueIntent(
+        core.Id.create(),
+        clientMutationId: 'x',
+        operationId: core.Id.create(),
+      ),
+      throwsArgumentError,
+    );
+  });
 }

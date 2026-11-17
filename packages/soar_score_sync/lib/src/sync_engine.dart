@@ -571,7 +571,18 @@ class SyncEngine {
         // _settlePromotions); a refusal is final, unless the service turns
         // out not to know the operation.
         if (result.outcome == MutationOutcome.accepted) continue;
-        if (await _promotionUnknownToService(result)) continue;
+        if (await _promotionUnknownToService(result)) {
+          // The older service recorded its refusal under these ids. It was a
+          // decision about an entity type it did not know, never about the
+          // slot, so a service that learns the operation later must not
+          // replay it as final: the intent is asked again under new ids.
+          await _store.reissueIntent(
+            mutation.id,
+            clientMutationId: Id.create().value,
+            operationId: Id.create(),
+          );
+          continue;
+        }
       }
       switch (result.outcome) {
         case MutationOutcome.accepted:
