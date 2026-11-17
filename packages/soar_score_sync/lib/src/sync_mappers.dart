@@ -25,6 +25,7 @@ ReplicatedChange changeFromDto(SyncScopeKey scope, SyncChangeDto change) =>
       revision: change.revision,
       payload: change.payload,
       isDelete: change.payload['deleted'] == true,
+      aggregateId: change.aggregateId,
     );
 
 /// The wire scope of [scope]. System data has no exchange scope.

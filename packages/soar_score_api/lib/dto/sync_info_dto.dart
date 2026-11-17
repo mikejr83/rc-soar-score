@@ -12,6 +12,7 @@ class SyncInfoDto {
     required this.minSchemaVersion,
     required this.maxSchemaVersion,
     required this.serverTime,
+    this.capabilities = const [],
   });
 
   factory SyncInfoDto.fromJson(Map<String, dynamic> json) =>
@@ -23,6 +24,14 @@ class SyncInfoDto {
   final int minSchemaVersion;
   final int maxSchemaVersion;
   final DateTime serverTime;
+
+  /// The optional operations the service implements (`promote_score`). A
+  /// client sends an operation only when it is listed here.
+  @JsonKey(defaultValue: <String>[])
+  final List<String> capabilities;
+
+  /// Whether the service implements [capability].
+  bool supports(String capability) => capabilities.contains(capability);
 
   /// Whether a client at these versions can sync.
   bool accepts({required int protocol, required int schema}) =>

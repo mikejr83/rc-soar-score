@@ -231,6 +231,22 @@ class _Context implements core.WriteContext {
   }
 
   @override
+  Future<void> recordOperation({
+    required String entityType,
+    required core.Id entityId,
+    required core.Id contestId,
+    required Map<String, Object?> payload,
+    required core.MutationMetadata metadata,
+  }) => _recordMutation(
+    entityType: entityType,
+    entityId: entityId,
+    scope: (contestId: contestId, ownerAccountId: null),
+    baseRevision: null,
+    metadata: metadata,
+    payload: payload,
+  );
+
+  @override
   Future<void> removeAssignment(
     core.MatrixAssignment assignment, {
     required core.MutationMetadata metadata,
@@ -397,6 +413,7 @@ class _Context implements core.WriteContext {
       clientTime: metadata.clientTime,
       payload: payload,
       dependsOnMutationId: metadata.dependsOnMutationId,
+      aggregateId: metadata.aggregateId,
       sequence: sequence,
       outcome: accepted
           ? core.MutationOutcome.accepted

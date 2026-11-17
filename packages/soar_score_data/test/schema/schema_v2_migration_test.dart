@@ -43,6 +43,11 @@ class _Version1Database extends SoarScoreDatabase {
           throw StateError('Unrecognized snapshot statement: $sql');
         if (tables.contains(table)) await m.database.customStatement(sql);
       }
+      // The test writes rows through the current model, which has the
+      // aggregate column; the test drops it again before upgrading.
+      await m.database.customStatement(
+        'ALTER TABLE mutation_records ADD COLUMN aggregate_id TEXT',
+      );
     },
     beforeOpen: (_) async {
       if (executor.dialect == SqlDialect.sqlite) {
@@ -205,6 +210,10 @@ void main() => forEachBackend((backend) {
                         .getSingle())
                     .read<int>('n');
             expect(before, greaterThan(0));
+            // Back to the genuine version 1 shape: the upgrade adds the column.
+            await old.customStatement(
+              'ALTER TABLE mutation_records DROP COLUMN aggregate_id',
+            );
             await old.customStatement(
               'CREATE TABLE pilot_import_links (unexpected TEXT)',
             );
@@ -230,6 +239,9 @@ void main() => forEachBackend((backend) {
               profile: databaseProfile,
             );
             openDatabase = stillOld;
+            await stillOld.customStatement(
+              'ALTER TABLE mutation_records ADD COLUMN aggregate_id TEXT',
+            );
             expect(
               (await Repository(stillOld).participantProfileRepository
                       .findById(participantId))
@@ -276,6 +288,9 @@ void main() => forEachBackend((backend) {
                 metadata: metadata(),
               );
             }
+            await stillOld.customStatement(
+              'ALTER TABLE mutation_records DROP COLUMN aggregate_id',
+            );
             await stillOld.close();
             openDatabase = null;
 
@@ -295,6 +310,16 @@ void main() => forEachBackend((backend) {
               (await repository.contestRepository.findById(oldContest.id))
                   ?.name,
               'Preserved contest',
+            );
+            expect(
+              (await upgraded
+                      .customSelect(
+                        'SELECT COUNT(*) AS n FROM mutation_records '
+                        'WHERE aggregate_id IS NOT NULL',
+                      )
+                      .getSingle())
+                  .read<int>('n'),
+              0,
             );
             final scoresAfter = await upgraded
                 .customSelect('SELECT * FROM official_scores ORDER BY id')

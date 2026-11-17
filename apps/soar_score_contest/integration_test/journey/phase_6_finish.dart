@@ -120,9 +120,7 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
       expect(director.statusCode, 200);
       final publication = jsonDecode(director.body) as Map<String, dynamic>;
       final id = publication['publication_id'] as String;
-      final unlisted = await http.get(
-        Uri.parse('$_apiBase/public/publications/$id'),
-      );
+      final unlisted = await _publicCopy(id);
       expect(unlisted.statusCode, 200);
       final copy = jsonDecode(unlisted.body) as Map<String, dynamic>;
       expect(copy['visibility'], 'Unlisted');
@@ -138,9 +136,7 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
       await pumpUntilFound(tester, _key('public-dialog'));
       await tester.tap(_key('public-dialog-confirm'));
       await pumpUntilFound(tester, _key('publication-request-delisting'));
-      final published = await http.get(
-        Uri.parse('$_apiBase/public/publications/$id'),
-      );
+      final published = await _publicCopy(id);
       expect(published.statusCode, 200);
       expect(
         (jsonDecode(published.body) as Map<String, dynamic>)['visibility'],
@@ -155,9 +151,7 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
       await pumpUntilFound(tester, _key('publish-dialog'));
       await tester.tap(_key('publish-dialog-confirm'));
       await pumpUntilFound(tester, find.text('Results published.'));
-      final updated = await http.get(
-        Uri.parse('$_apiBase/public/publications/$id'),
-      );
+      final updated = await _publicCopy(id);
       expect(updated.statusCode, 200);
       expect(
         (jsonDecode(updated.body)
@@ -256,3 +250,11 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
     nativeOnly: true,
   );
 }
+
+/// The public copy of publication [id], read past the browser's cache: public
+/// answers may be cached for 30 seconds, and this journey changes the copy
+/// between reads of the same address.
+Future<http.Response> _publicCopy(String id) => http.get(
+  Uri.parse('$_apiBase/public/publications/$id'),
+  headers: const {'cache-control': 'no-cache'},
+);

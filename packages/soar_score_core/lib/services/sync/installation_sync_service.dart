@@ -100,6 +100,23 @@ class InstallationSyncService {
     required Id contestId,
     required Id installationId,
     required ActivationKind kind,
+  }) => _repository.officialScoreRepository.withContestGate(
+    // The contest's score gate serializes this with a promotion decided for
+    // the contest, which checks the activation under the same gate.
+    contestId,
+    () => _activate(
+      accountId: accountId,
+      contestId: contestId,
+      installationId: installationId,
+      kind: kind,
+    ),
+  );
+
+  Future<InstallationActivation> _activate({
+    required Id accountId,
+    required Id contestId,
+    required Id installationId,
+    required ActivationKind kind,
   }) => _store.transaction((tx) async {
     final contest = await tx.findEntity('Contest', contestId);
     if (contest == null) {

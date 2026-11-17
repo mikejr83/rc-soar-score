@@ -1,3 +1,4 @@
+import '../models/id.dart';
 import '../models/landing/landing_table.dart';
 import '../models/landing/landing_table_with_results.dart';
 import '../models/matrix/matrix_assignment.dart';
@@ -26,6 +27,18 @@ abstract interface class WriteContext {
   /// Throws an `AlreadyStoredError` if an entity with the same id is stored.
   Future<T> append<T extends AppendOnly>(
     T entity, {
+    required MutationMetadata metadata,
+  });
+
+  /// Records an operation that changes no entity by itself (a score
+  /// promotion's receipt): one `MutationRecord` for [entityType] and
+  /// [entityId] with [payload], in the surrounding transaction. Joins the
+  /// scope [contestId] on the service like any other write.
+  Future<void> recordOperation({
+    required String entityType,
+    required Id entityId,
+    required Id contestId,
+    required Map<String, Object?> payload,
     required MutationMetadata metadata,
   });
 

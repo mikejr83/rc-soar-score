@@ -28,6 +28,7 @@ void main() {
     expect(json['protocol_version'], 1);
     expect(json['min_schema_version'], 1);
     expect(json['max_schema_version'], 1);
+    expect(json['capabilities'], ['promote_score']);
   });
 
   test('a protocol outside the range is a 426 with its code', () async {

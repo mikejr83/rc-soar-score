@@ -1,1 +1,2 @@
 contest_lifecycle_journey_test.dart
+hidden_areas_test.dart

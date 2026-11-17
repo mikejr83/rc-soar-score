@@ -58,6 +58,7 @@ void addSyncRoutes(
         minSchemaVersion: versions.minSchemaVersion,
         maxSchemaVersion: versions.maxSchemaVersion,
         serverTime: acceptor.serverTime,
+        capabilities: acceptor.capabilities,
       ).toJson(),
     ),
   );
@@ -262,6 +263,7 @@ SyncMutationResult _resultOf(MutationResult r) => SyncMutationResult(
   reasonCode: r.reasonCode,
   currentRevision: r.currentRevision,
   dependsOn: r.dependsOn,
+  replayed: r.replayed ? true : null,
 );
 
 SyncChangeDto _changeOf(AcceptedChange c) => SyncChangeDto(
@@ -270,6 +272,7 @@ SyncChangeDto _changeOf(AcceptedChange c) => SyncChangeDto(
   entityId: c.entityId,
   revision: c.revision,
   payload: c.payload,
+  aggregateId: c.aggregateId,
 );
 
 FirstUploadPhase? _firstUploadOf(String? wire) {

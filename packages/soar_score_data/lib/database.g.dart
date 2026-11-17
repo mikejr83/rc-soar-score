@@ -34791,6 +34791,17 @@ class $MutationRecordsTable extends MutationRecords
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _aggregateIdMeta = const VerificationMeta(
+    'aggregateId',
+  );
+  @override
+  late final GeneratedColumn<String> aggregateId = GeneratedColumn<String>(
+    'aggregate_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -34813,6 +34824,7 @@ class $MutationRecordsTable extends MutationRecords
     reasonCode,
     errorMessage,
     dependsOnMutationId,
+    aggregateId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -34986,6 +34998,15 @@ class $MutationRecordsTable extends MutationRecords
         ),
       );
     }
+    if (data.containsKey('aggregate_id')) {
+      context.handle(
+        _aggregateIdMeta,
+        aggregateId.isAcceptableOrUnknown(
+          data['aggregate_id']!,
+          _aggregateIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -35082,6 +35103,10 @@ class $MutationRecordsTable extends MutationRecords
         DriftSqlType.string,
         data['${effectivePrefix}depends_on_mutation_id'],
       ),
+      aggregateId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}aggregate_id'],
+      ),
     );
   }
 
@@ -35115,6 +35140,10 @@ class MutationRecordData extends DataClass
   final String? reasonCode;
   final String? errorMessage;
   final String? dependsOnMutationId;
+
+  /// Groups the records one operation wrote (a score promotion); pages of
+  /// changes never split a group.
+  final String? aggregateId;
   const MutationRecordData({
     required this.id,
     this.contestId,
@@ -35136,6 +35165,7 @@ class MutationRecordData extends DataClass
     this.reasonCode,
     this.errorMessage,
     this.dependsOnMutationId,
+    this.aggregateId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -35183,6 +35213,9 @@ class MutationRecordData extends DataClass
     }
     if (!nullToAbsent || dependsOnMutationId != null) {
       map['depends_on_mutation_id'] = Variable<String>(dependsOnMutationId);
+    }
+    if (!nullToAbsent || aggregateId != null) {
+      map['aggregate_id'] = Variable<String>(aggregateId);
     }
     return map;
   }
@@ -35233,6 +35266,9 @@ class MutationRecordData extends DataClass
       dependsOnMutationId: dependsOnMutationId == null && nullToAbsent
           ? const Value.absent()
           : Value(dependsOnMutationId),
+      aggregateId: aggregateId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(aggregateId),
     );
   }
 
@@ -35270,6 +35306,7 @@ class MutationRecordData extends DataClass
       dependsOnMutationId: serializer.fromJson<String?>(
         json['dependsOnMutationId'],
       ),
+      aggregateId: serializer.fromJson<String?>(json['aggregateId']),
     );
   }
   @override
@@ -35296,6 +35333,7 @@ class MutationRecordData extends DataClass
       'reasonCode': serializer.toJson<String?>(reasonCode),
       'errorMessage': serializer.toJson<String?>(errorMessage),
       'dependsOnMutationId': serializer.toJson<String?>(dependsOnMutationId),
+      'aggregateId': serializer.toJson<String?>(aggregateId),
     };
   }
 
@@ -35320,6 +35358,7 @@ class MutationRecordData extends DataClass
     Value<String?> reasonCode = const Value.absent(),
     Value<String?> errorMessage = const Value.absent(),
     Value<String?> dependsOnMutationId = const Value.absent(),
+    Value<String?> aggregateId = const Value.absent(),
   }) => MutationRecordData(
     id: id ?? this.id,
     contestId: contestId.present ? contestId.value : this.contestId,
@@ -35351,6 +35390,7 @@ class MutationRecordData extends DataClass
     dependsOnMutationId: dependsOnMutationId.present
         ? dependsOnMutationId.value
         : this.dependsOnMutationId,
+    aggregateId: aggregateId.present ? aggregateId.value : this.aggregateId,
   );
   MutationRecordData copyWithCompanion(MutationRecordsCompanion data) {
     return MutationRecordData(
@@ -35398,6 +35438,9 @@ class MutationRecordData extends DataClass
       dependsOnMutationId: data.dependsOnMutationId.present
           ? data.dependsOnMutationId.value
           : this.dependsOnMutationId,
+      aggregateId: data.aggregateId.present
+          ? data.aggregateId.value
+          : this.aggregateId,
     );
   }
 
@@ -35423,13 +35466,14 @@ class MutationRecordData extends DataClass
           ..write('outcome: $outcome, ')
           ..write('reasonCode: $reasonCode, ')
           ..write('errorMessage: $errorMessage, ')
-          ..write('dependsOnMutationId: $dependsOnMutationId')
+          ..write('dependsOnMutationId: $dependsOnMutationId, ')
+          ..write('aggregateId: $aggregateId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     contestId,
     ownerAccountId,
@@ -35450,7 +35494,8 @@ class MutationRecordData extends DataClass
     reasonCode,
     errorMessage,
     dependsOnMutationId,
-  );
+    aggregateId,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -35474,7 +35519,8 @@ class MutationRecordData extends DataClass
           other.outcome == this.outcome &&
           other.reasonCode == this.reasonCode &&
           other.errorMessage == this.errorMessage &&
-          other.dependsOnMutationId == this.dependsOnMutationId);
+          other.dependsOnMutationId == this.dependsOnMutationId &&
+          other.aggregateId == this.aggregateId);
 }
 
 class MutationRecordsCompanion extends UpdateCompanion<MutationRecordData> {
@@ -35498,6 +35544,7 @@ class MutationRecordsCompanion extends UpdateCompanion<MutationRecordData> {
   final Value<String?> reasonCode;
   final Value<String?> errorMessage;
   final Value<String?> dependsOnMutationId;
+  final Value<String?> aggregateId;
   final Value<int> rowid;
   const MutationRecordsCompanion({
     this.id = const Value.absent(),
@@ -35520,6 +35567,7 @@ class MutationRecordsCompanion extends UpdateCompanion<MutationRecordData> {
     this.reasonCode = const Value.absent(),
     this.errorMessage = const Value.absent(),
     this.dependsOnMutationId = const Value.absent(),
+    this.aggregateId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   MutationRecordsCompanion.insert({
@@ -35543,6 +35591,7 @@ class MutationRecordsCompanion extends UpdateCompanion<MutationRecordData> {
     this.reasonCode = const Value.absent(),
     this.errorMessage = const Value.absent(),
     this.dependsOnMutationId = const Value.absent(),
+    this.aggregateId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        entityType = Value(entityType),
@@ -35573,6 +35622,7 @@ class MutationRecordsCompanion extends UpdateCompanion<MutationRecordData> {
     Expression<String>? reasonCode,
     Expression<String>? errorMessage,
     Expression<String>? dependsOnMutationId,
+    Expression<String>? aggregateId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -35600,6 +35650,7 @@ class MutationRecordsCompanion extends UpdateCompanion<MutationRecordData> {
       if (errorMessage != null) 'error_message': errorMessage,
       if (dependsOnMutationId != null)
         'depends_on_mutation_id': dependsOnMutationId,
+      if (aggregateId != null) 'aggregate_id': aggregateId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -35625,6 +35676,7 @@ class MutationRecordsCompanion extends UpdateCompanion<MutationRecordData> {
     Value<String?>? reasonCode,
     Value<String?>? errorMessage,
     Value<String?>? dependsOnMutationId,
+    Value<String?>? aggregateId,
     Value<int>? rowid,
   }) {
     return MutationRecordsCompanion(
@@ -35648,6 +35700,7 @@ class MutationRecordsCompanion extends UpdateCompanion<MutationRecordData> {
       reasonCode: reasonCode ?? this.reasonCode,
       errorMessage: errorMessage ?? this.errorMessage,
       dependsOnMutationId: dependsOnMutationId ?? this.dependsOnMutationId,
+      aggregateId: aggregateId ?? this.aggregateId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -35723,6 +35776,9 @@ class MutationRecordsCompanion extends UpdateCompanion<MutationRecordData> {
         dependsOnMutationId.value,
       );
     }
+    if (aggregateId.present) {
+      map['aggregate_id'] = Variable<String>(aggregateId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -35752,6 +35808,7 @@ class MutationRecordsCompanion extends UpdateCompanion<MutationRecordData> {
           ..write('reasonCode: $reasonCode, ')
           ..write('errorMessage: $errorMessage, ')
           ..write('dependsOnMutationId: $dependsOnMutationId, ')
+          ..write('aggregateId: $aggregateId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -74910,6 +74967,7 @@ typedef $$MutationRecordsTableCreateCompanionBuilder =
       Value<String?> reasonCode,
       Value<String?> errorMessage,
       Value<String?> dependsOnMutationId,
+      Value<String?> aggregateId,
       Value<int> rowid,
     });
 typedef $$MutationRecordsTableUpdateCompanionBuilder =
@@ -74934,6 +74992,7 @@ typedef $$MutationRecordsTableUpdateCompanionBuilder =
       Value<String?> reasonCode,
       Value<String?> errorMessage,
       Value<String?> dependsOnMutationId,
+      Value<String?> aggregateId,
       Value<int> rowid,
     });
 
@@ -75043,6 +75102,11 @@ class $$MutationRecordsTableFilterComposer
 
   ColumnFilters<String> get dependsOnMutationId => $composableBuilder(
     column: $table.dependsOnMutationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get aggregateId => $composableBuilder(
+    column: $table.aggregateId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -75155,6 +75219,11 @@ class $$MutationRecordsTableOrderingComposer
     column: $table.dependsOnMutationId,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get aggregateId => $composableBuilder(
+    column: $table.aggregateId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MutationRecordsTableAnnotationComposer
@@ -75249,6 +75318,11 @@ class $$MutationRecordsTableAnnotationComposer
     column: $table.dependsOnMutationId,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get aggregateId => $composableBuilder(
+    column: $table.aggregateId,
+    builder: (column) => column,
+  );
 }
 
 class $$MutationRecordsTableTableManager
@@ -75308,6 +75382,7 @@ class $$MutationRecordsTableTableManager
                 Value<String?> reasonCode = const Value.absent(),
                 Value<String?> errorMessage = const Value.absent(),
                 Value<String?> dependsOnMutationId = const Value.absent(),
+                Value<String?> aggregateId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MutationRecordsCompanion(
                 id: id,
@@ -75330,6 +75405,7 @@ class $$MutationRecordsTableTableManager
                 reasonCode: reasonCode,
                 errorMessage: errorMessage,
                 dependsOnMutationId: dependsOnMutationId,
+                aggregateId: aggregateId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -75354,6 +75430,7 @@ class $$MutationRecordsTableTableManager
                 Value<String?> reasonCode = const Value.absent(),
                 Value<String?> errorMessage = const Value.absent(),
                 Value<String?> dependsOnMutationId = const Value.absent(),
+                Value<String?> aggregateId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MutationRecordsCompanion.insert(
                 id: id,
@@ -75376,6 +75453,7 @@ class $$MutationRecordsTableTableManager
                 reasonCode: reasonCode,
                 errorMessage: errorMessage,
                 dependsOnMutationId: dependsOnMutationId,
+                aggregateId: aggregateId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
