@@ -17,6 +17,7 @@ import '../services/new_contest/draft_validation.dart';
 import '../services/new_contest/draw_settings.dart';
 import '../services/participants/participant_option.dart';
 import '../services/new_contest/participant_rules.dart';
+import '../services/new_contest/scoring_settings.dart';
 import '../services/new_contest/wizard_discipline.dart';
 import '../widgets/api_error_text.dart';
 import '../widgets/new_contest/contest_details_section.dart';
@@ -355,8 +356,24 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       confirmLabel: 'Change and clear',
     );
     if (change && mounted) {
-      // Scoring values are reset to the new discipline's defaults.
-      _update(_draft.copyWith(discipline: discipline, scoring: null));
+      // The discipline's own scoring values are reset to the new defaults.
+      // The choices that do not depend on the discipline stay as the
+      // director made them: whether pilots may ask for reviews, the public
+      // update policy and when scores become official (a director who chose
+      // Manually must not end up with a contest that accepts scores itself).
+      final kept = _draft.scoring;
+      _update(
+        _draft.copyWith(
+          discipline: discipline,
+          scoring: kept == null
+              ? null
+              : ScoringSettings.defaultsFor(discipline).copyWith(
+                  reviewRequests: kept.reviewRequests,
+                  publicUpdateMode: kept.publicUpdateMode,
+                  scoresBecomeOfficial: kept.scoresBecomeOfficial,
+                ),
+        ),
+      );
       _message(
         'Discipline changed to ${discipline.name}. Incompatible values were '
         'cleared.',
