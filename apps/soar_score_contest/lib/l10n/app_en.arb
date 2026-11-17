@@ -2866,5 +2866,27 @@
   "@scoreMarkOfficialFailed": {
     "description": "Banner after Mark official failed with a server error.",
     "placeholders": {"message": {"type": "String"}}
-  }
+  },
+  "scoreMarkAllOfficial": "Mark all valid rows official",
+  "@scoreMarkAllOfficial": {"description": "Toolbar button that accepts every waiting pilot entry of the group as official."},
+  "scoreMarkAllNoneValid": "No row is ready to mark official. Save or revert edited rows, wait for a save in progress, or open a review first.",
+  "@scoreMarkAllNoneValid": {"description": "Tooltip of the disabled Mark all button when every waiting entry is held back."},
+  "scoreMarkAllSkipEdited": "{count, plural, one{1 row with unsaved edits is left out.} other{{count} rows with unsaved edits are left out.}}",
+  "@scoreMarkAllSkipEdited": {"description": "Part of the Mark all dialog and result.", "placeholders": {"count": {"type": "int"}}},
+  "scoreMarkAllSkipReview": "{count, plural, one{1 row with an open review is left out.} other{{count} rows with an open review are left out.}}",
+  "@scoreMarkAllSkipReview": {"description": "Part of the Mark all dialog and result.", "placeholders": {"count": {"type": "int"}}},
+  "scoreMarkAllSkipClosed": "{count, plural, one{1 locked row is left out.} other{{count} locked rows are left out.}}",
+  "@scoreMarkAllSkipClosed": {"description": "Part of the Mark all dialog and result.", "placeholders": {"count": {"type": "int"}}},
+  "scoreMarkAllSkipRetired": "{count, plural, one{1 retired pilot is left out.} other{{count} retired pilots are left out.}}",
+  "@scoreMarkAllSkipRetired": {"description": "Part of the Mark all dialog and result.", "placeholders": {"count": {"type": "int"}}},
+  "scoreMarkAllDone": "{count, plural, one{Marked 1 row official.} other{Marked {count} rows official.}}",
+  "@scoreMarkAllDone": {"description": "Snackbar after Mark all.", "placeholders": {"count": {"type": "int"}}},
+  "scoreMarkAllNothing": "Nothing was marked official.",
+  "@scoreMarkAllNothing": {"description": "Snackbar when Mark all made no row official."},
+  "scoreMarkAllChanged": "{count, plural, one{1 row changed since you opened it.} other{{count} rows changed since you opened them.}}",
+  "@scoreMarkAllChanged": {"description": "Part of the Mark all result.", "placeholders": {"count": {"type": "int"}}},
+  "scoreMarkAllRefused": "{count, plural, one{1 row was refused.} other{{count} rows were refused.}}",
+  "@scoreMarkAllRefused": {"description": "Part of the Mark all result.", "placeholders": {"count": {"type": "int"}}},
+  "scoreMarkAllRetry": "{count, plural, one{1 row was not marked; try it again.} other{{count} rows were not marked; try them again.}}",
+  "@scoreMarkAllRetry": {"description": "Part of the Mark all result for rows to try again.", "placeholders": {"count": {"type": "int"}}}
 }

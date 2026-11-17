@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../api_client_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../router.dart';
 import '../../services/scoring/pilot_history.dart';
 import '../../services/scoring/row_save.dart';
@@ -267,6 +268,50 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     }
   }
 
+  /// Marks every valid row of the group official in one request, without
+  /// asking (each row is checked on its own by the server), and says what
+  /// happened, row by row where it did not go through.
+  Future<void> _markAll() async {
+    final c = _controller!;
+    if (c.markAllRows.isEmpty) return;
+    final words = AppLocalizations.of(context);
+    final summary = await c.markAllOfficial();
+    if (!mounted) return;
+    final parts = [
+      summary.nothingAccepted
+          ? words.scoreMarkAllNothing
+          : words.scoreMarkAllDone(summary.official),
+      if (summary.changed > 0) words.scoreMarkAllChanged(summary.changed),
+      if (summary.refused > 0) words.scoreMarkAllRefused(summary.refused),
+      if (summary.retry > 0) words.scoreMarkAllRetry(summary.retry),
+      ..._skipLines(words, summary.skipped),
+    ];
+    _say(parts.join(' '));
+  }
+
+  static List<String> _skipLines(
+    AppLocalizations words,
+    Map<MarkOfficialSkip, int> skipped,
+  ) {
+    final lines = <String>[];
+    for (final MapEntry(:key, :value) in skipped.entries) {
+      switch (key) {
+        case MarkOfficialSkip.edited:
+          lines.add(words.scoreMarkAllSkipEdited(value));
+        case MarkOfficialSkip.inReview:
+          lines.add(words.scoreMarkAllSkipReview(value));
+        case MarkOfficialSkip.closed:
+          lines.add(words.scoreMarkAllSkipClosed(value));
+        case MarkOfficialSkip.retired:
+          lines.add(words.scoreMarkAllSkipRetired(value));
+        case MarkOfficialSkip.busy:
+        case MarkOfficialSkip.noSubmission:
+          break;
+      }
+    }
+    return lines;
+  }
+
   Future<void> _showHistory(ScoringRow row) {
     final c = _controller!;
     return showDialog<void>(
@@ -409,6 +454,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
                     controller: c,
                     onOpen: _go,
                     onSaveAll: _saveAll,
+                    onMarkAll: _markAll,
                     onGroupHistory: _showGroupHistory,
                   ),
                   ScoringContextStrip(controller: c),

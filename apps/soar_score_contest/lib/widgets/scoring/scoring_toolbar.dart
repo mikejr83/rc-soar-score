@@ -14,6 +14,7 @@ class ScoringToolbar extends StatelessWidget {
     required this.controller,
     required this.onOpen,
     required this.onSaveAll,
+    required this.onMarkAll,
     required this.onGroupHistory,
   });
 
@@ -23,6 +24,9 @@ class ScoringToolbar extends StatelessWidget {
   /// edits before it calls the controller.
   final void Function(int round, int group) onOpen;
   final VoidCallback onSaveAll;
+
+  /// Marks every valid waiting pilot entry of the group official.
+  final VoidCallback onMarkAll;
 
   /// Opens the history of every row in the group.
   final VoidCallback onGroupHistory;
@@ -264,6 +268,21 @@ class ScoringToolbar extends StatelessWidget {
             ),
           ],
         ),
+        if (controller.waitingCount > 0)
+          Tooltip(
+            message: controller.markAllRows.isEmpty
+                ? AppLocalizations.of(context).scoreMarkAllNoneValid
+                : '',
+            child: pill(
+              key: const ValueKey('score-mark-all-official'),
+              icon: Icons.verified_outlined,
+              label: AppLocalizations.of(context).scoreMarkAllOfficial,
+              onTap: block == null && controller.markAllRows.isNotEmpty
+                  ? onMarkAll
+                  : null,
+              busy: saving,
+            ),
+          ),
         pill(
           key: const ValueKey('score-check'),
           icon: Icons.fact_check_outlined,

@@ -4261,6 +4261,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not marked official. {message}'**
   String scoreMarkOfficialFailed(String message);
+
+  /// Toolbar button that accepts every waiting pilot entry of the group as official.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all valid rows official'**
+  String get scoreMarkAllOfficial;
+
+  /// Tooltip of the disabled Mark all button when every waiting entry is held back.
+  ///
+  /// In en, this message translates to:
+  /// **'No row is ready to mark official. Save or revert edited rows, wait for a save in progress, or open a review first.'**
+  String get scoreMarkAllNoneValid;
+
+  /// Part of the Mark all dialog and result.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 row with unsaved edits is left out.} other{{count} rows with unsaved edits are left out.}}'**
+  String scoreMarkAllSkipEdited(int count);
+
+  /// Part of the Mark all dialog and result.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 row with an open review is left out.} other{{count} rows with an open review are left out.}}'**
+  String scoreMarkAllSkipReview(int count);
+
+  /// Part of the Mark all dialog and result.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 locked row is left out.} other{{count} locked rows are left out.}}'**
+  String scoreMarkAllSkipClosed(int count);
+
+  /// Part of the Mark all dialog and result.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 retired pilot is left out.} other{{count} retired pilots are left out.}}'**
+  String scoreMarkAllSkipRetired(int count);
+
+  /// Snackbar after Mark all.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Marked 1 row official.} other{Marked {count} rows official.}}'**
+  String scoreMarkAllDone(int count);
+
+  /// Snackbar when Mark all made no row official.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was marked official.'**
+  String get scoreMarkAllNothing;
+
+  /// Part of the Mark all result.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 row changed since you opened it.} other{{count} rows changed since you opened them.}}'**
+  String scoreMarkAllChanged(int count);
+
+  /// Part of the Mark all result.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 row was refused.} other{{count} rows were refused.}}'**
+  String scoreMarkAllRefused(int count);
+
+  /// Part of the Mark all result for rows to try again.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 row was not marked; try it again.} other{{count} rows were not marked; try them again.}}'**
+  String scoreMarkAllRetry(int count);
 }
 
 class _AppLocalizationsDelegate
