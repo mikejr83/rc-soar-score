@@ -141,7 +141,7 @@ void _tests(SliceBackend backend) {
 
   tearDown(() => api.close());
 
-  Future<int> submit(int pilot, int round) async {
+  Future<Map<String, Object?>> submit(int pilot, int round) async {
     final response = await handler(
       Request(
         'POST',
@@ -154,8 +154,10 @@ void _tests(SliceBackend backend) {
         headers: {'authorization': 'Bearer ${tokens[pilot]}'},
       ),
     );
-    expect(response.statusCode, 201, reason: await response.readAsString());
-    return response.statusCode;
+    final text = await response.readAsString();
+    expect(response.statusCode, anyOf(200, 201), reason: text);
+    return (jsonDecode(text) as Map<String, Object?>)['score']!
+        as Map<String, Object?>;
   }
 
   Map<String, Object?> assignmentOf(int round, int pilot) =>
@@ -206,11 +208,17 @@ void _tests(SliceBackend backend) {
     setUp(() => open('EndOfRound'));
 
     test('the submission that completes the round accepts all of it', () async {
-      await submit(1, 1);
-      await submit(2, 1);
+      expect((await submit(1, 1))['state'], 'submitted');
+      expect((await submit(2, 1))['state'], 'submitted');
       await expectWaiting(1, 1);
       await expectWaiting(1, 2);
-      await submit(3, 1);
+      // The pilot who completes the round is told the score is official.
+      final last = await submit(3, 1);
+      expect(last['state'], 'official');
+      expect(last['entered_by'], 'P3 X');
+      // A retry of any of the mutations sees the state the score has now.
+      expect((await submit(3, 1))['state'], 'official');
+      expect((await submit(1, 1))['state'], 'official');
       for (final pilot in [1, 2, 3]) {
         await expectAutomatic(1, pilot, core.automaticRoundCompleteReason);
       }

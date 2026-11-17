@@ -126,8 +126,9 @@ ParticipantScoreDto _scoreDto(ParticipantSubmission stored, String pilotName) {
     assignmentId: stored.assignmentId,
     round: stored.round,
     // The pilot's own score is the preliminary "submitted" one; once the
-    // director entered or corrected it, it is "official".
-    state: byPilot
+    // director entered or corrected it, or the contest accepted it on its
+    // own, it is "official".
+    state: byPilot && !stored.isOfficial
         ? ParticipantScoreState.submitted
         : ParticipantScoreState.official,
     revision: stored.revision,

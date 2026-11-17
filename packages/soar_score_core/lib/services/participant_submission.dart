@@ -17,7 +17,7 @@ class ParticipantSubmission extends Equatable {
     required this.authority,
     this.nextRound,
     this.replayed = false,
-    this.becameOfficial = false,
+    this.isOfficial = false,
     this.scoresChanged = false,
   });
 
@@ -47,9 +47,10 @@ class ParticipantSubmission extends Equatable {
   /// mutation id): nothing was stored again.
   final bool replayed;
 
-  /// True when the contest made this submission official on its own in the
-  /// request that stored it. Not part of the API answer.
-  final bool becameOfficial;
+  /// True when the score is official: the contest made the pilot's own
+  /// submission official on its own (so [authority] stays the pilot's), or the
+  /// director's score stands over it.
+  final bool isOfficial;
 
   /// True when that run made any submission official (this one or another
   /// of its round or group), so the results need a recalculation.
@@ -57,7 +58,7 @@ class ParticipantSubmission extends Equatable {
 
   /// This submission with the outcome of the automatic run.
   ParticipantSubmission copyWithOfficialization(
-    bool becameOfficial, {
+    bool isOfficial, {
     required bool anyOfficial,
   }) => ParticipantSubmission(
     assignmentId: assignmentId,
@@ -69,7 +70,7 @@ class ParticipantSubmission extends Equatable {
     authority: authority,
     nextRound: nextRound,
     replayed: replayed,
-    becameOfficial: becameOfficial,
+    isOfficial: isOfficial,
     scoresChanged: anyOfficial,
   );
 
@@ -84,7 +85,7 @@ class ParticipantSubmission extends Equatable {
     authority,
     nextRound,
     replayed,
-    becameOfficial,
+    isOfficial,
     scoresChanged,
   ];
 }

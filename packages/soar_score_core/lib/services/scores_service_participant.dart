@@ -337,6 +337,9 @@ extension ParticipantScoresService on ScoresService {
         'this request id was already used for a different score',
       );
     }
+    // The submission may have been made official on its own since.
+    final official = await repository.officialScoreRepository
+        .currentForPlaceholder(placeholder.id);
     return ParticipantSubmission(
       assignmentId: assignment.id,
       round: round,
@@ -347,6 +350,10 @@ extension ParticipantScoresService on ScoresService {
       authority: Authority.participant,
       nextRound: (await _nextParticipantRound(access, round)).after,
       replayed: true,
+      isOfficial:
+          official != null &&
+          official.selectionOrigin == SelectionOrigin.automatic &&
+          official.scoreAttemptId == earlier.id,
     );
   }
 
@@ -367,7 +374,11 @@ extension ParticipantScoresService on ScoresService {
         revision: official.scoreRevision,
         enteredAt: official.setAt,
         calculated: await _calculate(context, official.components),
-        authority: Authority.director,
+        // An automatically accepted score is still the pilot's own.
+        authority: official.selectionOrigin == SelectionOrigin.automatic
+            ? Authority.participant
+            : Authority.director,
+        isOfficial: true,
       );
     }
     final attempt = (await repository.scoreAttemptRepository
