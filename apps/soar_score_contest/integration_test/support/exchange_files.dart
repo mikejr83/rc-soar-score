@@ -6,6 +6,7 @@ import 'package:soar_score_contest/services/exchange/contest_exchange.dart';
 
 import 'interact.dart';
 import 'launch_app.dart';
+import 'pump_until_gone.dart';
 
 /// Replaces the system file dialogs: the chooser answers [chosen] (named
 /// [chosenName]) and saves are recorded by file name. Restored after the
@@ -46,8 +47,13 @@ Future<void> importForInspection(WidgetTester tester, String name) async {
   await tapVisible(tester, find.byKey(const ValueKey('import-contest')));
   await pumpUntilFound(tester, find.byKey(const ValueKey('import-dialog')));
   await tapVisible(tester, find.byKey(const ValueKey('import-confirm')));
-  await pumpUntilFound(
-    tester,
-    find.descendant(of: find.byType(ListTile), matching: find.text(name)),
+  await pumpUntilGone(tester, find.byKey(const ValueKey('import-dialog')));
+  // The list is newest first and builds only the rows near its top, so an
+  // imported contest with an old date sits below the window.
+  final row = find.descendant(
+    of: find.byType(ListTile),
+    matching: find.text(name),
   );
+  await scrollListTo(tester, row);
+  await pumpUntilFound(tester, row);
 }
