@@ -37,6 +37,7 @@
 | `outcome`                | enum        | Yes         | Pending | `Pending` (still in a client outbox), `Accepted`, `Rejected`, `Conflict`, or `Skipped` (not attempted because a mutation it depends on failed)                                                           |
 | `reason_code`            | text        | No          | -       | Machine-readable reason for a rejection, conflict, or skip, for example `stale_base`, `inactive_installation`, `unknown_matrix_revision`, `entity_deleted`, `unique_violation`, `locked`, `unauthorized` |
 | `error_message`          | text        | No          | -       | Human-readable explanation of a rejection or conflict                                                                                                                                                    |
+| `aggregate_id`           | UUIDv7      | No          | -       | Groups the records one operation wrote (for example a score promotion). Pages of changes never split a group and clients apply it atomically                                                             |
 | `depends_on_mutation_id` | UUIDv7      | No          | -       | FK MutationRecord this change depends on                                                                                                                                                                 |
 
 ## Invariants and Constraints
@@ -54,6 +55,8 @@
 - A score against an unknown matrix revision or group is `Rejected` with `unknown_matrix_revision` or `unknown_flight_group`. The client keeps it in its outbox and pushes the matrix revision first on retry
 - Deleting a contest is an ordinary mutation. Publishing does not prevent it, and the published record is unaffected
 - Records are append-only. The outcome and times are set once by the service
+
+- `entity_type` `ScorePromotion` is an operation, not a stored entity: its `entity_id` is the operation id, its payload is the intent, and the decided record is the service's receipt. Its reason codes include `stale_source`, `unsupported_operation` and `operation_mismatch`. See the promote score operation in sync-protocol.md
 
 ## Lifecycle
 

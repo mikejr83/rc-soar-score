@@ -23,6 +23,10 @@ This document uses **score** for the discipline-specific raw components entered 
    System data ships with the app and is installed at startup, before any synchronization, so an installation that has never synchronized can create and score contests offline. The installation keeps the system-data sequence it holds as its own sync position. A later launch never rewrites system data, and data synchronized from the service is never overwritten by the shipped copy.
 9. Sync must be scoped to the contest director's authorized data. Participant email addresses and other private data must follow the privacy rules in the participant requirements.
 
+## Marking a Score Official Offline
+
+Marking a participant's submission official is not a generic edit. A syncing installation queues a guarded `promote_score` intent and shows the adoption as pending. The service adopts exactly that submission at that score revision, or refuses the whole intent as `stale_source` when another submission or official score is current; it never merges these. Replays create no second version, an unsupported service is never written to, and the slot accepts no other save until the intent is decided. Details: [sync-protocol.md](sync-protocol.md#promote-score-operation).
+
 ## Administration Installation
 
 1. Each contest has one active administration installation. This installation is the sole offline authority for contest configuration, matrix changes, official score changes, state transitions, and deletions.
