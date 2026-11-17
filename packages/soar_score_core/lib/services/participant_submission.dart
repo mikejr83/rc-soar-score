@@ -17,6 +17,7 @@ class ParticipantSubmission extends Equatable {
     required this.authority,
     this.nextRound,
     this.replayed = false,
+    this.isOfficial = false,
   });
 
   final Id assignmentId;
@@ -27,7 +28,8 @@ class ParticipantSubmission extends Equatable {
   /// The components as submitted (or as the director entered them).
   final Map<String, Object?> components;
 
-  /// The slot's score revision after this score.
+  /// The slot's score revision after this score: the official version's when
+  /// the score is official.
   final int revision;
 
   /// When the score was accepted.
@@ -45,6 +47,28 @@ class ParticipantSubmission extends Equatable {
   /// mutation id): nothing was stored again.
   final bool replayed;
 
+  /// True when the score is official: the contest made the pilot's own
+  /// submission official on its own (so [authority] stays the pilot's), or the
+  /// director's score stands over it.
+  final bool isOfficial;
+
+  /// This submission with the outcome of the automatic run.
+  ParticipantSubmission copyWithOfficialization(
+    bool isOfficial, {
+    int? officialRevision,
+  }) => ParticipantSubmission(
+    assignmentId: assignmentId,
+    round: round,
+    components: components,
+    revision: officialRevision ?? revision,
+    enteredAt: enteredAt,
+    calculated: calculated,
+    authority: authority,
+    nextRound: nextRound,
+    replayed: replayed,
+    isOfficial: isOfficial,
+  );
+
   @override
   List<Object?> get props => [
     assignmentId,
@@ -56,6 +80,7 @@ class ParticipantSubmission extends Equatable {
     authority,
     nextRound,
     replayed,
+    isOfficial,
   ];
 }
 

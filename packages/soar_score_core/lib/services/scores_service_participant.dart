@@ -14,6 +14,11 @@ extension ParticipantScoresService on ScoresService {
   /// contest moves to `Running` in the same transaction. The director's own
   /// entry for the slot is what makes it official.
   ///
+  /// When the contest accepts scores on its own and this submission completes
+  /// its round or group, the same transaction makes it (and the other waiting
+  /// submissions of the round or group) official; see
+  /// [AutomaticOfficializationService.evaluateAutomaticOfficialization].
+  ///
   /// A repeat of [clientMutationId] with the same components returns the
   /// first answer ([ParticipantSubmission.replayed]); with other components
   /// it is a `mutation_conflict`.
@@ -33,14 +38,41 @@ extension ParticipantScoresService on ScoresService {
     String? sourceDevice,
   }) => repository.officialScoreRepository.withContestGate(
     access.contestId,
-    () => _submitParticipantScore(
-      access,
-      round,
-      clientMutationId: clientMutationId,
-      matrixRevision: matrixRevision,
-      components: components,
-      sourceDevice: sourceDevice,
-    ),
+    () async {
+      Future<ParticipantSubmission> submit() => _submitParticipantScore(
+        access,
+        round,
+        clientMutationId: clientMutationId,
+        matrixRevision: matrixRevision,
+        components: components,
+        sourceDevice: sourceDevice,
+      );
+      final stored = await submit();
+      // The submission may complete its round or group. The acceptances and
+      // the recalculation of the results run in their own savepoint of this
+      // transaction: they commit with the pilot's score or not at all, so a
+      // failure leaves the submission waiting and the standings as they
+      // were. A repeat of the request runs it again, which finishes what a
+      // failed run left. A busy contest escapes to the caller.
+      final AutomaticOfficialization run;
+      try {
+        run = await officializeAndRecalculate(access.contestId);
+      } on ContestBusyError {
+        rethrow;
+      } on Object catch (error) {
+        _logger.warning(
+          'Automatic officialization failed after a submission in contest '
+          '${access.contestId}: ${error.runtimeType}',
+        );
+        return stored;
+      }
+      // A repeat is answered again from what is stored now.
+      if (stored.replayed) return run.changedScores ? submit() : stored;
+      return stored.copyWithOfficialization(
+        run.promoted.contains(stored.assignmentId),
+        officialRevision: run.revisions[stored.assignmentId],
+      );
+    },
   );
 
   Future<ParticipantSubmission> _submitParticipantScore(
@@ -308,16 +340,24 @@ extension ParticipantScoresService on ScoresService {
         'this request id was already used for a different score',
       );
     }
+    // The submission may have been made official on its own since.
+    final official = await repository.officialScoreRepository
+        .currentForPlaceholder(placeholder.id);
+    final accepted =
+        official != null &&
+        official.selectionOrigin == SelectionOrigin.automatic &&
+        official.scoreAttemptId == earlier.id;
     return ParticipantSubmission(
       assignmentId: assignment.id,
       round: round,
       components: earlier.rawComponents,
-      revision: 1,
+      revision: accepted ? official.scoreRevision : 1,
       enteredAt: earlier.acceptedAt,
       calculated: await _calculate(context, earlier.rawComponents),
       authority: Authority.participant,
       nextRound: (await _nextParticipantRound(access, round)).after,
       replayed: true,
+      isOfficial: accepted,
     );
   }
 
@@ -338,7 +378,11 @@ extension ParticipantScoresService on ScoresService {
         revision: official.scoreRevision,
         enteredAt: official.setAt,
         calculated: await _calculate(context, official.components),
-        authority: Authority.director,
+        // An automatically accepted score is still the pilot's own.
+        authority: official.selectionOrigin == SelectionOrigin.automatic
+            ? Authority.participant
+            : Authority.director,
+        isOfficial: true,
       );
     }
     final attempt = (await repository.scoreAttemptRepository

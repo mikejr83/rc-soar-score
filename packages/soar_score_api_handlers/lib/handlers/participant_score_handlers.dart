@@ -26,7 +26,10 @@ final _logger = Logger('ParticipantScores');
 ///
 /// The score is preliminary: an attempt and a `Submitted` slot, no official
 /// score, so the official results and the public projection are unchanged
-/// and nothing is recalculated or published.
+/// and nothing is recalculated or published. The exception is a contest that
+/// accepts scores on its own ("Scores become official"): a submission that
+/// completes its round or group makes it and the waiting ones official, and the
+/// results are recalculated, all in the same transaction as the submission.
 void addParticipantScoreRoutes(
   Router router,
   Repository repository, {
@@ -111,8 +114,9 @@ ParticipantScoreDto _scoreDto(ParticipantSubmission stored, String pilotName) {
     assignmentId: stored.assignmentId,
     round: stored.round,
     // The pilot's own score is the preliminary "submitted" one; once the
-    // director entered or corrected it, it is "official".
-    state: byPilot
+    // director entered or corrected it, or the contest accepted it on its
+    // own, it is "official".
+    state: byPilot && !stored.isOfficial
         ? ParticipantScoreState.submitted
         : ParticipantScoreState.official,
     revision: stored.revision,
