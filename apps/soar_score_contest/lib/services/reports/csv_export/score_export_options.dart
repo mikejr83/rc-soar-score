@@ -4,23 +4,26 @@ import '../reports_facts.dart';
 
 /// The options a CSV export honours, read from the same filter map the report
 /// reads. The keys mirror the Overall Standings report (`from`/`to`, `pct`,
-/// `raw`, `team`, `num`, `cls`, `det`) so the export matches what the viewer
-/// is showing. A key the map leaves out takes its default.
+/// `raw`, `team`, `num`, `cls`) so the export matches what the viewer is
+/// showing. A key the map leaves out takes its default.
 class ScoreExportOptions {
   const ScoreExportOptions({
     required this.from,
+    required this.requestedTo,
     required this.to,
+    required this.lastShown,
     required this.rounds,
-    required this.provisional,
     required this.percentage,
     required this.raw,
     required this.team,
     required this.number,
     required this.pilotClass,
-    required this.details,
   });
 
-  factory ScoreExportOptions.of(Map<String, String> filters, ReportsFacts facts) {
+  factory ScoreExportOptions.of(
+    Map<String, String> filters,
+    ReportsFacts facts,
+  ) {
     bool on(String key, bool fallback) =>
         filters[key] == null ? fallback : filters[key] == '1';
     final provisional =
@@ -38,16 +41,18 @@ class ScoreExportOptions {
     final to = ordinals.where((round) => round <= cap).fold(0, math.max);
     return ScoreExportOptions(
       from: from,
+      requestedTo: requestedTo,
       to: to,
-      rounds: [for (final round in ordinals)
-        if (round >= from && round <= to) round],
-      provisional: provisional,
+      lastShown: lastShown,
+      rounds: [
+        for (final round in ordinals)
+          if (round >= from && round <= to) round,
+      ],
       percentage: on('pct', true),
       raw: on('raw', false),
       team: facts.teamsEnabled && on('team', true),
       number: facts.numbersEnabled && on('num', false),
       pilotClass: facts.classesEnabled && on('cls', false),
-      details: on('det', false),
     );
   }
 
@@ -70,14 +75,17 @@ class ScoreExportOptions {
   /// The first round exported.
   final int from;
 
+  /// The upper bound the director chose, before it is held to [lastShown].
+  final int requestedTo;
+
   /// The last round exported.
   final int to;
 
+  /// The last round the export can show.
+  final int lastShown;
+
   /// The rounds exported, ascending.
   final List<int> rounds;
-
-  /// Whether the standings shown are provisional.
-  final bool provisional;
 
   /// A percentage column (of the winner).
   final bool percentage;
@@ -94,6 +102,12 @@ class ScoreExportOptions {
   /// A pilot class column.
   final bool pilotClass;
 
-  /// Flight details columns.
-  final bool details;
+  /// The reason the range cannot be exported, or null when it can.
+  String? check() {
+    if (from > to || rounds.isEmpty) {
+      final range = from == requestedTo ? '$from' : '$from–$requestedTo';
+      return 'No rounds to export: nothing is scored in rounds $range.';
+    }
+    return null;
+  }
 }

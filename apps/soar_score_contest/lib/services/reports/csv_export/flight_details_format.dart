@@ -8,10 +8,10 @@ import 'score_export_source.dart';
 /// [Total] are repeated on each pilot's rows so a pivot on Pilot reproduces
 /// the standings.
 ///
-/// The detail columns follow the discipline: F5J shows Time, Height and
-/// Landing; F3J and the other disciplines omit Height.
+/// The recorded launch height is always shown, for every discipline (in
+/// metres); a discipline that does not record it simply leaves it empty.
 class FlightDetailsFormat extends ScoreCsvFormat {
-  const FlightDetailsFormat(this.options);
+  const FlightDetailsFormat(this.options, {super.writeBom, super.hardenText});
 
   /// The options that decide which columns appear; the same filters the
   /// viewer is showing.
@@ -26,7 +26,6 @@ class FlightDetailsFormat extends ScoreCsvFormat {
   @override
   List<List<String?>> build(ScoreExportSource source) {
     final decimals = source.decimalPlaces;
-    final hasHeight = source.hasLaunchHeight;
     final header = <String>[
       'Pilot',
       if (options.number) 'No.',
@@ -34,8 +33,8 @@ class FlightDetailsFormat extends ScoreCsvFormat {
       if (options.pilotClass) 'Class',
       'Round',
       'Group',
-      'Time',
-      if (hasHeight) 'Height',
+      'Time (s)',
+      'Height (m)',
       'Landing',
       'Raw',
       'Flight penalty',
@@ -48,14 +47,14 @@ class FlightDetailsFormat extends ScoreCsvFormat {
     final rows = <List<String?>>[header];
     for (final flight in source.flights) {
       final cells = <String?>[
-        flight.pilot.listName,
+        _text(flight.pilot.listName),
         if (options.number) _number(flight.pilot.number),
-        if (options.team) flight.pilot.team,
-        if (options.pilotClass) flight.pilot.className,
+        if (options.team) _text(flight.pilot.team),
+        if (options.pilotClass) _text(flight.pilot.className),
         '${flight.round}',
         flight.group,
         flight.seconds?.toString(),
-        if (hasHeight) flight.height?.toString(),
+        flight.height?.toString(),
         _num(flight.landing, decimals),
         _num(flight.raw, decimals),
         _num(flight.flightPenalty, decimals),
@@ -68,6 +67,13 @@ class FlightDetailsFormat extends ScoreCsvFormat {
       rows.add(cells);
     }
     return rows;
+  }
+
+  String? _text(String? value) {
+    if (value == null) {
+      return null;
+    }
+    return hardenText ? ScoreCsvFormat.harden(value) : value;
   }
 
   static String? _num(double? value, int decimals) =>

@@ -15,6 +15,12 @@ Future<String?> saveCsvFile(String fileName, String csv) async {
   if (location == null) {
     return null;
   }
-  await File(location.path).writeAsString(csv);
-  return p.basename(location.path);
+  var path = location.path;
+  // The dialog can change the name; keep the CSV extension so the file is
+  // always a CSV.
+  if (!p.extension(path).toLowerCase().endsWith('csv')) {
+    path = '$path.csv';
+  }
+  await File(path).writeAsString(csv);
+  return p.basename(path);
 }

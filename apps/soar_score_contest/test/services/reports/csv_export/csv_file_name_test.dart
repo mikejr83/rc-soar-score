@@ -28,8 +28,16 @@ void main() {
     expect(csvFileName('x' * 300, 'Cup').length, 124);
   });
 
-  test('uses the same safety logic as the PDF file name', () {
-    expect(FileName.named('Overall Results – Gator Cup', 'csv'),
-        csvFileName('Overall Results', 'Gator Cup'));
+  test('a Windows reserved name is made safe', () {
+    // The CSV base is always "{Report} – {Contest}", so a bare reserved word
+    // is reached through the shared FileName (as the PDF printer's title can
+    // be). The guard appends a dash to the reserved base.
+    expect(FileName.named('con', 'csv'), 'con-.csv');
+    expect(FileName.named('NUL', 'csv'), 'NUL-.csv');
+    // And csvFileName routes through the same FileName logic.
+    expect(
+      FileName.named('Overall Results – Gator Cup', 'csv'),
+      csvFileName('Overall Results', 'Gator Cup'),
+    );
   });
 }

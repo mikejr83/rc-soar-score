@@ -2,6 +2,7 @@ import 'csv_builder.dart';
 import 'csv_file_name.dart';
 import 'save_csv_platform.dart' as platform;
 import 'score_csv_format.dart';
+import 'score_export_error.dart';
 import 'score_export_source.dart';
 
 /// Saves a CSV file and answers the name written, or `null` when the director
@@ -24,19 +25,31 @@ class ScoreCsvExporter {
 
   final CsvBuilder builder;
 
-  /// The CSV for [source] in [format]: a header, then the rows.
-  String exportCsv(ScoreExportSource source, ScoreCsvFormat format) =>
-      builder.build(format.build(source));
+  /// The CSV for [source] in [format]: a header, then the rows, with a UTF-8
+  /// BOM when the format writes one.
+  String exportCsv(ScoreExportSource source, ScoreCsvFormat format) {
+    final csv = builder.build(format.build(source));
+    return format.writeBom ? '\uFEFF$csv' : csv;
+  }
 
   /// Exports and saves [source] in [format], naming the file from the report
   /// and contest names and the format's extension. Answers the file name, or
-  /// `null` when the director cancelled.
+  /// `null` when the director cancelled. A save that fails throws a
+  /// [ScoreExportError]; only a director cancel answers `null`.
   Future<String?> saveCsv(
     ScoreExportSource source,
     ScoreCsvFormat format, {
     required String reportName,
   }) async {
-    final name = csvFileName(reportName, source.contestName, extension: format.fileExtension);
-    return saveFile(name, exportCsv(source, format));
+    final name = csvFileName(
+      reportName,
+      source.contestName,
+      extension: format.fileExtension,
+    );
+    try {
+      return await saveFile(name, exportCsv(source, format));
+    } catch (error) {
+      throw ScoreExportError('Saving "$name" failed: $error');
+    }
   }
 }

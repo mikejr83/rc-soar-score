@@ -6,7 +6,7 @@ import 'score_export_source.dart';
 /// The optional columns appear only when the matching option is on, and the
 /// Penalty column appears only when some pilot has a deduction.
 class OverallResultsFormat extends ScoreCsvFormat {
-  const OverallResultsFormat(this.options);
+  const OverallResultsFormat(this.options, {super.writeBom, super.hardenText});
 
   /// The options that decide which columns appear; the same filters the
   /// viewer is showing.
@@ -21,6 +21,7 @@ class OverallResultsFormat extends ScoreCsvFormat {
   @override
   List<List<String?>> build(ScoreExportSource source) {
     final decimals = source.decimalPlaces;
+    final hasPenalty = source.standings.any((row) => row.penalty > 0);
     final header = <String>[
       'Rank',
       'Pilot',
@@ -31,25 +32,44 @@ class OverallResultsFormat extends ScoreCsvFormat {
       if (options.number) 'No.',
       if (options.pilotClass) 'Class',
       for (final round in source.rounds) 'R$round',
-      if (source.standings.any((row) => row.penalty > 0)) 'Penalty',
+      if (hasPenalty) 'Penalty deducted',
     ];
     final rows = <List<String?>>[header];
     for (final row in source.standings) {
       final cells = <String?>[
         '${row.place}',
-        row.pilot.listName,
+        _text(row.pilot.listName),
         _num(row.total, decimals),
         if (options.percentage) _num(row.percentage, decimals),
         if (options.raw) _num(row.raw, decimals),
-        if (options.team) row.pilot.team,
+        if (options.team) _text(row.pilot.team),
         if (options.number) _number(row.pilot.number),
-        if (options.pilotClass) row.pilot.className,
-        for (final round in source.rounds) _num(row.cells[round]?.score, decimals),
-        if (source.standings.any((r) => r.penalty > 0)) _num(row.penalty, decimals),
+        if (options.pilotClass) _text(row.pilot.className),
+        for (final round in source.rounds)
+          _roundCell(row.cells[round], decimals),
+        if (hasPenalty) _num(row.penalty, decimals),
       ];
       rows.add(cells);
     }
     return rows;
+  }
+
+  /// A round score; a dropped round keeps its value with a `*` prefix, so a
+  /// spreadsheet reader sees which round was dropped.
+  String? _roundCell(ExportStandingsCell? cell, int decimals) {
+    final score = cell?.score;
+    if (score == null) {
+      return null;
+    }
+    final text = score.toStringAsFixed(decimals);
+    return cell!.dropped ? '*$text' : text;
+  }
+
+  String? _text(String? value) {
+    if (value == null) {
+      return null;
+    }
+    return hardenText ? ScoreCsvFormat.harden(value) : value;
   }
 
   static String? _num(double? value, int decimals) =>

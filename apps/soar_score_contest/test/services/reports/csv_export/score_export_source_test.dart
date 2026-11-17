@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import 'package:soar_score_contest/services/reports/csv_export/score_export_error.dart';
 import 'package:soar_score_contest/services/reports/csv_export/score_export_options.dart';
 import 'package:soar_score_contest/services/reports/csv_export/score_export_source.dart';
 
@@ -8,8 +9,8 @@ import '../../../support/matrix_test_support.dart';
 import '../../../support/standings_fixtures.dart';
 
 /// A one-read report for [fixture]'s two-round contest: the contest facts,
-/// the stored standings, and every flight of the two rounds.
-ReportData reportOf(StandingsFixture fixture) {
+/// the stored standings as of round 2, and every flight of the two rounds.
+ReportData reportOf(StandingsFixture fixture, {int asOf = 2}) {
   return ReportData(
     contest: matrixContest(),
     configuration: matrixConfiguration(),
@@ -18,24 +19,22 @@ ReportData reportOf(StandingsFixture fixture) {
     teams: matrixTeams(),
     teamMemberships: matrixMemberships(),
     scores: fixture.scores,
-    results: fixture.standings[2]!,
-    roundResults: [
-      for (final round in fixture.roundResults.values) round,
-    ],
+    results: fixture.standings[asOf]!,
+    roundResults: [for (final round in fixture.roundResults.values) round],
   );
 }
 
-ScoreExportOptions allOptions() => const ScoreExportOptions(
+ScoreExportOptions allOptions({int to = 2}) => ScoreExportOptions(
   from: 1,
-  to: 2,
+  requestedTo: to,
+  to: to,
+  lastShown: 2,
   rounds: [1, 2],
-  provisional: false,
   percentage: false,
   raw: false,
   team: false,
   number: false,
   pilotClass: false,
-  details: false,
 );
 
 void main() {
@@ -80,7 +79,9 @@ void main() {
     });
 
     test('a dropped round keeps its value and is marked dropped', () {
-      final lee = source.standings.lastWhere((r) => r.pilot.listName == 'Lee, Ann');
+      final lee = source.standings.lastWhere(
+        (r) => r.pilot.listName == 'Lee, Ann',
+      );
       expect(lee.cells[2]!.score, 500);
       expect(lee.cells[2]!.dropped, isTrue);
     });
@@ -133,46 +134,94 @@ void main() {
   });
 
   group('facts', () {
-    test('the discipline resolves from the system profile', () {
-      // matrixConfiguration uses a profile id that is not a system one, so
-      // the discipline is unknown; the branch still degrades to no height.
-      expect(source.discipline, isNull);
-      expect(source.hasLaunchHeight, isFalse);
-    });
-
     test('the contest name and decimal places are carried', () {
       expect(source.contestName, 'Gator Cup F5J');
       expect(source.decimalPlaces, 1);
       expect(source.rounds, [1, 2]);
     });
+  });
 
-    test('a system F5J configuration records a launch height', () {
+  group('validation', () {
+    test('a read with no stored standing throws', () {
       final report = reportOf(fixture);
-      final config = ContestConfigurationRevision(
-        id: report.configuration!.id,
-        contestId: report.contest.id,
-        revisionNumber: report.configuration!.revisionNumber,
-        disciplineProfileId: SystemDisciplineProfiles.f5jId,
-        config: report.configuration!.config,
-        createdBy: report.configuration!.createdBy,
-        createdAt: report.configuration!.createdAt,
+      final noStanding = ReportData(
+        contest: report.contest,
+        configuration: report.configuration,
+        participations: report.participations,
+        participants: report.participants,
+        teams: report.teams,
+        teamMemberships: report.teamMemberships,
+        scores: report.scores,
+        results: null,
+        roundResults: report.roundResults,
       );
-      final f5j = ScoreExportSource.of(
-        ReportData(
-          contest: report.contest,
-          configuration: config,
-          participations: report.participations,
-          participants: report.participants,
-          teams: report.teams,
-          teamMemberships: report.teamMemberships,
-          scores: report.scores,
-          results: report.results,
-          roundResults: report.roundResults,
-        ),
-        allOptions(),
+      expect(
+        () => ScoreExportSource.of(noStanding, allOptions()),
+        throwsA(isA<ScoreExportError>()),
       );
-      expect(f5j.discipline, DisciplineType.f5j);
-      expect(f5j.hasLaunchHeight, isTrue);
+    });
+
+    test('standings as of a different round than the export throws', () {
+      // The standings are as of round 1, but the export shows to round 2.
+      expect(
+        () => ScoreExportSource.of(reportOf(fixture, asOf: 1), allOptions()),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+
+    test('an empty range throws', () {
+      final options = ScoreExportOptions(
+        from: 3,
+        requestedTo: 5,
+        to: 0,
+        lastShown: 2,
+        rounds: const [],
+        percentage: false,
+        raw: false,
+        team: false,
+        number: false,
+        pilotClass: false,
+      );
+      expect(
+        () => ScoreExportSource.of(reportOf(fixture), options),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+  });
+
+  group('sort tiebreak', () {
+    test('tied flights order by participation id', () {
+      // Two flights in group 1 with the same score: the order is decided by
+      // the participation id, not the unstable list order.
+      final tie = RoundResults(
+        ordinal: 1,
+        flights: [
+          RoundFlightResult(
+            group: 1,
+            result: flight(1, 1, 500, placeholder: Id.create()),
+          ),
+          RoundFlightResult(
+            group: 1,
+            result: flight(3, 1, 500, placeholder: Id.create()),
+          ),
+        ],
+      );
+      final report = ReportData(
+        contest: matrixContest(),
+        configuration: matrixConfiguration(),
+        participations: matrixParticipations(numbered: true),
+        participants: matrixProfiles(),
+        teams: matrixTeams(),
+        teamMemberships: matrixMemberships(),
+        scores: fixture.scores,
+        results: fixture.standings[1]!,
+        roundResults: [tie],
+      );
+      final source = ScoreExportSource.of(report, allOptions(to: 1));
+      expect(
+        [for (final f in source.flights) f.pilot.participationId.value],
+        [participationId(1).value, participationId(3).value],
+      );
     });
   });
 }

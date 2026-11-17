@@ -8,26 +8,22 @@ void main() {
   final fixture = StandingsFixture();
   final facts = factsOf(fixture);
 
-  ScoreExportOptions of(Map<String, String> filters) => ScoreExportOptions.of(
-    {
-      ...ScoreExportOptions.defaults(facts),
-      ...filters,
-    },
-    facts,
-  );
+  ScoreExportOptions of(Map<String, String> filters) => ScoreExportOptions.of({
+    ...ScoreExportOptions.defaults(facts),
+    ...filters,
+  }, facts);
 
   test('defaults show every scored round', () {
     final options = of(const {});
     expect(options.from, 1);
     expect(options.to, 2);
     expect(options.rounds, [1, 2]);
-    expect(options.provisional, isFalse);
     expect(options.percentage, isTrue);
     expect(options.raw, isFalse);
     expect(options.team, isFalse);
     expect(options.number, isFalse);
     expect(options.pilotClass, isFalse);
-    expect(options.details, isFalse);
+    expect(options.check(), isNull);
   });
 
   test('a round range is honoured', () {
@@ -36,14 +32,9 @@ void main() {
   });
 
   test('column options toggle', () {
-    final options = of(const {
-      'pct': '0',
-      'raw': '1',
-      'det': '1',
-    });
+    final options = of(const {'pct': '0', 'raw': '1'});
     expect(options.percentage, isFalse);
     expect(options.raw, isTrue);
-    expect(options.details, isTrue);
   });
 
   test('a key the contest does not use stays off', () {
@@ -54,8 +45,21 @@ void main() {
     expect(options.pilotClass, isFalse);
   });
 
+  test('a from above the to is refused', () {
+    final options = of(const {'from': '2', 'to': '1'});
+    expect(options.check(), isNotNull);
+  });
+
+  test('a range with no scored round is refused', () {
+    // The fixture scores only rounds 1 and 2, so a range past them is empty.
+    final options = of(const {'from': '3', 'to': '5'});
+    expect(options.check(), isNotNull);
+  });
+
   test('a completed contest is never provisional', () {
     final completed = factsOf(fixture, state: LifecycleState.completed);
-    expect(ScoreExportOptions.of(const {}, completed).provisional, isFalse);
+    // Provisional is gone from the options; the default filters still turn it
+    // off for a completed contest.
+    expect(ScoreExportOptions.defaults(completed)['prov'], '0');
   });
 }

@@ -1,6 +1,7 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../report_pilot.dart';
+import 'score_export_error.dart';
 import 'score_export_options.dart';
 
 /// One pilot's score in one of the shown rounds, for the standings view.
@@ -112,20 +113,46 @@ class ScoreExportSource {
   const ScoreExportSource({
     required this.contestName,
     required this.decimalPlaces,
-    required this.discipline,
     required this.rounds,
     required this.standings,
     required this.flights,
   });
 
   /// Builds the source from one [reportData] read and the shown rounds in
-  /// [options]. The discipline is resolved from the saved configuration
-  /// against the system profiles, the same way the workspace does.
-  factory ScoreExportSource.of(ReportData reportData, ScoreExportOptions options) {
+  /// [options].
+  ///
+  /// The read must carry the facts, the scores and the standings of the shown
+  /// rounds: `reportData(facts: true, scores: true, asOfRound: options.to,
+  /// rounds: options.rounds)`. Without the facts the pilot names and teams are
+  /// blank; without the scores the time and height are blank; and the standings
+  /// are required and must be as of `options.to`. A violation throws a
+  /// [ScoreExportError].
+  factory ScoreExportSource.of(
+    ReportData reportData,
+    ScoreExportOptions options,
+  ) {
+    final rangeError = options.check();
+    if (rangeError != null) {
+      throw ScoreExportError(rangeError);
+    }
+    final results = reportData.results;
+    if (results == null || results.standings.isEmpty) {
+      throw ScoreExportError(
+        'No standings are stored yet. Save a score on the Scoring page and '
+        'try again.',
+      );
+    }
+    if (results.asOfRound != options.to) {
+      throw ScoreExportError(
+        'The standings are as of round ${results.asOfRound}, but the export '
+        'shows rounds to ${options.to}.',
+      );
+    }
     final rounds = options.rounds;
     final pilots = _pilots(reportData);
     final standingOf = {
-      for (final standing in reportData.results?.standings ?? const <ParticipationStanding>[])
+      for (final standing
+          in reportData.results?.standings ?? const <ParticipationStanding>[])
         standing.contestParticipationId: standing,
     };
     final componentsOf = _officialComponents(reportData);
@@ -153,7 +180,8 @@ class ScoreExportSource {
     // per shown round.
     final standings = <ExportStandingsRow>[];
     final ordered = [
-      for (final standing in reportData.results?.standings ?? const <ParticipationStanding>[])
+      for (final standing
+          in reportData.results?.standings ?? const <ParticipationStanding>[])
         if (pilots.containsKey(standing.contestParticipationId)) standing,
     ];
     final top = ordered.isEmpty ? 0.0 : ordered.first.overallScore;
@@ -166,7 +194,8 @@ class ScoreExportSource {
             pilot.retiredAtRound != null && round >= pilot.retiredAtRound!;
         // A round after retirement is a plain zero without a flight behind it.
         cells[round] = ExportStandingsCell(
-          score: selectedOf[round]?[pilot.participationId] ??
+          score:
+              selectedOf[round]?[pilot.participationId] ??
               (retired ? 0.0 : null),
           dropped: standing.droppedRounds.contains(round),
         );
@@ -190,13 +219,17 @@ class ScoreExportSource {
     for (final round in rounds) {
       final result = byRound[round];
       if (result == null) continue;
-      final ordered = [
-        for (final flight in result.flights)
-          if (pilots.containsKey(flight.participationId)) flight,
-      ]..sort((a, b) {
-        if (a.group != b.group) return a.group.compareTo(b.group);
-        return b.result.groupScore.compareTo(a.result.groupScore);
-      });
+      final ordered =
+          [
+            for (final flight in result.flights)
+              if (pilots.containsKey(flight.participationId)) flight,
+          ]..sort((a, b) {
+            if (a.group != b.group) return a.group.compareTo(b.group);
+            final byScore = b.result.groupScore.compareTo(a.result.groupScore);
+            if (byScore != 0) return byScore;
+            // A tiebreak keeps the order deterministic: List.sort is not stable.
+            return a.participationId.value.compareTo(b.participationId.value);
+          });
       for (final flight in ordered) {
         final pilot = pilots[flight.participationId]!;
         final standing = standingOf[flight.participationId];
@@ -224,7 +257,6 @@ class ScoreExportSource {
     return ScoreExportSource(
       contestName: reportData.contest.name,
       decimalPlaces: _decimalPlaces(reportData),
-      discipline: _disciplineType(reportData),
       rounds: rounds,
       standings: standings,
       flights: flights,
@@ -237,10 +269,6 @@ class ScoreExportSource {
   /// How many decimals a score shows.
   final int decimalPlaces;
 
-  /// The discipline the contest scores, or `null` when the configuration is
-  /// missing or not a system profile.
-  final DisciplineType? discipline;
-
   /// The rounds the export shows, ascending.
   final List<int> rounds;
 
@@ -250,16 +278,12 @@ class ScoreExportSource {
   /// The flight view: one row per flight, by round then group then score.
   final List<ExportFlightRow> flights;
 
-  /// The discipline records a launch height (F5J); F3J and the others do not.
-  bool get hasLaunchHeight => discipline == DisciplineType.f5j;
-
   static Map<Id, ReportPilot> _pilots(ReportData data) {
     final profiles = {
-      for (final p in data.participants ?? const <ParticipantProfile>[]) p.id: p,
+      for (final p in data.participants ?? const <ParticipantProfile>[])
+        p.id: p,
     };
-    final teams = {
-      for (final t in data.teams ?? const <Team>[]) t.id: t.name,
-    };
+    final teams = {for (final t in data.teams ?? const <Team>[]) t.id: t.name};
     final teamOf = {
       for (final m in data.teamMemberships ?? const <TeamMembership>[])
         m.contestParticipationId: m.teamId,
@@ -280,23 +304,11 @@ class ScoreExportSource {
   }
 
   /// The official score components, by placeholder id.
-  static Map<Id, Map<String, Object?>> _officialComponents(ReportData data) =>
-      {
-        for (final slot in data.scores?.slots ?? const <ScoreSlot>[])
-          if (slot.officialScore != null)
-            slot.placeholder.id: slot.officialScore!.components,
-      };
-
-  static DisciplineType? _disciplineType(ReportData data) {
-    final configuration = data.configuration;
-    if (configuration == null) return null;
-    for (final profile in SystemDisciplineProfiles.all) {
-      if (profile.profile.id == configuration.disciplineProfileId) {
-        return profile.profile.type;
-      }
-    }
-    return null;
-  }
+  static Map<Id, Map<String, Object?>> _officialComponents(ReportData data) => {
+    for (final slot in data.scores?.slots ?? const <ScoreSlot>[])
+      if (slot.officialScore != null)
+        slot.placeholder.id: slot.officialScore!.components,
+  };
 
   static int _decimalPlaces(ReportData data) {
     final configuration = data.configuration;
