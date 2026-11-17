@@ -55,18 +55,36 @@ class PromotionOperation {
         'A score promotion belongs to a contest.',
       );
     }
-    final prior = await _store.transaction(
-      (tx) => tx.findMutation(scope, m.clientMutationId),
-    );
-    final decided = prior != null && prior.outcome != MutationOutcome.pending;
-    if (decided && !_sameIntent(prior.payload, m.payload)) {
+    // The operation is known by its id as well as by the request that carried
+    // it: the same id with another payload is refused wherever it was sent.
+    final earlier = await _store.transaction((tx) async {
+      final byRequest = await tx.findMutation(scope, m.clientMutationId);
+      return [
+        ?byRequest,
+        for (final r in await tx.decidedMutationsFor(
+          scope,
+          promotionReceiptEntityType,
+          m.entityId,
+        ))
+          if (r.id != byRequest?.id) r,
+      ].where((r) => r.outcome != MutationOutcome.pending).toList();
+    });
+    if (earlier.any((r) => !_sameIntent(r.payload, m.payload))) {
       return MutationResult(
         clientMutationId: m.clientMutationId,
         outcome: MutationOutcome.rejected,
         reasonCode: SyncReasonCode.operationMismatch.code,
       );
     }
-    if (decided && prior.outcome != MutationOutcome.accepted) {
+    // The decision to answer from: an accepted receipt wins over a refusal.
+    final prior = earlier.isEmpty
+        ? null
+        : earlier.firstWhere(
+            (r) => r.outcome == MutationOutcome.accepted,
+            orElse: () => earlier.first,
+          );
+    final decided = prior != null;
+    if (prior != null && prior.outcome != MutationOutcome.accepted) {
       return MutationResult(
         clientMutationId: m.clientMutationId,
         outcome: prior.outcome,
@@ -208,6 +226,18 @@ class PromotionOperation {
     _Intent intent,
     ScorePromotionResult result,
   ) => _store.transaction((tx) async {
+    // A concurrent retry may have committed the promotion and its receipt
+    // while this one waited at the gate: answer from the recorded receipt.
+    final recorded = await tx.findMutation(scope, m.clientMutationId);
+    if (recorded != null && recorded.outcome == MutationOutcome.accepted) {
+      return MutationResult(
+        clientMutationId: m.clientMutationId,
+        outcome: MutationOutcome.accepted,
+        revision: result.entry.officialScore.scoreRevision,
+        sequence: recorded.sequence,
+        replayed: true,
+      );
+    }
     final sequence = await tx.highestSequence(scope) + 1;
     final now = ctx.clock();
     await tx.recordMutation(

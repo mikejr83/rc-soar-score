@@ -74,6 +74,15 @@ abstract interface class SyncAcceptorTransaction {
     String clientMutationId,
   );
 
+  /// Every decided record (any outcome) of one entity, in the order they
+  /// were stored, so an operation can be found by its id whatever the
+  /// `client_mutation_id` of the request that carried it.
+  Future<List<MutationRecord>> decidedMutationsFor(
+    SyncScopeKey scope,
+    String entityType,
+    Id entityId,
+  );
+
   /// The accepted mutations that changed one entity, oldest sequence first.
   Future<List<MutationRecord>> acceptedMutationsFor(
     SyncScopeKey scope,

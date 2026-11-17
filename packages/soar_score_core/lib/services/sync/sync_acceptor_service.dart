@@ -277,7 +277,12 @@ class SyncAcceptorService {
   ) async {
     final recalculation = this.recalculation;
     if (recalculation == null || scope is! ContestScopeKey) return;
-    if (!results.any((r) => r.outcome == MutationOutcome.accepted)) return;
+    // An answered replay changed nothing, so it rewrites no results.
+    if (!results.any(
+      (r) => r.outcome == MutationOutcome.accepted && !r.replayed,
+    )) {
+      return;
+    }
     await recalculation.recalculateAfterEntry(scope.contestId, cause: 'a sync');
   }
 

@@ -247,6 +247,26 @@ class _DriftSyncAcceptorTransaction implements core.SyncAcceptorTransaction {
   }
 
   @override
+  Future<List<core.MutationRecord>> decidedMutationsFor(
+    core.SyncScopeKey scope,
+    String entityType,
+    core.Id entityId,
+  ) async {
+    final (column, id) = _scopeColumn(scope);
+    final rows = await _mutations.where(
+      "$column = ? AND outcome <> 'Pending' AND entity_type = ? "
+      'AND entity_id = ?',
+      [
+        Variable<String>(id),
+        Variable<String>(entityType),
+        Variable<String>(entityId.value),
+      ],
+      orderBy: 'client_time, id',
+    );
+    return [for (final row in rows) core.MutationRecord.fromJson(row)];
+  }
+
+  @override
   Future<List<core.MutationRecord>> acceptedMutationsFor(
     core.SyncScopeKey scope,
     String entityType,

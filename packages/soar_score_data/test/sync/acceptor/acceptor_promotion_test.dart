@@ -6,6 +6,21 @@ import 'package:test/test.dart';
 import '../../support/acceptor_harness.dart';
 import '../../support/backends.dart';
 
+class _CountingRecalculation extends RecalculationService {
+  _CountingRecalculation(super.results);
+
+  var runs = 0;
+
+  @override
+  Future<String?> recalculateAfterEntry(
+    core.Id contestId, {
+    String cause = 'a score entry',
+  }) async {
+    runs++;
+    return null;
+  }
+}
+
 void main() => forEachBackend(_tests);
 
 /// The `promote_score` operation: an installation asks the service to adopt a
@@ -72,6 +87,16 @@ void _tests(Backend backend) {
       },
     );
   }
+
+  Future<List<core.ScorePlaceholder>> storedSlots() async =>
+      (await harness.server.stores.of('ScorePlaceholder').all())
+          .cast<core.ScorePlaceholder>()
+          .where(
+            (p) =>
+                p.contestId == contestId &&
+                p.state == core.ScorePlaceholderState.submitted,
+          )
+          .toList();
 
   Future<SyncExchangeOutput> send(SyncMutation m, {int after = 0}) =>
       harness.exchange(scope, mutations: [m], after: after);
@@ -308,6 +333,127 @@ void _tests(Backend backend) {
     expect(result.reasonCode, 'locked');
     expect(await officials(), isEmpty);
   });
+
+  Future<SyncExchangeOutput> sendVia(
+    SyncAcceptorService service,
+    SyncMutation m,
+  ) => service.exchange(
+    accountId: harness.account,
+    input: SyncExchangeInput(
+      protocolVersion: 1,
+      schemaVersion: 1,
+      installationId: harness.installationA,
+      scope: scope,
+      lastAcknowledgedSequence: 0,
+      mutations: [m],
+    ),
+  );
+
+  test(
+    'an operation id is bound to its first payload, whatever the request',
+    () async {
+      final operationId = core.Id.create();
+      await send(intent(operationId: operationId));
+      final other = (await storedSlots()).firstWhere((p) => p.id != slot.id);
+
+      final result = (await send(
+        intent(operationId: operationId, placeholder: other),
+      )).results.single;
+
+      expect(result.outcome, core.MutationOutcome.rejected);
+      expect(result.reasonCode, 'operation_mismatch');
+      expect(await officials(), hasLength(1));
+      expect(
+        (await harness.server.stores.of('OfficialScore').all())
+            .cast<core.OfficialScore>()
+            .where((o) => o.scorePlaceholderId == other.id),
+        isEmpty,
+      );
+    },
+  );
+
+  test('the same operation sent under a new request id replays', () async {
+    final operationId = core.Id.create();
+    await send(intent(operationId: operationId));
+    final records = await harness.serverMutationCount();
+
+    final again = (await send(intent(operationId: operationId))).results.single;
+
+    expect(again.outcome, core.MutationOutcome.accepted);
+    expect(again.replayed, isTrue);
+    expect(await harness.serverMutationCount(), records);
+    expect(await officials(), hasLength(1));
+  });
+
+  test('a replay does not recalculate the results', () async {
+    final counting = _CountingRecalculation(
+      ResultsService(harness.serverRepository),
+    );
+    final service = SyncAcceptorService(
+      harness.serverRepository,
+      versions: const SyncVersions.exactly(1),
+      recalculation: counting,
+    );
+    final m = intent();
+
+    await sendVia(service, m);
+    expect(counting.runs, 1);
+    await sendVia(service, m);
+    expect(counting.runs, 1);
+  });
+
+  test(
+    'a retry that races the first answers from the recorded receipt',
+    () async {
+      final second = SyncAcceptorService(
+        harness.serverRepository,
+        versions: const SyncVersions.exactly(1),
+      );
+      final m = intent();
+
+      final results = await Future.wait([
+        sendVia(harness.service, m),
+        sendVia(second, m),
+      ]);
+
+      for (final out in results) {
+        expect(out.results.single.outcome, core.MutationOutcome.accepted);
+      }
+      expect(await officials(), hasLength(1));
+      expect(
+        (await harness.server.stores.of('OfficialScore').all()).length,
+        greaterThan(0),
+      );
+    },
+  );
+
+  test(
+    'a slot another route already adopted gets its own receipt once',
+    () async {
+      await ScoresService(harness.serverRepository).promoteSubmission(
+        contestId,
+        slot.assignmentId,
+        sourceAttemptId: source.id,
+        expectedScoreRevision: slot.scoreRevision,
+        actorId: harness.account,
+        metadata: core.MutationMetadata(
+          clientMutationId: 'route-promote',
+          authority: core.Authority.director,
+          clientTime: DateTime.utc(2026, 11, 16),
+          actorId: harness.account,
+        ),
+      );
+      final m = intent();
+
+      final first = (await send(m)).results.single;
+      final again = (await send(m)).results.single;
+
+      expect(first.outcome, core.MutationOutcome.accepted);
+      expect(again.outcome, core.MutationOutcome.accepted);
+      expect(again.sequence, first.sequence);
+      expect(await officials(), hasLength(1));
+    },
+  );
 
   test('an aggregate is never split across pages', () async {
     await harness.close();
