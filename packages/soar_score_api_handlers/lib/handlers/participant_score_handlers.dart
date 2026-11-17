@@ -28,8 +28,8 @@ final _logger = Logger('ParticipantScores');
 /// score, so the official results and the public projection are unchanged
 /// and nothing is recalculated or published. The exception is a contest that
 /// accepts scores on its own ("Scores become official"): a submission that
-/// completes its round or group makes it and the waiting ones official in the
-/// same transaction, and the results are then recalculated once.
+/// completes its round or group makes it and the waiting ones official, and the
+/// results are recalculated, all in the same transaction as the submission.
 void addParticipantScoreRoutes(
   Router router,
   Repository repository, {
@@ -57,27 +57,6 @@ void addParticipantScoreRoutes(
         components: body.components,
         sourceDevice: _sourceDevice(request),
       );
-      if (stored.scoresChanged) {
-        // The contest accepted submissions on its own: the official results
-        // change, so they are recalculated once. Publication follows its
-        // own policy (a later change of this feature).
-        // Under the contest gate, so reading the scores and replacing the
-        // results cannot interleave with another acceptance and leave an
-        // older standing as the current one.
-        final contestId = principal.access.contestId;
-        final warning = await repository.officialScoreRepository
-            .withContestGate(
-              contestId,
-              () =>
-                  RecalculationService(ResultsService(repository))
-                      .recalculateAfterEntry(contestId),
-            );
-        if (warning != null) {
-          _logger.info(
-            'Recalculation warning after an automatic acceptance: $warning',
-          );
-        }
-      }
       final name = await _pilotName(repository, principal);
       return _json(
         SubmitParticipantScoreResponse(

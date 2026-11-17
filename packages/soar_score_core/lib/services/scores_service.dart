@@ -41,6 +41,7 @@ import 'contest_scores.dart';
 import 'invitations/participant_access.dart';
 import 'participant_submission.dart';
 import 'landing_bonus.dart';
+import 'results_service.dart';
 import 'score_correction_audit.dart';
 import 'score_entry_result.dart';
 import 'score_history.dart';

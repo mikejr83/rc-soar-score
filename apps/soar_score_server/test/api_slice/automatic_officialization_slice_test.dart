@@ -36,6 +36,35 @@ class _FailsOnSecondPromotion extends OfficialScoreRepository {
   }
 }
 
+/// Refuses to store the recalculated results while [failing], as an
+/// interruption between the acceptances and the results would.
+class _FailsToStoreResults extends ResultsRepository {
+  _FailsToStoreResults(super.db);
+
+  var failing = true;
+
+  @override
+  Future<void> replaceResultsForContest(
+    core.Id contestId,
+    Iterable<core.FlightResult> flights,
+    Iterable<core.ParticipationStanding> standings,
+    Iterable<core.TeamStanding> teams,
+  ) {
+    if (failing) throw StateError('results not stored');
+    return super.replaceResultsForContest(contestId, flights, standings, teams);
+  }
+}
+
+class _NoResultsRepository extends Repository {
+  _NoResultsRepository(super.database)
+    : _results = _FailsToStoreResults(database);
+
+  final _FailsToStoreResults _results;
+
+  @override
+  ResultsRepository get resultsRepository => _results;
+}
+
 class _FailingRepository extends Repository {
   _FailingRepository(super.database)
     : _official = _FailsOnSecondPromotion(database);
@@ -426,7 +455,6 @@ void _tests(SliceBackend backend) {
         components: _score,
       );
       expect(stored.isOfficial, isFalse);
-      expect(stored.scoresChanged, isFalse);
       expect(stored.revision, 1);
       // The first acceptance of the run was rolled back with the second.
       for (final pilot in [1, 2, 3]) {
@@ -437,6 +465,61 @@ void _tests(SliceBackend backend) {
         core.Id.parse(_contestId),
       );
       expect(run.promoted, hasLength(3));
+    });
+
+    test('results that cannot be stored roll the acceptances back, and a '
+        'repeat of the request finishes them', () async {
+      await submit(1, 1);
+      await submit(2, 1);
+      final broken = _NoResultsRepository(api.database);
+      final service = core.InvitationService(
+        repository,
+        core.InvitationCodec.fromText(_secret),
+      );
+      final access = await service.authorize(tokens[3]!, write: true);
+      Future<core.ParticipantSubmission> third(core.Repository over) =>
+          core.ScoresService(over).submitParticipantScore(
+            access,
+            1,
+            clientMutationId: 'm-3-1',
+            matrixRevision: matrixRevision,
+            components: _score,
+          );
+
+      final first = await third(broken);
+      expect(first.isOfficial, isFalse);
+      expect(first.revision, 1);
+      // No score is official and no standing was written: nothing is half
+      // done, so the standings are not behind the official scores.
+      for (final pilot in [1, 2, 3]) {
+        await expectWaiting(1, pilot);
+      }
+      expect(
+        await repository.flightResultRepository.listForContest(
+          core.Id.parse(_contestId),
+        ),
+        isEmpty,
+      );
+
+      // The same request again, with working storage, finishes the job.
+      broken._results.failing = false;
+      final repeat = await third(broken);
+      expect(repeat.replayed, isTrue);
+      expect(repeat.isOfficial, isTrue);
+      expect(repeat.revision, 2);
+      for (final pilot in [1, 2, 3]) {
+        await expectAutomatic(1, pilot, core.automaticRoundCompleteReason);
+      }
+      expect(
+        await repository.flightResultRepository.listForContest(
+          core.Id.parse(_contestId),
+        ),
+        hasLength(3),
+      );
+      final standings = await core.ResultsService(repository)
+          .read(core.Id.parse(_contestId));
+      expect(standings.isStale, isFalse);
+      expect(standings.standings, hasLength(3));
     });
 
     test('a locked slot is left as it is', () async {
@@ -504,6 +587,26 @@ void _tests(SliceBackend backend) {
       for (final pilot in large) {
         await expectAutomatic(1, pilot, core.automaticGroupCompleteReason);
       }
+    });
+  });
+
+  group('simultaneous submissions', () {
+    setUp(() => open('EndOfGroup', groups: 3, pilots: 3));
+
+    test('completing different groups together keeps every standing', () async {
+      // Three groups of one pilot each: each submission completes its group.
+      await Future.wait([submit(1, 1), submit(2, 1), submit(3, 1)]);
+      for (final pilot in [1, 2, 3]) {
+        await expectAutomatic(1, pilot, core.automaticGroupCompleteReason);
+      }
+      final flights = await repository.flightResultRepository.listForContest(
+        core.Id.parse(_contestId),
+      );
+      expect(flights, hasLength(3));
+      final standings = await core.ResultsService(repository)
+          .read(core.Id.parse(_contestId));
+      expect(standings.isStale, isFalse);
+      expect(standings.standings, hasLength(3));
     });
   });
 

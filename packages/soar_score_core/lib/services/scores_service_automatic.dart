@@ -63,6 +63,29 @@ extension AutomaticOfficializationService on ScoresService {
     () => _evaluateAutomaticOfficialization(contestId),
   );
 
+  /// As [evaluateAutomaticOfficialization], and when it made scores official
+  /// the results are recalculated in the same gated transaction, so the
+  /// acceptances and the standings commit together or not at all.
+  ///
+  /// A failure of the recalculation (or of any acceptance) rolls the whole
+  /// run back; nothing is half accepted and no standing is left behind the
+  /// official scores. Run inside an outer gated transaction it is a
+  /// savepoint of it, so the caller can keep its own writes. Because the gate
+  /// is held from the read of the scores to the replacement of the results,
+  /// two runs cannot interleave and overwrite newer standings.
+  Future<AutomaticOfficialization> officializeAndRecalculate(Id contestId) =>
+      repository.officialScoreRepository.withContestGate(contestId, () async {
+        final run = await _evaluateAutomaticOfficialization(contestId);
+        if (run.changedScores) {
+          await ResultsService(
+            repository,
+            clock: _clock,
+            newId: _newId,
+          ).recalculate(contestId);
+        }
+        return run;
+      });
+
   Future<AutomaticOfficialization> _evaluateAutomaticOfficialization(
     Id contestId,
   ) async {

@@ -39,7 +39,7 @@ extension ParticipantScoresService on ScoresService {
   }) => repository.officialScoreRepository.withContestGate(
     access.contestId,
     () async {
-      final stored = await _submitParticipantScore(
+      Future<ParticipantSubmission> submit() => _submitParticipantScore(
         access,
         round,
         clientMutationId: clientMutationId,
@@ -47,22 +47,16 @@ extension ParticipantScoresService on ScoresService {
         components: components,
         sourceDevice: sourceDevice,
       );
-      if (stored.replayed) return stored;
-      // The submission may complete its round or group. The run is part of the
-      // same transaction, so the pilot's score and its acceptance commit
-      // together; a busy contest escapes to the caller, any other failure
-      // leaves the submission waiting.
+      final stored = await submit();
+      // The submission may complete its round or group. The acceptances and
+      // the recalculation of the results run in their own savepoint of this
+      // transaction: they commit with the pilot's score or not at all, so a
+      // failure leaves the submission waiting and the standings as they
+      // were. A repeat of the request runs it again, which finishes what a
+      // failed run left. A busy contest escapes to the caller.
+      final AutomaticOfficialization run;
       try {
-        // Its own savepoint (the nested gate): a failure part way rolls
-        // back every acceptance of the run and keeps the submission.
-        final automatic = await evaluateAutomaticOfficialization(
-          access.contestId,
-        );
-        return stored.copyWithOfficialization(
-          automatic.promoted.contains(stored.assignmentId),
-          anyOfficial: automatic.changedScores,
-          officialRevision: automatic.revisions[stored.assignmentId],
-        );
+        run = await officializeAndRecalculate(access.contestId);
       } on ContestBusyError {
         rethrow;
       } on Object catch (error) {
@@ -72,6 +66,12 @@ extension ParticipantScoresService on ScoresService {
         );
         return stored;
       }
+      // A repeat is answered again from what is stored now.
+      if (stored.replayed) return run.changedScores ? submit() : stored;
+      return stored.copyWithOfficialization(
+        run.promoted.contains(stored.assignmentId),
+        officialRevision: run.revisions[stored.assignmentId],
+      );
     },
   );
 

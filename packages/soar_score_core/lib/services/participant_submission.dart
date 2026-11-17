@@ -18,7 +18,6 @@ class ParticipantSubmission extends Equatable {
     this.nextRound,
     this.replayed = false,
     this.isOfficial = false,
-    this.scoresChanged = false,
   });
 
   final Id assignmentId;
@@ -53,14 +52,9 @@ class ParticipantSubmission extends Equatable {
   /// director's score stands over it.
   final bool isOfficial;
 
-  /// True when that run made any submission official (this one or another
-  /// of its round or group), so the results need a recalculation.
-  final bool scoresChanged;
-
   /// This submission with the outcome of the automatic run.
   ParticipantSubmission copyWithOfficialization(
     bool isOfficial, {
-    required bool anyOfficial,
     int? officialRevision,
   }) => ParticipantSubmission(
     assignmentId: assignmentId,
@@ -73,7 +67,6 @@ class ParticipantSubmission extends Equatable {
     nextRound: nextRound,
     replayed: replayed,
     isOfficial: isOfficial,
-    scoresChanged: anyOfficial,
   );
 
   @override
@@ -88,7 +81,6 @@ class ParticipantSubmission extends Equatable {
     nextRound,
     replayed,
     isOfficial,
-    scoresChanged,
   ];
 }
 
