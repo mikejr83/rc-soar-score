@@ -4327,6 +4327,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, one{1 row was not marked; try it again.} other{{count} rows were not marked; try them again.}}'**
   String scoreMarkAllRetry(int count);
+
+  /// Part of the Mark all result for rows whose adoption is queued on this device until the service decides it.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 row is waiting to sync.} other{{count} rows are waiting to sync.}}'**
+  String scoreMarkAllQueued(int count);
+
+  /// Part of the Mark all result for rows whose Mark official is already queued.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 row already waiting to sync is left out.} other{{count} rows already waiting to sync are left out.}}'**
+  String scoreMarkAllSkipWaiting(int count);
+
+  /// Why Mark official is off on a row whose adoption is queued for the service.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued; the service decides it when this device syncs.'**
+  String get scoreMarkOfficialWaiting;
+
+  /// Snackbar after Mark official was queued instead of applied.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark official for {pilot} is queued and will be reviewed when this device syncs.'**
+  String scoreMarkOfficialQueued(String pilot);
+
+  /// Line under the status chip of a row whose Mark official is queued until the service decides it.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark official is queued'**
+  String get scoreAdoptionWaiting;
+
+  /// Row on the sync page: queued changes the service cannot take until it is updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for a newer service'**
+  String get syncWaitingForNewerService;
+
+  /// Name of a refused Mark official change on the sync page.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark official'**
+  String get syncRefusedScorePromotion;
 }
 
 class _AppLocalizationsDelegate

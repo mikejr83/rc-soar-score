@@ -2888,5 +2888,19 @@
   "scoreMarkAllRefused": "{count, plural, one{1 row was refused.} other{{count} rows were refused.}}",
   "@scoreMarkAllRefused": {"description": "Part of the Mark all result.", "placeholders": {"count": {"type": "int"}}},
   "scoreMarkAllRetry": "{count, plural, one{1 row was not marked; try it again.} other{{count} rows were not marked; try them again.}}",
-  "@scoreMarkAllRetry": {"description": "Part of the Mark all result for rows to try again.", "placeholders": {"count": {"type": "int"}}}
+  "@scoreMarkAllRetry": {"description": "Part of the Mark all result for rows to try again.", "placeholders": {"count": {"type": "int"}}},
+  "scoreMarkAllQueued": "{count, plural, one{1 row is waiting to sync.} other{{count} rows are waiting to sync.}}",
+  "@scoreMarkAllQueued": {"description": "Part of the Mark all result for rows whose adoption is queued on this device until the service decides it.", "placeholders": {"count": {"type": "int"}}},
+  "scoreMarkAllSkipWaiting": "{count, plural, one{1 row already waiting to sync is left out.} other{{count} rows already waiting to sync are left out.}}",
+  "@scoreMarkAllSkipWaiting": {"description": "Part of the Mark all result for rows whose Mark official is already queued.", "placeholders": {"count": {"type": "int"}}},
+  "scoreMarkOfficialWaiting": "Queued; the service decides it when this device syncs.",
+  "@scoreMarkOfficialWaiting": {"description": "Why Mark official is off on a row whose adoption is queued for the service."},
+  "scoreMarkOfficialQueued": "Mark official for {pilot} is queued and will be reviewed when this device syncs.",
+  "@scoreMarkOfficialQueued": {"description": "Snackbar after Mark official was queued instead of applied.", "placeholders": {"pilot": {"type": "String"}}},
+  "scoreAdoptionWaiting": "Mark official is queued",
+  "@scoreAdoptionWaiting": {"description": "Line under the status chip of a row whose Mark official is queued until the service decides it."},
+  "syncWaitingForNewerService": "Waiting for a newer service",
+  "@syncWaitingForNewerService": {"description": "Row on the sync page: queued changes the service cannot take until it is updated."},
+  "syncRefusedScorePromotion": "Mark official",
+  "@syncRefusedScorePromotion": {"description": "Name of a refused Mark official change on the sync page."}
 }

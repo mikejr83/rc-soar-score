@@ -6,6 +6,7 @@ import '../models/matrix/matrix_assignment.dart';
 import '../models/matrix/round.dart';
 import '../models/participants/contest_participation.dart';
 import '../models/scores/official_score.dart';
+import '../models/scores/pending_promotion.dart';
 import '../models/scores/score_attempt.dart';
 import '../models/scores/score_placeholder.dart';
 
@@ -15,17 +16,22 @@ class ScoreSlot extends Equatable {
     required this.placeholder,
     this.officialScore,
     this.pendingAttempt,
+    this.pendingPromotion,
   });
 
   factory ScoreSlot.fromJson(Map<String, Object?> json) {
     final official = json['official_score'] as Map<String, Object?>?;
     final pending = json['pending_attempt'] as Map<String, Object?>?;
+    final promotion = json['pending_promotion'] as Map<String, Object?>?;
     return ScoreSlot(
       placeholder: ScorePlaceholder.fromJson(
         json['placeholder']! as Map<String, Object?>,
       ),
       officialScore: official == null ? null : OfficialScore.fromJson(official),
       pendingAttempt: pending == null ? null : ScoreAttempt.fromJson(pending),
+      pendingPromotion: promotion == null
+          ? null
+          : PendingPromotion.fromJson(promotion),
     );
   }
 
@@ -38,14 +44,25 @@ class ScoreSlot extends Equatable {
   /// pilot's preliminary score, not official until the director enters one.
   final ScoreAttempt? pendingAttempt;
 
+  /// The director's mark-official that waits for the service (an installation
+  /// whose contest syncs), or null. It is the pending projection of the
+  /// adoption: the slot is not official yet, and results do not count it.
+  final PendingPromotion? pendingPromotion;
+
   Map<String, Object?> toJson() => {
     'placeholder': placeholder.toJson(),
     'official_score': officialScore?.toJson(),
     'pending_attempt': pendingAttempt?.toJson(),
+    'pending_promotion': pendingPromotion?.toJson(),
   };
 
   @override
-  List<Object?> get props => [placeholder, officialScore, pendingAttempt];
+  List<Object?> get props => [
+    placeholder,
+    officialScore,
+    pendingAttempt,
+    pendingPromotion,
+  ];
 }
 
 /// How far a round has been scored.

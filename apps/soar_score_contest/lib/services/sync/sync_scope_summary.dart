@@ -9,6 +9,7 @@ class SyncScopeSummary extends Equatable {
     this.pendingChanges = 0,
     this.rejectedChanges = 0,
     this.conflicts = 0,
+    this.waitingForNewerService = 0,
     this.lastSyncedAt,
     this.dataRevision = 0,
     this.problem,
@@ -23,6 +24,10 @@ class SyncScopeSummary extends Equatable {
 
   /// Conflicts that need the director's decision.
   final int conflicts;
+
+  /// Queued changes held back because the service does not know them yet
+  /// (it runs an older version); they go out once it is updated.
+  final int waitingForNewerService;
 
   /// When the scope last synced; null before the first sync.
   final DateTime? lastSyncedAt;
@@ -46,6 +51,7 @@ class SyncScopeSummary extends Equatable {
     pendingChanges,
     rejectedChanges,
     conflicts,
+    waitingForNewerService,
     lastSyncedAt,
     dataRevision,
     problem,

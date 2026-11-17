@@ -3138,4 +3138,44 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String scoreMarkAllQueued(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rows are waiting to sync.',
+      one: '1 row is waiting to sync.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scoreMarkAllSkipWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rows already waiting to sync are left out.',
+      one: '1 row already waiting to sync is left out.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scoreMarkOfficialWaiting =>
+      'Queued; the service decides it when this device syncs.';
+
+  @override
+  String scoreMarkOfficialQueued(String pilot) {
+    return 'Mark official for $pilot is queued and will be reviewed when this device syncs.';
+  }
+
+  @override
+  String get scoreAdoptionWaiting => 'Mark official is queued';
+
+  @override
+  String get syncWaitingForNewerService => 'Waiting for a newer service';
+
+  @override
+  String get syncRefusedScorePromotion => 'Mark official';
 }

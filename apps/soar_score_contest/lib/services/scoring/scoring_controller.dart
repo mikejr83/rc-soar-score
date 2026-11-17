@@ -208,9 +208,15 @@ class ScoringController extends ChangeNotifier {
         );
       }
     }
+    _syncReads++;
     await _loadResults();
     notifyListeners();
   }
+
+  /// How many sync refreshes have been applied; a mark that was out while one
+  /// was applied reads its slot again after its receipt, because the refresh
+  /// kept the busy row as it was and the service may have decided meanwhile.
+  int _syncReads = 0;
 
   void _clampGroup() {
     final current = data?.roundByOrdinal(round);
@@ -400,6 +406,23 @@ class ScoringController extends ChangeNotifier {
     _theirs.remove(row.id);
     // The row no longer removes a penalty, so its reason is done with.
     _clearRemovalReason(row.id);
+  }
+
+  /// Shows [queued] on [row]: the pilot's entry and the score stay as they
+  /// were, and the slot holds the adoption waiting for the service.
+  void _applyQueued(ScoringRow row, PendingPromotion queued) {
+    // A sync read that began before the intent was queued is older than the
+    // page now; the epoch makes it be read again instead of put over this.
+    _savedEpoch++;
+    final slot = row.slot!;
+    data = data!.withSlot(
+      ScoreSlot(
+        placeholder: slot.placeholder,
+        officialScore: slot.officialScore,
+        pendingAttempt: slot.pendingAttempt,
+        pendingPromotion: queued,
+      ),
+    );
   }
 
   /// Saves one row as its own official revision. Returns whether it saved.
@@ -740,6 +763,7 @@ class ScoringController extends ChangeNotifier {
       return MarkOfficialSkip.noSubmission;
     }
     if (row.retired) return MarkOfficialSkip.retired;
+    if (row.isAdoptionPending) return MarkOfficialSkip.waitingToSync;
     if (block != null || row.isLocked) return MarkOfficialSkip.closed;
     if (saveOf(row.id).isBusy) return MarkOfficialSkip.busy;
     if (hasEdits(row)) return MarkOfficialSkip.edited;
@@ -785,6 +809,7 @@ class ScoringController extends ChangeNotifier {
     final attempt = row.slot!.pendingAttempt!;
     _saves[row.id] = const RowSave(RowSaveKind.saving, promotion: true);
     notifyListeners();
+    final readsBefore = _syncReads;
     try {
       final promoted = await client.promoteScore(
         contestId,
@@ -796,11 +821,12 @@ class ScoringController extends ChangeNotifier {
       );
       final adopted = promoted.adopted;
       if (adopted == null) {
-        // Queued for the service to decide: nothing changed on this slot yet.
-        // Read it again so the row shows the waiting adoption.
+        // Queued for the service to decide: only the waiting adoption shows.
+        // The receipt carries it, so a failed score read cannot hide it.
         _saves.remove(row.id);
-        await _refreshSlots([row]);
+        _applyQueued(row, promoted.queued!);
         notifyListeners();
+        if (_syncReads != readsBefore) await _reconcile([row]);
         return true;
       }
       _applySaved(row, adopted.entry);
@@ -871,6 +897,7 @@ class ScoringController extends ChangeNotifier {
       _saves[row.id] = const RowSave(RowSaveKind.saving, promotion: true);
     }
     notifyListeners();
+    final readsBefore = _syncReads;
     var adopted = 0;
     var replayed = 0;
     var changed = 0;
@@ -911,8 +938,9 @@ class ScoringController extends ChangeNotifier {
             _applySaved(row, promotion.entry);
             promotion.replayed ? replayed++ : adopted++;
           } else if (outcome?.isQueued ?? false) {
-            // Waiting for the service: nothing changed on the row yet.
+            // Waiting for the service: show the adoption from its receipt.
             _saves.remove(row.id);
+            _applyQueued(row, outcome!.queued!);
             waiting.add(row);
           } else if (outcome == null) {
             _saves[row.id] = const RowSave(
@@ -964,8 +992,9 @@ class ScoringController extends ChangeNotifier {
     if (moved.isNotEmpty) {
       changed -= _settleChanged(moved, await _refreshSlots(moved));
     }
-    // Rows queued for the service show their waiting adoption once read.
-    if (waiting.isNotEmpty) await _refreshSlots(waiting);
+    if (waiting.isNotEmpty && _syncReads != readsBefore) {
+      await _reconcile(waiting);
+    }
     if (adopted + replayed > 0) {
       notifyListeners();
       await _loadResults();
@@ -1000,6 +1029,23 @@ class ScoringController extends ChangeNotifier {
     return settled;
   }
 
+  /// After a sync was applied while a mark was out: reads the queued [rows]
+  /// again, since the service may have decided them meanwhile. A failed read
+  /// keeps the receipts shown and offers the sync-refresh Retry, which reads
+  /// the whole page again.
+  Future<void> _reconcile(List<ScoringRow> queued) async {
+    if (await _refreshSlots(queued)) {
+      notifyListeners();
+      return;
+    }
+    if (_disposed) return;
+    loadError = _slotReadError ?? StateError('The scores could not be read.');
+    syncRefreshFailed = true;
+    notifyListeners();
+  }
+
+  Object? _slotReadError;
+
   /// Reads the slots of [stale] again and shows their newer values, keeping
   /// whatever the director typed in a row.
   ///
@@ -1017,7 +1063,8 @@ class ScoringController extends ChangeNotifier {
         _drafts[row.id]?.resetTo(row.savedComponents, shown: _shown(row));
       }
       return true;
-    } on Object {
+    } on Object catch (error) {
+      _slotReadError = error;
       return false;
     }
   }
@@ -1140,6 +1187,9 @@ enum MarkOfficialSkip {
 
   /// The pilot retired from the round.
   retired,
+
+  /// The adoption is queued on this device until the service decides it.
+  waitingToSync,
 
   /// Entry is closed or the score is locked.
   closed,

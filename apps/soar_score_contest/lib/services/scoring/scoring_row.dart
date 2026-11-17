@@ -76,6 +76,10 @@ class ScoringRow {
     _ => false,
   };
 
+  /// Whether the director's Mark official waits to be sent to the service:
+  /// the adoption is queued on this device and the service has not decided.
+  bool get isAdoptionPending => slot?.pendingPromotion != null;
+
   bool get isLocked => locked || (slot?.placeholder.isLocked ?? false);
 
   /// Whether the slot counts as scored the way the server's round progress
