@@ -268,7 +268,10 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
   String _k(String name) => 'score-$name-${widget.row.id.value}';
 
   bool get _readOnly =>
-      widget.block != null || widget.row.isLocked || widget.row.retired;
+      widget.block != null ||
+      widget.row.isLocked ||
+      widget.row.retired ||
+      widget.row.isAdoptionPending;
 
   // Cells.
 
@@ -779,6 +782,12 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         (Icons.help_outline, 'Check: ${widget.findings.length}', colors.warn),
       if (widget.row.isLocked && widget.block != null)
         (Icons.lock, widget.block!.message, null),
+      if (widget.row.isAdoptionPending)
+        (
+          Icons.cloud_upload_outlined,
+          AppLocalizations.of(context).scoreAdoptionWaiting,
+          null,
+        ),
       if (widget.row.retired)
         (
           Icons.person_off_outlined,
@@ -831,6 +840,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final why = switch (skip) {
       MarkOfficialSkip.edited => words.scoreMarkOfficialEdited,
       MarkOfficialSkip.closed => words.scoreMarkOfficialClosed,
+      MarkOfficialSkip.waitingToSync => words.scoreMarkOfficialWaiting,
       _ => null,
     };
     return Padding(

@@ -184,6 +184,11 @@ class ScoringServer {
   /// promotion is refused as changed because the slot is official by then.
   final Set<Id> officialDuringPromote = {};
 
+  /// Slots whose promotion is queued for the service instead of adopted, as
+  /// on a syncing installation; the slot then lists the pending intent.
+  final Set<Id> queuePromotions = {};
+  final Map<Id, Map<String, Object?>> _queued = {};
+
   /// Promotion requests that arrived: a group request counts once.
   int promoteRequests = 0;
 
@@ -223,6 +228,21 @@ class ScoringServer {
     }
     final pending = _pendingAttempt(assignmentId);
     final revision = _score[assignmentId]?.scoreRevision ?? 0;
+    if (queuePromotions.contains(assignmentId) && pending != null) {
+      return (
+        202,
+        {
+          'queued': _queued[assignmentId] ??= {
+            'operation_id': Id.create().value,
+            'contest_id': matrixServer.contest.id.value,
+            'assignment_id': assignmentId.value,
+            'source_attempt_id': sourceAttemptId,
+            'expected_score_revision': expectedRevision,
+            'queued_at': '2026-11-17T10:00:00Z',
+          },
+        },
+      );
+    }
     if (pending == null ||
         pending.id.value != sourceAttemptId ||
         revision != expectedRevision) {
@@ -464,6 +484,7 @@ class ScoringServer {
               'placeholder': _placeholder(assignment.id).toJson(),
               'official_score': _score[assignment.id]?.toJson(),
               'pending_attempt': _pendingAttempt(assignment.id)?.toJson(),
+              'pending_promotion': _queued[assignment.id],
             },
         ],
         'rounds': const <Object>[],
@@ -496,6 +517,8 @@ class ScoringServer {
                   'assignment_id': id.value,
                   if (status == 200)
                     'result': answer
+                  else if (status == 202)
+                    'queued': answer['queued']
                   else
                     'error': (answer['error']! as Map<String, Object?>),
                 };
@@ -512,7 +535,7 @@ class ScoringServer {
         body['source_attempt_id'] as String,
         body['expected_score_revision'] as int,
       );
-      if (status == 200) return _json(answer);
+      if (status == 200 || status == 202) return _json(answer, status);
       final error = (answer['error']! as Map<String, Object?>);
       return _json({
         'error': {'code': error['code'], 'message': error['message']},

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/services/sync/sync_problem.dart';
 import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
 import 'package:soar_score_contest/widgets/sync/sync_details_card.dart';
@@ -7,6 +9,12 @@ import 'package:soar_score_contest/widgets/sync/sync_details_card.dart';
 Future<void> _pump(WidgetTester tester, SyncScopeSummary summary) =>
     tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: SyncDetailsCard(
             summary: summary,
@@ -49,5 +57,18 @@ void main() {
 
     expect(find.text('Offline'), findsOneWidget);
     expect(find.byKey(const ValueKey('sync-local-only')), findsNothing);
+  });
+
+  testWidgets('changes held for an older service are counted', (tester) async {
+    await _pump(
+      tester,
+      const SyncScopeSummary(pendingChanges: 1, waitingForNewerService: 1),
+    );
+    expect(find.text('Waiting for a newer service'), findsOneWidget);
+  });
+
+  testWidgets('no held changes, no such row', (tester) async {
+    await _pump(tester, const SyncScopeSummary(pendingChanges: 1));
+    expect(find.text('Waiting for a newer service'), findsNothing);
   });
 }

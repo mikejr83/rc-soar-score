@@ -128,6 +128,13 @@ class ScoresService {
         .currentForPlaceholders([
           for (final placeholder in placeholders.values) placeholder.id,
         ]);
+    final waiting = {
+      for (final intent
+          in await repository.promotionIntentRepository.pendingForContest(
+            contestId,
+          ))
+        intent.assignmentId: intent,
+    };
     final slots = <ScoreSlot>[];
     final progress = <RoundProgress>[];
     for (final round in rounds) {
@@ -150,6 +157,7 @@ class ScoresService {
             placeholder: placeholder,
             officialScore: officials[placeholder.id],
             pendingAttempt: pending[placeholder.id],
+            pendingPromotion: waiting[assignment.id],
           ),
         );
       }

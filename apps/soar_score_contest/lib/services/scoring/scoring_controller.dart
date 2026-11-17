@@ -740,6 +740,7 @@ class ScoringController extends ChangeNotifier {
       return MarkOfficialSkip.noSubmission;
     }
     if (row.retired) return MarkOfficialSkip.retired;
+    if (row.isAdoptionPending) return MarkOfficialSkip.waitingToSync;
     if (block != null || row.isLocked) return MarkOfficialSkip.closed;
     if (saveOf(row.id).isBusy) return MarkOfficialSkip.busy;
     if (hasEdits(row)) return MarkOfficialSkip.edited;
@@ -1140,6 +1141,9 @@ enum MarkOfficialSkip {
 
   /// The pilot retired from the round.
   retired,
+
+  /// The adoption is queued on this device until the service decides it.
+  waitingToSync,
 
   /// Entry is closed or the score is locked.
   closed,

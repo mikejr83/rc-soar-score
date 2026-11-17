@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/preferences/director_time.dart';
 import '../../services/sync/sync_problem.dart';
 import '../../services/sync/sync_scope_summary.dart';
@@ -73,6 +74,12 @@ class SyncDetailsCard extends StatelessWidget {
                 '${summary.rejectedChanges}',
               ),
               _row(theme, 'Conflicts to decide', '${summary.conflicts}'),
+              if (summary.waitingForNewerService > 0)
+                _row(
+                  theme,
+                  AppLocalizations.of(context).syncWaitingForNewerService,
+                  '${summary.waitingForNewerService}',
+                ),
               if (problem != null) ..._problemRow(theme, dark, problem),
             ],
             const SizedBox(height: 12),

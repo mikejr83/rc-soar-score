@@ -142,6 +142,24 @@ void _tests(Backend backend) {
     },
   );
 
+  test('the slot list shows the pending intent until it is decided', () async {
+    expect(
+      (await native.list(contestId)).slots
+          .where((s) => s.placeholder.id == slot.id)
+          .single
+          .pendingPromotion,
+      isNull,
+    );
+    final intent = await queue();
+
+    final shown = (await native.list(contestId)).slots
+        .where((s) => s.placeholder.id == slot.id)
+        .single;
+    expect(shown.pendingPromotion, intent);
+    expect(shown.officialScore, isNull);
+    expect(shown.pendingAttempt, isNotNull);
+  });
+
   test(
     'the same request again is the same intent, a new one is refused',
     () async {

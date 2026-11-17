@@ -262,6 +262,12 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
   Future<void> _markOfficial(ScoringRow row) async {
     final c = _controller!;
     final ok = await c.markOfficial(row);
+    final now = c.rows.where((r) => r.id == row.id).firstOrNull;
+    if (ok && mounted && (now?.isAdoptionPending ?? false)) {
+      _say(
+        AppLocalizations.of(context).scoreMarkOfficialQueued(row.pilot.name),
+      );
+    }
     // The banner with the reason sits in the row's band, so open it.
     if (!ok && mounted && c.saveOf(row.id).kind != RowSaveKind.idle) {
       c.activate(row.id);
@@ -281,6 +287,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       summary.nothingAccepted
           ? words.scoreMarkAllNothing
           : words.scoreMarkAllDone(summary.official),
+      if (summary.queued > 0) words.scoreMarkAllQueued(summary.queued),
       if (summary.changed > 0) words.scoreMarkAllChanged(summary.changed),
       if (summary.refused > 0) words.scoreMarkAllRefused(summary.refused),
       if (summary.retry > 0) words.scoreMarkAllRetry(summary.retry),
@@ -304,6 +311,8 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
           lines.add(words.scoreMarkAllSkipClosed(value));
         case MarkOfficialSkip.retired:
           lines.add(words.scoreMarkAllSkipRetired(value));
+        case MarkOfficialSkip.waitingToSync:
+          lines.add(words.scoreMarkAllSkipWaiting(value));
         case MarkOfficialSkip.busy:
         case MarkOfficialSkip.noSubmission:
           break;

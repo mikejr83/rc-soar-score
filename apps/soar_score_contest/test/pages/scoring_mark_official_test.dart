@@ -134,4 +134,59 @@ void main() {
     expect(button.onPressed, isNull);
     expect(find.text('Entry is closed for this row.'), findsOneWidget);
   });
+
+  testWidgets('a queued Mark official shows as waiting and blocks a repeat', (
+    tester,
+  ) async {
+    final first = scoringAssignmentId(1, 1);
+    final server = ScoringServer()
+      ..seedPendingSubmission(first, _flight)
+      ..queuePromotions.add(first);
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    await tester.tap(_key('score-mark-official-${first.value}'));
+    await tester.pumpAndSettle();
+
+    expect(server.promoteRequests, 1);
+    expect(
+      find.textContaining('marked official when this device syncs'),
+      findsOneWidget,
+    );
+    // The row is not official; it says the adoption waits.
+    expect(find.text('Mark official is waiting to sync'), findsOneWidget);
+    final button = tester.widget<OutlinedButton>(
+      _key('score-mark-official-${first.value}'),
+    );
+    expect(button.onPressed, isNull);
+    expect(
+      find.text(
+        'Waiting to sync; the service decides it when this device connects.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Pilot entry'), findsOneWidget);
+  });
+
+  testWidgets('Mark all counts queued rows and leaves queued ones out', (
+    tester,
+  ) async {
+    final first = scoringAssignmentId(1, 1);
+    final second = scoringAssignmentId(1, 2);
+    final server = ScoringServer()
+      ..seedPendingSubmission(first, _flight)
+      ..seedPendingSubmission(second, _flight)
+      ..queuePromotions.addAll([first, second]);
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    await tester.tap(_key('score-mark-all-official'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('2 rows are waiting to sync.'), findsOneWidget);
+    expect(find.text('Nothing was marked official.'), findsNothing);
+
+    // Both are queued now, so nothing is left to send.
+    final button = tester.widget<OutlinedButton>(
+      _key('score-mark-all-official'),
+    );
+    expect(button.onPressed, isNull);
+  });
 }

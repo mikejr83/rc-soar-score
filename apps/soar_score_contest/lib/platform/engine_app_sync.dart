@@ -140,6 +140,7 @@ class EngineAppSync implements AppSync {
           pendingChanges: entry.value.pendingMutations,
           rejectedChanges: entry.value.rejectedMutations,
           conflicts: entry.value.conflictsNeedingAction,
+          waitingForNewerService: entry.value.waitingForNewerService,
           lastSyncedAt: entry.value.lastSyncedAt,
           dataRevision: entry.value.dataRevision,
           problem:

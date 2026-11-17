@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/preferences/director_time.dart';
 import '../../services/sync/refused_change.dart';
 
@@ -46,7 +47,7 @@ class RefusedChangesCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${change.entityType}, changed '
+                        '${_name(context, change.entityType)}, changed '
                         '${DirectorTime.of(context)(change.madeAt)}',
                         style: theme.textTheme.titleSmall,
                       ),
@@ -59,4 +60,10 @@ class RefusedChangesCard extends StatelessWidget {
       ),
     );
   }
+
+  /// What the director knows the change as; other types keep their name.
+  static String _name(BuildContext context, String entityType) =>
+      entityType == 'ScorePromotion'
+      ? AppLocalizations.of(context).syncRefusedScorePromotion
+      : entityType;
 }
