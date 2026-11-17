@@ -179,6 +179,11 @@ class ScoringServer {
   /// adopting the submission (for example 503 or 409 `locked`).
   final Map<Id, (int, String)> promoteFailures = {};
 
+  /// Slots another operator makes official at the moment their promotion is
+  /// processed: the request was built from a waiting submission, and the
+  /// promotion is refused as changed because the slot is official by then.
+  final Set<Id> officialDuringPromote = {};
+
   /// Promotion requests that arrived: a group request counts once.
   int promoteRequests = 0;
 
@@ -200,6 +205,9 @@ class ScoringServer {
       'source_attempt_id': sourceAttemptId,
       'expected_score_revision': expectedRevision,
     });
+    if (officialDuringPromote.remove(assignmentId)) {
+      seedScore(assignmentId, _pendingAttempt(assignmentId)!.rawComponents);
+    }
     final failure = promoteFailures[assignmentId];
     if (failure != null) {
       return (

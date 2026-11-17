@@ -119,9 +119,10 @@ void main() {
     test('a change that already made it official leaves no banner', () async {
       final server = ScoringServer()..seedPendingSubmission(first, a);
       final c = await _open(server);
-      server.seedScore(first, b);
+      server.officialDuringPromote.add(first);
 
       expect(await c.markOfficial(_row(c, 1)), isFalse);
+      expect(server.promotedItems, hasLength(1));
 
       expect(c.saveOf(first).kind, RowSaveKind.idle);
       expect(_row(c, 1).status, RowStatus.official);
