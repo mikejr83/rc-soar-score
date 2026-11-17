@@ -22,6 +22,25 @@ const supersededByOfficialSelectionReason = 'superseded_by_official_selection';
 /// Raised inside a promotion pass that read a slot another request changed.
 class _SlotMoved implements Exception {}
 
+/// The `promote_score` intent of an installation that asked for an adoption.
+class PromotionIntent {
+  const PromotionIntent({
+    required this.operationId,
+    required this.clientMutationId,
+    required this.data,
+  });
+
+  /// The intent's operation id.
+  final Id operationId;
+
+  /// The intent's `client_mutation_id`; the official score is stored under
+  /// its own derived id.
+  final String clientMutationId;
+
+  /// The intent's payload data (assignment, source, expected revision).
+  final Map<String, Object?> data;
+}
+
 /// The outcome of adopting a stored submission as official.
 class ScorePromotionResult {
   const ScorePromotionResult({required this.entry, required this.replayed});
@@ -74,6 +93,7 @@ extension PromoteSubmissionService on ScoresService {
     required int expectedScoreRevision,
     required Id actorId,
     required MutationMetadata metadata,
+    PromotionIntent? intent,
   }) async {
     const passes = 4;
     for (var pass = 1; ; pass++) {
@@ -88,6 +108,7 @@ extension PromoteSubmissionService on ScoresService {
             expectedScoreRevision: expectedScoreRevision,
             actorId: actorId,
             metadata: metadata,
+            intent: intent,
             seen: seen,
           ),
         );
@@ -118,6 +139,7 @@ extension PromoteSubmissionService on ScoresService {
     required int expectedScoreRevision,
     required Id actorId,
     required MutationMetadata metadata,
+    required PromotionIntent? intent,
     required List<ScorePlaceholder> seen,
   }) async {
     final contest = await _requireContest(contestId);
@@ -279,6 +301,20 @@ extension PromoteSubmissionService on ScoresService {
         placeholder: updated,
         supersededReviews: superseded,
         audits: audits,
+        receipt: intent == null
+            ? null
+            : PromotionReceipt(
+                operationId: intent.operationId,
+                clientMutationId: intent.clientMutationId,
+                payload: VersionedPayload(
+                  version: 1,
+                  data: {
+                    ...intent.data,
+                    'official_score_id': adopted.id.value,
+                    'score_revision': adopted.scoreRevision,
+                  },
+                ).toJson(),
+              ),
       ),
       metadata: metadata,
     );

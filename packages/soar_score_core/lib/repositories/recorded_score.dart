@@ -1,4 +1,5 @@
 import '../models/contest/contest.dart';
+import '../models/id.dart';
 import '../models/scores/official_score.dart';
 import '../models/scores/score_attempt.dart';
 import '../models/scores/review_request.dart';
@@ -45,6 +46,7 @@ class PromotedScore {
     required this.placeholder,
     this.supersededReviews = const [],
     this.audits = const [],
+    this.receipt,
   });
 
   final OfficialScore officialScore;
@@ -57,4 +59,32 @@ class PromotedScore {
 
   /// Audit events stored with the promotion.
   final List<AuditEvent> audits;
+
+  /// The receipt of the sync operation that asked for the adoption, stored in
+  /// the same transaction and last of the aggregate; null for an adoption made
+  /// by a route of the service.
+  final PromotionReceipt? receipt;
+}
+
+/// The entity type of a promotion receipt and of the `promote_score` intent
+/// that asked for it. It names an operation, not a stored entity.
+const promotionReceiptEntityType = 'ScorePromotion';
+
+/// The service's durable record that it decided a `promote_score` intent of an
+/// installation in favour of the adoption.
+class PromotionReceipt {
+  const PromotionReceipt({
+    required this.operationId,
+    required this.clientMutationId,
+    required this.payload,
+  });
+
+  /// The intent's operation id (the receipt's `entity_id`).
+  final Id operationId;
+
+  /// The intent's `client_mutation_id`, so a retry finds the receipt.
+  final String clientMutationId;
+
+  /// The intent's payload, as sent.
+  final Map<String, Object?> payload;
 }

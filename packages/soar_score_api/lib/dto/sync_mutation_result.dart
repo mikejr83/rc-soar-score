@@ -24,6 +24,7 @@ class SyncMutationResult {
     this.reasonCode,
     this.currentRevision,
     this.dependsOn,
+    this.replayed,
   });
 
   factory SyncMutationResult.fromJson(Map<String, dynamic> json) =>
@@ -38,6 +39,10 @@ class SyncMutationResult {
 
   /// The `client_mutation_id` of the failed mutation this one depended on.
   final String? dependsOn;
+
+  /// True when an operation was already done and the answer is rebuilt from
+  /// its record; nothing was written. Absent for a plain mutation.
+  final bool? replayed;
 
   /// [reasonCode] as a known reason, or null when absent or from a newer
   /// service.

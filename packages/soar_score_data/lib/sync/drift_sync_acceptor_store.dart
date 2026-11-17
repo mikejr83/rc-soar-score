@@ -85,6 +85,14 @@ class _DriftSyncAcceptorTransaction implements core.SyncAcceptorTransaction {
   }
 
   @override
+  Future<core.Installation?> findInstallationForUpdate(core.Id id) async {
+    final rows = await _stores
+        .of('Installation')
+        .whereId('id', id, forUpdate: true);
+    return rows.isEmpty ? null : rows.single as core.Installation;
+  }
+
+  @override
   Future<List<core.Installation>> listInstallations(
     core.Id ownerAccountId,
   ) async => [
@@ -244,6 +252,26 @@ class _DriftSyncAcceptorTransaction implements core.SyncAcceptorTransaction {
       [Variable<String>(id), Variable<String>(clientMutationId)],
     );
     return rows.isEmpty ? null : core.MutationRecord.fromJson(rows.single);
+  }
+
+  @override
+  Future<List<core.MutationRecord>> decidedMutationsFor(
+    core.SyncScopeKey scope,
+    String entityType,
+    core.Id entityId,
+  ) async {
+    final (column, id) = _scopeColumn(scope);
+    final rows = await _mutations.where(
+      "$column = ? AND outcome <> 'Pending' AND entity_type = ? "
+      'AND entity_id = ?',
+      [
+        Variable<String>(id),
+        Variable<String>(entityType),
+        Variable<String>(entityId.value),
+      ],
+      orderBy: 'client_time, id',
+    );
+    return [for (final row in rows) core.MutationRecord.fromJson(row)];
   }
 
   @override

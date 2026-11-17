@@ -25,6 +25,7 @@
     "outcome": "Accepted",
     "reason_code": null,
     "error_message": null,
-    "depends_on_mutation_id": null
+    "depends_on_mutation_id": null,
+    "aggregate_id": null
   }
 ]

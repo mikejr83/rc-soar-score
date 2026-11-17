@@ -117,27 +117,51 @@ class OfficialScoreRepository extends DriftRepository
         throw ArgumentError('a superseded review is not the slot\'s');
       }
     }
+    // Every record of one adoption shares an aggregate, so a pull never
+    // returns half of it and a client applies it together.
+    final grouped = metadata.aggregateId == null
+        ? metadata.inAggregate(core.Id.create())
+        : metadata;
     return unitOfWork.run((context) async {
-      await context.append(score, metadata: metadata);
+      await context.append(score, metadata: grouped);
       final saved = await context.save(
         placeholder,
-        metadata: metadata.forPart(placeholder.id.value),
+        metadata: grouped.forPart(placeholder.id.value),
       );
       final reviews = <core.ReviewRequest>[
         for (final review in promotion.supersededReviews)
           await context.save(
             review,
-            metadata: metadata.forPart(review.id.value),
+            metadata: grouped.forPart(review.id.value),
           ),
       ];
       for (final audit in promotion.audits) {
         await _audits.append(audit);
+      }
+      final receipt = promotion.receipt;
+      if (receipt != null) {
+        await context.recordOperation(
+          entityType: core.promotionReceiptEntityType,
+          entityId: receipt.operationId,
+          contestId: score.contestId,
+          payload: receipt.payload,
+          metadata: core.MutationMetadata(
+            clientMutationId: receipt.clientMutationId,
+            authority: grouped.authority,
+            clientTime: grouped.clientTime,
+            actorId: grouped.actorId,
+            sourceInstallationId: grouped.sourceInstallationId,
+            sourceDevice: grouped.sourceDevice,
+            aggregateId: grouped.aggregateId,
+          ),
+        );
       }
       return core.PromotedScore(
         officialScore: score,
         placeholder: saved,
         supersededReviews: reviews,
         audits: promotion.audits,
+        receipt: receipt,
       );
     });
   }

@@ -28,6 +28,7 @@ SyncMutationResult _$SyncMutationResultFromJson(Map<String, dynamic> json) =>
             (v) => (v as num?)?.toInt(),
           ),
           dependsOn: $checkedConvert('depends_on', (v) => v as String?),
+          replayed: $checkedConvert('replayed', (v) => v as bool?),
         );
         return val;
       },
@@ -48,6 +49,7 @@ Map<String, dynamic> _$SyncMutationResultToJson(SyncMutationResult instance) =>
       'reason_code': instance.reasonCode,
       'current_revision': instance.currentRevision,
       'depends_on': instance.dependsOn,
+      'replayed': instance.replayed,
     };
 
 const _$MutationOutcomeEnumMap = {

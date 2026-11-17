@@ -12,6 +12,7 @@ class MutationResult extends Equatable {
     this.reasonCode,
     this.currentRevision,
     this.dependsOn,
+    this.replayed = false,
   });
 
   final String clientMutationId;
@@ -29,6 +30,9 @@ class MutationResult extends Equatable {
   /// The `client_mutation_id` of the failed mutation a `Skipped` one needed.
   final String? dependsOn;
 
+  /// An operation already done, answered from its record; nothing written.
+  final bool replayed;
+
   bool get failed =>
       outcome == MutationOutcome.rejected ||
       outcome == MutationOutcome.conflict ||
@@ -43,5 +47,6 @@ class MutationResult extends Equatable {
     reasonCode,
     currentRevision,
     dependsOn,
+    replayed,
   ];
 }

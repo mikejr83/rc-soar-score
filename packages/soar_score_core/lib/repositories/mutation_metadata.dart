@@ -16,6 +16,7 @@ class MutationMetadata extends Equatable {
     this.sourceInstallationId,
     this.sourceDevice,
     this.dependsOnMutationId,
+    this.aggregateId,
   });
 
   /// Unique request identifier, used for idempotency.
@@ -37,6 +38,23 @@ class MutationMetadata extends Equatable {
   /// A mutation that must be accepted first.
   final Id? dependsOnMutationId;
 
+  /// Groups the mutations one operation writes (for example a score
+  /// promotion), so pages of changes never split them and a client applies
+  /// them together.
+  final Id? aggregateId;
+
+  /// These metadata with the mutations grouped under [aggregateId].
+  MutationMetadata inAggregate(Id aggregateId) => MutationMetadata(
+    clientMutationId: clientMutationId,
+    authority: authority,
+    clientTime: clientTime,
+    actorId: actorId,
+    sourceInstallationId: sourceInstallationId,
+    sourceDevice: sourceDevice,
+    dependsOnMutationId: dependsOnMutationId,
+    aggregateId: aggregateId,
+  );
+
   /// The metadata for one more mutation of the same request.
   ///
   /// A request that changes several entities writes one mutation each, and a
@@ -51,6 +69,7 @@ class MutationMetadata extends Equatable {
     sourceInstallationId: sourceInstallationId,
     sourceDevice: sourceDevice,
     dependsOnMutationId: dependsOnMutationId,
+    aggregateId: aggregateId,
   );
 
   @override
@@ -62,5 +81,6 @@ class MutationMetadata extends Equatable {
     sourceInstallationId,
     sourceDevice,
     dependsOnMutationId,
+    aggregateId,
   ];
 }

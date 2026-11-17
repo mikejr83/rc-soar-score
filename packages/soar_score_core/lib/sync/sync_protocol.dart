@@ -11,3 +11,10 @@ abstract final class SyncProtocol {
   /// lowers it.
   static const int defaultPageSize = 500;
 }
+
+/// The optional operations a service lists in `GET /sync/info`.
+abstract final class SyncCapabilities {
+  /// Adopts a stored participant submission as the official score, guarded by
+  /// its source and score revision (version 1).
+  static const String promoteScore = 'promote_score';
+}

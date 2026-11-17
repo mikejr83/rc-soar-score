@@ -11,6 +11,7 @@ import '../../models/sync/installation_activation.dart';
 import '../../models/sync/mutation_record.dart';
 import '../../models/sync/tombstone.dart';
 import '../../enums/sync_reason_code.dart';
+import '../../repositories/recorded_score.dart';
 import '../../repositories/sync_acceptor_store.dart';
 import '../../repositories/sync_scope_key.dart';
 import 'exchange_context.dart';
@@ -21,6 +22,7 @@ import 'mutation_payloads.dart';
 import 'mutation_replay.dart';
 import 'mutation_result.dart';
 import 'pilot_link_collisions.dart';
+import 'promotion_operation.dart';
 import 'sync_entity_catalog.dart';
 import 'sync_log.dart';
 import 'sync_mutation.dart';
@@ -37,12 +39,16 @@ const firstUploadClockSkew = Duration(minutes: 10);
 /// valid siblings. The decision is recorded, so a retry of the same
 /// `client_mutation_id` returns it unchanged and applies nothing twice.
 class MutationProcessor {
-  MutationProcessor(this._store, {SyncLog? log})
+  MutationProcessor(this._store, {SyncLog? log, this.promotion})
     : _log = log ?? SyncLog(),
       _links = PilotLinkCollisions(log ?? SyncLog());
 
   final SyncAcceptorStore _store;
   final SyncLog _log;
+
+  /// Decides `ScorePromotion` intents; without it they are refused as an
+  /// operation this service does not implement.
+  final PromotionOperation? promotion;
   final PilotLinkCollisions _links;
 
   /// Authorities a director's installation may send. A participant's
@@ -64,6 +70,25 @@ class MutationProcessor {
         reasonCode: SyncReasonCode.dependencyFailed.code,
         dependsOn: dependency.clientMutationId,
       );
+      ctx.decided[m.id] = result;
+      return result;
+    }
+
+    if (m.entityType == promotionReceiptEntityType) {
+      // An operation, not an entity: it never takes the generic path, so no
+      // director-wins merge can decide it.
+      final operation = promotion;
+      final result = operation != null
+          ? await operation.decide(ctx, m)
+          : await _store.transaction(
+              (tx) => _log.reject(
+                tx,
+                ctx,
+                m,
+                SyncReasonCode.unsupportedOperation.code,
+                'This service does not implement ${m.entityType}.',
+              ),
+            );
       ctx.decided[m.id] = result;
       return result;
     }

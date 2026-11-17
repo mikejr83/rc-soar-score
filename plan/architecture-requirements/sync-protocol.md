@@ -182,11 +182,14 @@ The intent is a mutation with `entity_type` `ScorePromotion`, `entity_id` the ne
 
 ```json
 {
-  "operation": "promote_score",
-  "operation_version": 1,
-  "assignment_id": "…",
-  "source_attempt_id": "…",
-  "expected_score_revision": 3
+  "version": 1,
+  "data": {
+    "operation": "promote_score",
+    "operation_version": 1,
+    "assignment_id": "…",
+    "source_attempt_id": "…",
+    "expected_score_revision": 3
+  }
 }
 ```
 
@@ -216,7 +219,7 @@ A retry of an accepted intent writes nothing. It is answered `Accepted` with `re
 
 ### Atomic aggregate
 
-The service marks every mutation record written by one adoption (official score, placeholder, superseded reviews, audit events and the intent's own receipt) with the same `aggregate_id`. This applies to adoptions made by the service's own routes too. When the service builds a page of changes it never splits an aggregate: it adds the rest of the aggregate to the page, which may then exceed the page size. The client applies an aggregate in one local transaction, with the intent's state change, in the order given by sequence, and advances the cursor only after it. Entities in an aggregate keep their own revisions and the usual skip rule for an equal or higher stored revision.
+The service marks every mutation record written by one adoption (official score, placeholder, superseded reviews, audit events and the intent's own receipt) with the same `aggregate_id`. This applies to adoptions made by the service's own routes too. When the service builds a page of changes it never splits an aggregate: it adds the rest of the aggregate to the page, which may then exceed the page size. The client applies an aggregate in one local transaction, with the intent's state change, in the order given by sequence, and advances the cursor only after it. Changes of an aggregate carry its `aggregate_id` on the wire. The intent's own change (entity type `ScorePromotion`, entity id the operation id, no revision) comes last and its payload data is the intent plus `official_score_id` and `score_revision`; it is how the installation learns that its intent was decided. Entities in an aggregate keep their own revisions and the usual skip rule for an equal or higher stored revision.
 
 ### Client behavior
 

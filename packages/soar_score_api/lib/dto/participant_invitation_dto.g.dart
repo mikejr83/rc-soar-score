@@ -114,7 +114,6 @@ ResolveInvitationResponse _$ResolveInvitationResponseFromJson(
   json,
   ($checkedConvert) {
     final val = ResolveInvitationResponse(
-      sessionToken: $checkedConvert('session_token', (v) => v as String?),
       sessionExpiresAt: $checkedConvert(
         'session_expires_at',
         (v) => DateTime.parse(v as String),
@@ -127,12 +126,13 @@ ResolveInvitationResponse _$ResolveInvitationResponseFromJson(
         'participant',
         (v) => ParticipantLinkDto.fromJson(v as Map<String, dynamic>),
       ),
+      sessionToken: $checkedConvert('session_token', (v) => v as String?),
     );
     return val;
   },
   fieldKeyMap: const {
-    'sessionToken': 'session_token',
     'sessionExpiresAt': 'session_expires_at',
+    'sessionToken': 'session_token',
   },
 );
 

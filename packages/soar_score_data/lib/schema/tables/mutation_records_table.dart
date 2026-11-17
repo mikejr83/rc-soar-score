@@ -33,6 +33,10 @@ class MutationRecords extends Table {
   TextColumn get errorMessage => text().nullable()();
   TextColumn get dependsOnMutationId => text().nullable()();
 
+  /// Groups the records one operation wrote (a score promotion); pages of
+  /// changes never split a group.
+  TextColumn get aggregateId => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 

@@ -38,6 +38,7 @@ class MutationRecord extends Equatable implements SyncScoped {
     this.reasonCode,
     this.errorMessage,
     this.dependsOnMutationId,
+    this.aggregateId,
   }) : entityType = requireNotBlank(entityType, 'entityType'),
        clientMutationId = requireNotBlank(clientMutationId, 'clientMutationId'),
        payload = Map.unmodifiable(payload) {
@@ -113,6 +114,9 @@ class MutationRecord extends Equatable implements SyncScoped {
   /// The mutation this change depends on.
   final Id? dependsOnMutationId;
 
+  /// Groups the records one operation wrote; null for a plain change.
+  final Id? aggregateId;
+
   @override
   SyncScope get syncScope =>
       contestId != null ? SyncScope.contest : SyncScope.director;
@@ -141,5 +145,6 @@ class MutationRecord extends Equatable implements SyncScoped {
     reasonCode,
     errorMessage,
     dependsOnMutationId,
+    aggregateId,
   ];
 }

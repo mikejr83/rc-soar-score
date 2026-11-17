@@ -53,6 +53,10 @@ MutationRecord _$MutationRecordFromJson(Map<String, dynamic> json) =>
         json['depends_on_mutation_id'],
         const IdConverter().fromJson,
       ),
+      aggregateId: _$JsonConverterFromJson<String, Id>(
+        json['aggregate_id'],
+        const IdConverter().fromJson,
+      ),
     );
 
 Map<String, dynamic> _$MutationRecordToJson(MutationRecord instance) =>
@@ -96,6 +100,10 @@ Map<String, dynamic> _$MutationRecordToJson(MutationRecord instance) =>
       'error_message': instance.errorMessage,
       'depends_on_mutation_id': _$JsonConverterToJson<String, Id>(
         instance.dependsOnMutationId,
+        const IdConverter().toJson,
+      ),
+      'aggregate_id': _$JsonConverterToJson<String, Id>(
+        instance.aggregateId,
         const IdConverter().toJson,
       ),
     };

@@ -21,6 +21,7 @@ import '../errors/sync_constraint_error.dart';
 import '../models/contest/contest.dart';
 import '../models/contest/contest_configuration_revision.dart';
 import '../models/id.dart';
+import '../models/shared/versioned_payload.dart';
 import '../models/sync/audit_event.dart';
 import '../models/matrix/matrix_assignment.dart';
 import '../models/scores/official_score.dart';
