@@ -53,6 +53,7 @@ class SyncEngine {
   // Whether the service lists `promote_score`. Read with the versions, and
   // read again when the service refuses the operation as unknown.
   bool _promoteScore = false;
+  DateTime? _capabilitiesReadAt;
 
   // Per scope, the `promote_score` intents held back because the service does
   // not list the capability. They stay pending and nothing is sent for them.
@@ -169,6 +170,7 @@ class SyncEngine {
         // Pull first, so the push is based on what the service already has.
         final pulled = await _pull(scope, await _exchange(scope, cursor, []));
         final pending = inDependencyOrder(await _store.pendingMutations(scope));
+        await _recheckPromotionSupport(pending);
         final sendable = _withoutHeldBack(scope, pending);
         if (sendable.isNotEmpty) {
           await _push(scope, sendable, pulled.cursor);
@@ -213,6 +215,29 @@ class SyncEngine {
       for (final m in pending)
         if (!_isPromotion(m)) m,
     ];
+  }
+
+  /// Reads the capability list again when intents are held back for want of
+  /// `promote_score` and the last read is older than the recheck interval, so
+  /// a service that was updated while this engine ran gets them without a
+  /// restart. Only scopes with held intents ask, and a failed read keeps the
+  /// intents queued (the sync goes on without them).
+  Future<void> _recheckPromotionSupport(List<MutationRecord> pending) async {
+    if (_promoteScore || !pending.any(_isPromotion)) return;
+    final readAt = _capabilitiesReadAt;
+    final now = _config.now();
+    if (readAt != null &&
+        now.difference(readAt) < _config.capabilityRecheckInterval) {
+      return;
+    }
+    try {
+      final info = await _gateway.syncInfo();
+      _capabilitiesReadAt = now;
+      _promoteScore = info.supports(SyncCapabilities.promoteScore);
+    } on ApiException {
+      // Unreachable or refused: the intents stay queued, and the exchange
+      // that follows reports the failure.
+    }
   }
 
   static bool _isPromotion(MutationRecord m) =>
@@ -400,6 +425,7 @@ class SyncEngine {
         throw const _UpdateRequired();
       }
       _promoteScore = info.supports(SyncCapabilities.promoteScore);
+      _capabilitiesReadAt = _config.now();
       _versionsChecked = true;
     }
     if (!_registered) {
@@ -581,6 +607,7 @@ class SyncEngine {
   Future<bool> _promotionUnknownToService(SyncMutationResult result) async {
     if (result.reasonCode != SyncReasonCode.invalidPayload.code) return false;
     final info = await _gateway.syncInfo();
+    _capabilitiesReadAt = _config.now();
     _promoteScore = info.supports(SyncCapabilities.promoteScore);
     return !_promoteScore;
   }

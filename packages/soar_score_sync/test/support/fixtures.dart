@@ -69,11 +69,14 @@ class Rig {
         schemaVersion: 1,
         maxExchangeBytes: maxBytes,
         maxExchangeMutations: maxMutations,
-        now: () => DateTime.utc(2026, 10, 13, 15),
+        now: () => clock,
         isSyncable: syncable == null ? null : (s) async => syncable(s),
       ),
     );
   }
+
+  /// The engine's clock; a test moves it.
+  DateTime clock = DateTime.utc(2026, 10, 13, 15);
 
   final log = <String>[];
   late final FakeSyncStore store;

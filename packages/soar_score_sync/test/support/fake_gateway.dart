@@ -29,6 +29,9 @@ class FakeGateway implements SyncGateway {
     token,
   ) async => SystemDataResponse(changes: const [], systemDataSeq: after);
 
+  /// Thrown by [syncInfo] when set.
+  Object? infoError;
+
   Object? registerError;
   Object? resolveError;
 
@@ -38,6 +41,8 @@ class FakeGateway implements SyncGateway {
   @override
   Future<SyncInfoDto> syncInfo() async {
     infoCalls++;
+    final error = infoError;
+    if (error != null) throw error;
     return info;
   }
 

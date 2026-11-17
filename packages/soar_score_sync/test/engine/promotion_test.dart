@@ -276,4 +276,77 @@ void main() {
       expect(rig.store.mutations.single.outcome, MutationOutcome.pending);
     },
   );
+
+  test('an updated service gets the held intents without a restart', () async {
+    final rig = Rig();
+    rig.store.mutations.add(intent(1));
+    rig.gateway.onExchange = (request) async => request.mutations.isEmpty
+        ? FakeGateway.response()
+        : FakeGateway.response(
+            results: [accepted('p-1', 12)],
+            changes: adoption(1, from: 10),
+          );
+
+    await rig.engine.syncScope(scope);
+    expect(rig.store.mutations.single.outcome, MutationOutcome.pending);
+    final calls = rig.gateway.infoCalls;
+
+    // The service is updated, but the recheck interval has not passed.
+    rig.gateway.info = infoWithPromotion();
+    rig.clock = rig.clock.add(const Duration(seconds: 10));
+    await rig.engine.syncScope(scope);
+    expect(rig.gateway.infoCalls, calls);
+    expect(rig.store.mutations.single.outcome, MutationOutcome.pending);
+
+    rig.clock = rig.clock.add(const Duration(minutes: 2));
+    await rig.engine.syncScope(scope);
+
+    expect(rig.gateway.infoCalls, calls + 1);
+    final sent = rig.gateway.exchanges.expand((r) => r.mutations).single;
+    expect(sent.entityId, idN(5001));
+    expect(rig.store.mutations.single.outcome, MutationOutcome.accepted);
+    expect(rig.engine.state.scopes[scope]!.waitingForNewerService, 0);
+  });
+
+  test(
+    'a failed recheck keeps the intents queued and the sync going',
+    () async {
+      final rig = Rig();
+      rig.store.mutations
+        ..add(intent(1))
+        ..add(mutation(2));
+      rig.gateway.onExchange = (request) async => request.mutations.isEmpty
+          ? FakeGateway.response()
+          : FakeGateway.response(results: [accepted('m-2', 3)]);
+      await rig.engine.syncScope(scope);
+
+      rig.gateway.info = infoWithPromotion();
+      rig.clock = rig.clock.add(const Duration(minutes: 2));
+      rig.gateway.infoError = httpError(503);
+      rig.store.mutations.add(mutation(3));
+      rig.gateway.onExchange = (request) async => request.mutations.isEmpty
+          ? FakeGateway.response()
+          : FakeGateway.response(results: [accepted('m-3', 4)]);
+
+      expect(await rig.engine.syncScope(scope), isNull);
+
+      expect(
+        rig.store.mutations
+            .firstWhere((m) => m.entityType == promotionReceiptEntityType)
+            .outcome,
+        MutationOutcome.pending,
+      );
+      expect(rig.engine.state.scopes[scope]!.waitingForNewerService, 1);
+    },
+  );
+
+  test('a scope without held intents never asks again', () async {
+    final rig = Rig();
+    rig.store.mutations.add(mutation(1));
+    await rig.engine.syncScope(scope);
+    rig.clock = rig.clock.add(const Duration(hours: 1));
+    await rig.engine.syncScope(scope);
+
+    expect(rig.gateway.infoCalls, 1);
+  });
 }

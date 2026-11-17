@@ -11,6 +11,7 @@ class SyncEngineConfig {
     this.protocolVersion = SyncProtocol.protocolVersion,
     this.isSyncable,
     this.now = _systemNow,
+    this.capabilityRecheckInterval = const Duration(minutes: 1),
     this.maxExchangeBytes = syncExchangeMaxBodyBytes,
     this.maxExchangeMutations = syncExchangeMaxMutations,
   });
@@ -35,6 +36,10 @@ class SyncEngineConfig {
   /// The service's limits on one exchange; a push is cut to fit them.
   final int maxExchangeBytes;
   final int maxExchangeMutations;
+
+  /// How long a scope with `promote_score` intents held back waits before it
+  /// reads the service's capabilities again.
+  final Duration capabilityRecheckInterval;
 
   /// The clock, replaceable in tests.
   final DateTime Function() now;
