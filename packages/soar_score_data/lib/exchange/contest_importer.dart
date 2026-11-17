@@ -177,10 +177,16 @@ class ContestImporter {
   final SoarScoreDatabase _db;
   final DateTime Function() _clock;
 
-  /// Columns older files of the same version do not have. A missing one reads
-  /// as null; import fills the slot pointers after the scores are written.
-  static const _legacyOptionalColumns = {
-    'score_placeholders': {'current_attempt_id'},
+  /// Columns older files of the same version do not have, with what a missing
+  /// one reads as. Import fills the slot pointers after the scores are
+  /// written. Official scores of older files were all selected by a director,
+  /// so they read as `Manual`; no review closure was ever stored.
+  static const _legacyOptionalColumns = <String, Map<String, Object?>>{
+    'score_placeholders': {
+      'current_attempt_id': null,
+      'review_closed_score_revision': null,
+    },
+    'official_scores': {'selection_origin': 'Manual'},
   };
 
   static final _tableSpecs = {
@@ -386,7 +392,8 @@ class ContestImporter {
           );
           continue;
         }
-        final optional = _legacyOptionalColumns[table] ?? const <String>{};
+        final optional =
+            _legacyOptionalColumns[table]?.keys.toSet() ?? const <String>{};
         if (row.keys.toSet().difference(expected).isNotEmpty ||
             expected
                 .difference(row.keys.toSet())
@@ -699,8 +706,8 @@ class ContestImporter {
     for (final MapEntry(key: table, value: columns)
         in _legacyOptionalColumns.entries) {
       for (final row in tables[table] ?? const <Map<String, Object?>>[]) {
-        for (final column in columns) {
-          row.putIfAbsent(column, () => null);
+        for (final MapEntry(key: column, value: fallback) in columns.entries) {
+          row.putIfAbsent(column, () => fallback);
         }
       }
     }

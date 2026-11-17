@@ -462,6 +462,7 @@ erDiagram
         int         score_revision
         uuid        locked_by                FK "optional"
         timestamptz locked_at                   "optional"
+        int         review_closed_score_revision "optional"
         int         revision
     }
 
@@ -488,8 +489,9 @@ erDiagram
         int       score_revision
         jsonb     components
         timestamp set_at
-        uuid      set_by               FK
+        uuid      set_by               FK "null when Automatic"
         text      reason
+        text      selection_origin     "enum"
     }
 
     FLIGHT_RESULT {

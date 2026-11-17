@@ -940,6 +940,253 @@ void main() {
     });
   });
 
+  group('score states and selection origin', () {
+    /// A pending slot (participant submission, no official score), a manual
+    /// official, an automatic one with no actor, and an automatic one a
+    /// director confirmed, all in the Autumn contest of [site].
+    Future<Map<String, core.Id>> shapeScores(Site site) async {
+      final repo = Repository(site.db);
+      final contest = await site.contestNamed(_autumn);
+      final slots = await repo.scorePlaceholderRepository.listForContest(
+        contest.id,
+      );
+      final officials = slots
+          .where((p) => p.state == core.ScorePlaceholderState.official)
+          .toList();
+      expect(officials.length, greaterThanOrEqualTo(4));
+      final automatic = officials[1];
+      final confirmed = officials[2];
+      for (final (slot, closed) in [(automatic, false), (confirmed, true)]) {
+        await site.db.customStatement(
+          "UPDATE official_scores SET set_by = NULL, "
+          "selection_origin = 'Automatic', "
+          "reason = 'automatic_round_complete' "
+          "WHERE score_placeholder_id = '${slot.id.value}'",
+        );
+        if (closed) {
+          await site.db.customStatement(
+            'UPDATE score_placeholders SET review_closed_score_revision = '
+            "score_revision WHERE id = '${slot.id.value}'",
+          );
+        }
+      }
+      // The demo contest is fully scored: turn one slot back into a pending
+      // participant submission (its attempt stays, the official score goes).
+      final pending = officials[3];
+      await site.db.customStatement(
+        "DELETE FROM flight_results WHERE score_placeholder_id = '${pending.id.value}'",
+      );
+      await site.db.customStatement(
+        "DELETE FROM official_scores WHERE score_placeholder_id = '${pending.id.value}'",
+      );
+      await site.db.customStatement(
+        "UPDATE score_placeholders SET state = 'Submitted' "
+        "WHERE id = '${pending.id.value}'",
+      );
+      return {
+        'manual': officials.first.id,
+        'automatic': automatic.id,
+        'confirmed': confirmed.id,
+        'pending': pending.id,
+      };
+    }
+
+    Future<void> expectKept(Site site, Map<String, core.Id> shaped) async {
+      final contest = await site.contestNamed(_autumn);
+      final repo = Repository(site.db);
+      final slots = {
+        for (final p in await repo.scorePlaceholderRepository.listForContest(
+          contest.id,
+        ))
+          p.id: p,
+      };
+      final officials = {
+        for (final id in shaped.values)
+          id: await repo.officialScoreRepository.currentForPlaceholder(id),
+      };
+      expect(
+        officials[shaped['manual']]!.selectionOrigin,
+        core.SelectionOrigin.manual,
+      );
+      expect(officials[shaped['manual']]!.setBy, isNotNull);
+      final automatic = officials[shaped['automatic']]!;
+      expect(automatic.selectionOrigin, core.SelectionOrigin.automatic);
+      expect(automatic.setBy, isNull);
+      expect(automatic.reason, 'automatic_round_complete');
+      expect(slots[shaped['automatic']]!.isReviewClosed(automatic), isFalse);
+      final confirmed = officials[shaped['confirmed']]!;
+      expect(confirmed.setBy, isNull);
+      expect(slots[shaped['confirmed']]!.isReviewClosed(confirmed), isTrue);
+      // The pending submission stays pending: no official score appeared.
+      final pending = slots[shaped['pending']]!;
+      expect(pending.state, core.ScorePlaceholderState.submitted);
+      expect(officials[shaped['pending']], isNull);
+    }
+
+    test(
+      'an inspection copy keeps pending, manual and automatic scores',
+      () async {
+        final shaped = await shapeScores(source);
+        final file = await source.exportNamed(_autumn);
+        await importInspection(file);
+        await expectKept(source, shaped);
+        // An inspection copy gets new ids; the target holds only this contest.
+        Future<List<int>> counts(Site site) async {
+          final row = await site.db
+              .customSelect(
+                "SELECT "
+                "(SELECT COUNT(*) FROM official_scores WHERE selection_origin = 'Automatic' AND set_by IS NULL) AS automatic, "
+                "(SELECT COUNT(*) FROM official_scores WHERE selection_origin = 'Manual' AND set_by IS NOT NULL) AS manual, "
+                "(SELECT COUNT(*) FROM score_placeholders WHERE state = 'Submitted') AS pending, "
+                "(SELECT COUNT(*) FROM score_placeholders WHERE review_closed_score_revision IS NOT NULL) AS closed",
+              )
+              .getSingle();
+          return [
+            for (final k in ['automatic', 'manual', 'pending', 'closed'])
+              row.read<int>(k),
+          ];
+        }
+
+        final copied = await counts(target);
+        expect(copied[1], greaterThan(0));
+        expect(copied[0], 2);
+        expect(copied[2], 1);
+        expect(copied[3], 1);
+      },
+    );
+
+    test('an editable copy keeps them too', () async {
+      final shaped = await shapeScores(source);
+      final file = await source.exportNamed(_autumn);
+      await target.importer.import(
+        file,
+        mode: ImportMode.editable,
+        target: target.target,
+      );
+      // Nothing was accepted on import: the same states in the copy.
+      final contest = await target.contestNamed(_autumn);
+      final repo = Repository(target.db);
+      final slots = {
+        for (final p in await repo.scorePlaceholderRepository.listForContest(
+          contest.id,
+        ))
+          p.id: p,
+      };
+      expect(
+        slots[shaped['pending']]!.state,
+        core.ScorePlaceholderState.submitted,
+      );
+      expect(
+        await repo.officialScoreRepository.currentForPlaceholder(
+          shaped['pending']!,
+        ),
+        isNull,
+      );
+      final automatic = (await repo.officialScoreRepository
+          .currentForPlaceholder(shaped['automatic']!))!;
+      expect(automatic.selectionOrigin, core.SelectionOrigin.automatic);
+      expect(automatic.setBy, isNull);
+      expect(slots[shaped['confirmed']]!.hasReviewClosure, isTrue);
+    });
+
+    test('an export from before selection origins reads as manual', () async {
+      final file = await source.exportNamed(_autumn);
+      for (final row in file.rows('official_scores')) {
+        row.remove('selection_origin');
+      }
+      for (final row in file.rows('score_placeholders')) {
+        row.remove('review_closed_score_revision');
+      }
+      final legacy = ExchangeFile.decode(
+        utf8.encode(jsonEncode(file.toJson())),
+      );
+
+      final result = await importInspection(legacy);
+
+      expect(result.contestId.value, file.header.contestId);
+      final origins = await target.db
+          .customSelect(
+            'SELECT DISTINCT selection_origin AS o FROM official_scores '
+            'WHERE contest_id = ?',
+            variables: [Variable.withString(file.header.contestId)],
+          )
+          .get();
+      expect([for (final r in origins) r.read<String>('o')], ['Manual']);
+      final closures = await target.db
+          .customSelect(
+            'SELECT COUNT(*) AS n FROM score_placeholders WHERE contest_id = ? '
+            'AND review_closed_score_revision IS NOT NULL',
+            variables: [Variable.withString(file.header.contestId)],
+          )
+          .getSingle();
+      expect(closures.read<int>('n'), 0);
+    });
+  });
+
+  group('scores become official setting', () {
+    Map<String, Object?> coreOf(Object? config) {
+      final map = config is String ? jsonDecode(config) : config;
+      return Map<String, Object?>.from((map as Map)['core'] as Map);
+    }
+
+    Future<core.OfficializationMode> importedMode(
+      ExchangeFile file,
+      Site into,
+    ) async {
+      await into.importer.import(
+        file,
+        mode: ImportMode.inspection,
+        target: into.target,
+      );
+      final rows = await into.db
+          .customSelect(
+            'SELECT config FROM contest_configuration_revisions '
+            'WHERE contest_id IN (SELECT id FROM contests WHERE name = ?) '
+            'ORDER BY revision_number DESC',
+            variables: [Variable.withString(_autumn)],
+          )
+          .get();
+      return core.CoreOptions.fromMap(coreOf(rows.first.read<String>('config')))
+          .scoresBecomeOfficial;
+    }
+
+    test('the stored mode round trips through an export', () async {
+      for (final mode in core.OfficializationMode.values) {
+        final file = await source.exportNamed(_autumn);
+        for (final row in file.rows('contest_configuration_revisions')) {
+          final config = Map<String, Object?>.from(
+            (row['config'] is String
+                    ? jsonDecode(row['config']! as String)
+                    : row['config'])
+                as Map,
+          );
+          final options = Map<String, Object?>.from(config['core'] as Map)
+            ..['scores_become_official'] = mode.json;
+          row['config'] = {...config, 'core': options};
+        }
+        final fresh = await Site.open();
+        addTearDown(fresh.close);
+        expect(await importedMode(file, fresh), mode);
+      }
+    });
+
+    test('an export with no stored mode reads as Manual', () async {
+      final file = await source.exportNamed(_autumn);
+      for (final row in file.rows('contest_configuration_revisions')) {
+        final config = Map<String, Object?>.from(
+          (row['config'] is String
+                  ? jsonDecode(row['config']! as String)
+                  : row['config'])
+              as Map,
+        );
+        final options = Map<String, Object?>.from(config['core'] as Map)
+          ..remove('scores_become_official');
+        row['config'] = {...config, 'core': options};
+      }
+      expect(await importedMode(file, target), core.OfficializationMode.manual);
+    });
+  });
+
   group('untrusted files', () {
     test('a file that is not an export is refused', () {
       for (final text in ['not json', '[]', '{"format":"other"}']) {

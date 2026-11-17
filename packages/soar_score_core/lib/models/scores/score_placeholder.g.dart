@@ -32,6 +32,8 @@ ScorePlaceholder _$ScorePlaceholderFromJson(Map<String, dynamic> json) =>
         json['locked_at'],
         const UtcTimestampConverter().fromJson,
       ),
+      reviewClosedScoreRevision: (json['review_closed_score_revision'] as num?)
+          ?.toInt(),
       revision: (json['revision'] as num?)?.toInt() ?? 0,
     );
 
@@ -57,6 +59,7 @@ Map<String, dynamic> _$ScorePlaceholderToJson(ScorePlaceholder instance) =>
         instance.lockedAt,
         const UtcTimestampConverter().toJson,
       ),
+      'review_closed_score_revision': instance.reviewClosedScoreRevision,
       'revision': instance.revision,
     };
 

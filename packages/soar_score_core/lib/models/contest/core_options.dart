@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import '../../enums/draw_mode.dart';
 import '../../enums/group_score_mode.dart';
 import '../../enums/lane_mode.dart';
+import '../../enums/officialization_mode.dart';
 import '../../enums/public_update_mode.dart';
 import '../../enums/rounding_mode.dart';
 
@@ -31,6 +32,7 @@ class CoreOptions extends Equatable {
     this.participantNumbersEnabled = false,
     this.reviewRequestsEnabled = true,
     this.publicUpdateMode = PublicUpdateMode.roundCompletion,
+    this.scoresBecomeOfficial = OfficializationMode.manual,
     this.intendedTotalRounds,
   }) : dropAfterRounds = List.unmodifiable(dropAfterRounds) {
     if (teamsEnabled) {
@@ -178,6 +180,11 @@ class CoreOptions extends Equatable {
         (v) => asEnum(PublicUpdateMode.values, v, (e) => e.json),
         PublicUpdateMode.roundCompletion,
       ),
+      scoresBecomeOfficial: read(
+        'scores_become_official',
+        (v) => asEnum(OfficializationMode.values, v, (e) => e.json),
+        OfficializationMode.manual,
+      ),
       intendedTotalRounds: readOptional('intended_total_rounds', asInt),
     );
   }
@@ -202,6 +209,7 @@ class CoreOptions extends Equatable {
     'participant_numbers_enabled',
     'review_requests_enabled',
     'public_update_mode',
+    'scores_become_official',
     'intended_total_rounds',
   };
 
@@ -233,6 +241,17 @@ class CoreOptions extends Equatable {
   final bool reviewRequestsEnabled;
   final PublicUpdateMode publicUpdateMode;
 
+  /// When submitted scores become official. Independent of
+  /// [publicUpdateMode]. A configuration with no stored value reads as
+  /// [OfficializationMode.manual]; a new contest stores
+  /// [freshContestScoresBecomeOfficial] unless the director chooses another.
+  final OfficializationMode scoresBecomeOfficial;
+
+  /// What a fresh contest starts with, as opposed to the reading of a
+  /// configuration that has no stored value.
+  static const freshContestScoresBecomeOfficial =
+      OfficializationMode.endOfRound;
+
   /// Only for `SeededManOnMan`; shown to people, with no effect on the draw.
   final int? intendedTotalRounds;
 
@@ -256,6 +275,7 @@ class CoreOptions extends Equatable {
     participantNumbersEnabled,
     reviewRequestsEnabled,
     publicUpdateMode,
+    scoresBecomeOfficial,
     intendedTotalRounds,
   ];
 }

@@ -12,6 +12,7 @@ import '../enums/authority.dart';
 import '../enums/discipline_type.dart';
 import '../enums/lifecycle_state.dart';
 import '../enums/score_placeholder_state.dart';
+import '../enums/selection_origin.dart';
 import '../errors/contest_state_error.dart';
 import '../errors/entity_not_found_error.dart';
 import '../errors/scoring_validation_error.dart';
@@ -203,6 +204,7 @@ class ScoresService {
               reason: official.reason,
               actorId: official.setBy,
               authority: attempt.authority,
+              selectionOrigin: official.selectionOrigin,
               at: official.setAt,
             )
           else
@@ -369,6 +371,7 @@ class ScoresService {
       setAt: now,
       setBy: actorId,
       reason: (trimmed == null || trimmed.isEmpty) ? defaultReason : trimmed,
+      selectionOrigin: SelectionOrigin.manual,
     );
     final updated = ScorePlaceholder(
       id: placeholder.id,
