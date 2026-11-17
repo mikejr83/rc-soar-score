@@ -1,5 +1,7 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
+import 'fake_store.dart';
+
 /// Records the changes it is given; can be made to fail on one sequence.
 class FakeApplier implements ReplicatedChangeApplier {
   FakeApplier(this.log);
@@ -11,6 +13,10 @@ class FakeApplier implements ReplicatedChangeApplier {
   int? invalidOnSequence;
 
   final _stored = <int>{};
+
+  /// Where a receipt settles its intent, as the real applier does in the same
+  /// transaction as the rest of its aggregate.
+  FakeSyncStore? store;
 
   @override
   Future<bool> apply(ReplicatedChange change) async {
@@ -43,6 +49,13 @@ class FakeApplier implements ReplicatedChangeApplier {
     aggregates.add(changes);
     var changed = false;
     for (final change in changes) {
+      if (change.entityType == promotionReceiptEntityType) {
+        log.add('receipt:${change.sequence}');
+        changed =
+            (store?.settle(change.entityId, change.sequence) ?? false) ||
+            changed;
+        continue;
+      }
       if (await apply(change)) changed = true;
     }
     return changed;

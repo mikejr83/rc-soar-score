@@ -62,6 +62,21 @@ class FakeSyncStore implements SyncStore {
     });
   }
 
+  /// Settles the pending intent [operationId] as accepted, like a receipt.
+  bool settle(Id operationId, int sequence) {
+    final index = mutations.indexWhere(
+      (m) => m.entityId == operationId && m.outcome == MutationOutcome.pending,
+    );
+    if (index < 0) return false;
+    log.add('settle:$sequence');
+    mutations[index] = MutationRecord.fromJson({
+      ...mutations[index].toJson(),
+      'outcome': 'Accepted',
+      'sequence': sequence,
+    });
+    return true;
+  }
+
   @override
   Future<int> readCursor(SyncScopeKey scope) async => cursors[scope] ?? 0;
 
