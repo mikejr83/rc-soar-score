@@ -4223,7 +4223,7 @@ abstract class AppLocalizations {
   /// Tooltip of the disabled Mark all button when every waiting entry is held back.
   ///
   /// In en, this message translates to:
-  /// **'No row is ready to mark official. Save or revert edited rows, or open a review first.'**
+  /// **'No row is ready to mark official. Save or revert edited rows, wait for a save in progress, or open a review first.'**
   String get scoreMarkAllNoneValid;
 
   /// Part of the Mark all dialog and result.
@@ -4277,7 +4277,7 @@ abstract class AppLocalizations {
   /// Part of the Mark all result for rows to try again.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, one{1 row could not be reached; try it again.} other{{count} rows could not be reached; try them again.}}'**
+  /// **'{count, plural, one{1 row was not marked; try it again.} other{{count} rows were not marked; try them again.}}'**
   String scoreMarkAllRetry(int count);
 }
 

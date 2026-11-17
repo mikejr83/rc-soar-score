@@ -221,6 +221,24 @@ void main() {
       },
     );
 
+    test(
+      'a row another operator already made official leaves no banner',
+      () async {
+        final server = ScoringServer()
+          ..seedPendingSubmission(first, a)
+          ..seedPendingSubmission(second, a);
+        final c = await _open(server);
+        server.seedScore(first, b);
+
+        final summary = await c.markAllOfficial();
+
+        expect(summary.changed, 0);
+        expect(summary.adopted, 1);
+        expect(c.saveOf(first).kind, RowSaveKind.idle);
+        expect(_row(c, 1).status, RowStatus.official);
+      },
+    );
+
     test('one busy row does not stop the rest', () async {
       final server = ScoringServer()
         ..seedPendingSubmission(first, a)

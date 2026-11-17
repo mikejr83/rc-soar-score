@@ -3018,7 +3018,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scoreMarkAllNoneValid =>
-      'No row is ready to mark official. Save or revert edited rows, or open a review first.';
+      'No row is ready to mark official. Save or revert edited rows, wait for a save in progress, or open a review first.';
 
   @override
   String scoreMarkAllSkipEdited(int count) {
@@ -3105,8 +3105,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count rows could not be reached; try them again.',
-      one: '1 row could not be reached; try it again.',
+      other: '$count rows were not marked; try them again.',
+      one: '1 row was not marked; try it again.',
     );
     return '$_temp0';
   }

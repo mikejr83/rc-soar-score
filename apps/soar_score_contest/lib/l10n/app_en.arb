@@ -2853,7 +2853,7 @@
   },
   "scoreMarkAllOfficial": "Mark all valid rows official",
   "@scoreMarkAllOfficial": {"description": "Toolbar button that accepts every waiting pilot entry of the group as official."},
-  "scoreMarkAllNoneValid": "No row is ready to mark official. Save or revert edited rows, or open a review first.",
+  "scoreMarkAllNoneValid": "No row is ready to mark official. Save or revert edited rows, wait for a save in progress, or open a review first.",
   "@scoreMarkAllNoneValid": {"description": "Tooltip of the disabled Mark all button when every waiting entry is held back."},
   "scoreMarkAllSkipEdited": "{count, plural, one{1 row with unsaved edits is left out.} other{{count} rows with unsaved edits are left out.}}",
   "@scoreMarkAllSkipEdited": {"description": "Part of the Mark all dialog and result.", "placeholders": {"count": {"type": "int"}}},
@@ -2871,6 +2871,6 @@
   "@scoreMarkAllChanged": {"description": "Part of the Mark all result.", "placeholders": {"count": {"type": "int"}}},
   "scoreMarkAllRefused": "{count, plural, one{1 row was refused.} other{{count} rows were refused.}}",
   "@scoreMarkAllRefused": {"description": "Part of the Mark all result.", "placeholders": {"count": {"type": "int"}}},
-  "scoreMarkAllRetry": "{count, plural, one{1 row could not be reached; try it again.} other{{count} rows could not be reached; try them again.}}",
+  "scoreMarkAllRetry": "{count, plural, one{1 row was not marked; try it again.} other{{count} rows were not marked; try them again.}}",
   "@scoreMarkAllRetry": {"description": "Part of the Mark all result for rows to try again.", "placeholders": {"count": {"type": "int"}}}
 }

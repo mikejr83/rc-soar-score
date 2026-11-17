@@ -806,17 +806,9 @@ class ScoringController extends ChangeNotifier {
         error.error?.code,
         error.error?.message,
       );
-      if (!refusal.changed) {
-        _saves[row.id] = refusal;
-      } else if (!await _refreshSlots([row])) {
-        // The newer values could not be read, so the row cannot say to
-        // check them: it offers Refresh instead.
-        _saves[row.id] = const RowSave(RowSaveKind.failed, promotion: true);
-      } else if (_rowOf(row.id)?.hasPendingSubmission ?? false) {
-        _saves[row.id] = refusal;
-      } else {
-        // Another operator already made it official: nothing to ask again.
-        _saves.remove(row.id);
+      _saves[row.id] = refusal;
+      if (refusal.changed) {
+        _settleChanged([row], await _refreshSlots([row]));
       }
     } on ApiNetworkError {
       _saves[row.id] = const RowSave(
@@ -939,10 +931,15 @@ class ScoringController extends ChangeNotifier {
         final unreachable =
             error is ApiNetworkError ||
             (error is ApiHttpError && error.statusCode == 503);
+        // Any other whole-request failure keeps the server's words and
+        // offers Refresh; it is still counted as rows to try again.
+        final said = error is ApiHttpError
+            ? error.error?.message ?? 'The server failed (${error.statusCode}).'
+            : '$error';
         for (final row in chunk) {
           _saves[row.id] = RowSave(
             RowSaveKind.failed,
-            message: unreachable ? null : '$error',
+            message: unreachable ? null : said,
             networkProblem: unreachable,
             promotion: true,
           );
@@ -950,7 +947,9 @@ class ScoringController extends ChangeNotifier {
         retry += chunk.length;
       }
     }
-    if (moved.isNotEmpty) await _refreshSlots(moved);
+    if (moved.isNotEmpty) {
+      changed -= _settleChanged(moved, await _refreshSlots(moved));
+    }
     if (adopted + replayed > 0) {
       notifyListeners();
       await _loadResults();
@@ -964,6 +963,24 @@ class ScoringController extends ChangeNotifier {
       retry: retry,
       skipped: skipped,
     );
+  }
+
+  /// After rows were refused as changed and their slots were read again
+  /// ([read] says whether that worked): a row whose newer values could not
+  /// be read offers Refresh, and a row that no longer waits, because another
+  /// operator already made it official, has nothing left to ask. Returns how
+  /// many rows were settled that way.
+  int _settleChanged(List<ScoringRow> changed, bool read) {
+    var settled = 0;
+    for (final row in changed) {
+      if (!read) {
+        _saves[row.id] = const RowSave(RowSaveKind.failed, promotion: true);
+      } else if (!(_rowOf(row.id)?.hasPendingSubmission ?? false)) {
+        _saves.remove(row.id);
+        settled++;
+      }
+    }
+    return settled;
   }
 
   /// Reads the slots of [stale] again and shows their newer values, keeping
