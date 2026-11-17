@@ -9,9 +9,10 @@ ScoringSheetLayout _plan(
   ScoringSheetData data, {
   Map<String, String> filters = const {},
   Size? body,
+  bool withScores = false,
 }) => ScoringSheetLayout.plan(
   data: data,
-  options: sheetOptions(filters),
+  options: sheetOptions(filters, withScores),
   body: body ?? letterLandscapeBody,
 );
 
@@ -145,6 +146,29 @@ void main() {
           expect(_headings(page), _headings(pages.first));
         }
       }
+    });
+  });
+
+  group('the pre-fill legend', () {
+    test('marks values that are only waiting submissions', () {
+      final layout = _plan(
+        syntheticSheet(
+          groupSizes: [2],
+          scores: {(1, 1): enteredScore(official: false)},
+        ),
+        filters: {'pre': '1'},
+        withScores: true,
+      );
+      expect(layout.legend, 'Includes scores through round 1 · * not official');
+    });
+
+    test('has no mark when every value is official', () {
+      final layout = _plan(
+        syntheticSheet(groupSizes: [2], scores: {(1, 1): enteredScore()}),
+        filters: {'pre': '1'},
+        withScores: true,
+      );
+      expect(layout.legend, 'Includes scores through round 1');
     });
   });
 }

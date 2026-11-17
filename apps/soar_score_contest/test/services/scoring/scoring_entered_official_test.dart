@@ -74,4 +74,73 @@ void main() {
       expect((completeness.entered, completeness.official), (2, 0));
     },
   );
+
+  test('Score check reports an official row whose draft was blanked', () async {
+    final server = ScoringServer()
+      ..seedScore(scoringAssignmentId(1, 1), flight);
+    final c = await _open(server);
+    final row = _row(c, 1);
+    c.draftOf(row)
+      ..setTime('')
+      ..setHeight('');
+    c.runCheck();
+    // Nothing is left to save for the pilot; the check says so rather than
+    // passing the row.
+    expect(
+      c.check!.findings.where((f) => f.rowKey == row.id.value),
+      isNotEmpty,
+    );
+  });
+
+  test('the score check does not pass a submission without values', () async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(scoringAssignmentId(1, 1), flight)
+      ..seedPendingSubmission(scoringAssignmentId(1, 2), const {});
+    final c = await _open(server);
+    c.runCheck();
+    final findings = c.check!.findings;
+    expect(findings.where((f) => f.rowKey == _row(c, 2).id.value), isNotEmpty);
+    expect(findings.where((f) => f.rowKey == _row(c, 1).id.value), isEmpty);
+  });
+
+  test('a pending flight of a retired pilot is entered, not missed', () async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(scoringAssignmentId(1, 1), flight);
+    final c = await _open(server);
+    final pending = _row(c, 1);
+    final retired = ScoringRow(
+      assignment: pending.assignment,
+      pilot: pending.pilot,
+      slot: pending.slot,
+      retired: true,
+    );
+    expect(retired.isMissed, isFalse);
+    expect(retired.isEntered, isTrue);
+    final unscored = ScoringRow(
+      assignment: pending.assignment,
+      pilot: pending.pilot,
+      slot: null,
+      retired: true,
+    );
+    expect(unscored.isMissed, isTrue);
+  });
+
+  test('a locked group still counts its waiting submissions', () async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(scoringAssignmentId(1, 1), flight)
+      ..seedScore(scoringAssignmentId(1, 2), flight);
+    final c = await _open(server);
+    final locked = [
+      for (final r in c.rows)
+        ScoringRow(
+          assignment: r.assignment,
+          pilot: r.pilot,
+          slot: r.slot,
+          locked: true,
+        ),
+    ];
+    expect(locked.map((r) => r.isEntered), everyElement(isTrue));
+    expect(locked.where((r) => r.isOfficial), hasLength(1));
+    expect(locked.first.status, RowStatus.locked);
+  });
 }

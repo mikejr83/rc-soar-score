@@ -42,6 +42,46 @@ void main() {
       expect(after.fingerprint, isNot(before.fingerprint));
     });
 
+    test('changes when a waiting submission is replaced by a newer one', () {
+      final base = scoresFor(matrix, const {});
+      ScoreSlot waiting(ScoreSlot slot, String attempt) => ScoreSlot(
+        placeholder: ScorePlaceholder(
+          id: slot.placeholder.id,
+          contestId: slot.placeholder.contestId,
+          contestParticipationId: slot.placeholder.contestParticipationId,
+          assignmentId: slot.placeholder.assignmentId,
+          state: ScorePlaceholderState.submitted,
+        ),
+        pendingAttempt: ScoreAttempt(
+          id: Id.parse(attempt),
+          contestId: slot.placeholder.contestId,
+          scorePlaceholderId: slot.placeholder.id,
+          configRevisionId: Id.create(),
+          matrixRevisionId: Id.create(),
+          rawComponents: const {'time_flown': 500},
+          actorId: Id.create(),
+          authority: Authority.participant,
+          clientMutationId: attempt,
+          baseScoreRevision: 0,
+          acceptedAt: at(1),
+        ),
+      );
+      ContestScores with_(String attempt) => ContestScores(
+        rounds: base.rounds,
+        slots: [waiting(base.slots.first, attempt), ...base.slots.skip(1)],
+      );
+      final a = Id.create().value;
+      final b = Id.create().value;
+      expect(
+        _facts(with_(a), matrix).fingerprint,
+        isNot(_facts(with_(b), matrix).fingerprint),
+      );
+      expect(
+        _facts(with_(a), matrix).fingerprint,
+        _facts(with_(a), matrix).fingerprint,
+      );
+    });
+
     test('changes when a score moves to another revision', () {
       final base = scoresFor(matrix, _scored());
       final slot = base.slots.first;

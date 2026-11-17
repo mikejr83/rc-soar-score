@@ -180,6 +180,7 @@ class ReportsFacts {
         slot.placeholder.scoreRevision,
         slot.officialScore?.scoreRevision,
         slot.officialScore?.setAt,
+        slot.pendingAttempt?.id,
       ),
   ]);
 

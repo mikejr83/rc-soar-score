@@ -640,6 +640,11 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
           reason: name,
         );
       }
+      // #929: the strip counts the waiting entries as entered, apart from the
+      // official scores the group already has.
+      final (entered, total, official) = groupStripCounts(tester);
+      expect(entered - official, pilots.length, reason: 'waiting entries');
+      expect(entered, lessThanOrEqualTo(total));
       // A group opens with its pending rows filled in for the director, so
       // leaving it asks about the unsaved rows. Discarding keeps the
       // submissions: they stay pending on the server.

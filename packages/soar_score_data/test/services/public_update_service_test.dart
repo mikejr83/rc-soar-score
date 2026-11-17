@@ -135,6 +135,44 @@ void _tests(Backend backend) {
       );
     }
 
+    /// A participant's submission waiting for the director: the slot is
+    /// Submitted, with no official score.
+    Future<void> submitPending(MatrixSlot slot) async {
+      final placeholder = (await repository.scorePlaceholderRepository
+          .findForAssignment(slot.assignmentId))!;
+      final assignment = (await repository.matrixAssignmentRepository.findById(
+        slot.assignmentId,
+      ))!;
+      await repository.scoreAttemptRepository.recordAttempt(
+        core.ScoreAttempt(
+          id: core.Id.create(),
+          contestId: contestId,
+          scorePlaceholderId: placeholder.id,
+          configRevisionId:
+              (await repository.contestConfigurationRevisionRepository
+                      .latestForContest(contestId))!
+                  .id,
+          matrixRevisionId: assignment.matrixRevisionId,
+          rawComponents: const {'time_flown': 580, 'launch_height': 100},
+          actorId: core.Id.create(),
+          authority: core.Authority.participant,
+          clientMutationId: 'pending-${mutations++}',
+          baseScoreRevision: 0,
+          acceptedAt: now,
+        ),
+        core.ScorePlaceholder(
+          id: placeholder.id,
+          contestId: contestId,
+          contestParticipationId: placeholder.contestParticipationId,
+          assignmentId: placeholder.assignmentId,
+          state: core.ScorePlaceholderState.submitted,
+          scoreRevision: 0,
+          revision: placeholder.revision,
+        ),
+        metadata: metadata('pending'),
+      );
+    }
+
     Future<List<core.PublicationProjection>> projections() => repository
         .publicationProjectionRepository
         .listForPublication(publicationId);
@@ -221,6 +259,52 @@ void _tests(Backend backend) {
       final corrected = await enter(round1.first, 595, base: 1);
       expect(corrected!.view.current!.projectionRevision, 3);
     });
+
+    test(
+      'RoundCompletion counts a waiting submission as entered, unchanged',
+      () async {
+        await publishFirst();
+
+        // Every slot but the last is official; the last has a participant
+        // submission the director has not made official. The round counts as
+        // entered, so the next entry in it publishes (the all-entered policy
+        // of #929, which counts entered, not official).
+        for (var i = 0; i < round1.length - 1; i++) {
+          expect(await enter(round1[i], 500 + i), isNull);
+        }
+        await submitPending(round1.last);
+        expect(await projections(), hasLength(1));
+
+        final published = await enter(round1.first, 595, base: 1);
+
+        expect(published, isNotNull);
+        expect(published!.view.current!.projectionRevision, 2);
+        // Only official scores are projected; the submission is not.
+        expect(published.view.current!.scores, hasLength(round1.length - 1));
+      },
+    );
+
+    test(
+      'the last official entry of a round publishes while a slot waits',
+      () async {
+        await publishFirst();
+
+        // One slot has only a participant submission. The director enters
+        // the rest; the entry that finishes the round publishes, because the
+        // waiting slot already counts as entered.
+        await submitPending(round1.last);
+        for (var i = 0; i < round1.length - 2; i++) {
+          expect(await enter(round1[i], 500 + i), isNull);
+        }
+        expect(await projections(), hasLength(1));
+
+        final published = await enter(round1[round1.length - 2], 590);
+
+        expect(published, isNotNull);
+        expect(published!.view.current!.projectionRevision, 2);
+        expect(published.view.current!.scores, hasLength(round1.length - 1));
+      },
+    );
 
     test('a retried entry publishes once', () async {
       await useMode(core.PublicUpdateMode.automatic);
