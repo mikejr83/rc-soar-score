@@ -235,6 +235,15 @@ class PromotionOperation {
 
   Future<bool> _administers(ExchangeContext ctx, ContestScopeKey scope) =>
       _store.transaction((tx) async {
+        // The installation row is held until the commit, so a revocation
+        // cannot land between this check and the promotion; an activation
+        // change takes the contest's gate, which this call already holds.
+        final installation = await tx.findInstallationForUpdate(
+          ctx.installationId!,
+        );
+        if (installation == null || installation.revokedAt != null) {
+          return false;
+        }
         final activations = await tx.listActivations(scope.contestId);
         return activations.any(
           (a) => a.isOpen && a.installationId == ctx.installationId,

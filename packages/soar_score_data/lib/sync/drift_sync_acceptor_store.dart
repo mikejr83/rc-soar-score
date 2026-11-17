@@ -85,6 +85,14 @@ class _DriftSyncAcceptorTransaction implements core.SyncAcceptorTransaction {
   }
 
   @override
+  Future<core.Installation?> findInstallationForUpdate(core.Id id) async {
+    final rows = await _stores
+        .of('Installation')
+        .whereId('id', id, forUpdate: true);
+    return rows.isEmpty ? null : rows.single as core.Installation;
+  }
+
+  @override
   Future<List<core.Installation>> listInstallations(
     core.Id ownerAccountId,
   ) async => [

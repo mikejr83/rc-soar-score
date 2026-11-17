@@ -28,6 +28,11 @@ abstract interface class SyncAcceptorStore {
 abstract interface class SyncAcceptorTransaction {
   Future<Installation?> findInstallation(Id id);
 
+  /// Reads the installation and, on PostgreSQL, holds its row until the
+  /// transaction ends, so a revocation (an update of the row) waits for the
+  /// holder to commit. SQLite's writer lock already serializes them.
+  Future<Installation?> findInstallationForUpdate(Id id);
+
   /// The account's installations, oldest first, revoked ones included.
   Future<List<Installation>> listInstallations(Id ownerAccountId);
 

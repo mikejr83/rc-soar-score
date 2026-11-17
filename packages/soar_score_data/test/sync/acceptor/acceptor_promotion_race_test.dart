@@ -7,8 +7,12 @@ import 'package:test/test.dart';
 
 import '../../support/acceptor_harness.dart';
 import '../../support/backends.dart';
+import '../../support/fixtures.dart' show Installation;
 
-void main() => forEachBackend(_tests);
+void main() {
+  forEachBackend(_tests);
+  forPostgresOnly(_twoConnections);
+}
 
 /// Runs [before] ahead of, and [after] once behind, the first read of a
 /// slot's placeholder under a row lock (the read an adoption starts with).
@@ -332,4 +336,302 @@ void _tests(Backend backend) {
     }
     expect(await receipts(), isEmpty);
   });
+
+  Future<core.InstallationActivation> replaceWithB() async {
+    await harness.register(harness.installationB, 'Tablet');
+    return harness.installations.activate(
+      accountId: harness.account,
+      contestId: contestId,
+      installationId: harness.installationB,
+      kind: core.ActivationKind.replacement,
+    );
+  }
+
+  test(
+    'an activation that commits first refuses the old installation',
+    () async {
+      await replaceWithB();
+      final operationId = core.Id.create();
+
+      final result = await send(
+        service(harness.serverRepository),
+        intent(slots[0], operationId: operationId),
+      );
+
+      expect(result.outcome, core.MutationOutcome.rejected);
+      expect(result.reasonCode, 'inactive_installation');
+      expect(await officials(slots.map((s) => s.id)), isEmpty);
+      expect(await receipts(), isEmpty);
+      // The refusal is final for that request.
+      final again = await send(
+        service(harness.serverRepository),
+        intent(slots[0], operationId: operationId, clientMutationId: 'race-x'),
+      );
+      expect(again.outcome, core.MutationOutcome.rejected);
+    },
+  );
+
+  test('an activation started mid-decision waits for the commit', () async {
+    final hooked = _HookedPlaceholders(harness.server.db);
+    final repository = _HookedRepository(harness.server.db, hooked);
+    Future<core.InstallationActivation>? activation;
+    hooked.after = () async {
+      // The authority check is behind us; the replacement starts now, outside
+      // the running transaction, and must queue behind it.
+      activation = Zone.root.run(replaceWithB);
+      for (var i = 0; i < 20; i++) {
+        await Future<void>.delayed(Duration.zero);
+      }
+    };
+
+    final result = await send(service(repository), intent(slots[0]));
+    final replaced = await activation!;
+
+    expect(result.outcome, core.MutationOutcome.accepted);
+    expect(await officials([slots[0].id]), hasLength(1));
+    final receipt = (await receipts()).single;
+    expect(receipt.sequence, isNotNull);
+    expect(replaced.installationId, harness.installationB);
+    // The old installation holds no authority any more: a further intent from
+    // it is refused.
+    final next = await send(
+      service(harness.serverRepository),
+      intent(slots[1]),
+    );
+    expect(next.reasonCode, 'inactive_installation');
+    expect(await officials([slots[1].id]), isEmpty);
+  });
+
+  test('a promotion and an activation raced: one consistent outcome', () async {
+    final a = service(harness.serverRepository);
+    final m = intent(slots[0]);
+
+    final outcome = await Future.wait<Object>([send(a, m), replaceWithB()]);
+
+    final result = outcome[0] as MutationResult;
+    final promoted = await officials([slots[0].id]);
+    if (result.outcome == core.MutationOutcome.accepted) {
+      expect(promoted, hasLength(1));
+      expect(await receipts(), hasLength(1));
+    } else {
+      expect(result.reasonCode, 'inactive_installation');
+      expect(promoted, isEmpty);
+      expect(await receipts(), isEmpty);
+    }
+  });
+
+  test(
+    'a revocation started mid-decision waits; later intents are refused',
+    () async {
+      final hooked = _HookedPlaceholders(harness.server.db);
+      final repository = _HookedRepository(harness.server.db, hooked);
+      Future<core.Installation>? revoked;
+      hooked.after = () async {
+        revoked = Zone.root.run(
+          () => harness.installations.revoke(
+            accountId: harness.account,
+            id: harness.installationA,
+          ),
+        );
+        for (var i = 0; i < 20; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+      };
+
+      final result = await send(service(repository), intent(slots[0]));
+      final installation = await revoked!;
+
+      expect(result.outcome, core.MutationOutcome.accepted);
+      expect(installation.revokedAt, isNotNull);
+      expect(await officials([slots[0].id]), hasLength(1));
+      await expectLater(
+        send(service(harness.serverRepository), intent(slots[1])),
+        throwsA(isA<core.SyncRefusal>()),
+      );
+      expect(await officials([slots[1].id]), isEmpty);
+    },
+  );
+}
+
+/// Two PostgreSQL connections to one database stand in for two service
+/// instances: the lock, not a shared connection, orders the writers.
+void _twoConnections(Backend backend) {
+  late AcceptorHarness harness;
+  late Installation second;
+  late core.Id contestId;
+  late core.ContestScopeKey scope;
+  late core.ScorePlaceholder slot;
+
+  setUp(() async {
+    harness = await AcceptorHarness.open(backend);
+    second = await harness.server.reopen();
+    await DemoDataSeeder(
+      harness.clientRepository,
+      localAccountId: harness.account,
+    ).seed();
+    final running = (await harness.clientRepository.contestRepository.getAll())
+        .firstWhere((c) => c.name == 'Mountain States Team F5J');
+    contestId = running.id;
+    scope = core.ContestScopeKey(contestId);
+    await harness.uploadAll(contestId);
+    slot = (await harness.server.stores.of('ScorePlaceholder').all())
+        .cast<core.ScorePlaceholder>()
+        .firstWhere(
+          (p) =>
+              p.contestId == contestId &&
+              p.state == core.ScorePlaceholderState.submitted,
+        );
+    await harness.register(harness.installationB, 'Tablet');
+  });
+  tearDown(() async {
+    await second.close();
+    await harness.close();
+  });
+
+  SyncMutation intent() => SyncMutation(
+    id: core.Id.create(),
+    clientMutationId: 'two-connections',
+    entityType: core.promotionReceiptEntityType,
+    entityId: core.Id.create(),
+    authority: core.Authority.director,
+    clientTime: DateTime.utc(2026, 11, 16),
+    payload: {
+      'version': 1,
+      'data': {
+        'operation': core.SyncCapabilities.promoteScore,
+        'operation_version': 1,
+        'assignment_id': slot.assignmentId.value,
+        'source_attempt_id': slot.currentAttemptId!.value,
+        'expected_score_revision': slot.scoreRevision,
+      },
+    },
+  );
+
+  Future<MutationResult> send(SyncAcceptorService s) async => (await s.exchange(
+    accountId: harness.account,
+    input: SyncExchangeInput(
+      protocolVersion: 1,
+      schemaVersion: 1,
+      installationId: harness.installationA,
+      scope: scope,
+      lastAcknowledgedSequence: 0,
+      mutations: [intent()],
+    ),
+  )).results.single;
+
+  Future<core.InstallationActivation> activate(Repository repository) =>
+      InstallationSyncService(repository).activate(
+        accountId: harness.account,
+        contestId: contestId,
+        installationId: harness.installationB,
+        kind: core.ActivationKind.replacement,
+      );
+
+  Future<int> officials() async =>
+      (await harness.server.stores.of('OfficialScore').all())
+          .cast<core.OfficialScore>()
+          .where((o) => o.scorePlaceholderId == slot.id)
+          .length;
+
+  test('an activation waits for a decision that holds the gate', () async {
+    final hooked = _HookedPlaceholders(harness.server.db);
+    final repository = _HookedRepository(harness.server.db, hooked);
+    final reached = Completer<void>();
+    final release = Completer<void>();
+    hooked.after = () async {
+      reached.complete();
+      await release.future;
+    };
+    final promotion = send(
+      SyncAcceptorService(repository, versions: const SyncVersions.exactly(1)),
+    );
+    await reached.future;
+
+    var activated = false;
+    final activation = activate(Repository(second.db)).then((a) {
+      activated = true;
+      return a;
+    });
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    expect(activated, isFalse, reason: 'the gate is held by the decision');
+
+    release.complete();
+    final result = await promotion;
+    await activation;
+
+    expect(result.outcome, core.MutationOutcome.accepted);
+    expect(await officials(), 1);
+  });
+
+  test('a decision waits for an activation that holds the gate', () async {
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    final holding = Repository(second.db).officialScoreRepository
+        .withContestGate(contestId, () async {
+          await activate(Repository(second.db));
+          entered.complete();
+          await release.future;
+        });
+    await entered.future;
+
+    var decided = false;
+    final promotion =
+        send(
+          SyncAcceptorService(
+            harness.serverRepository,
+            versions: const SyncVersions.exactly(1),
+          ),
+        ).then((r) {
+          decided = true;
+          return r;
+        });
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    expect(decided, isFalse, reason: 'the decision waits at the gate');
+
+    release.complete();
+    await holding;
+    final result = await promotion;
+
+    expect(result.outcome, core.MutationOutcome.rejected);
+    expect(result.reasonCode, 'inactive_installation');
+    expect(await officials(), 0);
+  });
+
+  test(
+    'a revocation waits for a decision that holds the installation',
+    () async {
+      final hooked = _HookedPlaceholders(harness.server.db);
+      final repository = _HookedRepository(harness.server.db, hooked);
+      final reached = Completer<void>();
+      final release = Completer<void>();
+      hooked.after = () async {
+        reached.complete();
+        await release.future;
+      };
+      final promotion = send(
+        SyncAcceptorService(
+          repository,
+          versions: const SyncVersions.exactly(1),
+        ),
+      );
+      await reached.future;
+
+      var revoked = false;
+      final revocation = InstallationSyncService(Repository(second.db))
+          .revoke(accountId: harness.account, id: harness.installationA)
+          .then((i) {
+            revoked = true;
+            return i;
+          });
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      expect(revoked, isFalse, reason: 'the row is held by the decision');
+
+      release.complete();
+      final result = await promotion;
+      await revocation;
+
+      expect(result.outcome, core.MutationOutcome.accepted);
+      expect(await officials(), 1);
+    },
+  );
 }
