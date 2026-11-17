@@ -86,17 +86,26 @@ extension AutomaticOfficializationService on ScoresService {
         return run;
       });
 
-  /// Repeats the automatic officialization for every contest that can take
-  /// scores, and returns how many contests it made scores official in.
+  /// Repeats the automatic officialization for every contest that may owe
+  /// one, and returns how many contests it made scores official in.
   ///
   /// The server runs it once when it starts: an evaluation that a restart
   /// (or a failure after the triggering change committed) interrupted is
-  /// found again from the stored state, the contest's setting and its
-  /// `Submitted` slots, so no separate request needs storing. A run only
-  /// turns `Submitted` slots into `Official` ones with a fixed operation id,
-  /// so repeating it never creates a second official version. A contest
-  /// that is busy or whose evaluation fails is logged and left for the next
-  /// trigger; it never stops the others.
+  /// found again from the stored state. A contest owes one when it has a
+  /// `Submitted` slot whose submission arrived on this server, that is,
+  /// after the contest was first uploaded to it. A submission stored before
+  /// that came with the upload (an RCSS import's pending scores, or history
+  /// entered offline): it stays pending until a later trigger, so a restart
+  /// never accepts it. A contest created on the server has no upload and
+  /// every submission counts.
+  ///
+  /// This reads the policy and the stored scores, not a stored request, so a
+  /// policy change interrupted before it ran is recovered only for
+  /// submissions that arrived here. A run only turns `Submitted` slots into
+  /// `Official` ones with a fixed operation id, so repeating it never creates
+  /// a second official version. A contest that is busy or whose evaluation
+  /// fails is logged and left for the next trigger; it never stops the
+  /// others.
   Future<int> recoverAutomaticOfficialization() async {
     var changed = 0;
     for (final contest in await repository.contestRepository.getAll()) {
@@ -106,13 +115,7 @@ extension AutomaticOfficializationService on ScoresService {
         continue;
       }
       try {
-        final placeholders = await repository.scorePlaceholderRepository
-            .listForContest(contest.id);
-        if (!placeholders.any(
-          (p) => p.state == ScorePlaceholderState.submitted,
-        )) {
-          continue;
-        }
+        if (!await _owesEvaluation(contest.id)) continue;
         final run = await officializeAndRecalculate(contest.id);
         if (run.changedScores) changed++;
       } on Object catch (error, stackTrace) {
@@ -125,6 +128,30 @@ extension AutomaticOfficializationService on ScoresService {
       }
     }
     return changed;
+  }
+
+  /// Whether [contestId] has a waiting submission that arrived on this server.
+  Future<bool> _owesEvaluation(Id contestId) async {
+    final waiting = [
+      for (final placeholder
+          in await repository.scorePlaceholderRepository.listForContest(
+            contestId,
+          ))
+        if (placeholder.state == ScorePlaceholderState.submitted &&
+            placeholder.currentAttemptId != null)
+          placeholder.currentAttemptId!,
+    ];
+    if (waiting.isEmpty) return false;
+    final activations = await repository.installationActivationRepository
+        .listForContest(contestId);
+    if (activations.isEmpty) return true;
+    final uploaded = activations
+        .map((activation) => activation.activatedAt)
+        .reduce((a, b) => a.isBefore(b) ? a : b);
+    final attempts = await repository.scoreAttemptRepository.findByIds(waiting);
+    return attempts.values.any(
+      (attempt) => attempt.acceptedAt.isAfter(uploaded),
+    );
   }
 
   Future<AutomaticOfficialization> _evaluateAutomaticOfficialization(

@@ -689,6 +689,67 @@ void _tests(SliceBackend backend) {
       },
     );
 
+    for (final (name, upload, recovered) in [
+      (
+        'recovery leaves scores that arrived with the first upload',
+        const Duration(hours: 1),
+        0,
+      ),
+      (
+        'recovery accepts scores that arrived after the first upload',
+        const Duration(hours: -1),
+        1,
+      ),
+    ]) {
+      test(name, () async {
+        await open('EndOfRound');
+        for (final pilot in [1, 2]) {
+          await submit(pilot, 1);
+        }
+        final broken = _NoResultsRepository(api.database);
+        final access = await core.InvitationService(
+          repository,
+          core.InvitationCodec.fromText(_secret),
+        ).authorize(tokens[3]!, write: true);
+        await core.ScoresService(broken).submitParticipantScore(
+          access,
+          1,
+          clientMutationId: 'm-3-1',
+          matrixRevision: matrixRevision,
+          components: _score,
+        );
+        // The contest was uploaded after all three were stored (an import
+        // whose pending scores came with it).
+        final installation = core.Installation(
+          id: core.Id.create(),
+          ownerAccountId: api.director,
+          label: 'Laptop',
+          platform: core.Platform.windows,
+          createdAt: DateTime.now().toUtc(),
+        );
+        await repository.installationRepository.save(installation);
+        await repository.installationActivationRepository.save(
+          core.InstallationActivation(
+            id: core.Id.create(),
+            contestId: core.Id.parse(_contestId),
+            installationId: installation.id,
+            activatedBy: api.director,
+            kind: core.ActivationKind.initial,
+            activatedAt: DateTime.now().toUtc().add(upload),
+          ),
+        );
+
+        expect(await scores.recoverAutomaticOfficialization(), recovered);
+        for (final pilot in [1, 2, 3]) {
+          if (recovered == 0) {
+            await expectWaiting(1, pilot);
+          } else {
+            await expectAutomatic(1, pilot, core.automaticRoundCompleteReason);
+          }
+        }
+      });
+    }
+
     test('choosing the policy accepts the rounds already complete', () async {
       await open('Manual');
       for (final pilot in [1, 2, 3]) {
