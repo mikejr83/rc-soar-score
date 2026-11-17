@@ -12,7 +12,9 @@ import 'acting_account.dart';
 import 'engine_app_sync.dart';
 import 'inspection_owner_guard.dart';
 import 'installation_id_file.dart';
+import 'native_promotion_intents.dart';
 import 'profile_bound_sync.dart';
+import '../server/switchable_promotion_policy.dart';
 
 final _logger = Logger('NativeSync');
 
@@ -125,6 +127,7 @@ class NativeSync {
     Duration discoveryDelay = const Duration(seconds: 2),
     ActingAccount? acting,
     InspectionOwnerGuard? inspectionOwners,
+    SwitchablePromotionPolicy? promotionIntents,
   }) async {
     final inspection = inspectionOwners ?? InspectionOwnerGuard(database);
     final installationId = await InstallationIdFile.besides(databasePath)
@@ -168,6 +171,7 @@ class NativeSync {
       }
     }
 
+    promotionIntents?.use(NativePromotionIntents(database, isSyncable));
     final api = ApiClientSyncGateway(remote);
     // With a sign-in, what a sync stores is bound to the profile and sign-in
     // its exchange was made under (see SyncProfileBinding).

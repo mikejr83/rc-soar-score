@@ -8,6 +8,7 @@ import 'assignment_markers.dart';
 import 'current_attempt_pointer.dart';
 import 'entity_stores.dart';
 import 'sql_placeholders.dart';
+import 'table_mapper.dart';
 
 /// Applies changes the service already accepted.
 ///
@@ -25,9 +26,28 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
 
   final SoarScoreDatabase _db;
   final EntityStores _stores;
+  late final _mutations = TableMapper(
+    _db,
+    _db.mutationRecords,
+    jsonColumns: {'payload'},
+  );
+
+  @override
+  Future<bool> applyAggregate(List<core.ReplicatedChange> changes) =>
+      _db.transaction<bool>(() async {
+        var changed = false;
+        for (final change in changes) {
+          // Each apply joins this transaction, so one failure undoes all.
+          if (await apply(change)) changed = true;
+        }
+        return changed;
+      });
 
   @override
   Future<bool> apply(core.ReplicatedChange change) async {
+    if (change.entityType == core.promotionReceiptEntityType) {
+      return _settleIntent(change);
+    }
     if (derivedEntityTypes.contains(change.entityType)) {
       throw core.UnsupportedEntityTypeError(
         change.entityType,
@@ -124,6 +144,54 @@ class DriftReplicatedChangeApplier implements core.ReplicatedChangeApplier {
         }
       }
       await _reconcileCurrentAttempt(change.entityType, json);
+      return changed;
+    });
+  }
+
+  /// A receipt: the service decided this installation's `promote_score`
+  /// intent and accepted it. The intent leaves the pending list. The receipt
+  /// of an intent this installation does not hold (another installation made
+  /// it) changes nothing, and neither does one for an intent already decided.
+  Future<bool> _settleIntent(core.ReplicatedChange change) async {
+    final contest = change.scope;
+    if (contest is! core.ContestScopeKey) return false;
+    return _db.transaction<bool>(() async {
+      final rows = await _mutations.where(
+        'entity_type = ? AND entity_id = ? AND contest_id = ?',
+        [
+          Variable<String>(core.promotionReceiptEntityType),
+          Variable<String>(change.entityId.value),
+          Variable<String>(contest.contestId.value),
+        ],
+      );
+      var changed = false;
+      for (final row in rows) {
+        final current = core.MutationRecord.fromJson(row);
+        if (current.outcome != core.MutationOutcome.pending) continue;
+        await _mutations.upsert(
+          core.MutationRecord(
+            id: current.id,
+            contestId: current.contestId,
+            ownerAccountId: current.ownerAccountId,
+            sequence: change.sequence,
+            entityType: current.entityType,
+            entityId: current.entityId,
+            baseRevision: current.baseRevision,
+            clientMutationId: current.clientMutationId,
+            actorId: current.actorId,
+            authority: current.authority,
+            sourceInstallationId: current.sourceInstallationId,
+            sourceDevice: current.sourceDevice,
+            clientTime: current.clientTime,
+            serverAcceptanceTime: DateTime.now().toUtc(),
+            payload: current.payload,
+            outcome: core.MutationOutcome.accepted,
+            dependsOnMutationId: current.dependsOnMutationId,
+            aggregateId: change.aggregateId,
+          ).toJson(),
+        );
+        changed = true;
+      }
       return changed;
     });
   }

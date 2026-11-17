@@ -8,6 +8,7 @@ class SyncScopeState {
     required this.conflictsNeedingAction,
     required this.lastSyncedSequence,
     this.rejectedMutations = 0,
+    this.waitingForNewerService = 0,
     this.lastSyncedAt,
     this.remoteSequence,
     this.dataRevision = 0,
@@ -23,6 +24,10 @@ class SyncScopeState {
 
   /// Mutations the service rejected, kept so the director can see them.
   final int rejectedMutations;
+
+  /// `promote_score` intents held back because the service does not list the
+  /// capability. They are pending and unsent until the service is updated.
+  final int waitingForNewerService;
 
   final int lastSyncedSequence;
 

@@ -57,6 +57,7 @@ class Rig {
     store = FakeSyncStore(log);
     applier = FakeApplier(log);
     gateway = FakeGateway(log);
+    applier.store = store;
     engine = SyncEngine(
       store: store,
       applier: applier,
@@ -68,15 +69,80 @@ class Rig {
         schemaVersion: 1,
         maxExchangeBytes: maxBytes,
         maxExchangeMutations: maxMutations,
-        now: () => DateTime.utc(2026, 10, 13, 15),
+        now: () => clock,
         isSyncable: syncable == null ? null : (s) async => syncable(s),
       ),
     );
   }
+
+  /// The engine's clock; a test moves it.
+  DateTime clock = DateTime.utc(2026, 10, 13, 15);
 
   final log = <String>[];
   late final FakeSyncStore store;
   late final FakeApplier applier;
   late final FakeGateway gateway;
   late final SyncEngine engine;
+}
+
+/// A service that lists `promote_score`.
+SyncInfoDto infoWithPromotion() => SyncInfoDto(
+  protocolVersion: 1,
+  minProtocolVersion: 1,
+  minSchemaVersion: 1,
+  maxSchemaVersion: 1,
+  serverTime: DateTime.utc(2026, 10, 13),
+  capabilities: const [SyncCapabilities.promoteScore],
+);
+
+/// A `promote_score` intent in the outbox.
+MutationRecord intent(int n, {String? clientId}) => MutationRecord(
+  id: idN(4000 + n),
+  contestId: contestId,
+  entityType: promotionReceiptEntityType,
+  entityId: idN(5000 + n),
+  clientMutationId: clientId ?? 'p-$n',
+  authority: Authority.director,
+  clientTime: DateTime.utc(2026, 10, 13, 12, n),
+  payload: {
+    'version': 1,
+    'data': {
+      'operation': 'promote_score',
+      'operation_version': 1,
+      'assignment_id': idN(6000 + n).value,
+      'source_attempt_id': idN(7000 + n).value,
+      'expected_score_revision': 0,
+    },
+  },
+);
+
+/// The changes of one adoption: a score, its slot and the intent's receipt.
+List<SyncChangeDto> adoption(int n, {required int from, Id? aggregate}) {
+  final id = aggregate ?? idN(8000 + n);
+  return [
+    SyncChangeDto(
+      sequence: from,
+      entityType: 'OfficialScore',
+      entityId: idN(9000 + n),
+      revision: 1,
+      payload: {'n': n},
+      aggregateId: id,
+    ),
+    SyncChangeDto(
+      sequence: from + 1,
+      entityType: 'ScorePlaceholder',
+      entityId: idN(9100 + n),
+      revision: 2,
+      payload: {'n': n},
+      aggregateId: id,
+    ),
+    SyncChangeDto(
+      sequence: from + 2,
+      entityType: promotionReceiptEntityType,
+      entityId: idN(5000 + n),
+      revision: 0,
+      payload: {'version': 1, 'data': {}},
+      aggregateId: id,
+    ),
+  ];
 }

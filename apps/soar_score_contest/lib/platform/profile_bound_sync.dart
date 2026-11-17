@@ -118,6 +118,10 @@ class ProfileBoundChangeApplier implements core.ReplicatedChangeApplier {
   @override
   Future<bool> apply(core.ReplicatedChange change) =>
       _binding.write(() => _inner.apply(change));
+
+  @override
+  Future<bool> applyAggregate(List<core.ReplicatedChange> changes) =>
+      _binding.write(() => _inner.applyAggregate(changes));
 }
 
 /// A [core.SyncStore] whose writes are pinned; reads are not.
@@ -158,6 +162,19 @@ class ProfileBoundSyncStore implements core.SyncStore {
       serverRejectionTime: serverRejectionTime,
       reasonCode: reasonCode,
       errorMessage: errorMessage,
+    ),
+  );
+
+  @override
+  Future<void> reissueIntent(
+    core.Id mutationId, {
+    required String clientMutationId,
+    required core.Id operationId,
+  }) => _binding.write(
+    () => _inner.reissueIntent(
+      mutationId,
+      clientMutationId: clientMutationId,
+      operationId: operationId,
     ),
   );
 

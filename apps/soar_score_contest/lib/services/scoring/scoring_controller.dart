@@ -794,8 +794,17 @@ class ScoringController extends ChangeNotifier {
           expectedScoreRevision: row.baseRevision,
         ),
       );
-      _applySaved(row, promoted.entry);
-      recalculationWarning = promoted.entry.recalculationWarning;
+      final adopted = promoted.adopted;
+      if (adopted == null) {
+        // Queued for the service to decide: nothing changed on this slot yet.
+        // Read it again so the row shows the waiting adoption.
+        _saves.remove(row.id);
+        await _refreshSlots([row]);
+        notifyListeners();
+        return true;
+      }
+      _applySaved(row, adopted.entry);
+      recalculationWarning = adopted.entry.recalculationWarning;
       notifyListeners();
       await _loadResults();
       notifyListeners();
@@ -868,6 +877,7 @@ class ScoringController extends ChangeNotifier {
     var refused = 0;
     var retry = 0;
     final moved = <ScoringRow>[];
+    final waiting = <ScoringRow>[];
     for (
       var from = 0;
       from < batch.length;
@@ -900,6 +910,10 @@ class ScoringController extends ChangeNotifier {
           if (promotion != null) {
             _applySaved(row, promotion.entry);
             promotion.replayed ? replayed++ : adopted++;
+          } else if (outcome?.isQueued ?? false) {
+            // Waiting for the service: nothing changed on the row yet.
+            _saves.remove(row.id);
+            waiting.add(row);
           } else if (outcome == null) {
             _saves[row.id] = const RowSave(
               RowSaveKind.failed,
@@ -950,6 +964,8 @@ class ScoringController extends ChangeNotifier {
     if (moved.isNotEmpty) {
       changed -= _settleChanged(moved, await _refreshSlots(moved));
     }
+    // Rows queued for the service show their waiting adoption once read.
+    if (waiting.isNotEmpty) await _refreshSlots(waiting);
     if (adopted + replayed > 0) {
       notifyListeners();
       await _loadResults();
@@ -957,6 +973,7 @@ class ScoringController extends ChangeNotifier {
     notifyListeners();
     return MarkAllSummary(
       adopted: adopted,
+      queued: waiting.length,
       replayed: replayed,
       changed: changed,
       refused: refused,
@@ -1141,6 +1158,7 @@ enum MarkOfficialSkip {
 class MarkAllSummary {
   const MarkAllSummary({
     this.adopted = 0,
+    this.queued = 0,
     this.replayed = 0,
     this.changed = 0,
     this.refused = 0,
@@ -1150,6 +1168,9 @@ class MarkAllSummary {
 
   /// Rows made official now.
   final int adopted;
+
+  /// Rows whose adoption waits for the service to decide it.
+  final int queued;
 
   /// Rows that already were official from this very submission.
   final int replayed;
@@ -1170,5 +1191,5 @@ class MarkAllSummary {
   int get official => adopted + replayed;
 
   /// Whether no row is official after the request.
-  bool get nothingAccepted => official == 0;
+  bool get nothingAccepted => official == 0 && queued == 0;
 }

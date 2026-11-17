@@ -49,6 +49,15 @@ class SyncEngine {
   SyncState _state;
   bool _registered = false;
   bool _versionsChecked = false;
+
+  // Whether the service lists `promote_score`. Read with the versions, and
+  // read again when the service refuses the operation as unknown.
+  bool _promoteScore = false;
+  DateTime? _capabilitiesReadAt;
+
+  // Per scope, the `promote_score` intents held back because the service does
+  // not list the capability. They stay pending and nothing is sent for them.
+  final _waitingForPeer = <SyncScopeKey, int>{};
   Future<void> _tail = Future.value();
 
   /// The current state.
@@ -161,8 +170,10 @@ class SyncEngine {
         // Pull first, so the push is based on what the service already has.
         final pulled = await _pull(scope, await _exchange(scope, cursor, []));
         final pending = inDependencyOrder(await _store.pendingMutations(scope));
-        if (pending.isNotEmpty) {
-          await _push(scope, pending, pulled.cursor);
+        await _recheckPromotionSupport(pending);
+        final sendable = _withoutHeldBack(scope, pending);
+        if (sendable.isNotEmpty) {
+          await _push(scope, sendable, pulled.cursor);
         }
       });
       if (failure == null) {
@@ -180,6 +191,57 @@ class SyncEngine {
       _emit(_state.copyWith(syncing: false));
     }
   }
+
+  /// [pending] without the `promote_score` intents the service cannot take.
+  ///
+  /// An intent is never sent to a service that does not list the capability:
+  /// it stays pending, nothing is written, and the scope reports how many wait
+  /// for a newer service.
+  List<MutationRecord> _withoutHeldBack(
+    SyncScopeKey scope,
+    List<MutationRecord> pending,
+  ) {
+    if (_promoteScore) {
+      _waitingForPeer.remove(scope);
+      return pending;
+    }
+    final held = pending.where(_isPromotion).length;
+    if (held == 0) {
+      _waitingForPeer.remove(scope);
+    } else {
+      _waitingForPeer[scope] = held;
+    }
+    return [
+      for (final m in pending)
+        if (!_isPromotion(m)) m,
+    ];
+  }
+
+  /// Reads the capability list again when intents are held back for want of
+  /// `promote_score` and the last read is older than the recheck interval, so
+  /// a service that was updated while this engine ran gets them without a
+  /// restart. Only scopes with held intents ask, and a failed read keeps the
+  /// intents queued (the sync goes on without them).
+  Future<void> _recheckPromotionSupport(List<MutationRecord> pending) async {
+    if (_promoteScore || !pending.any(_isPromotion)) return;
+    final readAt = _capabilitiesReadAt;
+    final now = _config.now();
+    if (readAt != null &&
+        now.difference(readAt) < _config.capabilityRecheckInterval) {
+      return;
+    }
+    try {
+      final info = await _gateway.syncInfo();
+      _capabilitiesReadAt = now;
+      _promoteScore = info.supports(SyncCapabilities.promoteScore);
+    } on ApiException {
+      // Unreachable or refused: the intents stay queued, and the exchange
+      // that follows reports the failure.
+    }
+  }
+
+  static bool _isPromotion(MutationRecord m) =>
+      m.entityType == promotionReceiptEntityType;
 
   /// Sends [pending] in as many exchanges as the service's limits need, each
   /// one's results stored before the next is sent.
@@ -312,6 +374,7 @@ class SyncEngine {
       // it (invitations, the publication) need to read again.
       if (accepted.isNotEmpty) _bumpRevision(scope);
       sequence = (await _pull(scope, response, from: sequence)).cursor;
+      await _settlePromotions(scope, sendable, response.results, sequence);
     }
     if (heldCreation != null && heldAccepted != null && left == 0) {
       // Everything of the upload is decided: tell the service, which then
@@ -361,6 +424,8 @@ class SyncEngine {
       )) {
         throw const _UpdateRequired();
       }
+      _promoteScore = info.supports(SyncCapabilities.promoteScore);
+      _capabilitiesReadAt = _config.now();
       _versionsChecked = true;
     }
     if (!_registered) {
@@ -461,15 +526,34 @@ class SyncEngine {
     List<SyncChangeDto> ordered,
     void Function() onChanged,
   ) async {
-    for (final change in ordered) {
+    var i = 0;
+    while (i < ordered.length) {
+      // The changes of one aggregate are applied together, in one local
+      // transaction with the settling of the intent they answer.
+      final aggregateId = ordered[i].aggregateId;
+      var end = i + 1;
+      if (aggregateId != null) {
+        while (end < ordered.length &&
+            ordered[end].aggregateId == aggregateId) {
+          end++;
+        }
+      }
+      final run = ordered.sublist(i, end);
       try {
-        if (await _applier.apply(changeFromDto(scope, change))) onChanged();
+        final changed = aggregateId == null
+            ? await _applier.apply(changeFromDto(scope, run.single))
+            : await _applier.applyAggregate([
+                for (final change in run) changeFromDto(scope, change),
+              ]);
+        if (changed) onChanged();
       } on UnsupportedEntityTypeError {
         // The applier refuses an entity type it has no store for, or one that
         // is derived. Stop here without moving the cursor past it: nothing is
         // dropped, and the scope reports why it cannot go on.
-        throw _UnsupportedChange(change.sequence, change.entityType);
+        final first = run.first;
+        throw _UnsupportedChange(first.sequence, first.entityType);
       }
+      i = end;
     }
   }
 
@@ -481,6 +565,25 @@ class SyncEngine {
     for (final result in results) {
       final mutation = byClientId[result.clientMutationId];
       if (mutation == null) continue;
+      if (_isPromotion(mutation)) {
+        // An accepted intent is settled by the receipt that comes back in the
+        // pulled aggregate, in the same transaction as its adoption (see
+        // _settlePromotions); a refusal is final, unless the service turns
+        // out not to know the operation.
+        if (result.outcome == MutationOutcome.accepted) continue;
+        if (await _promotionUnknownToService(result)) {
+          // The older service recorded its refusal under these ids. It was a
+          // decision about an entity type it did not know, never about the
+          // slot, so a service that learns the operation later must not
+          // replay it as final: the intent is asked again under new ids.
+          await _store.reissueIntent(
+            mutation.id,
+            clientMutationId: Id.create().value,
+            operationId: Id.create(),
+          );
+          continue;
+        }
+      }
       switch (result.outcome) {
         case MutationOutcome.accepted:
           await _store.recordOutcome(
@@ -503,6 +606,55 @@ class SyncEngine {
           // and is sent again on the next sync.
           break;
       }
+    }
+  }
+
+  /// Whether a refusal of a `promote_score` intent comes from a service that
+  /// does not know the operation. An older service answers `invalid_payload`
+  /// because it knows no such entity type; a current one gives the same code
+  /// for a slot it does not hold, which is final. The capability list tells
+  /// them apart, so it is read again. A service that no longer lists it holds
+  /// the intent back; the refusal is not recorded.
+  Future<bool> _promotionUnknownToService(SyncMutationResult result) async {
+    if (result.reasonCode != SyncReasonCode.invalidPayload.code) return false;
+    final info = await _gateway.syncInfo();
+    _capabilitiesReadAt = _config.now();
+    _promoteScore = info.supports(SyncCapabilities.promoteScore);
+    return !_promoteScore;
+  }
+
+  /// Settles accepted `promote_score` intents whose receipt did not arrive in
+  /// the pulled aggregate although the pull has passed its sequence. The
+  /// receipt normally does the settling, together with the adoption.
+  Future<void> _settlePromotions(
+    SyncScopeKey scope,
+    List<MutationRecord> sent,
+    List<SyncMutationResult> results,
+    int cursor,
+  ) async {
+    final accepted = {
+      for (final r in results)
+        if (r.outcome == MutationOutcome.accepted && r.sequence != null)
+          r.clientMutationId: r.sequence!,
+    };
+    final candidates = [
+      for (final m in sent)
+        if (_isPromotion(m) &&
+            (accepted[m.clientMutationId] ?? cursor + 1) <= cursor)
+          m,
+    ];
+    if (candidates.isEmpty) return;
+    final stillPending = {
+      for (final m in await _store.pendingMutations(scope)) m.id,
+    };
+    for (final m in candidates) {
+      if (!stillPending.contains(m.id)) continue;
+      await _store.recordOutcome(
+        mutationId: m.id,
+        outcome: MutationOutcome.accepted,
+        sequence: accepted[m.clientMutationId],
+        serverAcceptanceTime: _config.now(),
+      );
     }
   }
 
@@ -546,6 +698,7 @@ class SyncEngine {
       rejectedMutations: status.rejectedMutations,
       lastSyncedAt: status.lastSyncedAt,
       remoteSequence: _remoteSequence[scope],
+      waitingForNewerService: _waitingForPeer[scope] ?? 0,
       dataRevision: _dataRevision[scope] ?? 0,
       failure: failure,
       skipReason: skip,

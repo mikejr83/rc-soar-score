@@ -61,8 +61,145 @@ class ScorePromotionResult {
   Map<String, Object?> toJson() => {...entry.toJson(), 'replayed': replayed};
 }
 
+/// The answer to a mark-official request on an installation: the adoption was
+/// written, or it was queued as a `promote_score` intent that waits for the
+/// service's decision.
+class PromotionDecision extends Equatable {
+  const PromotionDecision.adopted(ScorePromotionResult this.adopted)
+    : queued = null;
+
+  const PromotionDecision.queued(PendingPromotion this.queued) : adopted = null;
+
+  /// An adoption as its JSON, or a queued intent as `{"queued": {...}}`.
+  factory PromotionDecision.fromJson(Map<String, Object?> json) {
+    final queued = json['queued'];
+    return queued == null
+        ? PromotionDecision.adopted(ScorePromotionResult.fromJson(json))
+        : PromotionDecision.queued(
+            PendingPromotion.fromJson(queued as Map<String, Object?>),
+          );
+  }
+
+  final ScorePromotionResult? adopted;
+  final PendingPromotion? queued;
+
+  Map<String, Object?> toJson() =>
+      queued != null ? {'queued': queued!.toJson()} : adopted!.toJson();
+
+  @override
+  List<Object?> get props => [adopted?.toJson(), queued];
+}
+
 /// Director adoption of a participant submission ("mark official").
 extension PromoteSubmissionService on ScoresService {
+  /// Marks the stored submission official the way this installation does it:
+  /// written as [promoteSubmission] when the contest does not sync (or its
+  /// first upload is not finished), otherwise queued as an intent.
+  ///
+  /// The queued intent changes no score, placeholder or review. It records
+  /// only the director's request in the outbox, with the facts the service
+  /// needs to refuse it when the slot has moved. A retry that names the same
+  /// slot, source and revision as the pending intent returns that intent.
+  /// Another request for a slot with a pending intent is a
+  /// [ContestStateError] `promotion_pending`.
+  ///
+  /// The same errors as [promoteSubmission] are thrown for a slot the
+  /// installation already knows to be stale, locked or unknown.
+  Future<PromotionDecision> promoteOrQueue(
+    Id contestId,
+    Id assignmentId, {
+    required Id sourceAttemptId,
+    required int expectedScoreRevision,
+    required Id actorId,
+    required MutationMetadata metadata,
+  }) async {
+    if (!await _promotionIntents.queuesPromotions(contestId)) {
+      return PromotionDecision.adopted(
+        await promoteSubmission(
+          contestId,
+          assignmentId,
+          sourceAttemptId: sourceAttemptId,
+          expectedScoreRevision: expectedScoreRevision,
+          actorId: actorId,
+          metadata: metadata,
+        ),
+      );
+    }
+    return PromotionDecision.queued(
+      await repository.officialScoreRepository.withContestGate(
+        contestId,
+        () => _queuePromotion(
+          contestId,
+          assignmentId,
+          sourceAttemptId: sourceAttemptId,
+          expectedScoreRevision: expectedScoreRevision,
+          metadata: metadata,
+        ),
+      ),
+    );
+  }
+
+  Future<PendingPromotion> _queuePromotion(
+    Id contestId,
+    Id assignmentId, {
+    required Id sourceAttemptId,
+    required int expectedScoreRevision,
+    required MutationMetadata metadata,
+  }) async {
+    final contest = await _requireContest(contestId);
+    final pending = await repository.promotionIntentRepository
+        .pendingForAssignment(contestId, assignmentId);
+    if (pending != null) {
+      if (pending.sourceAttemptId == sourceAttemptId &&
+          pending.expectedScoreRevision == expectedScoreRevision) {
+        return pending;
+      }
+      throw _promotionPending();
+    }
+    _requireScoringAllowed(contest);
+    final slot = await _requireSlot(contestId, assignmentId);
+    final placeholder = slot.placeholder;
+    if (placeholder.isLocked) {
+      throw ContestStateError(
+        'score_locked',
+        'this score is locked; unlock it to change it',
+      );
+    }
+    if (placeholder.currentAttemptId != sourceAttemptId ||
+        placeholder.scoreRevision != expectedScoreRevision) {
+      throw StaleRevisionError(
+        entityType: 'ScorePlaceholder',
+        entityId: placeholder.id,
+        expectedRevision: expectedScoreRevision,
+        storedRevision: placeholder.scoreRevision,
+      );
+    }
+    final attempt = await repository.scoreAttemptRepository.findById(
+      sourceAttemptId,
+    );
+    if (attempt == null ||
+        attempt.contestId != contestId ||
+        attempt.scorePlaceholderId != placeholder.id) {
+      throw EntityNotFoundError(
+        entityType: 'ScoreAttempt',
+        entityId: sourceAttemptId,
+      );
+    }
+    final intent = PendingPromotion(
+      operationId: _newId(),
+      contestId: contestId,
+      assignmentId: assignmentId,
+      sourceAttemptId: sourceAttemptId,
+      expectedScoreRevision: expectedScoreRevision,
+      queuedAt: metadata.clientTime.toUtc(),
+    );
+    await repository.promotionIntentRepository.queue(
+      intent,
+      metadata: metadata,
+    );
+    return intent;
+  }
+
   /// Makes the stored submission [sourceAttemptId] of the slot
   /// [assignmentId] its official score. [expectedScoreRevision] is the score
   /// revision the director saw on the slot.
@@ -190,6 +327,9 @@ extension PromoteSubmissionService on ScoresService {
     _requireScoringAllowed(contest);
     final slot = await _requireSlot(contestId, assignmentId);
     final placeholder = slot.placeholder;
+    if (intent == null) {
+      await _requireNoPendingPromotion(contestId, assignmentId);
+    }
     if (placeholder.revision != current.revision) throw _SlotMoved();
     if (placeholder.isLocked) {
       throw ContestStateError(
@@ -370,14 +510,23 @@ class PromotionOutcome extends Equatable {
     ScorePromotionResult this.promotion,
   ) : statusCode = null,
       code = null,
-      message = null;
+      message = null,
+      queued = null;
 
   const PromotionOutcome.refused(
     this.assignmentId, {
     required int this.statusCode,
     required String this.code,
     required String this.message,
-  }) : promotion = null;
+  }) : promotion = null,
+       queued = null;
+
+  /// The slot's adoption was queued for the service to decide.
+  const PromotionOutcome.queued(this.assignmentId, PendingPromotion this.queued)
+    : promotion = null,
+      statusCode = null,
+      code = null,
+      message = null;
 
   factory PromotionOutcome.fromJson(Map<String, Object?> json) {
     final assignmentId = Id.parse(json['assignment_id']! as String);
@@ -386,6 +535,13 @@ class PromotionOutcome extends Equatable {
       return PromotionOutcome.adopted(
         assignmentId,
         ScorePromotionResult.fromJson(result as Map<String, Object?>),
+      );
+    }
+    final queued = json['queued'];
+    if (queued != null) {
+      return PromotionOutcome.queued(
+        assignmentId,
+        PendingPromotion.fromJson(queued as Map<String, Object?>),
       );
     }
     final error = json['error']! as Map<String, Object?>;
@@ -405,13 +561,21 @@ class PromotionOutcome extends Equatable {
   final String? code;
   final String? message;
 
+  /// The queued intent, or null when the slot was adopted or refused.
+  final PendingPromotion? queued;
+
   /// Whether the slot now holds the requested adoption.
   bool get isAdopted => promotion != null;
+
+  /// Whether the adoption waits for the service's decision.
+  bool get isQueued => queued != null;
 
   Map<String, Object?> toJson() => {
     'assignment_id': assignmentId.value,
     if (promotion != null)
       'result': promotion!.toJson()
+    else if (queued != null)
+      'queued': queued!.toJson()
     else
       'error': {'status': statusCode, 'code': code, 'message': message},
   };
@@ -420,6 +584,7 @@ class PromotionOutcome extends Equatable {
   List<Object?> get props => [
     assignmentId,
     promotion?.toJson(),
+    queued,
     statusCode,
     code,
     message,
@@ -531,18 +696,18 @@ extension PromoteGroupService on ScoresService {
         continue;
       }
       try {
+        final decision = await promoteOrQueue(
+          contestId,
+          item.assignmentId,
+          sourceAttemptId: item.sourceAttemptId!,
+          expectedScoreRevision: item.expectedScoreRevision,
+          actorId: actorId,
+          metadata: metadata.forPart(item.assignmentId.value),
+        );
         outcomes.add(
-          PromotionOutcome.adopted(
-            item.assignmentId,
-            await promoteSubmission(
-              contestId,
-              item.assignmentId,
-              sourceAttemptId: item.sourceAttemptId!,
-              expectedScoreRevision: item.expectedScoreRevision,
-              actorId: actorId,
-              metadata: metadata.forPart(item.assignmentId.value),
-            ),
-          ),
+          decision.queued != null
+              ? PromotionOutcome.queued(item.assignmentId, decision.queued!)
+              : PromotionOutcome.adopted(item.assignmentId, decision.adopted!),
         );
       } on Object catch (error) {
         final refused = _refusal(error);

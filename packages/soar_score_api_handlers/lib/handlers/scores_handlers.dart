@@ -77,8 +77,9 @@ void addScoreRoutes(
   Repository repository, {
   bool publishingEnabled = false,
   RecalculationService? recalculation,
+  PromotionIntentPolicy? promotionIntents,
 }) {
-  final service = ScoresService(repository);
+  final service = ScoresService(repository, promotionIntents: promotionIntents);
   final recalculationService =
       recalculation ?? RecalculationService.automatic(repository);
   final publicUpdates = PublicUpdateService(repository);
@@ -195,7 +196,7 @@ void addScoreRoutes(
 
     _logger.fine('Marking assignment $assignmentId official in contest $id');
 
-    final promoted = await service.promoteSubmission(
+    final decision = await service.promoteOrQueue(
       contestId,
       Id.parse(assignmentId),
       sourceAttemptId: Id.parse(body.sourceAttemptId),
@@ -203,6 +204,13 @@ void addScoreRoutes(
       actorId: principal.accountId,
       metadata: metadata,
     );
+    final queued = decision.queued;
+    if (queued != null) {
+      // Nothing was adopted: the intent waits in the outbox for the service,
+      // so there is nothing to recalculate or publish yet.
+      return jsonResponse(decision.toJson(), statusCode: 202);
+    }
+    final promoted = decision.adopted!;
     var entry = promoted.entry;
     // A replay still finishes the recalculation and publish a request that
     // stopped after the adoption may have missed.

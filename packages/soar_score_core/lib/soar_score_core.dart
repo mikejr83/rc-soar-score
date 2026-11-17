@@ -68,6 +68,8 @@ export 'repositories/matrix_assignment_repository.dart';
 export 'repositories/matrix_revision_repository.dart';
 export 'repositories/mutation_metadata.dart';
 export 'repositories/official_score_repository.dart';
+export 'repositories/promotion_intent_policy.dart';
+export 'repositories/promotion_intent_repository.dart';
 export 'repositories/participant_account_link_repository.dart';
 export 'repositories/participant_directory_entry_repository.dart';
 export 'repositories/participant_profile_repository.dart';

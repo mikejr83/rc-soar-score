@@ -71,6 +71,7 @@ export 'repositories/re_flight_participant_repository.dart';
 export 'repositories/re_flight_repository.dart';
 export 'repositories/review_request_repository.dart';
 export 'repositories/score_placeholder_repository.dart';
+export 'repositories/promotion_intent_repository.dart';
 export 'repositories/sync_cursor_repository.dart';
 export 'repositories/team_membership_repository.dart';
 export 'repositories/team_repository.dart';

@@ -39,6 +39,7 @@ import 'round_repository.dart';
 import 'score_attempt_repository.dart';
 import 'review_request_repository.dart';
 import 'score_placeholder_repository.dart';
+import 'promotion_intent_repository.dart';
 import 'sync_acceptor_store.dart';
 import 'sync_cursor_repository.dart';
 import 'team_membership_repository.dart';
@@ -129,6 +130,9 @@ abstract interface class Repository {
   SyncCursorRepository get syncCursorRepository;
 
   SyncAcceptorStore get syncAcceptorStore;
+
+  /// The installation's undecided `promote_score` intents.
+  PromotionIntentRepository get promotionIntentRepository;
 
   InvitationRepository get invitationRepository;
   ModelCatalogRepository get modelCatalogRepository;
