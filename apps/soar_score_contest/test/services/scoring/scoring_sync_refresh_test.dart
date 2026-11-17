@@ -325,4 +325,54 @@ void main() {
       expect(_row(c, 1).isOfficial, isTrue);
     });
   }
+
+  for (final bulk in [false, true]) {
+    test('a failed read after a sync-settled queue offers a retry that shows '
+        'the decision (${bulk ? 'Mark all' : 'single'})', () async {
+      final server = ScoringServer()
+        ..seedPendingSubmission(first, a)
+        ..queuePromotions.add(first);
+      final gate = Completer<void>();
+      var hold = false;
+      final c = ScoringController(
+        client: ApiClient(
+          baseUrl: Uri.parse('http://localhost'),
+          httpClient: MockClient((request) async {
+            final answer = await server.handle(request);
+            if (hold && request.method == 'POST') {
+              hold = false;
+              await gate.future;
+            }
+            return answer;
+          }),
+        ),
+        contestId: contestId,
+        round: 1,
+        group: 1,
+      );
+      addTearDown(c.dispose);
+      await c.load();
+
+      hold = true;
+      final marked = bulk ? c.markAllOfficial() : c.markOfficial(_row(c, 1));
+      await Future<void>.delayed(Duration.zero);
+      server.settleQueued(first);
+      await c.refreshAfterSync();
+      server.failScoreReads = true;
+      gate.complete();
+      await marked;
+
+      // The receipt stays shown, and the failure offers a retry.
+      expect(_row(c, 1).isAdoptionPending, isTrue);
+      expect(c.loadError, isNotNull);
+      expect(c.syncRefreshFailed, isTrue);
+
+      server.failScoreReads = false;
+      await c.refreshAfterSync();
+
+      expect(c.loadError, isNull);
+      expect(_row(c, 1).isAdoptionPending, isFalse);
+      expect(_row(c, 1).isOfficial, isTrue);
+    });
+  }
 }

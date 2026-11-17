@@ -826,11 +826,7 @@ class ScoringController extends ChangeNotifier {
         _saves.remove(row.id);
         _applyQueued(row, promoted.queued!);
         notifyListeners();
-        if (_syncReads != readsBefore) {
-          // A failed read keeps the receipt shown.
-          await _refreshSlots([row]);
-          notifyListeners();
-        }
+        if (_syncReads != readsBefore) await _reconcile([row]);
         return true;
       }
       _applySaved(row, adopted.entry);
@@ -997,9 +993,7 @@ class ScoringController extends ChangeNotifier {
       changed -= _settleChanged(moved, await _refreshSlots(moved));
     }
     if (waiting.isNotEmpty && _syncReads != readsBefore) {
-      // A sync was applied while the request was out: read the queued rows
-      // again. A failed read keeps their receipts shown.
-      await _refreshSlots(waiting);
+      await _reconcile(waiting);
     }
     if (adopted + replayed > 0) {
       notifyListeners();
@@ -1035,6 +1029,23 @@ class ScoringController extends ChangeNotifier {
     return settled;
   }
 
+  /// After a sync was applied while a mark was out: reads the queued [rows]
+  /// again, since the service may have decided them meanwhile. A failed read
+  /// keeps the receipts shown and offers the sync-refresh Retry, which reads
+  /// the whole page again.
+  Future<void> _reconcile(List<ScoringRow> queued) async {
+    if (await _refreshSlots(queued)) {
+      notifyListeners();
+      return;
+    }
+    if (_disposed) return;
+    loadError = _slotReadError ?? StateError('The scores could not be read.');
+    syncRefreshFailed = true;
+    notifyListeners();
+  }
+
+  Object? _slotReadError;
+
   /// Reads the slots of [stale] again and shows their newer values, keeping
   /// whatever the director typed in a row.
   ///
@@ -1052,7 +1063,8 @@ class ScoringController extends ChangeNotifier {
         _drafts[row.id]?.resetTo(row.savedComponents, shown: _shown(row));
       }
       return true;
-    } on Object {
+    } on Object catch (error) {
+      _slotReadError = error;
       return false;
     }
   }
