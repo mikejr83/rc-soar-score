@@ -208,9 +208,15 @@ class ScoringController extends ChangeNotifier {
         );
       }
     }
+    _syncReads++;
     await _loadResults();
     notifyListeners();
   }
+
+  /// How many sync refreshes have been applied; a mark that was out while one
+  /// was applied reads its slot again after its receipt, because the refresh
+  /// kept the busy row as it was and the service may have decided meanwhile.
+  int _syncReads = 0;
 
   void _clampGroup() {
     final current = data?.roundByOrdinal(round);
@@ -803,6 +809,7 @@ class ScoringController extends ChangeNotifier {
     final attempt = row.slot!.pendingAttempt!;
     _saves[row.id] = const RowSave(RowSaveKind.saving, promotion: true);
     notifyListeners();
+    final readsBefore = _syncReads;
     try {
       final promoted = await client.promoteScore(
         contestId,
@@ -819,6 +826,11 @@ class ScoringController extends ChangeNotifier {
         _saves.remove(row.id);
         _applyQueued(row, promoted.queued!);
         notifyListeners();
+        if (_syncReads != readsBefore) {
+          // A failed read keeps the receipt shown.
+          await _refreshSlots([row]);
+          notifyListeners();
+        }
         return true;
       }
       _applySaved(row, adopted.entry);
@@ -889,6 +901,7 @@ class ScoringController extends ChangeNotifier {
       _saves[row.id] = const RowSave(RowSaveKind.saving, promotion: true);
     }
     notifyListeners();
+    final readsBefore = _syncReads;
     var adopted = 0;
     var replayed = 0;
     var changed = 0;
@@ -982,6 +995,11 @@ class ScoringController extends ChangeNotifier {
     }
     if (moved.isNotEmpty) {
       changed -= _settleChanged(moved, await _refreshSlots(moved));
+    }
+    if (waiting.isNotEmpty && _syncReads != readsBefore) {
+      // A sync was applied while the request was out: read the queued rows
+      // again. A failed read keeps their receipts shown.
+      await _refreshSlots(waiting);
     }
     if (adopted + replayed > 0) {
       notifyListeners();

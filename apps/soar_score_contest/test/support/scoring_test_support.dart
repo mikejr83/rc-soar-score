@@ -189,6 +189,15 @@ class ScoringServer {
   final Set<Id> queuePromotions = {};
   final Map<Id, Map<String, Object?>> _queued = {};
 
+  /// The service decides the queued adoption of [assignmentId] as accepted:
+  /// the submission becomes the official score and the intent is gone.
+  void settleQueued(Id assignmentId) {
+    final pending = _pendingAttempt(assignmentId)!;
+    _queued.remove(assignmentId);
+    queuePromotions.remove(assignmentId);
+    seedScore(assignmentId, pending.rawComponents);
+  }
+
   /// While true, reading the score list fails (a server error).
   bool failScoreReads = false;
 

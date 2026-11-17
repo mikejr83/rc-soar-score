@@ -284,4 +284,45 @@ void main() {
       expect(c.markOfficialSkip(_row(c, 1)), MarkOfficialSkip.waitingToSync);
     });
   }
+
+  for (final bulk in [false, true]) {
+    test('a sync that settles the intent before the queue answer arrives '
+        'wins (${bulk ? 'Mark all' : 'single'})', () async {
+      final server = ScoringServer()
+        ..seedPendingSubmission(first, a)
+        ..queuePromotions.add(first);
+      final gate = Completer<void>();
+      var hold = false;
+      final c = ScoringController(
+        client: ApiClient(
+          baseUrl: Uri.parse('http://localhost'),
+          httpClient: MockClient((request) async {
+            final answer = await server.handle(request);
+            if (hold && request.method == 'POST') {
+              hold = false;
+              await gate.future;
+            }
+            return answer;
+          }),
+        ),
+        contestId: contestId,
+        round: 1,
+        group: 1,
+      );
+      addTearDown(c.dispose);
+      await c.load();
+
+      hold = true;
+      final marked = bulk ? c.markAllOfficial() : c.markOfficial(_row(c, 1));
+      await Future<void>.delayed(Duration.zero);
+      // The service accepted the intent while the answer is still out.
+      server.settleQueued(first);
+      await c.refreshAfterSync();
+      gate.complete();
+      await marked;
+
+      expect(_row(c, 1).isAdoptionPending, isFalse);
+      expect(_row(c, 1).isOfficial, isTrue);
+    });
+  }
 }
