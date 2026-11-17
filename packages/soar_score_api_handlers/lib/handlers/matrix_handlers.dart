@@ -173,6 +173,13 @@ void addMatrixRoutes(
       actorId: principal.accountId,
       metadata: writeMetadata(principal),
     );
+    // A move can complete the group it leaves (or the round it joins), so
+    // the contest's automatic officialization runs; a failure is logged and
+    // leaves everything stored, as after a redraw.
+    await recalculationService.recalculateAfterEntry(
+      contestId,
+      cause: 'an assignment move',
+    );
     return jsonResponse(matrix.toJson(), statusCode: 201);
   });
 
@@ -197,6 +204,10 @@ void addMatrixRoutes(
       actorId: principal.accountId,
       metadata: writeMetadata(principal),
     );
+    await recalculationService.recalculateAfterEntry(
+      contestId,
+      cause: 'a late add',
+    );
     return jsonResponse(matrix.toJson(), statusCode: 201);
   });
 
@@ -218,13 +229,12 @@ void addMatrixRoutes(
       actorId: principal.accountId,
       metadata: writeMetadata(principal),
     );
-    // A zero score changes the results.
-    final warning = rounds.any((round) => round.zeroed)
-        ? await recalculationService.recalculateAfterEntry(
-            contestId,
-            cause: 'a pilot added after the round was scored',
-          )
-        : null;
+    // A zero score changes the results, and any placement can change which
+    // rounds and groups are complete.
+    final warning = await recalculationService.recalculateAfterEntry(
+      contestId,
+      cause: 'a pilot added after the round was scored',
+    );
     return jsonResponse(
       LatePlacementResult(
         rounds: rounds,

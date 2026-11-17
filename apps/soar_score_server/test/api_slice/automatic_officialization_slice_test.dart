@@ -657,6 +657,38 @@ void _tests(SliceBackend backend) {
       await expectBothAccepted(core.automaticRoundCompleteReason);
     });
 
+    test(
+      'moving the only unscored pilot out of a group completes it',
+      () async {
+        await open('EndOfGroup', groups: 2, pilots: 4);
+        final roundOne = assignments
+            .where((a) => a['scheduled_round_id'] == rounds[0]['id'])
+            .toList();
+        final inGroupOne = roundOne.where((a) => a['group'] == 1).toList();
+        expect(inGroupOne, hasLength(2));
+        int pilotOf(Map<String, Object?> a) => [1, 2, 3, 4].singleWhere(
+          (n) => a['contest_participation_id'] == _participationId(n),
+        );
+        final scored = pilotOf(inGroupOne[0]);
+        final mover = inGroupOne[1];
+        await submit(scored, 1);
+        await expectWaiting(1, scored);
+
+        await api.expectOk(
+          'POST',
+          '/contests/$_contestId/matrix/assignments/${mover['id']}/moves',
+          status: 201,
+          body: {
+            'id': '019c0000-0000-7000-8000-000000000613',
+            'group': 2,
+            'reason': 'Moved to the other group',
+          },
+        );
+
+        await expectAutomatic(1, scored, core.automaticGroupCompleteReason);
+      },
+    );
+
     test('choosing the policy accepts the rounds already complete', () async {
       await open('Manual');
       for (final pilot in [1, 2, 3]) {
