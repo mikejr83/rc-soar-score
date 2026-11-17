@@ -9,6 +9,7 @@ import '../../models/shared/versioned_payload.dart';
 import '../../models/sync/mutation_record.dart';
 import '../../repositories/mutation_metadata.dart';
 import '../../repositories/recorded_score.dart';
+import '../../repositories/repository.dart';
 import '../../repositories/stale_revision_error.dart';
 import '../../repositories/sync_acceptor_store.dart';
 import '../../repositories/sync_scope_key.dart';
@@ -29,8 +30,9 @@ import 'sync_mutation.dart';
 /// route: exactly the stated source at the stated score revision, or nothing.
 /// It never goes through the generic director-wins merge.
 class PromotionOperation {
-  PromotionOperation(this._store, this._scores, this._log);
+  PromotionOperation(this._store, this._scores, this._log, this._repository);
 
+  final Repository _repository;
   final SyncAcceptorStore _store;
   final ScoresService _scores;
   final SyncLog _log;
@@ -45,6 +47,16 @@ class PromotionOperation {
   /// slot still shows it (else `stale_source` with the current state in the
   /// pulled changes). The same `client_mutation_id` with another payload is
   /// refused as `operation_mismatch` without touching the record.
+  ///
+  /// Everything runs inside the contest's score gate and one transaction: the
+  /// lookup of earlier decisions (by request and by operation id), the
+  /// activation check, the guarded adoption, the receipt and any refusal
+  /// record. Another service instance deciding the same contest waits at the
+  /// gate and then reads what this one committed, so two requests can never
+  /// both decide one operation, and no gated score write can land between the
+  /// check that the slot still shows an adoption and the receipt that says so.
+  /// (A writer outside the gate, an accepted sync change, is held off the slot
+  /// by the row lock the adoption's read takes, which lasts until the commit.)
   Future<MutationResult> decide(ExchangeContext ctx, SyncMutation m) async {
     final scope = ctx.scope;
     if (scope is! ContestScopeKey) {
@@ -55,6 +67,17 @@ class PromotionOperation {
         'A score promotion belongs to a contest.',
       );
     }
+    return _repository.officialScoreRepository.withContestGate(
+      scope.contestId,
+      () => _decideInGate(ctx, m, scope),
+    );
+  }
+
+  Future<MutationResult> _decideInGate(
+    ExchangeContext ctx,
+    SyncMutation m,
+    ContestScopeKey scope,
+  ) async {
     // The operation is known by its id as well as by the request that carried
     // it: the same id with another payload is refused wherever it was sent.
     final earlier = await _store.transaction((tx) async {

@@ -76,6 +76,7 @@ class SyncAcceptorService {
       _store,
       ScoresService(_repository, clock: _clock, newId: _newId),
       _log,
+      _repository,
     ),
   );
   late final ConflictResolver _resolver = ConflictResolver(
