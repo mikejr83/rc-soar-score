@@ -109,7 +109,8 @@ class _Gateway implements SyncGateway {
   Future<SystemDataResponse> systemData({
     required int afterSequence,
     String? pageToken,
-  }) async => SystemDataResponse(changes: const [], systemDataSeq: afterSequence);
+  }) async =>
+      SystemDataResponse(changes: const [], systemDataSeq: afterSequence);
 
   @override
   Future<SyncMutationResult> resolveConflict(
