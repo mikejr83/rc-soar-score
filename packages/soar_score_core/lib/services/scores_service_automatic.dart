@@ -86,6 +86,47 @@ extension AutomaticOfficializationService on ScoresService {
         return run;
       });
 
+  /// Repeats the automatic officialization for every contest that can take
+  /// scores, and returns how many contests it made scores official in.
+  ///
+  /// The server runs it once when it starts: an evaluation that a restart
+  /// (or a failure after the triggering change committed) interrupted is
+  /// found again from the stored state, the contest's setting and its
+  /// `Submitted` slots, so no separate request needs storing. A run only
+  /// turns `Submitted` slots into `Official` ones with a fixed operation id,
+  /// so repeating it never creates a second official version. A contest
+  /// that is busy or whose evaluation fails is logged and left for the next
+  /// trigger; it never stops the others.
+  Future<int> recoverAutomaticOfficialization() async {
+    var changed = 0;
+    for (final contest in await repository.contestRepository.getAll()) {
+      if (contest.adminLock == AdminLock.locked ||
+          (contest.lifecycleState != LifecycleState.ready &&
+              contest.lifecycleState != LifecycleState.running)) {
+        continue;
+      }
+      try {
+        final placeholders = await repository.scorePlaceholderRepository
+            .listForContest(contest.id);
+        if (!placeholders.any(
+          (p) => p.state == ScorePlaceholderState.submitted,
+        )) {
+          continue;
+        }
+        final run = await officializeAndRecalculate(contest.id);
+        if (run.changedScores) changed++;
+      } on Object catch (error, stackTrace) {
+        _logger.warning(
+          'Recovering automatic officialization failed for contest '
+          '${contest.id}; it repeats on the next trigger',
+          error,
+          stackTrace,
+        );
+      }
+    }
+    return changed;
+  }
+
   Future<AutomaticOfficialization> _evaluateAutomaticOfficialization(
     Id contestId,
   ) async {

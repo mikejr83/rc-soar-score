@@ -20,6 +20,7 @@ class AcceptorHarness {
     Backend backend, {
     int pageSize = 500,
     bool recalculates = false,
+    RecalculationService Function(Repository server)? recalculation,
     DateTime Function()? clock,
   }) async {
     // The client and the server are two databases on purpose.
@@ -48,9 +49,11 @@ class AcceptorHarness {
       versions: const SyncVersions.exactly(1),
       pageSize: pageSize,
       clock: clock,
-      recalculation: recalculates
-          ? RecalculationService(ResultsService(harness.serverRepository))
-          : null,
+      recalculation:
+          recalculation?.call(harness.serverRepository) ??
+          (recalculates
+              ? RecalculationService(ResultsService(harness.serverRepository))
+              : null),
     );
     harness.installations = InstallationSyncService(harness.serverRepository);
     await harness.register(harness.installationA, 'Laptop');

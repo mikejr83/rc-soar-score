@@ -79,8 +79,8 @@ void addScoreRoutes(
   RecalculationService? recalculation,
 }) {
   final service = ScoresService(repository);
-  final results = ResultsService(repository);
-  final recalculationService = recalculation ?? RecalculationService(results);
+  final recalculationService =
+      recalculation ?? RecalculationService.automatic(repository);
   final publicUpdates = PublicUpdateService(repository);
 
   router.get('/contests/<id>/scores', (Request request, String id) async {

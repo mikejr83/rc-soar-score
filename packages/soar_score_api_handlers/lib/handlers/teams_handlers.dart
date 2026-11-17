@@ -35,7 +35,7 @@ void addTeamRoutes(
   final service = TeamsService(repository);
   final scoresService = ScoresService(repository);
   final recalculationService =
-      recalculation ?? RecalculationService(ResultsService(repository));
+      recalculation ?? RecalculationService.automatic(repository);
 
   /// Recalculates after a membership change; the notice when it fails.
   Future<String?> recalculateAfterMembership(Id contestId) async {

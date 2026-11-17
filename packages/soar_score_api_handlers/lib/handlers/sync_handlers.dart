@@ -45,8 +45,7 @@ void addSyncRoutes(
   final acceptor = SyncAcceptorService(
     repository,
     versions: versions,
-    recalculation:
-        recalculation ?? RecalculationService(ResultsService(repository)),
+    recalculation: recalculation ?? RecalculationService.automatic(repository),
   );
 
   router.get(

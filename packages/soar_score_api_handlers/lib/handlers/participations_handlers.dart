@@ -41,15 +41,20 @@ void addParticipationRoutes(
   final service = ParticipationsService(repository);
   final scoresService = ScoresService(repository);
   final recalculationService =
-      recalculation ?? RecalculationService(ResultsService(repository));
+      recalculation ?? RecalculationService.automatic(repository);
 
-  /// A contest with no official score has no results to go stale.
+  /// A contest with no score, official or waiting, has nothing to go stale
+  /// and nothing to accept.
   Future<String?> recalculateIfScored(
     Id contestId, {
     required String cause,
   }) async {
     final scores = await scoresService.list(contestId);
-    if (!scores.slots.any((slot) => slot.officialScore != null)) return null;
+    if (!scores.slots.any(
+      (slot) => slot.officialScore != null || slot.pendingAttempt != null,
+    )) {
+      return null;
+    }
     return recalculationService.recalculateAfterEntry(contestId, cause: cause);
   }
 

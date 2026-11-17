@@ -416,7 +416,8 @@ void main() {
       expect((await bulk(api, List.filled(101, one))).statusCode, 400);
     });
 
-    test('takes the contest score gate once for the whole request', () async {
+    test('takes the contest score gate once for the whole request, then once '
+        'more for the automatic officialization', () async {
       final api = HandlerHarness(_owner);
       await drawnContest(api);
 
@@ -426,7 +427,12 @@ void main() {
       ]);
 
       expect(response.statusCode, 200);
-      expect(api.repository.officialScores.gated, [Id.parse(_contestId)]);
+      // One gated write for every entry, then the evaluation that follows
+      // the request.
+      expect(api.repository.officialScores.gated, [
+        Id.parse(_contestId),
+        Id.parse(_contestId),
+      ]);
     });
 
     test('a lock timeout or deadlock is a retryable 503 with nothing '

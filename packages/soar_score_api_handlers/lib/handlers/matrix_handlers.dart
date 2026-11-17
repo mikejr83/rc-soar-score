@@ -58,7 +58,7 @@ void addMatrixRoutes(
   final lateAdds = LateAddService(repository);
   final placements = LatePlacementService(repository);
   final recalculationService =
-      recalculation ?? RecalculationService(ResultsService(repository));
+      recalculation ?? RecalculationService.automatic(repository);
   final redraws = MatrixRedrawService(
     repository,
     runner: drawRunner,

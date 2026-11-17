@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
+import 'package:soar_score_core/soar_score_core.dart' hide Repository;
 import 'package:soar_score_data/soar_score_data.dart';
 
 import 'auth/auth0_token_verifier.dart';
@@ -15,10 +16,11 @@ final _logger = Logger('Server');
 
 /// A started server: the listener plus the database behind it.
 class RunningServer {
-  RunningServer._(this._server, this._database);
+  RunningServer._(this._server, this._database, this._recovery);
 
   final HttpServer _server;
   final SoarScoreDatabase _database;
+  final Future<void> _recovery;
   Future<void>? _closing;
 
   /// The port the server listens on.
@@ -38,6 +40,8 @@ class RunningServer {
       _logger.warning('Requests still running after $grace; closing them.');
       await _server.close(force: true);
     }
+    // A recovery pass still running must end before its database closes.
+    await _recovery;
     await _database.close();
     _logger.info('Shutdown complete.');
   }
@@ -93,10 +97,27 @@ Future<RunningServer> startServer(
       config.port,
     );
     _logger.info('Listening on port ${server.port}.');
-    return RunningServer._(server, db);
+    return RunningServer._(server, db, _recoverOfficialization(db));
   } catch (_) {
     await db.close();
     rethrow;
+  }
+}
+
+/// Repeats the automatic officialization the last run may have left unfinished
+/// (see [ScoresService.recoverAutomaticOfficialization]). It runs beside the
+/// first requests and never fails the server.
+Future<void> _recoverOfficialization(SoarScoreDatabase database) async {
+  try {
+    final changed = await ScoresService(Repository(database))
+        .recoverAutomaticOfficialization();
+    _logger.info('Automatic officialization recovered in $changed contests.');
+  } on Object catch (error, stackTrace) {
+    _logger.warning(
+      'Automatic officialization recovery failed',
+      error,
+      stackTrace,
+    );
   }
 }
 

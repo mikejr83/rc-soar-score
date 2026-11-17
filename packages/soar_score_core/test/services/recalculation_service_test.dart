@@ -120,6 +120,71 @@ void main() {
         expect(attempts, hasLength(1));
       },
     );
+
+    group('with automatic officialization', () {
+      test(
+        'a run that accepted scores has recalculated; no second run',
+        () async {
+          final attempts = <int>[];
+          final service = RecalculationService(
+            _AlwaysFailingResults(attempts),
+            officialize: (_) async =>
+                AutomaticOfficialization(promoted: [Id.create()]),
+          );
+
+          expect(await service.recalculateAfterEntry(Id.create()), isNull);
+          expect(attempts, isEmpty);
+        },
+      );
+
+      test(
+        'a run that accepted nothing leaves the plain recalculation',
+        () async {
+          final attempts = <int>[];
+          final service = RecalculationService(
+            _RefusingResults(attempts),
+            officialize: (_) async => AutomaticOfficialization.none,
+          );
+
+          await service.recalculateAfterEntry(Id.create());
+
+          expect(attempts, hasLength(1));
+        },
+      );
+
+      test(
+        'a failing run never blocks the recalculation or the caller',
+        () async {
+          final attempts = <int>[];
+          final service = RecalculationService(
+            _RefusingResults(attempts),
+            officialize: (_) async => throw StateError('evaluation failed'),
+          );
+
+          final warning = await service.recalculateAfterEntry(Id.create());
+
+          expect(warning, contains('refused'));
+          expect(attempts, hasLength(1));
+        },
+      );
+
+      test('the first upload path accepts nothing', () async {
+        var evaluated = 0;
+        final attempts = <int>[];
+        final service = RecalculationService(
+          _RefusingResults(attempts),
+          officialize: (_) async {
+            evaluated++;
+            return AutomaticOfficialization.none;
+          },
+        );
+
+        await service.recalculateWithoutOfficialization(Id.create());
+
+        expect(evaluated, 0);
+        expect(attempts, hasLength(1));
+      });
+    });
   });
 }
 
