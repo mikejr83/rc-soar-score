@@ -133,8 +133,8 @@ void main() {
       request,
     );
 
-    expect(promoted.replayed, isTrue);
-    expect(promoted.entry, result.entry);
+    expect(promoted.adopted!.replayed, isTrue);
+    expect(promoted.adopted!.entry, result.entry);
     expect(seen.method, 'POST');
     expect(
       seen.url.path,

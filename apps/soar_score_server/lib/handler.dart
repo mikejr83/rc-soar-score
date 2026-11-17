@@ -1,7 +1,7 @@
 import 'package:shelf/shelf.dart';
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
 import 'package:soar_score_core/soar_score_core.dart'
-    show InvitationCodec, InvitationService;
+    show InvitationCodec, InvitationService, PromotionIntentPolicy;
 import 'package:soar_score_data/soar_score_data.dart';
 
 const String serverName = 'soar_score_server';
@@ -31,6 +31,7 @@ Handler createServerHandler(
   String? selfScoringBaseUrl,
   String? trustedProxySecret,
   InvitationThrottle? invitationThrottle,
+  PromotionIntentPolicy? promotionIntents,
 }) {
   final repository = Repository(database);
   return buildApiHandler(
@@ -41,6 +42,7 @@ Handler createServerHandler(
     repository: repository,
     authMiddleware: authMiddleware,
     publishingEnabled: true,
+    promotionIntents: promotionIntents,
     selfScoringBaseUrl: selfScoringBaseUrl ?? defaultSelfScoringBaseUrl,
     corsAllowedOrigins: corsAllowedOrigins,
     trustedProxySecret: trustedProxySecret,

@@ -135,6 +135,11 @@ class StubRepository implements core.Repository {
   @override
   core.RoundGroupRepository get roundGroupRepository => roundGroups;
 
+  /// No intent is ever pending: these handlers run as the service.
+  @override
+  core.PromotionIntentRepository get promotionIntentRepository =>
+      const _NoIntents();
+
   @override
   core.ScorePlaceholderRepository get scorePlaceholderRepository =>
       scorePlaceholders;
@@ -172,4 +177,25 @@ class StubRepository implements core.Repository {
   @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not stubbed');
+}
+
+class _NoIntents implements core.PromotionIntentRepository {
+  const _NoIntents();
+
+  @override
+  Future<List<core.PendingPromotion>> pendingForContest(
+    core.Id contestId,
+  ) async => const [];
+
+  @override
+  Future<core.PendingPromotion?> pendingForAssignment(
+    core.Id contestId,
+    core.Id assignmentId,
+  ) async => null;
+
+  @override
+  Future<void> queue(
+    core.PendingPromotion intent, {
+    required core.MutationMetadata metadata,
+  }) => throw UnsupportedError('the stub holds no outbox');
 }

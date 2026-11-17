@@ -953,4 +953,87 @@ void _tests(SliceBackend backend) {
       );
     });
   });
+
+  group('on an installation whose contest syncs', () {
+    late Handler queuing;
+
+    setUp(() {
+      queuing = createServerHandler(
+        api.database,
+        authMiddleware: fixedPrincipal(Principal(accountId: api.director)),
+        promotionIntents: const _Always(),
+      );
+    });
+
+    Future<(int, Map<String, Object?>)> post(String path, Object body) async {
+      final response = await queuing(
+        Request(
+          'POST',
+          Uri.parse('http://localhost/api/v1$path'),
+          body: jsonEncode(body),
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      return (
+        response.statusCode,
+        jsonDecode(await response.readAsString()) as Map<String, Object?>,
+      );
+    }
+
+    test('marking official is answered as queued and adopts nothing', () async {
+      await submitFirst();
+
+      final (status, body) = await post(
+        '/contests/$_contestId/assignments/${slotId.value}/scores/official',
+        {'source_attempt_id': attemptId.value, 'expected_score_revision': 1},
+      );
+
+      expect(status, 202, reason: '$body');
+      final queued = body['queued']! as Map<String, Object?>;
+      expect(queued['assignment_id'], slotId.value);
+      expect(queued['source_attempt_id'], attemptId.value);
+      final placeholder = await placeholderOf(1, 1);
+      expect(placeholder.state, core.ScorePlaceholderState.submitted);
+      expect(
+        await repository.officialScoreRepository.listForPlaceholder(
+          placeholder.id,
+        ),
+        isEmpty,
+      );
+    });
+
+    test('a group request answers each row as queued', () async {
+      await submitFirst();
+      final placeholder = await placeholderOf(1, 1);
+
+      final (status, body) = await post(
+        '/contests/$_contestId/rounds/${rounds[0]['id']}/groups/1/scores/official',
+        {
+          'items': [
+            {
+              'assignment_id': placeholder.assignmentId.value,
+              'source_attempt_id': placeholder.currentAttemptId!.value,
+              'expected_score_revision': placeholder.scoreRevision,
+            },
+          ],
+        },
+      );
+
+      expect(status, 200, reason: '$body');
+      final outcome = (body['outcomes']! as List).single as Map;
+      expect(outcome['queued'], isNotNull);
+      expect(outcome['result'], isNull);
+      expect(
+        (await placeholderOf(1, 1)).state,
+        core.ScorePlaceholderState.submitted,
+      );
+    });
+  });
+}
+
+class _Always implements core.PromotionIntentPolicy {
+  const _Always();
+
+  @override
+  Future<bool> queuesPromotions(core.Id contestId) async => true;
 }

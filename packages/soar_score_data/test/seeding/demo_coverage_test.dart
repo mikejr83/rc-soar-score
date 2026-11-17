@@ -24,6 +24,8 @@ void main() {
     'installationActivationRepository':
         'backend-only; needs a server demo (#305)',
     'syncCursorRepository': 'backend-only; needs a server demo (#305)',
+    'promotionIntentRepository':
+        'an outbox of a syncing contest; the demo never syncs (#305)',
     'contestConfigurationPresetRepository':
         'not used by a screen yet; needs demo data (#288)',
     'accountRepository': 'backend-only; needs a server demo (#305)',

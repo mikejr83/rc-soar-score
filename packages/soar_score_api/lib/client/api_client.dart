@@ -1080,7 +1080,7 @@ class ApiClient {
   /// — accepts the stored participant submission named by [request] as the
   /// official score. A source or score revision that is no longer current is
   /// an [ApiHttpError] with status 409; a locked slot is 409 as well.
-  Future<ScorePromotionResult> promoteScore(
+  Future<PromotionDecision> promoteScore(
     Id contestId,
     Id assignmentId,
     PromoteScoreRequest request,
@@ -1090,10 +1090,10 @@ class ApiClient {
       '${assignmentId.value}/scores/official',
     );
     final response = await _send('POST', uri, body: request.toJson());
-    return _decode<ScorePromotionResult>(
+    return _decode<PromotionDecision>(
       response,
       uri,
-      ScorePromotionResult.fromJson,
+      PromotionDecision.fromJson,
     );
   }
 

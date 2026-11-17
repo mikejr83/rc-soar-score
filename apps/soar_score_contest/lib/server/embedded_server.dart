@@ -15,6 +15,7 @@ import 'embedded_guard.dart';
 import 'owner_scoped_principal.dart';
 import 'profile_access.dart';
 import 'profile_mismatch_guard.dart';
+import 'switchable_promotion_policy.dart';
 
 final _logger = Logger('EmbeddedServer');
 
@@ -72,6 +73,10 @@ class EmbeddedServer {
 
   /// Which owner ids belong to contests imported for inspection. Shared with
   /// the sync engine, so both decide from the same answers.
+  /// How marking a score official is done: written directly until the sync
+  /// wiring installs the policy that queues it for a syncing contest.
+  final promotionIntents = SwitchablePromotionPolicy();
+
   late final InspectionOwnerGuard inspectionOwners = InspectionOwnerGuard(
     _database,
   );
@@ -319,6 +324,7 @@ class EmbeddedServer {
       ),
       gliderScoreImport: GliderScoreImportProcessRunner(),
       drawRunner: drawRunner,
+      promotionIntents: promotionIntents,
     );
     final guarded = Pipeline()
         .addMiddleware(_inFlight.middleware)

@@ -25,11 +25,13 @@ import '../models/shared/versioned_payload.dart';
 import '../models/sync/audit_event.dart';
 import '../models/matrix/matrix_assignment.dart';
 import '../models/scores/official_score.dart';
+import '../models/scores/pending_promotion.dart';
 import '../models/scores/review_request.dart';
 import '../models/scores/score_attempt.dart';
 import '../models/scores/score_placeholder.dart';
 import '../repositories/already_stored_error.dart';
 import '../repositories/mutation_metadata.dart';
+import '../repositories/promotion_intent_policy.dart';
 import '../repositories/recorded_score.dart';
 import '../repositories/repository.dart';
 import '../repositories/contest_busy_error.dart';
@@ -71,8 +73,10 @@ class ScoresService {
     this.repository, {
     DateTime Function()? clock,
     Id Function()? newId,
+    PromotionIntentPolicy? promotionIntents,
   }) : _clock = clock ?? DateTime.now,
-       _newId = newId ?? Id.create;
+       _newId = newId ?? Id.create,
+       _promotionIntents = promotionIntents ?? const NoPromotionIntents();
 
   /// The reason stored with a first entry that gives none.
   static const String defaultReason = 'Entered by the director';
@@ -81,6 +85,7 @@ class ScoresService {
   final F5jProfile _f5j = F5jProfile();
   final DateTime Function() _clock;
   final Id Function() _newId;
+  final PromotionIntentPolicy _promotionIntents;
 
   /// Every score slot of the current matrix of contest [contestId], with the
   /// scored and total count of each round.
@@ -328,6 +333,9 @@ class ScoresService {
     _requireScoringAllowed(contest);
     final slot = await _requireSlot(contestId, assignmentId);
     final placeholder = slot.placeholder;
+    if (authority == Authority.director) {
+      await _requireNoPendingPromotion(contestId, assignmentId);
+    }
     if (placeholder.isLocked) {
       throw ContestStateError(
         'score_locked',
@@ -464,6 +472,20 @@ class ScoresService {
       contest: contest,
       calculated: await _calculate(context, official.components),
     );
+  }
+
+  ContestStateError _promotionPending() => ContestStateError(
+    'promotion_pending',
+    'this score is waiting for the service to decide marking it official',
+  );
+
+  /// Refuses a local save or promotion of a slot whose `promote_score` intent
+  /// the service has not decided: the slot accepts no other change until the
+  /// intent is decided.
+  Future<void> _requireNoPendingPromotion(Id contestId, Id assignmentId) async {
+    final pending = await repository.promotionIntentRepository
+        .pendingForAssignment(contestId, assignmentId);
+    if (pending != null) throw _promotionPending();
   }
 
   void _requireScoringAllowed(Contest contest) {
