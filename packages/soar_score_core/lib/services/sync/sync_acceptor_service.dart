@@ -164,7 +164,7 @@ class SyncAcceptorService {
       final results = <MutationResult>[];
       if (position == null) {
         results.addAll(await _decideAll(ctx, input));
-        await _recalculateAfter(scope, results);
+        await _recalculateAfter(scope, results, _isFirstUpload(scope, input));
       }
       final after = position ?? input.lastAcknowledgedSequence;
       return _store.transaction((tx) => _pull(tx, ctx, input, results, after));
@@ -268,13 +268,32 @@ class SyncAcceptorService {
     return [for (var i = 0; i < input.mutations.length; i++) decided[i]!];
   }
 
+  /// Whether [input] belongs to the first upload of its contest: it says so,
+  /// or it carries the mutation that creates the contest (a contest sent in
+  /// one exchange has no phase).
+  bool _isFirstUpload(SyncScopeKey scope, SyncExchangeInput input) =>
+      input.firstUpload != null ||
+      (scope is ContestScopeKey &&
+          input.mutations.any(
+            (m) =>
+                m.entityType == 'Contest' &&
+                m.entityId == scope.contestId &&
+                m.baseRevision == null,
+          ));
+
   /// Recalculates the results of the contest in [scope] when [results]
   /// accepted a change to it. The changes are already committed, so a failure
   /// is reported by [RecalculationService] in the log and leaves the results
   /// stale; it never fails the exchange.
+  ///
+  /// The exchanges of a contest's first upload never accept scores: an
+  /// imported contest keeps its pending scores pending, and only a later
+  /// trigger (a director action, a new submission, a change of the setting)
+  /// evaluates it.
   Future<void> _recalculateAfter(
     SyncScopeKey scope,
     List<MutationResult> results,
+    bool firstUpload,
   ) async {
     final recalculation = this.recalculation;
     if (recalculation == null || scope is! ContestScopeKey) return;
@@ -284,7 +303,17 @@ class SyncAcceptorService {
     )) {
       return;
     }
-    await recalculation.recalculateAfterEntry(scope.contestId, cause: 'a sync');
+    if (firstUpload) {
+      await recalculation.recalculateWithoutOfficialization(
+        scope.contestId,
+        cause: 'a sync',
+      );
+    } else {
+      await recalculation.recalculateAfterEntry(
+        scope.contestId,
+        cause: 'a sync',
+      );
+    }
   }
 
   Future<SyncExchangeOutput> _pull(

@@ -80,8 +80,8 @@ void addScoreRoutes(
   PromotionIntentPolicy? promotionIntents,
 }) {
   final service = ScoresService(repository, promotionIntents: promotionIntents);
-  final results = ResultsService(repository);
-  final recalculationService = recalculation ?? RecalculationService(results);
+  final recalculationService =
+      recalculation ?? RecalculationService.automatic(repository);
   final publicUpdates = PublicUpdateService(repository);
 
   router.get('/contests/<id>/scores', (Request request, String id) async {

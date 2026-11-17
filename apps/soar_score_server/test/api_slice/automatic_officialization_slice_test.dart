@@ -610,6 +610,274 @@ void _tests(SliceBackend backend) {
     });
   });
 
+  group('other triggers', () {
+    Future<void> expectBothAccepted(String reason) async {
+      await expectAutomatic(1, 1, reason);
+      await expectAutomatic(1, 2, reason);
+    }
+
+    test('a director bulk entry that completes the round accepts it', () async {
+      await open('EndOfRound');
+      await submit(1, 1);
+      await submit(2, 1);
+      final entered = await api.expectOk(
+        'POST',
+        '/contests/$_contestId/scores/bulk',
+        body: {
+          'entries': [
+            {
+              'assignment_id': assignmentOf(1, 3)['id'],
+              'client_mutation_id': 'bulk-3',
+              'base_score_revision': 0,
+              'components': _score,
+            },
+          ],
+        },
+      );
+      expect(entered['recalculation_warning'], isNull);
+      await expectBothAccepted(core.automaticRoundCompleteReason);
+      expect(
+        (await officialOf(1, 3))!.selectionOrigin,
+        core.SelectionOrigin.manual,
+      );
+    });
+
+    test('a retirement that completes the round accepts it', () async {
+      await open('EndOfRound');
+      await submit(1, 1);
+      await submit(2, 1);
+      await expectWaiting(1, 1);
+      final participation = (await repository.contestParticipationRepository
+          .findById(core.Id.parse(_participationId(3))))!;
+      await api.expectOk(
+        'PUT',
+        '/contests/$_contestId/participations/${_participationId(3)}',
+        body: {'base_revision': participation.revision, 'retired_at_round': 1},
+      );
+      await expectBothAccepted(core.automaticRoundCompleteReason);
+    });
+
+    test(
+      'moving the only unscored pilot out of a group completes it',
+      () async {
+        await open('EndOfGroup', groups: 2, pilots: 4);
+        final roundOne = assignments
+            .where((a) => a['scheduled_round_id'] == rounds[0]['id'])
+            .toList();
+        final inGroupOne = roundOne.where((a) => a['group'] == 1).toList();
+        expect(inGroupOne, hasLength(2));
+        int pilotOf(Map<String, Object?> a) => [1, 2, 3, 4].singleWhere(
+          (n) => a['contest_participation_id'] == _participationId(n),
+        );
+        final scored = pilotOf(inGroupOne[0]);
+        final mover = inGroupOne[1];
+        await submit(scored, 1);
+        await expectWaiting(1, scored);
+
+        await api.expectOk(
+          'POST',
+          '/contests/$_contestId/matrix/assignments/${mover['id']}/moves',
+          status: 201,
+          body: {
+            'id': '019c0000-0000-7000-8000-000000000613',
+            'group': 2,
+            'reason': 'Moved to the other group',
+          },
+        );
+
+        await expectAutomatic(1, scored, core.automaticGroupCompleteReason);
+      },
+    );
+
+    for (final (name, upload, recovered) in [
+      (
+        'recovery leaves scores that arrived with the first upload',
+        const Duration(hours: 1),
+        0,
+      ),
+      (
+        'recovery accepts scores that arrived after the first upload',
+        const Duration(hours: -1),
+        1,
+      ),
+    ]) {
+      test(name, () async {
+        await open('EndOfRound');
+        for (final pilot in [1, 2]) {
+          await submit(pilot, 1);
+        }
+        final broken = _NoResultsRepository(api.database);
+        final access = await core.InvitationService(
+          repository,
+          core.InvitationCodec.fromText(_secret),
+        ).authorize(tokens[3]!, write: true);
+        await core.ScoresService(broken).submitParticipantScore(
+          access,
+          1,
+          clientMutationId: 'm-3-1',
+          matrixRevision: matrixRevision,
+          components: _score,
+        );
+        // The contest was uploaded after all three were stored (an import
+        // whose pending scores came with it).
+        final installation = core.Installation(
+          id: core.Id.create(),
+          ownerAccountId: api.director,
+          label: 'Laptop',
+          platform: core.Platform.windows,
+          createdAt: DateTime.now().toUtc(),
+        );
+        await repository.installationRepository.save(installation);
+        await repository.installationActivationRepository.save(
+          core.InstallationActivation(
+            id: core.Id.create(),
+            contestId: core.Id.parse(_contestId),
+            installationId: installation.id,
+            activatedBy: api.director,
+            kind: core.ActivationKind.initial,
+            activatedAt: DateTime.now().toUtc().add(upload),
+          ),
+        );
+
+        expect(await scores.recoverAutomaticOfficialization(), recovered);
+        for (final pilot in [1, 2, 3]) {
+          if (recovered == 0) {
+            await expectWaiting(1, pilot);
+          } else {
+            await expectAutomatic(1, pilot, core.automaticRoundCompleteReason);
+          }
+        }
+      });
+    }
+
+    test(
+      'a team change accepts a complete round that is only waiting',
+      () async {
+        await open('EndOfRound');
+        for (final pilot in [1, 2]) {
+          await submit(pilot, 1);
+        }
+        final broken = _NoResultsRepository(api.database);
+        final access = await core.InvitationService(
+          repository,
+          core.InvitationCodec.fromText(_secret),
+        ).authorize(tokens[3]!, write: true);
+        // The last submission completes the round, but its evaluation fails.
+        await core.ScoresService(broken).submitParticipantScore(
+          access,
+          1,
+          clientMutationId: 'm-3-1',
+          matrixRevision: matrixRevision,
+          components: _score,
+        );
+        for (final pilot in [1, 2, 3]) {
+          await expectWaiting(1, pilot);
+        }
+
+        await api.expectOk(
+          'POST',
+          '/contests/$_contestId/teams',
+          status: 201,
+          body: {
+            'id': '019c0000-0000-7000-8000-000000000711',
+            'name': 'Gators',
+          },
+        );
+        await api.expectOk(
+          'POST',
+          '/contests/$_contestId/team-memberships',
+          status: 201,
+          body: {
+            'id': '019c0000-0000-7000-8000-000000000712',
+            'team_id': '019c0000-0000-7000-8000-000000000711',
+            'contest_participation_id': _participationId(1),
+          },
+        );
+
+        for (final pilot in [1, 2, 3]) {
+          await expectAutomatic(1, pilot, core.automaticRoundCompleteReason);
+        }
+      },
+    );
+
+    test('choosing the policy accepts the rounds already complete', () async {
+      await open('Manual');
+      for (final pilot in [1, 2, 3]) {
+        await submit(pilot, 1);
+      }
+      // Nothing is official yet, only waiting.
+      await expectWaiting(1, 1);
+      await api.expectOk(
+        'POST',
+        '/contests/$_contestId/configuration',
+        status: 201,
+        body: {
+          'base_revision_number': 1,
+          'discipline_profile_id': core.SystemDisciplineProfiles.f5jId.value,
+          'config': {
+            'core': {'scores_become_official': 'EndOfRound'},
+            'discipline': {'working_time': 600},
+          },
+        },
+      );
+      for (final pilot in [1, 2, 3]) {
+        await expectAutomatic(1, pilot, core.automaticRoundCompleteReason);
+      }
+    });
+
+    test('moving back to Manually undoes nothing', () async {
+      await open('EndOfRound');
+      for (final pilot in [1, 2, 3]) {
+        await submit(pilot, 1);
+      }
+      await api.expectOk(
+        'POST',
+        '/contests/$_contestId/configuration',
+        status: 201,
+        body: {
+          'base_revision_number': 1,
+          'discipline_profile_id': core.SystemDisciplineProfiles.f5jId.value,
+          'config': {
+            'core': {'scores_become_official': 'Manual'},
+            'discipline': {'working_time': 600},
+          },
+        },
+      );
+      await expectAutomatic(1, 1, core.automaticRoundCompleteReason);
+    });
+
+    test('recovery finds an evaluation a restart interrupted', () async {
+      await open('EndOfRound');
+      await submit(1, 1);
+      await submit(2, 1);
+      final broken = _NoResultsRepository(api.database);
+      final access = await core.InvitationService(
+        repository,
+        core.InvitationCodec.fromText(_secret),
+      ).authorize(tokens[3]!, write: true);
+      // The last submission is stored, but its evaluation cannot finish.
+      final stored = await core.ScoresService(broken).submitParticipantScore(
+        access,
+        1,
+        clientMutationId: 'm-3-1',
+        matrixRevision: matrixRevision,
+        components: _score,
+      );
+      expect(stored.isOfficial, isFalse);
+      for (final pilot in [1, 2, 3]) {
+        await expectWaiting(1, pilot);
+      }
+
+      // The server starts again with working storage.
+      expect(await scores.recoverAutomaticOfficialization(), 1);
+      for (final pilot in [1, 2, 3]) {
+        await expectAutomatic(1, pilot, core.automaticRoundCompleteReason);
+      }
+      // A second pass has nothing left to do.
+      expect(await scores.recoverAutomaticOfficialization(), 0);
+    });
+  });
+
   group('manually', () {
     for (final policy in <String?>['Manual', null]) {
       test(

@@ -38,7 +38,7 @@ void addConfigurationRoutes(
   final service = ContestConfigurationService(repository);
   final scoresService = ScoresService(repository);
   final recalculationService =
-      recalculation ?? RecalculationService(ResultsService(repository));
+      recalculation ?? RecalculationService.automatic(repository);
 
   router.get('/contests/<id>/configuration', (
     Request request,
@@ -91,9 +91,12 @@ void addConfigurationRoutes(
     // warning, and the results read as stale until a later recalculation.
     String? warning;
     try {
-      // A contest with no official score has no results to go stale.
+      // A contest with no score, official or waiting, has no results to go
+      // stale and nothing to accept.
       final scores = await scoresService.list(contestId);
-      if (scores.slots.any((slot) => slot.officialScore != null)) {
+      if (scores.slots.any(
+        (slot) => slot.officialScore != null || slot.pendingAttempt != null,
+      )) {
         warning = await recalculationService.recalculateAfterEntry(
           contestId,
           cause: 'a configuration change',

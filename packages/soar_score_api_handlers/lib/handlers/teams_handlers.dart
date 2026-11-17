@@ -35,13 +35,16 @@ void addTeamRoutes(
   final service = TeamsService(repository);
   final scoresService = ScoresService(repository);
   final recalculationService =
-      recalculation ?? RecalculationService(ResultsService(repository));
+      recalculation ?? RecalculationService.automatic(repository);
 
   /// Recalculates after a membership change; the notice when it fails.
   Future<String?> recalculateAfterMembership(Id contestId) async {
-    // A contest with no official score has no results to go stale.
+    // A contest with no score, official or waiting, has no results to go
+    // stale and nothing to accept.
     final scores = await scoresService.list(contestId);
-    if (scores.slots.any((slot) => slot.officialScore != null)) {
+    if (scores.slots.any(
+      (slot) => slot.officialScore != null || slot.pendingAttempt != null,
+    )) {
       return recalculationService.recalculateAfterEntry(
         contestId,
         cause: 'a team change',
