@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:printing/printing.dart';
 
+import '../file_name.dart';
 import 'raster_report_pdf_builder.dart';
 import 'report_pdf_builder.dart';
 import 'report_print_result.dart';
@@ -76,29 +77,8 @@ class PlatformReportPrinter implements ReportPrinter {
     }
   }
 
-  static final _illegal = RegExp(r'[\\/:*?"<>|\x00-\x1f]');
-  static final _reserved = RegExp(
-    r'^(con|prn|aux|nul|com[1-9]|lpt[1-9])$',
-    caseSensitive: false,
-  );
-  static const _maxBaseLength = 120;
-
-  /// `{Report} – {Contest}.pdf` made safe for a file system: characters it
-  /// refuses are replaced, Windows' reserved names, trailing dots and spaces
-  /// and an empty or very long title are handled.
-  static String fileNameFor(String title) {
-    var base = title.replaceAll(_illegal, '-').trim();
-    if (base.length > _maxBaseLength) {
-      base = base.substring(0, _maxBaseLength);
-    }
-    base = base.replaceAll(RegExp(r'[. ]+$'), '');
-    if (base.isEmpty) {
-      base = 'Report';
-    } else if (_reserved.hasMatch(base)) {
-      base = '$base-';
-    }
-    return '$base.pdf';
-  }
+  /// `{Report} – {Contest}.pdf` made safe for a file system.
+  static String fileNameFor(String title) => FileName.named(title, 'pdf');
 }
 
 typedef PrintDialog = Future<bool> Function(ReportPrintJob job, Uint8List pdf);
