@@ -53,12 +53,15 @@ extension ParticipantScoresService on ScoresService {
       // together; a busy contest escapes to the caller, any other failure
       // leaves the submission waiting.
       try {
-        final automatic = await _evaluateAutomaticOfficialization(
+        // Its own savepoint (the nested gate): a failure part way rolls
+        // back every acceptance of the run and keeps the submission.
+        final automatic = await evaluateAutomaticOfficialization(
           access.contestId,
         );
         return stored.copyWithOfficialization(
           automatic.promoted.contains(stored.assignmentId),
           anyOfficial: automatic.changedScores,
+          officialRevision: automatic.revisions[stored.assignmentId],
         );
       } on ContestBusyError {
         rethrow;
@@ -340,20 +343,21 @@ extension ParticipantScoresService on ScoresService {
     // The submission may have been made official on its own since.
     final official = await repository.officialScoreRepository
         .currentForPlaceholder(placeholder.id);
+    final accepted =
+        official != null &&
+        official.selectionOrigin == SelectionOrigin.automatic &&
+        official.scoreAttemptId == earlier.id;
     return ParticipantSubmission(
       assignmentId: assignment.id,
       round: round,
       components: earlier.rawComponents,
-      revision: 1,
+      revision: accepted ? official.scoreRevision : 1,
       enteredAt: earlier.acceptedAt,
       calculated: await _calculate(context, earlier.rawComponents),
       authority: Authority.participant,
       nextRound: (await _nextParticipantRound(access, round)).after,
       replayed: true,
-      isOfficial:
-          official != null &&
-          official.selectionOrigin == SelectionOrigin.automatic &&
-          official.scoreAttemptId == earlier.id,
+      isOfficial: accepted,
     );
   }
 

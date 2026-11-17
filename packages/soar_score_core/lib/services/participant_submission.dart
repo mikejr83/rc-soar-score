@@ -29,7 +29,8 @@ class ParticipantSubmission extends Equatable {
   /// The components as submitted (or as the director entered them).
   final Map<String, Object?> components;
 
-  /// The slot's score revision after this score.
+  /// The slot's score revision after this score: the official version's when
+  /// the score is official.
   final int revision;
 
   /// When the score was accepted.
@@ -60,11 +61,12 @@ class ParticipantSubmission extends Equatable {
   ParticipantSubmission copyWithOfficialization(
     bool isOfficial, {
     required bool anyOfficial,
+    int? officialRevision,
   }) => ParticipantSubmission(
     assignmentId: assignmentId,
     round: round,
     components: components,
-    revision: revision,
+    revision: officialRevision ?? revision,
     enteredAt: enteredAt,
     calculated: calculated,
     authority: authority,

@@ -4,6 +4,7 @@ part of 'scores_service.dart';
 class AutomaticOfficialization extends Equatable {
   const AutomaticOfficialization({
     this.promoted = const [],
+    this.revisions = const {},
     this.heldForReview = 0,
   });
 
@@ -14,6 +15,9 @@ class AutomaticOfficialization extends Equatable {
   /// stored.
   final List<Id> promoted;
 
+  /// The official score revision stored for each promoted slot.
+  final Map<Id, int> revisions;
+
   /// Submissions of complete rounds or groups that stay waiting because an
   /// open review holds them.
   final int heldForReview;
@@ -21,7 +25,7 @@ class AutomaticOfficialization extends Equatable {
   bool get changedScores => promoted.isNotEmpty;
 
   @override
-  List<Object?> get props => [promoted, heldForReview];
+  List<Object?> get props => [promoted, revisions, heldForReview];
 }
 
 /// The contest's own acceptance of participant submissions, by the setting
@@ -100,6 +104,7 @@ extension AutomaticOfficializationService on ScoresService {
     };
 
     final promoted = <Id>[];
+    final revisions = <Id, int>{};
     var held = 0;
     final rounds =
         (await repository.roundRepository.listForContest(contestId))
@@ -153,33 +158,36 @@ extension AutomaticOfficializationService on ScoresService {
             held++;
             continue;
           }
-          if (placeholder.isLocked ||
-              lockedGroups.contains(assignment.group) ||
-              (participations[assignment.contestParticipationId]?.hasRetiredBy(
-                    round.ordinal,
-                  ) ??
-                  false)) {
+          // A pilot who retired after submitting keeps the submission: the
+          // retirement only excuses a missing score (see RoundProgress).
+          if (placeholder.isLocked || lockedGroups.contains(assignment.group)) {
             continue;
           }
-          if (await _promoteAutomatically(
+          final revision = await _promoteAutomatically(
             context,
             contest,
             placeholder,
             mode: mode,
             reason: reason,
-          )) {
+          );
+          if (revision != null) {
             promoted.add(assignment.id);
+            revisions[assignment.id] = revision;
           }
         }
       }
     }
-    return AutomaticOfficialization(promoted: promoted, heldForReview: held);
+    return AutomaticOfficialization(
+      promoted: promoted,
+      revisions: revisions,
+      heldForReview: held,
+    );
   }
 
   /// Stores the automatic adoption of the submission waiting on [placeholder].
-  /// Returns false when the slot moved under it or its values are refused,
+  /// Returns the stored official score revision, or null when the slot moved under it or its values are refused,
   /// which leaves it waiting for the next run.
-  Future<bool> _promoteAutomatically(
+  Future<int?> _promoteAutomatically(
     _Configuration context,
     Contest contest,
     ScorePlaceholder placeholder, {
@@ -191,7 +199,7 @@ extension AutomaticOfficializationService on ScoresService {
         ? null
         : await repository.scoreAttemptRepository.findById(attemptId);
     if (attempt == null || attempt.scorePlaceholderId != placeholder.id) {
-      return false;
+      return null;
     }
     try {
       await _calculate(context, attempt.rawComponents);
@@ -200,7 +208,7 @@ extension AutomaticOfficializationService on ScoresService {
         'Submission ${attempt.id} of contest ${contest.id} was not made '
         'official automatically: ${error.issues.length} refused field(s)',
       );
-      return false;
+      return null;
     }
     final now = _clock();
     final official = OfficialScore(
@@ -239,8 +247,8 @@ extension AutomaticOfficializationService on ScoresService {
         ),
       );
     } on StaleRevisionError {
-      return false;
+      return null;
     }
-    return true;
+    return official.scoreRevision;
   }
 }

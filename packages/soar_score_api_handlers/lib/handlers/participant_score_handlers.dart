@@ -61,8 +61,17 @@ void addParticipantScoreRoutes(
         // The contest accepted submissions on its own: the official results
         // change, so they are recalculated once. Publication follows its
         // own policy (a later change of this feature).
-        final warning = await RecalculationService(ResultsService(repository))
-            .recalculateAfterEntry(principal.access.contestId);
+        // Under the contest gate, so reading the scores and replacing the
+        // results cannot interleave with another acceptance and leave an
+        // older standing as the current one.
+        final contestId = principal.access.contestId;
+        final warning = await repository.officialScoreRepository
+            .withContestGate(
+              contestId,
+              () =>
+                  RecalculationService(ResultsService(repository))
+                      .recalculateAfterEntry(contestId),
+            );
         if (warning != null) {
           _logger.info(
             'Recalculation warning after an automatic acceptance: $warning',

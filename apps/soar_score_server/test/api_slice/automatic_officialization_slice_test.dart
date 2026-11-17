@@ -19,6 +19,33 @@ String _two(int n) => n.toString().padLeft(2, '0');
 
 const _score = {'time_flown': 540, 'launch_height': 45, 'landing': 'points_50'};
 
+/// Refuses the second automatic acceptance of a run, as a failure part way
+/// through would.
+class _FailsOnSecondPromotion extends OfficialScoreRepository {
+  _FailsOnSecondPromotion(super.db);
+
+  var _calls = 0;
+
+  @override
+  Future<core.PromotedScore> recordPromotion(
+    core.PromotedScore promotion, {
+    required core.MutationMetadata metadata,
+  }) {
+    if (++_calls == 2) throw StateError('second promotion refused');
+    return super.recordPromotion(promotion, metadata: metadata);
+  }
+}
+
+class _FailingRepository extends Repository {
+  _FailingRepository(super.database)
+    : _official = _FailsOnSecondPromotion(database);
+
+  final _FailsOnSecondPromotion _official;
+
+  @override
+  OfficialScoreRepository get officialScoreRepository => _official;
+}
+
 /// The contest accepting participant submissions on its own ("Scores become
 /// official"), over a real database through the participant route.
 void main() {
@@ -215,10 +242,15 @@ void _tests(SliceBackend backend) {
       // The pilot who completes the round is told the score is official.
       final last = await submit(3, 1);
       expect(last['state'], 'official');
+      expect(last['revision'], 2);
       expect(last['entered_by'], 'P3 X');
       // A retry of any of the mutations sees the state the score has now.
-      expect((await submit(3, 1))['state'], 'official');
-      expect((await submit(1, 1))['state'], 'official');
+      final retry = await submit(3, 1);
+      expect(retry['state'], 'official');
+      expect(retry['revision'], 2);
+      final first = await submit(1, 1);
+      expect(first['state'], 'official');
+      expect(first['revision'], 2);
       for (final pilot in [1, 2, 3]) {
         await expectAutomatic(1, pilot, core.automaticRoundCompleteReason);
       }
@@ -352,6 +384,59 @@ void _tests(SliceBackend backend) {
           .listForScorePlaceholder(held.id);
       expect(reviews.single.isOpen, isTrue);
       expect(reviews.single.state, core.ReviewRequestState.submitted);
+    });
+
+    test('a pilot who retires after submitting keeps the submission', () async {
+      await submit(1, 1);
+      Future<void> retire(int pilot) async {
+        final participation = (await repository.contestParticipationRepository
+            .findById(core.Id.parse(_participationId(pilot))))!;
+        await repository.contestParticipationRepository.save(
+          participation.withRetiredAtRound(1),
+          metadata: core.MutationMetadata(
+            clientMutationId: 'retire-$pilot',
+            authority: core.Authority.director,
+            clientTime: DateTime.utc(2026, 10, 17, 15),
+            actorId: api.director,
+          ),
+        );
+      }
+
+      await retire(1);
+      await retire(3);
+      await submit(2, 1);
+      await expectAutomatic(1, 1, core.automaticRoundCompleteReason);
+      await expectAutomatic(1, 2, core.automaticRoundCompleteReason);
+    });
+
+    test('a failure part way keeps the submission and no acceptance', () async {
+      await submit(1, 1);
+      await submit(2, 1);
+      final service = core.InvitationService(
+        repository,
+        core.InvitationCodec.fromText(_secret),
+      );
+      final access = await service.authorize(tokens[3]!, write: true);
+      final failing = core.ScoresService(_FailingRepository(api.database));
+      final stored = await failing.submitParticipantScore(
+        access,
+        1,
+        clientMutationId: 'm-3-1',
+        matrixRevision: matrixRevision,
+        components: _score,
+      );
+      expect(stored.isOfficial, isFalse);
+      expect(stored.scoresChanged, isFalse);
+      expect(stored.revision, 1);
+      // The first acceptance of the run was rolled back with the second.
+      for (final pilot in [1, 2, 3]) {
+        await expectWaiting(1, pilot);
+      }
+      // The next run, with working storage, accepts all three.
+      final run = await scores.evaluateAutomaticOfficialization(
+        core.Id.parse(_contestId),
+      );
+      expect(run.promoted, hasLength(3));
     });
 
     test('a locked slot is left as it is', () async {
