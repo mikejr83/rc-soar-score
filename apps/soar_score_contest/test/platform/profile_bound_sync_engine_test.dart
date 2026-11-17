@@ -130,6 +130,15 @@ class _CountingApplier implements core.ReplicatedChangeApplier {
     applied++;
     return true;
   }
+
+  @override
+  Future<bool> applyAggregate(List<core.ReplicatedChange> changes) async {
+    var changed = false;
+    for (final change in changes) {
+      if (await apply(change)) changed = true;
+    }
+    return changed;
+  }
 }
 
 /// A service that answers at once unless a test holds the exchange or the

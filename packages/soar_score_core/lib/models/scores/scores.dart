@@ -1,5 +1,6 @@
 export 'invitation.dart';
 export 'official_score.dart';
+export 'pending_promotion.dart';
 export 'review_request.dart';
 export 'score_attempt.dart';
 export 'score_components.dart';

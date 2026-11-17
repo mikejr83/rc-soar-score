@@ -115,6 +115,7 @@ class DriftSyncStore implements core.SyncStore {
       reasonCode: reasonCode,
       errorMessage: errorMessage,
       dependsOnMutationId: current.dependsOnMutationId,
+      aggregateId: current.aggregateId,
     );
     if (current.outcome != core.MutationOutcome.pending) {
       if (current == updated) return;

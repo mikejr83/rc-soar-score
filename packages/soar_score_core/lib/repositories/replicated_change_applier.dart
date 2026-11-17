@@ -14,4 +14,17 @@ abstract interface class ReplicatedChangeApplier {
   /// Completes with whether stored data changed: false when the store already
   /// held this revision or newer, or the entity to delete was not there.
   Future<bool> apply(ReplicatedChange change);
+
+  /// Applies [changes], the changes of one aggregate in sequence order, in
+  /// one transaction: all of them are stored or, when one fails, none is.
+  ///
+  /// The service sends the changes of one operation (a promoted score with
+  /// its placeholder, superseded reviews and the receipt of the intent that
+  /// asked for it) as one aggregate, so no reader sees part of it. A change
+  /// of the entity type `ScorePromotion` is the receipt of an intent in the
+  /// outbox: it settles that intent as accepted, in the same transaction.
+  /// A receipt for an intent this installation does not hold is skipped.
+  ///
+  /// Completes with whether stored data changed.
+  Future<bool> applyAggregate(List<ReplicatedChange> changes);
 }

@@ -248,6 +248,7 @@ class NativeBootstrap extends AppBootstrap {
       remote: remote,
       databasePath: database,
       inspectionOwners: server.inspectionOwners,
+      promotionIntents: server.promotionIntents,
     );
     final preferences = NativePreferences(
       epoch: epoch,

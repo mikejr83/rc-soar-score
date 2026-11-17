@@ -4,6 +4,7 @@ import 'package:soar_score_api_handlers/handlers/handlers.dart';
 import 'package:soar_score_api_handlers/handlers/invitation_handlers.dart';
 import 'package:soar_score_api_handlers/middleware/invitation_throttle.dart';
 import 'package:soar_score_api_handlers/middleware/middleware.dart';
+import 'package:soar_score_core/repositories/promotion_intent_policy.dart';
 import 'package:soar_score_core/repositories/repository.dart';
 import 'package:soar_score_core/services/invitations/invitation_service.dart';
 import 'package:soar_score_core/services/recalculation/recalculation_service.dart';
@@ -74,6 +75,10 @@ final _logger = Logger('Handler');
 /// [selfScoringBaseUrl] is the site invitation links point at (the director's
 /// `GET`/`POST /contests/{id}/invitations` build `{base}/invitations/{credential}`).
 ///
+/// [promotionIntents] decides whether marking a score official queues a
+/// `promote_score` intent (an installation whose contest syncs) or adopts the
+/// submission directly; the default always adopts.
+///
 /// [corsAllowedOrigins] are the exact browser origins (for example
 /// `http://127.0.0.1:8091`) allowed to call the API cross-origin. Empty, the
 /// default, adds no CORS headers.
@@ -93,6 +98,7 @@ Handler buildApiHandler({
   InvitationThrottle? invitationThrottle,
   String? trustedProxySecret,
   String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
+  PromotionIntentPolicy? promotionIntents,
 }) {
   final handlers = createHandlers(
     name,
@@ -110,6 +116,7 @@ Handler buildApiHandler({
     trustedProxySecret: trustedProxySecret,
     corsAllowedOrigins: corsAllowedOrigins,
     selfScoringBaseUrl: selfScoringBaseUrl,
+    promotionIntents: promotionIntents,
   );
   Handler api = handlers.apiHandler;
 

@@ -2,6 +2,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/draw/isolate_draw_runner.dart';
+import 'package:soar_score_core/repositories/promotion_intent_policy.dart';
 import 'package:soar_score_core/repositories/repository.dart';
 import 'package:soar_score_core/services/matrix/draw_job.dart';
 import 'package:soar_score_core/services/sync/sync_versions.dart';
@@ -53,6 +54,7 @@ createHandlers(
   String? trustedProxySecret,
   Set<String> corsAllowedOrigins = const {},
   String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
+  PromotionIntentPolicy? promotionIntents,
 }) {
   final router = Router()
     ..get(
@@ -87,6 +89,7 @@ createHandlers(
     repository,
     publishingEnabled: publishingEnabled,
     recalculation: recalculation,
+    promotionIntents: promotionIntents,
   );
   addResultsRoutes(router, repository);
   addReportDataRoutes(router, repository);
