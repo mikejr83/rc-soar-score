@@ -369,7 +369,7 @@ To do it all in one step (needs Docker), run the script. It starts a throwaway c
 ```
 
 CI runs the PostgreSQL test group against a `postgres:17` service container
-in the `test (data-and-server)` job.
+in the `Test (data-and-server)` job.
 
 To manage the server yourself instead:
 
