@@ -9,6 +9,7 @@ class ResultsView {
     required this.snapshot,
     this.heldRound,
     this.policy,
+    this.preliminary = true,
   });
 
   final String contestName;
@@ -23,6 +24,9 @@ class ResultsView {
 
   /// When the contest makes scores official; null when unknown.
   final OfficializationPolicy? policy;
+
+  /// False once every score in the standings is official.
+  final bool preliminary;
 
   bool get isLatest => snapshot.round == latestRound;
 }

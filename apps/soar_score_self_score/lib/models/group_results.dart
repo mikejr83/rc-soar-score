@@ -10,6 +10,7 @@ class GroupResults {
     required this.latestRound,
     required this.rows,
     this.policy,
+    this.preliminary = true,
   });
 
   final String contestName;
@@ -22,6 +23,9 @@ class GroupResults {
 
   /// When the contest makes scores official; null when unknown.
   final OfficializationPolicy? policy;
+
+  /// False once every score in the results is official.
+  final bool preliminary;
 
   /// True when a flight in the group is held by an open review.
   bool get hasReviewHold =>

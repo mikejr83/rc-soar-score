@@ -70,11 +70,13 @@ class GroupResultsPage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const StatusChip(
-                        label: 'Preliminary',
-                        icon: Icons.pending_outlined,
-                      ),
-                      const SizedBox(width: 8),
+                      if (data.preliminary) ...[
+                        const StatusChip(
+                          label: 'Preliminary',
+                          icon: Icons.pending_outlined,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
                       Expanded(
                         child: Text(
                           AppLocalizations.of(context).resultsRefreshHint,
@@ -148,10 +150,11 @@ class GroupResultsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          PreliminaryNote(
-            policy: data.policy,
-            showReviewHold: data.hasReviewHold,
-          ),
+          if (data.preliminary)
+            PreliminaryNote(
+              policy: data.policy,
+              showReviewHold: data.hasReviewHold,
+            ),
         ],
       ),
     );

@@ -353,6 +353,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       latestRound: group.latestRound,
       rows: [for (final row in group.rows) _groupRow(row)],
       policy: OfficializationPolicy.fromWire(group.scoresBecomeOfficial?.json),
+      preliminary: group.preliminary,
     );
   });
 
@@ -401,6 +402,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
           policy: OfficializationPolicy.fromWire(
             overall.scoresBecomeOfficial?.json,
           ),
+          preliminary: overall.preliminary,
           snapshot: ResultsSnapshot(
             round: overall.asOfRound,
             ordinal: place == null ? '–' : ScoreFormat.ordinal(place),

@@ -60,10 +60,11 @@ class _ResultsBodyState extends State<ResultsBody> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const StatusChip(
-              label: 'Preliminary',
-              icon: Icons.pending_outlined,
-            ),
+            if (data.preliminary)
+              const StatusChip(
+                label: 'Preliminary',
+                icon: Icons.pending_outlined,
+              ),
             Text(
               isLatest ? 'As of round $round · latest' : 'As of round $round',
               style: theme.textTheme.bodyMedium?.copyWith(color: muted),
@@ -177,8 +178,9 @@ class _ResultsBodyState extends State<ResultsBody> {
           rows: _rows(_teams ? snapshot.teams : snapshot.pilots),
         ),
         const SizedBox(height: 16),
-        PreliminaryNote(policy: data.policy, showReviewHold: true),
-        if (!isLatest) ...[
+        if (data.preliminary)
+          PreliminaryNote(policy: data.policy, showReviewHold: true),
+        if (data.preliminary && !isLatest) ...[
           const SizedBox(height: 8),
           Text(
             'Results as of round $round are preliminary. A review that '
