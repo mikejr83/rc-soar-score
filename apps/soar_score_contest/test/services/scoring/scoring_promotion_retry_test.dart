@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -173,5 +175,31 @@ void main() {
       expect(await c.retryPromotion(_row(c, 1)), isFalse);
       expect(server.confirmedAssignments, isEmpty);
     });
+  });
+
+  test('a sync that ran during a failed Confirm retires it', () async {
+    final server = ScoringServer()..seedAutomaticScore(first, flight);
+    final hold = server.holdPromote = Completer<void>();
+    final c = await _open(server);
+
+    final sent = c.confirmAutomatic(_row(c, 1));
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    expect(server.promoteRequests, 1);
+
+    // Another director confirms and a sync is applied: the row is busy, so
+    // the page keeps its own copy.
+    server.confirmAsDirector(first);
+    await c.refreshAfterSync();
+    expect(_row(c, 1).isAutomaticUnconfirmed, isTrue);
+
+    // The local request then fails.
+    server.promoteFailures[first] = (503, 'contest_busy');
+    hold.complete();
+    expect(await sent, isFalse);
+
+    expect(_row(c, 1).isAutomaticUnconfirmed, isFalse);
+    expect(c.saveOf(first).kind, RowSaveKind.idle);
+    expect(await c.retryPromotion(_row(c, 1)), isFalse);
   });
 }

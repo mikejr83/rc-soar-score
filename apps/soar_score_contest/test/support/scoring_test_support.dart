@@ -175,6 +175,9 @@ class ScoringServer {
     _record(assignmentId, components, revision, reason);
   }
 
+  /// When set, a promotion request waits for this before it is answered.
+  Completer<void>? holdPromote;
+
   /// Slots whose official score the contest accepted automatically, and the
   /// revision the director confirmed for each (review closed).
   final Set<Id> _automatic = {};
@@ -637,6 +640,7 @@ class ScoringServer {
     }
     if (request.method == 'POST' && path.endsWith('/scores/official')) {
       promoteRequests++;
+      await holdPromote?.future;
       if (offlineOnEntry) {
         throw http.ClientException('offline', request.url);
       }

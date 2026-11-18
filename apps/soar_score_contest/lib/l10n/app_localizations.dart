@@ -4370,6 +4370,12 @@ abstract class AppLocalizations {
   /// **'Automatically accepted. This score is locked.'**
   String get scoreAutomaticLocked;
 
+  /// Note on a row whose Confirm is queued for the service.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm is queued; the service decides it when this device syncs.'**
+  String get scoreConfirmQueuedNote;
+
   /// Button on a scoring row that confirms a score the contest accepted automatically.
   ///
   /// In en, this message translates to:

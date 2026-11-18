@@ -3182,6 +3182,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Automatically accepted. This score is locked.';
 
   @override
+  String get scoreConfirmQueuedNote =>
+      'Confirm is queued; the service decides it when this device syncs.';
+
+  @override
   String get scoreConfirm => 'Confirm';
 
   @override

@@ -948,6 +948,8 @@ class ScoringController extends ChangeNotifier {
       _saves[row.id] = refusal.withTarget(target);
       if (refusal.changed) {
         _settleChanged([row], await _refreshSlots([row]));
+      } else {
+        await _rereadIfSyncOverlapped(row, readsBefore);
       }
     } on ApiNetworkError {
       _saves[row.id] = RowSave(
@@ -957,6 +959,7 @@ class ScoringController extends ChangeNotifier {
         confirm: confirm,
         target: target,
       );
+      await _rereadIfSyncOverlapped(row, readsBefore);
     } on Object catch (error) {
       _saves[row.id] = RowSave(
         RowSaveKind.failed,
@@ -965,9 +968,18 @@ class ScoringController extends ChangeNotifier {
         confirm: confirm,
         target: target,
       );
+      await _rereadIfSyncOverlapped(row, readsBefore);
     }
     notifyListeners();
     return false;
+  }
+
+  /// After a promotion failed: a sync applied while the request was out kept
+  /// this busy row as it was, so another device may have decided it already.
+  /// Reads the slot again then and retires the failure if it is obsolete.
+  Future<void> _rereadIfSyncOverlapped(ScoringRow row, int readsBefore) async {
+    if (_syncReads == readsBefore || _disposed) return;
+    if (await _refreshSlots([row])) _dropObsoletePromotionFailures();
   }
 
   static RowSave _promotionRefusal(

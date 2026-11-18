@@ -910,7 +910,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         child: Text(
           skip == MarkOfficialSkip.closed
               ? words.scoreAutomaticLocked
-              : words.scoreMarkOfficialWaiting,
+              : words.scoreConfirmQueuedNote,
           style: Theme.of(context).textTheme.bodySmall,
         ),
       );

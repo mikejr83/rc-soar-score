@@ -2903,6 +2903,8 @@
   "@scoreAutomaticNote": {"description": "Explanation under the Accepted automatically chip of a scoring row."},
   "scoreAutomaticLocked": "Automatically accepted. This score is locked.",
   "@scoreAutomaticLocked": {"description": "Note on a scoring row whose automatically accepted score is locked, so review and Confirm no longer apply."},
+  "scoreConfirmQueuedNote": "Confirm is queued; the service decides it when this device syncs.",
+  "@scoreConfirmQueuedNote": {"description": "Note on a row whose Confirm is queued for the service."},
   "scoreConfirm": "Confirm",
   "@scoreConfirm": {"description": "Button on a scoring row that confirms a score the contest accepted automatically."},
   "scoreConfirming": "Confirming…",
