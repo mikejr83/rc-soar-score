@@ -556,4 +556,44 @@ void main() {
     expect(c.syncRefreshFailed, isFalse);
     expect(c.confirmAutomaticSkip(_row(c, 1)), isNull);
   });
+
+  test(
+    'a manual refresh that skips an unread slot leaves it blocked',
+    () async {
+      final server = ScoringServer()..seedAutomaticScore(first, flight);
+      final c = await _open(server);
+
+      // A manual refresh is held with the old answer; a passive sync applies
+      // a newer slot meanwhile.
+      final manualRead = server.holdNextScoresRead = Completer<void>();
+      final manual = c.refresh();
+      for (var i = 0; i < 6; i++) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      await c.refreshAfterSync();
+
+      // Confirm is refused as changed and its catch-up read is held.
+      server.promoteFailures[first] = (409, 'stale_revision');
+      final catchUp = server.holdNextScoresRead = Completer<void>();
+      final confirm = c.confirmAutomatic(_row(c, 1));
+      for (var i = 0; i < 6; i++) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      expect(server.promoteRequests, 1);
+
+      // The older manual response keeps the newer slot and clears saves.
+      manualRead.complete();
+      await manual;
+      expect(c.confirmAutomaticSkip(_row(c, 1)), MarkOfficialSkip.busy);
+      expect(await c.confirmAutomatic(_row(c, 1)), isFalse);
+      expect(server.promoteRequests, 1, reason: 'no second POST');
+
+      // The catch-up read fails: Refresh is offered.
+      server.failHeldScoresRead = true;
+      catchUp.complete();
+      await confirm;
+      expect(c.saveOf(first).needsRefresh, isTrue);
+      expect(c.confirmAutomaticSkip(_row(c, 1)), MarkOfficialSkip.busy);
+    },
+  );
 }

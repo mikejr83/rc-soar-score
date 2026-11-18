@@ -90,7 +90,6 @@ class ScoringController extends ChangeNotifier {
       final loaded = await ScoringPageData.load(client, contestId);
       data = loaded;
       loaded.slotIds.forEach(_slotApplied);
-      _unreadSlots.clear();
       final open = loaded.firstOpen;
       final wantedRound = _wantedRound;
       if (wantedRound != null && loaded.roundByOrdinal(wantedRound) != null) {
@@ -743,7 +742,6 @@ class ScoringController extends ChangeNotifier {
       final loaded = _keepNewer(read, versions, kept);
       data = loaded;
       loaded.slotIds.where((id) => !kept.contains(id)).forEach(_slotApplied);
-      _unreadSlots.clear();
       loadError = null;
       syncRefreshFailed = false;
       for (final row in rows) {
@@ -758,6 +756,8 @@ class ScoringController extends ChangeNotifier {
         }
       }
       _saves.clear();
+      // A slot the reload skipped as older is still behind.
+      _seedUnreadSaves();
       // A reload that shows the penalty already removed settles the row.
       for (final row in rows) {
         if (!_removal(row, _drafts[row.id])) _clearRemovalReason(row.id);
