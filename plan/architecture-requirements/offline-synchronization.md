@@ -27,6 +27,10 @@ This document uses **score** for the discipline-specific raw components entered 
 
 Marking a participant's submission official is not a generic edit. A syncing installation queues a guarded `promote_score` intent and shows the adoption as pending. The service adopts exactly that submission at that score revision, or refuses the whole intent as `stale_source` when another submission or official score is current; it never merges these. Replays create no second version, an unsupported service is never written to, and the slot accepts no other save until the intent is decided. Details: [sync-protocol.md](sync-protocol.md#promote-score-operation).
 
+## Automatic Acceptance on a Syncing Installation
+
+The setting "Scores become official" is decided by the service, not by an installation whose contest syncs. Such an installation (its contest syncs and its first upload has finished) never accepts a waiting submission on its own: an acceptance made there would travel as a generic director-wins write. It leaves the submissions waiting, and the service accepts them on its own triggers (a participant submission, a director write, an accepted sync, a change of the setting). Each acceptance reaches the installation in a pull as one atomic aggregate, as a system acceptance (selection origin `Automatic`, no setter), exactly like an adoption. A service that does not list `promote_score` is therefore never written to either. An installation whose contest does not sync, or whose first upload is still open, evaluates the setting itself and the first upload carries the result. A director who wants a waiting score official before the service decides marks it official, which queues the guarded `promote_score` intent described above.
+
 ## Administration Installation
 
 1. Each contest has one active administration installation. This installation is the sole offline authority for contest configuration, matrix changes, official score changes, state transitions, and deletions.

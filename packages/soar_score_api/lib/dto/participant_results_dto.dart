@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 
 import 'participant_overview_dto.dart';
 
@@ -71,6 +72,7 @@ class ParticipantGroupResultsDto {
     required this.preliminary,
     required this.rows,
     this.pendingReviewAffectsPlacement = false,
+    this.scoresBecomeOfficial,
   });
 
   factory ParticipantGroupResultsDto.fromJson(Map<String, dynamic> json) =>
@@ -86,6 +88,13 @@ class ParticipantGroupResultsDto {
   final bool preliminary;
   final List<ParticipantGroupRowDto> rows;
   final bool pendingReviewAffectsPlacement;
+
+  /// When the contest makes submitted scores official
+  /// (`scores_become_official`); the pilot app uses it to explain why a
+  /// score is still preliminary. Null from a server that does not say, and for
+  /// a rule this client does not know.
+  @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+  final OfficializationMode? scoresBecomeOfficial;
 
   Map<String, dynamic> toJson() => _$ParticipantGroupResultsDtoToJson(this);
 }
@@ -136,6 +145,7 @@ class ParticipantOverallResultsDto {
     this.yourPlace,
     this.yourScore,
     this.teamStandings,
+    this.scoresBecomeOfficial,
   });
 
   factory ParticipantOverallResultsDto.fromJson(Map<String, dynamic> json) =>
@@ -157,6 +167,11 @@ class ParticipantOverallResultsDto {
   /// Optional in contests without teams; present when team standings are
   /// enabled for participants.
   final List<ParticipantTeamStandingDto>? teamStandings;
+
+  /// When the contest makes submitted scores official; null from a server
+  /// that does not say.
+  @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+  final OfficializationMode? scoresBecomeOfficial;
 
   Map<String, dynamic> toJson() => _$ParticipantOverallResultsDtoToJson(this);
 }

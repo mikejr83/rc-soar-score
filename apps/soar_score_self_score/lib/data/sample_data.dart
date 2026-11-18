@@ -156,7 +156,8 @@ abstract final class SampleData {
     GroupResultRow(
       name: 'Sam Park',
       pilotNumber: 21,
-      kind: GroupRowKind.pendingReview,
+      kind: GroupRowKind.scored,
+      reviewPending: true,
       time: '6:02.0',
       height: 50,
       landing: 50,

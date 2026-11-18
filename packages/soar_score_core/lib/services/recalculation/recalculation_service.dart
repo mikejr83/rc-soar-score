@@ -2,6 +2,7 @@ import 'package:logging/logging.dart';
 
 import '../../errors/contest_state_error.dart';
 import '../../models/id.dart';
+import '../../repositories/promotion_intent_policy.dart';
 import '../../repositories/repository.dart';
 import '../results_service.dart';
 import '../scores_service.dart';
@@ -41,8 +42,18 @@ class RecalculationService {
 
   /// A service over [repository] that officializes automatically before it
   /// recalculates.
-  factory RecalculationService.automatic(Repository repository) {
-    final scores = ScoresService(repository);
+  ///
+  /// [promotionIntents] is the installation's policy for contests that sync
+  /// (see [ScoresService.evaluateAutomaticOfficialization]): there the
+  /// service decides, and this installation accepts nothing on its own.
+  factory RecalculationService.automatic(
+    Repository repository, {
+    PromotionIntentPolicy? promotionIntents,
+  }) {
+    final scores = ScoresService(
+      repository,
+      promotionIntents: promotionIntents,
+    );
     return RecalculationService(
       ResultsService(repository),
       officialize: scores.officializeAndRecalculate,

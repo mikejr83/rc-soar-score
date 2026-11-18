@@ -10,6 +10,7 @@ import 'package:soar_score_self_score/data/self_score_repository.dart';
 import 'package:soar_score_self_score/models/entry_context.dart';
 import 'package:soar_score_self_score/models/group_result_row.dart';
 import 'package:soar_score_self_score/models/guest_session.dart';
+import 'package:soar_score_self_score/models/officialization_policy.dart';
 import 'package:soar_score_self_score/models/pilot_overview.dart';
 import 'package:soar_score_self_score/models/pilot_round.dart';
 import 'package:soar_score_self_score/models/score_submission.dart';
@@ -448,6 +449,35 @@ void main() {
       expect(pending.score, isNull);
       expect(pending.landing, isNull);
       expect(pending.height, isNull);
+    },
+  );
+
+  test(
+    'a known rule reaches both results; an unknown one gives null',
+    () async {
+      final known = _repository(_fixtures);
+      expect(
+        (await known.groupResults('c', 'p', 1)).policy,
+        OfficializationPolicy.endOfRound,
+      );
+      expect(
+        (await known.results('c')).policy,
+        OfficializationPolicy.endOfRound,
+      );
+
+      String unknown(String name) =>
+          _fixture(name).replaceFirst('"EndOfRound"', '"EndOfSeason"');
+      final newer = _repository(
+        (request) => switch (request.url.path) {
+          '/api/v1/self-scoring/rounds/1/group-results' => _json(
+            unknown('group_results'),
+          ),
+          '/api/v1/self-scoring/results' => _json(unknown('overall_results')),
+          _ => _fixtures(request),
+        },
+      );
+      expect((await newer.groupResults('c', 'p', 1)).policy, isNull);
+      expect((await newer.results('c')).policy, isNull);
     },
   );
 
