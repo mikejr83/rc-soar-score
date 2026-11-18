@@ -259,11 +259,14 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     );
   }
 
-  Future<void> _markOfficial(ScoringRow row) async {
+  /// The row's Mark official or Confirm button, or, for [retry], the banner's
+  /// Retry of the request that failed.
+  Future<void> _markOfficial(ScoringRow row, {bool retry = false}) async {
     final c = _controller!;
-    // A Retry asks for what failed, not for what the row offers after a sync.
-    final confirming = c.isConfirming(row);
-    final ok = await c.retryPromotion(row);
+    final confirming = retry
+        ? c.saveOf(row.id).target?.confirm ?? false
+        : row.isAutomaticUnconfirmed;
+    final ok = retry ? await c.retryPromotion(row) : await c.promote(row);
     final now = c.rows.where((r) => r.id == row.id).firstOrNull;
     if (ok && mounted && (now?.isAdoptionPending ?? false)) {
       final words = AppLocalizations.of(context);
@@ -601,6 +604,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
         onActivate: () => c.activate(row.id),
         onSave: () => _save(row),
         onMarkOfficial: () => _markOfficial(row),
+        onRetryPromotion: () => _markOfficial(row, retry: true),
         onRevert: () => c.revert(row),
         onKeepMine: () => c.keepMine(row),
         onTakeTheirs: () => c.takeTheirs(row),

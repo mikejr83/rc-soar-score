@@ -24,6 +24,7 @@ class ScoreRowActions {
     required this.onActivate,
     required this.onSave,
     required this.onMarkOfficial,
+    required this.onRetryPromotion,
     required this.onRevert,
     required this.onKeepMine,
     required this.onTakeTheirs,
@@ -38,6 +39,9 @@ class ScoreRowActions {
 
   /// Accepts the pilot's waiting entry as the official score.
   final VoidCallback onMarkOfficial;
+
+  /// Asks again for the Mark official or Confirm that failed.
+  final VoidCallback onRetryPromotion;
   final VoidCallback onRevert;
   final VoidCallback onKeepMine;
   final VoidCallback onTakeTheirs;

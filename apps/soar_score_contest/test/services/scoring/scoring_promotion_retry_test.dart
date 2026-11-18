@@ -104,4 +104,74 @@ void main() {
       expect(server.promoteRequests, requests);
     });
   });
+
+  group('after a refusal as changed', () {
+    test(
+      'the row button sends the new submission, an old Retry cannot',
+      () async {
+        final server = ScoringServer()..seedPendingSubmission(first, flight);
+        final c = await _open(server);
+        final attemptA = _row(c, 1).slot!.pendingAttempt!.id.value;
+        // The pilot enters again before the director's tap.
+        server.seedPendingSubmission(first, {'time_flown': 500});
+
+        expect(await c.promote(_row(c, 1)), isFalse);
+        final attemptB = _row(c, 1).slot!.pendingAttempt!.id.value;
+        expect(attemptB, isNot(attemptA));
+        // The refusal keeps the request it was for.
+        expect(c.saveOf(first).target?.attemptId, attemptA);
+        final requests = server.promoteRequests;
+
+        // The banner's Retry is for attempt A and sends nothing for B.
+        expect(await c.retryPromotion(_row(c, 1)), isFalse);
+        expect(server.promoteRequests, requests);
+
+        // The row's own button sends B on its first click.
+        expect(await c.promote(_row(c, 1)), isTrue);
+        expect(server.promotedBodies.last['source_attempt_id'], attemptB);
+        expect(_row(c, 1).status, RowStatus.official);
+      },
+    );
+
+    test(
+      'a failed reload keeps the request, so a later sync retires it',
+      () async {
+        final server = ScoringServer()..seedAutomaticScore(first, flight);
+        server.promoteFailures[first] = (409, 'stale_revision');
+        final c = await _open(server);
+        server.readFailure = 503;
+
+        expect(await c.confirmAutomatic(_row(c, 1)), isFalse);
+        expect(c.saveOf(first).kind, RowSaveKind.failed);
+        expect(c.saveOf(first).target?.confirm, isTrue);
+
+        // Another director confirms and the next sync reads fine.
+        server.readFailure = null;
+        server.promoteFailures.clear();
+        server.confirmAsDirector(first);
+        await c.refreshAfterSync();
+
+        expect(c.saveOf(first).kind, RowSaveKind.idle);
+      },
+    );
+  });
+
+  group('a lock or retirement ends a failed confirmation', () {
+    test('the retirement of the pilot drops the Retry', () async {
+      final server = ScoringServer()..seedAutomaticScore(first, flight);
+      server.promoteFailures[first] = (503, 'contest_busy');
+      final c = await _open(server);
+      await c.confirmAutomatic(_row(c, 1));
+      expect(c.saveOf(first).kind, RowSaveKind.failed);
+
+      // Same attempt and revision, but the pilot retired from this round.
+      server.promoteFailures.clear();
+      server.matrixServer.retirements[1] = 1;
+      await c.refreshAfterSync();
+
+      expect(c.saveOf(first).kind, RowSaveKind.idle);
+      expect(await c.retryPromotion(_row(c, 1)), isFalse);
+      expect(server.confirmedAssignments, isEmpty);
+    });
+  });
 }

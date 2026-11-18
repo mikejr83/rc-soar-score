@@ -821,6 +821,8 @@ class ScoringController extends ChangeNotifier {
   /// revision.
   bool _matchesTarget(ScoringRow row, PromotionTarget target) {
     if (row.baseRevision != target.revision) return false;
+    // A lock or a retirement ends the action: the guards refuse it.
+    if (row.retired || row.isLocked || block != null) return false;
     if (target.confirm) {
       return row.isAutomaticUnconfirmed &&
           row.slot!.officialScore!.scoreAttemptId.value == target.attemptId;
@@ -829,28 +831,24 @@ class ScoringController extends ChangeNotifier {
         row.slot?.pendingAttempt?.id.value == target.attemptId;
   }
 
-  /// Whether the Mark official or Confirm of [row] is the one in play: the
-  /// failed request's own kind while one is shown, else what the row offers.
-  bool isConfirming(ScoringRow row) =>
-      saveOf(row.id).target?.confirm ?? row.isAutomaticUnconfirmed;
+  /// The row's own button: Confirm for an automatic score, else Mark official
+  /// for the waiting submission it shows now, whatever failed before.
+  Future<bool> promote(ScoringRow row) =>
+      row.isAutomaticUnconfirmed ? confirmAutomatic(row) : markOfficial(row);
 
-  /// Asks again for what a failed Mark official or Confirm asked for, or, with
-  /// nothing failed, does what the row offers now. A failure whose submission,
-  /// score or revision has changed since (a sync brought another director's
-  /// decision or a new pilot entry) is dropped without sending anything.
+  /// The banner's Retry: asks again for exactly what the failure asked for. A
+  /// failure whose submission, score or revision has changed since (or that a
+  /// lock or retirement ended) is dropped without sending anything, and a row
+  /// with no failure to retry sends nothing.
   Future<bool> retryPromotion(ScoringRow row) async {
     final target = saveOf(row.id).target;
-    if (target != null) {
-      if (!_matchesTarget(row, target)) {
-        _saves.remove(row.id);
-        notifyListeners();
-        return false;
-      }
-      return target.confirm ? confirmAutomatic(row) : markOfficial(row);
+    if (target == null) return false;
+    if (!_matchesTarget(row, target)) {
+      _saves.remove(row.id);
+      notifyListeners();
+      return false;
     }
-    return row.isAutomaticUnconfirmed
-        ? confirmAutomatic(row)
-        : markOfficial(row);
+    return target.confirm ? confirmAutomatic(row) : markOfficial(row);
   }
 
   /// Drops the failures of Mark official and Confirm that a sync made
@@ -1159,10 +1157,14 @@ class ScoringController extends ChangeNotifier {
     var settled = 0;
     for (final row in changed) {
       if (!read) {
+        // The failed read keeps what the request was for, so a later sync can
+        // still retire the failure.
+        final target = _saves[row.id]?.target;
         _saves[row.id] = RowSave(
           RowSaveKind.failed,
           promotion: true,
-          confirm: row.isAutomaticUnconfirmed,
+          confirm: target?.confirm ?? row.isAutomaticUnconfirmed,
+          target: target,
         );
       } else if (!_stillWaiting(row)) {
         _saves.remove(row.id);
