@@ -368,6 +368,9 @@ extension PromoteSubmissionService on ScoresService {
       return null;
     }
     _requireScoringAllowed(contest);
+    // The same slot rules as an adoption: a locked round or group, a moved
+    // assignment or a round no longer current refuse a fresh confirmation.
+    await _requireSlot(contest.id, current.assignmentId);
     if (intent == null) {
       await _requireNoPendingPromotion(contest.id, current.assignmentId);
     }
@@ -485,7 +488,11 @@ extension PromoteSubmissionService on ScoresService {
       // writes nothing, whatever locks were set since.
       if (official.scoreAttemptId == sourceAttemptId &&
           slot.currentAttemptId == sourceAttemptId &&
-          official.scoreRevision - 1 == expectedScoreRevision) {
+          (official.scoreRevision - 1 == expectedScoreRevision ||
+              // A confirmed automatic score also answers its own accepted
+              // revision, one of the two a confirmation may name.
+              (official.selectionOrigin == SelectionOrigin.automatic &&
+                  official.scoreRevision == expectedScoreRevision))) {
         return ScorePromotionResult(
           entry: ScoreEntryResult(
             officialScore: official,
