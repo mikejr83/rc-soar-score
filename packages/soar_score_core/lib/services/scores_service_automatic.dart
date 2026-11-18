@@ -54,6 +54,12 @@ extension AutomaticOfficializationService on ScoresService {
   /// recalculation or publication; the caller does that once for the batch
   /// when [AutomaticOfficialization.changedScores].
   ///
+  /// An installation whose contest syncs (its [PromotionIntentPolicy] queues
+  /// promotions) accepts nothing: the service decides, on its own submissions
+  /// and accepted syncs, and its acceptances reach the installation in a pull
+  /// like any adoption. A service that does not know the capability is
+  /// therefore never written to either.
+  ///
   /// It takes the contest's score gate; a [ContestBusyError] from it is
   /// thrown to the caller.
   Future<AutomaticOfficialization> evaluateAutomaticOfficialization(
@@ -157,6 +163,13 @@ extension AutomaticOfficializationService on ScoresService {
   Future<AutomaticOfficialization> _evaluateAutomaticOfficialization(
     Id contestId,
   ) async {
+    // A contest that syncs is decided by the service: an acceptance made
+    // here would travel as a generic director-wins write, so this
+    // installation leaves the submissions waiting and the service's
+    // acceptance arrives in a pull as one atomic change.
+    if (await _promotionIntents.queuesPromotions(contestId)) {
+      return AutomaticOfficialization.none;
+    }
     final contest = await _requireContest(contestId);
     if (contest.adminLock == AdminLock.locked ||
         (contest.lifecycleState != LifecycleState.ready &&
