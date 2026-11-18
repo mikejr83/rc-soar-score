@@ -123,7 +123,9 @@ class OfficialScoreRepository extends DriftRepository
         ? metadata.inAggregate(core.Id.create())
         : metadata;
     return unitOfWork.run((context) async {
-      await context.append(score, metadata: grouped);
+      if (!promotion.confirmsExisting) {
+        await context.append(score, metadata: grouped);
+      }
       final saved = await context.save(
         placeholder,
         metadata: grouped.forPart(placeholder.id.value),
@@ -162,6 +164,7 @@ class OfficialScoreRepository extends DriftRepository
         supersededReviews: reviews,
         audits: promotion.audits,
         receipt: receipt,
+        confirmsExisting: promotion.confirmsExisting,
       );
     });
   }

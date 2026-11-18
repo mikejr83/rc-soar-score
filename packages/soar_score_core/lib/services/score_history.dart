@@ -54,6 +54,7 @@ class ScoreHistoryEntry extends Equatable {
     this.scoreRevision,
     this.reason,
     this.at,
+    this.reviewClosed = false,
   });
 
   factory ScoreHistoryEntry.fromJson(Map<String, Object?> json) =>
@@ -73,6 +74,7 @@ class ScoreHistoryEntry extends Equatable {
             ? null
             : _parseOrigin(json['selection_origin']! as String),
         at: json['at'] == null ? null : DateTime.parse(json['at']! as String),
+        reviewClosed: json['review_closed'] as bool? ?? false,
       );
 
   final Id attemptId;
@@ -103,6 +105,12 @@ class ScoreHistoryEntry extends Equatable {
   /// adopted, which carries no time.
   final DateTime? at;
 
+  /// True for the current official version when a director's decision closed
+  /// review of it: a manual or review-decision version, or an automatically
+  /// accepted one the director confirmed (`ScorePlaceholder.isReviewClosed`).
+  /// A lock is separate and not included.
+  final bool reviewClosed;
+
   Map<String, Object?> toJson() => {
     'attempt_id': attemptId.value,
     'outcome': outcome.wire,
@@ -115,6 +123,7 @@ class ScoreHistoryEntry extends Equatable {
         ? null
         : _originWire(selectionOrigin!),
     'at': at?.toUtc().toIso8601String(),
+    'review_closed': reviewClosed,
   };
 
   @override
@@ -128,6 +137,7 @@ class ScoreHistoryEntry extends Equatable {
     authority,
     selectionOrigin,
     at,
+    reviewClosed,
   ];
 }
 

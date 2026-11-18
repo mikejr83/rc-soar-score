@@ -147,6 +147,60 @@ void _tests(Backend backend) {
     },
   );
 
+  test(
+    'confirming an automatic score closes review with its receipt',
+    () async {
+      // The contest accepted the submission on its own.
+      final accepted = core.OfficialScore(
+        id: core.Id.create(),
+        contestId: contestId,
+        scorePlaceholderId: slot.id,
+        scoreAttemptId: source.id,
+        scoreRevision: slot.scoreRevision + 1,
+        components: source.rawComponents,
+        setAt: DateTime.utc(2026, 11, 16, 12),
+        reason: core.automaticRoundCompleteReason,
+        selectionOrigin: core.SelectionOrigin.automatic,
+      );
+      await harness.serverRepository.officialScoreRepository.recordPromotion(
+        core.PromotedScore(
+          officialScore: accepted,
+          placeholder: core.ScorePlaceholder(
+            id: slot.id,
+            contestId: contestId,
+            contestParticipationId: slot.contestParticipationId,
+            assignmentId: slot.assignmentId,
+            state: core.ScorePlaceholderState.official,
+            scoreRevision: accepted.scoreRevision,
+            currentAttemptId: source.id,
+            revision: (await storedSlot()).revision,
+          ),
+        ),
+        metadata: core.MutationMetadata(
+          clientMutationId: 'auto-1',
+          authority: core.Authority.system,
+          clientTime: DateTime.utc(2026, 11, 16, 12),
+        ),
+      );
+
+      final m = intent(expected: slot.scoreRevision);
+      final out = await send(m);
+
+      expect(out.results.single.outcome, core.MutationOutcome.accepted);
+      expect(out.results.single.replayed, isFalse);
+      final stored = await storedSlot();
+      expect(stored.reviewClosedScoreRevision, accepted.scoreRevision);
+      expect(stored.isReviewClosed(accepted), isTrue);
+      // No second official version.
+      expect(await officials(), hasLength(1));
+
+      final again = (await send(m)).results.single;
+      expect(again.outcome, core.MutationOutcome.accepted);
+      expect(again.replayed, isTrue);
+      expect(await officials(), hasLength(1));
+    },
+  );
+
   test('a retried intent writes nothing and answers replayed', () async {
     final m = intent();
     await send(m);
