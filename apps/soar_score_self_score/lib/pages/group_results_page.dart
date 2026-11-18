@@ -7,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import '../router.dart';
 import '../widgets/group_result_tile.dart';
 import '../widgets/loadable_scaffold.dart';
+import '../widgets/preliminary_note.dart';
 import '../widgets/self_score_app_bar.dart';
 import '../widgets/status_chip.dart';
 
@@ -147,10 +148,9 @@ class GroupResultsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text(
-            'Scores are preliminary. The director can change them until '
-            'results are official.',
-            style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+          PreliminaryNote(
+            policy: data.policy,
+            showReviewHold: data.hasReviewHold,
           ),
         ],
       ),

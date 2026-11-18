@@ -244,4 +244,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retirePilot => 'Retire pilot';
+
+  @override
+  String get preliminaryNoteGeneral =>
+      'Scores are preliminary until the contest makes them official. Until then they can change.';
+
+  @override
+  String get preliminaryNoteEndOfRound =>
+      'Your score is preliminary. It becomes official when every pilot\'s score for the round has been submitted. Until then it can change.';
+
+  @override
+  String get preliminaryNoteEndOfGroup =>
+      'Your score is preliminary. It becomes official when every pilot\'s score in your group has been submitted. Until then it can change.';
+
+  @override
+  String get preliminaryNoteManual =>
+      'Your score is preliminary. It becomes official when the director makes it official. Until then it can change.';
+
+  @override
+  String get preliminaryNoteReviewHold =>
+      'A score under review is held: it stays as entered and is not made official until the review is decided.';
 }

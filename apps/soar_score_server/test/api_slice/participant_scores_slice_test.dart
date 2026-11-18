@@ -564,6 +564,8 @@ void _tests(SliceBackend backend) {
       expect(body['round'], 1);
       expect(body['latest_round'], 1);
       expect(body['preliminary'], isTrue);
+      // A contest with no stored setting reads as Manual.
+      expect(body['scores_become_official'], 'Manual');
       final rows = rowsOf(body);
       expect(rows, hasLength(3));
       final you = rows.first;
@@ -619,6 +621,7 @@ void _tests(SliceBackend backend) {
         expect(body['latest_round'], 1);
         expect(body['held_at_round'], isNull);
         expect(body['preliminary'], isTrue);
+        expect(body['scores_become_official'], 'Manual');
         expect(body['your_place'], 1);
         expect(body['your_score'], isA<num>());
         final standings = (body['standings']! as List)

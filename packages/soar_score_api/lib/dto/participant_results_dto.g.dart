@@ -112,12 +112,17 @@ ParticipantGroupResultsDto _$ParticipantGroupResultsDtoFromJson(
         'pending_review_affects_placement',
         (v) => v as bool? ?? false,
       ),
+      scoresBecomeOfficial: $checkedConvert(
+        'scores_become_official',
+        (v) => $enumDecodeNullable(_$OfficializationModeEnumMap, v),
+      ),
     );
     return val;
   },
   fieldKeyMap: const {
     'latestRound': 'latest_round',
     'pendingReviewAffectsPlacement': 'pending_review_affects_placement',
+    'scoresBecomeOfficial': 'scores_become_official',
   },
 );
 
@@ -130,6 +135,14 @@ Map<String, dynamic> _$ParticipantGroupResultsDtoToJson(
   'preliminary': instance.preliminary,
   'rows': instance.rows,
   'pending_review_affects_placement': instance.pendingReviewAffectsPlacement,
+  'scores_become_official':
+      _$OfficializationModeEnumMap[instance.scoresBecomeOfficial],
+};
+
+const _$OfficializationModeEnumMap = {
+  OfficializationMode.endOfRound: 'EndOfRound',
+  OfficializationMode.endOfGroup: 'EndOfGroup',
+  OfficializationMode.manual: 'Manual',
 };
 
 ParticipantStandingDto _$ParticipantStandingDtoFromJson(
@@ -200,6 +213,10 @@ ParticipantOverallResultsDto _$ParticipantOverallResultsDtoFromJson(
             )
             .toList(),
       ),
+      scoresBecomeOfficial: $checkedConvert(
+        'scores_become_official',
+        (v) => $enumDecodeNullable(_$OfficializationModeEnumMap, v),
+      ),
     );
     return val;
   },
@@ -210,6 +227,7 @@ ParticipantOverallResultsDto _$ParticipantOverallResultsDtoFromJson(
     'yourPlace': 'your_place',
     'yourScore': 'your_score',
     'teamStandings': 'team_standings',
+    'scoresBecomeOfficial': 'scores_become_official',
   },
 );
 
@@ -224,6 +242,8 @@ Map<String, dynamic> _$ParticipantOverallResultsDtoToJson(
   'your_score': instance.yourScore,
   'standings': instance.standings,
   'team_standings': instance.teamStandings,
+  'scores_become_official':
+      _$OfficializationModeEnumMap[instance.scoresBecomeOfficial],
 };
 
 ParticipantTeamStandingDto _$ParticipantTeamStandingDtoFromJson(

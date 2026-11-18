@@ -142,6 +142,8 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
               r.row.state == ParticipantScoreState.submitted,
         ) ||
         calculation.input.incompleteGroups.contains((roundOrdinal, mine.group)),
+    scoresBecomeOfficial:
+        calculation.revision.config.coreOptions.scoresBecomeOfficial,
     rows: [for (final r in rows) r.row],
   );
 }
@@ -179,6 +181,8 @@ Future<ParticipantOverallResultsDto?> participantOverallResults(
       latestRound: latest,
       heldAtRound: null,
       preliminary: true,
+      scoresBecomeOfficial:
+          calculation.revision.config.coreOptions.scoresBecomeOfficial,
       standings: const [],
     );
   }
@@ -231,6 +235,8 @@ Future<ParticipantOverallResultsDto?> participantOverallResults(
         standing.ranking.isPreliminary || calculation.isPreliminaryAsOf(round),
     yourPlace: you?.place,
     yourScore: you?.score,
+    scoresBecomeOfficial:
+        calculation.revision.config.coreOptions.scoresBecomeOfficial,
     standings: lines,
   );
 }

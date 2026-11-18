@@ -6,6 +6,7 @@ import '../models/results_snapshot.dart';
 import '../models/results_view.dart';
 import '../router.dart';
 import 'earlier_round_banner.dart';
+import 'preliminary_note.dart';
 import 'standings_table.dart';
 import 'status_chip.dart';
 
@@ -176,14 +177,15 @@ class _ResultsBodyState extends State<ResultsBody> {
           rows: _rows(_teams ? snapshot.teams : snapshot.pilots),
         ),
         const SizedBox(height: 16),
-        Text(
-          isLatest
-              ? 'Scores are preliminary and can change until the director '
-                    'marks results official.'
-              : 'Results as of round $round are preliminary. A review that '
-                    'changes round $round updates this page.',
-          style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-        ),
+        PreliminaryNote(policy: data.policy, showReviewHold: true),
+        if (!isLatest) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Results as of round $round are preliminary. A review that '
+            'changes round $round updates this page.',
+            style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+          ),
+        ],
       ],
     );
   }

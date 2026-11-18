@@ -7,6 +7,7 @@ import '../models/entry_context.dart';
 import '../models/group_result_row.dart';
 import '../models/group_results.dart';
 import '../models/guest_session.dart';
+import '../models/officialization_policy.dart';
 import '../models/landing_result.dart';
 import '../models/pilot_overview.dart';
 import '../models/pilot_round.dart';
@@ -351,6 +352,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       group: group.group,
       latestRound: group.latestRound,
       rows: [for (final row in group.rows) _groupRow(row)],
+      policy: OfficializationPolicy.fromWire(group.scoresBecomeOfficial?.json),
     );
   });
 
@@ -396,6 +398,9 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
           contestName: session.contestName,
           latestRound: overall.latestRound,
           heldRound: overall.heldAtRound,
+          policy: OfficializationPolicy.fromWire(
+            overall.scoresBecomeOfficial?.json,
+          ),
           snapshot: ResultsSnapshot(
             round: overall.asOfRound,
             ordinal: place == null ? '–' : ScoreFormat.ordinal(place),
