@@ -139,6 +139,23 @@ extension PromoteSubmissionService on ScoresService {
     );
   }
 
+  /// Whether [expectedScoreRevision] is the revision before the contest
+  /// accepted [sourceAttemptId] automatically: a director who saw the score
+  /// waiting may confirm it after the acceptance reached this installation.
+  Future<bool> _namesAutomaticAcceptance(
+    ScorePlaceholder placeholder,
+    Id sourceAttemptId,
+    int expectedScoreRevision,
+  ) async {
+    if (expectedScoreRevision != placeholder.scoreRevision - 1) return false;
+    final official = await repository.officialScoreRepository
+        .currentForPlaceholder(placeholder.id);
+    return official != null &&
+        official.selectionOrigin == SelectionOrigin.automatic &&
+        official.scoreRevision == placeholder.scoreRevision &&
+        official.scoreAttemptId == sourceAttemptId;
+  }
+
   Future<PendingPromotion> _queuePromotion(
     Id contestId,
     Id assignmentId, {
@@ -166,7 +183,12 @@ extension PromoteSubmissionService on ScoresService {
       );
     }
     if (placeholder.currentAttemptId != sourceAttemptId ||
-        placeholder.scoreRevision != expectedScoreRevision) {
+        (placeholder.scoreRevision != expectedScoreRevision &&
+            !await _namesAutomaticAcceptance(
+              placeholder,
+              sourceAttemptId,
+              expectedScoreRevision,
+            ))) {
       throw StaleRevisionError(
         entityType: 'ScorePlaceholder',
         entityId: placeholder.id,
@@ -269,6 +291,192 @@ extension PromoteSubmissionService on ScoresService {
     }
   }
 
+  /// Closes every open review of [placeholder] as superseded by an official
+  /// selection, with one audit event each.
+  Future<({List<ReviewRequest> superseded, List<AuditEvent> audits})>
+  _supersedeOpenReviews(
+    ScorePlaceholder placeholder, {
+    required Id actorId,
+    required MutationMetadata metadata,
+    required DateTime now,
+    required Id sourceAttemptId,
+    required Id officialScoreId,
+  }) async {
+    final superseded = <ReviewRequest>[];
+    final audits = <AuditEvent>[];
+    for (final review
+        in await repository.reviewRequestRepository.listForScorePlaceholder(
+          placeholder.id,
+        )) {
+      if (!review.isOpen) continue;
+      superseded.add(
+        ReviewRequest(
+          id: review.id,
+          contestId: review.contestId,
+          scorePlaceholderId: review.scorePlaceholderId,
+          proposedComponents: review.proposedComponents,
+          participantMessage: review.participantMessage,
+          requesterId: review.requesterId,
+          baseScoreRevision: review.baseScoreRevision,
+          requestedAt: review.requestedAt,
+          state: ReviewRequestState.superseded,
+          decisionActorId: actorId,
+          decisionTime: now,
+          decisionMessage: supersededByOfficialSelectionReason,
+          revision: review.revision,
+        ),
+      );
+      audits.add(
+        AuditEvent(
+          id: _newId(),
+          entityType: review.entityType,
+          entityId: review.id,
+          contestId: placeholder.contestId,
+          action: AuditAction.scoreReview,
+          actorId: actorId,
+          authority: Authority.director,
+          installationId: metadata.sourceInstallationId,
+          device: metadata.sourceDevice,
+          baseRevision: review.revision,
+          resultingRevision: review.revision + 1,
+          serverTimestamp: now,
+          clientTimestamp: metadata.clientTime,
+          reason: jsonEncode({
+            'v': 1,
+            'code': supersededByOfficialSelectionReason,
+            'source_attempt_id': sourceAttemptId.value,
+            'official_score_id': officialScoreId.value,
+          }),
+          outcome: AuditOutcome.success,
+        ),
+      );
+    }
+    return (superseded: superseded, audits: audits);
+  }
+
+  /// A director's confirmation of an automatically accepted score: the
+  /// request names the submission the contest already made official. Review
+  /// is closed on the placeholder ([ScorePlaceholder.reviewClosedScoreRevision])
+  /// and open reviews are superseded; no second official version is written,
+  /// and the result is not a replay. Returns null when the request is not
+  /// such a confirmation (another score, a manual or review-decision
+  /// version, an already confirmed or locked score), so the caller handles
+  /// it as an adoption or a replay.
+  ///
+  /// The request may carry the score revision the director saw before the
+  /// contest accepted the submission (one less than the official revision)
+  /// or the accepted revision itself.
+  Future<ScorePromotionResult?> _confirmAutomatic(
+    Contest contest,
+    _Configuration context,
+    ScorePlaceholder current, {
+    required Id sourceAttemptId,
+    required int expectedScoreRevision,
+    required Id actorId,
+    required MutationMetadata metadata,
+    required PromotionIntent? intent,
+  }) async {
+    final official = await repository.officialScoreRepository
+        .currentForPlaceholder(current.id);
+    if (official == null ||
+        official.selectionOrigin != SelectionOrigin.automatic ||
+        official.scoreRevision != current.scoreRevision ||
+        official.scoreAttemptId != sourceAttemptId ||
+        current.currentAttemptId != sourceAttemptId ||
+        current.hasReviewClosure ||
+        current.isLocked ||
+        (expectedScoreRevision != official.scoreRevision - 1 &&
+            expectedScoreRevision != official.scoreRevision)) {
+      return null;
+    }
+    _requireScoringAllowed(contest);
+    // The same slot rules as an adoption: a locked round or group, a moved
+    // assignment or a round no longer current refuse a fresh confirmation.
+    await _requireSlot(contest.id, current.assignmentId);
+    if (intent == null) {
+      await _requireNoPendingPromotion(contest.id, current.assignmentId);
+    }
+    final now = _clock();
+    final updated = ScorePlaceholder(
+      id: current.id,
+      contestId: current.contestId,
+      contestParticipationId: current.contestParticipationId,
+      assignmentId: current.assignmentId,
+      state: current.state,
+      scoreRevision: current.scoreRevision,
+      currentAttemptId: current.currentAttemptId,
+      lockedBy: current.lockedBy,
+      lockedAt: current.lockedAt,
+      reviewClosedScoreRevision: current.scoreRevision,
+      revision: current.revision,
+    );
+    final (:superseded, :audits) = await _supersedeOpenReviews(
+      current,
+      actorId: actorId,
+      metadata: metadata,
+      now: now,
+      sourceAttemptId: sourceAttemptId,
+      officialScoreId: official.id,
+    );
+    final stored = await repository.officialScoreRepository.recordPromotion(
+      PromotedScore(
+        officialScore: official,
+        placeholder: updated,
+        supersededReviews: superseded,
+        confirmsExisting: true,
+        audits: [
+          ...audits,
+          AuditEvent(
+            id: _newId(),
+            entityType: current.entityType,
+            entityId: current.id,
+            contestId: current.contestId,
+            action: AuditAction.scoreReview,
+            actorId: actorId,
+            authority: Authority.director,
+            installationId: metadata.sourceInstallationId,
+            device: metadata.sourceDevice,
+            baseRevision: current.revision,
+            resultingRevision: current.revision + 1,
+            serverTimestamp: now,
+            clientTimestamp: metadata.clientTime,
+            reason: jsonEncode({
+              'v': 1,
+              'code': directorConfirmedAutomaticReason,
+              'source_attempt_id': sourceAttemptId.value,
+              'official_score_id': official.id.value,
+            }),
+            outcome: AuditOutcome.success,
+          ),
+        ],
+        receipt: intent == null
+            ? null
+            : PromotionReceipt(
+                operationId: intent.operationId,
+                clientMutationId: intent.clientMutationId,
+                payload: VersionedPayload(
+                  version: 1,
+                  data: {
+                    ...intent.data,
+                    'official_score_id': official.id.value,
+                    'score_revision': official.scoreRevision,
+                  },
+                ).toJson(),
+              ),
+      ),
+      metadata: metadata,
+    );
+    return ScorePromotionResult(
+      entry: ScoreEntryResult(
+        officialScore: official,
+        placeholder: stored.placeholder,
+        contest: contest,
+        calculated: await _calculate(context, official.components),
+      ),
+      replayed: false,
+    );
+  }
+
   Future<ScorePromotionResult> _promoteOnce(
     Id contestId,
     Id assignmentId, {
@@ -302,7 +510,11 @@ extension PromoteSubmissionService on ScoresService {
       // writes nothing, whatever locks were set since.
       if (official.scoreAttemptId == sourceAttemptId &&
           slot.currentAttemptId == sourceAttemptId &&
-          official.scoreRevision - 1 == expectedScoreRevision) {
+          (official.scoreRevision - 1 == expectedScoreRevision ||
+              // A confirmed automatic score also answers its own accepted
+              // revision, one of the two a confirmation may name.
+              (official.selectionOrigin == SelectionOrigin.automatic &&
+                  official.scoreRevision == expectedScoreRevision))) {
         return ScorePromotionResult(
           entry: ScoreEntryResult(
             officialScore: official,
@@ -321,6 +533,17 @@ extension PromoteSubmissionService on ScoresService {
       );
     }
 
+    final confirmed = await _confirmAutomatic(
+      contest,
+      context,
+      current,
+      sourceAttemptId: sourceAttemptId,
+      expectedScoreRevision: expectedScoreRevision,
+      actorId: actorId,
+      metadata: metadata,
+      intent: intent,
+    );
+    if (confirmed != null) return confirmed;
     final earlier = await replayOf(current);
     if (earlier != null) return earlier;
 
@@ -385,55 +608,14 @@ extension PromoteSubmissionService on ScoresService {
       revision: placeholder.revision,
     );
 
-    final superseded = <ReviewRequest>[];
-    final audits = <AuditEvent>[];
-    for (final review
-        in await repository.reviewRequestRepository.listForScorePlaceholder(
-          placeholder.id,
-        )) {
-      if (!review.isOpen) continue;
-      superseded.add(
-        ReviewRequest(
-          id: review.id,
-          contestId: review.contestId,
-          scorePlaceholderId: review.scorePlaceholderId,
-          proposedComponents: review.proposedComponents,
-          participantMessage: review.participantMessage,
-          requesterId: review.requesterId,
-          baseScoreRevision: review.baseScoreRevision,
-          requestedAt: review.requestedAt,
-          state: ReviewRequestState.superseded,
-          decisionActorId: actorId,
-          decisionTime: now,
-          decisionMessage: supersededByOfficialSelectionReason,
-          revision: review.revision,
-        ),
-      );
-      audits.add(
-        AuditEvent(
-          id: _newId(),
-          entityType: review.entityType,
-          entityId: review.id,
-          contestId: contestId,
-          action: AuditAction.scoreReview,
-          actorId: actorId,
-          authority: Authority.director,
-          installationId: metadata.sourceInstallationId,
-          device: metadata.sourceDevice,
-          baseRevision: review.revision,
-          resultingRevision: review.revision + 1,
-          serverTimestamp: now,
-          clientTimestamp: metadata.clientTime,
-          reason: jsonEncode({
-            'v': 1,
-            'code': supersededByOfficialSelectionReason,
-            'source_attempt_id': attempt.id.value,
-            'official_score_id': adopted.id.value,
-          }),
-          outcome: AuditOutcome.success,
-        ),
-      );
-    }
+    final (:superseded, :audits) = await _supersedeOpenReviews(
+      placeholder,
+      actorId: actorId,
+      metadata: metadata,
+      now: now,
+      sourceAttemptId: attempt.id,
+      officialScoreId: adopted.id,
+    );
 
     final stored = await repository.officialScoreRepository.recordPromotion(
       PromotedScore(
