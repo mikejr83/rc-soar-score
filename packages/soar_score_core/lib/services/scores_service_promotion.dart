@@ -139,6 +139,23 @@ extension PromoteSubmissionService on ScoresService {
     );
   }
 
+  /// Whether [expectedScoreRevision] is the revision before the contest
+  /// accepted [sourceAttemptId] automatically: a director who saw the score
+  /// waiting may confirm it after the acceptance reached this installation.
+  Future<bool> _namesAutomaticAcceptance(
+    ScorePlaceholder placeholder,
+    Id sourceAttemptId,
+    int expectedScoreRevision,
+  ) async {
+    if (expectedScoreRevision != placeholder.scoreRevision - 1) return false;
+    final official = await repository.officialScoreRepository
+        .currentForPlaceholder(placeholder.id);
+    return official != null &&
+        official.selectionOrigin == SelectionOrigin.automatic &&
+        official.scoreRevision == placeholder.scoreRevision &&
+        official.scoreAttemptId == sourceAttemptId;
+  }
+
   Future<PendingPromotion> _queuePromotion(
     Id contestId,
     Id assignmentId, {
@@ -166,7 +183,12 @@ extension PromoteSubmissionService on ScoresService {
       );
     }
     if (placeholder.currentAttemptId != sourceAttemptId ||
-        placeholder.scoreRevision != expectedScoreRevision) {
+        (placeholder.scoreRevision != expectedScoreRevision &&
+            !await _namesAutomaticAcceptance(
+              placeholder,
+              sourceAttemptId,
+              expectedScoreRevision,
+            ))) {
       throw StaleRevisionError(
         entityType: 'ScorePlaceholder',
         entityId: placeholder.id,
