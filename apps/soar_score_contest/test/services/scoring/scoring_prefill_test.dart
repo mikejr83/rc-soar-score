@@ -194,6 +194,24 @@ void main() {
     expect(c.hasUnsaved, isTrue);
   });
 
+  test('a failed removal asks for no zero confirmation', () async {
+    final second = scoringAssignmentId(1, 2);
+    final server = ScoringServer()
+      ..seedScore(first, {...a, 'cumulative_penalty': 10})
+      ..seedScore(second, a)
+      ..entryFailures[first] = (500, 'internal');
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setCumulativePenalty('0');
+    c.recordRemovalReason(first, 'Misapplied');
+    await c.save(_row(c, 1));
+    expect(c.saveOf(first).kind, RowSaveKind.failed);
+    c.draftOf(_row(c, 1)).outOfBounds = true;
+    c.draftOf(_row(c, 2)).setHeight('99');
+
+    expect(c.unconfirmedZeroRows(editedOnly: true), isEmpty);
+    expect(c.saveCandidates(editedOnly: true).map((r) => r.id), [second]);
+  });
+
   test('what the director typed survives a later submission', () async {
     final server = ScoringServer()..seedPendingSubmission(first, a);
     final c = await _open(server);
