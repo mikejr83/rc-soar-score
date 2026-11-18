@@ -1207,7 +1207,7 @@ class ScoringController extends ChangeNotifier {
       // A sync kept these rows as they were while the request was out: until
       // each is read again none of them may be promoted on what it shows, so
       // all are marked before the first read is awaited.
-      _unreadSlots.addAll([
+      _markUnread([
         for (final row in [...moved, ...waiting, ...failedRows.keys]) row.id,
       ]);
     }
@@ -1345,9 +1345,13 @@ class ScoringController extends ChangeNotifier {
     return next;
   }
 
-  /// Makes every read started so far older than the slots of [ids].
-  void _invalidate(Iterable<Id> ids) {
+  /// Marks the slots of [ids] as behind the service and makes every read
+  /// started so far older than them: such a read is older than the refusal
+  /// or failure that made the catch-up necessary, so it may not clear the
+  /// marker. The one place that does both.
+  void _markUnread(Iterable<Id> ids) {
     for (final id in ids) {
+      _unreadSlots.add(id);
       _slotVersions[id] = _slotVersion(id) + 1;
     }
   }
@@ -1379,10 +1383,7 @@ class ScoringController extends ChangeNotifier {
   ///
   /// Returns false when the read failed and the rows are as they were.
   Future<bool> _refreshSlots(List<ScoringRow> stale) async {
-    _unreadSlots.addAll(stale.map((row) => row.id));
-    // Any full or targeted read that started before this one is older than
-    // the refusal that made it necessary: it may not clear the marker.
-    _invalidate(stale.map((row) => row.id));
+    _markUnread(stale.map((row) => row.id));
     try {
       final ids = {for (final row in stale) row.id};
       final versions = {for (final id in ids) id: _slotVersion(id)};

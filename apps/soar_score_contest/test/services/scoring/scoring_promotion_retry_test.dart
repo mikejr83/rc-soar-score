@@ -634,4 +634,49 @@ void main() {
       expect(c.confirmAutomaticSkip(_row(c, 1)), MarkOfficialSkip.busy);
     },
   );
+
+  test('Mark all: an older manual refresh cannot free a failed row', () async {
+    final second = scoringAssignmentId(1, 2);
+    final server = ScoringServer()
+      ..seedPendingSubmission(first, flight)
+      ..seedPendingSubmission(second, flight);
+    final c = await _open(server);
+
+    // A manual refresh is held after reading both rows.
+    final manualRead = server.holdNextScoresRead = Completer<void>();
+    final manual = c.refresh();
+    for (var i = 0; i < 6; i++) {
+      await Future<void>.delayed(Duration.zero);
+    }
+    expect(server.holdNextScoresRead, isNull, reason: 'the refresh is held');
+
+    final hold = server.holdPromote = Completer<void>();
+    final all = c.markAllOfficial();
+    for (var i = 0; i < 6; i++) {
+      await Future<void>.delayed(Duration.zero);
+    }
+    await c.refreshAfterSync();
+
+    // Ann is refused as changed and her read is held; Bo fails.
+    server.promoteFailures[first] = (409, 'stale_revision');
+    server.promoteFailures[second] = (503, 'contest_busy');
+    final annRead = server.holdNextScoresRead = Completer<void>();
+    hold.complete();
+    for (var i = 0; i < 6; i++) {
+      await Future<void>.delayed(Duration.zero);
+    }
+    final before = server.promoteRequests;
+
+    // The older manual response arrives first.
+    manualRead.complete();
+    await manual;
+    expect(c.markOfficialSkip(_row(c, 2)), MarkOfficialSkip.busy);
+    expect(await c.retryPromotion(_row(c, 2)), isFalse);
+    expect(await c.markOfficial(_row(c, 2)), isFalse);
+    await c.markAllOfficial();
+    expect(server.promoteRequests, before, reason: 'no write for Bo');
+
+    annRead.complete();
+    await all;
+  });
 }
