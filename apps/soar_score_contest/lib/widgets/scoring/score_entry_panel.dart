@@ -169,7 +169,9 @@ class ScoreEntryPanel extends StatelessWidget {
               save: save,
               theirs: theirs,
               mine: draft.components,
-              onRetry: save.promotion ? actions.onMarkOfficial : actions.onSave,
+              onRetry: save.promotion
+                  ? actions.onRetryPromotion
+                  : actions.onSave,
               onRefresh: actions.onRefresh,
               onKeepMine: actions.onKeepMine,
               onTakeTheirs: actions.onTakeTheirs,

@@ -24,6 +24,7 @@ class ScoreRowActions {
     required this.onActivate,
     required this.onSave,
     required this.onMarkOfficial,
+    required this.onRetryPromotion,
     required this.onRevert,
     required this.onKeepMine,
     required this.onTakeTheirs,
@@ -38,6 +39,9 @@ class ScoreRowActions {
 
   /// Accepts the pilot's waiting entry as the official score.
   final VoidCallback onMarkOfficial;
+
+  /// Asks again for the Mark official or Confirm that failed.
+  final VoidCallback onRetryPromotion;
   final VoidCallback onRevert;
   final VoidCallback onKeepMine;
   final VoidCallback onTakeTheirs;
@@ -785,7 +789,9 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       if (widget.row.isAdoptionPending)
         (
           Icons.cloud_upload_outlined,
-          AppLocalizations.of(context).scoreAdoptionWaiting,
+          widget.row.isAutomaticUnconfirmed
+              ? AppLocalizations.of(context).scoreConfirmWaiting
+              : AppLocalizations.of(context).scoreAdoptionWaiting,
           null,
         ),
       if (widget.row.retired)
@@ -801,7 +807,11 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _label(context, 'Status', labels),
-          RowStatusChip(status: widget.row.status, unsaved: dirty),
+          RowStatusChip(
+            status: widget.row.status,
+            unsaved: dirty,
+            automatic: widget.row.isAutomaticUnconfirmed,
+          ),
           _markOfficial(context),
           for (final (icon, text, color) in subs)
             Padding(
@@ -830,12 +840,13 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
   Widget _markOfficial(BuildContext context) {
     final skip = widget.markSkip;
     final row = widget.row;
+    final words = AppLocalizations.of(context);
+    if (row.isAutomaticUnconfirmed) return _confirmAutomatic(context, skip);
     if (!row.hasPendingSubmission ||
         skip == MarkOfficialSkip.noSubmission ||
         skip == MarkOfficialSkip.retired) {
       return const SizedBox.shrink();
     }
-    final words = AppLocalizations.of(context);
     final busy = widget.save.isBusy && widget.save.promotion;
     final why = switch (skip) {
       MarkOfficialSkip.edited => words.scoreMarkOfficialEdited,
@@ -876,6 +887,71 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
                 key: ValueKey(_k('mark-official-why')),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// The Confirm button and its explanation under the "Accepted
+  /// automatically" chip: the contest accepted this score when its round or
+  /// group was fully scored, and confirming it records the director's
+  /// decision and closes review without a second official version.
+  Widget _confirmAutomatic(BuildContext context, MarkOfficialSkip? skip) {
+    final words = AppLocalizations.of(context);
+    final row = widget.row;
+    // A retired pilot's score stays as it is: the service refuses a decision.
+    if (skip == MarkOfficialSkip.retired) return const SizedBox.shrink();
+    // A locked or queued row has nothing to confirm from here.
+    if (skip == MarkOfficialSkip.closed ||
+        skip == MarkOfficialSkip.waitingToSync) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Text(
+          skip == MarkOfficialSkip.closed
+              ? words.scoreAutomaticLocked
+              : words.scoreConfirmQueuedNote,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      );
+    }
+    final busy = widget.save.isBusy && widget.save.promotion;
+    final why = skip == MarkOfficialSkip.edited
+        ? words.scoreMarkOfficialEdited
+        : null;
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            words.scoreAutomaticNote,
+            key: ValueKey(_k('automatic-note')),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 4),
+          Tooltip(
+            message: why ?? words.scoreConfirmTooltip(row.pilot.name),
+            child: OutlinedButton.icon(
+              key: ValueKey(_k('confirm-automatic')),
+              onPressed: skip == null ? widget.actions.onMarkOfficial : null,
+              icon: busy
+                  ? const SizedBox.square(
+                      dimension: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.verified_outlined, size: 18),
+              label: Text(busy ? words.scoreConfirming : words.scoreConfirm),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(0, 40),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+            ),
+          ),
+          if (why != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(why, style: Theme.of(context).textTheme.bodySmall),
             ),
         ],
       ),
@@ -1239,7 +1315,10 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     return switch (widget.row.status) {
       RowStatus.notEntered => 'not entered',
       RowStatus.submitted => 'submitted by a participant',
-      RowStatus.official => 'official',
+      RowStatus.official =>
+        widget.row.isAutomaticUnconfirmed
+            ? 'accepted automatically'
+            : 'official',
       RowStatus.locked => 'locked',
       RowStatus.retired => 'retired',
     };

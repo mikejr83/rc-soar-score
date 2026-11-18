@@ -91,6 +91,12 @@ class ScoringPageData {
   final ScoreEntrySettings settings;
   final Map<Id, ScoreSlot> _slots;
 
+  /// The assignments this read holds a slot for.
+  Iterable<Id> get slotIds => _slots.keys;
+
+  /// The slot of [assignmentId] in this read, or null.
+  ScoreSlot? slotOf(Id assignmentId) => _slots[assignmentId];
+
   Contest get contest => base.contest;
   CurrentMatrix get matrix => base.matrix;
   List<Round> get rounds =>

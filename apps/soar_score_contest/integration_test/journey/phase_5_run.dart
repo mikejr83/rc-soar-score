@@ -1,11 +1,13 @@
 import 'dart:math' show min;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/scoring/scoring_row.dart';
 import 'package:soar_score_core/soar_score_core.dart'
     show ScorePlaceholderState;
 
+import '../support/configuration_fields.dart';
 import '../support/interact.dart';
 import '../support/launch_app.dart';
 import '../support/open_demo_contest.dart';
@@ -599,16 +601,22 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
     () => inContest(() async {
       // All of them fly in one group, so the page never asks about unsaved
       // rows of another one. Tess retires in the next step, so she stays out.
-      // The draw decides who flies where, so the first group with two open
-      // rows is used.
+      // The draw decides who flies where, so the group with the most open
+      // rows is used (the next steps need three).
       var group = 0;
       var inGroup = <String>[];
-      for (var g = 1; g <= data.groupsPerRound && inGroup.length < 2; g++) {
+      for (var g = 1; g <= data.groupsPerRound; g++) {
         await openRoundGroup(tester, 3, g);
-        inGroup = openRowNames(tester, skip: {'Tess Valdez'});
-        group = g;
+        final open = openRowNames(tester, skip: {'Tess Valdez'});
+        if (open.length > inGroup.length) {
+          inGroup = open;
+          group = g;
+        }
       }
-      expect(inGroup.length, greaterThanOrEqualTo(2), reason: 'rows to fill');
+      await openRoundGroup(tester, 3, group);
+      // Mark official, Mark all and the review need a plain, a second plain
+      // and a reviewed entry in one group.
+      expect(inGroup.length, greaterThanOrEqualTo(3), reason: 'rows to fill');
       final pilots = waiting = await submitAsPilots(
         contestName: data.contestName,
         candidates: inGroup,
@@ -743,6 +751,8 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
     timeout: _longStep,
   );
 
+  var automatic = <String>[];
+
   await journey.step(
     'Round 3: a pilot retires, the rest of the round is scored',
     () => inContest(() async {
@@ -758,16 +768,128 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await pumpUntilFound(tester, find.text('Retired'));
       expect(find.text('Retired from round 3'), findsOneWidget);
 
-      // The retirement is on the Recent activity card too.
+      // The retirement is on the Recent activity card too. On the web run the
+      // pilots' waiting entries filled the group's rows, so leaving can ask
+      // about them.
       await tapRail(tester, 'Workspace');
+      await tester.pump(const Duration(seconds: 1));
+      if (find.text('Unsaved scores').evaluate().isNotEmpty) {
+        await tapVisible(tester, find.text('Discard'));
+      }
       // The Scoring page's snackbar can still be up, and it says the same, so
       // count only the activity entry's own wording.
       final retired = _either('was retired from round 3', 'You retired pilot');
       await pumpUntilFound(tester, retired);
       expect(retired, findsOneWidget);
 
-      await scoreRound(tester, data, 3);
+      // On the web run the pilots enter the rest of the round next, and the
+      // contest accepts their entries; the native run scores it here.
+      if (!kIsWeb) await scoreRound(tester, data, 3);
     }),
+    timeout: _longStep,
+  );
+  await journey.step(
+    'Round 3: the contest accepts the last entries itself, the director '
+    'confirms one',
+    () => inContest(() async {
+      // The set-up phase left scores to become official manually; the
+      // director switches back to the end of the round for these last flights.
+      await openConfiguration(tester);
+      await tapRadio(tester, 'scores_become_official', 'At end of round');
+      // The page cannot save while the first drop lies after the last round,
+      // so a stored value past round 3 is brought back to it.
+      final drop = find.descendant(
+        of: settingField('drop1'),
+        matching: find.byType(TextField),
+      );
+      if (drop.evaluate().isNotEmpty &&
+          find.textContaining('the last round drawn').evaluate().isNotEmpty) {
+        await enterIn(tester, drop, '${data.rounds}');
+      }
+      await tapVisible(
+        tester,
+        find.widgetWithText(FilledButton, 'Save configuration'),
+      );
+      // Changing a drop recalculates the results, which asks first.
+      await tester.pump(const Duration(seconds: 1));
+      if (_key('confirm-save').evaluate().isNotEmpty) {
+        await tapVisible(tester, _key('confirm-save'));
+      }
+      await pumpUntilFound(
+        tester,
+        find.textContaining('Configuration saved as revision'),
+      );
+      // Every flight but the last waits: scores become official at the end
+      // of the round. The last pilot's entry completes it, and the contest
+      // accepts them all without a director.
+      final all = <String>[];
+      for (var g = 1; g <= data.groupsPerRound; g++) {
+        await openRoundGroup(tester, 3, g);
+        all.addAll(openRowNames(tester));
+      }
+      expect(all, isNotEmpty, reason: 'rows still open in round 3');
+      final early = all.take(all.length - 1).toList();
+      if (early.isNotEmpty) {
+        await submitAsPilots(
+          contestName: data.contestName,
+          candidates: early,
+          round: 3,
+          count: early.length,
+          timeFlown: 430,
+        );
+      }
+      // Before the last flight arrives nothing may be official: an early
+      // entry still waits.
+      if (early.isNotEmpty) {
+        await openGroupOf(tester, data, 3, early.first);
+        final entry = (await rowOf(tester, early.first))!;
+        expect(entry.hasPendingSubmission, isTrue, reason: early.first);
+        expect(entry.status, RowStatus.submitted, reason: early.first);
+        expect(entry.isAutomaticUnconfirmed, isFalse, reason: early.first);
+      }
+      await submitAsPilots(
+        contestName: data.contestName,
+        candidates: [all.last],
+        round: 3,
+        count: 1,
+        timeFlown: 440,
+      );
+      automatic = all;
+      await leaveGroupDiscardingPending(tester);
+      for (final name in automatic) {
+        await openGroupOf(tester, data, 3, name);
+        final row = (await rowOf(tester, name))!;
+        expect(row.hasPendingSubmission, isFalse, reason: name);
+        expect(row.status, RowStatus.official, reason: name);
+        expect(row.isAutomaticUnconfirmed, isTrue, reason: name);
+        expect(find.text('Accepted automatically'), findsWidgets);
+        expect(_key('score-confirm-automatic-${row.id.value}'), findsOneWidget);
+      }
+
+      // The history names the system, not a director.
+      final pilot = automatic.first;
+      await openGroupOf(tester, data, 3, pilot);
+      var row = (await rowOf(tester, pilot))!;
+      await openRowHistory(tester, row);
+      expect(find.text('Made official by System (automatic)'), findsOneWidget);
+      expect(find.text('Confirmed by the director'), findsNothing);
+      await closeHistory(tester);
+
+      // Confirming records the decision without a second version.
+      final revision = row.slot!.placeholder.scoreRevision;
+      final confirm = _key('score-confirm-automatic-${row.id.value}');
+      await tapVisible(tester, confirm);
+      await pumpUntilGone(tester, confirm);
+      row = (await rowOf(tester, pilot))!;
+      expect(row.isAutomaticUnconfirmed, isFalse);
+      expect(row.status, RowStatus.official);
+      expect(row.slot!.placeholder.scoreRevision, revision);
+      await openRowHistory(tester, row);
+      expect(find.text('Made official by System (automatic)'), findsOneWidget);
+      expect(find.text('Confirmed by the director'), findsOneWidget);
+      await closeHistory(tester);
+    }),
+    webOnly: true,
     timeout: _longStep,
   );
 }

@@ -89,6 +89,7 @@ class ScoringController extends ChangeNotifier {
     try {
       final loaded = await ScoringPageData.load(client, contestId);
       data = loaded;
+      loaded.slotIds.forEach(_slotApplied);
       final open = loaded.firstOpen;
       final wantedRound = _wantedRound;
       if (wantedRound != null && loaded.roundByOrdinal(wantedRound) != null) {
@@ -161,11 +162,13 @@ class ScoringController extends ChangeNotifier {
     }
     if (data == null) return;
     ScoringPageData? loaded;
+    var versions = <Id, int>{};
     try {
       // A save that answers while the read is out makes the read older than
       // the page, so the read is made again rather than put over the save.
       for (var tries = 0; tries < 3 && loaded == null; tries++) {
         final epoch = _savedEpoch;
+        versions = _versionsNow();
         final read = await ScoringPageData.load(client, contestId);
         if (epoch == _savedEpoch) loaded = read;
       }
@@ -184,7 +187,9 @@ class ScoringController extends ChangeNotifier {
     loadError = null;
     syncRefreshFailed = false;
     final before = {for (final row in rows) row.id: row};
-    var next = loaded;
+    // A slot another reader applied while this read was out is newer.
+    final kept = <Id>{};
+    var next = _keepNewer(loaded, versions, kept);
     // A save in flight answers with its own copy of the slot.
     for (final row in before.values) {
       final slot = row.slot;
@@ -192,6 +197,13 @@ class ScoringController extends ChangeNotifier {
     }
     data = next;
     _clampGroup();
+    // Every slot of the read is applied except those of rows with a save in
+    // flight, which keep their own copy.
+    for (final id in next.slotIds) {
+      if (kept.contains(id)) continue;
+      if (!(before[id] != null && saveOf(id).isBusy)) _slotApplied(id);
+    }
+    _dropObsoletePromotionFailures();
     for (final row in rows) {
       if (saveOf(row.id).isBusy) continue;
       final draft = _drafts[row.id];
@@ -321,6 +333,7 @@ class ScoringController extends ChangeNotifier {
     round = toRound;
     group = toGroup;
     _clampGroup();
+    _seedUnreadSaves();
     notifyListeners();
     await _loadResults();
     notifyListeners();
@@ -336,6 +349,7 @@ class ScoringController extends ChangeNotifier {
     rows.forEach(_dismissPrefill);
     _drafts.clear();
     _saves.clear();
+    _seedUnreadSaves();
     _theirs.clear();
     _removalReasons.clear();
     notifyListeners();
@@ -401,6 +415,7 @@ class ScoringController extends ChangeNotifier {
       officialScore: result.officialScore,
     );
     data = data!.withSlot(slot).withContest(result.contest);
+    _slotApplied(row.id);
     _drafts[row.id]?.resetTo(result.officialScore.components);
     _saves.remove(row.id);
     _theirs.remove(row.id);
@@ -423,6 +438,7 @@ class ScoringController extends ChangeNotifier {
         pendingPromotion: queued,
       ),
     );
+    _slotApplied(row.id);
   }
 
   /// Saves one row as its own official revision. Returns whether it saved.
@@ -666,11 +682,14 @@ class ScoringController extends ChangeNotifier {
 
   Future<void> _markStale(List<ScoringRow> stale) async {
     try {
-      final fresh = await client.scores(contestId);
       final ids = {for (final row in stale) row.id};
+      final versions = {for (final id in ids) id: _slotVersion(id)};
+      final fresh = await client.scores(contestId);
       for (final slot in fresh.slots) {
-        if (ids.contains(slot.placeholder.assignmentId)) {
+        final id = slot.placeholder.assignmentId;
+        if (ids.contains(id) && _slotVersion(id) == versions[id]) {
           data = data!.withSlot(slot);
+          _slotApplied(id);
           _theirs[slot.placeholder.assignmentId] =
               slot.officialScore?.components ?? const {};
         }
@@ -717,8 +736,12 @@ class ScoringController extends ChangeNotifier {
   /// Loads the contest again, keeping what was typed.
   Future<void> refresh() async {
     try {
-      final loaded = await ScoringPageData.load(client, contestId);
+      final versions = _versionsNow();
+      final read = await ScoringPageData.load(client, contestId);
+      final kept = <Id>{};
+      final loaded = _keepNewer(read, versions, kept);
       data = loaded;
+      loaded.slotIds.where((id) => !kept.contains(id)).forEach(_slotApplied);
       loadError = null;
       syncRefreshFailed = false;
       for (final row in rows) {
@@ -733,6 +756,8 @@ class ScoringController extends ChangeNotifier {
         }
       }
       _saves.clear();
+      // A slot the reload skipped as older is still behind.
+      _seedUnreadSaves();
       // A reload that shows the penalty already removed settles the row.
       for (final row in rows) {
         if (!_removal(row, _drafts[row.id])) _clearRemovalReason(row.id);
@@ -765,7 +790,9 @@ class ScoringController extends ChangeNotifier {
     if (row.retired) return MarkOfficialSkip.retired;
     if (row.isAdoptionPending) return MarkOfficialSkip.waitingToSync;
     if (block != null || row.isLocked) return MarkOfficialSkip.closed;
-    if (saveOf(row.id).isBusy) return MarkOfficialSkip.busy;
+    if (_promotionBlocked(row)) {
+      return MarkOfficialSkip.busy;
+    }
     if (hasEdits(row)) return MarkOfficialSkip.edited;
     if (forGroup &&
         row.slot?.placeholder.state == ScorePlaceholderState.inReview) {
@@ -806,8 +833,126 @@ class ScoringController extends ChangeNotifier {
   /// not a failed save.
   Future<bool> markOfficial(ScoringRow row) async {
     if (markOfficialSkip(row) != null) return false;
-    final attempt = row.slot!.pendingAttempt!;
-    _saves[row.id] = const RowSave(RowSaveKind.saving, promotion: true);
+    return _sendPromotion(row, row.slot!.pendingAttempt!.id.value);
+  }
+
+  /// The request a Mark official of [row]'s waiting submission would send.
+  PromotionTarget _waitingTarget(ScoringRow row) => PromotionTarget(
+    attemptId: row.slot!.pendingAttempt!.id.value,
+    revision: row.baseRevision,
+  );
+
+  /// Whether [row], as it is now, still is what [target] asked about: the
+  /// same waiting submission, or the same automatic score, at the same score
+  /// revision.
+  bool _matchesTarget(ScoringRow row, PromotionTarget target) {
+    if (row.baseRevision != target.revision) return false;
+    // A lock or a retirement ends the action: the guards refuse it.
+    if (row.retired || row.isLocked || block != null) return false;
+    if (target.confirm) {
+      return row.isAutomaticUnconfirmed &&
+          row.slot!.officialScore!.scoreAttemptId.value == target.attemptId;
+    }
+    return row.hasPendingSubmission &&
+        row.slot?.pendingAttempt?.id.value == target.attemptId;
+  }
+
+  /// The row's own button: Confirm for an automatic score, else Mark official
+  /// for the waiting submission it shows now, whatever failed before.
+  Future<bool> promote(ScoringRow row) =>
+      row.isAutomaticUnconfirmed ? confirmAutomatic(row) : markOfficial(row);
+
+  /// The banner's Retry: asks again for exactly what the failure asked for. A
+  /// failure whose submission, score or revision has changed since (or that a
+  /// lock or retirement ended) is dropped without sending anything, and a row
+  /// with no failure to retry sends nothing.
+  Future<bool> retryPromotion(ScoringRow row) async {
+    final save = saveOf(row.id);
+    final target = save.target;
+    if (target == null || _promotionBlocked(row)) return false;
+    if (!_matchesTarget(row, target)) {
+      _saves.remove(row.id);
+      notifyListeners();
+      return false;
+    }
+    return target.confirm ? confirmAutomatic(row) : markOfficial(row);
+  }
+
+  /// Whether a promotion of [row] must wait: one is in flight, or its slot
+  /// is behind the service until a read of it has been applied.
+  bool _promotionBlocked(ScoringRow row) =>
+      saveOf(row.id).isBusy ||
+      saveOf(row.id).needsRefresh ||
+      _unreadSlots.contains(row.id);
+
+  /// Drops the failures of Mark official and Confirm that a sync made
+  /// obsolete. A row refused as changed keeps its message: it already shows
+  /// the newer values the director was told to check.
+  void _dropObsoletePromotionFailures() {
+    for (final row in rows) {
+      final save = saveOf(row.id);
+      final target = save.target;
+      if (!save.promotion || save.isBusy || save.changed) continue;
+      // A failure that was waiting for a read is settled once a fresh slot of
+      // the row has been applied: the director can ask afresh.
+      if (save.needsRefresh) {
+        if (!_unreadSlots.contains(row.id)) _saves.remove(row.id);
+        continue;
+      }
+      if (target != null && !_matchesTarget(row, target)) {
+        _saves.remove(row.id);
+      }
+    }
+  }
+
+  /// Why the director cannot confirm the automatic score of [row] now, or
+  /// null when they can. A row that is not an unconfirmed automatic score
+  /// answers [MarkOfficialSkip.noSubmission].
+  MarkOfficialSkip? confirmAutomaticSkip(ScoringRow row) {
+    if (!row.isAutomaticUnconfirmed) return MarkOfficialSkip.noSubmission;
+    // The service refuses it for a retired pilot (`pilot_retired`); the
+    // historical score stays visible.
+    if (row.retired) return MarkOfficialSkip.retired;
+    if (row.isAdoptionPending) return MarkOfficialSkip.waitingToSync;
+    if (block != null || row.isLocked) return MarkOfficialSkip.closed;
+    if (_promotionBlocked(row)) {
+      return MarkOfficialSkip.busy;
+    }
+    if (hasEdits(row)) return MarkOfficialSkip.edited;
+    return null;
+  }
+
+  /// Confirms the score the contest accepted automatically for [row]: the
+  /// director's decision is recorded and review closes for it, with no second
+  /// official version. Asked like Mark official, naming the official score
+  /// and its revision, so a change meanwhile is refused and shown. Returns
+  /// whether the row is confirmed (a repeat counts).
+  Future<bool> confirmAutomatic(ScoringRow row) async {
+    if (confirmAutomaticSkip(row) != null) return false;
+    return _sendPromotion(
+      row,
+      row.slot!.officialScore!.scoreAttemptId.value,
+      confirm: true,
+    );
+  }
+
+  /// The "mark official" request of [row] for [attemptId]: a waiting
+  /// submission, or, for [confirm], the automatic official score itself.
+  Future<bool> _sendPromotion(
+    ScoringRow row,
+    String attemptId, {
+    bool confirm = false,
+  }) async {
+    final target = PromotionTarget(
+      attemptId: attemptId,
+      revision: row.baseRevision,
+      confirm: confirm,
+    );
+    _saves[row.id] = RowSave(
+      RowSaveKind.saving,
+      promotion: true,
+      confirm: confirm,
+    );
     notifyListeners();
     final readsBefore = _syncReads;
     try {
@@ -815,7 +960,7 @@ class ScoringController extends ChangeNotifier {
         contestId,
         row.id,
         PromoteScoreRequest(
-          sourceAttemptId: attempt.id.value,
+          sourceAttemptId: attemptId,
           expectedScoreRevision: row.baseRevision,
         ),
       );
@@ -840,47 +985,107 @@ class ScoringController extends ChangeNotifier {
         error.statusCode,
         error.error?.code,
         error.error?.message,
+        confirm: confirm,
       );
-      _saves[row.id] = refusal;
+      _saves[row.id] = refusal.withTarget(target);
       if (refusal.changed) {
         _settleChanged([row], await _refreshSlots([row]));
+      } else {
+        await _rereadIfSyncOverlapped(row, readsBefore);
       }
     } on ApiNetworkError {
-      _saves[row.id] = const RowSave(
+      _saves[row.id] = RowSave(
         RowSaveKind.failed,
         networkProblem: true,
         promotion: true,
+        confirm: confirm,
+        target: target,
       );
+      await _rereadIfSyncOverlapped(row, readsBefore);
     } on Object catch (error) {
       _saves[row.id] = RowSave(
         RowSaveKind.failed,
         message: '$error',
         promotion: true,
+        confirm: confirm,
+        target: target,
       );
+      await _rereadIfSyncOverlapped(row, readsBefore);
     }
     notifyListeners();
     return false;
   }
 
-  static RowSave _promotionRefusal(int? status, String? code, String? message) {
+  /// After a promotion failed: a sync applied while the request was out kept
+  /// this busy row as it was, so another device may have decided it already.
+  /// Reads the slot again then and retires the failure if it is obsolete.
+  Future<void> _rereadIfSyncOverlapped(ScoringRow row, int readsBefore) async {
+    if (_syncReads == readsBefore || _disposed) return;
+    if (await _refreshSlots([row])) {
+      _dropObsoletePromotionFailures();
+    } else {
+      // A newer slot applied meanwhile has already settled the row.
+      _needsRefresh([row]);
+      _dropObsoletePromotionFailures();
+    }
+  }
+
+  /// Marks the failures of [rows] as unsettled: the slot could not be read
+  /// again after a sync overlapped, so Retry is replaced by Refresh until the
+  /// page has read the newer values.
+  void _needsRefresh(Iterable<ScoringRow> rows) {
+    for (final row in rows) {
+      // Only a row still behind needs it: a fresh slot applied while the
+      // read was out settled the rows it covered.
+      if (!_unreadSlots.contains(row.id)) continue;
+      final save = saveOf(row.id);
+      if (!save.promotion || save.isBusy) continue;
+      _saves[row.id] = RowSave(
+        RowSaveKind.failed,
+        promotion: true,
+        confirm: save.confirm,
+        target: save.target,
+        needsRefresh: true,
+      );
+    }
+  }
+
+  static RowSave _promotionRefusal(
+    int? status,
+    String? code,
+    String? message, {
+    bool confirm = false,
+  }) {
     if (status == 409 && code == 'stale_revision') {
-      return const RowSave(RowSaveKind.refused, promotion: true, changed: true);
+      return RowSave(
+        RowSaveKind.refused,
+        promotion: true,
+        changed: true,
+        confirm: confirm,
+      );
     }
     if (status == 503) {
       // A lock the server could not take in time: nothing was stored.
-      return const RowSave(
+      return RowSave(
         RowSaveKind.failed,
         networkProblem: true,
         promotion: true,
+        confirm: confirm,
       );
     }
     if (status == 409 || status == 400) {
-      return RowSave(RowSaveKind.refused, message: message, promotion: true);
+      return RowSave(
+        RowSaveKind.refused,
+        message: message,
+        promotion: true,
+        confirm: confirm,
+      );
     }
     return RowSave(
       RowSaveKind.failed,
       message: message ?? 'The server failed ($status).',
       promotion: true,
+      confirm: confirm,
     );
   }
 
@@ -905,6 +1110,9 @@ class ScoringController extends ChangeNotifier {
     var retry = 0;
     final moved = <ScoringRow>[];
     final waiting = <ScoringRow>[];
+    // Rows counted as retry (true) or refused (false) until a sync that ran
+    // during the request shows another device decided them.
+    final failedRows = <ScoringRow, bool>{};
     for (
       var from = 0;
       from < batch.length;
@@ -943,11 +1151,13 @@ class ScoringController extends ChangeNotifier {
             _applyQueued(row, outcome!.queued!);
             waiting.add(row);
           } else if (outcome == null) {
-            _saves[row.id] = const RowSave(
+            _saves[row.id] = RowSave(
               RowSaveKind.failed,
               networkProblem: true,
               promotion: true,
+              target: _waitingTarget(row),
             );
+            failedRows[row] = true;
             retry++;
           } else {
             final refusal = _promotionRefusal(
@@ -955,13 +1165,15 @@ class ScoringController extends ChangeNotifier {
               outcome.code,
               outcome.message,
             );
-            _saves[row.id] = refusal;
+            _saves[row.id] = refusal.withTarget(_waitingTarget(row));
             if (refusal.changed) {
               moved.add(row);
               changed++;
             } else if (refusal.kind == RowSaveKind.failed) {
+              failedRows[row] = true;
               retry++;
             } else {
+              failedRows[row] = false;
               refused++;
             }
           }
@@ -984,16 +1196,40 @@ class ScoringController extends ChangeNotifier {
             message: unreachable ? null : said,
             networkProblem: unreachable,
             promotion: true,
+            target: _waitingTarget(row),
           );
+          failedRows[row] = true;
         }
         retry += chunk.length;
       }
+    }
+    if (_syncReads != readsBefore) {
+      // A sync kept these rows as they were while the request was out: until
+      // each is read again none of them may be promoted on what it shows, so
+      // all are marked before the first read is awaited.
+      _markUnread([
+        for (final row in [...moved, ...waiting, ...failedRows.keys]) row.id,
+      ]);
     }
     if (moved.isNotEmpty) {
       changed -= _settleChanged(moved, await _refreshSlots(moved));
     }
     if (waiting.isNotEmpty && _syncReads != readsBefore) {
       await _reconcile(waiting);
+    }
+    if (failedRows.isNotEmpty && _syncReads != readsBefore && !_disposed) {
+      // A sync applied during the request kept these busy rows as they were:
+      // read them in one go and drop the failures another device settled.
+      final rows = failedRows.keys.toList();
+      if (await _refreshSlots(rows)) {
+        _dropObsoletePromotionFailures();
+        for (final MapEntry(key: row, value: wasRetry) in failedRows.entries) {
+          if (saveOf(row.id).kind != RowSaveKind.idle) continue;
+          wasRetry ? retry-- : refused--;
+        }
+      } else {
+        _needsRefresh(rows);
+      }
     }
     if (adopted + replayed > 0) {
       notifyListeners();
@@ -1014,14 +1250,33 @@ class ScoringController extends ChangeNotifier {
   /// After rows were refused as changed and their slots were read again
   /// ([read] says whether that worked): a row whose newer values could not
   /// be read offers Refresh, and a row that no longer waits, because another
-  /// operator already made it official, has nothing left to ask. Returns how
+  /// operator already made it official (or already decided an automatic
+  /// score), has nothing left to ask. Returns how
   /// many rows were settled that way.
+  /// Whether [row], read again, still asks the director for the decision it
+  /// asked for: a waiting submission, or an automatic score to confirm.
+  bool _stillWaiting(ScoringRow row) {
+    final now = _rowOf(row.id);
+    return row.isAutomaticUnconfirmed
+        ? now?.isAutomaticUnconfirmed ?? false
+        : now?.hasPendingSubmission ?? false;
+  }
+
   int _settleChanged(List<ScoringRow> changed, bool read) {
     var settled = 0;
     for (final row in changed) {
-      if (!read) {
-        _saves[row.id] = const RowSave(RowSaveKind.failed, promotion: true);
-      } else if (!(_rowOf(row.id)?.hasPendingSubmission ?? false)) {
+      if (!read && _unreadSlots.contains(row.id)) {
+        // The failed read keeps what the request was for, so a later sync can
+        // still retire the failure.
+        final target = _saves[row.id]?.target;
+        _saves[row.id] = RowSave(
+          RowSaveKind.failed,
+          promotion: true,
+          confirm: target?.confirm ?? row.isAutomaticUnconfirmed,
+          target: target,
+          needsRefresh: true,
+        );
+      } else if (!_stillWaiting(row)) {
         _saves.remove(row.id);
         settled++;
       }
@@ -1039,6 +1294,11 @@ class ScoringController extends ChangeNotifier {
       return;
     }
     if (_disposed) return;
+    // Rows a newer slot already covered have nothing left to read.
+    if (queued.every((row) => !_unreadSlots.contains(row.id))) {
+      notifyListeners();
+      return;
+    }
     loadError = _slotReadError ?? StateError('The scores could not be read.');
     syncRefreshFailed = true;
     notifyListeners();
@@ -1046,20 +1306,102 @@ class ScoringController extends ChangeNotifier {
 
   Object? _slotReadError;
 
+  /// Assignments whose slot may be behind the service: a promotion of them
+  /// failed after a sync overlapped, or their catch-up read is out or
+  /// failed. Kept apart from banners and drafts, so moving to another group
+  /// does not forget it, and cleared for an assignment only when a fresh
+  /// slot of it has been applied. While it holds, nothing is promoted from
+  /// that row; a passive sync still applies fresh slots.
+  final Set<Id> _unreadSlots = {};
+
+  /// How many times a slot of each assignment was applied, by whichever
+  /// writer. A read that was out while its slot was applied by another
+  /// writer is older than the page and is dropped for that assignment.
+  final Map<Id, int> _slotVersions = {};
+
+  int _slotVersion(Id id) => _slotVersions[id] ?? 0;
+
+  /// The versions of every slot the page holds, taken before a full read.
+  Map<Id, int> _versionsNow() => {
+    for (final id in data!.slotIds) id: _slotVersion(id),
+  };
+
+  /// [read] with the slots another writer applied while it was out put back
+  /// over it, so an older full read cannot undo a newer slot. [kept] gets
+  /// those assignments.
+  ScoringPageData _keepNewer(
+    ScoringPageData read,
+    Map<Id, int> versions,
+    Set<Id> kept,
+  ) {
+    var next = read;
+    for (final MapEntry(key: id, value: version) in versions.entries) {
+      if (_slotVersion(id) == version) continue;
+      final slot = data!.slotOf(id);
+      if (slot == null) continue;
+      next = next.withSlot(slot);
+      kept.add(id);
+    }
+    return next;
+  }
+
+  /// Marks the slots of [ids] as behind the service and makes every read
+  /// started so far older than them: such a read is older than the refusal
+  /// or failure that made the catch-up necessary, so it may not clear the
+  /// marker. The one place that does both.
+  void _markUnread(Iterable<Id> ids) {
+    for (final id in ids) {
+      _unreadSlots.add(id);
+      _slotVersions[id] = _slotVersion(id) + 1;
+    }
+  }
+
+  /// Records that a fresh slot of [id] was applied: it is no longer behind.
+  void _slotApplied(Id id) {
+    _slotVersions[id] = _slotVersion(id) + 1;
+    _unreadSlots.remove(id);
+  }
+
+  /// Puts back the Refresh requirement of every unread slot that has no
+  /// save state, after navigation cleared them.
+  void _seedUnreadSaves() {
+    for (final row in rows) {
+      if (!_unreadSlots.contains(row.id) || _saves.containsKey(row.id)) {
+        continue;
+      }
+      _saves[row.id] = RowSave(
+        RowSaveKind.failed,
+        promotion: true,
+        confirm: row.isAutomaticUnconfirmed,
+        needsRefresh: true,
+      );
+    }
+  }
+
   /// Reads the slots of [stale] again and shows their newer values, keeping
   /// whatever the director typed in a row.
   ///
   /// Returns false when the read failed and the rows are as they were.
   Future<bool> _refreshSlots(List<ScoringRow> stale) async {
+    _markUnread(stale.map((row) => row.id));
     try {
-      final fresh = await client.scores(contestId);
       final ids = {for (final row in stale) row.id};
+      final versions = {for (final id in ids) id: _slotVersion(id)};
+      final fresh = await client.scores(contestId);
+      final applied = <Id>{};
       for (final slot in fresh.slots) {
-        if (!ids.contains(slot.placeholder.assignmentId)) continue;
+        final id = slot.placeholder.assignmentId;
+        if (!ids.contains(id)) continue;
+        // Any writer that applied a slot of this assignment while the read
+        // was out (a sync, a manual refresh, a save) is newer than it: keep
+        // that and do not put this older answer over it.
+        if (_slotVersion(id) != versions[id]) continue;
         data = data!.withSlot(slot);
+        _slotApplied(id);
+        applied.add(id);
       }
       for (final row in rows) {
-        if (!ids.contains(row.id) || hasEdits(row)) continue;
+        if (!applied.contains(row.id) || hasEdits(row)) continue;
         _drafts[row.id]?.resetTo(row.savedComponents, shown: _shown(row));
       }
       return true;

@@ -4352,6 +4352,102 @@ abstract class AppLocalizations {
   /// **'Mark official for {pilot} is queued and will be reviewed when this device syncs.'**
   String scoreMarkOfficialQueued(String pilot);
 
+  /// Status chip of a scoring row whose official score the contest accepted on its own and the director has not confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted automatically'**
+  String get scoreAcceptedAutomatically;
+
+  /// Explanation under the Accepted automatically chip of a scoring row.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest accepted this score when its round or group was fully scored. It stays open to a review until you confirm it.'**
+  String get scoreAutomaticNote;
+
+  /// Note on a scoring row whose automatically accepted score is locked, so review and Confirm no longer apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically accepted. This score is locked.'**
+  String get scoreAutomaticLocked;
+
+  /// Note on a row whose Confirm is queued for the service.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm is queued; the service decides it when this device syncs.'**
+  String get scoreConfirmQueuedNote;
+
+  /// Button on a scoring row that confirms a score the contest accepted automatically.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get scoreConfirm;
+
+  /// Label of the Confirm button while the request is out.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming…'**
+  String get scoreConfirming;
+
+  /// Tooltip of the Confirm button of a row.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm {pilot}\'s automatically accepted score as the director\'s decision.'**
+  String scoreConfirmTooltip(String pilot);
+
+  /// Line under the status chip of a row whose Confirm is queued until the service decides it.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm is queued'**
+  String get scoreConfirmWaiting;
+
+  /// Banner after Confirm was refused because the row changed meanwhile.
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed: the score changed since you opened this row. Check the values shown and confirm again.'**
+  String get scoreConfirmChanged;
+
+  /// Banner when Confirm was refused as changed and re-reading the row failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed: the score changed, and the newer values could not be read. Refresh to see them.'**
+  String get scoreConfirmReloadFailed;
+
+  /// Snackbar after Confirm was queued instead of applied.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm for {pilot} is queued and will be decided when this device syncs.'**
+  String scoreConfirmQueued(String pilot);
+
+  /// Banner after the server refused Confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed: {message}'**
+  String scoreConfirmRefused(String message);
+
+  /// Banner after Confirm met a busy or unreachable server; Retry asks again.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not confirm. The server was busy or could not be reached, so the confirmation may or may not have been recorded. Check the row, then try again.'**
+  String get scoreConfirmTryAgain;
+
+  /// Who made a score official in the score history when the contest accepted it on its own.
+  ///
+  /// In en, this message translates to:
+  /// **'System (automatic)'**
+  String get scoreHistoryAutomatic;
+
+  /// Line on a score history entry naming who made it official.
+  ///
+  /// In en, this message translates to:
+  /// **'Made official by {who}'**
+  String scoreHistoryMadeOfficialBy(String who);
+
+  /// Note on the current version in the score history when the director confirmed an automatically accepted score.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed by the director'**
+  String get scoreHistoryConfirmed;
+
   /// Line under the status chip of a row whose Mark official is queued until the service decides it.
   ///
   /// In en, this message translates to:

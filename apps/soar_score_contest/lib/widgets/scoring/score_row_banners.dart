@@ -192,8 +192,12 @@ class ScoreSaveBanner extends StatelessWidget {
           bannerKey: const ValueKey('score-mark-official-failed'),
           kind: PageBannerKind.alert,
           icon: Icons.error_outline,
-          text: save.networkProblem
+          text: save.confirm && save.networkProblem
+              ? words.scoreConfirmTryAgain
+              : save.networkProblem
               ? words.scoreMarkOfficialTryAgain
+              : save.confirm && save.message == null
+              ? words.scoreConfirmReloadFailed
               : save.message == null
               ? words.scoreMarkOfficialReloadFailed
               : words.scoreMarkOfficialFailed(save.message!),
@@ -215,8 +219,12 @@ class ScoreSaveBanner extends StatelessWidget {
         return ScoreInlineNote(
           icon: save.changed ? Icons.sync_problem : Icons.error_outline,
           kind: save.changed ? PageBannerKind.status : PageBannerKind.alert,
-          text: save.changed
+          text: save.changed && save.confirm
+              ? words.scoreConfirmChanged
+              : save.changed
               ? words.scoreMarkOfficialChanged
+              : save.confirm && save.message != null
+              ? words.scoreConfirmRefused(save.message!)
               : save.message == null
               ? words.scoreMarkOfficialRefusedNoReason
               : words.scoreMarkOfficialRefused(save.message!),

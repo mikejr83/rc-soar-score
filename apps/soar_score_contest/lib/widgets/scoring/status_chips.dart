@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/scoring/scoring_completeness.dart';
 import '../../services/scoring/scoring_row.dart';
 import '../matrix/matrix_colors.dart';
@@ -65,12 +66,21 @@ class StatusChip extends StatelessWidget {
 
 /// The status of one row: Not entered, Unsaved, Submitted, Official, Locked, Retired.
 class RowStatusChip extends StatelessWidget {
-  const RowStatusChip({super.key, required this.status, this.unsaved = false});
+  const RowStatusChip({
+    super.key,
+    required this.status,
+    this.unsaved = false,
+    this.automatic = false,
+  });
 
   final RowStatus status;
 
   /// Typed values that are not saved yet; shown over the saved status.
   final bool unsaved;
+
+  /// An official score the contest accepted on its own that the director has
+  /// not confirmed: shown as "Accepted automatically" instead of "Official".
+  final bool automatic;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +105,12 @@ class RowStatusChip extends StatelessWidget {
         label: 'Submitted',
         background: scheme.surfaceContainerHighest,
         foreground: scheme.onSurface,
+      ),
+      RowStatus.official when automatic => StatusChip(
+        icon: Icons.auto_mode,
+        label: AppLocalizations.of(context).scoreAcceptedAutomatically,
+        background: colors.successContainer,
+        foreground: colors.onSuccessContainer,
       ),
       RowStatus.official => StatusChip(
         icon: Icons.verified,

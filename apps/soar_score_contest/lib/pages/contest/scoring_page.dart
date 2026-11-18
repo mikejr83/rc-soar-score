@@ -259,13 +259,21 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     );
   }
 
-  Future<void> _markOfficial(ScoringRow row) async {
+  /// The row's Mark official or Confirm button, or, for [retry], the banner's
+  /// Retry of the request that failed.
+  Future<void> _markOfficial(ScoringRow row, {bool retry = false}) async {
     final c = _controller!;
-    final ok = await c.markOfficial(row);
+    final confirming = retry
+        ? c.saveOf(row.id).target?.confirm ?? false
+        : row.isAutomaticUnconfirmed;
+    final ok = retry ? await c.retryPromotion(row) : await c.promote(row);
     final now = c.rows.where((r) => r.id == row.id).firstOrNull;
     if (ok && mounted && (now?.isAdoptionPending ?? false)) {
+      final words = AppLocalizations.of(context);
       _say(
-        AppLocalizations.of(context).scoreMarkOfficialQueued(row.pilot.name),
+        confirming
+            ? words.scoreConfirmQueued(row.pilot.name)
+            : words.scoreMarkOfficialQueued(row.pilot.name),
       );
     }
     // The banner with the reason sits in the row's band, so open it.
@@ -588,12 +596,15 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       findings: c.check?.of(row.id.value).toList() ?? const [],
       theirs: save.kind == RowSaveKind.stale ? c.theirsOf(row.id) : null,
       retireBlocked: c.retireBlocked,
-      markSkip: c.markOfficialSkip(row),
+      markSkip: row.isAutomaticUnconfirmed
+          ? c.confirmAutomaticSkip(row)
+          : c.markOfficialSkip(row),
       focusField: _focusRow == row.id.value ? _focusField : null,
       actions: ScoreRowActions(
         onActivate: () => c.activate(row.id),
         onSave: () => _save(row),
         onMarkOfficial: () => _markOfficial(row),
+        onRetryPromotion: () => _markOfficial(row, retry: true),
         onRevert: () => c.revert(row),
         onKeepMine: () => c.keepMine(row),
         onTakeTheirs: () => c.takeTheirs(row),

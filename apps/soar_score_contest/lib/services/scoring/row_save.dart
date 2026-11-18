@@ -17,6 +17,23 @@ enum RowSaveKind {
   refused,
 }
 
+/// The request a failed "mark official" or "confirm" was for: the attempt it
+/// named and the score revision it was based on. A Retry asks for this and
+/// nothing else, and the failure is dropped when the row no longer matches.
+class PromotionTarget {
+  const PromotionTarget({
+    required this.attemptId,
+    required this.revision,
+    this.confirm = false,
+  });
+
+  final String attemptId;
+  final int revision;
+
+  /// True for confirming an automatic score, false for a waiting submission.
+  final bool confirm;
+}
+
 class RowSave {
   const RowSave(
     this.kind, {
@@ -24,6 +41,9 @@ class RowSave {
     this.networkProblem = false,
     this.promotion = false,
     this.changed = false,
+    this.confirm = false,
+    this.target,
+    this.needsRefresh = false,
   });
 
   static const idle = RowSave(RowSaveKind.idle);
@@ -45,6 +65,31 @@ class RowSave {
   /// changed since the director opened the row, and the row now shows the
   /// newer values to check before asking again.
   final bool changed;
+
+  /// True when the [promotion] was the director confirming a score the
+  /// contest accepted automatically, so the banner says "confirm".
+  final bool confirm;
+
+  /// For a failed or refused [promotion]: what it asked for, so Retry and the
+  /// page reconcile against that and not against whatever the row shows now.
+  final PromotionTarget? target;
+
+  /// For a failed [promotion]: the slot could not be read again after a sync
+  /// overlapped the request, so the row may be behind. Mark official, Confirm
+  /// and Retry stay off until a read has settled it (the Refresh action).
+  final bool needsRefresh;
+
+  /// This save bound to [target].
+  RowSave withTarget(PromotionTarget target) => RowSave(
+    kind,
+    message: message,
+    networkProblem: networkProblem,
+    promotion: promotion,
+    changed: changed,
+    confirm: confirm,
+    needsRefresh: needsRefresh,
+    target: target,
+  );
 
   bool get isBusy => kind == RowSaveKind.saving;
 }

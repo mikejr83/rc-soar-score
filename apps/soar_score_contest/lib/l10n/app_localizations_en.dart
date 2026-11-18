@@ -3171,6 +3171,68 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get scoreAcceptedAutomatically => 'Accepted automatically';
+
+  @override
+  String get scoreAutomaticNote =>
+      'The contest accepted this score when its round or group was fully scored. It stays open to a review until you confirm it.';
+
+  @override
+  String get scoreAutomaticLocked =>
+      'Automatically accepted. This score is locked.';
+
+  @override
+  String get scoreConfirmQueuedNote =>
+      'Confirm is queued; the service decides it when this device syncs.';
+
+  @override
+  String get scoreConfirm => 'Confirm';
+
+  @override
+  String get scoreConfirming => 'Confirming…';
+
+  @override
+  String scoreConfirmTooltip(String pilot) {
+    return 'Confirm $pilot\'s automatically accepted score as the director\'s decision.';
+  }
+
+  @override
+  String get scoreConfirmWaiting => 'Confirm is queued';
+
+  @override
+  String get scoreConfirmChanged =>
+      'Not confirmed: the score changed since you opened this row. Check the values shown and confirm again.';
+
+  @override
+  String get scoreConfirmReloadFailed =>
+      'Not confirmed: the score changed, and the newer values could not be read. Refresh to see them.';
+
+  @override
+  String scoreConfirmQueued(String pilot) {
+    return 'Confirm for $pilot is queued and will be decided when this device syncs.';
+  }
+
+  @override
+  String scoreConfirmRefused(String message) {
+    return 'Not confirmed: $message';
+  }
+
+  @override
+  String get scoreConfirmTryAgain =>
+      'Could not confirm. The server was busy or could not be reached, so the confirmation may or may not have been recorded. Check the row, then try again.';
+
+  @override
+  String get scoreHistoryAutomatic => 'System (automatic)';
+
+  @override
+  String scoreHistoryMadeOfficialBy(String who) {
+    return 'Made official by $who';
+  }
+
+  @override
+  String get scoreHistoryConfirmed => 'Confirmed by the director';
+
+  @override
   String get scoreAdoptionWaiting => 'Mark official is queued';
 
   @override
