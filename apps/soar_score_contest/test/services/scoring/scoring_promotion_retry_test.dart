@@ -503,4 +503,57 @@ void main() {
     read.complete();
     await all;
   });
+
+  test('an older full refresh does not undo a newer targeted read', () async {
+    final server = ScoringServer()..seedAutomaticScore(first, flight);
+    final c = await _open(server);
+
+    // A passive refresh reads the page and is held with the old answer.
+    final read = server.holdNextScoresRead = Completer<void>();
+    final passive = c.refreshAfterSync();
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+
+    // Another director confirms; a Confirm refused as changed reads the
+    // newer slot.
+    server.confirmAsDirector(first);
+    server.promoteFailures[first] = (409, 'stale_revision');
+    await c.confirmAutomatic(_row(c, 1));
+    expect(_row(c, 1).isAutomaticUnconfirmed, isFalse);
+
+    read.complete();
+    await passive;
+    expect(_row(c, 1).isAutomaticUnconfirmed, isFalse);
+    expect(c.confirmAutomaticSkip(_row(c, 1)), MarkOfficialSkip.noSubmission);
+  });
+
+  test('a failed catch-up read that a refresh already covered leaves no '
+      'Refresh', () async {
+    final server = ScoringServer()..seedAutomaticScore(first, flight);
+    final hold = server.holdPromote = Completer<void>();
+    final c = await _open(server);
+
+    final sent = c.confirmAutomatic(_row(c, 1));
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    await c.refreshAfterSync();
+
+    // The request fails; its catch-up read is held and will fail.
+    server.promoteFailures[first] = (503, 'contest_busy');
+    final read = server.holdNextScoresRead = Completer<void>();
+    server.failHeldScoresRead = true;
+    hold.complete();
+    for (var i = 0; i < 4; i++) {
+      await Future<void>.delayed(Duration.zero);
+    }
+
+    // The director refreshes by hand; the score still needs confirming.
+    await c.refresh();
+    read.complete();
+    await sent;
+
+    expect(c.saveOf(first).needsRefresh, isFalse);
+    expect(c.syncRefreshFailed, isFalse);
+    expect(c.confirmAutomaticSkip(_row(c, 1)), isNull);
+  });
 }

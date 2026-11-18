@@ -189,6 +189,9 @@ class ScoringServer {
   /// knew then, but only after this completes. It is used once.
   Completer<void>? holdNextScoresRead;
 
+  /// When true, the held read is answered with a 503 once released.
+  bool failHeldScoresRead = false;
+
   /// Slots whose official score the contest accepted automatically, and the
   /// revision the director confirmed for each (review closed).
   final Set<Id> _automatic = {};
@@ -653,6 +656,12 @@ class ScoringServer {
       if (hold != null) {
         holdNextScoresRead = null;
         await hold.future;
+        if (failHeldScoresRead) {
+          failHeldScoresRead = false;
+          return _json({
+            'error': {'code': 'server_error', 'message': 'Failed.'},
+          }, 503);
+        }
       }
       return answer;
     }

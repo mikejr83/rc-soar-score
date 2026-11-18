@@ -163,11 +163,13 @@ class ScoringController extends ChangeNotifier {
     }
     if (data == null) return;
     ScoringPageData? loaded;
+    var versions = <Id, int>{};
     try {
       // A save that answers while the read is out makes the read older than
       // the page, so the read is made again rather than put over the save.
       for (var tries = 0; tries < 3 && loaded == null; tries++) {
         final epoch = _savedEpoch;
+        versions = _versionsNow();
         final read = await ScoringPageData.load(client, contestId);
         if (epoch == _savedEpoch) loaded = read;
       }
@@ -186,7 +188,9 @@ class ScoringController extends ChangeNotifier {
     loadError = null;
     syncRefreshFailed = false;
     final before = {for (final row in rows) row.id: row};
-    var next = loaded;
+    // A slot another reader applied while this read was out is newer.
+    final kept = <Id>{};
+    var next = _keepNewer(loaded, versions, kept);
     // A save in flight answers with its own copy of the slot.
     for (final row in before.values) {
       final slot = row.slot;
@@ -197,6 +201,7 @@ class ScoringController extends ChangeNotifier {
     // Every slot of the read is applied except those of rows with a save in
     // flight, which keep their own copy.
     for (final id in next.slotIds) {
+      if (kept.contains(id)) continue;
       if (!(before[id] != null && saveOf(id).isBusy)) _slotApplied(id);
     }
     _dropObsoletePromotionFailures();
@@ -732,9 +737,12 @@ class ScoringController extends ChangeNotifier {
   /// Loads the contest again, keeping what was typed.
   Future<void> refresh() async {
     try {
-      final loaded = await ScoringPageData.load(client, contestId);
+      final versions = _versionsNow();
+      final read = await ScoringPageData.load(client, contestId);
+      final kept = <Id>{};
+      final loaded = _keepNewer(read, versions, kept);
       data = loaded;
-      loaded.slotIds.forEach(_slotApplied);
+      loaded.slotIds.where((id) => !kept.contains(id)).forEach(_slotApplied);
       _unreadSlots.clear();
       loadError = null;
       syncRefreshFailed = false;
@@ -1016,7 +1024,9 @@ class ScoringController extends ChangeNotifier {
     if (await _refreshSlots([row])) {
       _dropObsoletePromotionFailures();
     } else {
+      // A newer slot applied meanwhile has already settled the row.
       _needsRefresh([row]);
+      _dropObsoletePromotionFailures();
     }
   }
 
@@ -1025,6 +1035,9 @@ class ScoringController extends ChangeNotifier {
   /// page has read the newer values.
   void _needsRefresh(Iterable<ScoringRow> rows) {
     for (final row in rows) {
+      // Only a row still behind needs it: a fresh slot applied while the
+      // read was out settled the rows it covered.
+      if (!_unreadSlots.contains(row.id)) continue;
       final save = saveOf(row.id);
       if (!save.promotion || save.isBusy) continue;
       _saves[row.id] = RowSave(
@@ -1252,7 +1265,7 @@ class ScoringController extends ChangeNotifier {
   int _settleChanged(List<ScoringRow> changed, bool read) {
     var settled = 0;
     for (final row in changed) {
-      if (!read) {
+      if (!read && _unreadSlots.contains(row.id)) {
         // The failed read keeps what the request was for, so a later sync can
         // still retire the failure.
         final target = _saves[row.id]?.target;
@@ -1281,6 +1294,11 @@ class ScoringController extends ChangeNotifier {
       return;
     }
     if (_disposed) return;
+    // Rows a newer slot already covered have nothing left to read.
+    if (queued.every((row) => !_unreadSlots.contains(row.id))) {
+      notifyListeners();
+      return;
+    }
     loadError = _slotReadError ?? StateError('The scores could not be read.');
     syncRefreshFailed = true;
     notifyListeners();
@@ -1302,6 +1320,30 @@ class ScoringController extends ChangeNotifier {
   final Map<Id, int> _slotVersions = {};
 
   int _slotVersion(Id id) => _slotVersions[id] ?? 0;
+
+  /// The versions of every slot the page holds, taken before a full read.
+  Map<Id, int> _versionsNow() => {
+    for (final id in data!.slotIds) id: _slotVersion(id),
+  };
+
+  /// [read] with the slots another writer applied while it was out put back
+  /// over it, so an older full read cannot undo a newer slot. [kept] gets
+  /// those assignments.
+  ScoringPageData _keepNewer(
+    ScoringPageData read,
+    Map<Id, int> versions,
+    Set<Id> kept,
+  ) {
+    var next = read;
+    for (final MapEntry(key: id, value: version) in versions.entries) {
+      if (_slotVersion(id) == version) continue;
+      final slot = data!.slotOf(id);
+      if (slot == null) continue;
+      next = next.withSlot(slot);
+      kept.add(id);
+    }
+    return next;
+  }
 
   /// Records that a fresh slot of [id] was applied: it is no longer behind.
   void _slotApplied(Id id) {
