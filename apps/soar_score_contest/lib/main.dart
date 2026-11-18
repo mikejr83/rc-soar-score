@@ -5,6 +5,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import 'app.dart';
 import 'pages/bootstrap_failure_page.dart';
+import 'pages/startup_splash_page.dart';
+import 'services/startup/startup_mode.dart';
 import 'platform/app_bootstrap.dart';
 // Platform selection happens at compile time, not at runtime: the web build
 // never compiles the native bootstrap (or its FFI-backed data layer and
@@ -33,7 +35,7 @@ Future<void> main() async {
 
   try {
     _logger.info('Starting Soar Score Contest App');
-    await _runContestApp(await bootstrap.start());
+    await _runContestApp(await _startWithSplash());
   } catch (error, stackTrace) {
     _logger.severe('Soar Score startup failed: $error\n$stackTrace');
     debugPrintStack(
@@ -55,7 +57,20 @@ Future<void> main() async {
 }
 
 Future<void> _retryStartup() async {
-  await _runContestApp(await bootstrap.start());
+  await _runContestApp(await _startWithSplash());
+}
+
+/// Starts the app, showing the splash for at least
+/// [minimumSplashDuration] when it is on. A failure skips the wait, so the
+/// failure page appears at once.
+Future<AppBootstrap> _startWithSplash() async {
+  final plan = await bootstrap.startupPlan();
+  if (plan == null) return bootstrap.start();
+  runApp(StartupSplashApp(mode: plan.mode));
+  final minimum = Future<void>.delayed(minimumSplashDuration);
+  final started = await bootstrap.start();
+  await minimum;
+  return started;
 }
 
 Future<void> _runContestApp(AppBootstrap appBootstrap) async {

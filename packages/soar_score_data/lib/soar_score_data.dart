@@ -7,6 +7,7 @@ library;
 
 export 'contests_table.dart';
 export 'database.dart';
+export 'local_schema_version.dart';
 export 'guard/write_guard_interceptor.dart';
 export 'import/glider_score_import_process_runner.dart';
 export 'migrate.dart';

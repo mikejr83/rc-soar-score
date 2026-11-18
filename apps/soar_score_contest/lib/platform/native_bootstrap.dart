@@ -10,12 +10,16 @@ import 'package:soar_score_api_handlers/soar_score_api_handlers.dart'
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
-import 'package:soar_score_contest/platform/web_bootstrap.dart';
+import 'package:soar_score_contest/platform/web_bootstrap.dart'
+    show defaultApiBaseUrl;
 
 import '../auth/auth_session.dart';
 import '../auth/auth_session_factory.dart';
 import '../server/embedded_server.dart';
 import '../server/profile_access.dart';
+import '../services/startup/startup_mode.dart';
+import '../services/startup/startup_splash_control.dart';
+import '../services/startup/startup_splash_store.dart';
 import '../services/sync/sync_problem.dart';
 import '../services/exchange/contest_exchange.dart';
 import '../services/competition_import/competition_import.dart';
@@ -321,3 +325,32 @@ class NativeBootstrap extends AppBootstrap {
 Future<AppBootstrap> start() => NativeBootstrap.start();
 
 void quitApplication() => exit(0);
+
+/// What the startup splash shows, or `null` when it is off: switched off in
+/// this build, by `SOAR_SCORE_NO_SPLASH` in the environment, or in Settings.
+/// A first run (no database file) is [StartupMode.initializing], an older
+/// database [StartupMode.updating], otherwise [StartupMode.starting].
+Future<StartupPlan?> startupPlan() async {
+  if (splashSuppressedByBuild ||
+      noSplashRequested(Platform.environment[noSplashVariable])) {
+    return null;
+  }
+  final database = await NativeBootstrap.databasePath(
+    demo: NativeBootstrap.demo,
+  );
+  if (!StartupSplashStore(p.dirname(database)).enabled) return null;
+  return StartupPlan(
+    startupModeFor(
+      storedVersion: readLocalSchemaVersion(File(database)),
+      currentVersion: SoarScoreDatabase.currentSchemaVersion,
+    ),
+  );
+}
+
+/// The Settings switch for the startup splash.
+Future<StartupSplashControl?> openStartupSplashControl() async {
+  final database = await NativeBootstrap.databasePath(
+    demo: NativeBootstrap.demo,
+  );
+  return StartupSplashStore(p.dirname(database));
+}

@@ -11,6 +11,8 @@ import '../widgets/settings/about_setting.dart';
 import '../widgets/settings/locale_setting.dart';
 import '../widgets/settings/report_options_setting.dart';
 import '../widgets/settings/reset_areas_setting.dart';
+import '../platform/bootstrap.dart' as bootstrap;
+import '../widgets/settings/startup_splash_setting.dart';
 import '../widgets/settings/text_size_setting.dart';
 import '../widgets/settings/theme_mode_setting.dart';
 import '../widgets/settings/time_zone_setting.dart';
@@ -51,6 +53,9 @@ class SettingsPage extends StatelessWidget {
                 store: uiStore == null
                     ? null
                     : ReportOptionsStore(uiStore, uiAccountIdOf(context)),
+              ),
+              StartupSplashSetting(
+                control: bootstrap.openStartupSplashControl(),
               ),
               const AboutSetting(),
             ],

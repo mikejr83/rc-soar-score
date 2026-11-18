@@ -30,7 +30,9 @@ A fresh install lists no contests. For development, run in demo mode:
 flutter run -d windows --dart-define=SOAR_SCORE_DEMO=true
 ```
 
-Demo mode opens `soar_score_demo.db` instead of `soar_score.db`, so your real data is never touched. On the first start with an empty demo database it loads five example contests, one in each lifecycle state, with participants, teams, drawn matrices, entered F5J scores and calculated results. The demo data is kept current with the models; see the Demo Data section of the root `AGENTS.md`. Add `--dart-define=SOAR_SCORE_DEMO_RESET=true` to start over from a new demo database. Both defines are ignored in release builds. See the root [README](../../README.md#demo-data-development-only) for details, including the VS Code launch configurations and tasks.
+Demo mode opens `soar_score_demo.db` instead of `soar_score.db`, so your real data is never touched. On the first start with an empty demo database it loads five example contests, one in each lifecycle state, with participants, teams, drawn matrices, entered F5J scores and calculated results. The demo data is kept current with the models; see the Demo Data section of the root `AGENTS.md`. Add `--dart-define=SOAR_SCORE_DEMO_RESET=true` to start over from a new demo database. Both defines are ignored in release builds.
+
+The native app shows a startup screen for at least 5 seconds ("Initializing system..." on the first run, "Updating system..." after an update, otherwise "Starting..."). Turn it off in Settings, or for debugging set the environment variable `SOAR_SCORE_NO_SPLASH=1` or pass `--dart-define=SOAR_SCORE_NO_SPLASH=true`. The demo and E2E builds never show it. See the root [README](../../README.md#demo-data-development-only) for details, including the VS Code launch configurations and tasks.
 
 ### Where the data lives
 

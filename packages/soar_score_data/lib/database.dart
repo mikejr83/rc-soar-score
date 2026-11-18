@@ -162,8 +162,11 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
   List<TableInfo<Table, Object?>> get profileTables =>
       tablesFor(profile, allTables);
 
+  /// The schema version this build creates and upgrades to.
+  static const int currentSchemaVersion = 2;
+
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => currentSchemaVersion;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
