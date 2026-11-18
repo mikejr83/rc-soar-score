@@ -4,15 +4,19 @@ import 'package:soar_score_self_score/data/sample_data.dart';
 import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_scope.dart';
 import 'package:soar_score_self_score/l10n/app_localizations.dart';
+import 'package:soar_score_self_score/models/group_result_row.dart';
 import 'package:soar_score_self_score/models/group_results.dart';
 import 'package:soar_score_self_score/models/results_view.dart';
 import 'package:soar_score_self_score/pages/group_results_page.dart';
 import 'package:soar_score_self_score/pages/results_page.dart';
 
 class _Repository extends SampleSelfScoreRepository {
-  const _Repository(this.preliminary);
+  const _Repository(this.preliminary, {this.review = false});
 
   final bool preliminary;
+
+  /// Marks the first row as held by an open review.
+  final bool review;
 
   @override
   Future<GroupResults> groupResults(
@@ -26,7 +30,25 @@ class _Repository extends SampleSelfScoreRepository {
       round: data.round,
       group: data.group,
       latestRound: data.latestRound,
-      rows: data.rows,
+      rows: [
+        for (final (i, row) in data.rows.indexed)
+          if (row.kind == GroupRowKind.pendingReview && !review)
+            GroupResultRow(
+              name: row.name,
+              kind: GroupRowKind.scored,
+              time: row.time,
+              score: row.score,
+            )
+          else if (review && i == 0)
+            GroupResultRow(
+              name: row.name,
+              kind: GroupRowKind.pendingReview,
+              time: row.time,
+              score: row.score,
+            )
+          else
+            row,
+      ],
       preliminary: preliminary,
     );
   }
@@ -44,13 +66,18 @@ class _Repository extends SampleSelfScoreRepository {
   }
 }
 
-Future<void> _pump(WidgetTester tester, bool preliminary, Widget page) async {
+Future<void> _pump(
+  WidgetTester tester,
+  bool preliminary,
+  Widget page, {
+  bool review = false,
+}) async {
   tester.view.physicalSize = const Size(800, 2400);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     SelfScoreScope(
-      repository: _Repository(preliminary),
+      repository: _Repository(preliminary, review: review),
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         home: page,
@@ -84,4 +111,13 @@ void main() {
       expect(find.byKey(const ValueKey('preliminary-note')), findsNothing);
     });
   }
+
+  testWidgets('a row held by a review adds the hold to the group note', (
+    tester,
+  ) async {
+    await _pump(tester, true, group, review: true);
+    expect(find.textContaining('A score under review is held'), findsOneWidget);
+    await _pump(tester, true, group);
+    expect(find.textContaining('A score under review is held'), findsNothing);
+  });
 }

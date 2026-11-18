@@ -32,11 +32,11 @@ void main() {
     );
     expect(
       await _noteFor(tester, OfficializationPolicy.endOfGroup),
-      contains('in your group has been submitted'),
+      contains('in the group has been submitted'),
     );
     expect(
       await _noteFor(tester, OfficializationPolicy.manual),
-      contains('when the director makes it official'),
+      contains('when the director makes them official'),
     );
   });
 

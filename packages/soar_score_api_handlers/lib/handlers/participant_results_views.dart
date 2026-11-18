@@ -117,6 +117,9 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
         rawScore: flight?.flight.rawScore,
         roundScore: flight?.group.groupScore,
         zeroReason: zero ? flight!.flight.zeroReasons.firstOrNull?.code : null,
+        // An open review holds the pilot's entry, which is still shown.
+        reviewPending:
+            slot?.placeholder.state == ScorePlaceholderState.inReview,
       ),
     ));
   }

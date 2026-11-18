@@ -30,7 +30,7 @@ Future<void> phase6Results(
         // The e2e contest stores no official-score rule, which reads as the
         // director marking scores official.
         expect(
-          find.textContaining('when the director makes it official'),
+          find.textContaining('when the director makes them official'),
           findsOneWidget,
         );
         expect(
@@ -57,7 +57,7 @@ Future<void> phase6Results(
       expect(find.text(mate), findsWidgets);
       expect(find.textContaining('Standings are held'), findsNothing);
       expect(
-        find.textContaining('when the director makes it official'),
+        find.textContaining('when the director makes them official'),
         findsOneWidget,
       );
       expect(

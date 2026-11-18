@@ -91,7 +91,9 @@ class ParticipantGroupResultsDto {
 
   /// When the contest makes submitted scores official
   /// (`scores_become_official`); the pilot app uses it to explain why a
-  /// score is still preliminary. Null from a server that does not say.
+  /// score is still preliminary. Null from a server that does not say, and for
+  /// a rule this client does not know.
+  @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
   final OfficializationMode? scoresBecomeOfficial;
 
   Map<String, dynamic> toJson() => _$ParticipantGroupResultsDtoToJson(this);
@@ -168,6 +170,7 @@ class ParticipantOverallResultsDto {
 
   /// When the contest makes submitted scores official; null from a server
   /// that does not say.
+  @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
   final OfficializationMode? scoresBecomeOfficial;
 
   Map<String, dynamic> toJson() => _$ParticipantOverallResultsDtoToJson(this);

@@ -311,15 +311,15 @@
   "@preliminaryNoteGeneral": {
     "description": "Note under the results: a pilot's own scores are preliminary; used when the contest's official-score rule is unknown."
   },
-  "preliminaryNoteEndOfRound": "Your score is preliminary. It becomes official when every pilot's score for the round has been submitted. Until then it can change.",
+  "preliminaryNoteEndOfRound": "These scores are preliminary. They become official when every pilot's score for the round has been submitted. Until then they can change.",
   "@preliminaryNoteEndOfRound": {
     "description": "Note under the results when scores become official at the end of the round."
   },
-  "preliminaryNoteEndOfGroup": "Your score is preliminary. It becomes official when every pilot's score in your group has been submitted. Until then it can change.",
+  "preliminaryNoteEndOfGroup": "These scores are preliminary. They become official when every pilot's score in the group has been submitted. Until then they can change.",
   "@preliminaryNoteEndOfGroup": {
     "description": "Note under the results when scores become official at the end of the group."
   },
-  "preliminaryNoteManual": "Your score is preliminary. It becomes official when the director makes it official. Until then it can change.",
+  "preliminaryNoteManual": "These scores are preliminary. They become official when the director makes them official. Until then they can change.",
   "@preliminaryNoteManual": {
     "description": "Note under the results when only the director makes scores official."
   },

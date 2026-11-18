@@ -114,7 +114,11 @@ ParticipantGroupResultsDto _$ParticipantGroupResultsDtoFromJson(
       ),
       scoresBecomeOfficial: $checkedConvert(
         'scores_become_official',
-        (v) => $enumDecodeNullable(_$OfficializationModeEnumMap, v),
+        (v) => $enumDecodeNullable(
+          _$OfficializationModeEnumMap,
+          v,
+          unknownValue: JsonKey.nullForUndefinedEnumValue,
+        ),
       ),
     );
     return val;
@@ -215,7 +219,11 @@ ParticipantOverallResultsDto _$ParticipantOverallResultsDtoFromJson(
       ),
       scoresBecomeOfficial: $checkedConvert(
         'scores_become_official',
-        (v) => $enumDecodeNullable(_$OfficializationModeEnumMap, v),
+        (v) => $enumDecodeNullable(
+          _$OfficializationModeEnumMap,
+          v,
+          unknownValue: JsonKey.nullForUndefinedEnumValue,
+        ),
       ),
     );
     return val;

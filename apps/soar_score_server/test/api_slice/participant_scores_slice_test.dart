@@ -583,6 +583,40 @@ void _tests(SliceBackend backend) {
       }
     });
 
+    test('a slot with an open review is flagged review_pending', () async {
+      await submit(1);
+      final (_, before) = await get('/rounds/1/group-results');
+      expect(
+        rowsOf(before).map((r) => r['review_pending']),
+        everyElement(false),
+      );
+      final held = await placeholderOf(1, 1);
+      await repository.scorePlaceholderRepository.save(
+        core.ScorePlaceholder(
+          id: held.id,
+          contestId: held.contestId,
+          contestParticipationId: held.contestParticipationId,
+          assignmentId: held.assignmentId,
+          state: core.ScorePlaceholderState.inReview,
+          scoreRevision: held.scoreRevision,
+          currentAttemptId: held.currentAttemptId,
+          revision: held.revision,
+        ),
+        metadata: core.MutationMetadata(
+          clientMutationId: 'review-state-1',
+          authority: core.Authority.participant,
+          clientTime: DateTime.utc(2026, 10, 17, 15),
+          actorId: api.director,
+        ),
+      );
+      final (status, after) = await get('/rounds/1/group-results');
+      expect(status, 200, reason: '$after');
+      final rows = rowsOf(after);
+      expect(rows.first['is_you'], isTrue);
+      expect(rows.first['review_pending'], isTrue);
+      expect(rows.skip(1).map((r) => r['review_pending']), everyElement(false));
+    });
+
     test(
       'a pilot score never reaches the stored or director results',
       () async {
