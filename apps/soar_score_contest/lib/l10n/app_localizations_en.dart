@@ -66,7 +66,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get startupSplashDescription =>
-      'Show a startup screen with a status message for at least 5 seconds when the app opens. Takes effect the next time the app starts.';
+      'Takes effect the next time the app starts.';
 
   @override
   String get startupSplashSwitch => 'Show startup screen';

@@ -68,7 +68,7 @@
   "@startupSplashHeading": {
     "description": "Heading of the Settings card for the startup splash."
   },
-  "startupSplashDescription": "Show a startup screen with a status message for at least 5 seconds when the app opens. Takes effect the next time the app starts.",
+  "startupSplashDescription": "Takes effect the next time the app starts.",
   "@startupSplashDescription": {
     "description": "Explains the startup screen switch on the Settings page."
   },

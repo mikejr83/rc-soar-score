@@ -199,7 +199,7 @@ abstract class AppLocalizations {
   /// Explains the startup screen switch on the Settings page.
   ///
   /// In en, this message translates to:
-  /// **'Show a startup screen with a status message for at least 5 seconds when the app opens. Takes effect the next time the app starts.'**
+  /// **'Takes effect the next time the app starts.'**
   String get startupSplashDescription;
 
   /// Label of the switch that turns the startup splash on or off.
