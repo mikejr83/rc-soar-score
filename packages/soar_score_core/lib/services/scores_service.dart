@@ -223,6 +223,9 @@ class ScoresService {
               authority: attempt.authority,
               selectionOrigin: official.selectionOrigin,
               at: official.setAt,
+              reviewClosed:
+                  official.scoreRevision == current &&
+                  placeholder.isReviewClosed(official),
             )
           else
             ScoreHistoryEntry(

@@ -47,9 +47,18 @@ class PromotedScore {
     this.supersededReviews = const [],
     this.audits = const [],
     this.receipt,
+    this.confirmsExisting = false,
   });
 
+  /// The official version the adoption made; with [confirmsExisting] the
+  /// version that is already stored and was confirmed.
   final OfficialScore officialScore;
+
+  /// True when [officialScore] is already stored and only the placeholder's
+  /// review closure (and the superseded reviews) are written: a director's
+  /// confirmation of an automatically accepted score, which creates no second
+  /// official version.
+  final bool confirmsExisting;
 
   /// The placeholder as it must be stored, at the revision it was read at.
   final ScorePlaceholder placeholder;
