@@ -175,6 +175,38 @@ class ScoringServer {
     _record(assignmentId, components, revision, reason);
   }
 
+  /// Slots whose official score the contest accepted automatically, and the
+  /// revision the director confirmed for each (review closed).
+  final Set<Id> _automatic = {};
+  final Map<Id, int> _confirmed = {};
+
+  /// Pre-fills an official score the contest accepted on its own: origin
+  /// automatic, no official actor, review still open.
+  void seedAutomaticScore(Id assignmentId, Map<String, Object?> components) {
+    _automatic.add(assignmentId);
+    _score[assignmentId] = _official(
+      assignmentId,
+      components,
+      1,
+      automatic: true,
+    );
+    (_history[assignmentId] ??= []).add(
+      ScoreHistoryEntry(
+        attemptId: _automaticAttempt,
+        outcome: ScoreHistoryOutcome.current,
+        scoreRevision: 1,
+        components: components,
+        reason: 'automatic_acceptance',
+        actorId: null,
+        authority: Authority.participant,
+        selectionOrigin: SelectionOrigin.automatic,
+        at: DateTime.utc(2026, 10, 17, 15),
+      ),
+    );
+  }
+
+  Id get _automaticAttempt => _sid('000a', 77);
+
   /// Per slot, a status and code the promotion routes answer instead of
   /// adopting the submission (for example 503 or 409 `locked`).
   final Map<Id, (int, String)> promoteFailures = {};
@@ -240,6 +272,9 @@ class ScoringServer {
     }
     final pending = _pendingAttempt(assignmentId);
     final revision = _score[assignmentId]?.scoreRevision ?? 0;
+    if (_automatic.contains(assignmentId)) {
+      return _confirm(assignmentId, sourceAttemptId, expectedRevision);
+    }
     if (queuePromotions.contains(assignmentId) && pending != null) {
       return (
         202,
@@ -283,6 +318,63 @@ class ScoringServer {
     ).toJson();
     return (200, {...result, 'replayed': false});
   }
+
+  /// Confirming an automatic score: the director's decision closes review,
+  /// with no second official version; repeating it is a replay.
+  (int, Map<String, Object?>) _confirm(
+    Id assignmentId,
+    String sourceAttemptId,
+    int expectedRevision,
+  ) {
+    final score = _score[assignmentId]!;
+    if (sourceAttemptId != score.scoreAttemptId.value ||
+        expectedRevision != score.scoreRevision) {
+      return (
+        409,
+        {
+          'error': {
+            'status': 409,
+            'code': 'stale_revision',
+            'message': 'The slot changed.',
+          },
+        },
+      );
+    }
+    final replayed = _confirmed[assignmentId] == score.scoreRevision;
+    _confirmed[assignmentId] = score.scoreRevision;
+    confirmedAssignments.add(assignmentId);
+    final entries = _history[assignmentId]!;
+    _history[assignmentId] = [
+      for (final e in entries)
+        e.outcome == ScoreHistoryOutcome.current
+            ? ScoreHistoryEntry(
+                attemptId: e.attemptId,
+                outcome: e.outcome,
+                scoreRevision: e.scoreRevision,
+                components: e.components,
+                reason: e.reason,
+                actorId: e.actorId,
+                authority: e.authority,
+                selectionOrigin: e.selectionOrigin,
+                at: e.at,
+                reviewClosed: true,
+              )
+            : e,
+    ];
+    final result = ScoreEntryResult(
+      officialScore: score,
+      placeholder: _placeholder(assignmentId),
+      contest: matrixServer.contest,
+      calculated: const CalculatedFlight(
+        outcome: FlightOutcome.scored,
+        rawScore: 0,
+      ),
+    ).toJson();
+    return (replayed ? 200 : 201, {...result, 'replayed': replayed});
+  }
+
+  /// Slots the director confirmed, in order.
+  final List<Id> confirmedAssignments = [];
 
   final Set<Id> _submitted = {};
   final Set<Id> _inReview = {};
@@ -387,18 +479,26 @@ class ScoringServer {
   OfficialScore _official(
     Id assignmentId,
     Map<String, Object?> components,
-    int revision,
-  ) => OfficialScore(
-    id: _sid('0009', assignmentId.value.hashCode.abs() % 99999999),
-    contestId: contestId,
-    scorePlaceholderId: _placeholderId(assignmentId),
-    scoreAttemptId: _sid('000a', 1),
-    scoreRevision: revision,
-    components: components,
-    setAt: DateTime.utc(2026, 10, 17, 15),
-    setBy: _setBy,
-    reason: 'seeded',
-  );
+    int revision, {
+    bool automatic = false,
+  }) {
+    // A later revision by the director replaces the automatic one.
+    if (!automatic) _automatic.remove(assignmentId);
+    return OfficialScore(
+      id: _sid('0009', assignmentId.value.hashCode.abs() % 99999999),
+      contestId: contestId,
+      scorePlaceholderId: _placeholderId(assignmentId),
+      scoreAttemptId: automatic ? _automaticAttempt : _sid('000a', 1),
+      scoreRevision: revision,
+      components: components,
+      setAt: DateTime.utc(2026, 10, 17, 15),
+      setBy: automatic ? null : _setBy,
+      reason: automatic ? 'automatic_acceptance' : 'seeded',
+      selectionOrigin: automatic
+          ? SelectionOrigin.automatic
+          : SelectionOrigin.manual,
+    );
+  }
 
   Id _placeholderId(Id assignmentId) =>
       _sid('0008', assignmentId.value.hashCode.abs() % 99999999);
@@ -422,6 +522,8 @@ class ScoringServer {
           ? ScorePlaceholderState.submitted
           : ScorePlaceholderState.notEntered,
       scoreRevision: score?.scoreRevision ?? 0,
+      currentAttemptId: score?.scoreAttemptId,
+      reviewClosedScoreRevision: _confirmed[assignmentId],
     );
   }
 
@@ -532,7 +634,7 @@ class ScoringServer {
                 );
                 return {
                   'assignment_id': id.value,
-                  if (status == 200)
+                  if (status == 200 || status == 201)
                     'result': answer
                   else if (status == 202)
                     'queued': answer['queued']
@@ -552,7 +654,9 @@ class ScoringServer {
         body['source_attempt_id'] as String,
         body['expected_score_revision'] as int,
       );
-      if (status == 200 || status == 202) return _json(answer, status);
+      if (status == 200 || status == 201 || status == 202) {
+        return _json(answer, status);
+      }
       final error = (answer['error']! as Map<String, Object?>);
       return _json({
         'error': {'code': error['code'], 'message': error['message']},

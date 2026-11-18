@@ -116,6 +116,16 @@ class ScoringRow {
   /// presents the row as locked. A pending submission is not official.
   bool get isOfficial => slot?.officialScore != null;
 
+  /// Whether the contest accepted this row's score on its own and no director
+  /// has decided it since: the score is official, its origin is automatic, and
+  /// review is not closed for it. The director can confirm it.
+  bool get isAutomaticUnconfirmed {
+    final official = slot?.officialScore;
+    return official != null &&
+        official.selectionOrigin == SelectionOrigin.automatic &&
+        !slot!.placeholder.isReviewClosed(official);
+  }
+
   /// This row with a new saved [slot], after a save.
   ScoringRow withSlot(ScoreSlot slot) => ScoringRow(
     assignment: assignment,

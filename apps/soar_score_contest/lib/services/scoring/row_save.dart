@@ -24,6 +24,7 @@ class RowSave {
     this.networkProblem = false,
     this.promotion = false,
     this.changed = false,
+    this.confirm = false,
   });
 
   static const idle = RowSave(RowSaveKind.idle);
@@ -45,6 +46,10 @@ class RowSave {
   /// changed since the director opened the row, and the row now shows the
   /// newer values to check before asking again.
   final bool changed;
+
+  /// True when the [promotion] was the director confirming a score the
+  /// contest accepted automatically, so the banner says "confirm".
+  final bool confirm;
 
   bool get isBusy => kind == RowSaveKind.saving;
 }

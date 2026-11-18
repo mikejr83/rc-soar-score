@@ -4352,6 +4352,78 @@ abstract class AppLocalizations {
   /// **'Mark official for {pilot} is queued and will be reviewed when this device syncs.'**
   String scoreMarkOfficialQueued(String pilot);
 
+  /// Status chip of a scoring row whose official score the contest accepted on its own and the director has not confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted automatically'**
+  String get scoreAcceptedAutomatically;
+
+  /// Explanation under the Accepted automatically chip of a scoring row.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest accepted this score when its round or group was fully scored. It stays open to a review until you confirm it.'**
+  String get scoreAutomaticNote;
+
+  /// Button on a scoring row that confirms a score the contest accepted automatically.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get scoreConfirm;
+
+  /// Label of the Confirm button while the request is out.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming…'**
+  String get scoreConfirming;
+
+  /// Tooltip of the Confirm button of a row.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm {pilot}\'s automatically accepted score as the director\'s decision.'**
+  String scoreConfirmTooltip(String pilot);
+
+  /// Line under the status chip of a row whose Confirm is queued until the service decides it.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm is queued'**
+  String get scoreConfirmWaiting;
+
+  /// Banner after Confirm was refused because the row changed meanwhile.
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed: the score changed since you opened this row. Check the values shown and confirm again.'**
+  String get scoreConfirmChanged;
+
+  /// Banner after the server refused Confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed: {message}'**
+  String scoreConfirmRefused(String message);
+
+  /// Banner after Confirm met a busy or unreachable server; Retry asks again.
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed. The server is busy or could not be reached. Nothing was changed; try again.'**
+  String get scoreConfirmTryAgain;
+
+  /// Who made a score official in the score history when the contest accepted it on its own.
+  ///
+  /// In en, this message translates to:
+  /// **'System (automatic)'**
+  String get scoreHistoryAutomatic;
+
+  /// Line on a score history entry naming who made it official.
+  ///
+  /// In en, this message translates to:
+  /// **'Made official by {who}'**
+  String scoreHistoryMadeOfficialBy(String who);
+
+  /// Note on the current version in the score history when the director confirmed an automatically accepted score.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed by the director'**
+  String get scoreHistoryConfirmed;
+
   /// Line under the status chip of a row whose Mark official is queued until the service decides it.
   ///
   /// In en, this message translates to:

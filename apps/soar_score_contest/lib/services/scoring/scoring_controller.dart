@@ -806,8 +806,47 @@ class ScoringController extends ChangeNotifier {
   /// not a failed save.
   Future<bool> markOfficial(ScoringRow row) async {
     if (markOfficialSkip(row) != null) return false;
-    final attempt = row.slot!.pendingAttempt!;
-    _saves[row.id] = const RowSave(RowSaveKind.saving, promotion: true);
+    return _sendPromotion(row, row.slot!.pendingAttempt!.id.value);
+  }
+
+  /// Why the director cannot confirm the automatic score of [row] now, or
+  /// null when they can. A row that is not an unconfirmed automatic score
+  /// answers [MarkOfficialSkip.noSubmission].
+  MarkOfficialSkip? confirmAutomaticSkip(ScoringRow row) {
+    if (!row.isAutomaticUnconfirmed) return MarkOfficialSkip.noSubmission;
+    if (row.isAdoptionPending) return MarkOfficialSkip.waitingToSync;
+    if (block != null || row.isLocked) return MarkOfficialSkip.closed;
+    if (saveOf(row.id).isBusy) return MarkOfficialSkip.busy;
+    if (hasEdits(row)) return MarkOfficialSkip.edited;
+    return null;
+  }
+
+  /// Confirms the score the contest accepted automatically for [row]: the
+  /// director's decision is recorded and review closes for it, with no second
+  /// official version. Asked like Mark official, naming the official score
+  /// and its revision, so a change meanwhile is refused and shown. Returns
+  /// whether the row is confirmed (a repeat counts).
+  Future<bool> confirmAutomatic(ScoringRow row) async {
+    if (confirmAutomaticSkip(row) != null) return false;
+    return _sendPromotion(
+      row,
+      row.slot!.officialScore!.scoreAttemptId.value,
+      confirm: true,
+    );
+  }
+
+  /// The "mark official" request of [row] for [attemptId]: a waiting
+  /// submission, or, for [confirm], the automatic official score itself.
+  Future<bool> _sendPromotion(
+    ScoringRow row,
+    String attemptId, {
+    bool confirm = false,
+  }) async {
+    _saves[row.id] = RowSave(
+      RowSaveKind.saving,
+      promotion: true,
+      confirm: confirm,
+    );
     notifyListeners();
     final readsBefore = _syncReads;
     try {
@@ -815,7 +854,7 @@ class ScoringController extends ChangeNotifier {
         contestId,
         row.id,
         PromoteScoreRequest(
-          sourceAttemptId: attempt.id.value,
+          sourceAttemptId: attemptId,
           expectedScoreRevision: row.baseRevision,
         ),
       );
@@ -840,47 +879,67 @@ class ScoringController extends ChangeNotifier {
         error.statusCode,
         error.error?.code,
         error.error?.message,
+        confirm: confirm,
       );
       _saves[row.id] = refusal;
       if (refusal.changed) {
         _settleChanged([row], await _refreshSlots([row]));
       }
     } on ApiNetworkError {
-      _saves[row.id] = const RowSave(
+      _saves[row.id] = RowSave(
         RowSaveKind.failed,
         networkProblem: true,
         promotion: true,
+        confirm: confirm,
       );
     } on Object catch (error) {
       _saves[row.id] = RowSave(
         RowSaveKind.failed,
         message: '$error',
         promotion: true,
+        confirm: confirm,
       );
     }
     notifyListeners();
     return false;
   }
 
-  static RowSave _promotionRefusal(int? status, String? code, String? message) {
+  static RowSave _promotionRefusal(
+    int? status,
+    String? code,
+    String? message, {
+    bool confirm = false,
+  }) {
     if (status == 409 && code == 'stale_revision') {
-      return const RowSave(RowSaveKind.refused, promotion: true, changed: true);
+      return RowSave(
+        RowSaveKind.refused,
+        promotion: true,
+        changed: true,
+        confirm: confirm,
+      );
     }
     if (status == 503) {
       // A lock the server could not take in time: nothing was stored.
-      return const RowSave(
+      return RowSave(
         RowSaveKind.failed,
         networkProblem: true,
         promotion: true,
+        confirm: confirm,
       );
     }
     if (status == 409 || status == 400) {
-      return RowSave(RowSaveKind.refused, message: message, promotion: true);
+      return RowSave(
+        RowSaveKind.refused,
+        message: message,
+        promotion: true,
+        confirm: confirm,
+      );
     }
     return RowSave(
       RowSaveKind.failed,
       message: message ?? 'The server failed ($status).',
       promotion: true,
+      confirm: confirm,
     );
   }
 
@@ -1014,14 +1073,24 @@ class ScoringController extends ChangeNotifier {
   /// After rows were refused as changed and their slots were read again
   /// ([read] says whether that worked): a row whose newer values could not
   /// be read offers Refresh, and a row that no longer waits, because another
-  /// operator already made it official, has nothing left to ask. Returns how
+  /// operator already made it official (or already decided an automatic
+  /// score), has nothing left to ask. Returns how
   /// many rows were settled that way.
+  /// Whether [row], read again, still asks the director for the decision it
+  /// asked for: a waiting submission, or an automatic score to confirm.
+  bool _stillWaiting(ScoringRow row) {
+    final now = _rowOf(row.id);
+    return row.isAutomaticUnconfirmed
+        ? now?.isAutomaticUnconfirmed ?? false
+        : now?.hasPendingSubmission ?? false;
+  }
+
   int _settleChanged(List<ScoringRow> changed, bool read) {
     var settled = 0;
     for (final row in changed) {
       if (!read) {
         _saves[row.id] = const RowSave(RowSaveKind.failed, promotion: true);
-      } else if (!(_rowOf(row.id)?.hasPendingSubmission ?? false)) {
+      } else if (!_stillWaiting(row)) {
         _saves.remove(row.id);
         settled++;
       }

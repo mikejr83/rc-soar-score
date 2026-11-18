@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/scoring/pilot_history.dart';
 import '../../services/scoring/score_components_text.dart';
 import '../../services/workspace/next_step/next_step_text.dart';
@@ -130,6 +131,12 @@ class _EntryTile extends StatelessWidget {
       ScoreHistoryOutcome.pending => (Icons.inbox, 'Awaiting decision'),
     };
     final revision = entry.scoreRevision;
+    final words = AppLocalizations.of(context);
+    // No official actor and an automatic origin: the contest accepted it.
+    final automatic =
+        entry.selectionOrigin == SelectionOrigin.automatic &&
+        entry.outcome != ScoreHistoryOutcome.notAdopted &&
+        entry.outcome != ScoreHistoryOutcome.pending;
     final when = entry.at == null ? null : NextStepText.when(entry.at!, zoneId);
     return Card(
       key: ValueKey('history-entry-${entry.attemptId.value}'),
@@ -168,6 +175,16 @@ class _EntryTile extends StatelessWidget {
               ),
             ),
             if (entry.reason != null) Text('Reason: ${entry.reason}'),
+            if (automatic)
+              Text(
+                words.scoreHistoryMadeOfficialBy(words.scoreHistoryAutomatic),
+                key: ValueKey('history-automatic-${entry.attemptId.value}'),
+              ),
+            if (automatic && entry.reviewClosed)
+              Text(
+                words.scoreHistoryConfirmed,
+                key: ValueKey('history-confirmed-${entry.attemptId.value}'),
+              ),
             Text(
               when == null ? _who : '$_who · $when',
               style: theme.textTheme.bodySmall,

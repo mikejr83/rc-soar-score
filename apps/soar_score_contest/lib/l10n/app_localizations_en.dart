@@ -3171,6 +3171,51 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get scoreAcceptedAutomatically => 'Accepted automatically';
+
+  @override
+  String get scoreAutomaticNote =>
+      'The contest accepted this score when its round or group was fully scored. It stays open to a review until you confirm it.';
+
+  @override
+  String get scoreConfirm => 'Confirm';
+
+  @override
+  String get scoreConfirming => 'Confirming…';
+
+  @override
+  String scoreConfirmTooltip(String pilot) {
+    return 'Confirm $pilot\'s automatically accepted score as the director\'s decision.';
+  }
+
+  @override
+  String get scoreConfirmWaiting => 'Confirm is queued';
+
+  @override
+  String get scoreConfirmChanged =>
+      'Not confirmed: the score changed since you opened this row. Check the values shown and confirm again.';
+
+  @override
+  String scoreConfirmRefused(String message) {
+    return 'Not confirmed: $message';
+  }
+
+  @override
+  String get scoreConfirmTryAgain =>
+      'Not confirmed. The server is busy or could not be reached. Nothing was changed; try again.';
+
+  @override
+  String get scoreHistoryAutomatic => 'System (automatic)';
+
+  @override
+  String scoreHistoryMadeOfficialBy(String who) {
+    return 'Made official by $who';
+  }
+
+  @override
+  String get scoreHistoryConfirmed => 'Confirmed by the director';
+
+  @override
   String get scoreAdoptionWaiting => 'Mark official is queued';
 
   @override
