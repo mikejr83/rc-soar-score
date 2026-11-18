@@ -183,8 +183,9 @@ void main() {
         fixture.roundResults[1]!,
         RoundResults(
           ordinal: 2,
-          flights: fixture.roundResults[2]!.flights
-              .where((f) => f.participationId != participationId(3)),
+          flights: fixture.roundResults[2]!.flights.where(
+            (f) => f.participationId != participationId(3),
+          ),
         ),
       ],
     );
@@ -192,8 +193,9 @@ void main() {
       retired,
       ScoreExportOptions.of(filters, facts),
     );
-    final lee = source.standings
-        .singleWhere((r) => r.pilot.participationId == participationId(3));
+    final lee = source.standings.singleWhere(
+      (r) => r.pilot.participationId == participationId(3),
+    );
     expect(lee.cells[1]?.score, 700); // round 1 flew
     expect(lee.cells[2]?.score, 0.0); // round 2 is zeroed (retired)
     expect(lee.cells[2]?.dropped, isFalse);

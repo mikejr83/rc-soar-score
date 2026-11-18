@@ -215,8 +215,8 @@ void main() {
     });
 
     test('text cells that start with a formula character are hardened', () {
-      final rows =
-          OverallResultsFormat(options(team: true, pilotClass: true)).build(
+      final rows = OverallResultsFormat(options(team: true, pilotClass: true))
+          .build(
             source(
               standings: [
                 ExportStandingsRow(
@@ -271,21 +271,21 @@ void main() {
           ).build(
             source(
               standings: [
-                    ExportStandingsRow(
-                      place: 1,
-                      pilot: ReportPilot(
-                        participationId: _bo.participationId,
-                        firstName: 'Bo',
-                        lastName: '@Ray',
-                        team: '=SUM(A1)',
-                        className: '-Open',
-                      ),
-                      total: 1750,
-                      raw: 1750,
-                      penalty: 0,
-                      percentage: 100,
-                      cells: const {},
-                    ),
+                ExportStandingsRow(
+                  place: 1,
+                  pilot: ReportPilot(
+                    participationId: _bo.participationId,
+                    firstName: 'Bo',
+                    lastName: '@Ray',
+                    team: '=SUM(A1)',
+                    className: '-Open',
+                  ),
+                  total: 1750,
+                  raw: 1750,
+                  penalty: 0,
+                  percentage: 100,
+                  cells: const {},
+                ),
               ],
             ),
           );
