@@ -225,7 +225,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
   Future<int> _saveAllWithRemovals({bool editedOnly = false}) async {
     final c = _controller!;
     final need = [
-      for (final r in c.removalRows)
+      for (final r in c.removalRows(editedOnly: editedOnly))
         if (c.removalReason(r.id) == null &&
             !const {
               RowSaveKind.failed,
@@ -245,7 +245,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       }
     }
     // Save row asks for a zero to be confirmed, so saving many rows does too.
-    final zeros = c.unconfirmedZeroRows;
+    final zeros = c.unconfirmedZeroRows(editedOnly: editedOnly);
     if (zeros.isNotEmpty && !await askConfirmZeros(context, zeros)) return 0;
     if (!mounted) return 0;
     return c.saveAll(editedOnly: editedOnly);

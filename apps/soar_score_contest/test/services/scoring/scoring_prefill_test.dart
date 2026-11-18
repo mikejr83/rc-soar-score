@@ -108,6 +108,74 @@ void main() {
     expect(c.unsavedCount, 0);
   });
 
+  test('invalid text typed over a prefill is unsaved input', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setTime('abc');
+
+    expect(c.hasUnsaved, isTrue);
+    expect(c.unsavedCount, 1);
+  });
+
+  test('input that parses back to the saved score is unsaved input', () async {
+    final server = ScoringServer()..seedScore(first, a);
+    final c = await _open(server);
+    expect(c.hasUnsaved, isFalse);
+
+    c.draftOf(_row(c, 1)).setTime('09:00');
+    expect(c.draftOf(_row(c, 1)).isDirty, isFalse);
+    expect(c.hasUnsaved, isTrue);
+
+    // Nothing to write; saving settles the row so the director can leave.
+    expect(await c.saveAll(editedOnly: true), 0);
+    expect(c.hasUnsaved, isFalse);
+    expect(server.entries, isEmpty);
+  });
+
+  test('typing the original text again is not unsaved', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, a);
+    final c = await _open(server);
+    final d = c.draftOf(_row(c, 1));
+    d.setTime('1:00');
+    expect(c.hasUnsaved, isTrue);
+
+    d.setTime('9:00');
+
+    expect(c.hasUnsaved, isFalse);
+  });
+
+  test('checks for an edited-only save skip untouched prefills', () async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(first, {'out_of_bounds': true})
+      ..seedPendingSubmission(scoringAssignmentId(1, 2), a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1));
+    c.draftOf(_row(c, 2)).setHeight('99');
+
+    expect(c.unconfirmedZeroRows(), hasLength(1));
+    expect(c.unconfirmedZeroRows(editedOnly: true), isEmpty);
+    expect(c.saveCandidates(editedOnly: true).map((r) => r.id), [
+      scoringAssignmentId(1, 2),
+    ]);
+    expect(await c.saveAll(editedOnly: true), 1);
+    expect(_row(c, 1).status, RowStatus.submitted);
+  });
+
+  test('removal reasons are asked only for edited rows', () async {
+    final server = ScoringServer()
+      ..seedScore(first, {...a, 'cumulative_penalty': 10})
+      ..seedScore(scoringAssignmentId(1, 2), {...a, 'cumulative_penalty': 10});
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setCumulativePenalty('0');
+    c.draftOf(_row(c, 2)).setHeight('99');
+
+    expect(c.removalRows(), hasLength(1));
+    expect(c.removalRows(editedOnly: true), hasLength(1));
+    c.discardEdits();
+    c.draftOf(_row(c, 2)).setHeight('99');
+    expect(c.removalRows(editedOnly: true), isEmpty);
+  });
+
   test('what the director typed survives a later submission', () async {
     final server = ScoringServer()..seedPendingSubmission(first, a);
     final c = await _open(server);

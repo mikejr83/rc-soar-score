@@ -321,8 +321,27 @@ class ScoringController extends ChangeNotifier {
   /// Rows the director typed over. A form still holding exactly what a pilot
   /// submitted is not counted: that submission is already saved (waiting to
   /// become official), so leaving the group loses nothing.
-  int get unsavedCount => rows.where(hasEdits).length;
+  int get unsavedCount => rows.where(hasUnsavedInput).length;
   bool get hasUnsaved => unsavedCount > 0;
+
+  /// Whether the director typed anything into [row] that is not saved. Unlike
+  /// [hasEdits] this also sees invalid text and text that parses back to the
+  /// saved values, which the director still typed. A pilot prefill left as it
+  /// came is not input.
+  bool hasUnsavedInput(ScoringRow row) {
+    final draft = _drafts[row.id];
+    if (draft == null) return false;
+    return draft.editedSinceLoad ||
+        (draft.isDirty && !draft.isUntouchedPrefill);
+  }
+
+  /// The rows a save would write: dirty ones, and with [editedOnly] only
+  /// those with director input. Preflight checks and the save itself use
+  /// this one list.
+  List<ScoringRow> saveCandidates({bool editedOnly = false}) => [
+    for (final row in rows)
+      if (isDirty(row) && (!editedOnly || hasUnsavedInput(row))) row,
+  ];
 
   // Navigation.
 
@@ -389,14 +408,10 @@ class ScoringController extends ChangeNotifier {
 
   /// The dirty rows whose save removes an applied cumulative penalty, in row
   /// order. Each needs a recorded reason the bulk paths must capture.
-  List<ScoringRow> get removalRows {
-    final removal = <ScoringRow>[];
-    for (final row in rows) {
-      final draft = _drafts[row.id];
-      if (draft != null && _removal(row, draft)) removal.add(row);
-    }
-    return removal;
-  }
+  List<ScoringRow> removalRows({bool editedOnly = false}) => [
+    for (final row in saveCandidates(editedOnly: editedOnly))
+      if (_removal(row, _drafts[row.id])) row,
+  ];
 
   static bool _removal(ScoringRow row, ScoreRowDraft? draft) {
     if (draft == null || !draft.isDirty) return false;
@@ -529,8 +544,8 @@ class ScoringController extends ChangeNotifier {
 
   /// Dirty rows that [saveAll] would save as a zero the director has not
   /// confirmed yet (a motor restart, out of bounds or no altitude).
-  List<ScoringRow> get unconfirmedZeroRows => [
-    for (final row in rows.where(isDirty))
+  List<ScoringRow> unconfirmedZeroRows({bool editedOnly = false}) => [
+    for (final row in saveCandidates(editedOnly: editedOnly))
       if (!const {
             RowSaveKind.stale,
             RowSaveKind.saving,
@@ -556,7 +571,19 @@ class ScoringController extends ChangeNotifier {
   /// came is left alone (saving it would make it official).
   Future<int> saveAll({bool editedOnly = false}) async {
     final batch = <ScoringRow>[];
-    for (final row in rows.where(editedOnly ? hasEdits : isDirty).toList()) {
+    if (editedOnly) {
+      // Input that parses back to what is saved has nothing to write.
+      for (final row in rows) {
+        final draft = _drafts[row.id];
+        if (draft != null &&
+            !draft.isDirty &&
+            draft.problems.isEmpty &&
+            draft.editedSinceLoad) {
+          draft.resetTo(row.savedComponents, shown: _shown(row));
+        }
+      }
+    }
+    for (final row in saveCandidates(editedOnly: editedOnly)) {
       final kind = saveOf(row.id).kind;
       if (kind == RowSaveKind.stale || kind == RowSaveKind.saving) continue;
       if (isPenaltyRemoval(row)) {

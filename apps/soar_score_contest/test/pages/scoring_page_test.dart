@@ -737,6 +737,22 @@ void main() {
     expect(find.text('Cy Fox'), findsOneWidget);
   });
 
+  testWidgets('moving on with only untouched pilot entries asks nothing', (
+    tester,
+  ) async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(scoringAssignmentId(1, 1), {
+        'time_flown': 540,
+        'launch_height': 120,
+      });
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    await tester.tap(find.byKey(const ValueKey('group-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Unsaved scores'), findsNothing);
+    expect(find.text('Cy Fox'), findsOneWidget);
+  });
+
   testWidgets('a locked round is read only and says why', (tester) async {
     final server = ScoringServer(
       matrix: drawnMatrix(round2Status: RoundStatus.locked),
