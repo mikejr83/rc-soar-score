@@ -60,8 +60,13 @@ class LandingTableRepository extends DriftRepository
         return true;
       });
 
+  /// Installs [table] unless its row exists. Writes the table and its entries
+  /// in one transaction, unless the caller is already in one ([atomic] false).
   @override
-  Future<bool> installSystemTable(core.LandingTableWithResults table) {
+  Future<bool> installSystemTable(
+    core.LandingTableWithResults table, {
+    bool atomic = true,
+  }) {
     if (!table.table.isSystem) {
       throw ArgumentError.value(
         table.table.id.value,
@@ -69,14 +74,18 @@ class LandingTableRepository extends DriftRepository
         'must be a system table with no owner',
       );
     }
-    return db.transaction(() async {
-      if (await _tables.findJson(table.table.id) != null) return false;
-      await _tables.upsertJson(_tables.encode(table.table));
-      for (final result in table.results) {
-        await _results.upsertJson(_results.encode(result));
-      }
+    Future<bool> install() async {
+      final inserted = await _tables.insertMissingJson([
+        _tables.encode(table.table),
+      ]);
+      if (inserted == 0) return false;
+      await _results.insertMissingJson([
+        for (final result in table.results) _results.encode(result),
+      ]);
       return true;
-    });
+    }
+
+    return atomic ? db.transaction(install) : install();
   }
 
   Future<core.LandingTableWithResults> _withResults(

@@ -71,14 +71,12 @@ class SystemDataSeeder {
     final profiles = DisciplineProfileRepository(_db, stores: stores);
     final roles = RoleRepository(_db, stores: stores);
     for (final table in _landingTables) {
-      await landingTables.installSystemTable(table);
+      await landingTables.installSystemTable(table, atomic: false);
     }
     for (final profile in _profiles) {
-      await profiles.installSystemProfile(profile);
+      await profiles.installSystemProfile(profile, atomic: false);
     }
-    for (final role in _roles) {
-      await roles.installSystemRole(role);
-    }
+    await roles.installSystemRoles(_roles);
     await syncStore?.writeCursor(scope, sequence);
     return SystemSeedOutcome.installed;
   });
