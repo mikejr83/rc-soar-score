@@ -35,7 +35,7 @@ A participant-account link belongs to a director's participant profile, not to a
 
 An account also becomes linked when a participant opens an invitation link, signs in or creates an account, and confirms that the participation named on the invitation is theirs. The confirmation is required so that a forwarded link cannot be used to claim someone else's profile. Records created under the guest identity are then attached to the account (see Claiming).
 
-A guest account is created once per participant link when the invitation is first opened. A second device that opens the same link acts as the same guest. A person is either a pilot or a helper on one participant record; a person who does both needs two participant records with different emails in the first release.
+A guest account is created once per participant link when the invitation is first opened. A second device that opens the same link acts as the same guest. In the first release, a participant has one self-scoring role per contest, either pilot or helper. If a future release supports both roles, they can share one participant record and one invitation. Registered-account email uniqueness continues to apply.
 
 Access to scoring through an account is defined in [self-scoring-invites.md](../self-scoring-invites.md).
 

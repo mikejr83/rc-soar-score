@@ -139,6 +139,23 @@ extension PromoteSubmissionService on ScoresService {
     );
   }
 
+  /// Whether [expectedScoreRevision] is the revision before the contest
+  /// accepted [sourceAttemptId] automatically: a director who saw the score
+  /// waiting may confirm it after the acceptance reached this installation.
+  Future<bool> _namesAutomaticAcceptance(
+    ScorePlaceholder placeholder,
+    Id sourceAttemptId,
+    int expectedScoreRevision,
+  ) async {
+    if (expectedScoreRevision != placeholder.scoreRevision - 1) return false;
+    final official = await repository.officialScoreRepository
+        .currentForPlaceholder(placeholder.id);
+    return official != null &&
+        official.selectionOrigin == SelectionOrigin.automatic &&
+        official.scoreRevision == placeholder.scoreRevision &&
+        official.scoreAttemptId == sourceAttemptId;
+  }
+
   Future<PendingPromotion> _queuePromotion(
     Id contestId,
     Id assignmentId, {
@@ -166,7 +183,12 @@ extension PromoteSubmissionService on ScoresService {
       );
     }
     if (placeholder.currentAttemptId != sourceAttemptId ||
-        placeholder.scoreRevision != expectedScoreRevision) {
+        (placeholder.scoreRevision != expectedScoreRevision &&
+            !await _namesAutomaticAcceptance(
+              placeholder,
+              sourceAttemptId,
+              expectedScoreRevision,
+            ))) {
       throw StaleRevisionError(
         entityType: 'ScorePlaceholder',
         entityId: placeholder.id,
@@ -368,6 +390,9 @@ extension PromoteSubmissionService on ScoresService {
       return null;
     }
     _requireScoringAllowed(contest);
+    // The same slot rules as an adoption: a locked round or group, a moved
+    // assignment or a round no longer current refuse a fresh confirmation.
+    await _requireSlot(contest.id, current.assignmentId);
     if (intent == null) {
       await _requireNoPendingPromotion(contest.id, current.assignmentId);
     }
@@ -485,7 +510,11 @@ extension PromoteSubmissionService on ScoresService {
       // writes nothing, whatever locks were set since.
       if (official.scoreAttemptId == sourceAttemptId &&
           slot.currentAttemptId == sourceAttemptId &&
-          official.scoreRevision - 1 == expectedScoreRevision) {
+          (official.scoreRevision - 1 == expectedScoreRevision ||
+              // A confirmed automatic score also answers its own accepted
+              // revision, one of the two a confirmation may name.
+              (official.selectionOrigin == SelectionOrigin.automatic &&
+                  official.scoreRevision == expectedScoreRevision))) {
         return ScorePromotionResult(
           entry: ScoreEntryResult(
             officialScore: official,

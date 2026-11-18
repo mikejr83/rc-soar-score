@@ -255,6 +255,52 @@ void _tests(Backend backend) {
     expect(await intents(), isEmpty);
   });
 
+  test(
+    'a confirmation queues at the revision before the acceptance too',
+    () async {
+      final accepted = core.OfficialScore(
+        id: core.Id.create(),
+        contestId: contestId,
+        scorePlaceholderId: slot.id,
+        scoreAttemptId: slot.currentAttemptId!,
+        scoreRevision: slot.scoreRevision + 1,
+        components:
+            (await harness.clientRepository.scoreAttemptRepository.findById(
+              slot.currentAttemptId!,
+            ))!.rawComponents,
+        setAt: DateTime.utc(2026, 11, 17, 12),
+        reason: core.automaticRoundCompleteReason,
+        selectionOrigin: core.SelectionOrigin.automatic,
+      );
+      await harness.clientRepository.officialScoreRepository.recordPromotion(
+        core.PromotedScore(
+          officialScore: accepted,
+          placeholder: core.ScorePlaceholder(
+            id: slot.id,
+            contestId: contestId,
+            contestParticipationId: slot.contestParticipationId,
+            assignmentId: slot.assignmentId,
+            state: core.ScorePlaceholderState.official,
+            scoreRevision: accepted.scoreRevision,
+            currentAttemptId: slot.currentAttemptId,
+            revision: (await clientSlot()).revision,
+          ),
+        ),
+        metadata: meta('auto-sync'),
+      );
+
+      // The director saw the score waiting (the revision before acceptance).
+      final intent = await queue(expected: slot.scoreRevision);
+
+      expect(intent.expectedScoreRevision, slot.scoreRevision);
+      expect(
+        await harness.clientRepository.promotionIntentRepository
+            .pendingForAssignment(contestId, slot.assignmentId),
+        intent,
+      );
+    },
+  );
+
   test('a stale or locked slot is refused before anything is queued', () async {
     await expectLater(
       queue(expected: slot.scoreRevision + 3),

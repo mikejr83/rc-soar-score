@@ -210,6 +210,12 @@ void _tests(SliceBackend backend) {
       );
     }
 
+    Future<int> auditCount() async =>
+        (await repository.auditEventRepository.listForContest(
+          core.Id.parse(_contestId),
+          action: core.AuditAction.scoreReview,
+        )).length;
+
     Future<void> acceptRound() async {
       for (final pilot in [1, 2, 3]) {
         await submit(pilot, 1);
@@ -265,12 +271,67 @@ void _tests(SliceBackend backend) {
       expect((await placeholderOf(1, 1)).revision, before.revision);
     });
 
-    test('names the accepted revision as well as the one before', () async {
-      await acceptRound();
-      final response = await confirmRaw(1, 2, 2);
-      expect(response.status, 201, reason: '${response.body}');
-      expect((await placeholderOf(1, 2)).reviewClosedScoreRevision, 2);
-    });
+    for (final expected in [1, 2]) {
+      test('a request naming revision $expected confirms once, then replays '
+          'with nothing more written', () async {
+        await acceptRound();
+        final first = await confirmRaw(1, 2, expected);
+        expect(first.status, 201, reason: '${first.body}');
+        final slot = await placeholderOf(1, 2);
+        final events = await auditCount();
+
+        final again = await confirmRaw(1, 2, expected);
+
+        expect(again.status, 200, reason: '${again.body}');
+        expect(again.body['replayed'], isTrue);
+        expect((await placeholderOf(1, 2)).revision, slot.revision);
+        expect(slot.reviewClosedScoreRevision, 2);
+        expect(
+          await repository.officialScoreRepository.listForPlaceholder(slot.id),
+          hasLength(1),
+        );
+        expect(await auditCount(), events);
+      });
+    }
+
+    test(
+      'a locked round refuses a fresh confirmation, writing nothing',
+      () async {
+        await acceptRound();
+        final held = await placeholderOf(1, 1);
+        final assignment = (await repository.matrixAssignmentRepository
+            .findById(core.Id.parse(assignmentOf(1, 1)['id']! as String)))!;
+        final round = (await repository.roundRepository.findById(
+          assignment.scheduledRoundId,
+        ))!;
+        await repository.roundRepository.save(
+          core.Round(
+            id: round.id,
+            contestId: round.contestId,
+            matrixRevisionId: round.matrixRevisionId,
+            ordinal: round.ordinal,
+            groupCount: round.groupCount,
+            status: core.RoundStatus.locked,
+            revision: round.revision,
+          ),
+          metadata: core.MutationMetadata(
+            clientMutationId: 'lock-round',
+            authority: core.Authority.director,
+            clientTime: DateTime.utc(2026, 10, 17, 16),
+            actorId: api.director,
+          ),
+        );
+        final events = await auditCount();
+
+        final response = await confirmRaw(1, 1, 1);
+
+        expect(response.status, 409, reason: '${response.body}');
+        expect((response.body['error']! as Map)['code'], 'round_locked');
+        expect((await placeholderOf(1, 1)).reviewClosedScoreRevision, isNull);
+        expect((await placeholderOf(1, 1)).revision, held.revision);
+        expect(await auditCount(), events);
+      },
+    );
 
     test('another revision is stale and stores nothing', () async {
       await acceptRound();
