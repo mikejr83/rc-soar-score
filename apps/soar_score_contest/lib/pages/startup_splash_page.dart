@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soar_score_ui/soar_score_ui.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/startup/startup_mode.dart';
@@ -14,8 +15,8 @@ class StartupSplashApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Soar Score',
-      theme: ThemeData(useMaterial3: true),
-      darkTheme: ThemeData(useMaterial3: true, brightness: Brightness.dark),
+      theme: ContestAppTheme.lightTheme,
+      darkTheme: ContestAppTheme.darkTheme,
       themeMode: ThemeMode.system,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
