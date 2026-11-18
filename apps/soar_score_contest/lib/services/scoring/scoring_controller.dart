@@ -814,6 +814,9 @@ class ScoringController extends ChangeNotifier {
   /// answers [MarkOfficialSkip.noSubmission].
   MarkOfficialSkip? confirmAutomaticSkip(ScoringRow row) {
     if (!row.isAutomaticUnconfirmed) return MarkOfficialSkip.noSubmission;
+    // The service refuses it for a retired pilot (`pilot_retired`); the
+    // historical score stays visible.
+    if (row.retired) return MarkOfficialSkip.retired;
     if (row.isAdoptionPending) return MarkOfficialSkip.waitingToSync;
     if (block != null || row.isLocked) return MarkOfficialSkip.closed;
     if (saveOf(row.id).isBusy) return MarkOfficialSkip.busy;
@@ -1089,7 +1092,11 @@ class ScoringController extends ChangeNotifier {
     var settled = 0;
     for (final row in changed) {
       if (!read) {
-        _saves[row.id] = const RowSave(RowSaveKind.failed, promotion: true);
+        _saves[row.id] = RowSave(
+          RowSaveKind.failed,
+          promotion: true,
+          confirm: row.isAutomaticUnconfirmed,
+        );
       } else if (!_stillWaiting(row)) {
         _saves.remove(row.id);
         settled++;

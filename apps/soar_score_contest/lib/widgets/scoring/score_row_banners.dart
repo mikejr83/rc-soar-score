@@ -196,6 +196,8 @@ class ScoreSaveBanner extends StatelessWidget {
               ? words.scoreConfirmTryAgain
               : save.networkProblem
               ? words.scoreMarkOfficialTryAgain
+              : save.confirm && save.message == null
+              ? words.scoreConfirmReloadFailed
               : save.message == null
               ? words.scoreMarkOfficialReloadFailed
               : words.scoreMarkOfficialFailed(save.message!),

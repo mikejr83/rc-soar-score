@@ -4394,6 +4394,18 @@ abstract class AppLocalizations {
   /// **'Not confirmed: the score changed since you opened this row. Check the values shown and confirm again.'**
   String get scoreConfirmChanged;
 
+  /// Banner when Confirm was refused as changed and re-reading the row failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed: the score changed, and the newer values could not be read. Refresh to see them.'**
+  String get scoreConfirmReloadFailed;
+
+  /// Snackbar after Confirm was queued instead of applied.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm for {pilot} is queued and will be decided when this device syncs.'**
+  String scoreConfirmQueued(String pilot);
+
   /// Banner after the server refused Confirm.
   ///
   /// In en, this message translates to:
@@ -4403,7 +4415,7 @@ abstract class AppLocalizations {
   /// Banner after Confirm met a busy or unreachable server; Retry asks again.
   ///
   /// In en, this message translates to:
-  /// **'Not confirmed. The server is busy or could not be reached. Nothing was changed; try again.'**
+  /// **'Could not confirm. The server was busy or could not be reached, so the confirmation may or may not have been recorded. Check the row, then try again.'**
   String get scoreConfirmTryAgain;
 
   /// Who made a score official in the score history when the contest accepted it on its own.

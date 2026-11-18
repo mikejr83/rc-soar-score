@@ -3196,13 +3196,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Not confirmed: the score changed since you opened this row. Check the values shown and confirm again.';
 
   @override
+  String get scoreConfirmReloadFailed =>
+      'Not confirmed: the score changed, and the newer values could not be read. Refresh to see them.';
+
+  @override
+  String scoreConfirmQueued(String pilot) {
+    return 'Confirm for $pilot is queued and will be decided when this device syncs.';
+  }
+
+  @override
   String scoreConfirmRefused(String message) {
     return 'Not confirmed: $message';
   }
 
   @override
   String get scoreConfirmTryAgain =>
-      'Not confirmed. The server is busy or could not be reached. Nothing was changed; try again.';
+      'Could not confirm. The server was busy or could not be reached, so the confirmation may or may not have been recorded. Check the row, then try again.';
 
   @override
   String get scoreHistoryAutomatic => 'System (automatic)';

@@ -261,13 +261,17 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
 
   Future<void> _markOfficial(ScoringRow row) async {
     final c = _controller!;
-    final ok = row.isAutomaticUnconfirmed
+    final confirming = row.isAutomaticUnconfirmed;
+    final ok = confirming
         ? await c.confirmAutomatic(row)
         : await c.markOfficial(row);
     final now = c.rows.where((r) => r.id == row.id).firstOrNull;
     if (ok && mounted && (now?.isAdoptionPending ?? false)) {
+      final words = AppLocalizations.of(context);
       _say(
-        AppLocalizations.of(context).scoreMarkOfficialQueued(row.pilot.name),
+        confirming
+            ? words.scoreConfirmQueued(row.pilot.name)
+            : words.scoreMarkOfficialQueued(row.pilot.name),
       );
     }
     // The banner with the reason sits in the row's band, so open it.

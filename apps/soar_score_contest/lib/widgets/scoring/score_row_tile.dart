@@ -896,6 +896,8 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
   Widget _confirmAutomatic(BuildContext context, MarkOfficialSkip? skip) {
     final words = AppLocalizations.of(context);
     final row = widget.row;
+    // A retired pilot's score stays as it is: the service refuses a decision.
+    if (skip == MarkOfficialSkip.retired) return const SizedBox.shrink();
     // A locked or queued row has nothing to confirm from here.
     if (skip == MarkOfficialSkip.closed ||
         skip == MarkOfficialSkip.waitingToSync) {

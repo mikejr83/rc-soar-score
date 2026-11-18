@@ -614,7 +614,9 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
         }
       }
       await openRoundGroup(tester, 3, group);
-      expect(inGroup.length, greaterThanOrEqualTo(2), reason: 'rows to fill');
+      // Mark official, Mark all and the review need a plain, a second plain
+      // and a reviewed entry in one group.
+      expect(inGroup.length, greaterThanOrEqualTo(3), reason: 'rows to fill');
       final pilots = waiting = await submitAsPilots(
         contestName: data.contestName,
         candidates: inGroup,
@@ -835,6 +837,15 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
           count: early.length,
           timeFlown: 430,
         );
+      }
+      // Before the last flight arrives nothing may be official: an early
+      // entry still waits.
+      if (early.isNotEmpty) {
+        await openGroupOf(tester, data, 3, early.first);
+        final entry = (await rowOf(tester, early.first))!;
+        expect(entry.hasPendingSubmission, isTrue, reason: early.first);
+        expect(entry.status, RowStatus.submitted, reason: early.first);
+        expect(entry.isAutomaticUnconfirmed, isFalse, reason: early.first);
       }
       await submitAsPilots(
         contestName: data.contestName,

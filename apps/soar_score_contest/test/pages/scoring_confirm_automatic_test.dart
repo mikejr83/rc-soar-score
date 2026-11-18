@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
+
 import '../support/scoring_test_support.dart';
+
+final _words = AppLocalizationsEn();
 
 const _flight = {'time_flown': 540, 'launch_height': 120};
 
@@ -24,9 +28,9 @@ void main() {
 
     // Only the automatic row has the chip and the button; a director's score
     // stays plain Official.
-    expect(find.text('Accepted automatically'), findsOneWidget);
+    expect(find.text(_words.scoreAcceptedAutomatically), findsOneWidget);
     expect(find.text('Official'), findsOneWidget);
-    expect(find.text('Confirm'), findsOneWidget);
+    expect(find.text(_words.scoreConfirm), findsOneWidget);
     expect(_key('score-confirm-automatic-${first.value}'), findsOneWidget);
     expect(_key('score-automatic-note-${first.value}'), findsOneWidget);
   });
@@ -45,9 +49,9 @@ void main() {
     expect(server.entries, isEmpty);
     expect(server.confirmedAssignments, [first]);
     expect(server.promotedBodies.single['expected_score_revision'], 1);
-    expect(find.text('Accepted automatically'), findsNothing);
+    expect(find.text(_words.scoreAcceptedAutomatically), findsNothing);
     expect(find.text('Official'), findsOneWidget);
-    expect(find.text('Confirm'), findsNothing);
+    expect(find.text(_words.scoreConfirm), findsNothing);
   });
 
   testWidgets('a busy server shows Retry for Confirm, which asks again', (
@@ -60,16 +64,16 @@ void main() {
 
     await tester.tap(_key('score-confirm-automatic-${first.value}'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Not confirmed.'), findsOneWidget);
+    expect(find.textContaining('Could not confirm.'), findsOneWidget);
     // Nothing was stored; the row is still waiting for a decision.
-    expect(find.text('Accepted automatically'), findsOneWidget);
+    expect(find.text(_words.scoreAcceptedAutomatically), findsOneWidget);
 
     server.promoteFailures.clear();
     await tester.tap(_key('score-retry'));
     await tester.pumpAndSettle();
 
     expect(server.confirmedAssignments, [first]);
-    expect(find.text('Accepted automatically'), findsNothing);
+    expect(find.text(_words.scoreAcceptedAutomatically), findsNothing);
   });
 
   testWidgets(
@@ -87,8 +91,8 @@ void main() {
       // The row now shows the newer, director-entered score and has nothing
       // left to confirm.
       expect(find.text('8:20'), findsWidgets);
-      expect(find.text('Accepted automatically'), findsNothing);
-      expect(find.text('Confirm'), findsNothing);
+      expect(find.text(_words.scoreAcceptedAutomatically), findsNothing);
+      expect(find.text(_words.scoreConfirm), findsNothing);
       expect(server.confirmedAssignments, isEmpty);
     },
   );
@@ -118,16 +122,26 @@ void main() {
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
     await _openHistory(tester, 1);
-    expect(find.text('Made official by System (automatic)'), findsOneWidget);
-    expect(find.text('Confirmed by the director'), findsNothing);
+    expect(
+      find.text(
+        _words.scoreHistoryMadeOfficialBy(_words.scoreHistoryAutomatic),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text(_words.scoreHistoryConfirmed), findsNothing);
     await tester.tap(_key('score-history-close'));
     await tester.pumpAndSettle();
 
     await tester.tap(_key('score-confirm-automatic-${first.value}'));
     await tester.pumpAndSettle();
     await _openHistory(tester, 1);
-    expect(find.text('Made official by System (automatic)'), findsOneWidget);
-    expect(find.text('Confirmed by the director'), findsOneWidget);
+    expect(
+      find.text(
+        _words.scoreHistoryMadeOfficialBy(_words.scoreHistoryAutomatic),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text(_words.scoreHistoryConfirmed), findsOneWidget);
   });
 
   testWidgets('a director\'s own score shows no automatic wording', (
@@ -137,9 +151,62 @@ void main() {
     final server = ScoringServer()..seedScore(first, _flight);
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
-    expect(find.text('Accepted automatically'), findsNothing);
-    expect(find.text('Confirm'), findsNothing);
+    expect(find.text(_words.scoreAcceptedAutomatically), findsNothing);
+    expect(find.text(_words.scoreConfirm), findsNothing);
     await _openHistory(tester, 1);
     expect(find.textContaining('System (automatic)'), findsNothing);
+  });
+
+  testWidgets('a retired pilot keeps the score and has no Confirm', (
+    tester,
+  ) async {
+    final second = scoringAssignmentId(1, 2);
+    final server = ScoringServer()..seedAutomaticScore(second, _flight);
+    // Bo retired at round 1 after the contest accepted their entry.
+    server.matrixServer.retirements[2] = 1;
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    expect(find.text('Retired from round 1'), findsOneWidget);
+    expect(find.text('1 of 2 entered · 1 official'), findsOneWidget);
+    expect(find.text('9:00'), findsWidgets);
+    expect(find.text(_words.scoreConfirm), findsNothing);
+    expect(_key('score-confirm-automatic-${second.value}'), findsNothing);
+    expect(server.promoteRequests, 0);
+  });
+
+  testWidgets('a queued Confirm says confirm, and blocks a repeat', (
+    tester,
+  ) async {
+    final first = scoringAssignmentId(1, 1);
+    final server = ScoringServer()
+      ..seedAutomaticScore(first, _flight)
+      ..queuePromotions.add(first);
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    await tester.tap(_key('score-confirm-automatic-${first.value}'));
+    await tester.pumpAndSettle();
+
+    expect(server.promoteRequests, 1);
+    expect(find.text(_words.scoreConfirmWaiting), findsOneWidget);
+    expect(find.text(_words.scoreConfirmQueued('Ann Lee')), findsOneWidget);
+    expect(find.text(_words.scoreAdoptionWaiting), findsNothing);
+    // Nothing more to ask while the service decides.
+    expect(_key('score-confirm-automatic-${first.value}'), findsNothing);
+  });
+
+  testWidgets('a changed score whose reload fails still words it as Confirm', (
+    tester,
+  ) async {
+    final first = scoringAssignmentId(1, 1);
+    final server = ScoringServer()..seedAutomaticScore(first, _flight);
+    server.promoteFailures[first] = (409, 'stale_revision');
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    server.readFailure = 503;
+
+    await tester.tap(_key('score-confirm-automatic-${first.value}'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(_words.scoreConfirmReloadFailed), findsOneWidget);
+    expect(find.textContaining('Not marked official'), findsNothing);
   });
 }

@@ -273,6 +273,21 @@ class ScoringServer {
     final pending = _pendingAttempt(assignmentId);
     final revision = _score[assignmentId]?.scoreRevision ?? 0;
     if (_automatic.contains(assignmentId)) {
+      if (queuePromotions.contains(assignmentId)) {
+        return (
+          202,
+          {
+            'queued': _queued[assignmentId] ??= {
+              'operation_id': Id.create().value,
+              'contest_id': matrixServer.contest.id.value,
+              'assignment_id': assignmentId.value,
+              'source_attempt_id': sourceAttemptId,
+              'expected_score_revision': expectedRevision,
+              'queued_at': '2026-11-17T10:00:00Z',
+            },
+          },
+        );
+      }
       return _confirm(assignmentId, sourceAttemptId, expectedRevision);
     }
     if (queuePromotions.contains(assignmentId) && pending != null) {
