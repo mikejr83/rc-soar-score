@@ -28,15 +28,15 @@ void main() {
   ) async {
     expect(
       await _noteFor(tester, OfficializationPolicy.endOfRound),
-      contains('all required scores for the round'),
+      contains('all required scores for its round'),
     );
     expect(
       await _noteFor(tester, OfficializationPolicy.endOfGroup),
-      contains('all required scores in the group'),
+      contains('all required scores for its group'),
     );
     expect(
       await _noteFor(tester, OfficializationPolicy.manual),
-      contains('when the director makes them official'),
+      contains('when the director makes it official'),
     );
   });
 

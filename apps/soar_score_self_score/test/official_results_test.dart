@@ -13,9 +13,12 @@ import 'package:soar_score_self_score/pages/results_page.dart';
 import 'package:soar_score_self_score/widgets/group_result_tile.dart';
 
 class _Repository extends SampleSelfScoreRepository {
-  const _Repository(this.preliminary, {this.review = false});
+  const _Repository(this.preliminary, {this.review = false, this.policy});
 
   final bool preliminary;
+
+  /// The contest's official-score rule the results report.
+  final OfficializationPolicy? policy;
 
   /// Marks the first row as held by an open review.
   final bool review;
@@ -56,6 +59,7 @@ class _Repository extends SampleSelfScoreRepository {
       snapshot: data.snapshot,
       heldRound: data.heldRound,
       preliminary: preliminary,
+      policy: policy,
     );
   }
 }
@@ -140,7 +144,7 @@ void main() {
         find.byKey(const ValueKey('preliminary-note'), skipOffstage: false),
       );
       expect(note.data, startsWith('These scores are preliminary'));
-      expect(note.data, contains('all required scores in the group'));
+      expect(note.data, contains('all required scores for its group'));
     },
   );
 
@@ -171,6 +175,35 @@ void main() {
     expect(find.text('Time, height and landing are zeroed.'), findsOneWidget);
     expect(find.text('The review keeps the original entry.'), findsOneWidget);
   });
+
+  for (final (policy, phrase) in [
+    (OfficializationPolicy.endOfRound, 'all required scores for its round'),
+    (OfficializationPolicy.endOfGroup, 'all required scores for its group'),
+  ]) {
+    testWidgets('overall results word ${policy.name} per score', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        SelfScoreScope(
+          repository: _Repository(true, policy: policy),
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: overall,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final note = tester.widget<Text>(
+        find.byKey(const ValueKey('preliminary-note')),
+      );
+      expect(note.data, startsWith('These scores are preliminary'));
+      expect(note.data, contains('Each score becomes official'));
+      expect(note.data, contains(phrase));
+    });
+  }
 }
 
 class _MixedRepository extends SampleSelfScoreRepository {
