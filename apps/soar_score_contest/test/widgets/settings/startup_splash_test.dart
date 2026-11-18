@@ -27,6 +27,32 @@ void main() {
     });
   }
 
+  test('the logo follows the system theme', () {
+    expect(
+      StartupSplashPage.logoAsset(Brightness.light),
+      'assets/brand/rc-soar-score-lockup-light-transparent.svg',
+    );
+    expect(
+      StartupSplashPage.logoAsset(Brightness.dark),
+      'assets/brand/rc-soar-score-lockup-dark-transparent.svg',
+    );
+  });
+
+  for (final brightness in Brightness.values) {
+    testWidgets('splash shows the logo in ${brightness.name} mode', (
+      tester,
+    ) async {
+      tester.platformDispatcher.platformBrightnessTestValue = brightness;
+      addTearDown(tester.platformDispatcher.clearAllTestValues);
+      await tester.pumpWidget(
+        const StartupSplashApp(mode: StartupMode.starting),
+      );
+      await tester.pump();
+      expect(find.byKey(const ValueKey('startup-splash-logo')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   Widget host(Future<StartupSplashControl?> control) => MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,

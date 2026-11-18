@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/startup/startup_mode.dart';
@@ -15,6 +16,8 @@ class StartupSplashApp extends StatelessWidget {
     return MaterialApp(
       title: 'Soar Score',
       theme: ThemeData(useMaterial3: true),
+      darkTheme: ThemeData(useMaterial3: true, brightness: Brightness.dark),
+      themeMode: ThemeMode.system,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       debugShowCheckedModeBanner: false,
@@ -27,6 +30,12 @@ class StartupSplashPage extends StatelessWidget {
   const StartupSplashPage({super.key, required this.mode});
 
   final StartupMode mode;
+
+  /// The lockup for the system's light or dark theme.
+  static String logoAsset(Brightness brightness) =>
+      brightness == Brightness.dark
+      ? 'assets/brand/rc-soar-score-lockup-dark-transparent.svg'
+      : 'assets/brand/rc-soar-score-lockup-light-transparent.svg';
 
   static String message(AppLocalizations l10n, StartupMode mode) =>
       switch (mode) {
@@ -50,10 +59,11 @@ class StartupSplashPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Soar Score',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineMedium,
+                SvgPicture.asset(
+                  logoAsset(theme.brightness),
+                  key: const ValueKey('startup-splash-logo'),
+                  height: 96,
+                  semanticsLabel: 'Soar Score',
                 ),
                 const SizedBox(height: 24),
                 const LinearProgressIndicator(),
