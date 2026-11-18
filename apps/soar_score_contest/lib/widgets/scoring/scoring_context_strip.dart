@@ -24,7 +24,7 @@ class ScoringContextStrip extends StatelessWidget {
     final rows = controller.rows.where((r) => !r.isMissed).toList();
     final entered = rows.where((r) => r.isEntered).length;
     final official = rows.where((r) => r.isOfficial).length;
-    final dirty = controller.dirtyCount;
+    final dirty = controller.unsavedCount;
     final block = controller.block;
     final roundState = round == null
         ? CompletenessState.empty

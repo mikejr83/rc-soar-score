@@ -1124,7 +1124,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     );
     final pen = _penaltyCell(context, labels);
     final ind = _indicatorCell(context, labels);
-    final stat = _statusCell(context, labels, dirty);
+    final stat = _statusCell(context, labels, dirty && !d.isUntouchedPrefill);
     final menu = _menuCell(context);
     const gap = SizedBox(width: ScoreGridColumns.gap);
     const vgap = SizedBox(height: 4);

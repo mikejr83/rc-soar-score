@@ -64,6 +64,50 @@ void main() {
     },
   );
 
+  test('an untouched pilot prefill is not unsaved', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, a);
+    final c = await _open(server);
+
+    expect(c.draftOf(_row(c, 1)).timeText, '9:00');
+    expect(c.unsavedCount, 0);
+    expect(c.hasUnsaved, isFalse);
+    // Save all still makes the waiting entry official.
+    expect(c.dirtyCount, 1);
+  });
+
+  test('typing over a prefill makes the row unsaved', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setHeight('99');
+
+    expect(c.unsavedCount, 1);
+    expect(c.hasUnsaved, isTrue);
+  });
+
+  test('saving edited rows only leaves a waiting entry unofficial', () async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(first, a)
+      ..seedPendingSubmission(scoringAssignmentId(1, 2), a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 2)).setHeight('99');
+
+    expect(await c.saveAll(editedOnly: true), 1);
+
+    expect(_row(c, 1).status, RowStatus.submitted);
+    expect(_row(c, 2).status, RowStatus.official);
+  });
+
+  test('discarding edits keeps the pilot prefill', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setHeight('99');
+
+    c.discardEdits();
+
+    expect(c.draftOf(_row(c, 1)).heightText, '120');
+    expect(c.unsavedCount, 0);
+  });
+
   test('what the director typed survives a later submission', () async {
     final server = ScoringServer()..seedPendingSubmission(first, a);
     final c = await _open(server);

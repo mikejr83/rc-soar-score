@@ -317,7 +317,12 @@ class ScoringController extends ChangeNotifier {
   bool get isSaving => savingCount > 0;
 
   int get dirtyCount => rows.where(isDirty).length;
-  bool get hasUnsaved => dirtyCount > 0;
+
+  /// Rows the director typed over. A form still holding exactly what a pilot
+  /// submitted is not counted: that submission is already saved (waiting to
+  /// become official), so leaving the group loses nothing.
+  int get unsavedCount => rows.where(hasEdits).length;
+  bool get hasUnsaved => unsavedCount > 0;
 
   // Navigation.
 
@@ -342,6 +347,17 @@ class ScoringController extends ChangeNotifier {
   void activate(Id id) {
     if (activeId == id) return;
     activeId = id;
+    notifyListeners();
+  }
+
+  /// Drops what the director typed. Pilot submissions stay: the forms fill
+  /// from them again.
+  void discardEdits() {
+    _drafts.clear();
+    _saves.clear();
+    _seedUnreadSaves();
+    _theirs.clear();
+    _removalReasons.clear();
     notifyListeners();
   }
 
@@ -535,9 +551,12 @@ class ScoringController extends ChangeNotifier {
   /// resolve on the row. A removal row is included only when its reason was
   /// recorded first ([recordRemovalReason]), so it is never saved under a
   /// generic reason.
-  Future<int> saveAll() async {
+  ///
+  /// With [editedOnly], a form that still holds a pilot submission as it
+  /// came is left alone (saving it would make it official).
+  Future<int> saveAll({bool editedOnly = false}) async {
     final batch = <ScoringRow>[];
-    for (final row in rows.where(isDirty).toList()) {
+    for (final row in rows.where(editedOnly ? hasEdits : isDirty).toList()) {
       final kind = saveOf(row.id).kind;
       if (kind == RowSaveKind.stale || kind == RowSaveKind.saving) continue;
       if (isPenaltyRemoval(row)) {
