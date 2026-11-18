@@ -54,7 +54,12 @@ class DisciplineProfileRepository extends DriftRepository
           'not installed; install the landing tables first.',
         );
       }
-      await _profiles.insertMissingJson([_profiles.encode(head)]);
+      // Another transaction may have inserted it since the check above: then
+      // its children are its own, and none of ours are written.
+      final inserted = await _profiles.insertMissingJson([
+        _profiles.encode(head),
+      ]);
+      if (inserted == 0) return false;
       await _configFields.insertMissingJson([
         for (final row in profile.configFields) _configFields.encode(row),
       ]);
