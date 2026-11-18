@@ -32,19 +32,24 @@ class RoleRepository extends DriftRepository implements core.RoleRepository {
         return true;
       });
 
+  /// Installs [role] unless its row exists.
   @override
-  Future<bool> installSystemRole(core.Role role) {
-    if (!role.isSystem) {
-      throw ArgumentError.value(
-        role.id.value,
-        'role',
-        'must be a system role with no owner',
-      );
+  Future<bool> installSystemRole(core.Role role) async =>
+      await installSystemRoles([role]) > 0;
+
+  /// Installs the roles not stored yet in one statement and returns how many
+  /// were new. A stored role is never overwritten.
+  Future<int> installSystemRoles(Iterable<core.Role> roles) {
+    final list = roles.toList();
+    for (final role in list) {
+      if (!role.isSystem) {
+        throw ArgumentError.value(
+          role.id.value,
+          'role',
+          'must be a system role with no owner',
+        );
+      }
     }
-    return db.transaction(() async {
-      if (await _roles.findJson(role.id) != null) return false;
-      await _roles.upsertJson(_roles.encode(role));
-      return true;
-    });
+    return _roles.insertMissingJson([for (final r in list) _roles.encode(r)]);
   }
 }

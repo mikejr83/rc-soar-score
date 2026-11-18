@@ -106,6 +106,39 @@ class TableMapper {
     );
   }
 
+  /// Inserts every row of [rows] that is not stored yet, never touching a
+  /// stored one, and returns how many were inserted.
+  ///
+  /// Rows go in multi-row statements (`INSERT ... VALUES (...), (...) ON
+  /// CONFLICT DO NOTHING`), as many per statement as the smallest bound
+  /// variable limit of the backends allows, so a large install costs a few
+  /// statements instead of one per row.
+  Future<int> insertMissing(List<Map<String, Object?>> rows) async {
+    if (rows.isEmpty) return 0;
+    final columns = [for (final c in _table.$columns) c.$name];
+    final keys = [for (final c in _table.$primaryKey) c.$name];
+    final perStatement = (_maxVariables ~/ columns.length).clamp(1, 1 << 20);
+    final tuple = '(${List.filled(columns.length, '?').join(', ')})';
+    var inserted = 0;
+    for (var start = 0; start < rows.length; start += perStatement) {
+      final chunk = rows.skip(start).take(perStatement).toList();
+      inserted += await _db.customUpdate(
+        portableSql(
+          _db,
+          'INSERT INTO $_name (${columns.map((c) => '"$c"').join(', ')}) '
+          'VALUES ${List.filled(chunk.length, tuple).join(', ')} '
+          'ON CONFLICT (${keys.map((k) => '"$k"').join(', ')}) DO NOTHING',
+        ),
+        variables: [for (final row in chunk) ..._toVariables(row, columns)],
+        updates: {_table},
+      );
+    }
+    return inserted;
+  }
+
+  /// Below the variable limit of every supported backend (older SQLite: 999).
+  static const _maxVariables = 900;
+
   /// Writes [json] as the next revision of the row stored at
   /// [expectedRevision], or inserts it when [expectedRevision] is null; the
   /// write is refused (returns false) when the stored row is not at that

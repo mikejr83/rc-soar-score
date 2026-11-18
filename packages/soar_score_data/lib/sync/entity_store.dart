@@ -164,6 +164,11 @@ class EntityStore<T extends Object> {
 
   Future<void> upsertJson(Map<String, Object?> json) => _mapper.upsert(json);
 
+  /// Inserts the rows not stored yet and leaves stored ones alone; returns how
+  /// many were inserted. See [TableMapper.insertMissing].
+  Future<int> insertMissingJson(List<Map<String, Object?>> rows) =>
+      _mapper.insertMissing(rows);
+
   /// See [TableMapper.upsertIfRevision].
   Future<bool> upsertJsonIfRevision(
     Map<String, Object?> json,

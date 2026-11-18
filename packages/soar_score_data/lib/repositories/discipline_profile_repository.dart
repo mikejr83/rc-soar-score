@@ -36,36 +36,50 @@ class DisciplineProfileRepository extends DriftRepository
     return [for (final profile in profiles) await _withRules(profile)];
   }
 
+  /// Installs [profile] unless its row exists. Writes the profile and its
+  /// child rows in one transaction, unless the caller is already in one
+  /// ([atomic] false).
   @override
-  Future<bool> installSystemProfile(core.DisciplineProfileWithRules profile) =>
-      db.transaction(() async {
-        final head = profile.profile;
-        if (await _profiles.findJson(head.id) != null) return false;
-        final tableId = head.defaultLandingTableId;
-        if (tableId != null && await _landingTables.findJson(tableId) == null) {
-          throw StateError(
-            'The default landing table ${tableId.value} of ${head.name} is '
-            'not installed; install the landing tables first.',
-          );
-        }
-        await _profiles.upsertJson(_profiles.encode(head));
-        for (final row in profile.configFields) {
-          await _configFields.upsertJson(_configFields.encode(row));
-        }
-        for (final row in profile.scoreFields) {
-          await _scoreFields.upsertJson(_scoreFields.encode(row));
-        }
-        for (final row in profile.validations) {
-          await _validations.upsertJson(_validations.encode(row));
-        }
-        for (final row in profile.formulas) {
-          await _formulas.upsertJson(_formulas.encode(row));
-        }
-        for (final row in profile.rules) {
-          await _rules.upsertJson(_rules.encode(row));
-        }
-        return true;
-      });
+  Future<bool> installSystemProfile(
+    core.DisciplineProfileWithRules profile, {
+    bool atomic = true,
+  }) {
+    Future<bool> install() async {
+      final head = profile.profile;
+      if (await _profiles.findJson(head.id) != null) return false;
+      final tableId = head.defaultLandingTableId;
+      if (tableId != null && await _landingTables.findJson(tableId) == null) {
+        throw StateError(
+          'The default landing table ${tableId.value} of ${head.name} is '
+          'not installed; install the landing tables first.',
+        );
+      }
+      // Another transaction may have inserted it since the check above: then
+      // its children are its own, and none of ours are written.
+      final inserted = await _profiles.insertMissingJson([
+        _profiles.encode(head),
+      ]);
+      if (inserted == 0) return false;
+      await _configFields.insertMissingJson([
+        for (final row in profile.configFields) _configFields.encode(row),
+      ]);
+      await _scoreFields.insertMissingJson([
+        for (final row in profile.scoreFields) _scoreFields.encode(row),
+      ]);
+      await _validations.insertMissingJson([
+        for (final row in profile.validations) _validations.encode(row),
+      ]);
+      await _formulas.insertMissingJson([
+        for (final row in profile.formulas) _formulas.encode(row),
+      ]);
+      await _rules.insertMissingJson([
+        for (final row in profile.rules) _rules.encode(row),
+      ]);
+      return true;
+    }
+
+    return atomic ? db.transaction(install) : install();
+  }
 
   Future<core.DisciplineProfileWithRules> _withRules(
     core.DisciplineProfile profile,
