@@ -691,6 +691,42 @@ void _tests(SliceBackend backend) {
       expect(byName['P2 X']!['flight_score'], isA<num>());
     });
 
+    test(
+      'a preliminary zero keeps the group preliminary beside official peers',
+      () async {
+        for (final pilot in [2, 3]) {
+          final slot = assignments.singleWhere(
+            (a) =>
+                a['scheduled_round_id'] == rounds[0]['id'] &&
+                a['contest_participation_id'] == _participationId(pilot),
+          );
+          await api.expectOk(
+            'POST',
+            '/contests/$_contestId/assignments/${slot['id']}/scores',
+            status: 201,
+            body: {
+              'client_mutation_id': 'director-$pilot',
+              'base_score_revision': 0,
+              'components': _goodScore,
+              'reason': 'Entered by the director',
+            },
+          );
+        }
+        final (submitted, _) = await submit(
+          1,
+          components: const {'motor_restart': true},
+        );
+        expect(submitted, 201);
+        final (status, body) = await get('/rounds/1/group-results');
+        expect(status, 200, reason: '$body');
+        final byName = {for (final r in rowsOf(body)) r['pilot_name']: r};
+        expect(byName['P1 X']!['state'], 'zero');
+        expect(byName['P2 X']!['state'], 'official');
+        expect(byName['P3 X']!['state'], 'official');
+        expect(body['preliminary'], isTrue);
+      },
+    );
+
     test('hiding results holds the overall standings, not the group', () async {
       expect((await submit(1)).$1, 201);
       expect((await submit(2, mutation: 'm-2')).$1, 201);

@@ -6,6 +6,7 @@ import 'package:soar_score_self_score/data/self_score_scope.dart';
 import 'package:soar_score_self_score/l10n/app_localizations.dart';
 import 'package:soar_score_self_score/models/group_result_row.dart';
 import 'package:soar_score_self_score/models/group_results.dart';
+import 'package:soar_score_self_score/models/officialization_policy.dart';
 import 'package:soar_score_self_score/models/results_view.dart';
 import 'package:soar_score_self_score/pages/group_results_page.dart';
 import 'package:soar_score_self_score/pages/results_page.dart';
@@ -120,4 +121,63 @@ void main() {
     await _pump(tester, true, group);
     expect(find.textContaining('A score under review is held'), findsNothing);
   });
+
+  testWidgets(
+    'an official viewer beside a preliminary peer sees the page note',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: SelfScoreScope(
+            repository: const _MixedRepository(),
+            child: const GroupResultsPage(
+              contestId: SampleData.contestId,
+              pilotId: '12',
+              roundId: '4',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // The viewer's own row is scored, a peer has nothing yet.
+      expect(find.text('(you)'), findsOneWidget);
+      expect(find.text('No score yet'), findsOneWidget);
+      expect(find.text('Preliminary'), findsOneWidget);
+      final note = tester.widget<Text>(
+        find.byKey(const ValueKey('preliminary-note'), skipOffstage: false),
+      );
+      expect(note.data, startsWith('These scores are preliminary'));
+      expect(note.data, contains('in the group'));
+    },
+  );
+}
+
+class _MixedRepository extends SampleSelfScoreRepository {
+  const _MixedRepository();
+
+  @override
+  Future<GroupResults> groupResults(
+    String contestId,
+    String pilotId,
+    int round,
+  ) async {
+    final data = await super.groupResults(contestId, pilotId, round);
+    return GroupResults(
+      contestName: data.contestName,
+      round: data.round,
+      group: data.group,
+      latestRound: data.latestRound,
+      policy: OfficializationPolicy.endOfGroup,
+      rows: const [
+        GroupResultRow(
+          name: 'Jane Smith',
+          kind: GroupRowKind.scored,
+          time: '9:00',
+          score: '962.5',
+          isYou: true,
+        ),
+        GroupResultRow(name: 'Sam Chen', kind: GroupRowKind.noScore),
+      ],
+    );
+  }
 }
