@@ -71,6 +71,9 @@ class ScoringServer {
   /// When set, every read answers with this status instead of the data.
   int? readFailure;
 
+  /// How many of the next reads fail with 503 before reads work again.
+  int failNextReads = 0;
+
   int entryStatus = 200;
 
   /// Answers a bulk request with this status instead of the entries, like
@@ -567,7 +570,11 @@ class ScoringServer {
 
   Future<http.Response> handle(http.Request request) async {
     final path = request.url.path;
-    final failure = readFailure;
+    var failure = readFailure;
+    if (failure == null && failNextReads > 0 && request.method == 'GET') {
+      failNextReads--;
+      failure = 503;
+    }
     if (failure != null && request.method == 'GET') {
       return _json({
         'code': failure == 403 ? 'forbidden' : 'unavailable',

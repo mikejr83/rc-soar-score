@@ -89,6 +89,7 @@ class ScoringController extends ChangeNotifier {
     try {
       final loaded = await ScoringPageData.load(client, contestId);
       data = loaded;
+      _unreadSlots.clear();
       final open = loaded.firstOpen;
       final wantedRound = _wantedRound;
       if (wantedRound != null && loaded.roundByOrdinal(wantedRound) != null) {
@@ -192,6 +193,11 @@ class ScoringController extends ChangeNotifier {
     }
     data = next;
     _clampGroup();
+    // Every slot of the read is applied except those of rows with a save in
+    // flight, which keep their own copy.
+    for (final id in next.slotIds) {
+      if (!(before[id] != null && saveOf(id).isBusy)) _unreadSlots.remove(id);
+    }
     _dropObsoletePromotionFailures();
     for (final row in rows) {
       if (saveOf(row.id).isBusy) continue;
@@ -322,6 +328,7 @@ class ScoringController extends ChangeNotifier {
     round = toRound;
     group = toGroup;
     _clampGroup();
+    _seedUnreadSaves();
     notifyListeners();
     await _loadResults();
     notifyListeners();
@@ -337,6 +344,7 @@ class ScoringController extends ChangeNotifier {
     rows.forEach(_dismissPrefill);
     _drafts.clear();
     _saves.clear();
+    _seedUnreadSaves();
     _theirs.clear();
     _removalReasons.clear();
     notifyListeners();
@@ -720,6 +728,7 @@ class ScoringController extends ChangeNotifier {
     try {
       final loaded = await ScoringPageData.load(client, contestId);
       data = loaded;
+      _unreadSlots.clear();
       loadError = null;
       syncRefreshFailed = false;
       for (final row in rows) {
@@ -766,7 +775,7 @@ class ScoringController extends ChangeNotifier {
     if (row.retired) return MarkOfficialSkip.retired;
     if (row.isAdoptionPending) return MarkOfficialSkip.waitingToSync;
     if (block != null || row.isLocked) return MarkOfficialSkip.closed;
-    if (saveOf(row.id).isBusy || saveOf(row.id).needsRefresh) {
+    if (_promotionBlocked(row)) {
       return MarkOfficialSkip.busy;
     }
     if (hasEdits(row)) return MarkOfficialSkip.edited;
@@ -845,7 +854,7 @@ class ScoringController extends ChangeNotifier {
   Future<bool> retryPromotion(ScoringRow row) async {
     final save = saveOf(row.id);
     final target = save.target;
-    if (target == null || save.needsRefresh) return false;
+    if (target == null || _promotionBlocked(row)) return false;
     if (!_matchesTarget(row, target)) {
       _saves.remove(row.id);
       notifyListeners();
@@ -854,6 +863,13 @@ class ScoringController extends ChangeNotifier {
     return target.confirm ? confirmAutomatic(row) : markOfficial(row);
   }
 
+  /// Whether a promotion of [row] must wait: one is in flight, or its slot
+  /// is behind the service until a read of it has been applied.
+  bool _promotionBlocked(ScoringRow row) =>
+      saveOf(row.id).isBusy ||
+      saveOf(row.id).needsRefresh ||
+      _unreadSlots.contains(row.id);
+
   /// Drops the failures of Mark official and Confirm that a sync made
   /// obsolete. A row refused as changed keeps its message: it already shows
   /// the newer values the director was told to check.
@@ -861,12 +877,14 @@ class ScoringController extends ChangeNotifier {
     for (final row in rows) {
       final save = saveOf(row.id);
       final target = save.target;
-      if (!save.promotion || save.isBusy || save.changed || target == null) {
+      if (!save.promotion || save.isBusy || save.changed) continue;
+      // A failure that was waiting for a read is settled once a fresh slot of
+      // the row has been applied: the director can ask afresh.
+      if (save.needsRefresh) {
+        if (!_unreadSlots.contains(row.id)) _saves.remove(row.id);
         continue;
       }
-      // A failure that was waiting for a read is settled by this one: the row
-      // is current again and the director can ask afresh.
-      if (save.needsRefresh || !_matchesTarget(row, target)) {
+      if (target != null && !_matchesTarget(row, target)) {
         _saves.remove(row.id);
       }
     }
@@ -882,7 +900,7 @@ class ScoringController extends ChangeNotifier {
     if (row.retired) return MarkOfficialSkip.retired;
     if (row.isAdoptionPending) return MarkOfficialSkip.waitingToSync;
     if (block != null || row.isLocked) return MarkOfficialSkip.closed;
-    if (saveOf(row.id).isBusy || saveOf(row.id).needsRefresh) {
+    if (_promotionBlocked(row)) {
       return MarkOfficialSkip.busy;
     }
     if (hasEdits(row)) return MarkOfficialSkip.edited;
@@ -1255,11 +1273,36 @@ class ScoringController extends ChangeNotifier {
 
   Object? _slotReadError;
 
+  /// Assignments whose slot may be behind the service: a promotion of them
+  /// failed after a sync overlapped, or their catch-up read is out or
+  /// failed. Kept apart from banners and drafts, so moving to another group
+  /// does not forget it, and cleared for an assignment only when a fresh
+  /// slot of it has been applied. While it holds, nothing is promoted from
+  /// that row; a passive sync still applies fresh slots.
+  final Set<Id> _unreadSlots = {};
+
+  /// Puts back the Refresh requirement of every unread slot that has no
+  /// save state, after navigation cleared them.
+  void _seedUnreadSaves() {
+    for (final row in rows) {
+      if (!_unreadSlots.contains(row.id) || _saves.containsKey(row.id)) {
+        continue;
+      }
+      _saves[row.id] = RowSave(
+        RowSaveKind.failed,
+        promotion: true,
+        confirm: row.isAutomaticUnconfirmed,
+        needsRefresh: true,
+      );
+    }
+  }
+
   /// Reads the slots of [stale] again and shows their newer values, keeping
   /// whatever the director typed in a row.
   ///
   /// Returns false when the read failed and the rows are as they were.
   Future<bool> _refreshSlots(List<ScoringRow> stale) async {
+    _unreadSlots.addAll(stale.map((row) => row.id));
     try {
       final generation = _syncReads;
       final fresh = await client.scores(contestId);
@@ -1270,6 +1313,7 @@ class ScoringController extends ChangeNotifier {
       for (final slot in fresh.slots) {
         if (!ids.contains(slot.placeholder.assignmentId)) continue;
         data = data!.withSlot(slot);
+        _unreadSlots.remove(slot.placeholder.assignmentId);
       }
       for (final row in rows) {
         if (!ids.contains(row.id) || hasEdits(row)) continue;

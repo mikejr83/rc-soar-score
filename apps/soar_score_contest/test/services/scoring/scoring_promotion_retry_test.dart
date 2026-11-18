@@ -354,4 +354,89 @@ void main() {
       }
     });
   });
+
+  group('a row that is behind the service stays blocked', () {
+    // Ann's and Bo's confirms are out when a sync is applied; both then
+    // fail, Ann's catch-up read fails and Bo's works.
+    Future<(ScoringController, ScoringServer)> annBehind() async {
+      final second = scoringAssignmentId(1, 2);
+      final server = ScoringServer()
+        ..seedAutomaticScore(first, flight)
+        ..seedAutomaticScore(second, flight);
+      final c = await _open(server);
+      final hold = server.holdPromote = Completer<void>();
+      final ann = c.confirmAutomatic(_row(c, 1));
+      final bo = c.confirmAutomatic(_row(c, 2));
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      await c.refreshAfterSync();
+      server.promoteFailures[first] = (503, 'contest_busy');
+      server.promoteFailures[second] = (503, 'contest_busy');
+      server.failNextReads = 1;
+      hold.complete();
+      await Future.wait([ann, bo]);
+      return (c, server);
+    }
+
+    test('a read of another row does not free it', () async {
+      final (c, server) = await annBehind();
+      expect(c.saveOf(first).needsRefresh, isTrue);
+      expect(
+        c.saveOf(scoringAssignmentId(1, 2)).needsRefresh,
+        isFalse,
+        reason: "Bo's own read worked",
+      );
+
+      final before = server.promoteRequests;
+      expect(c.confirmAutomaticSkip(_row(c, 1)), MarkOfficialSkip.busy);
+      expect(await c.retryPromotion(_row(c, 1)), isFalse);
+      expect(await c.confirmAutomatic(_row(c, 1)), isFalse);
+      expect(server.promoteRequests, before, reason: 'nothing sent for Ann');
+
+      // A sync that applies a fresh slot of Ann frees her.
+      await c.refreshAfterSync();
+      expect(c.confirmAutomaticSkip(_row(c, 1)), isNull);
+    });
+
+    test('moving to another group and back keeps it', () async {
+      final (c, server) = await annBehind();
+
+      await c.open(2, 1);
+      await c.open(1, 1);
+      expect(c.confirmAutomaticSkip(_row(c, 1)), MarkOfficialSkip.busy);
+      expect(c.saveOf(first).needsRefresh, isTrue, reason: 'still shows it');
+      final before = server.promoteRequests;
+      expect(await c.confirmAutomatic(_row(c, 1)), isFalse);
+      expect(server.promoteRequests, before);
+    });
+
+    test('no second request while the catch-up read is out', () async {
+      final server = ScoringServer()..seedAutomaticScore(first, flight);
+      final hold = server.holdPromote = Completer<void>();
+      final c = await _open(server);
+
+      final sent = c.confirmAutomatic(_row(c, 1));
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      await c.refreshAfterSync();
+
+      // The request fails and its catch-up read is held.
+      server.promoteFailures[first] = (503, 'contest_busy');
+      final read = server.holdNextScoresRead = Completer<void>();
+      hold.complete();
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      expect(server.promoteRequests, 1);
+
+      expect(c.confirmAutomaticSkip(_row(c, 1)), MarkOfficialSkip.busy);
+      expect(await c.retryPromotion(_row(c, 1)), isFalse);
+      expect(await c.confirmAutomatic(_row(c, 1)), isFalse);
+      expect(server.promoteRequests, 1, reason: 'no second request');
+
+      read.complete();
+      await sent;
+      expect(c.confirmAutomaticSkip(_row(c, 1)), isNull);
+    });
+  });
 }
