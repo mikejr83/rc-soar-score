@@ -564,6 +564,8 @@ void _tests(SliceBackend backend) {
       expect(body['round'], 1);
       expect(body['latest_round'], 1);
       expect(body['preliminary'], isTrue);
+      // A contest with no stored setting reads as Manual.
+      expect(body['scores_become_official'], 'Manual');
       final rows = rowsOf(body);
       expect(rows, hasLength(3));
       final you = rows.first;
@@ -579,6 +581,40 @@ void _tests(SliceBackend backend) {
         expect(other['flight_score'], isNull);
         expect(other['time_flown_seconds'], isNull);
       }
+    });
+
+    test('a slot with an open review is flagged review_pending', () async {
+      await submit(1);
+      final (_, before) = await get('/rounds/1/group-results');
+      expect(
+        rowsOf(before).map((r) => r['review_pending']),
+        everyElement(false),
+      );
+      final held = await placeholderOf(1, 1);
+      await repository.scorePlaceholderRepository.save(
+        core.ScorePlaceholder(
+          id: held.id,
+          contestId: held.contestId,
+          contestParticipationId: held.contestParticipationId,
+          assignmentId: held.assignmentId,
+          state: core.ScorePlaceholderState.inReview,
+          scoreRevision: held.scoreRevision,
+          currentAttemptId: held.currentAttemptId,
+          revision: held.revision,
+        ),
+        metadata: core.MutationMetadata(
+          clientMutationId: 'review-state-1',
+          authority: core.Authority.participant,
+          clientTime: DateTime.utc(2026, 10, 17, 15),
+          actorId: api.director,
+        ),
+      );
+      final (status, after) = await get('/rounds/1/group-results');
+      expect(status, 200, reason: '$after');
+      final rows = rowsOf(after);
+      expect(rows.first['is_you'], isTrue);
+      expect(rows.first['review_pending'], isTrue);
+      expect(rows.skip(1).map((r) => r['review_pending']), everyElement(false));
     });
 
     test(
@@ -619,6 +655,7 @@ void _tests(SliceBackend backend) {
         expect(body['latest_round'], 1);
         expect(body['held_at_round'], isNull);
         expect(body['preliminary'], isTrue);
+        expect(body['scores_become_official'], 'Manual');
         expect(body['your_place'], 1);
         expect(body['your_score'], isA<num>());
         final standings = (body['standings']! as List)
@@ -652,6 +689,121 @@ void _tests(SliceBackend backend) {
       expect(byName['P1 X']!['state'], 'submitted');
       expect(byName['P2 X']!['state'], 'official');
       expect(byName['P2 X']!['flight_score'], isA<num>());
+    });
+
+    test(
+      'a preliminary zero keeps the group preliminary beside official peers',
+      () async {
+        for (final pilot in [2, 3]) {
+          final slot = assignments.singleWhere(
+            (a) =>
+                a['scheduled_round_id'] == rounds[0]['id'] &&
+                a['contest_participation_id'] == _participationId(pilot),
+          );
+          await api.expectOk(
+            'POST',
+            '/contests/$_contestId/assignments/${slot['id']}/scores',
+            status: 201,
+            body: {
+              'client_mutation_id': 'director-$pilot',
+              'base_score_revision': 0,
+              'components': _goodScore,
+              'reason': 'Entered by the director',
+            },
+          );
+        }
+        final (submitted, _) = await submit(
+          1,
+          components: const {'motor_restart': true},
+        );
+        expect(submitted, 201);
+        final (status, body) = await get('/rounds/1/group-results');
+        expect(status, 200, reason: '$body');
+        final byName = {for (final r in rowsOf(body)) r['pilot_name']: r};
+        expect(byName['P1 X']!['state'], 'zero');
+        expect(byName['P2 X']!['state'], 'official');
+        expect(byName['P3 X']!['state'], 'official');
+        expect(body['preliminary'], isTrue);
+      },
+    );
+
+    test('an unscored retiree does not keep the group preliminary', () async {
+      for (final pilot in [1, 2]) {
+        final slot = assignments.singleWhere(
+          (a) =>
+              a['scheduled_round_id'] == rounds[0]['id'] &&
+              a['contest_participation_id'] == _participationId(pilot),
+        );
+        await api.expectOk(
+          'POST',
+          '/contests/$_contestId/assignments/${slot['id']}/scores',
+          status: 201,
+          body: {
+            'client_mutation_id': 'director-$pilot',
+            'base_score_revision': 0,
+            'components': _goodScore,
+            'reason': 'Entered by the director',
+          },
+        );
+      }
+      final retiree = (await repository.contestParticipationRepository.findById(
+        core.Id.parse(_participationId(3)),
+      ))!;
+      await repository.contestParticipationRepository.save(
+        retiree.withRetiredAtRound(1),
+        metadata: core.MutationMetadata(
+          clientMutationId: 'retire-3',
+          authority: core.Authority.director,
+          clientTime: DateTime.utc(2026, 10, 17, 15),
+          actorId: api.director,
+        ),
+      );
+      final (status, body) = await get('/rounds/1/group-results');
+      expect(status, 200, reason: '$body');
+      final byName = {for (final r in rowsOf(body)) r['pilot_name']: r};
+      expect(byName['P3 X']!['state'], 'retired');
+      expect(byName['P1 X']!['state'], 'official');
+      expect(body['preliminary'], isFalse);
+    });
+
+    test('a retiree\'s submitted score keeps the group preliminary', () async {
+      expect((await submit(1)).$1, 201);
+      for (final pilot in [2, 3]) {
+        final slot = assignments.singleWhere(
+          (a) =>
+              a['scheduled_round_id'] == rounds[0]['id'] &&
+              a['contest_participation_id'] == _participationId(pilot),
+        );
+        await api.expectOk(
+          'POST',
+          '/contests/$_contestId/assignments/${slot['id']}/scores',
+          status: 201,
+          body: {
+            'client_mutation_id': 'director-$pilot',
+            'base_score_revision': 0,
+            'components': _goodScore,
+            'reason': 'Entered by the director',
+          },
+        );
+      }
+      final retiree = (await repository.contestParticipationRepository.findById(
+        core.Id.parse(_participationId(1)),
+      ))!;
+      await repository.contestParticipationRepository.save(
+        retiree.withRetiredAtRound(1),
+        metadata: core.MutationMetadata(
+          clientMutationId: 'retire-1',
+          authority: core.Authority.director,
+          clientTime: DateTime.utc(2026, 10, 17, 15),
+          actorId: api.director,
+        ),
+      );
+      final (status, body) = await get('/rounds/1/group-results');
+      expect(status, 200, reason: '$body');
+      final byName = {for (final r in rowsOf(body)) r['pilot_name']: r};
+      expect(byName['P1 X']!['state'], 'retired');
+      expect(byName['P2 X']!['state'], 'official');
+      expect(body['preliminary'], isTrue);
     });
 
     test('hiding results holds the overall standings, not the group', () async {

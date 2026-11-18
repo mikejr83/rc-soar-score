@@ -61,7 +61,8 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
       p.id: p,
   };
   final flights = {
-    for (final flight in calculation.recalculation?.flights ?? const [])
+    for (final flight
+        in calculation.recalculation?.flights ?? const <F5jRoundFlight>[])
       if (flight.round == roundOrdinal) flight.pilotId: flight,
   };
   final landing = await _landingResults(repository, calculation.revision);
@@ -77,7 +78,8 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
     for (final participation in inGroup) participation.participantProfileId,
   ]);
 
-  final rows = <({double? sortKey, ParticipantGroupRowDto row})>[];
+  final rows =
+      <({double? sortKey, bool pending, ParticipantGroupRowDto row})>[];
   for (final participation in inGroup) {
     final profile = profiles[participation.participantProfileId];
     final name = [
@@ -95,6 +97,9 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
     final zero = flight?.flight.outcome == FlightOutcome.zero;
     rows.add((
       sortKey: flight?.group.groupScore,
+      // Counted on an attempt, whatever the row shows (a zero or a retiree's
+      // retained submission included).
+      pending: slot?.isPreliminary ?? false,
       row: ParticipantGroupRowDto(
         pilotName: name,
         pilotNumber: participation.participantNumber,
@@ -117,6 +122,9 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
         rawScore: flight?.flight.rawScore,
         roundScore: flight?.group.groupScore,
         zeroReason: zero ? flight!.flight.zeroReasons.firstOrNull?.code : null,
+        // An open review holds the pilot's entry, which is still shown.
+        reviewPending:
+            slot?.placeholder.state == ScorePlaceholderState.inReview,
       ),
     ));
   }
@@ -136,12 +144,16 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
     group: participantGroupLabel(mine.group - 1),
     latestRound: latest < roundOrdinal ? roundOrdinal : latest,
     preliminary:
+        // A retiree with no score is not a missing required score.
         rows.any(
           (r) =>
-              r.sortKey == null ||
-              r.row.state == ParticipantScoreState.submitted,
+              (r.sortKey == null &&
+                  r.row.state != ParticipantScoreState.retired) ||
+              r.pending,
         ) ||
         calculation.input.incompleteGroups.contains((roundOrdinal, mine.group)),
+    scoresBecomeOfficial:
+        calculation.revision.config.coreOptions.scoresBecomeOfficial,
     rows: [for (final r in rows) r.row],
   );
 }
@@ -179,6 +191,8 @@ Future<ParticipantOverallResultsDto?> participantOverallResults(
       latestRound: latest,
       heldAtRound: null,
       preliminary: true,
+      scoresBecomeOfficial:
+          calculation.revision.config.coreOptions.scoresBecomeOfficial,
       standings: const [],
     );
   }
@@ -231,6 +245,8 @@ Future<ParticipantOverallResultsDto?> participantOverallResults(
         standing.ranking.isPreliminary || calculation.isPreliminaryAsOf(round),
     yourPlace: you?.place,
     yourScore: you?.score,
+    scoresBecomeOfficial:
+        calculation.revision.config.coreOptions.scoresBecomeOfficial,
     standings: lines,
   );
 }

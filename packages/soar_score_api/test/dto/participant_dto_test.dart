@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 import 'package:test/test.dart';
 
 Map<String, dynamic> _fixture(String name) =>
@@ -36,6 +37,32 @@ void main() {
   _roundTrips('error_invalid_invitation', ParticipantErrorDto.fromJson);
   _roundTrips('group_results', ParticipantGroupResultsDto.fromJson);
   _roundTrips('overall_results', ParticipantOverallResultsDto.fromJson);
+
+  test('an unknown officialization rule decodes as null, not an error', () {
+    final group = Map<String, dynamic>.of(_fixture('group_results'))
+      ..['scores_become_official'] = 'EndOfSeason';
+    expect(
+      ParticipantGroupResultsDto.fromJson(group).scoresBecomeOfficial,
+      isNull,
+    );
+    final overall = Map<String, dynamic>.of(_fixture('overall_results'))
+      ..['scores_become_official'] = 'EndOfSeason';
+    expect(
+      ParticipantOverallResultsDto.fromJson(overall).scoresBecomeOfficial,
+      isNull,
+    );
+    final absent = Map<String, dynamic>.of(_fixture('group_results'))
+      ..remove('scores_become_official');
+    expect(
+      ParticipantGroupResultsDto.fromJson(absent).scoresBecomeOfficial,
+      isNull,
+    );
+    expect(
+      ParticipantGroupResultsDto.fromJson(_fixture('group_results'))
+          .scoresBecomeOfficial,
+      OfficializationMode.endOfRound,
+    );
+  });
 
   test('overview marks exactly one round as next to score', () {
     final overview = ParticipantOverviewDto.fromJson(

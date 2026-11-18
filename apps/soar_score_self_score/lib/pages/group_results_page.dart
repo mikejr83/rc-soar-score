@@ -7,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import '../router.dart';
 import '../widgets/group_result_tile.dart';
 import '../widgets/loadable_scaffold.dart';
+import '../widgets/preliminary_note.dart';
 import '../widgets/self_score_app_bar.dart';
 import '../widgets/status_chip.dart';
 
@@ -69,11 +70,13 @@ class GroupResultsPage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const StatusChip(
-                        label: 'Preliminary',
-                        icon: Icons.pending_outlined,
-                      ),
-                      const SizedBox(width: 8),
+                      if (data.preliminary) ...[
+                        const StatusChip(
+                          label: 'Preliminary',
+                          icon: Icons.pending_outlined,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
                       Expanded(
                         child: Text(
                           AppLocalizations.of(context).resultsRefreshHint,
@@ -147,11 +150,11 @@ class GroupResultsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text(
-            'Scores are preliminary. The director can change them until '
-            'results are official.',
-            style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-          ),
+          if (data.preliminary)
+            PreliminaryNote(
+              policy: data.policy,
+              showReviewHold: data.hasReviewHold,
+            ),
         ],
       ),
     );

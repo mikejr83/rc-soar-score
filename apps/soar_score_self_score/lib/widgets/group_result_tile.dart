@@ -52,16 +52,11 @@ class GroupResultTile extends StatelessWidget {
         icon: Icons.schedule,
         style: StatusChipStyle.quiet,
       ),
-      GroupRowKind.pendingReview => const StatusChip(
-        label: 'Pending review',
-        icon: Icons.rate_review_outlined,
-      ),
     };
     final note = switch (row.kind) {
       GroupRowKind.scored => null,
       GroupRowKind.zero => 'Time, height and landing are zeroed.',
       GroupRowKind.noScore => 'Not in the standings for this round.',
-      GroupRowKind.pendingReview => 'The review keeps the original entry.',
     };
     final numbers = BrandTypography.numbers.copyWith(
       fontWeight: row.isYou ? FontWeight.w700 : null,
@@ -124,6 +119,19 @@ class GroupResultTile extends StatelessWidget {
                     note,
                     style: theme.textTheme.bodySmall?.copyWith(color: muted),
                   ),
+                if (row.reviewPending) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4),
+                    child: StatusChip(
+                      label: 'Pending review',
+                      icon: Icons.rate_review_outlined,
+                    ),
+                  ),
+                  Text(
+                    'The review keeps the original entry.',
+                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                  ),
+                ],
               ],
             ),
           ),

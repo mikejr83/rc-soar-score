@@ -489,6 +489,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retire pilot'**
   String get retirePilot;
+
+  /// Note under the results: a pilot's own scores are preliminary; used when the contest's official-score rule is unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores are preliminary until the contest makes them official. Until then they can change.'**
+  String get preliminaryNoteGeneral;
+
+  /// Note under the results when scores become official at the end of the round.
+  ///
+  /// In en, this message translates to:
+  /// **'These scores are preliminary. Each score becomes official when all required scores for its round have been submitted. Until then it can change.'**
+  String get preliminaryNoteEndOfRound;
+
+  /// Note under the results when scores become official at the end of the group.
+  ///
+  /// In en, this message translates to:
+  /// **'These scores are preliminary. Each score becomes official when all required scores for its group have been submitted. Until then it can change.'**
+  String get preliminaryNoteEndOfGroup;
+
+  /// Note under the results when only the director makes scores official.
+  ///
+  /// In en, this message translates to:
+  /// **'These scores are preliminary. Each score becomes official when the director makes it official. Until then it can change.'**
+  String get preliminaryNoteManual;
+
+  /// Added to the preliminary note when a review is open, or may be opened.
+  ///
+  /// In en, this message translates to:
+  /// **'A score under review is held: it stays as entered and is not made official until the review is decided.'**
+  String get preliminaryNoteReviewHold;
 }
 
 class _AppLocalizationsDelegate

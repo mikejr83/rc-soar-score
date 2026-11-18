@@ -24,6 +24,21 @@ Future<void> phase6Results(
       expect(find.text(mate), findsOneWidget);
       expect(find.text('No score yet'), findsOneWidget);
     });
+    await journey.step(
+      'The group says when the score becomes official',
+      () async {
+        // The e2e contest stores no official-score rule, which reads as the
+        // director marking scores official.
+        expect(
+          find.textContaining('when the director makes it official'),
+          findsOneWidget,
+        );
+        expect(
+          find.textContaining('A score under review is held'),
+          findsNothing,
+        );
+      },
+    );
     await journey.step('A group mate\'s score shows after it is in', () async {
       await contest.scoreAsDirector(mate, 1, timeFlown: 420);
       await tapVisible(tester, find.text('Refresh'));
@@ -41,6 +56,14 @@ Future<void> phase6Results(
       expect(find.text(pilot), findsWidgets);
       expect(find.text(mate), findsWidgets);
       expect(find.textContaining('Standings are held'), findsNothing);
+      expect(
+        find.textContaining('when the director makes it official'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('A score under review is held'),
+        findsOneWidget,
+      );
     });
     await journey.step(
       'Overall results refresh without leaving the page',
