@@ -72,7 +72,6 @@ dependencies:
   printing: ^5.15.1
   qr: ^3.0.2
   file_selector: ^1.1.0
-  flutter_svg: ^2.4.0
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/startup/startup_mode.dart';
@@ -34,8 +33,8 @@ class StartupSplashPage extends StatelessWidget {
   /// The lockup for the system's light or dark theme.
   static String logoAsset(Brightness brightness) =>
       brightness == Brightness.dark
-      ? 'assets/brand/rc-soar-score-lockup-dark-transparent.svg'
-      : 'assets/brand/rc-soar-score-lockup-light-transparent.svg';
+      ? 'assets/brand/rc-soar-score-lockup-dark.png'
+      : 'assets/brand/rc-soar-score-lockup-light.png';
 
   static String message(AppLocalizations l10n, StartupMode mode) =>
       switch (mode) {
@@ -59,11 +58,11 @@ class StartupSplashPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SvgPicture.asset(
+                Image.asset(
                   logoAsset(theme.brightness),
                   key: const ValueKey('startup-splash-logo'),
                   height: 96,
-                  semanticsLabel: 'Soar Score',
+                  semanticLabel: 'Soar Score',
                 ),
                 const SizedBox(height: 24),
                 const LinearProgressIndicator(),

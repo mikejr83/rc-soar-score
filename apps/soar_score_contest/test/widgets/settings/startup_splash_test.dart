@@ -30,11 +30,11 @@ void main() {
   test('the logo follows the system theme', () {
     expect(
       StartupSplashPage.logoAsset(Brightness.light),
-      'assets/brand/rc-soar-score-lockup-light-transparent.svg',
+      'assets/brand/rc-soar-score-lockup-light.png',
     );
     expect(
       StartupSplashPage.logoAsset(Brightness.dark),
-      'assets/brand/rc-soar-score-lockup-dark-transparent.svg',
+      'assets/brand/rc-soar-score-lockup-dark.png',
     );
   });
 
