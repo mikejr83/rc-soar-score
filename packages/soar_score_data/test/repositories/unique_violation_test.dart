@@ -1,4 +1,9 @@
 import 'package:drift/drift.dart' show DriftWrappedException;
+import 'package:postgres/postgres.dart' show ServerException;
+import 'package:postgres/src/exceptions.dart'
+    show buildExceptionFromErrorFields;
+import 'package:postgres/src/messages/server_messages.dart'
+    show ErrorField, ErrorFieldId;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/repositories/unique_violation.dart';
 import 'package:soar_score_data/sync/drift_sync_acceptor_store.dart';
@@ -7,6 +12,20 @@ import 'package:test/test.dart';
 
 SqliteException _sqlite(int code, String message) =>
     SqliteException(extendedResultCode: code, message: message);
+
+/// Builds a [ServerException] the way the postgres driver does, using the
+/// package's own `buildExceptionFromErrorFields` helper because
+/// `ServerException`'s canonical constructor is private.
+///
+/// When [code] is null the code field is omitted so the built exception
+/// reports `code == null`, matching a server error without a SQLSTATE.
+ServerException _pg({String? code, String message = 'x'}) {
+  final fields = <ErrorField>[
+    if (code != null) ErrorField(ErrorFieldId.code, code),
+    ErrorField(ErrorFieldId.message, message),
+  ];
+  return buildExceptionFromErrorFields(fields);
+}
 
 void main() {
   group('constraintViolationKind', () {
@@ -76,6 +95,29 @@ void main() {
           core.SyncConstraintKind.foreignKey,
         ),
       );
+    });
+
+    test('reads the PostgreSQL SQLSTATE code', () {
+      expect(
+        constraintViolationKind(_pg(code: '23505')),
+        ConstraintViolationKind.unique,
+      );
+      expect(
+        constraintViolationKind(_pg(code: '23503')),
+        ConstraintViolationKind.foreignKey,
+      );
+      expect(constraintViolationKind(_pg()), isNull);
+      expect(constraintViolationKind(_pg(code: '42P01')), isNull);
+    });
+  });
+
+  group('isUniqueViolation', () {
+    test('is false for null', () {
+      expect(isUniqueViolation(null), isFalse);
+    });
+
+    test('is true for a 23505 ServerException', () {
+      expect(isUniqueViolation(_pg(code: '23505')), isTrue);
     });
   });
 }
