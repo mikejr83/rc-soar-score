@@ -178,6 +178,14 @@ class ScoringServer {
   /// When set, a promotion request waits for this before it is answered.
   Completer<void>? holdPromote;
 
+  /// When set, a whole group promotion request is answered with this error
+  /// status and none of its rows are decided.
+  int? groupPromoteFailure;
+
+  /// When set, the next read of the scores is answered with what the server
+  /// knew then, but only after this completes. It is used once.
+  Completer<void>? holdNextScoresRead;
+
   /// Slots whose official score the contest accepted automatically, and the
   /// revision the director confirmed for each (review closed).
   final Set<Id> _automatic = {};
@@ -620,7 +628,7 @@ class ScoringServer {
         }, 500);
       }
       final matrix = matrixServer.matrix!;
-      return _json({
+      final answer = _json({
         'scores': [
           for (final assignment in matrix.assignments)
             {
@@ -632,6 +640,14 @@ class ScoringServer {
         ],
         'rounds': const <Object>[],
       });
+      // The answer above is what the server knew when the read arrived; a
+      // held read delivers it late, after later reads were answered.
+      final hold = holdNextScoresRead;
+      if (hold != null) {
+        holdNextScoresRead = null;
+        await hold.future;
+      }
+      return answer;
     }
     if (request.method == 'GET' && path.contains('/results/rounds/')) {
       return _json({
@@ -646,6 +662,12 @@ class ScoringServer {
       }
       final body = jsonDecode(request.body) as Map<String, dynamic>;
       if (path.contains('/groups/')) {
+        final whole = groupPromoteFailure;
+        if (whole != null) {
+          return _json({
+            'error': {'code': 'contest_busy', 'message': 'Busy.'},
+          }, whole);
+        }
         return _json({
           'outcomes': [
             for (final raw in body['items'] as List<dynamic>)

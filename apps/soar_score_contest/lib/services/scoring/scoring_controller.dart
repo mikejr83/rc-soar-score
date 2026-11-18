@@ -766,7 +766,9 @@ class ScoringController extends ChangeNotifier {
     if (row.retired) return MarkOfficialSkip.retired;
     if (row.isAdoptionPending) return MarkOfficialSkip.waitingToSync;
     if (block != null || row.isLocked) return MarkOfficialSkip.closed;
-    if (saveOf(row.id).isBusy) return MarkOfficialSkip.busy;
+    if (saveOf(row.id).isBusy || saveOf(row.id).needsRefresh) {
+      return MarkOfficialSkip.busy;
+    }
     if (hasEdits(row)) return MarkOfficialSkip.edited;
     if (forGroup &&
         row.slot?.placeholder.state == ScorePlaceholderState.inReview) {
@@ -841,8 +843,9 @@ class ScoringController extends ChangeNotifier {
   /// lock or retirement ended) is dropped without sending anything, and a row
   /// with no failure to retry sends nothing.
   Future<bool> retryPromotion(ScoringRow row) async {
-    final target = saveOf(row.id).target;
-    if (target == null) return false;
+    final save = saveOf(row.id);
+    final target = save.target;
+    if (target == null || save.needsRefresh) return false;
     if (!_matchesTarget(row, target)) {
       _saves.remove(row.id);
       notifyListeners();
@@ -861,7 +864,11 @@ class ScoringController extends ChangeNotifier {
       if (!save.promotion || save.isBusy || save.changed || target == null) {
         continue;
       }
-      if (!_matchesTarget(row, target)) _saves.remove(row.id);
+      // A failure that was waiting for a read is settled by this one: the row
+      // is current again and the director can ask afresh.
+      if (save.needsRefresh || !_matchesTarget(row, target)) {
+        _saves.remove(row.id);
+      }
     }
   }
 
@@ -875,7 +882,9 @@ class ScoringController extends ChangeNotifier {
     if (row.retired) return MarkOfficialSkip.retired;
     if (row.isAdoptionPending) return MarkOfficialSkip.waitingToSync;
     if (block != null || row.isLocked) return MarkOfficialSkip.closed;
-    if (saveOf(row.id).isBusy) return MarkOfficialSkip.busy;
+    if (saveOf(row.id).isBusy || saveOf(row.id).needsRefresh) {
+      return MarkOfficialSkip.busy;
+    }
     if (hasEdits(row)) return MarkOfficialSkip.edited;
     return null;
   }
@@ -998,6 +1007,7 @@ class ScoringController extends ChangeNotifier {
         promotion: true,
         confirm: save.confirm,
         target: save.target,
+        needsRefresh: true,
       );
     }
   }
@@ -1218,6 +1228,7 @@ class ScoringController extends ChangeNotifier {
           promotion: true,
           confirm: target?.confirm ?? row.isAutomaticUnconfirmed,
           target: target,
+          needsRefresh: true,
         );
       } else if (!_stillWaiting(row)) {
         _saves.remove(row.id);
@@ -1250,7 +1261,11 @@ class ScoringController extends ChangeNotifier {
   /// Returns false when the read failed and the rows are as they were.
   Future<bool> _refreshSlots(List<ScoringRow> stale) async {
     try {
+      final generation = _syncReads;
       final fresh = await client.scores(contestId);
+      // A sync applied while this read was out is newer than it: keep that
+      // and do not put this older answer over it.
+      if (generation != _syncReads) return true;
       final ids = {for (final row in stale) row.id};
       for (final slot in fresh.slots) {
         if (!ids.contains(slot.placeholder.assignmentId)) continue;

@@ -263,4 +263,95 @@ void main() {
       expect(summary.retry, 1);
     },
   );
+
+  test('a Confirm in flight cannot be sent again', () async {
+    final server = ScoringServer()..seedAutomaticScore(first, flight);
+    final hold = server.holdPromote = Completer<void>();
+    final c = await _open(server);
+
+    final sent = c.confirmAutomatic(_row(c, 1));
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    expect(server.promoteRequests, 1);
+
+    expect(c.confirmAutomaticSkip(_row(c, 1)), MarkOfficialSkip.busy);
+    expect(await c.confirmAutomatic(_row(c, 1)), isFalse);
+    expect(server.promoteRequests, 1, reason: 'no second request');
+
+    hold.complete();
+    await sent;
+  });
+
+  test('an older read arriving after a newer sync does not restore the '
+      'old row', () async {
+    final server = ScoringServer()..seedAutomaticScore(first, flight);
+    final hold = server.holdPromote = Completer<void>();
+    final c = await _open(server);
+
+    final sent = c.confirmAutomatic(_row(c, 1));
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    // A sync applied while the request is out makes the catch-up necessary.
+    await c.refreshAfterSync();
+
+    // The request fails; its catch-up read is held with the old answer.
+    server.promoteFailures[first] = (503, 'contest_busy');
+    hold.complete();
+    final readHeld = server.holdNextScoresRead = Completer<void>();
+    final done = sent;
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+
+    // Meanwhile another director confirms and a newer sync is applied.
+    server.confirmAsDirector(first);
+    await c.refreshAfterSync();
+    readHeld.complete();
+    await done;
+
+    expect(_row(c, 1).isAutomaticUnconfirmed, isFalse);
+    expect(c.saveOf(first).kind, RowSaveKind.idle);
+  });
+
+  group('Mark all when the whole request fails', () {
+    test('a failed catch-up read leaves Refresh for every row', () async {
+      final second = scoringAssignmentId(1, 2);
+      final server = ScoringServer()
+        ..seedPendingSubmission(first, flight)
+        ..seedPendingSubmission(second, flight);
+      final hold = server.holdPromote = Completer<void>();
+      final c = await _open(server);
+
+      final all = c.markAllOfficial();
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      await c.refreshAfterSync();
+
+      server.groupPromoteFailure = 503;
+      server.readFailure = 503;
+      hold.complete();
+      await all;
+      for (final pilot in [1, 2]) {
+        expect(
+          c.saveOf(scoringAssignmentId(1, pilot)).kind,
+          RowSaveKind.failed,
+        );
+        expect(
+          c.markOfficialSkip(_row(c, pilot)),
+          MarkOfficialSkip.busy,
+          reason: 'Refresh first, no new request',
+        );
+        expect(await c.retryPromotion(_row(c, pilot)), isFalse);
+      }
+      expect(server.promoteRequests, 1);
+
+      server.readFailure = null;
+      server.groupPromoteFailure = null;
+      await c.refreshAfterSync();
+      // Refresh worked: the rows wait plainly again, with no stale failure.
+      for (final pilot in [1, 2]) {
+        expect(c.saveOf(scoringAssignmentId(1, pilot)).kind, RowSaveKind.idle);
+        expect(c.markOfficialSkip(_row(c, pilot)), isNull);
+      }
+    });
+  });
 }

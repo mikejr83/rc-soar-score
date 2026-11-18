@@ -43,6 +43,7 @@ class RowSave {
     this.changed = false,
     this.confirm = false,
     this.target,
+    this.needsRefresh = false,
   });
 
   static const idle = RowSave(RowSaveKind.idle);
@@ -73,6 +74,11 @@ class RowSave {
   /// page reconcile against that and not against whatever the row shows now.
   final PromotionTarget? target;
 
+  /// For a failed [promotion]: the slot could not be read again after a sync
+  /// overlapped the request, so the row may be behind. Mark official, Confirm
+  /// and Retry stay off until a read has settled it (the Refresh action).
+  final bool needsRefresh;
+
   /// This save bound to [target].
   RowSave withTarget(PromotionTarget target) => RowSave(
     kind,
@@ -81,6 +87,7 @@ class RowSave {
     promotion: promotion,
     changed: changed,
     confirm: confirm,
+    needsRefresh: needsRefresh,
     target: target,
   );
 
