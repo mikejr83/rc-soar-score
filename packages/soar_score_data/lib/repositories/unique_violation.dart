@@ -15,9 +15,10 @@ const _sqliteForeignKey = 787;
 /// it is not the database refusing a unique or foreign-key rule.
 ///
 /// Decided from the driver's own code (the SQLite extended result code or the
-/// PostgreSQL SQLSTATE), never from the message text: a message can carry
-/// user data, such as an id that happens to contain `23505`, and an error that
-/// is not from the database at all (a not-found, say) must stay what it is.
+/// PostgreSQL SQLSTATE — `23505` is a unique violation, `23503` is a foreign
+/// key violation), never from the message text: a message can carry user
+/// data, such as an id that happens to contain `23505`, and an error that is
+/// not from the database at all (a not-found, say) must stay what it is.
 ConstraintViolationKind? constraintViolationKind(Object? error) {
   switch (error) {
     case ServerException(:final code):
@@ -40,5 +41,5 @@ ConstraintViolationKind? constraintViolationKind(Object? error) {
 }
 
 /// Whether [error] is a broken unique rule on either backend.
-bool isUniqueViolation(Object error) =>
+bool isUniqueViolation(Object? error) =>
     constraintViolationKind(error) == ConstraintViolationKind.unique;
