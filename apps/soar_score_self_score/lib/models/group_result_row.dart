@@ -8,9 +8,6 @@ enum GroupRowKind {
 
   /// No score has been entered yet.
   noScore,
-
-  /// A review is open; the original entry is still shown.
-  pendingReview,
 }
 
 /// One pilot's flight in a group, as the group results page shows it. Each
@@ -28,6 +25,7 @@ class GroupResultRow {
     this.score,
     this.zeroReason,
     this.isYou = false,
+    this.reviewPending = false,
   });
 
   final String name;
@@ -51,4 +49,8 @@ class GroupResultRow {
   final String? zeroReason;
 
   final bool isYou;
+
+  /// A review is open on the flight; the original entry is still shown. It
+  /// holds for any kind, so a zero keeps its reason while under review.
+  final bool reviewPending;
 }

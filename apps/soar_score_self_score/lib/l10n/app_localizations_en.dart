@@ -251,11 +251,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get preliminaryNoteEndOfRound =>
-      'These scores are preliminary. They become official when every pilot\'s score for the round has been submitted. Until then they can change.';
+      'These scores are preliminary. They become official when all required scores for the round have been submitted. Until then they can change.';
 
   @override
   String get preliminaryNoteEndOfGroup =>
-      'These scores are preliminary. They become official when every pilot\'s score in the group has been submitted. Until then they can change.';
+      'These scores are preliminary. They become official when all required scores in the group have been submitted. Until then they can change.';
 
   @override
   String get preliminaryNoteManual =>

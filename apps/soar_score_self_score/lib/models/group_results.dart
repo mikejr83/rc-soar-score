@@ -28,6 +28,5 @@ class GroupResults {
   final bool preliminary;
 
   /// True when a flight in the group is held by an open review.
-  bool get hasReviewHold =>
-      rows.any((row) => row.kind == GroupRowKind.pendingReview);
+  bool get hasReviewHold => rows.any((row) => row.reviewPending);
 }

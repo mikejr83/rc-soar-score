@@ -10,6 +10,7 @@ import 'package:soar_score_self_score/models/officialization_policy.dart';
 import 'package:soar_score_self_score/models/results_view.dart';
 import 'package:soar_score_self_score/pages/group_results_page.dart';
 import 'package:soar_score_self_score/pages/results_page.dart';
+import 'package:soar_score_self_score/widgets/group_result_tile.dart';
 
 class _Repository extends SampleSelfScoreRepository {
   const _Repository(this.preliminary, {this.review = false});
@@ -33,22 +34,14 @@ class _Repository extends SampleSelfScoreRepository {
       latestRound: data.latestRound,
       rows: [
         for (final (i, row) in data.rows.indexed)
-          if (row.kind == GroupRowKind.pendingReview && !review)
-            GroupResultRow(
-              name: row.name,
-              kind: GroupRowKind.scored,
-              time: row.time,
-              score: row.score,
-            )
-          else if (review && i == 0)
-            GroupResultRow(
-              name: row.name,
-              kind: GroupRowKind.pendingReview,
-              time: row.time,
-              score: row.score,
-            )
-          else
-            row,
+          GroupResultRow(
+            name: row.name,
+            kind: row.kind,
+            time: row.time,
+            score: row.score,
+            zeroReason: row.zeroReason,
+            reviewPending: review && i == 0,
+          ),
       ],
       preliminary: preliminary,
     );
@@ -147,9 +140,37 @@ void main() {
         find.byKey(const ValueKey('preliminary-note'), skipOffstage: false),
       );
       expect(note.data, startsWith('These scores are preliminary'));
-      expect(note.data, contains('in the group'));
+      expect(note.data, contains('all required scores in the group'));
     },
   );
+
+  testWidgets('a zero under review keeps its reason beside the review chip', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: Scaffold(
+          body: GroupResultTile(
+            row: const GroupResultRow(
+              name: 'Jane Smith',
+              kind: GroupRowKind.zero,
+              zeroReason: 'landed out',
+              isYou: true,
+              reviewPending: true,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Zero: landed out'), findsOneWidget);
+    expect(find.text('Pending review'), findsOneWidget);
+    expect(find.text('Time, height and landing are zeroed.'), findsOneWidget);
+    expect(find.text('The review keeps the original entry.'), findsOneWidget);
+  });
 }
 
 class _MixedRepository extends SampleSelfScoreRepository {

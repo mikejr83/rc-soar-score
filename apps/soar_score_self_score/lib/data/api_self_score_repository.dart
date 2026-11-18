@@ -359,7 +359,6 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
 
   GroupResultRow _groupRow(ParticipantGroupRowDto row) {
     final kind = switch (row.state) {
-      _ when row.reviewPending => GroupRowKind.pendingReview,
       ParticipantScoreState.zero => GroupRowKind.zero,
       ParticipantScoreState.notEntered ||
       ParticipantScoreState.draft => GroupRowKind.noScore,
@@ -383,6 +382,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
           : ScoreFormat.score(score),
       zeroReason: row.zeroReason?.toLowerCase(),
       isYou: row.isYou,
+      reviewPending: row.reviewPending,
     );
   }
 

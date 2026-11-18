@@ -143,7 +143,13 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
     group: participantGroupLabel(mine.group - 1),
     latestRound: latest < roundOrdinal ? roundOrdinal : latest,
     preliminary:
-        rows.any((r) => r.sortKey == null || r.pending) ||
+        // A retiree with no score is not a missing required score.
+        rows.any(
+          (r) =>
+              (r.sortKey == null &&
+                  r.row.state != ParticipantScoreState.retired) ||
+              r.pending,
+        ) ||
         calculation.input.incompleteGroups.contains((roundOrdinal, mine.group)),
     scoresBecomeOfficial:
         calculation.revision.config.coreOptions.scoresBecomeOfficial,

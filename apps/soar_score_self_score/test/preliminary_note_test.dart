@@ -28,11 +28,11 @@ void main() {
   ) async {
     expect(
       await _noteFor(tester, OfficializationPolicy.endOfRound),
-      contains('for the round has been submitted'),
+      contains('all required scores for the round'),
     );
     expect(
       await _noteFor(tester, OfficializationPolicy.endOfGroup),
-      contains('in the group has been submitted'),
+      contains('all required scores in the group'),
     );
     expect(
       await _noteFor(tester, OfficializationPolicy.manual),
