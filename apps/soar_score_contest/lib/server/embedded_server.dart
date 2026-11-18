@@ -297,10 +297,14 @@ class EmbeddedServer {
       _settle();
       if (seedDemo) {
         _logger.finer('Seeding demo data');
-        await DemoDataSeeder(
-          Repository(_database),
-          localAccountId: _localAccountId,
-        ).seed();
+        // One transaction for the whole demo: each service call would
+        // otherwise commit (and sync to disk) on its own, 300 times over.
+        await _database.transaction(
+          () => DemoDataSeeder(
+            Repository(_database),
+            localAccountId: _localAccountId,
+          ).seed(),
+        );
       }
     } catch (_) {
       await _database.close();
