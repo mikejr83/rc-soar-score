@@ -1,0 +1,347 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_core/soar_score_core.dart';
+
+import 'package:soar_score_contest/services/reports/csv_export/score_export_error.dart';
+import 'package:soar_score_contest/services/reports/csv_export/score_export_options.dart';
+import 'package:soar_score_contest/services/reports/csv_export/score_export_source.dart';
+
+import '../../../support/matrix_test_support.dart';
+import '../../../support/standings_fixtures.dart';
+
+/// A one-read report for [fixture]'s two-round contest: the contest facts,
+/// the stored standings as of round 2, and every flight of the two rounds.
+ReportData reportOf(StandingsFixture fixture, {int asOf = 2}) {
+  return ReportData(
+    contest: matrixContest(),
+    configuration: matrixConfiguration(),
+    participations: matrixParticipations(numbered: true),
+    participants: matrixProfiles(),
+    teams: matrixTeams(),
+    teamMemberships: matrixMemberships(),
+    scores: fixture.scores,
+    results: fixture.standings[asOf]!,
+    roundResults: [for (final round in fixture.roundResults.values) round],
+  );
+}
+
+ScoreExportOptions allOptions({int to = 2}) => ScoreExportOptions(
+  from: 1,
+  requestedTo: to,
+  to: to,
+  lastShown: 2,
+  rounds: [for (var r = 1; r <= to; r++) r],
+  percentage: false,
+  raw: false,
+  team: false,
+  number: false,
+  pilotClass: false,
+);
+
+void main() {
+  final fixture = StandingsFixture();
+  final source = ScoreExportSource.of(reportOf(fixture), allOptions());
+
+  group('standings view', () {
+    test('one row per pilot, in the stored rank order', () {
+      expect(source.standings.length, 4);
+      expect(
+        [for (final row in source.standings) row.pilot.listName],
+        ['Ray, Bo', 'Fox, Cy', 'Park, Di', 'Lee, Ann'],
+      );
+      expect([for (final row in source.standings) row.place], [1, 2, 3, 4]);
+    });
+
+    test('total, raw and penalty come from the stored standing', () {
+      final byName = {for (final r in source.standings) r.pilot.listName: r};
+      expect(byName['Ray, Bo']!.total, 1750);
+      expect(byName['Ray, Bo']!.raw, 1750);
+      expect(byName['Lee, Ann']!.total, 900);
+      expect(byName['Lee, Ann']!.raw, 1400);
+      expect(byName['Lee, Ann']!.penalty, 0);
+      expect(byName['Park, Di']!.total, 1200);
+      expect(byName['Park, Di']!.raw, 1200);
+      expect(byName['Park, Di']!.penalty, 50);
+    });
+
+    test('percentage is of the winner', () {
+      final byName = {for (final r in source.standings) r.pilot.listName: r};
+      expect(byName['Ray, Bo']!.percentage, 100);
+      expect(byName['Fox, Cy']!.percentage, 80);
+      expect(byName['Lee, Ann']!.percentage, closeTo(51.4286, 0.0001));
+    });
+
+    test('a cell is the pilot\'s selected round score', () {
+      final byName = {for (final r in source.standings) r.pilot.listName: r};
+      final ray = byName['Ray, Bo']!;
+      expect(ray.cells[1]!.score, 800);
+      expect(ray.cells[2]!.score, 950);
+      expect(ray.cells[1]!.dropped, isFalse);
+    });
+
+    test('a dropped round keeps its value and is marked dropped', () {
+      final lee = source.standings.lastWhere(
+        (r) => r.pilot.listName == 'Lee, Ann',
+      );
+      expect(lee.cells[2]!.score, 500);
+      expect(lee.cells[2]!.dropped, isTrue);
+    });
+  });
+
+  group('flight view', () {
+    test('one row per flight, every flight not only the selected one', () {
+      expect(source.flights.length, 8);
+    });
+
+    test('rows are ordered by round, then group, then score', () {
+      expect(
+        [for (final f in source.flights) '${f.round}${f.group}'],
+        ['1A', '1A', '1B', '1B', '2A', '2A', '2B', '2B'],
+      );
+    });
+
+    test('the selected flag marks the counting flight', () {
+      expect(source.flights.every((f) => f.selected), isTrue);
+    });
+
+    test('the round score is the flight group score', () {
+      expect(
+        [for (final f in source.flights) f.roundScore],
+        [900, 800, 700, 600, 700, 500, 950, 650],
+      );
+    });
+
+    test('time and height come from the official score components', () {
+      for (final flight in source.flights) {
+        expect(flight.seconds, 592);
+        expect(flight.height, 105);
+      }
+    });
+
+    test('landing points come from the flight result', () {
+      expect(
+        [for (final f in source.flights) f.landing],
+        [50, 50, 50, 50, 50, 50, 50, 50],
+      );
+    });
+
+    test('place and total are denormalized onto every flight row', () {
+      final ray = source.flights
+          .where((f) => f.pilot.listName == 'Ray, Bo')
+          .toList();
+      expect(ray.map((f) => f.place), [1, 1]);
+      expect(ray.map((f) => f.total), [1750, 1750]);
+    });
+  });
+
+  group('facts', () {
+    test('the contest name and decimal places are carried', () {
+      expect(source.contestName, 'Gator Cup F5J');
+      expect(source.decimalPlaces, 1);
+      expect(source.rounds, [1, 2]);
+    });
+  });
+
+  group('validation', () {
+    test('a read with no stored standing throws', () {
+      final report = reportOf(fixture);
+      final noStanding = ReportData(
+        contest: report.contest,
+        configuration: report.configuration,
+        participations: report.participations,
+        participants: report.participants,
+        teams: report.teams,
+        teamMemberships: report.teamMemberships,
+        scores: report.scores,
+        results: null,
+        roundResults: report.roundResults,
+      );
+      expect(
+        () => ScoreExportSource.of(noStanding, allOptions()),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+
+    test('standings as of a different round than the export throws', () {
+      // The standings are as of round 1, but the export shows to round 2.
+      expect(
+        () => ScoreExportSource.of(reportOf(fixture, asOf: 1), allOptions()),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+
+    test('an empty range throws', () {
+      final options = ScoreExportOptions(
+        from: 3,
+        requestedTo: 5,
+        to: 0,
+        lastShown: 2,
+        rounds: const [],
+        percentage: false,
+        raw: false,
+        team: false,
+        number: false,
+        pilotClass: false,
+      );
+      expect(
+        () => ScoreExportSource.of(reportOf(fixture), options),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+
+    test('a read without the rounds throws, even with populated standings', () {
+      // The standings are stored, but the read omitted the rounds: without the
+      // check this would export blank round scores and a header-only Flight
+      // Details sheet.
+      final base = reportOf(fixture);
+      final noRounds = ReportData(
+        contest: base.contest,
+        configuration: base.configuration,
+        participations: base.participations,
+        participants: base.participants,
+        teams: base.teams,
+        teamMemberships: base.teamMemberships,
+        scores: base.scores,
+        results: base.results,
+        roundResults: null,
+      );
+      expect(
+        () => ScoreExportSource.of(noRounds, allOptions()),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+
+    test('a read missing one requested round throws', () {
+      // Only round 1 is present, but the export shows rounds 1 and 2.
+      final base = reportOf(fixture);
+      final partial = ReportData(
+        contest: base.contest,
+        configuration: base.configuration,
+        participations: base.participations,
+        participants: base.participants,
+        teams: base.teams,
+        teamMemberships: base.teamMemberships,
+        scores: base.scores,
+        results: base.results,
+        roundResults: [fixture.roundResults[1]!],
+      );
+      expect(
+        () => ScoreExportSource.of(partial, allOptions()),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+
+    test('a requested round with no flights is preserved, not refused', () {
+      // Round 2 is present but empty: that is a legitimate result (no one
+      // flew), not an omitted round. The check must pass it through.
+      final base = reportOf(fixture);
+      final emptyRound2 = ReportData(
+        contest: base.contest,
+        configuration: base.configuration,
+        participations: base.participations,
+        participants: base.participants,
+        teams: base.teams,
+        teamMemberships: base.teamMemberships,
+        scores: base.scores,
+        results: base.results,
+        roundResults: [fixture.roundResults[1]!, RoundResults(ordinal: 2)],
+      );
+      final source = ScoreExportSource.of(emptyRound2, allOptions());
+      // Round 1's flights are there; round 2's are not.
+      expect(source.flights.map((f) => f.round).toSet(), {1});
+    });
+  });
+
+  group('sort tiebreak', () {
+    test('tied flights order by name, then participation id', () {
+      // Two flights in group 1 with the same score: the order is decided by
+      // the pilot name, then the participation id, not the unstable list
+      // order. Pilot 3 ("Di Park") sorts before pilot 1 ("Bo Ray") by name.
+      final tie = RoundResults(
+        ordinal: 1,
+        flights: [
+          RoundFlightResult(
+            group: 1,
+            result: flight(1, 1, 500, placeholder: Id.create()),
+          ),
+          RoundFlightResult(
+            group: 1,
+            result: flight(3, 1, 500, placeholder: Id.create()),
+          ),
+        ],
+      );
+      final report = ReportData(
+        contest: matrixContest(),
+        configuration: matrixConfiguration(),
+        participations: matrixParticipations(numbered: true),
+        participants: matrixProfiles(),
+        teams: matrixTeams(),
+        teamMemberships: matrixMemberships(),
+        scores: fixture.scores,
+        results: fixture.standings[1]!,
+        roundResults: [tie],
+      );
+      final source = ScoreExportSource.of(report, allOptions(to: 1));
+      expect(
+        [for (final f in source.flights) f.pilot.participationId.value],
+        [participationId(3).value, participationId(1).value],
+      );
+    });
+
+    test('a read without the pilots throws, even with stored standings', () {
+      final base = reportOf(fixture);
+      final noParticipations = ReportData(
+        contest: base.contest,
+        configuration: base.configuration,
+        participations: null,
+        participants: base.participants,
+        teams: base.teams,
+        teamMemberships: base.teamMemberships,
+        scores: base.scores,
+        results: base.results,
+        roundResults: base.roundResults,
+      );
+      expect(
+        () => ScoreExportSource.of(noParticipations, allOptions()),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+
+    test('a read without the participants throws', () {
+      final base = reportOf(fixture);
+      final noParticipants = ReportData(
+        contest: base.contest,
+        configuration: base.configuration,
+        participations: base.participations,
+        participants: null,
+        teams: base.teams,
+        teamMemberships: base.teamMemberships,
+        scores: base.scores,
+        results: base.results,
+        roundResults: base.roundResults,
+      );
+      expect(
+        () => ScoreExportSource.of(noParticipants, allOptions()),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+
+    test('a read without the scores throws', () {
+      final base = reportOf(fixture);
+      final noScores = ReportData(
+        contest: base.contest,
+        configuration: base.configuration,
+        participations: base.participations,
+        participants: base.participants,
+        teams: base.teams,
+        teamMemberships: base.teamMemberships,
+        scores: null,
+        results: base.results,
+        roundResults: base.roundResults,
+      );
+      expect(
+        () => ScoreExportSource.of(noScores, allOptions()),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+  });
+}
