@@ -149,6 +149,17 @@ class ScoreExportSource {
       );
     }
     final rounds = options.rounds;
+    final roundResults = reportData.roundResults;
+    if (roundResults == null ||
+        rounds.any(
+          (round) =>
+              roundResults.indexWhere((r) => r.ordinal == round).isNegative,
+        )) {
+      throw ScoreExportError(
+        'The report read did not include the flights of the rounds shown '
+        '(rounds ${rounds.join(', ')}).',
+      );
+    }
     final pilots = _pilots(reportData);
     final standingOf = {
       for (final standing
@@ -156,10 +167,7 @@ class ScoreExportSource {
         standing.contestParticipationId: standing,
     };
     final componentsOf = _officialComponents(reportData);
-    final byRound = {
-      for (final round in reportData.roundResults ?? const <RoundResults>[])
-        round.ordinal: round,
-    };
+    final byRound = {for (final round in roundResults) round.ordinal: round};
 
     // The selected flight of each shown round, by pilot, so the standings view
     // can read a round score without a per-round lookup.

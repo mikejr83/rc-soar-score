@@ -29,7 +29,7 @@ ScoreExportOptions allOptions({int to = 2}) => ScoreExportOptions(
   requestedTo: to,
   to: to,
   lastShown: 2,
-  rounds: [1, 2],
+  rounds: [for (var r = 1; r <= to; r++) r],
   percentage: false,
   raw: false,
   team: false,
@@ -186,6 +186,68 @@ void main() {
         () => ScoreExportSource.of(reportOf(fixture), options),
         throwsA(isA<ScoreExportError>()),
       );
+    });
+
+    test('a read without the rounds throws, even with populated standings', () {
+      // The standings are stored, but the read omitted the rounds: without the
+      // check this would export blank round scores and a header-only Flight
+      // Details sheet.
+      final base = reportOf(fixture);
+      final noRounds = ReportData(
+        contest: base.contest,
+        configuration: base.configuration,
+        participations: base.participations,
+        participants: base.participants,
+        teams: base.teams,
+        teamMemberships: base.teamMemberships,
+        scores: base.scores,
+        results: base.results,
+        roundResults: null,
+      );
+      expect(
+        () => ScoreExportSource.of(noRounds, allOptions()),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+
+    test('a read missing one requested round throws', () {
+      // Only round 1 is present, but the export shows rounds 1 and 2.
+      final base = reportOf(fixture);
+      final partial = ReportData(
+        contest: base.contest,
+        configuration: base.configuration,
+        participations: base.participations,
+        participants: base.participants,
+        teams: base.teams,
+        teamMemberships: base.teamMemberships,
+        scores: base.scores,
+        results: base.results,
+        roundResults: [fixture.roundResults[1]!],
+      );
+      expect(
+        () => ScoreExportSource.of(partial, allOptions()),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+
+    test('a requested round with no flights is preserved, not refused', () {
+      // Round 2 is present but empty: that is a legitimate result (no one
+      // flew), not an omitted round. The check must pass it through.
+      final base = reportOf(fixture);
+      final emptyRound2 = ReportData(
+        contest: base.contest,
+        configuration: base.configuration,
+        participations: base.participations,
+        participants: base.participants,
+        teams: base.teams,
+        teamMemberships: base.teamMemberships,
+        scores: base.scores,
+        results: base.results,
+        roundResults: [fixture.roundResults[1]!, RoundResults(ordinal: 2)],
+      );
+      final source = ScoreExportSource.of(emptyRound2, allOptions());
+      // Round 1's flights are there; round 2's are not.
+      expect(source.flights.map((f) => f.round).toSet(), {1});
     });
   });
 

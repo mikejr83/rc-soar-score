@@ -5,10 +5,15 @@ import 'score_csv_format.dart';
 import 'score_export_error.dart';
 import 'score_export_source.dart';
 
-/// Saves a CSV file and answers the name written, or `null` when the director
+/// Saves a file and answers the name written, or `null` when the director
 /// cancelled. The web build downloads a blob; the native build uses the save
-/// dialog. A test swaps in a recorder with no real IO.
-typedef SaveCsvFile = Future<String?> Function(String fileName, String csv);
+/// dialog. [extension] is the format's file extension, so a non-CSV target is
+/// saved with its own extension. A test swaps in a recorder with no real IO.
+typedef SaveCsvFile = Future<String?> Function(
+  String fileName,
+  String csv, {
+  String extension,
+});
 
 /// The engine's entry point: it turns a [ScoreExportSource] into a CSV in the
 /// chosen [ScoreCsvFormat] and saves it. The save step is injected, mirroring
@@ -47,7 +52,11 @@ class ScoreCsvExporter {
       extension: format.fileExtension,
     );
     try {
-      return await saveFile(name, exportCsv(source, format));
+      return await saveFile(
+        name,
+        exportCsv(source, format),
+        extension: format.fileExtension,
+      );
     } catch (error) {
       throw ScoreExportError('Saving "$name" failed: $error');
     }
