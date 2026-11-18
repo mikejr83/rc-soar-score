@@ -4,9 +4,9 @@ The RC Soar Score solution is a set of applications and APIs to track, score, an
 
 This document is intended to explain how scores are entered by participants other than the contest director. A contest director is not considered a participant for this aspect of contest except in an administrative capacity.
 
-Participants can be of two main types, pilots and non-fliers. A pilot is only ever a pilot. A person who both flies and helps is not supported in the first release; the contest director can create a second participant with a different email for the helper role.
+Participants can be of two main types, pilots and non-fliers. In the first release, each participant has one self-scoring role per contest: pilot or helper. A future release may allow one participant to hold both roles.
 
-The general case for entering scores is that of an individual pilot in the contest entering their own scores. A pilot can only self-enter. When teams are enabled, a non-flier on a team is a **helper**: a helper can enter scores for the pilots on their team. Helper self-scoring exists only when teams are enabled. Every helper is assigned to a team, and the contest director assigns them.
+The general case for entering scores is that of an individual pilot in the contest entering their own scores. A pilot can only self-enter. When teams are enabled, a non-flier on a team is a **helper**: a helper can enter scores for the pilots on their team. Helper self-scoring exists only when teams are enabled. The contest director assigns each helper to exactly one team.
 
 In the case of a helper entering scores for their team, the helper first selects the team member and then follows the same steps to enter the score for the pilot as if the pilot were doing this operation. A pilot and a helper can both submit scores for the same pilot; the first accepted submission wins (see Pilot and helper entering the same score).
 
