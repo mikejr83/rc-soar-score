@@ -307,9 +307,13 @@ class ScoringController extends ChangeNotifier {
   /// What the other operator or the participant saved, for a stale row.
   Map<String, Object?>? theirsOf(Id id) => _theirs[id];
 
+  /// Whether a save of [row] has something to write: its values differ
+  /// from what is saved, or the director edited a pilot prefill (even back to
+  /// the saved values, which settles the waiting submission).
   bool isDirty(ScoringRow row) {
     final draft = _drafts[row.id];
-    return draft != null && draft.isDirty;
+    if (draft == null) return false;
+    return draft.isDirty || (row.hasPendingSubmission && draft.editedSinceLoad);
   }
 
   /// Rows being saved right now, one or many.
@@ -317,7 +321,47 @@ class ScoringController extends ChangeNotifier {
   bool get isSaving => savingCount > 0;
 
   int get dirtyCount => rows.where(isDirty).length;
-  bool get hasUnsaved => dirtyCount > 0;
+
+  /// Rows the director typed over. A form still holding exactly what a pilot
+  /// submitted is not counted: that submission is already saved (waiting to
+  /// become official), so leaving the group loses nothing.
+  int get unsavedCount => rows.where(hasUnsavedInput).length;
+  bool get hasUnsaved => unsavedCount > 0;
+
+  /// Whether the director typed anything into [row] that is not saved. Unlike
+  /// [hasEdits] this also sees invalid text and text that parses back to the
+  /// saved values, which the director still typed. A pilot prefill left as it
+  /// came is not input.
+  bool hasUnsavedInput(ScoringRow row) {
+    final draft = _drafts[row.id];
+    if (draft == null) return false;
+    return draft.editedSinceLoad ||
+        (draft.isDirty && !draft.isUntouchedPrefill);
+  }
+
+  /// The rows a save would write: the ones that differ from what is saved,
+  /// a pilot prefill the director edited (even back to the official values,
+  /// which resolves the waiting submission), and, with [editedOnly], only
+  /// rows with director input. Rows that cannot be saved now (invalid, stale
+  /// or already saving) are left out. Preflight checks and the save itself
+  /// use this one list.
+  List<ScoringRow> saveCandidates({bool editedOnly = false}) => [
+    for (final row in rows)
+      if (isDirty(row) &&
+          (!editedOnly || hasUnsavedInput(row)) &&
+          !const {
+            RowSaveKind.stale,
+            RowSaveKind.saving,
+          }.contains(saveOf(row.id).kind) &&
+          draftOf(row).problems.isEmpty &&
+          // saveAll leaves these for the director to retry on the row.
+          !(_removal(row, _drafts[row.id]) &&
+              const {
+                RowSaveKind.failed,
+                RowSaveKind.refused,
+              }.contains(saveOf(row.id).kind)))
+        row,
+  ];
 
   // Navigation.
 
@@ -342,6 +386,17 @@ class ScoringController extends ChangeNotifier {
   void activate(Id id) {
     if (activeId == id) return;
     activeId = id;
+    notifyListeners();
+  }
+
+  /// Drops what the director typed. Pilot submissions stay: the forms fill
+  /// from them again.
+  void discardEdits() {
+    _drafts.clear();
+    _saves.clear();
+    _seedUnreadSaves();
+    _theirs.clear();
+    _removalReasons.clear();
     notifyListeners();
   }
 
@@ -373,14 +428,10 @@ class ScoringController extends ChangeNotifier {
 
   /// The dirty rows whose save removes an applied cumulative penalty, in row
   /// order. Each needs a recorded reason the bulk paths must capture.
-  List<ScoringRow> get removalRows {
-    final removal = <ScoringRow>[];
-    for (final row in rows) {
-      final draft = _drafts[row.id];
-      if (draft != null && _removal(row, draft)) removal.add(row);
-    }
-    return removal;
-  }
+  List<ScoringRow> removalRows({bool editedOnly = false}) => [
+    for (final row in saveCandidates(editedOnly: editedOnly))
+      if (_removal(row, _drafts[row.id])) row,
+  ];
 
   static bool _removal(ScoringRow row, ScoreRowDraft? draft) {
     if (draft == null || !draft.isDirty) return false;
@@ -513,15 +564,9 @@ class ScoringController extends ChangeNotifier {
 
   /// Dirty rows that [saveAll] would save as a zero the director has not
   /// confirmed yet (a motor restart, out of bounds or no altitude).
-  List<ScoringRow> get unconfirmedZeroRows => [
-    for (final row in rows.where(isDirty))
-      if (!const {
-            RowSaveKind.stale,
-            RowSaveKind.saving,
-          }.contains(saveOf(row.id).kind) &&
-          draftOf(row).problems.isEmpty &&
-          draftOf(row).needsZeroConfirmation &&
-          !draftOf(row).zeroConfirmed)
+  List<ScoringRow> unconfirmedZeroRows({bool editedOnly = false}) => [
+    for (final row in saveCandidates(editedOnly: editedOnly))
+      if (draftOf(row).needsZeroConfirmation && !draftOf(row).zeroConfirmed)
         row,
   ];
 
@@ -535,20 +580,28 @@ class ScoringController extends ChangeNotifier {
   /// resolve on the row. A removal row is included only when its reason was
   /// recorded first ([recordRemovalReason]), so it is never saved under a
   /// generic reason.
-  Future<int> saveAll() async {
+  ///
+  /// With [editedOnly], a form that still holds a pilot submission as it
+  /// came is left alone (saving it would make it official).
+  Future<int> saveAll({bool editedOnly = false}) async {
     final batch = <ScoringRow>[];
-    for (final row in rows.where(isDirty).toList()) {
-      final kind = saveOf(row.id).kind;
-      if (kind == RowSaveKind.stale || kind == RowSaveKind.saving) continue;
-      if (isPenaltyRemoval(row)) {
-        if (removalReason(row.id) == null ||
-            kind == RowSaveKind.failed ||
-            kind == RowSaveKind.refused) {
-          continue;
+    if (editedOnly) {
+      // Formatting-only input has nothing to write: settle it, unless the
+      // row went stale (the director resolves that on the row).
+      for (final row in rows) {
+        final draft = _drafts[row.id];
+        if (draft != null &&
+            !isDirty(row) &&
+            draft.problems.isEmpty &&
+            draft.editedSinceLoad &&
+            saveOf(row.id).kind != RowSaveKind.stale) {
+          draft.resetTo(row.savedComponents, shown: _shown(row));
         }
       }
+    }
+    for (final row in saveCandidates(editedOnly: editedOnly)) {
+      if (isPenaltyRemoval(row) && removalReason(row.id) == null) continue;
       final draft = draftOf(row);
-      if (draft.problems.isNotEmpty) continue;
       if (draft.needsZeroConfirmation) draft.confirmZero();
       batch.add(row);
     }
@@ -749,7 +802,7 @@ class ScoringController extends ChangeNotifier {
         if (draft == null) continue;
         // An untouched form follows the reload (a pilot may have submitted
         // since); what the director typed stays.
-        if (draft.isDirty && !draft.isUntouchedPrefill) {
+        if (hasUnsavedInput(row)) {
           draft.rebase(row.savedComponents);
         } else {
           draft.resetTo(row.savedComponents, shown: _shown(row));
@@ -774,8 +827,7 @@ class ScoringController extends ChangeNotifier {
   /// Whether the director typed over the form of [row], as opposed to the
   /// form still holding what the pilot submitted.
   bool hasEdits(ScoringRow row) {
-    final draft = _drafts[row.id];
-    return draft != null && draft.isDirty && !draft.isUntouchedPrefill;
+    return hasUnsavedInput(row);
   }
 
   /// Why [row] cannot be marked official now, or null when it can.

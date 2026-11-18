@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/services/scoring/score_entry_settings.dart';
+import 'package:soar_score_contest/services/scoring/row_save.dart';
 import 'package:soar_score_contest/services/scoring/score_row_draft.dart';
 import 'package:soar_score_contest/services/scoring/scoring_controller.dart';
 import 'package:soar_score_contest/services/scoring/scoring_row.dart';
@@ -63,6 +64,153 @@ void main() {
       expect(c.dirtyCount, 1);
     },
   );
+
+  test('an untouched pilot prefill is not unsaved', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, a);
+    final c = await _open(server);
+
+    expect(c.draftOf(_row(c, 1)).timeText, '9:00');
+    expect(c.unsavedCount, 0);
+    expect(c.hasUnsaved, isFalse);
+    // Save all still makes the waiting entry official.
+    expect(c.dirtyCount, 1);
+  });
+
+  test('typing over a prefill makes the row unsaved', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setHeight('99');
+
+    expect(c.unsavedCount, 1);
+    expect(c.hasUnsaved, isTrue);
+  });
+
+  test('saving edited rows only leaves a waiting entry unofficial', () async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(first, a)
+      ..seedPendingSubmission(scoringAssignmentId(1, 2), a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 2)).setHeight('99');
+
+    expect(await c.saveAll(editedOnly: true), 1);
+
+    expect(_row(c, 1).status, RowStatus.submitted);
+    expect(_row(c, 2).status, RowStatus.official);
+  });
+
+  test('discarding edits keeps the pilot prefill', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setHeight('99');
+
+    c.discardEdits();
+
+    expect(c.draftOf(_row(c, 1)).heightText, '120');
+    expect(c.unsavedCount, 0);
+  });
+
+  test('invalid text typed over a prefill is unsaved input', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setTime('abc');
+
+    expect(c.hasUnsaved, isTrue);
+    expect(c.unsavedCount, 1);
+  });
+
+  test('input that parses back to the saved score is unsaved input', () async {
+    final server = ScoringServer()..seedScore(first, a);
+    final c = await _open(server);
+    expect(c.hasUnsaved, isFalse);
+
+    c.draftOf(_row(c, 1)).setTime('09:00');
+    expect(c.draftOf(_row(c, 1)).isDirty, isFalse);
+    expect(c.hasUnsaved, isTrue);
+
+    // Nothing to write; saving settles the row so the director can leave.
+    expect(await c.saveAll(editedOnly: true), 0);
+    expect(c.hasUnsaved, isFalse);
+    expect(server.entries, isEmpty);
+  });
+
+  test('typing the original text again is not unsaved', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, a);
+    final c = await _open(server);
+    final d = c.draftOf(_row(c, 1));
+    d.setTime('1:00');
+    expect(c.hasUnsaved, isTrue);
+
+    d.setTime('9:00');
+
+    expect(c.hasUnsaved, isFalse);
+  });
+
+  test('checks for an edited-only save skip untouched prefills', () async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(first, {'out_of_bounds': true})
+      ..seedPendingSubmission(scoringAssignmentId(1, 2), a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1));
+    c.draftOf(_row(c, 2)).setHeight('99');
+
+    expect(c.unconfirmedZeroRows(), hasLength(1));
+    expect(c.unconfirmedZeroRows(editedOnly: true), isEmpty);
+    expect(c.saveCandidates(editedOnly: true).map((r) => r.id), [
+      scoringAssignmentId(1, 2),
+    ]);
+    expect(await c.saveAll(editedOnly: true), 1);
+    expect(_row(c, 1).status, RowStatus.submitted);
+  });
+
+  test('a formatting-only edit on a stale row stays unsaved', () async {
+    final server = ScoringServer()..seedScore(first, a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setTime('09:00');
+    server.seedCorrection(first, b, 'Corrected elsewhere');
+    await c.refreshAfterSync();
+    expect(c.saveOf(first).kind, RowSaveKind.stale);
+
+    expect(await c.saveAll(editedOnly: true), 0);
+
+    expect(c.hasUnsaved, isTrue);
+    expect(c.draftOf(_row(c, 1)).timeText, '09:00');
+  });
+
+  test('an invalid penalty removal asks for no reason', () async {
+    final server = ScoringServer()
+      ..seedScore(first, {...a, 'cumulative_penalty': 10})
+      ..seedScore(scoringAssignmentId(1, 2), a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1))
+      ..setCumulativePenalty('0')
+      ..setTime('abc');
+    c.draftOf(_row(c, 2)).setHeight('99');
+
+    expect(c.removalRows(editedOnly: true), isEmpty);
+    expect(c.saveCandidates(editedOnly: true).map((r) => r.id), [
+      scoringAssignmentId(1, 2),
+    ]);
+    expect(await c.saveAll(editedOnly: true), 1);
+    expect(c.hasUnsaved, isTrue);
+  });
+
+  test('a failed removal asks for no zero confirmation', () async {
+    final second = scoringAssignmentId(1, 2);
+    final server = ScoringServer()
+      ..seedScore(first, {...a, 'cumulative_penalty': 10})
+      ..seedScore(second, a)
+      ..entryFailures[first] = (500, 'internal');
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setCumulativePenalty('0');
+    c.recordRemovalReason(first, 'Misapplied');
+    await c.save(_row(c, 1));
+    expect(c.saveOf(first).kind, RowSaveKind.failed);
+    c.draftOf(_row(c, 1)).outOfBounds = true;
+    c.draftOf(_row(c, 2)).setHeight('99');
+
+    expect(c.unconfirmedZeroRows(editedOnly: true), isEmpty);
+    expect(c.saveCandidates(editedOnly: true).map((r) => r.id), [second]);
+  });
 
   test('what the director typed survives a later submission', () async {
     final server = ScoringServer()..seedPendingSubmission(first, a);

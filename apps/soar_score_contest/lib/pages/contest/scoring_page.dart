@@ -159,17 +159,17 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     if (!c.hasUnsaved) return true;
     final choice = await askUnsavedEdits(
       context,
-      rows: c.dirtyCount,
+      rows: c.unsavedCount,
       closingApp: UnsavedChangesGuard.closingApp,
     );
     switch (choice) {
       case UnsavedChoice.stay:
         return false;
       case UnsavedChoice.discard:
-        c.discardAll();
+        c.discardEdits();
         return true;
       case UnsavedChoice.save:
-        await _saveAllWithRemovals();
+        await _saveAllWithRemovals(editedOnly: true);
         return !c.hasUnsaved;
     }
   }
@@ -222,10 +222,10 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
   /// Removals whose save already failed, was refused or went stale keep their
   /// banner and are not asked about; a missing reason is asked once for every
   /// other removal that lacks one.
-  Future<int> _saveAllWithRemovals() async {
+  Future<int> _saveAllWithRemovals({bool editedOnly = false}) async {
     final c = _controller!;
     final need = [
-      for (final r in c.removalRows)
+      for (final r in c.removalRows(editedOnly: editedOnly))
         if (c.removalReason(r.id) == null &&
             !const {
               RowSaveKind.failed,
@@ -245,10 +245,10 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       }
     }
     // Save row asks for a zero to be confirmed, so saving many rows does too.
-    final zeros = c.unconfirmedZeroRows;
+    final zeros = c.unconfirmedZeroRows(editedOnly: editedOnly);
     if (zeros.isNotEmpty && !await askConfirmZeros(context, zeros)) return 0;
     if (!mounted) return 0;
-    return c.saveAll();
+    return c.saveAll(editedOnly: editedOnly);
   }
 
   Future<void> _saveAll() async {
