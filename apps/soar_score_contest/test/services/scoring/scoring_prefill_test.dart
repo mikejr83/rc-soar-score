@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/services/scoring/score_entry_settings.dart';
+import 'package:soar_score_contest/services/scoring/row_save.dart';
 import 'package:soar_score_contest/services/scoring/score_row_draft.dart';
 import 'package:soar_score_contest/services/scoring/scoring_controller.dart';
 import 'package:soar_score_contest/services/scoring/scoring_row.dart';
@@ -161,19 +162,36 @@ void main() {
     expect(_row(c, 1).status, RowStatus.submitted);
   });
 
-  test('removal reasons are asked only for edited rows', () async {
+  test('a formatting-only edit on a stale row stays unsaved', () async {
+    final server = ScoringServer()..seedScore(first, a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setTime('09:00');
+    server.seedCorrection(first, b, 'Corrected elsewhere');
+    await c.refreshAfterSync();
+    expect(c.saveOf(first).kind, RowSaveKind.stale);
+
+    expect(await c.saveAll(editedOnly: true), 0);
+
+    expect(c.hasUnsaved, isTrue);
+    expect(c.draftOf(_row(c, 1)).timeText, '09:00');
+  });
+
+  test('an invalid penalty removal asks for no reason', () async {
     final server = ScoringServer()
       ..seedScore(first, {...a, 'cumulative_penalty': 10})
-      ..seedScore(scoringAssignmentId(1, 2), {...a, 'cumulative_penalty': 10});
+      ..seedScore(scoringAssignmentId(1, 2), a);
     final c = await _open(server);
-    c.draftOf(_row(c, 1)).setCumulativePenalty('0');
+    c.draftOf(_row(c, 1))
+      ..setCumulativePenalty('0')
+      ..setTime('abc');
     c.draftOf(_row(c, 2)).setHeight('99');
 
-    expect(c.removalRows(), hasLength(1));
-    expect(c.removalRows(editedOnly: true), hasLength(1));
-    c.discardEdits();
-    c.draftOf(_row(c, 2)).setHeight('99');
     expect(c.removalRows(editedOnly: true), isEmpty);
+    expect(c.saveCandidates(editedOnly: true).map((r) => r.id), [
+      scoringAssignmentId(1, 2),
+    ]);
+    expect(await c.saveAll(editedOnly: true), 1);
+    expect(c.hasUnsaved, isTrue);
   });
 
   test('what the director typed survives a later submission', () async {

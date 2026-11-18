@@ -335,13 +335,29 @@ class ScoringController extends ChangeNotifier {
         (draft.isDirty && !draft.isUntouchedPrefill);
   }
 
-  /// The rows a save would write: dirty ones, and with [editedOnly] only
-  /// those with director input. Preflight checks and the save itself use
-  /// this one list.
+  /// The rows a save would write: the ones that differ from what is saved,
+  /// a pilot prefill the director edited (even back to the official values,
+  /// which resolves the waiting submission), and, with [editedOnly], only
+  /// rows with director input. Rows that cannot be saved now (invalid, stale
+  /// or already saving) are left out. Preflight checks and the save itself
+  /// use this one list.
   List<ScoringRow> saveCandidates({bool editedOnly = false}) => [
     for (final row in rows)
-      if (isDirty(row) && (!editedOnly || hasUnsavedInput(row))) row,
+      if (_wantsSave(row) &&
+          (!editedOnly || hasUnsavedInput(row)) &&
+          !const {
+            RowSaveKind.stale,
+            RowSaveKind.saving,
+          }.contains(saveOf(row.id).kind) &&
+          draftOf(row).problems.isEmpty)
+        row,
   ];
+
+  bool _wantsSave(ScoringRow row) {
+    final draft = _drafts[row.id];
+    if (draft == null) return false;
+    return draft.isDirty || (row.hasPendingSubmission && draft.editedSinceLoad);
+  }
 
   // Navigation.
 
@@ -546,13 +562,7 @@ class ScoringController extends ChangeNotifier {
   /// confirmed yet (a motor restart, out of bounds or no altitude).
   List<ScoringRow> unconfirmedZeroRows({bool editedOnly = false}) => [
     for (final row in saveCandidates(editedOnly: editedOnly))
-      if (!const {
-            RowSaveKind.stale,
-            RowSaveKind.saving,
-          }.contains(saveOf(row.id).kind) &&
-          draftOf(row).problems.isEmpty &&
-          draftOf(row).needsZeroConfirmation &&
-          !draftOf(row).zeroConfirmed)
+      if (draftOf(row).needsZeroConfirmation && !draftOf(row).zeroConfirmed)
         row,
   ];
 
@@ -572,20 +582,21 @@ class ScoringController extends ChangeNotifier {
   Future<int> saveAll({bool editedOnly = false}) async {
     final batch = <ScoringRow>[];
     if (editedOnly) {
-      // Input that parses back to what is saved has nothing to write.
+      // Formatting-only input has nothing to write: settle it, unless the
+      // row went stale (the director resolves that on the row).
       for (final row in rows) {
         final draft = _drafts[row.id];
         if (draft != null &&
-            !draft.isDirty &&
+            !_wantsSave(row) &&
             draft.problems.isEmpty &&
-            draft.editedSinceLoad) {
+            draft.editedSinceLoad &&
+            saveOf(row.id).kind != RowSaveKind.stale) {
           draft.resetTo(row.savedComponents, shown: _shown(row));
         }
       }
     }
     for (final row in saveCandidates(editedOnly: editedOnly)) {
       final kind = saveOf(row.id).kind;
-      if (kind == RowSaveKind.stale || kind == RowSaveKind.saving) continue;
       if (isPenaltyRemoval(row)) {
         if (removalReason(row.id) == null ||
             kind == RowSaveKind.failed ||
@@ -594,7 +605,6 @@ class ScoringController extends ChangeNotifier {
         }
       }
       final draft = draftOf(row);
-      if (draft.problems.isNotEmpty) continue;
       if (draft.needsZeroConfirmation) draft.confirmZero();
       batch.add(row);
     }
