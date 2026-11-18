@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:js_interop';
 import 'dart:convert';
 
@@ -21,13 +22,14 @@ Future<String?> saveCsvFile(
   final anchor = web.document.createElement('a') as web.HTMLAnchorElement;
   anchor.href = url;
   anchor.download = fileName;
+  // Attach the anchor to the document before clicking: older Firefox may
+  // ignore a click on a detached element.
+  web.document.body!.append(anchor);
   anchor.click();
+  anchor.remove();
   // Revoke after a short delay: revoking right after the click can cancel the
-  // download in Safari and older Firefox.
-  await _delaySeconds(1);
-  web.URL.revokeObjectURL(url);
+  // download in Safari and older Firefox. The delay is a fire-and-forget timer
+  // so the "saved" feedback is not held up.
+  Timer(const Duration(seconds: 1), () => web.URL.revokeObjectURL(url));
   return fileName;
 }
-
-Future<void> _delaySeconds(double seconds) =>
-    Future<void>.delayed(Duration(milliseconds: (seconds * 1000).round()));

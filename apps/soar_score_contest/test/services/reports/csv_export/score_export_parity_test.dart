@@ -64,10 +64,17 @@ void main() {
           f.participationId: f.result,
       },
   };
+  final details = {
+    for (var r = 1; r <= 2; r++)
+      r: {
+        for (final id in flights[r]!.keys)
+          id: const FlightDetail(seconds: 592, landing: 50, height: 105),
+      },
+  };
   final reportData = StandingsReportData(
     results: fixture.standings[2]!,
     flights: flights,
-    details: const {},
+    details: details,
   );
   final table = StandingsTable.build(
     facts: facts,
@@ -125,12 +132,70 @@ void main() {
       expect(engine.total, viewer.total);
       expect(engine.raw, viewer.raw);
       expect(engine.penalty, viewer.penalty);
-      expect(engine.percentage, moreOrLessEquals(viewer.percentage!));
+      if (viewer.percentage == null) {
+        expect(engine.percentage, isNull);
+      } else {
+        expect(engine.percentage, moreOrLessEquals(viewer.percentage!));
+      }
       // Each shown round's score and drop.
       for (final round in viewerOptions.rounds) {
         expect(engine.cells[round]?.score, viewer.cells[round]?.score);
         expect(engine.cells[round]?.dropped, viewer.cells[round]?.dropped);
       }
     }
+  });
+
+  test('time and height agree between the engine and the viewer details', () {
+    // The engine reads time and height from the official score components; the
+    // viewer reads them from the report details. Both must agree per flight.
+    final engineFlights = {
+      for (final f in source.flights)
+        '${f.pilot.participationId.value}${f.round}': f,
+    };
+    for (var r = 1; r <= 2; r++) {
+      for (final f in fixture.roundResults[r]!.flights) {
+        final engine = engineFlights['${f.participationId.value}$r'];
+        expect(engine, isNotNull);
+        expect(engine!.seconds, 592);
+        expect(engine.height, 105);
+        expect(engine.landing, 50);
+      }
+    }
+  });
+
+  test('a retired pilot is zeroed in the rounds after retirement', () {
+    // Pilot 3 retired after round 1: they flew round 1 (700) but did not fly
+    // round 2, so the engine shows a plain 0.0 for round 2 (no flight behind
+    // it), not null.
+    final retired = ReportData(
+      contest: data.contest,
+      configuration: config,
+      participations: [
+        for (final p in participations)
+          p.id == participationId(3) ? p.withRetiredAtRound(2) : p,
+      ],
+      participants: matrixProfiles(),
+      teams: matrixTeams(),
+      teamMemberships: matrixMemberships(),
+      scores: scores,
+      results: fixture.standings[2]!,
+      roundResults: [
+        fixture.roundResults[1]!,
+        RoundResults(
+          ordinal: 2,
+          flights: fixture.roundResults[2]!.flights
+              .where((f) => f.participationId != participationId(3)),
+        ),
+      ],
+    );
+    final source = ScoreExportSource.of(
+      retired,
+      ScoreExportOptions.of(filters, facts),
+    );
+    final lee = source.standings
+        .singleWhere((r) => r.pilot.participationId == participationId(3));
+    expect(lee.cells[1]?.score, 700); // round 1 flew
+    expect(lee.cells[2]?.score, 0.0); // round 2 is zeroed (retired)
+    expect(lee.cells[2]?.dropped, isFalse);
   });
 }

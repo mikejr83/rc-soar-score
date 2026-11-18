@@ -127,15 +127,16 @@ class ScoreExportSource {
   /// blank; without the scores the time and height are blank; and the standings
   /// are required and must be as of `options.to`. A violation throws a
   /// [ScoreExportError].
-  factory ScoreExportSource.of(
-    ReportData reportData,
-    ScoreExportOptions options,
-  ) {
+  factory ScoreExportSource.of(ReportData data, ScoreExportOptions options) {
     final rangeError = options.check();
     if (rangeError != null) {
       throw ScoreExportError(rangeError);
     }
-    final results = reportData.results;
+    // The export needs the whole read: the facts (names, numbers, teams,
+    // classes), the scores (time, height), and the standings. A read made
+    // with facts: false or scores: false would silently blank the file, so a
+    // missing part is refused rather than exported.
+    final results = data.results;
     if (results == null || results.standings.isEmpty) {
       throw ScoreExportError(
         'No standings are stored yet. Save a score on the Scoring page and '
@@ -149,7 +150,7 @@ class ScoreExportSource {
       );
     }
     final rounds = options.rounds;
-    final roundResults = reportData.roundResults;
+    final roundResults = data.roundResults;
     if (roundResults == null ||
         rounds.any(
           (round) =>
@@ -160,13 +161,21 @@ class ScoreExportSource {
         '(rounds ${rounds.join(', ')}).',
       );
     }
-    final pilots = _pilots(reportData);
+    if (data.participations == null ||
+        data.participants == null ||
+        data.scores == null) {
+      throw ScoreExportError(
+        'The report read is incomplete: it does not include the pilots and '
+        'scores the export needs. Read the contest with facts and scores '
+        'included.',
+      );
+    }
+    final pilots = _pilots(data);
     final standingOf = {
-      for (final standing
-          in reportData.results?.standings ?? const <ParticipationStanding>[])
+      for (final standing in results.standings)
         standing.contestParticipationId: standing,
     };
-    final componentsOf = _officialComponents(reportData);
+    final componentsOf = _officialComponents(data);
     final byRound = {for (final round in roundResults) round.ordinal: round};
 
     // The selected flight of each shown round, by pilot, so the standings view
@@ -186,16 +195,22 @@ class ScoreExportSource {
 
     // Standings view: one row per pilot, in the stored rank order, with a cell
     // per shown round.
-    final standings = <ExportStandingsRow>[];
     final ordered = [
-      for (final standing
-          in reportData.results?.standings ?? const <ParticipationStanding>[])
+      for (final standing in results.standings)
         if (pilots.containsKey(standing.contestParticipationId)) standing,
     ];
-    final top = ordered.isEmpty ? 0.0 : ordered.first.overallScore;
+    if (ordered.isEmpty) {
+      // The standings are stored, but none of them matches a pilot of this
+      // read: exporting would produce a header-only file.
+      throw ScoreExportError(
+        'No standing matches the pilots of this read. The read may be '
+        'inconsistent; try again.',
+      );
+    }
+    final standings = <ExportStandingsRow>[];
+    final top = ordered.first.overallScore;
     for (final standing in ordered) {
-      final pilot = pilots[standing.contestParticipationId];
-      if (pilot == null) continue;
+      final pilot = pilots[standing.contestParticipationId]!;
       final cells = <int, ExportStandingsCell>{};
       for (final round in rounds) {
         final retired =
@@ -214,7 +229,7 @@ class ScoreExportSource {
           pilot: pilot,
           total: standing.overallScore,
           raw: standing.rawTotal - standing.penaltyTotal,
-          penalty: standing.penaltyTotal,
+          penalty: _signed(standing.penaltyTotal),
           percentage: top > 0 ? standing.overallScore / top * 100 : null,
           cells: cells,
         ),
@@ -235,7 +250,12 @@ class ScoreExportSource {
             if (a.group != b.group) return a.group.compareTo(b.group);
             final byScore = b.result.groupScore.compareTo(a.result.groupScore);
             if (byScore != 0) return byScore;
-            // A tiebreak keeps the order deterministic: List.sort is not stable.
+            // A tiebreak keeps the order deterministic (List.sort is not
+            // stable) and reads sensibly: by name, then id.
+            final byName = pilots[a.participationId]!.listName.compareTo(
+              pilots[b.participationId]!.listName,
+            );
+            if (byName != 0) return byName;
             return a.participationId.value.compareTo(b.participationId.value);
           });
       for (final flight in ordered) {
@@ -263,8 +283,8 @@ class ScoreExportSource {
     }
 
     return ScoreExportSource(
-      contestName: reportData.contest.name,
-      decimalPlaces: _decimalPlaces(reportData),
+      contestName: data.contest.name,
+      decimalPlaces: _decimalPlaces(data),
       rounds: rounds,
       standings: standings,
       flights: flights,
@@ -323,7 +343,8 @@ class ScoreExportSource {
     if (configuration == null) return 1;
     try {
       return configuration.config.coreOptions.decimalPlaces;
-    } on Object {
+    } on ArgumentError {
+      // A configuration that fails to read has no usable decimals.
       return 1;
     }
   }
@@ -339,4 +360,8 @@ class ScoreExportSource {
   }
 
   static int? _int(Object? value) => value is num ? value.toInt() : null;
+
+  /// A value that formats as "-0.0" through toStringAsFixed is shown as 0.0.
+  static double _signed(double value) =>
+      value == 0 || value.toStringAsFixed(3) == '-0.000' ? 0.0 : value;
 }

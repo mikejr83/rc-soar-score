@@ -51,14 +51,16 @@ class ScoreCsvExporter {
       source.contestName,
       extension: format.fileExtension,
     );
+    // The CSV is built outside the try, so a format bug reports its own error
+    // and the save only guards the IO.
+    final csv = exportCsv(source, format);
     try {
-      return await saveFile(
-        name,
-        exportCsv(source, format),
-        extension: format.fileExtension,
+      return await saveFile(name, csv, extension: format.fileExtension);
+    } catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        ScoreExportError('Saving "$name" failed: $error'),
+        stackTrace,
       );
-    } catch (error) {
-      throw ScoreExportError('Saving "$name" failed: $error');
     }
   }
 }

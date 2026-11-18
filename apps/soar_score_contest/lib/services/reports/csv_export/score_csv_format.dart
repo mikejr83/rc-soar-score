@@ -28,23 +28,20 @@ abstract class ScoreCsvFormat {
   /// empty cell, which the builder keeps distinct from a real `0`.
   List<List<String?>> build(ScoreExportSource source);
 
+  /// The characters a spreadsheet treats as the start of a formula or a
+  /// control character: `=`, `+`, `-`, `@`, tab and CR.
+  static const _risky = {0x3D, 0x2B, 0x2D, 0x40, 0x09, 0x0D};
+
   /// A text cell made safe for a spreadsheet: a leading apostrophe when it
-  /// starts with a formula or control character.
+  /// starts with a formula or control character. The apostrophe is shown
+  /// literally by Excel and LibreOffice (a CSV import does not treat it as
+  /// Excel's hidden text prefix); that is the cost of guarding against
+  /// formula injection, and the `hardenText` flag can be turned off for an
+  /// import target that wants the raw value.
   static String harden(String text) {
     if (text.isEmpty) {
       return text;
     }
-    final first = text.codeUnitAt(0);
-    if (first == 0x3D || // =
-        first == 0x2B || // +
-        first == 0x2D || // -
-        first == 0x40 || // @
-        first == 0x09 || // tab
-        first ==
-            0x0D // \r
-            ) {
-      return "'$text";
-    }
-    return text;
+    return _risky.contains(text.codeUnitAt(0)) ? "'$text" : text;
   }
 }

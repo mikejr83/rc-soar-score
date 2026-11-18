@@ -252,9 +252,10 @@ void main() {
   });
 
   group('sort tiebreak', () {
-    test('tied flights order by participation id', () {
+    test('tied flights order by name, then participation id', () {
       // Two flights in group 1 with the same score: the order is decided by
-      // the participation id, not the unstable list order.
+      // the pilot name, then the participation id, not the unstable list
+      // order. Pilot 3 ("Di Park") sorts before pilot 1 ("Bo Ray") by name.
       final tie = RoundResults(
         ordinal: 1,
         flights: [
@@ -282,7 +283,64 @@ void main() {
       final source = ScoreExportSource.of(report, allOptions(to: 1));
       expect(
         [for (final f in source.flights) f.pilot.participationId.value],
-        [participationId(1).value, participationId(3).value],
+        [participationId(3).value, participationId(1).value],
+      );
+    });
+
+    test('a read without the pilots throws, even with stored standings', () {
+      final base = reportOf(fixture);
+      final noParticipations = ReportData(
+        contest: base.contest,
+        configuration: base.configuration,
+        participations: null,
+        participants: base.participants,
+        teams: base.teams,
+        teamMemberships: base.teamMemberships,
+        scores: base.scores,
+        results: base.results,
+        roundResults: base.roundResults,
+      );
+      expect(
+        () => ScoreExportSource.of(noParticipations, allOptions()),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+
+    test('a read without the participants throws', () {
+      final base = reportOf(fixture);
+      final noParticipants = ReportData(
+        contest: base.contest,
+        configuration: base.configuration,
+        participations: base.participations,
+        participants: null,
+        teams: base.teams,
+        teamMemberships: base.teamMemberships,
+        scores: base.scores,
+        results: base.results,
+        roundResults: base.roundResults,
+      );
+      expect(
+        () => ScoreExportSource.of(noParticipants, allOptions()),
+        throwsA(isA<ScoreExportError>()),
+      );
+    });
+
+    test('a read without the scores throws', () {
+      final base = reportOf(fixture);
+      final noScores = ReportData(
+        contest: base.contest,
+        configuration: base.configuration,
+        participations: base.participations,
+        participants: base.participants,
+        teams: base.teams,
+        teamMemberships: base.teamMemberships,
+        scores: null,
+        results: base.results,
+        roundResults: base.roundResults,
+      );
+      expect(
+        () => ScoreExportSource.of(noScores, allOptions()),
+        throwsA(isA<ScoreExportError>()),
       );
     });
   });

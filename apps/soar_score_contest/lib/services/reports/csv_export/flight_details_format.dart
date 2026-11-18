@@ -36,7 +36,7 @@ class FlightDetailsFormat extends ScoreCsvFormat {
       'Time (s)',
       'Height (m)',
       'Landing',
-      'Raw',
+      'Flight raw',
       'Flight penalty',
       'Cumulative penalty',
       'Round score',

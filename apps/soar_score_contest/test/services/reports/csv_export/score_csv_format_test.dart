@@ -3,6 +3,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import 'package:soar_score_contest/services/reports/csv_export/flight_details_format.dart';
 import 'package:soar_score_contest/services/reports/csv_export/overall_results_format.dart';
+import 'package:soar_score_contest/services/reports/csv_export/score_csv_exporter.dart';
 import 'package:soar_score_contest/services/reports/csv_export/score_csv_format.dart';
 import 'package:soar_score_contest/services/reports/csv_export/score_export_options.dart';
 import 'package:soar_score_contest/services/reports/csv_export/score_export_source.dart';
@@ -214,41 +215,20 @@ void main() {
     });
 
     test('text cells that start with a formula character are hardened', () {
-      final rows = OverallResultsFormat(options(team: true)).build(
-        source(
-          standings: [
-            ExportStandingsRow(
-              place: 1,
-              pilot: ReportPilot(
-                participationId: _bo.participationId,
-                firstName: 'Bo',
-                lastName: 'Ray',
-                team: '=SUM(A1)',
-              ),
-              total: 1750,
-              raw: 1750,
-              penalty: 0,
-              percentage: 100,
-              cells: const {},
-            ),
-          ],
-        ),
-      );
-      expect(rows[1][col(rows, 'Team')], "'=SUM(A1)");
-    });
-
-    test('hardening is off for a format that wants raw text', () {
-      final rows = OverallResultsFormat(options(team: true), hardenText: false)
-          .build(
+      final rows =
+          OverallResultsFormat(options(team: true, pilotClass: true)).build(
             source(
               standings: [
                 ExportStandingsRow(
                   place: 1,
                   pilot: ReportPilot(
                     participationId: _bo.participationId,
+                    // A pilot whose list name (surname, first) starts with a
+                    // formula character.
                     firstName: 'Bo',
-                    lastName: 'Ray',
+                    lastName: '@Ray',
                     team: '=SUM(A1)',
+                    className: '-Open',
                   ),
                   total: 1750,
                   raw: 1750,
@@ -259,8 +239,92 @@ void main() {
               ],
             ),
           );
-      expect(rows[1][col(rows, 'Team')], '=SUM(A1)');
+      expect(rows[1][col(rows, 'Pilot')], "'@Ray, Bo");
+      expect(rows[1][col(rows, 'Team')], "'=SUM(A1)");
+      expect(rows[1][col(rows, 'Class')], "'-Open");
     });
+
+    test('a negative number stays a number, never prefixed', () {
+      final rows = OverallResultsFormat(options()).build(
+        source(
+          standings: [
+            ExportStandingsRow(
+              place: 1,
+              pilot: _bo,
+              total: -5,
+              raw: -5,
+              penalty: 0,
+              percentage: 0,
+              cells: const {},
+            ),
+          ],
+        ),
+      );
+      expect(rows[1][col(rows, 'Total')], '-5.0');
+    });
+
+    test('hardening is off for a format that wants raw text', () {
+      final rows =
+          OverallResultsFormat(
+            options(team: true, pilotClass: true),
+            hardenText: false,
+          ).build(
+            source(
+              standings: [
+                    ExportStandingsRow(
+                      place: 1,
+                      pilot: ReportPilot(
+                        participationId: _bo.participationId,
+                        firstName: 'Bo',
+                        lastName: '@Ray',
+                        team: '=SUM(A1)',
+                        className: '-Open',
+                      ),
+                      total: 1750,
+                      raw: 1750,
+                      penalty: 0,
+                      percentage: 100,
+                      cells: const {},
+                    ),
+              ],
+            ),
+          );
+      expect(rows[1][col(rows, 'Pilot')], '@Ray, Bo');
+      expect(rows[1][col(rows, 'Team')], '=SUM(A1)');
+      expect(rows[1][col(rows, 'Class')], '-Open');
+    });
+
+    test(
+      'a BOM leads the file and a non-ASCII name with a comma is quoted',
+      () {
+        final exporter = ScoreCsvExporter(
+          saveFile: (name, csv, {String? extension}) async => null,
+        );
+        final csv = exporter.exportCsv(
+          source(
+            standings: [
+              ExportStandingsRow(
+                place: 1,
+                pilot: ReportPilot(
+                  participationId: _bo.participationId,
+                  firstName: 'José',
+                  lastName: 'García, Jr.',
+                ),
+                total: 1750,
+                raw: 1750,
+                penalty: 0,
+                percentage: 100,
+                cells: const {},
+              ),
+            ],
+          ),
+          OverallResultsFormat(options()),
+        );
+        // The BOM is first; the pilot cell (with a comma) is quoted.
+        expect(csv, startsWith('\uFEFFRank,Pilot'));
+        expect(csv, contains('"García, Jr., José"'));
+      },
+    );
   });
 
   group('Flight Details', () {
@@ -304,7 +368,7 @@ void main() {
         'Time (s)',
         'Height (m)',
         'Landing',
-        'Raw',
+        'Flight raw',
         'Flight penalty',
         'Cumulative penalty',
         'Round score',
@@ -402,6 +466,28 @@ void main() {
       );
       expect(rows[1][col(rows, 'Time (s)')], null);
       expect(rows[1][col(rows, 'Landing')], null);
+    });
+
+    test('text cells are hardened, including the pilot name', () {
+      final rows = FlightDetailsFormat(options()).build(
+        source(
+          flights: [
+            ExportFlightRow(
+              pilot: ReportPilot(
+                participationId: _bo.participationId,
+                firstName: 'Bo',
+                lastName: '@Ray',
+              ),
+              round: 1,
+              group: 'A',
+              raw: 800,
+              roundScore: 800,
+              selected: true,
+            ),
+          ],
+        ),
+      );
+      expect(rows[1][col(rows, 'Pilot')], "'@Ray, Bo");
     });
   });
 
