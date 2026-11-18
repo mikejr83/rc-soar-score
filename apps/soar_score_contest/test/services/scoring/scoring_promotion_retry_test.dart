@@ -439,4 +439,68 @@ void main() {
       expect(c.confirmAutomaticSkip(_row(c, 1)), isNull);
     });
   });
+
+  test('a manual refresh also outranks an older catch-up read', () async {
+    final server = ScoringServer()..seedAutomaticScore(first, flight);
+    final hold = server.holdPromote = Completer<void>();
+    final c = await _open(server);
+
+    final sent = c.confirmAutomatic(_row(c, 1));
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    await c.refreshAfterSync();
+
+    // The request fails; its catch-up read is held with the old answer.
+    server.promoteFailures[first] = (503, 'contest_busy');
+    final read = server.holdNextScoresRead = Completer<void>();
+    hold.complete();
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+
+    // Another director confirms; the page is refreshed by hand, which does
+    // not count as a sync.
+    server.confirmAsDirector(first);
+    await c.refresh();
+    expect(_row(c, 1).isAutomaticUnconfirmed, isFalse);
+
+    read.complete();
+    await sent;
+    expect(_row(c, 1).isAutomaticUnconfirmed, isFalse);
+    expect(c.saveOf(first).kind, RowSaveKind.idle);
+  });
+
+  test('Mark all blocks every affected row before its first read', () async {
+    final second = scoringAssignmentId(1, 2);
+    final server = ScoringServer()
+      ..seedPendingSubmission(first, flight)
+      ..seedPendingSubmission(second, flight);
+    final hold = server.holdPromote = Completer<void>();
+    final c = await _open(server);
+
+    final all = c.markAllOfficial();
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    await c.refreshAfterSync();
+
+    // Ann is refused as changed, Bo fails; Ann's read is held.
+    server.promoteFailures[first] = (409, 'stale_revision');
+    server.promoteFailures[second] = (503, 'contest_busy');
+    final read = server.holdNextScoresRead = Completer<void>();
+    hold.complete();
+    for (var i = 0; i < 6; i++) {
+      await Future<void>.delayed(Duration.zero);
+    }
+    final before = server.promoteRequests;
+
+    expect(c.markOfficialSkip(_row(c, 2)), MarkOfficialSkip.busy);
+    expect(await c.retryPromotion(_row(c, 2)), isFalse);
+    expect(await c.markOfficial(_row(c, 2)), isFalse);
+    final again = await c.markAllOfficial();
+    expect(again.adopted, 0);
+    expect(server.promoteRequests, before, reason: 'no write for Bo');
+
+    read.complete();
+    await all;
+  });
 }

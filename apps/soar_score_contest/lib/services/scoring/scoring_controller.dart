@@ -89,6 +89,7 @@ class ScoringController extends ChangeNotifier {
     try {
       final loaded = await ScoringPageData.load(client, contestId);
       data = loaded;
+      loaded.slotIds.forEach(_slotApplied);
       _unreadSlots.clear();
       final open = loaded.firstOpen;
       final wantedRound = _wantedRound;
@@ -196,7 +197,7 @@ class ScoringController extends ChangeNotifier {
     // Every slot of the read is applied except those of rows with a save in
     // flight, which keep their own copy.
     for (final id in next.slotIds) {
-      if (!(before[id] != null && saveOf(id).isBusy)) _unreadSlots.remove(id);
+      if (!(before[id] != null && saveOf(id).isBusy)) _slotApplied(id);
     }
     _dropObsoletePromotionFailures();
     for (final row in rows) {
@@ -410,6 +411,7 @@ class ScoringController extends ChangeNotifier {
       officialScore: result.officialScore,
     );
     data = data!.withSlot(slot).withContest(result.contest);
+    _slotApplied(row.id);
     _drafts[row.id]?.resetTo(result.officialScore.components);
     _saves.remove(row.id);
     _theirs.remove(row.id);
@@ -432,6 +434,7 @@ class ScoringController extends ChangeNotifier {
         pendingPromotion: queued,
       ),
     );
+    _slotApplied(row.id);
   }
 
   /// Saves one row as its own official revision. Returns whether it saved.
@@ -675,11 +678,14 @@ class ScoringController extends ChangeNotifier {
 
   Future<void> _markStale(List<ScoringRow> stale) async {
     try {
-      final fresh = await client.scores(contestId);
       final ids = {for (final row in stale) row.id};
+      final versions = {for (final id in ids) id: _slotVersion(id)};
+      final fresh = await client.scores(contestId);
       for (final slot in fresh.slots) {
-        if (ids.contains(slot.placeholder.assignmentId)) {
+        final id = slot.placeholder.assignmentId;
+        if (ids.contains(id) && _slotVersion(id) == versions[id]) {
           data = data!.withSlot(slot);
+          _slotApplied(id);
           _theirs[slot.placeholder.assignmentId] =
               slot.officialScore?.components ?? const {};
         }
@@ -728,6 +734,7 @@ class ScoringController extends ChangeNotifier {
     try {
       final loaded = await ScoringPageData.load(client, contestId);
       data = loaded;
+      loaded.slotIds.forEach(_slotApplied);
       _unreadSlots.clear();
       loadError = null;
       syncRefreshFailed = false;
@@ -1183,6 +1190,14 @@ class ScoringController extends ChangeNotifier {
         retry += chunk.length;
       }
     }
+    if (_syncReads != readsBefore) {
+      // A sync kept these rows as they were while the request was out: until
+      // each is read again none of them may be promoted on what it shows, so
+      // all are marked before the first read is awaited.
+      _unreadSlots.addAll([
+        for (final row in [...moved, ...waiting, ...failedRows.keys]) row.id,
+      ]);
+    }
     if (moved.isNotEmpty) {
       changed -= _settleChanged(moved, await _refreshSlots(moved));
     }
@@ -1281,6 +1296,19 @@ class ScoringController extends ChangeNotifier {
   /// that row; a passive sync still applies fresh slots.
   final Set<Id> _unreadSlots = {};
 
+  /// How many times a slot of each assignment was applied, by whichever
+  /// writer. A read that was out while its slot was applied by another
+  /// writer is older than the page and is dropped for that assignment.
+  final Map<Id, int> _slotVersions = {};
+
+  int _slotVersion(Id id) => _slotVersions[id] ?? 0;
+
+  /// Records that a fresh slot of [id] was applied: it is no longer behind.
+  void _slotApplied(Id id) {
+    _slotVersions[id] = _slotVersion(id) + 1;
+    _unreadSlots.remove(id);
+  }
+
   /// Puts back the Refresh requirement of every unread slot that has no
   /// save state, after navigation cleared them.
   void _seedUnreadSaves() {
@@ -1304,19 +1332,23 @@ class ScoringController extends ChangeNotifier {
   Future<bool> _refreshSlots(List<ScoringRow> stale) async {
     _unreadSlots.addAll(stale.map((row) => row.id));
     try {
-      final generation = _syncReads;
-      final fresh = await client.scores(contestId);
-      // A sync applied while this read was out is newer than it: keep that
-      // and do not put this older answer over it.
-      if (generation != _syncReads) return true;
       final ids = {for (final row in stale) row.id};
+      final versions = {for (final id in ids) id: _slotVersion(id)};
+      final fresh = await client.scores(contestId);
+      final applied = <Id>{};
       for (final slot in fresh.slots) {
-        if (!ids.contains(slot.placeholder.assignmentId)) continue;
+        final id = slot.placeholder.assignmentId;
+        if (!ids.contains(id)) continue;
+        // Any writer that applied a slot of this assignment while the read
+        // was out (a sync, a manual refresh, a save) is newer than it: keep
+        // that and do not put this older answer over it.
+        if (_slotVersion(id) != versions[id]) continue;
         data = data!.withSlot(slot);
-        _unreadSlots.remove(slot.placeholder.assignmentId);
+        _slotApplied(id);
+        applied.add(id);
       }
       for (final row in rows) {
-        if (!ids.contains(row.id) || hasEdits(row)) continue;
+        if (!applied.contains(row.id) || hasEdits(row)) continue;
         _drafts[row.id]?.resetTo(row.savedComponents, shown: _shown(row));
       }
       return true;
