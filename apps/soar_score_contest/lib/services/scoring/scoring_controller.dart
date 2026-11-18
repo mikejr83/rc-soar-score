@@ -1345,6 +1345,13 @@ class ScoringController extends ChangeNotifier {
     return next;
   }
 
+  /// Makes every read started so far older than the slots of [ids].
+  void _invalidate(Iterable<Id> ids) {
+    for (final id in ids) {
+      _slotVersions[id] = _slotVersion(id) + 1;
+    }
+  }
+
   /// Records that a fresh slot of [id] was applied: it is no longer behind.
   void _slotApplied(Id id) {
     _slotVersions[id] = _slotVersion(id) + 1;
@@ -1373,6 +1380,9 @@ class ScoringController extends ChangeNotifier {
   /// Returns false when the read failed and the rows are as they were.
   Future<bool> _refreshSlots(List<ScoringRow> stale) async {
     _unreadSlots.addAll(stale.map((row) => row.id));
+    // Any full or targeted read that started before this one is older than
+    // the refusal that made it necessary: it may not clear the marker.
+    _invalidate(stale.map((row) => row.id));
     try {
       final ids = {for (final row in stale) row.id};
       final versions = {for (final id in ids) id: _slotVersion(id)};

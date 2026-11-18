@@ -596,4 +596,42 @@ void main() {
       expect(c.confirmAutomaticSkip(_row(c, 1)), MarkOfficialSkip.busy);
     },
   );
+
+  test(
+    'a read started before a stale refusal cannot clear its block',
+    () async {
+      final server = ScoringServer()..seedAutomaticScore(first, flight);
+      final c = await _open(server);
+
+      // A manual refresh is held after reading revision 1; nothing else is
+      // applied meanwhile.
+      final manualRead = server.holdNextScoresRead = Completer<void>();
+      final manual = c.refresh();
+      for (var i = 0; i < 6; i++) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      expect(server.holdNextScoresRead, isNull, reason: 'the refresh is held');
+
+      // Confirm is refused as changed and its catch-up read is held.
+      server.promoteFailures[first] = (409, 'stale_revision');
+      final catchUp = server.holdNextScoresRead = Completer<void>();
+      final confirm = c.confirmAutomatic(_row(c, 1));
+      for (var i = 0; i < 6; i++) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      expect(server.promoteRequests, 1);
+
+      manualRead.complete();
+      await manual;
+      expect(c.confirmAutomaticSkip(_row(c, 1)), MarkOfficialSkip.busy);
+      expect(await c.confirmAutomatic(_row(c, 1)), isFalse);
+      expect(server.promoteRequests, 1, reason: 'no second POST');
+
+      server.failHeldScoresRead = true;
+      catchUp.complete();
+      await confirm;
+      expect(c.saveOf(first).needsRefresh, isTrue, reason: 'Refresh remains');
+      expect(c.confirmAutomaticSkip(_row(c, 1)), MarkOfficialSkip.busy);
+    },
+  );
 }
