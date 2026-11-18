@@ -6,7 +6,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import 'app.dart';
 import 'pages/bootstrap_failure_page.dart';
 import 'pages/startup_splash_page.dart';
-import 'services/startup/startup_mode.dart';
+import 'services/startup/startup_runner.dart';
 import 'platform/app_bootstrap.dart';
 // Platform selection happens at compile time, not at runtime: the web build
 // never compiles the native bootstrap (or its FFI-backed data layer and
@@ -56,22 +56,19 @@ Future<void> main() async {
   }
 }
 
+/// A retry from the failure page starts again without the splash, so the
+/// failure page stays mounted and shows the next error if it fails again.
 Future<void> _retryStartup() async {
-  await _runContestApp(await _startWithSplash());
+  await _runContestApp(await bootstrap.start());
 }
 
 /// Starts the app, showing the splash for at least
-/// [minimumSplashDuration] when it is on. A failure skips the wait, so the
-/// failure page appears at once.
-Future<AppBootstrap> _startWithSplash() async {
-  final plan = await bootstrap.startupPlan();
-  if (plan == null) return bootstrap.start();
-  runApp(StartupSplashApp(mode: plan.mode));
-  final minimum = Future<void>.delayed(minimumSplashDuration);
-  final started = await bootstrap.start();
-  await minimum;
-  return started;
-}
+/// [minimumSplashDuration] when it is on.
+Future<AppBootstrap> _startWithSplash() => startWithSplash(
+  plan: bootstrap.startupPlan,
+  start: bootstrap.start,
+  showSplash: (mode) => runApp(StartupSplashApp(mode: mode)),
+);
 
 Future<void> _runContestApp(AppBootstrap appBootstrap) async {
   // The connectivity monitor observes the same client the app talks through,
