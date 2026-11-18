@@ -37,9 +37,18 @@ final _logger = Logger('Scores');
 ///   (`source_attempt_id`, `expected_score_revision`) as the official score
 ///   (201, or 200 with `replayed: true` for an exact repeat). No components
 ///   are taken from the request. A source or revision that is no longer
-///   current, or a newer official score, is 409; locks are 409 as in an
-///   entry. Open reviews of the slot are superseded. The recalculation and
-///   public update then follow as for an entry;
+///   current, or a newer official score, is 409 `stale_revision`; a locked
+///   contest, round, group or score is 409 (`contest_locked`,
+///   `score_locked`) as in an entry; another request while the slot has a
+///   queued intent is 409 `promotion_pending`. Open reviews of the slot are
+///   superseded. The recalculation and public update then follow as for an
+///   entry. Naming a submission the contest already accepted automatically
+///   (selection origin `Automatic`, review not yet closed) is the director's
+///   confirmation: review closes on the score and no second official version
+///   is written (201, with `replayed: false`). On an installation whose contest syncs
+///   (and whose first upload has finished) the request is answered 202 with
+///   the queued `promote_score` intent and changes nothing; the service
+///   decides it on the next sync (`stale_source` if the slot moved);
 /// - `POST /contests/{id}/rounds/{roundId}/groups/{group}/scores/official`
 ///   accepts the stored submissions named in the body (1 to
 ///   [PromoteGroupRequest.maxItems] items of `assignment_id`,
@@ -63,10 +72,19 @@ final _logger = Logger('Scores');
 ///   whenever any entry is saved, replayed or new. The whole request runs in
 ///   the contest's score gate: it waits for other score writers of the
 ///   contest (up to the 30 s lock timeout on PostgreSQL), and a timeout or
-///   deadlock is a 503 `contest_busy` with `retry-after` and nothing kept;
+///   deadlock is a 503 `contest_busy` with `retry-after` and nothing kept
+///   (every route here that takes the gate answers it so, and a repeat of the
+///   same request is safe);
 /// - `GET /contests/{id}/assignments/{assignmentId}/scores/history` is every
 ///   submission to a slot, oldest first: the official revisions with their
 ///   reasons, and the attempts that never became official.
+///
+/// After every request that changes who has scored, the handler also runs the
+/// contest's automatic officialization (the setting "Scores become official",
+/// see `AutomaticOfficializationService`) through the [RecalculationService]:
+/// accepted submissions are stored as the system and the results are
+/// recalculated in the same transaction, so the response's data may already
+/// include them. A failure of that run never fails the request.
 ///
 /// The handlers only translate between HTTP and [ScoresService].
 ///
