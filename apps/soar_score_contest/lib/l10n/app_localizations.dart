@@ -208,6 +208,12 @@ abstract class AppLocalizations {
   /// **'Show startup screen'**
   String get startupSplashSwitch;
 
+  /// Shown under the startup screen switch when saving the choice fails.
+  ///
+  /// In en, this message translates to:
+  /// **'The setting could not be saved. It stays as it was.'**
+  String get startupSplashSaveFailed;
+
   /// Heading of the Settings card that resets hidden or minimized panels.
   ///
   /// In en, this message translates to:

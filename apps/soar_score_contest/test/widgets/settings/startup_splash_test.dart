@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
@@ -10,8 +12,18 @@ class _Control implements StartupSplashControl {
   @override
   bool enabled = true;
 
+  /// When set, a write waits for it; a write that throws leaves [enabled].
+  Completer<void>? pending;
+  bool fail = false;
+  int writes = 0;
+
   @override
-  Future<void> setEnabled(bool value) async => enabled = value;
+  Future<void> setEnabled(bool value) async {
+    writes++;
+    await pending?.future;
+    if (fail) throw StateError('disk full');
+    enabled = value;
+  }
 }
 
 void main() {
@@ -72,5 +84,46 @@ void main() {
     await tester.pumpWidget(host(Future.value(null)));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('startup-splash-switch')), findsNothing);
+  });
+
+  final switchKey = find.byKey(const ValueKey('startup-splash-switch'));
+
+  for (final startOn in [true, false]) {
+    testWidgets(
+      'a failed save puts the switch back (${startOn ? 'on' : 'off'})',
+      (tester) async {
+        final control = _Control()
+          ..enabled = startOn
+          ..fail = true;
+        await tester.pumpWidget(host(Future.value(control)));
+        await tester.pumpAndSettle();
+        await tester.tap(switchKey);
+        await tester.pumpAndSettle();
+        expect(tester.widget<SwitchListTile>(switchKey).value, startOn);
+        expect(control.enabled, startOn);
+        expect(
+          find.byKey(const ValueKey('startup-splash-save-failed')),
+          findsOneWidget,
+        );
+      },
+    );
+  }
+
+  testWidgets('taps while a write is pending start no second write', (
+    tester,
+  ) async {
+    final control = _Control()..pending = Completer<void>();
+    await tester.pumpWidget(host(Future.value(control)));
+    await tester.pumpAndSettle();
+    await tester.tap(switchKey);
+    await tester.pump();
+    expect(tester.widget<SwitchListTile>(switchKey).onChanged, isNull);
+    await tester.tap(switchKey, warnIfMissed: false);
+    await tester.pump();
+    expect(control.writes, 1);
+    control.pending!.complete();
+    await tester.pumpAndSettle();
+    expect(control.enabled, isFalse);
+    expect(tester.widget<SwitchListTile>(switchKey).onChanged, isNotNull);
   });
 }

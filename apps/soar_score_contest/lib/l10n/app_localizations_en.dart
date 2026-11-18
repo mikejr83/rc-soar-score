@@ -72,6 +72,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startupSplashSwitch => 'Show startup screen';
 
   @override
+  String get startupSplashSaveFailed =>
+      'The setting could not be saved. It stays as it was.';
+
+  @override
   String get panelsHeading => 'Panels';
 
   @override

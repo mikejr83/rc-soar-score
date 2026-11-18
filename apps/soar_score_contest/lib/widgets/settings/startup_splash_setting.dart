@@ -17,10 +17,30 @@ class StartupSplashSetting extends StatefulWidget {
 
 class _StartupSplashSettingState extends State<StartupSplashSetting> {
   bool? _enabled;
+  bool _saving = false;
+  bool _saveFailed = false;
 
+  /// Shows the new value while it is written, and puts the old one back with
+  /// an error if the write fails. The switch is off meanwhile, so two changes
+  /// never overlap.
   Future<void> _change(StartupSplashControl control, bool value) async {
-    setState(() => _enabled = value);
-    await control.setEnabled(value);
+    final previous = _enabled ?? control.enabled;
+    setState(() {
+      _enabled = value;
+      _saving = true;
+      _saveFailed = false;
+    });
+    try {
+      await control.setEnabled(value);
+    } on Object {
+      if (!mounted) return;
+      setState(() {
+        _enabled = previous;
+        _saveFailed = true;
+      });
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
@@ -54,8 +74,18 @@ class _StartupSplashSettingState extends State<StartupSplashSetting> {
                   contentPadding: EdgeInsets.zero,
                   title: Text(l10n.startupSplashSwitch),
                   value: _enabled ?? control.enabled,
-                  onChanged: (value) => _change(control, value),
+                  onChanged: _saving
+                      ? null
+                      : (value) => _change(control, value),
                 ),
+                if (_saveFailed)
+                  Text(
+                    l10n.startupSplashSaveFailed,
+                    key: const ValueKey('startup-splash-save-failed'),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.error,
+                    ),
+                  ),
               ],
             ),
           ),

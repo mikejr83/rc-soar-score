@@ -76,6 +76,10 @@
   "@startupSplashSwitch": {
     "description": "Label of the switch that turns the startup splash on or off."
   },
+  "startupSplashSaveFailed": "The setting could not be saved. It stays as it was.",
+  "@startupSplashSaveFailed": {
+    "description": "Shown under the startup screen switch when saving the choice fails."
+  },
   "panelsHeading": "Panels",
   "@panelsHeading": {
     "description": "Heading of the Settings card that resets hidden or minimized panels."

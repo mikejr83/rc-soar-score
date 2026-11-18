@@ -49,4 +49,42 @@ void main() {
       expect(error, isA<StateError>());
     });
   });
+
+  test('a failure after some work still skips the rest of the minimum', () {
+    fakeAsync((async) {
+      Object? error;
+      startWithSplash<int>(
+        plan: () async => const StartupPlan(StartupMode.starting),
+        // Stands for the bootstrap and the controller preparation.
+        start: () async {
+          await Future<void>.delayed(const Duration(seconds: 1));
+          throw StateError('theme could not load');
+        },
+        showSplash: (_) {},
+        minimum: const Duration(seconds: 5),
+      ).catchError((Object e) {
+        error = e;
+        return 0;
+      });
+      async.elapse(const Duration(seconds: 2));
+      expect(error, isA<StateError>());
+    });
+  });
+
+  test('a start longer than the minimum adds no extra wait', () {
+    fakeAsync((async) {
+      int? result;
+      startWithSplash<int>(
+        plan: () async => const StartupPlan(StartupMode.starting),
+        start: () async {
+          await Future<void>.delayed(const Duration(seconds: 8));
+          return 1;
+        },
+        showSplash: (_) {},
+        minimum: const Duration(seconds: 5),
+      ).then((v) => result = v);
+      async.elapse(const Duration(seconds: 8));
+      expect(result, 1);
+    });
+  });
 }
