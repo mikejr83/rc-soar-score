@@ -88,13 +88,25 @@ Future<void> runStartPhase(Journey journey, JourneyContext data) async {
     },
   );
 
-  await journey.step('Settings lists the open source licences', () async {
-    await openSettings(tester);
-    await pumpUntilFound(tester, find.text('About'));
-    await pumpUntilFound(tester, find.text('Open source licences'));
-    expect(find.text('Privacy Policy'), findsOneWidget);
-    expect(find.text('Terms of Service'), findsOneWidget);
-    await goToMainPage(tester);
-    await pumpUntilFound(tester, find.byType(HomePage));
-  });
+  await journey.step(
+    'Settings lists the licences and the startup screen switch',
+    () async {
+      await openSettings(tester);
+      await pumpUntilFound(tester, find.text('About'));
+      await pumpUntilFound(tester, find.text('Open source licences'));
+      expect(find.text('Privacy Policy'), findsOneWidget);
+      expect(find.text('Terms of Service'), findsOneWidget);
+      // The startup screen setting exists only where there is a local
+      // database to build: native yes, web no.
+      final startupSwitch = find.byKey(const ValueKey('startup-splash-switch'));
+      if (kIsWeb) {
+        expect(startupSwitch, findsNothing);
+      } else {
+        await pumpUntilFound(tester, startupSwitch);
+        expect(tester.widget<SwitchListTile>(startupSwitch).value, isTrue);
+      }
+      await goToMainPage(tester);
+      await pumpUntilFound(tester, find.byType(HomePage));
+    },
+  );
 }

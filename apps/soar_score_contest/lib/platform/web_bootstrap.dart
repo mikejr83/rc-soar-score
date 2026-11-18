@@ -11,6 +11,8 @@ import '../services/sync/revision_app_sync.dart';
 import '../services/ui_account/auth_ui_account.dart';
 import '../services/ui_account/ui_account.dart';
 import 'app_bootstrap.dart';
+import '../services/startup/startup_mode.dart';
+import '../services/startup/startup_splash_control.dart';
 
 final _logger = Logger('WebBootstrap');
 
@@ -130,3 +132,9 @@ class WebBootstrap extends AppBootstrap {
 Future<AppBootstrap> start() => WebBootstrap.start();
 
 void quitApplication() {}
+
+/// The web build has no local database to build, so it shows no splash.
+Future<StartupPlan?> startupPlan() async => null;
+
+/// The web build has no startup splash setting.
+Future<StartupSplashControl?> openStartupSplashControl() async => null;

@@ -5,6 +5,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import 'app.dart';
 import 'pages/bootstrap_failure_page.dart';
+import 'pages/startup_splash_page.dart';
+import 'services/startup/startup_runner.dart';
 import 'platform/app_bootstrap.dart';
 // Platform selection happens at compile time, not at runtime: the web build
 // never compiles the native bootstrap (or its FFI-backed data layer and
@@ -33,7 +35,7 @@ Future<void> main() async {
 
   try {
     _logger.info('Starting Soar Score Contest App');
-    await _runContestApp(await bootstrap.start());
+    runApp(await _startWithSplash());
   } catch (error, stackTrace) {
     _logger.severe('Soar Score startup failed: $error\n$stackTrace');
     debugPrintStack(
@@ -54,11 +56,36 @@ Future<void> main() async {
   }
 }
 
+/// A retry from the failure page starts again without the splash, so the
+/// failure page stays mounted and shows the next error if it fails again.
 Future<void> _retryStartup() async {
-  await _runContestApp(await bootstrap.start());
+  runApp(await _startApp());
 }
 
-Future<void> _runContestApp(AppBootstrap appBootstrap) async {
+/// Starts the app, showing the splash for at least
+/// [minimumSplashDuration] when it is on. Preparing the app is part of the
+/// timed start, so a failure there reaches the failure page at once too.
+Future<Widget> _startWithSplash() => startWithSplash(
+  plan: bootstrap.startupPlan,
+  start: _startApp,
+  showSplash: (mode) => runApp(StartupSplashApp(mode: mode)),
+);
+
+/// Starts the platform bootstrap and prepares the app around it, without
+/// showing it. A failure in either releases what was already opened.
+Future<Widget> _startApp() async {
+  final appBootstrap = await bootstrap.start();
+  try {
+    return await _prepareContestApp(appBootstrap);
+  } catch (_) {
+    await appBootstrap.close();
+    rethrow;
+  }
+}
+
+/// Builds the app around [appBootstrap] without showing it: the monitors and
+/// the saved theme, text size and panels, so the first frame already has them.
+Future<Widget> _prepareContestApp(AppBootstrap appBootstrap) async {
   // The connectivity monitor observes the same client the app talks through,
   // so no API request ever bypasses `soar_score_api`, and no platform channel
   // is needed on web (its connectivity probe resolves there). Tests that pump
@@ -72,28 +99,27 @@ Future<void> _runContestApp(AppBootstrap appBootstrap) async {
   final storage = appBootstrap.hasLocalStorage
       ? StorageMonitor(probe: appBootstrap.checkStorage)
       : null;
+  try {
+    // Load the saved theme first so the first frame already has it.
+    final theme = ThemeController(
+      store: appBootstrap.localUiStore,
+      account: appBootstrap.uiAccount,
+    );
+    await theme.load();
+    final textSize = TextSizeController(
+      store: appBootstrap.localUiStore,
+      account: appBootstrap.uiAccount,
+    );
+    await textSize.load();
+    final areas = CollapsibleAreasController(
+      store: appBootstrap.localUiStore,
+      account: appBootstrap.uiAccount,
+    );
+    await areas.load();
 
-  // Load the saved theme first so the first frame already has it.
-  final theme = ThemeController(
-    store: appBootstrap.localUiStore,
-    account: appBootstrap.uiAccount,
-  );
-  await theme.load();
-  final textSize = TextSizeController(
-    store: appBootstrap.localUiStore,
-    account: appBootstrap.uiAccount,
-  );
-  await textSize.load();
-  final areas = CollapsibleAreasController(
-    store: appBootstrap.localUiStore,
-    account: appBootstrap.uiAccount,
-  );
-  await areas.load();
-
-  // `SoarScoreContestApp` releases the bootstrap (closing the embedded
-  // server and its port) and disposes the monitor on dispose.
-  runApp(
-    SoarScoreContestApp(
+    // `SoarScoreContestApp` releases the bootstrap (closing the embedded
+    // server and its port) and disposes the monitor on dispose.
+    return SoarScoreContestApp(
       bootstrap: appBootstrap,
       connectivity: connectivity,
       storage: storage,
@@ -101,6 +127,10 @@ Future<void> _runContestApp(AppBootstrap appBootstrap) async {
       textSizeController: textSize,
       collapsibleAreas: areas,
       alphaNotice: showAlphaNotice,
-    ),
-  );
+    );
+  } catch (_) {
+    connectivity.dispose();
+    storage?.dispose();
+    rethrow;
+  }
 }

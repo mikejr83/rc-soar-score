@@ -172,6 +172,48 @@ abstract class AppLocalizations {
   /// **'The text size could not be saved. It applies until you close the app.'**
   String get textSizeSaveFailed;
 
+  /// Splash message on the first run, while the local database is created.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing system...'**
+  String get startupInitializing;
+
+  /// Splash message on a normal start.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting...'**
+  String get startupStarting;
+
+  /// Splash message after an app update, while the local database is upgraded.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating system...'**
+  String get startupUpdating;
+
+  /// Heading of the Settings card for the startup splash.
+  ///
+  /// In en, this message translates to:
+  /// **'Startup screen'**
+  String get startupSplashHeading;
+
+  /// Explains the startup screen switch on the Settings page.
+  ///
+  /// In en, this message translates to:
+  /// **'Takes effect the next time the app starts.'**
+  String get startupSplashDescription;
+
+  /// Label of the switch that turns the startup splash on or off.
+  ///
+  /// In en, this message translates to:
+  /// **'Show startup screen'**
+  String get startupSplashSwitch;
+
+  /// Shown under the startup screen switch when saving the choice fails.
+  ///
+  /// In en, this message translates to:
+  /// **'The setting could not be saved. It stays as it was.'**
+  String get startupSplashSaveFailed;
+
   /// Heading of the Settings card that resets hidden or minimized panels.
   ///
   /// In en, this message translates to:

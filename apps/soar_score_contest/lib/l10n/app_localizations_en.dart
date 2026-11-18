@@ -53,6 +53,29 @@ class AppLocalizationsEn extends AppLocalizations {
       'The text size could not be saved. It applies until you close the app.';
 
   @override
+  String get startupInitializing => 'Initializing system...';
+
+  @override
+  String get startupStarting => 'Starting...';
+
+  @override
+  String get startupUpdating => 'Updating system...';
+
+  @override
+  String get startupSplashHeading => 'Startup screen';
+
+  @override
+  String get startupSplashDescription =>
+      'Takes effect the next time the app starts.';
+
+  @override
+  String get startupSplashSwitch => 'Show startup screen';
+
+  @override
+  String get startupSplashSaveFailed =>
+      'The setting could not be saved. It stays as it was.';
+
+  @override
   String get panelsHeading => 'Panels';
 
   @override

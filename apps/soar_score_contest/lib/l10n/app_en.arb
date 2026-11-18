@@ -52,6 +52,34 @@
   "@textSizeSaveFailed": {
     "description": "Snackbar shown when the chosen text size could not be stored on the device."
   },
+  "startupInitializing": "Initializing system...",
+  "@startupInitializing": {
+    "description": "Splash message on the first run, while the local database is created."
+  },
+  "startupStarting": "Starting...",
+  "@startupStarting": {
+    "description": "Splash message on a normal start."
+  },
+  "startupUpdating": "Updating system...",
+  "@startupUpdating": {
+    "description": "Splash message after an app update, while the local database is upgraded."
+  },
+  "startupSplashHeading": "Startup screen",
+  "@startupSplashHeading": {
+    "description": "Heading of the Settings card for the startup splash."
+  },
+  "startupSplashDescription": "Takes effect the next time the app starts.",
+  "@startupSplashDescription": {
+    "description": "Explains the startup screen switch on the Settings page."
+  },
+  "startupSplashSwitch": "Show startup screen",
+  "@startupSplashSwitch": {
+    "description": "Label of the switch that turns the startup splash on or off."
+  },
+  "startupSplashSaveFailed": "The setting could not be saved. It stays as it was.",
+  "@startupSplashSaveFailed": {
+    "description": "Shown under the startup screen switch when saving the choice fails."
+  },
   "panelsHeading": "Panels",
   "@panelsHeading": {
     "description": "Heading of the Settings card that resets hidden or minimized panels."
