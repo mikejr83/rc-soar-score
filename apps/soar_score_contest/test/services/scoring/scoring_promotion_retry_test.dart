@@ -202,4 +202,65 @@ void main() {
     expect(c.saveOf(first).kind, RowSaveKind.idle);
     expect(await c.retryPromotion(_row(c, 1)), isFalse);
   });
+
+  test('a failed catch-up read leaves Refresh, not a stale Retry', () async {
+    final server = ScoringServer()..seedAutomaticScore(first, flight);
+    final hold = server.holdPromote = Completer<void>();
+    final c = await _open(server);
+
+    final sent = c.confirmAutomatic(_row(c, 1));
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    server.confirmAsDirector(first);
+    await c.refreshAfterSync();
+
+    // The request fails and the catch-up read fails too.
+    server.promoteFailures[first] = (503, 'contest_busy');
+    server.readFailure = 503;
+    hold.complete();
+    expect(await sent, isFalse);
+
+    final save = c.saveOf(first);
+    expect(save.kind, RowSaveKind.failed);
+    expect(save.networkProblem, isFalse, reason: 'Refresh, not Retry');
+    expect(save.target?.confirm, isTrue);
+
+    // A later read settles it.
+    server.readFailure = null;
+    await c.refreshAfterSync();
+    expect(c.saveOf(first).kind, RowSaveKind.idle);
+    expect(_row(c, 1).isAutomaticUnconfirmed, isFalse);
+  });
+
+  test(
+    'a failed Mark all after an overlapping sync drops settled rows',
+    () async {
+      final second = scoringAssignmentId(1, 2);
+      final server = ScoringServer()
+        ..seedPendingSubmission(first, flight)
+        ..seedPendingSubmission(second, flight);
+      final hold = server.holdPromote = Completer<void>();
+      final c = await _open(server);
+
+      final all = c.markAllOfficial();
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      expect(server.promoteRequests, 1);
+
+      // Another director marks Ann official; the sync keeps the busy rows.
+      server.seedScore(first, flight);
+      await c.refreshAfterSync();
+
+      // The batch then fails for both rows.
+      server.promoteFailures[first] = (503, 'contest_busy');
+      server.promoteFailures[second] = (503, 'contest_busy');
+      hold.complete();
+      final summary = await all;
+
+      // Ann's failure is gone; Bo's remains and is the only one to retry.
+      expect(c.saveOf(first).kind, RowSaveKind.idle);
+      expect(c.saveOf(second).kind, RowSaveKind.failed);
+      expect(summary.retry, 1);
+    },
+  );
 }

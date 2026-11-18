@@ -979,7 +979,27 @@ class ScoringController extends ChangeNotifier {
   /// Reads the slot again then and retires the failure if it is obsolete.
   Future<void> _rereadIfSyncOverlapped(ScoringRow row, int readsBefore) async {
     if (_syncReads == readsBefore || _disposed) return;
-    if (await _refreshSlots([row])) _dropObsoletePromotionFailures();
+    if (await _refreshSlots([row])) {
+      _dropObsoletePromotionFailures();
+    } else {
+      _needsRefresh([row]);
+    }
+  }
+
+  /// Marks the failures of [rows] as unsettled: the slot could not be read
+  /// again after a sync overlapped, so Retry is replaced by Refresh until the
+  /// page has read the newer values.
+  void _needsRefresh(Iterable<ScoringRow> rows) {
+    for (final row in rows) {
+      final save = saveOf(row.id);
+      if (!save.promotion || save.isBusy) continue;
+      _saves[row.id] = RowSave(
+        RowSaveKind.failed,
+        promotion: true,
+        confirm: save.confirm,
+        target: save.target,
+      );
+    }
   }
 
   static RowSave _promotionRefusal(
@@ -1042,6 +1062,9 @@ class ScoringController extends ChangeNotifier {
     var retry = 0;
     final moved = <ScoringRow>[];
     final waiting = <ScoringRow>[];
+    // Rows counted as retry (true) or refused (false) until a sync that ran
+    // during the request shows another device decided them.
+    final failedRows = <ScoringRow, bool>{};
     for (
       var from = 0;
       from < batch.length;
@@ -1086,6 +1109,7 @@ class ScoringController extends ChangeNotifier {
               promotion: true,
               target: _waitingTarget(row),
             );
+            failedRows[row] = true;
             retry++;
           } else {
             final refusal = _promotionRefusal(
@@ -1098,8 +1122,10 @@ class ScoringController extends ChangeNotifier {
               moved.add(row);
               changed++;
             } else if (refusal.kind == RowSaveKind.failed) {
+              failedRows[row] = true;
               retry++;
             } else {
+              failedRows[row] = false;
               refused++;
             }
           }
@@ -1124,6 +1150,7 @@ class ScoringController extends ChangeNotifier {
             promotion: true,
             target: _waitingTarget(row),
           );
+          failedRows[row] = true;
         }
         retry += chunk.length;
       }
@@ -1133,6 +1160,20 @@ class ScoringController extends ChangeNotifier {
     }
     if (waiting.isNotEmpty && _syncReads != readsBefore) {
       await _reconcile(waiting);
+    }
+    if (failedRows.isNotEmpty && _syncReads != readsBefore && !_disposed) {
+      // A sync applied during the request kept these busy rows as they were:
+      // read them in one go and drop the failures another device settled.
+      final rows = failedRows.keys.toList();
+      if (await _refreshSlots(rows)) {
+        _dropObsoletePromotionFailures();
+        for (final MapEntry(key: row, value: wasRetry) in failedRows.entries) {
+          if (saveOf(row.id).kind != RowSaveKind.idle) continue;
+          wasRetry ? retry-- : refused--;
+        }
+      } else {
+        _needsRefresh(rows);
+      }
     }
     if (adopted + replayed > 0) {
       notifyListeners();
