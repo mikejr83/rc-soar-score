@@ -97,8 +97,9 @@ Future<ParticipantGroupResultsDto?> participantGroupResults(
     final zero = flight?.flight.outcome == FlightOutcome.zero;
     rows.add((
       sortKey: flight?.group.groupScore,
-      // Counted on an attempt, whatever the row shows (a zero included).
-      pending: !retired && (slot?.isPreliminary ?? false),
+      // Counted on an attempt, whatever the row shows (a zero or a retiree's
+      // retained submission included).
+      pending: slot?.isPreliminary ?? false,
       row: ParticipantGroupRowDto(
         pilotName: name,
         pilotNumber: participation.participantNumber,

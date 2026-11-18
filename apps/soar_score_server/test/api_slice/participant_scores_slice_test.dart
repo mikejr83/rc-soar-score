@@ -766,6 +766,46 @@ void _tests(SliceBackend backend) {
       expect(body['preliminary'], isFalse);
     });
 
+    test('a retiree\'s submitted score keeps the group preliminary', () async {
+      expect((await submit(1)).$1, 201);
+      for (final pilot in [2, 3]) {
+        final slot = assignments.singleWhere(
+          (a) =>
+              a['scheduled_round_id'] == rounds[0]['id'] &&
+              a['contest_participation_id'] == _participationId(pilot),
+        );
+        await api.expectOk(
+          'POST',
+          '/contests/$_contestId/assignments/${slot['id']}/scores',
+          status: 201,
+          body: {
+            'client_mutation_id': 'director-$pilot',
+            'base_score_revision': 0,
+            'components': _goodScore,
+            'reason': 'Entered by the director',
+          },
+        );
+      }
+      final retiree = (await repository.contestParticipationRepository.findById(
+        core.Id.parse(_participationId(1)),
+      ))!;
+      await repository.contestParticipationRepository.save(
+        retiree.withRetiredAtRound(1),
+        metadata: core.MutationMetadata(
+          clientMutationId: 'retire-1',
+          authority: core.Authority.director,
+          clientTime: DateTime.utc(2026, 10, 17, 15),
+          actorId: api.director,
+        ),
+      );
+      final (status, body) = await get('/rounds/1/group-results');
+      expect(status, 200, reason: '$body');
+      final byName = {for (final r in rowsOf(body)) r['pilot_name']: r};
+      expect(byName['P1 X']!['state'], 'retired');
+      expect(byName['P2 X']!['state'], 'official');
+      expect(body['preliminary'], isTrue);
+    });
+
     test('hiding results holds the overall standings, not the group', () async {
       expect((await submit(1)).$1, 201);
       expect((await submit(2, mutation: 'm-2')).$1, 201);
