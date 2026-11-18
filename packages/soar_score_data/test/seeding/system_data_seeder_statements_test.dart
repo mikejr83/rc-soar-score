@@ -54,6 +54,7 @@ void main() {
 
     await SystemDataSeeder(db).seed();
     final first = counter.statements.length;
+    final firstRun = List.of(counter.statements);
     counter.statements.clear();
     await SystemDataSeeder(db).seed();
     final second = counter.statements.length;
@@ -61,7 +62,7 @@ void main() {
     expect(
       first,
       lessThanOrEqualTo(_firstRunBudget),
-      reason: counter.statements.join('\n'),
+      reason: firstRun.join('\n'),
     );
     // Up to date: only the cursor read.
     expect(second, lessThanOrEqualTo(2));
