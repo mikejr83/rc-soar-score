@@ -192,6 +192,7 @@ class ScoringController extends ChangeNotifier {
     }
     data = next;
     _clampGroup();
+    _dropObsoletePromotionFailures();
     for (final row in rows) {
       if (saveOf(row.id).isBusy) continue;
       final draft = _drafts[row.id];
@@ -809,6 +810,63 @@ class ScoringController extends ChangeNotifier {
     return _sendPromotion(row, row.slot!.pendingAttempt!.id.value);
   }
 
+  /// The request a Mark official of [row]'s waiting submission would send.
+  PromotionTarget _waitingTarget(ScoringRow row) => PromotionTarget(
+    attemptId: row.slot!.pendingAttempt!.id.value,
+    revision: row.baseRevision,
+  );
+
+  /// Whether [row], as it is now, still is what [target] asked about: the
+  /// same waiting submission, or the same automatic score, at the same score
+  /// revision.
+  bool _matchesTarget(ScoringRow row, PromotionTarget target) {
+    if (row.baseRevision != target.revision) return false;
+    if (target.confirm) {
+      return row.isAutomaticUnconfirmed &&
+          row.slot!.officialScore!.scoreAttemptId.value == target.attemptId;
+    }
+    return row.hasPendingSubmission &&
+        row.slot?.pendingAttempt?.id.value == target.attemptId;
+  }
+
+  /// Whether the Mark official or Confirm of [row] is the one in play: the
+  /// failed request's own kind while one is shown, else what the row offers.
+  bool isConfirming(ScoringRow row) =>
+      saveOf(row.id).target?.confirm ?? row.isAutomaticUnconfirmed;
+
+  /// Asks again for what a failed Mark official or Confirm asked for, or, with
+  /// nothing failed, does what the row offers now. A failure whose submission,
+  /// score or revision has changed since (a sync brought another director's
+  /// decision or a new pilot entry) is dropped without sending anything.
+  Future<bool> retryPromotion(ScoringRow row) async {
+    final target = saveOf(row.id).target;
+    if (target != null) {
+      if (!_matchesTarget(row, target)) {
+        _saves.remove(row.id);
+        notifyListeners();
+        return false;
+      }
+      return target.confirm ? confirmAutomatic(row) : markOfficial(row);
+    }
+    return row.isAutomaticUnconfirmed
+        ? confirmAutomatic(row)
+        : markOfficial(row);
+  }
+
+  /// Drops the failures of Mark official and Confirm that a sync made
+  /// obsolete. A row refused as changed keeps its message: it already shows
+  /// the newer values the director was told to check.
+  void _dropObsoletePromotionFailures() {
+    for (final row in rows) {
+      final save = saveOf(row.id);
+      final target = save.target;
+      if (!save.promotion || save.isBusy || save.changed || target == null) {
+        continue;
+      }
+      if (!_matchesTarget(row, target)) _saves.remove(row.id);
+    }
+  }
+
   /// Why the director cannot confirm the automatic score of [row] now, or
   /// null when they can. A row that is not an unconfirmed automatic score
   /// answers [MarkOfficialSkip.noSubmission].
@@ -845,6 +903,11 @@ class ScoringController extends ChangeNotifier {
     String attemptId, {
     bool confirm = false,
   }) async {
+    final target = PromotionTarget(
+      attemptId: attemptId,
+      revision: row.baseRevision,
+      confirm: confirm,
+    );
     _saves[row.id] = RowSave(
       RowSaveKind.saving,
       promotion: true,
@@ -884,7 +947,7 @@ class ScoringController extends ChangeNotifier {
         error.error?.message,
         confirm: confirm,
       );
-      _saves[row.id] = refusal;
+      _saves[row.id] = refusal.withTarget(target);
       if (refusal.changed) {
         _settleChanged([row], await _refreshSlots([row]));
       }
@@ -894,6 +957,7 @@ class ScoringController extends ChangeNotifier {
         networkProblem: true,
         promotion: true,
         confirm: confirm,
+        target: target,
       );
     } on Object catch (error) {
       _saves[row.id] = RowSave(
@@ -901,6 +965,7 @@ class ScoringController extends ChangeNotifier {
         message: '$error',
         promotion: true,
         confirm: confirm,
+        target: target,
       );
     }
     notifyListeners();
@@ -1005,10 +1070,11 @@ class ScoringController extends ChangeNotifier {
             _applyQueued(row, outcome!.queued!);
             waiting.add(row);
           } else if (outcome == null) {
-            _saves[row.id] = const RowSave(
+            _saves[row.id] = RowSave(
               RowSaveKind.failed,
               networkProblem: true,
               promotion: true,
+              target: _waitingTarget(row),
             );
             retry++;
           } else {
@@ -1017,7 +1083,7 @@ class ScoringController extends ChangeNotifier {
               outcome.code,
               outcome.message,
             );
-            _saves[row.id] = refusal;
+            _saves[row.id] = refusal.withTarget(_waitingTarget(row));
             if (refusal.changed) {
               moved.add(row);
               changed++;
@@ -1046,6 +1112,7 @@ class ScoringController extends ChangeNotifier {
             message: unreachable ? null : said,
             networkProblem: unreachable,
             promotion: true,
+            target: _waitingTarget(row),
           );
         }
         retry += chunk.length;

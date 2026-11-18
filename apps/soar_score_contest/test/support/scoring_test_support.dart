@@ -205,6 +205,12 @@ class ScoringServer {
     );
   }
 
+  /// Another director confirms the automatic score of [assignmentId].
+  void confirmAsDirector(Id assignmentId) {
+    final score = _score[assignmentId]!;
+    _confirm(assignmentId, score.scoreAttemptId.value, score.scoreRevision);
+  }
+
   Id get _automaticAttempt => _sid('000a', 77);
 
   /// Per slot, a status and code the promotion routes answer instead of

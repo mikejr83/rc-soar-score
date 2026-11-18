@@ -261,10 +261,9 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
 
   Future<void> _markOfficial(ScoringRow row) async {
     final c = _controller!;
-    final confirming = row.isAutomaticUnconfirmed;
-    final ok = confirming
-        ? await c.confirmAutomatic(row)
-        : await c.markOfficial(row);
+    // A Retry asks for what failed, not for what the row offers after a sync.
+    final confirming = c.isConfirming(row);
+    final ok = await c.retryPromotion(row);
     final now = c.rows.where((r) => r.id == row.id).firstOrNull;
     if (ok && mounted && (now?.isAdoptionPending ?? false)) {
       final words = AppLocalizations.of(context);

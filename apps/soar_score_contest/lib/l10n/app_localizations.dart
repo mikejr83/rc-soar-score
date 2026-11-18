@@ -4364,6 +4364,12 @@ abstract class AppLocalizations {
   /// **'The contest accepted this score when its round or group was fully scored. It stays open to a review until you confirm it.'**
   String get scoreAutomaticNote;
 
+  /// Note on a scoring row whose automatically accepted score is locked, so review and Confirm no longer apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically accepted. This score is locked.'**
+  String get scoreAutomaticLocked;
+
   /// Button on a scoring row that confirms a score the contest accepted automatically.
   ///
   /// In en, this message translates to:

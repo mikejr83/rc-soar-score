@@ -905,7 +905,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         padding: const EdgeInsets.only(top: 4),
         child: Text(
           skip == MarkOfficialSkip.closed
-              ? words.scoreAutomaticNote
+              ? words.scoreAutomaticLocked
               : words.scoreMarkOfficialWaiting,
           style: Theme.of(context).textTheme.bodySmall,
         ),

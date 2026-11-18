@@ -17,6 +17,23 @@ enum RowSaveKind {
   refused,
 }
 
+/// The request a failed "mark official" or "confirm" was for: the attempt it
+/// named and the score revision it was based on. A Retry asks for this and
+/// nothing else, and the failure is dropped when the row no longer matches.
+class PromotionTarget {
+  const PromotionTarget({
+    required this.attemptId,
+    required this.revision,
+    this.confirm = false,
+  });
+
+  final String attemptId;
+  final int revision;
+
+  /// True for confirming an automatic score, false for a waiting submission.
+  final bool confirm;
+}
+
 class RowSave {
   const RowSave(
     this.kind, {
@@ -25,6 +42,7 @@ class RowSave {
     this.promotion = false,
     this.changed = false,
     this.confirm = false,
+    this.target,
   });
 
   static const idle = RowSave(RowSaveKind.idle);
@@ -50,6 +68,21 @@ class RowSave {
   /// True when the [promotion] was the director confirming a score the
   /// contest accepted automatically, so the banner says "confirm".
   final bool confirm;
+
+  /// For a failed or refused [promotion]: what it asked for, so Retry and the
+  /// page reconcile against that and not against whatever the row shows now.
+  final PromotionTarget? target;
+
+  /// This save bound to [target].
+  RowSave withTarget(PromotionTarget target) => RowSave(
+    kind,
+    message: message,
+    networkProblem: networkProblem,
+    promotion: promotion,
+    changed: changed,
+    confirm: confirm,
+    target: target,
+  );
 
   bool get isBusy => kind == RowSaveKind.saving;
 }

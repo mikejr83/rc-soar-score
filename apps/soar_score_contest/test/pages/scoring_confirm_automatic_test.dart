@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 
+import '../support/matrix_test_support.dart';
 import '../support/scoring_test_support.dart';
 
 final _words = AppLocalizationsEn();
@@ -208,5 +209,18 @@ void main() {
 
     expect(find.text(_words.scoreConfirmReloadFailed), findsOneWidget);
     expect(find.textContaining('Not marked official'), findsNothing);
+  });
+
+  testWidgets('a locked automatic score says so and offers no Confirm', (
+    tester,
+  ) async {
+    final first = scoringAssignmentId(1, 1);
+    final server = ScoringServer(matrix: drawnMatrix(lockedGroups: {(1, 1)}))
+      ..seedAutomaticScore(first, _flight);
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    expect(find.text(_words.scoreAutomaticLocked), findsOneWidget);
+    expect(find.text(_words.scoreAutomaticNote), findsNothing);
+    expect(_key('score-confirm-automatic-${first.value}'), findsNothing);
   });
 }

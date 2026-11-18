@@ -3178,6 +3178,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'The contest accepted this score when its round or group was fully scored. It stays open to a review until you confirm it.';
 
   @override
+  String get scoreAutomaticLocked =>
+      'Automatically accepted. This score is locked.';
+
+  @override
   String get scoreConfirm => 'Confirm';
 
   @override
