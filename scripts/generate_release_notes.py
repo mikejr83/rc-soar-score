@@ -26,8 +26,8 @@ MAX_PRS = 150
 BODY_CHARS = 600
 
 PROMPT = """You write release notes for RC Soar Score, an application for \
-running radio controlled sailplane contests. Readers are contest directors and \
-testers, not developers.
+running radio controlled sailplane contests. Readers are contest directors, \
+pilots, and their helpers, not developers.
 
 Below is the list of changes merged since the previous release, with each pull \
 request's title, labels and description. Write the notes in Markdown with these \
@@ -43,6 +43,10 @@ can now do. Group related pull requests into one bullet and link each as \
 
 ## Fixes and improvements
 Same style.
+
+## Data Schema Revision
+Note the current data schema version and if it differs from the previous \
+release. Indicate any migrations or manual steps required.
 
 ## Before you update
 Anything a tester must do or know: data that is reset, things to re-publish, \
