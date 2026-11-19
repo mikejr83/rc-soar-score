@@ -520,7 +520,8 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       expect(row.hasPendingSubmission, isTrue);
       expect(find.text('Pilot entry'), findsOneWidget);
 
-      // The director checks the values and saves: the chip goes.
+      // The director checks the values and saves their own: the director is
+      // then the source, so the chip goes.
       await tapVisible(tester, _key('score-row-${row.id.value}'));
       final time = fieldWithKey('score-time-${row.id.value}');
       await pumpUntilFound(tester, time);
@@ -565,15 +566,16 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       final height = fieldWithKey('score-height-${row.id.value}');
       await pumpUntilFound(tester, height);
       await enterIn(tester, height, '99');
+      // The reason it is off is the button's tooltip, not a line of text.
       await pumpUntilFound(
         tester,
-        find.text('Save or revert your edits first.'),
+        find.byTooltip('Save or revert your edits first.'),
       );
-      expect(tester.widget<OutlinedButton>(mark).onPressed, isNull);
+      expect(tester.widget<TextButton>(mark).onPressed, isNull);
       await tapVisible(tester, _key('score-revert-${row.id.value}'));
       await pumpUntilGone(
         tester,
-        find.text('Save or revert your edits first.'),
+        find.byTooltip('Save or revert your edits first.'),
       );
 
       await tapVisible(tester, mark);
@@ -582,6 +584,13 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       expect(saved, isNotNull);
       expect(saved!.hasPendingSubmission, isFalse);
       expect(saved.status, RowStatus.official);
+      // Where the score came from is still true once it is official, so the
+      // Pilot entry indicator stays on the row.
+      expect(saved.isPilotEntry, isTrue);
+      expect(
+        _key('score-indicator-pilot-entry-${row.id.value}'),
+        findsOneWidget,
+      );
     }),
     webOnly: true,
   );
@@ -682,15 +691,16 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       final height = fieldWithKey('score-height-${row.id.value}');
       await pumpUntilFound(tester, height);
       await enterIn(tester, height, '99');
+      // The reason it is off is the button's tooltip, not a line of text.
       await pumpUntilFound(
         tester,
-        find.text('Save or revert your edits first.'),
+        find.byTooltip('Save or revert your edits first.'),
       );
-      expect(tester.widget<OutlinedButton>(mark).onPressed, isNull);
+      expect(tester.widget<TextButton>(mark).onPressed, isNull);
       await tapVisible(tester, _key('score-revert-${row.id.value}'));
       await pumpUntilGone(
         tester,
-        find.text('Save or revert your edits first.'),
+        find.byTooltip('Save or revert your edits first.'),
       );
 
       await tapVisible(tester, mark);
@@ -864,6 +874,11 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
         expect(row.isAutomaticUnconfirmed, isTrue, reason: name);
         expect(find.text('Accepted automatically'), findsWidgets);
         expect(_key('score-confirm-automatic-${row.id.value}'), findsOneWidget);
+        // The submission it came from is still the row's source.
+        expect(
+          _key('score-indicator-pilot-entry-${row.id.value}'),
+          findsOneWidget,
+        );
       }
 
       // The history names the system, not a director.
