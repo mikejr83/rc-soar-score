@@ -93,7 +93,17 @@ void main() {
         round: 1,
         group: 1,
       );
-      expect(tester.getSize(_time(1, 1)).height, closeTo(44, 2));
+      final id = scoringAssignmentId(1, 1).value;
+      for (final name in ['time', 'height', 'landing']) {
+        final field = find.byKey(ValueKey('score-$name-$id'));
+        // The border is drawn at the field's height, not just its text's.
+        final border = find.descendant(
+          of: field,
+          matching: find.byType(InputDecorator),
+        );
+        expect(tester.getSize(field).height, 44, reason: name);
+        expect(tester.getSize(border).height, 44, reason: name);
+      }
     });
   });
 

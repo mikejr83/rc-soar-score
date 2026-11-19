@@ -288,6 +288,8 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
   /// The entry fields are 44 px tall with 17 px text in the medium table, 48
   /// px with 18 px text elsewhere.
   bool get _mediumFields => widget.mode == ScoreGridMode.medium;
+  double get _fieldFont => _mediumFields ? 17 : 18;
+  double get _fieldHeight => _mediumFields ? 44 : 48;
 
   Widget _label(
     BuildContext context,
@@ -384,15 +386,31 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       onTap: widget.actions.onActivate,
       onChanged: onChanged,
       onSubmitted: onSubmitted,
-      style: TextStyle(fontSize: _mediumFields ? 17 : 18),
+      // The design's field is 44 px (medium) or 48 px tall with 17 or 18 px
+      // text. The line is pinned to the font size and the rest is padding, so
+      // the border is drawn at that height whatever the font's own metrics
+      // (a decoration's `constraints` reserve the room but leave the border
+      // at the height of the text).
+      style: TextStyle(fontSize: _fieldFont, height: 1),
+      strutStyle: StrutStyle(
+        fontSize: _fieldFont,
+        height: 1,
+        forceStrutHeight: true,
+      ),
       decoration: InputDecoration(
         isDense: true,
         filled: !enabled,
         fillColor: scheme.onSurface.withValues(alpha: 0.06),
-        // A fixed height, as in the design, whatever the font's line height.
-        constraints: BoxConstraints.tightFor(height: _mediumFields ? 44 : 48),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: (_fieldHeight - _fieldFont) / 2,
+        ),
         suffixText: suffix,
+        suffixStyle: TextStyle(
+          fontSize: 14,
+          height: 1,
+          color: scheme.onSurfaceVariant,
+        ),
         border: _border(invalid ? scheme.error : scheme.outline),
         enabledBorder: _border(
           invalid ? scheme.error : scheme.outline,
