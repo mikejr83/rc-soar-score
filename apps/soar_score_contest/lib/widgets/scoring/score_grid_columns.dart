@@ -13,7 +13,7 @@ enum ScoreGridMode {
   /// A stacked card per pilot.
   compact;
 
-  static const double wideMin = 1130;
+  static const double wideMin = 1140;
   static const double mediumMin = 600;
 
   static ScoreGridMode of(double width) {
@@ -34,7 +34,7 @@ abstract final class ScoreGridColumns {
   static const double raw = 72;
   static const double group = 80;
   static const double pen = 108;
-  static const double ind = 84;
+  static const double ind = 92;
   static const double stat = 132;
   static const double menu = 44;
 
