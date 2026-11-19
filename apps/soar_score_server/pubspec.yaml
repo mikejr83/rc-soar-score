@@ -7,6 +7,8 @@ publish_to: none
 environment:
   sdk: ">=3.13.0 <4.0.0"
 dependencies:
+  aws_common: ^0.7.15
+  aws_signature_v4: ^0.6.13
   dotenv: ^4.2.0
   http: ^1.6.0
   jose: ^0.3.5+2
