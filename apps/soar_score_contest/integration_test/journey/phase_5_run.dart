@@ -497,16 +497,21 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
   // which only the web run's E2E server has; the Windows build's embedded
   // server gets one by sync, which this signed-out journey cannot show.
   await journey.step(
-    'Round 3: a pilot\'s own entry shows as Pilot entry until the director saves',
+    'Round 3: a pilot\'s own entry shows as Pilot entry until the director types over it',
     () => inContest(() async {
       // Tess retires in the next step, and the draw decides who the group
-      // Save above took, so the first pilot without a score submits.
+      // Save above took, so the first pilot without a score submits. The
+      // pilots of group 1, where that Save was, go first: the later steps
+      // need a group with three open rows, so the other group is left alone.
       final pilot = await submitAsPilot(
         contestName: data.contestName,
-        candidates: [
-          for (final name in data.pilotNames)
-            if (name != 'Tess Valdez') name,
-        ],
+        candidates: await pilotsStartingIn(
+          tester,
+          data,
+          3,
+          1,
+          skip: {'Tess Valdez'},
+        ),
         round: 3,
         timeFlown: 480,
       );
@@ -547,10 +552,13 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
     () => inContest(() async {
       final pilot = await submitAsPilot(
         contestName: data.contestName,
-        candidates: [
-          for (final name in data.pilotNames)
-            if (name != 'Tess Valdez') name,
-        ],
+        candidates: await pilotsStartingIn(
+          tester,
+          data,
+          3,
+          1,
+          skip: {'Tess Valdez'},
+        ),
         round: 3,
         timeFlown: 470,
       );
@@ -614,9 +622,11 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       // rows is used (the next steps need three).
       var group = 0;
       var inGroup = <String>[];
+      final seen = <String>[];
       for (var g = 1; g <= data.groupsPerRound; g++) {
         await openRoundGroup(tester, 3, g);
         final open = openRowNames(tester, skip: {'Tess Valdez'});
+        seen.add('group $g: built ${builtRowNames(tester)}, open $open');
         if (open.length > inGroup.length) {
           inGroup = open;
           group = g;
@@ -625,7 +635,11 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await openRoundGroup(tester, 3, group);
       // Mark official, Mark all and the review need a plain, a second plain
       // and a reviewed entry in one group.
-      expect(inGroup.length, greaterThanOrEqualTo(3), reason: 'rows to fill');
+      expect(
+        inGroup.length,
+        greaterThanOrEqualTo(3),
+        reason: 'rows to fill; ${seen.join(' | ')}',
+      );
       final pilots = waiting = await submitAsPilots(
         contestName: data.contestName,
         candidates: inGroup,
