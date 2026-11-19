@@ -939,10 +939,15 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
 
   /// A quiet text button for the row's quick action, as in the design.
   static final ButtonStyle _quickStyle = TextButton.styleFrom(
+    // Compact density would take 8 px off the 32 px minimum, so the density
+    // stays standard and the height is fixed.
+    fixedSize: const Size.fromHeight(32),
     minimumSize: const Size(0, 32),
     padding: const EdgeInsets.symmetric(horizontal: 8),
     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    visualDensity: VisualDensity.compact,
+    visualDensity: VisualDensity.standard,
+    textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+    shape: const StadiumBorder(),
   );
 
   /// The Confirm button and its explanation under the "Accepted
