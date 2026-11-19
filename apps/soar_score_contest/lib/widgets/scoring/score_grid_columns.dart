@@ -27,10 +27,10 @@ enum ScoreGridMode {
 /// heading and every pilot row use these, so the columns line up.
 abstract final class ScoreGridColumns {
   static const double lane = 48;
-  static const double time = 100;
-  static const double height = 100;
+  static const double time = 116;
+  static const double height = 96;
 
-  static const double land = 100;
+  static const double land = 120;
   static const double raw = 72;
   static const double group = 80;
   static const double pen = 108;
@@ -43,6 +43,25 @@ abstract final class ScoreGridColumns {
 
   static const double gap = 6;
   static const double rowPadding = 8;
+
+  /// The width the wide table needs for its fixed columns, a lane or number
+  /// column, the pilot column at its least, the gaps and the row padding.
+  /// [ScoreGridMode.wideMin] must not be below it, or the pilot column would
+  /// shrink under [pilotMin].
+  static const double wideNeeds =
+      lane +
+      pilotMin +
+      time +
+      height +
+      land +
+      raw +
+      group +
+      pen +
+      ind +
+      stat +
+      menu +
+      gap * 10 +
+      rowPadding * 2;
 }
 
 /// The sticky column headings of the wide table: a name over its unit.
