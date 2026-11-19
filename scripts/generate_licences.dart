@@ -346,7 +346,31 @@ List<Map<String, dynamic>> _npmEntries() {
   final platform = (_overrides['npmSkipPlatform'] as Map)
       .cast<String, dynamic>();
   final excluded = (platform['excludeNameContains'] as List).cast<String>();
-  bool applies(Map<String, dynamic> p, String name) {
+  // An entry is shipped only if something shipped depends on it. Without this,
+  // a package needed only by an excluded platform package (for example
+  // @emnapi/runtime, needed only by the wasm build of sharp) is listed although
+  // npm never installs it. Entries with no recorded dependent are kept.
+  final byName = <String, Map<String, dynamic>>{};
+  final dependents = <String, Set<String>>{};
+  for (final e in packages.entries) {
+    if (e.key.isEmpty) continue;
+    final name = e.key.substring(
+      e.key.lastIndexOf('node_modules/') + 'node_modules/'.length,
+    );
+    byName.putIfAbsent(name, () => e.value);
+    for (final section in [
+      'dependencies',
+      'optionalDependencies',
+      'peerDependencies',
+    ]) {
+      final declared =
+          (e.value[section] as Map?)?.keys.cast<String>() ?? const <String>[];
+      for (final dep in declared) {
+        dependents.putIfAbsent(dep, () => <String>{}).add(name);
+      }
+    }
+  }
+  bool passesPlatform(Map<String, dynamic> p, String name) {
     if (excluded.any(name.contains)) return false;
     for (final key in ['os', 'cpu', 'libc']) {
       final want = platform[key] as String;
@@ -361,6 +385,28 @@ List<Map<String, dynamic>> _npmEntries() {
     }
     return true;
   }
+
+  // Only a package that passes the platform filter can cause another to ship.
+  final reachable = <String, bool>{};
+  bool isReachable(String name, Set<String> visiting) {
+    final cached = reachable[name];
+    if (cached != null) return cached;
+    final p = byName[name];
+    if (p == null || !passesPlatform(p, name)) return false;
+    if (!visiting.add(name)) return false;
+    final parents = dependents[name];
+    final result =
+        rootDeps.contains(name) ||
+        parents == null ||
+        parents.isEmpty ||
+        parents.any((d) => isReachable(d, visiting));
+    visiting.remove(name);
+    reachable[name] = result;
+    return result;
+  }
+
+  bool applies(Map<String, dynamic> p, String name) =>
+      passesPlatform(p, name) && isReachable(name, <String>{});
 
   final entries = <Map<String, dynamic>>[];
   final names = <String, String>{}; // name -> key, for textFrom
