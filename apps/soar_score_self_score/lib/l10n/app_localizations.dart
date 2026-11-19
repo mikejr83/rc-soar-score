@@ -136,6 +136,12 @@ abstract class AppLocalizations {
   /// **'Licences in this app'**
   String get licencesInThisAppLink;
 
+  /// Opens the support request form on the public site.
+  ///
+  /// In en, this message translates to:
+  /// **'Get support'**
+  String get supportLink;
+
   /// Link to the Privacy Policy on the public site.
   ///
   /// In en, this message translates to:

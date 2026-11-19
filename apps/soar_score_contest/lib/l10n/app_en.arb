@@ -1694,6 +1694,10 @@
   "@aboutPrivacyPolicy": {
     "description": "Settings entry that opens the Privacy Policy on the public site."
   },
+  "aboutSupport": "Get support",
+  "@aboutSupport": {
+    "description": "Settings entry that opens the support request form on the public site."
+  },
   "aboutTermsOfService": "Terms of Service",
   "@aboutTermsOfService": {
     "description": "Settings entry that opens the Terms of Service on the public site."

@@ -1,5 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../public_site.dart';
+
+Future<bool> _openExternal(Uri uri) =>
+    launchUrl(uri, mode: LaunchMode.externalApplication);
 
 class BootstrapFailurePage extends StatefulWidget {
   const BootstrapFailurePage({
@@ -7,6 +13,7 @@ class BootstrapFailurePage extends StatefulWidget {
     required this.onRetry,
     required this.onQuit,
     this.showQuit = !kIsWeb,
+    this.opener = _openExternal,
     super.key,
   });
 
@@ -15,6 +22,9 @@ class BootstrapFailurePage extends StatefulWidget {
   final VoidCallback onQuit;
   final bool showQuit;
 
+  /// Opens the support page; replaced in tests.
+  final Future<bool> Function(Uri uri) opener;
+
   @override
   State<BootstrapFailurePage> createState() => _BootstrapFailurePageState();
 }
@@ -22,6 +32,25 @@ class BootstrapFailurePage extends StatefulWidget {
 class _BootstrapFailurePageState extends State<BootstrapFailurePage> {
   late Object _error = widget.error;
   bool _retrying = false;
+
+  Future<void> _openSupport() async {
+    final messenger = ScaffoldMessenger.of(context);
+    var opened = false;
+    try {
+      opened = await widget.opener(PublicSite.support);
+    } on Object {
+      opened = false;
+    }
+    if (!opened) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Could not open the link. Check your network connection and try again.',
+          ),
+        ),
+      );
+    }
+  }
 
   Future<void> _retry() async {
     setState(() => _retrying = true);
@@ -84,6 +113,12 @@ class _BootstrapFailurePageState extends State<BootstrapFailurePage> {
                             )
                           : const Icon(Icons.refresh),
                       label: Text(_retrying ? 'Retrying...' : 'Retry'),
+                    ),
+                    OutlinedButton.icon(
+                      key: const ValueKey('bootstrap-support'),
+                      onPressed: _openSupport,
+                      icon: const Icon(Icons.help_outline),
+                      label: const Text('Get support'),
                     ),
                     if (widget.showQuit)
                       OutlinedButton.icon(

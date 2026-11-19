@@ -18,4 +18,7 @@ class PublicSite {
   static Uri get privacyPolicy => _at('/privacy');
 
   static Uri get termsOfService => _at('/terms');
+
+  /// The public support request form.
+  static Uri get support => _at('/support');
 }

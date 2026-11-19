@@ -5,6 +5,7 @@ import 'package:soar_score_ui/soar_score_ui.dart';
 import '../data/self_score_repository.dart';
 import '../data/self_score_scope.dart';
 import '../l10n/app_localizations.dart';
+import '../public_site.dart';
 import '../models/guest_session.dart';
 import '../router.dart';
 import '../session/guest_session_scope.dart';
@@ -75,6 +76,8 @@ class _InvitationPageState extends State<InvitationPage> {
                   return LoadErrorView(
                     message: l10n.invitationLoadFailed,
                     onRetry: _retry,
+                    supportUri: supportPageUri(),
+                    supportLabel: l10n.supportLink,
                   );
                 }
                 return Center(

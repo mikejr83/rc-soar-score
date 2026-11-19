@@ -28,6 +28,10 @@
   "@licencesInThisAppLink": {
     "description": "Menu item that opens the licence list built into the app. It works without a network connection."
   },
+  "supportLink": "Get support",
+  "@supportLink": {
+    "description": "Opens the support request form on the public site."
+  },
   "privacyPolicyLink": "Privacy Policy",
   "@privacyPolicyLink": {
     "description": "Link to the Privacy Policy on the public site."

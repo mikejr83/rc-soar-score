@@ -2252,6 +2252,12 @@ abstract class AppLocalizations {
   /// **'Privacy Policy'**
   String get aboutPrivacyPolicy;
 
+  /// Settings entry that opens the support request form on the public site.
+  ///
+  /// In en, this message translates to:
+  /// **'Get support'**
+  String get aboutSupport;
+
   /// Settings entry that opens the Terms of Service on the public site.
   ///
   /// In en, this message translates to:
