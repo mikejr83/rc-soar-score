@@ -25,7 +25,8 @@ class StatusChip extends StatelessWidget {
   /// Draws an outline only, for a state that has no value yet.
   final bool dashed;
 
-  /// A small outlined chip for flags and indicators.
+  /// A small chip for flags and indicators. Its text wraps in a narrow
+  /// column instead of being cut off.
   final bool dense;
 
   @override
@@ -53,7 +54,7 @@ class StatusChip extends StatelessWidget {
           Flexible(
             child: Text(
               label,
-              overflow: TextOverflow.ellipsis,
+              overflow: dense ? null : TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.labelLarge
                   ?.copyWith(color: fg, fontSize: dense ? 12 : 13),
             ),

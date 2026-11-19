@@ -22,7 +22,8 @@ void main() {
 
     expect(server.promoteRequests, 1);
     expect(server.entries, isEmpty);
-    expect(find.text('Pilot entry'), findsNothing);
+    // Where the score came from is still true once it is official.
+    expect(find.text('Pilot entry'), findsOneWidget);
     expect(find.text('Mark official'), findsNothing);
   });
 
@@ -62,7 +63,7 @@ void main() {
 
     expect(server.entries, isEmpty);
     expect(_key('score-mark-official-failed'), findsNothing);
-    expect(find.text('Pilot entry'), findsNothing);
+    expect(find.text('Mark official'), findsNothing);
   });
 
   testWidgets('Mark all marks the valid rows at once and says what it left', (
@@ -79,7 +80,7 @@ void main() {
 
     expect(server.promoteRequests, 1);
     expect(find.text('Marked 2 rows official.'), findsOneWidget);
-    expect(find.text('Pilot entry'), findsNothing);
+    expect(find.text('Pilot entry'), findsNWidgets(2));
     // Nothing waits any more, so the group action is gone.
     expect(_key('score-mark-all-official'), findsNothing);
   });

@@ -747,30 +747,58 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     );
   }
 
+  /// Where the score came from and whether a review waits. They describe the
+  /// values, not their state, so they stay on an official row.
   Widget _indicatorCell(BuildContext context, bool labels) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final words = AppLocalizations.of(context);
+    final row = widget.row;
+    final chips = <Widget>[
+      if (row.isPilotEntry)
+        Tooltip(
+          message: words.scorePilotEntryTooltip,
+          child: StatusChip(
+            key: ValueKey(_k('indicator-pilot-entry')),
+            icon: Icons.smartphone,
+            label: words.scorePilotEntryChip,
+            background: scheme.surfaceContainerHigh,
+            foreground: scheme.onSurface,
+            dense: true,
+          ),
+        ),
+      if (row.hasOpenReview)
+        Tooltip(
+          message: words.scoreReviewTooltip,
+          child: StatusChip(
+            key: ValueKey(_k('indicator-review')),
+            icon: Icons.rate_review,
+            label: words.scoreReviewChip,
+            background: scheme.tertiaryContainer,
+            foreground: scheme.onTertiaryContainer,
+            dense: true,
+          ),
+        ),
+    ];
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _label(context, 'Indicators', labels),
-          if (widget.row.hasPendingSubmission) ...[
-            Tooltip(
-              message: AppLocalizations.of(context).scorePilotEntryTooltip,
-              child: StatusChip(
-                icon: Icons.smartphone,
-                label: AppLocalizations.of(context).scorePilotEntryChip,
-                dense: true,
-              ),
-            ),
-          ] else
+          if (chips.isEmpty)
             Text(
               '–',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: scheme.onSurfaceVariant,
               ),
-            ),
+            )
+          else
+            for (final (i, chip) in chips.indexed)
+              Padding(
+                padding: EdgeInsets.only(top: i == 0 ? 0 : 4),
+                child: chip,
+              ),
         ],
       ),
     );

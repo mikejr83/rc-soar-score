@@ -2980,7 +2980,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scorePilotEntryTooltip =>
-      'A pilot or helper submitted values. The submission is kept in history.';
+      'A pilot or helper entered these values. The submission is kept in history.';
+
+  @override
+  String get scoreReviewChip => 'Review';
+
+  @override
+  String get scoreReviewTooltip =>
+      'A review request is pending. The review panel comes in a later release.';
 
   @override
   String get scoresBecomeOfficialLabel => 'Scores become official';
