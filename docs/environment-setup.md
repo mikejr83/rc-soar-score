@@ -356,3 +356,19 @@ npx prettier --check "**/*.md"
 - [`README.md`](../README.md): project overview and architecture
 - [`AGENTS.md`](../AGENTS.md): conventions, linting, and CI expectations
 - [`plan/`](../plan/INDEX.md): business, architecture, and UI requirements
+
+## Public support form locally (#220)
+
+To exercise the form end to end, set the following for the Dart API (see
+[deploy-api-fly.md](deploy-api-fly.md#public-support-form-220) for the full
+table):
+
+- `SUPPORT_ALLOWED_HOSTNAMES=localhost`, `TURNSTILE_SECRET_KEY` and
+  `SUPPORT_THROTTLE_SECRET` (32+ characters).
+- `SES_ACCESS_KEY_ID` and `SES_SECRET_ACCESS_KEY` for a restricted local IAM
+  user whose `ses:SendEmail` is limited to the `test@rcsoarscore.com`
+  recipient. Leave `MAIL_DELIVERY_MODE` unset or `redirect`.
+
+Set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` in `apps/soar_score_web` to a development
+widget registered for `localhost`, then restart `npm run dev`. Automated tests
+use a fake Siteverify transport and a fake SES transport and need none of these.

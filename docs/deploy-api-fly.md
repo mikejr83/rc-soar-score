@@ -369,3 +369,26 @@ history) as well. Check the release's schema changes first.
 Take a `pg_dump` of the Neon database, restore it on the new PostgreSQL, set
 `DATABASE_URL` on the new host, run the same image there, and point the `api`
 DNS record at it.
+
+## Public support form (#220)
+
+`POST /public/support` sends the public support form through Amazon SES (Ohio,
+`us-east-2`, SES v2 API). It answers 503 `support_unavailable` until every
+setting below is valid. Disabling it never stops the rest of the API.
+
+| Variable | Behaviour |
+| --- | --- |
+| `MAIL_DELIVERY_MODE` | On `rc-soar-score-api`, only `live` enables delivery. Elsewhere unset or `redirect` selects redirect (mail goes only to `test@rcsoarscore.com`, subject prefixed `[TEST] `); any other value disables delivery. |
+| `SES_ACCESS_KEY_ID`, `SES_SECRET_ACCESS_KEY` | A dedicated IAM key pair scoped to `ses:SendEmail` on the verified `rcsoarscore.com` identity, `FromAddress` `notifications@rcsoarscore.com`. Production uses its own pair, installed with `fly secrets set`. |
+| `TURNSTILE_SECRET_KEY` | Server-only Turnstile secret for the widget. Cloudflare's published dummy secrets are refused in live mode. |
+| `SUPPORT_ALLOWED_HOSTNAMES` | Comma-separated exact hostnames the widget may report, without scheme or port (for example `localhost` locally, the public site host in production). |
+| `SUPPORT_THROTTLE_SECRET` | At least 32 characters; keys the shared per-caller attempt count (5 attempts per 10 minutes). |
+
+Live mail goes to `support@rcsoarscore.com` with Reply-To set to the submitter.
+Attempts are counted in the database before the body is read, so every machine
+shares one limit. Support content is not stored.
+
+Production IAM for the sender must allow `ses:SendEmail` only for the
+`notifications@rcsoarscore.com` From address and the `support@rcsoarscore.com`
+recipient, as described in the setup plan for #220. Rotate the key pair by
+installing and testing a replacement before retiring the old one.
