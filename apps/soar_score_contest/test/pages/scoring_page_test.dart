@@ -85,7 +85,10 @@ void main() {
       });
     }
 
-    testWidgets('the entry fields are 44 px tall', (tester) async {
+    testWidgets('the entry fields are 44 px tall on a desktop theme', (
+      tester,
+    ) async {
+      // Desktop platforms use compact density, which shrinks a field by 8 px.
       await pumpScoringPage(
         tester,
         ScoringServer(),
@@ -104,7 +107,7 @@ void main() {
         expect(tester.getSize(field).height, 44, reason: name);
         expect(tester.getSize(border).height, 44, reason: name);
       }
-    });
+    }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
   });
 
   testWidgets('wide width shows one heading over the columns', (tester) async {

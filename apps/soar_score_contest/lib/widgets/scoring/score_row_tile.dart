@@ -420,13 +420,19 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         focusedBorder: _border(scheme.primary, 3),
       ),
     );
+    // Desktop themes use compact density, which takes 8 px off a field's
+    // height. The design's heights are the standard ones.
+    final sized = Theme(
+      data: Theme.of(context).copyWith(visualDensity: VisualDensity.standard),
+      child: input,
+    );
     final field = onKey == null
-        ? input
+        ? sized
         : Focus(
             canRequestFocus: false,
             skipTraversal: true,
             onKeyEvent: (node, event) => onKey(event),
-            child: input,
+            child: sized,
           );
     return FocusStep(
       order: order,
