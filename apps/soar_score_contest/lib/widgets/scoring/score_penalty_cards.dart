@@ -203,6 +203,21 @@ class ScorePenaltyCards extends StatelessWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 6),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(text: 'Deducted from the '),
+                    TextSpan(text: 'contest total', style: helpBold),
+                    const TextSpan(text: '. '),
+                    TextSpan(text: 'Never dropped', style: helpBold),
+                    const TextSpan(
+                      text: ', and still counts if this flight is re-flown.',
+                    ),
+                  ],
+                ),
+                style: helpStyle,
+              ),
             ],
           ),
         );
