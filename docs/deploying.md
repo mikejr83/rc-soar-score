@@ -91,14 +91,14 @@ trigger to revisit this and store its secret in the `Production` environment.
 
 Environment variables on each host:
 
-| Where  | Variable                  | Value                                                                                                                                                 |
-| ------ | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vercel | `SOAR_SCORE_API_URL`      | `https://api.rcsoarscore.com` (production). Server-side only; `src/proxy.ts` forwards `/api/*` to it. Renamed from `RAILWAY_API_URL`. |
+| Where  | Variable                  | Value                                                                                                                                                                                    |
+| ------ | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vercel | `SOAR_SCORE_API_URL`      | `https://api.rcsoarscore.com` (production). Server-side only; `src/proxy.ts` forwards `/api/*` to it. Renamed from `RAILWAY_API_URL`.                                                    |
 | Vercel | `TRUSTED_PROXY_SECRET`    | The same value as the Fly secret of that name; the proxy sends it with the visitor's address so the API's rate limits count visitors (deploy-api-fly.md, "Throttling invitation links"). |
-| Vercel | `NEXT_PUBLIC_*`           | optional overrides listed in `apps/soar_score_web/AGENTS.md`                                                                                          |
-| Fly    | `DATABASE_URL` (secret)   | see [deploy-api-fly.md](deploy-api-fly.md)                                                                                                            |
-| Fly    | everything else           | `apps/soar_score_server/fly.toml`                                                                                                                     |
-| Build  | `SOAR_SCORE_API_BASE_URL` | `--dart-define` for both Flutter web apps: `https://api.rcsoarscore.com`                                                                              |
+| Vercel | `NEXT_PUBLIC_*`           | optional overrides listed in `apps/soar_score_web/AGENTS.md`                                                                                                                             |
+| Fly    | `DATABASE_URL` (secret)   | see [deploy-api-fly.md](deploy-api-fly.md)                                                                                                                                               |
+| Fly    | everything else           | `apps/soar_score_server/fly.toml`                                                                                                                                                        |
+| Build  | `SOAR_SCORE_API_BASE_URL` | `--dart-define` for both Flutter web apps: `https://api.rcsoarscore.com`                                                                                                                 |
 
 ## One-time setup (move to release deploys)
 
