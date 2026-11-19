@@ -4,8 +4,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart';
-import 'package:soar_score_core/soar_score_core.dart'
-    show RequestThrottleStore;
+import 'package:soar_score_core/soar_score_core.dart' show RequestThrottleStore;
 
 import '../middleware/client_address.dart';
 import '../middleware/error_mapping.dart';

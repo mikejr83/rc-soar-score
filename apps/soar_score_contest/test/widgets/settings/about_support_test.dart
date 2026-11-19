@@ -6,7 +6,9 @@ import 'package:soar_score_contest/widgets/app_version_label.dart';
 import 'package:soar_score_contest/widgets/settings/about_setting.dart';
 
 void main() {
-  testWidgets('About offers Get support, which opens the support page', (tester) async {
+  testWidgets('About offers Get support, which opens the support page', (
+    tester,
+  ) async {
     appVersionLoader = () async => '0.1.0-alpha.1';
     addTearDown(() => appVersionLoader = loadAppVersion);
     final opened = <Uri>[];

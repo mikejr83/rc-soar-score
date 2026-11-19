@@ -13,12 +13,13 @@ const supportInbox = 'support@rcsoarscore.com';
 
 /// The answer while the support endpoint is not configured: 503, never a
 /// send, so a hosted server without settings still starts and serves the rest.
-Handler unavailableSupportHandler() => (Request request) => handledError(
-  request,
-  503,
-  'support_unavailable',
-  'Support requests are unavailable right now. Please try again later.',
-);
+Handler unavailableSupportHandler() =>
+    (Request request) => handledError(
+      request,
+      503,
+      'support_unavailable',
+      'Support requests are unavailable right now. Please try again later.',
+    );
 
 /// The real support endpoint, built from [config].
 ///

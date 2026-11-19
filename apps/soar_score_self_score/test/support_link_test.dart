@@ -5,15 +5,23 @@ import 'package:soar_score_self_score/public_site.dart';
 import 'package:soar_score_self_score/widgets/load_error_view.dart';
 
 void main() {
-  test('the support page is the public site form and carries no credential', () {
-    final uri = supportPageUri(base: 'https://rcsoarscore.com');
-    expect(uri.toString(), 'https://rcsoarscore.com/support');
-    expect(uri.hasQuery, isFalse);
-    expect(uri.fragment, isEmpty);
-    expect(supportPageUri(base: 'https://preview.example.test').host, 'preview.example.test');
-  });
+  test(
+    'the support page is the public site form and carries no credential',
+    () {
+      final uri = supportPageUri(base: 'https://rcsoarscore.com');
+      expect(uri.toString(), 'https://rcsoarscore.com/support');
+      expect(uri.hasQuery, isFalse);
+      expect(uri.fragment, isEmpty);
+      expect(
+        supportPageUri(base: 'https://preview.example.test').host,
+        'preview.example.test',
+      );
+    },
+  );
 
-  testWidgets('a load error offers Get support and Retry still works', (tester) async {
+  testWidgets('a load error offers Get support and Retry still works', (
+    tester,
+  ) async {
     final opened = <Uri>[];
     var retried = 0;
     await tester.pumpWidget(
@@ -44,7 +52,9 @@ void main() {
     expect(retried, 1);
   });
 
-  testWidgets('without a support page the error view has no support action', (tester) async {
+  testWidgets('without a support page the error view has no support action', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

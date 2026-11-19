@@ -40,30 +40,33 @@ void main() {
     ).verify('token', address: '203.0.113.7');
   });
 
-  test('the request posts the secret and token, never the visitor address', () async {
-    await verifier(
-      respond: (_) => siteverify({
-        'success': true,
-        'action': supportTurnstileAction,
-        'hostname': _host,
-      }),
-    ).verify('token', address: '203.0.113.7');
+  test(
+    'the request posts the secret and token, never the visitor address',
+    () async {
+      await verifier(
+        respond: (_) => siteverify({
+          'success': true,
+          'action': supportTurnstileAction,
+          'hostname': _host,
+        }),
+      ).verify('token', address: '203.0.113.7');
 
-    final request = requests.single;
-    expect(request.method, 'POST');
-    expect(request.url, siteverifyUri);
-    expect(request.bodyFields, {'secret': 'turnstile-secret', 'response': 'token'});
-    expect(request.body, isNot(contains('203.0.113.7')));
-  });
+      final request = requests.single;
+      expect(request.method, 'POST');
+      expect(request.url, siteverifyUri);
+      expect(request.bodyFields, {
+        'secret': 'turnstile-secret',
+        'response': 'token',
+      });
+      expect(request.body, isNot(contains('203.0.113.7')));
+    },
+  );
 
   test('a success for another action is rejected', () async {
     expect(
       verifier(
-        respond: (_) => siteverify({
-          'success': true,
-          'action': 'login',
-          'hostname': _host,
-        }),
+        respond: (_) =>
+            siteverify({'success': true, 'action': 'login', 'hostname': _host}),
       ).verify('token', address: 'x'),
       throwsA(isA<SupportChallengeRejected>()),
     );
@@ -105,30 +108,22 @@ void main() {
           'error-codes': ['invalid-input-secret'],
         }),
       ).verify('token', address: 'x'),
-      throwsA(
-        allOf(isA<StateError>(), isNot(isA<SupportChallengeRejected>())),
-      ),
+      throwsA(allOf(isA<StateError>(), isNot(isA<SupportChallengeRejected>()))),
     );
   });
 
   test('an upstream HTTP failure is an outage', () async {
     await expectLater(
-      verifier(respond: (_) => http.Response('down', 503)).verify(
-        'token',
-        address: 'x',
-      ),
-      throwsA(
-        allOf(isA<StateError>(), isNot(isA<SupportChallengeRejected>())),
-      ),
+      verifier(respond: (_) => http.Response('down', 503))
+          .verify('token', address: 'x'),
+      throwsA(allOf(isA<StateError>(), isNot(isA<SupportChallengeRejected>()))),
     );
   });
 
   test('an unreadable body is an outage', () async {
     await expectLater(
-      verifier(respond: (_) => http.Response('<html>', 200)).verify(
-        'token',
-        address: 'x',
-      ),
+      verifier(respond: (_) => http.Response('<html>', 200))
+          .verify('token', address: 'x'),
       throwsA(isA<FormatException>()),
     );
   });

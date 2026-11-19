@@ -40,68 +40,74 @@ void main() {
 
   setUp(() => requests = []);
 
-  test('one signed UTF-8 POST to the Ohio v2 endpoint with the intended envelope', () async {
-    final outcome = await sender(
-      respond: (_) => http.Response('{"MessageId":"abc"}', 200),
-    ).send(_message);
+  test(
+    'one signed UTF-8 POST to the Ohio v2 endpoint with the intended envelope',
+    () async {
+      final outcome = await sender(
+        respond: (_) => http.Response('{"MessageId":"abc"}', 200),
+      ).send(_message);
 
-    expect(outcome, isA<MailAccepted>());
-    expect(requests, hasLength(1));
-    final request = requests.single;
-    expect(request.method, 'POST');
-    expect(
-      request.url.toString(),
-      'https://email.us-east-2.amazonaws.com/v2/email/outbound-emails',
-    );
-    expect(request.headers['authorization'], startsWith('AWS4-HMAC-SHA256 '));
-    expect(
-      request.headers['authorization'],
-      contains('/us-east-2/ses/aws4_request'),
-    );
+      expect(outcome, isA<MailAccepted>());
+      expect(requests, hasLength(1));
+      final request = requests.single;
+      expect(request.method, 'POST');
+      expect(
+        request.url.toString(),
+        'https://email.us-east-2.amazonaws.com/v2/email/outbound-emails',
+      );
+      expect(request.headers['authorization'], startsWith('AWS4-HMAC-SHA256 '));
+      expect(
+        request.headers['authorization'],
+        contains('/us-east-2/ses/aws4_request'),
+      );
 
-    final body = _body(request);
-    expect(body['FromEmailAddress'], 'notifications@rcsoarscore.com');
-    expect(body['Destination'], {
-      'ToAddresses': ['support@rcsoarscore.com'],
-      'CcAddresses': ['cc@example.test'],
-      'BccAddresses': ['bcc@example.test'],
-    });
-    expect(body['ReplyToAddresses'], ['pilot@example.test']);
-    expect(
-      body['Content']['Simple']['Subject'],
-      {'Data': 'Support: Online Score Entry', 'Charset': 'UTF-8'},
-    );
-    expect(
-      body['Content']['Simple']['Body']['Text'],
-      {'Data': 'Héllo — a message', 'Charset': 'UTF-8'},
-    );
-  });
+      final body = _body(request);
+      expect(body['FromEmailAddress'], 'notifications@rcsoarscore.com');
+      expect(body['Destination'], {
+        'ToAddresses': ['support@rcsoarscore.com'],
+        'CcAddresses': ['cc@example.test'],
+        'BccAddresses': ['bcc@example.test'],
+      });
+      expect(body['ReplyToAddresses'], ['pilot@example.test']);
+      expect(body['Content']['Simple']['Subject'], {
+        'Data': 'Support: Online Score Entry',
+        'Charset': 'UTF-8',
+      });
+      expect(body['Content']['Simple']['Body']['Text'], {
+        'Data': 'Héllo — a message',
+        'Charset': 'UTF-8',
+      });
+    },
+  );
 
-  test('redirect mode sends only to the test alias with a [TEST] subject', () async {
-    await sender(
-      mode: MailDeliveryMode.redirect,
-      respond: (_) => http.Response('{"MessageId":"abc"}', 200),
-    ).send(_message);
-    final body = _body(requests.single);
-    expect(body['Destination'], {'ToAddresses': ['test@rcsoarscore.com']});
-    expect(body['ReplyToAddresses'], ['test@rcsoarscore.com']);
-    expect(
-      body['Content']['Simple']['Subject']['Data'],
-      '[TEST] Support: Online Score Entry',
-    );
-  });
+  test(
+    'redirect mode sends only to the test alias with a [TEST] subject',
+    () async {
+      await sender(
+        mode: MailDeliveryMode.redirect,
+        respond: (_) => http.Response('{"MessageId":"abc"}', 200),
+      ).send(_message);
+      final body = _body(requests.single);
+      expect(body['Destination'], {
+        'ToAddresses': ['test@rcsoarscore.com'],
+      });
+      expect(body['ReplyToAddresses'], ['test@rcsoarscore.com']);
+      expect(
+        body['Content']['Simple']['Subject']['Data'],
+        '[TEST] Support: Online Score Entry',
+      );
+    },
+  );
 
   test('a 200 without a MessageId is unconfirmed', () async {
-    final outcome = await sender(
-      respond: (_) => http.Response('{}', 200),
-    ).send(_message);
+    final outcome = await sender(respond: (_) => http.Response('{}', 200))
+        .send(_message);
     expect(outcome, isA<MailUnconfirmed>());
   });
 
   test('a malformed success body is unconfirmed', () async {
-    final outcome = await sender(
-      respond: (_) => http.Response('<html>', 200),
-    ).send(_message);
+    final outcome = await sender(respond: (_) => http.Response('<html>', 200))
+        .send(_message);
     expect(outcome, isA<MailUnconfirmed>());
   });
 
@@ -114,17 +120,15 @@ void main() {
 
   test('throttling and denied credentials are unavailable', () async {
     for (final status in [429, 403]) {
-      final outcome = await sender(
-        respond: (_) => http.Response('{}', status),
-      ).send(_message);
+      final outcome = await sender(respond: (_) => http.Response('{}', status))
+          .send(_message);
       expect(outcome, isA<MailUnavailable>(), reason: 'HTTP $status');
     }
   });
 
   test('a server failure is unconfirmed', () async {
-    final outcome = await sender(
-      respond: (_) => http.Response('{}', 500),
-    ).send(_message);
+    final outcome = await sender(respond: (_) => http.Response('{}', 500))
+        .send(_message);
     expect(outcome, isA<MailUnconfirmed>());
   });
 
@@ -164,23 +168,26 @@ void main() {
     expect(await slow.send(_message), isA<MailUnconfirmed>());
   });
 
-  test('missing credentials or mode make zero calls and are unavailable', () async {
-    expect(
-      await sender(
-        credentials: null,
-        respond: (_) => fail('no call expected'),
-      ).send(_message),
-      isA<MailUnavailable>(),
-    );
-    expect(
-      await sender(
-        mode: null,
-        respond: (_) => fail('no call expected'),
-      ).send(_message),
-      isA<MailUnavailable>(),
-    );
-    expect(requests, isEmpty);
-  });
+  test(
+    'missing credentials or mode make zero calls and are unavailable',
+    () async {
+      expect(
+        await sender(
+          credentials: null,
+          respond: (_) => fail('no call expected'),
+        ).send(_message),
+        isA<MailUnavailable>(),
+      );
+      expect(
+        await sender(
+          mode: null,
+          respond: (_) => fail('no call expected'),
+        ).send(_message),
+        isA<MailUnavailable>(),
+      );
+      expect(requests, isEmpty);
+    },
+  );
 
   group('support settings', () {
     Map<String, String> env({

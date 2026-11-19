@@ -90,15 +90,16 @@ class SesV2Sender implements TransactionalMailSender {
 
     final http.Response response;
     try {
-      final signed = await AWSSigV4Signer(
-        credentialsProvider: AWSCredentialsProvider(credentials),
-      ).sign(
-        unsigned,
-        credentialScope: AWSCredentialScope(
-          region: sesRegion,
-          service: AWSService.sesV2,
-        ),
-      );
+      final signed =
+          await AWSSigV4Signer(
+            credentialsProvider: AWSCredentialsProvider(credentials),
+          ).sign(
+            unsigned,
+            credentialScope: AWSCredentialScope(
+              region: sesRegion,
+              service: AWSService.sesV2,
+            ),
+          );
       final request = http.Request('POST', endpoint)
         ..headers.addAll(signed.headers)
         ..bodyBytes = body;

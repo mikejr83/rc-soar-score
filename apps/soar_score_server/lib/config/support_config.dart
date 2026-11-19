@@ -102,6 +102,6 @@ class SupportConfig {
 }
 
 /// A host name with no scheme, port, path or spaces.
-bool _isBareHostname(String host) =>
-    RegExp(r'^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)*$')
-        .hasMatch(host);
+bool _isBareHostname(String host) => RegExp(
+  r'^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)*$',
+).hasMatch(host);

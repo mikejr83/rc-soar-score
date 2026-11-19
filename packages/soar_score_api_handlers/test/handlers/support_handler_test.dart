@@ -52,25 +52,24 @@ void main() {
   late _FakeVerifier verifier;
   late SupportDelivery sendResult;
 
-  SupportAttemptQuota quotaFor(MemoryThrottleStore s) => SupportAttemptQuota(
-    store: s,
-    keySecret: 'k' * 32,
-    clock: () => now,
-  );
+  SupportAttemptQuota quotaFor(MemoryThrottleStore s) =>
+      SupportAttemptQuota(store: s, keySecret: 'k' * 32, clock: () => now);
 
   Handler handler({
     SupportAttemptQuota? quota,
     SupportChallengeVerifier? challenge,
-  }) => const Pipeline().addMiddleware(errorMappingMiddleware()).addHandler(
-    buildSupportHandler(
-      quota: quota ?? quotaFor(store),
-      verifier: challenge ?? verifier,
-      send: (s) async {
-        sent.add(s);
-        return sendResult;
-      },
-    ),
-  );
+  }) => const Pipeline()
+      .addMiddleware(errorMappingMiddleware())
+      .addHandler(
+        buildSupportHandler(
+          quota: quota ?? quotaFor(store),
+          verifier: challenge ?? verifier,
+          send: (s) async {
+            sent.add(s);
+            return sendResult;
+          },
+        ),
+      );
 
   setUp(() {
     now = DateTime.utc(2026, 1, 1, 12);
@@ -143,9 +142,7 @@ void main() {
   });
 
   test('an unknown request type is refused', () async {
-    final response = await handler()(
-      _post(_valid({'requestType': 'Sales'})),
-    );
+    final response = await handler()(_post(_valid({'requestType': 'Sales'})));
     expect(response.statusCode, 400);
   });
 
@@ -160,7 +157,10 @@ void main() {
     verifier = _FakeVerifier(result: const SupportChallengeRejected());
     final response = await handler()(_post(_valid()));
     expect(response.statusCode, 400);
-    expect(jsonDecode(await response.readAsString())['error']['code'], 'captcha_invalid');
+    expect(
+      jsonDecode(await response.readAsString())['error']['code'],
+      'captcha_invalid',
+    );
     expect(sent, isEmpty);
   });
 
@@ -183,14 +183,20 @@ void main() {
     sendResult = SupportDelivery.rejected;
     final response = await handler()(_post(_valid()));
     expect(response.statusCode, 503);
-    expect(jsonDecode(await response.readAsString())['error']['code'], 'support_unavailable');
+    expect(
+      jsonDecode(await response.readAsString())['error']['code'],
+      'support_unavailable',
+    );
   });
 
   test('an unconfirmed send is 503 delivery_unconfirmed', () async {
     sendResult = SupportDelivery.unconfirmed;
     final response = await handler()(_post(_valid()));
     expect(response.statusCode, 503);
-    expect(jsonDecode(await response.readAsString())['error']['code'], 'delivery_unconfirmed');
+    expect(
+      jsonDecode(await response.readAsString())['error']['code'],
+      'delivery_unconfirmed',
+    );
   });
 
   test('five attempts pass, the sixth is 429, another caller passes, and the first passes after ten minutes', () async {
