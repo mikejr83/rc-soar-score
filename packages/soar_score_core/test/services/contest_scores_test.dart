@@ -20,6 +20,32 @@ void main() {
       expect(ScoreSlot.fromJson(json).pendingAttempt, isNull);
     });
 
+    test('an older response without official_attempt_authority parses', () {
+      final json = slot.toJson()..remove('official_attempt_authority');
+
+      expect(ScoreSlot.fromJson(json).officialAttemptAuthority, isNull);
+    });
+
+    test('the official attempt authority round-trips as its text', () {
+      for (final authority in Authority.values) {
+        final withAuthority = ScoreSlot(
+          placeholder: slot.placeholder,
+          officialAttemptAuthority: authority,
+        );
+        final json = withAuthority.toJson();
+
+        expect(json['official_attempt_authority'], isA<String>());
+        expect(ScoreSlot.fromJson(json), withAuthority);
+      }
+      expect(
+        ScoreSlot(
+          placeholder: slot.placeholder,
+          officialAttemptAuthority: Authority.participant,
+        ).toJson()['official_attempt_authority'],
+        'Participant',
+      );
+    });
+
     test('a null pending_attempt parses as none', () {
       expect(slot.toJson()['pending_attempt'], isNull);
       expect(ScoreSlot.fromJson(slot.toJson()), slot);

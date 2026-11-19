@@ -128,6 +128,11 @@ class ScoresService {
         .currentForPlaceholders([
           for (final placeholder in placeholders.values) placeholder.id,
         ]);
+    // Who first entered each official score's values; the slot's pending
+    // attempt does not say once the score is official.
+    final adopted = await repository.scoreAttemptRepository.findByIds([
+      for (final official in officials.values) official.scoreAttemptId,
+    ]);
     final waiting = {
       for (final intent
           in await repository.promotionIntentRepository.pendingForContest(
@@ -158,6 +163,8 @@ class ScoresService {
             officialScore: officials[placeholder.id],
             pendingAttempt: pending[placeholder.id],
             pendingPromotion: waiting[assignment.id],
+            officialAttemptAuthority:
+                adopted[officials[placeholder.id]?.scoreAttemptId]?.authority,
           ),
         );
       }
