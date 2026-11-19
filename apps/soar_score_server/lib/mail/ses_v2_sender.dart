@@ -102,8 +102,8 @@ class SesV2Sender implements TransactionalMailSender {
       final request = http.Request('POST', endpoint)
         ..headers.addAll(signed.headers)
         ..bodyBytes = body;
-      final streamed = await client.send(request).timeout(deadline);
-      response = await http.Response.fromStream(streamed).timeout(deadline);
+      // One deadline for the whole exchange: the headers and the body share it.
+      response = await _exchange(request).timeout(deadline);
     } on Object catch (error) {
       // A lost or late response: SES may have accepted the message.
       _logger.warning('SES send unconfirmed (${error.runtimeType}).');
@@ -111,6 +111,11 @@ class SesV2Sender implements TransactionalMailSender {
     }
 
     return _outcome(response);
+  }
+
+  Future<http.Response> _exchange(http.BaseRequest request) async {
+    final streamed = await client.send(request);
+    return http.Response.fromStream(streamed);
   }
 
   MailOutcome _outcome(http.Response response) {

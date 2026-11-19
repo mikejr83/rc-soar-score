@@ -143,6 +143,27 @@ void main() {
     expect(requests, hasLength(1));
   });
 
+  test('headers and body share one deadline, not one each', () async {
+    // Headers arrive after 60 ms and the body after another 60 ms: each part
+    // is inside the 100 ms deadline, but the exchange is not.
+    final slow = SesV2Sender(
+      client: MockClient.streaming((request, _) async {
+        requests.add(request as http.Request);
+        await Future<void>.delayed(const Duration(milliseconds: 60));
+        Stream<List<int>> body() async* {
+          await Future<void>.delayed(const Duration(milliseconds: 60));
+          yield utf8.encode('{"MessageId":"late"}');
+        }
+
+        return http.StreamedResponse(body(), 200);
+      }),
+      credentials: _credentials,
+      mode: MailDeliveryMode.live,
+      deadline: const Duration(milliseconds: 100),
+    );
+    expect(await slow.send(_message), isA<MailUnconfirmed>());
+  });
+
   test('missing credentials or mode make zero calls and are unavailable', () async {
     expect(
       await sender(
@@ -169,13 +190,13 @@ void main() {
       String? turnstile = 'turnstile-secret',
       String? throttle = '0123456789abcdef0123456789abcdef',
     }) => {
-      if (app != null) 'FLY_APP_NAME': app,
-      if (mode != null) 'MAIL_DELIVERY_MODE': mode,
+      'FLY_APP_NAME': ?app,
+      'MAIL_DELIVERY_MODE': ?mode,
       'SES_ACCESS_KEY_ID': 'AKID',
       'SES_SECRET_ACCESS_KEY': 'secret',
-      if (hosts != null) 'SUPPORT_ALLOWED_HOSTNAMES': hosts,
-      if (turnstile != null) 'TURNSTILE_SECRET_KEY': turnstile,
-      if (throttle != null) 'SUPPORT_THROTTLE_SECRET': throttle,
+      'SUPPORT_ALLOWED_HOSTNAMES': ?hosts,
+      'TURNSTILE_SECRET_KEY': ?turnstile,
+      'SUPPORT_THROTTLE_SECRET': ?throttle,
     };
 
     test('production delivers live only with an explicit live mode', () {

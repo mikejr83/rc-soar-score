@@ -71,6 +71,9 @@ export function SupportForm() {
   const touch = (field: Field) => () => setTouched((t) => ({ ...t, [field]: true }));
 
   function fail(outcome: Extract<SubmitOutcome, { kind: "retry" | "unconfirmed" }>) {
+    // An unconfirmed send may already have spent the challenge, so a retry
+    // always needs a new token, whatever the outcome.
+    const resetChallenge = outcome.kind === "unconfirmed" || outcome.resetChallenge;
     if (outcome.kind === "unconfirmed") {
       setUnconfirmed(true);
       setServerError(
@@ -81,11 +84,11 @@ export function SupportForm() {
       setUnconfirmed(false);
       setServerError(outcome.message);
       setRetryWait(outcome.waitSeconds ?? null);
-      if (outcome.resetChallenge) {
-        // A spent token cannot be reused; the widget issues a new one.
-        setToken(null);
-        challenge.current?.reset();
-      }
+    }
+    if (resetChallenge) {
+      // A spent token cannot be reused; the widget issues a new one.
+      setToken(null);
+      challenge.current?.reset();
     }
     requestAnimationFrame(() => serverErrorRef.current?.focus());
   }

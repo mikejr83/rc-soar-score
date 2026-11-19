@@ -97,3 +97,21 @@ describe("postSupport", () => {
     expect(outcome).toMatchObject({ kind: "retry", resetChallenge: true });
   });
 });
+
+describe("unrecognized failures", () => {
+  test("a gateway 502 or 504 after a possible send is unconfirmed, not retry", async () => {
+    for (const status of [502, 504]) {
+      const gateway = new Response("<html>Bad gateway</html>", {
+        status,
+        headers: { "content-type": "text/html" },
+      });
+      const fetcher = vi.fn(async () => gateway) as unknown as typeof fetch;
+      expect((await postSupport(fetcher, body)).kind, `HTTP ${status}`).toBe("unconfirmed");
+    }
+  });
+
+  test("an unknown error code is unconfirmed", async () => {
+    const outcome = await postSupport(stub(500, { error: { code: "internal_error" } }), body);
+    expect(outcome.kind).toBe("unconfirmed");
+  });
+});

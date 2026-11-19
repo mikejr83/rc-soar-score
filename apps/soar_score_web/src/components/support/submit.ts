@@ -113,12 +113,15 @@ export async function postSupport(
         resetChallenge: false,
       };
     case "support_unavailable":
-    default:
       return {
         kind: "retry",
         message: "Support requests are unavailable right now. Please try again later.",
         resetChallenge: true,
       };
+    default:
+      // Unrecognized failures (a gateway's 502 or 504, or an unknown code) can
+      // come after the API handed the message to SES. Treat them as unknown.
+      return { kind: "unconfirmed" };
   }
 }
 
