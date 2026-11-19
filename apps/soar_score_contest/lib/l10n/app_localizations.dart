@@ -4172,6 +4172,12 @@ abstract class AppLocalizations {
   /// **'A pilot or helper entered these values. The submission is kept in history.'**
   String get scorePilotEntryTooltip;
 
+  /// Red line under the status chip of a row the director left with a mistake that blocks saving it.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix to save'**
+  String get scoreFixToSave;
+
   /// Indicator chip on a score row whose review request waits for the director. Hidden until review decisions exist.
   ///
   /// In en, this message translates to:

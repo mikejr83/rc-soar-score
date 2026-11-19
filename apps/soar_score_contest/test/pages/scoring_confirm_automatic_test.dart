@@ -110,11 +110,12 @@ void main() {
     await tester.enterText(_key('score-height-${first.value}'), '99');
     await tester.pumpAndSettle();
 
-    final button = tester.widget<OutlinedButton>(
+    final button = tester.widget<TextButton>(
       _key('score-confirm-automatic-${first.value}'),
     );
     expect(button.onPressed, isNull);
-    expect(find.text('Save or revert your edits first.'), findsOneWidget);
+    expect(find.byTooltip('Save or revert your edits first.'), findsOneWidget);
+    expect(find.text('Save or revert your edits first.'), findsNothing);
   });
 
   testWidgets('history names the system, and the confirmation', (tester) async {

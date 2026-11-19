@@ -809,7 +809,15 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final scheme = theme.colorScheme;
     final colors = MatrixColors.of(context);
     final subs = <(IconData, String, Color?)>[
-      if (dirty) (Icons.edit_note, 'Not saved yet', null),
+      // The Unsaved chip already says the values are not saved. Only a
+      // mistake that blocks the save is added, and only on a row the director
+      // has left: the open row lists its problems in the entry band.
+      if (dirty && !widget.active && widget.draft.problems.isNotEmpty)
+        (
+          Icons.error,
+          AppLocalizations.of(context).scoreFixToSave,
+          scheme.error,
+        ),
       if (widget.findings.isNotEmpty)
         (Icons.help_outline, 'Check: ${widget.findings.length}', colors.warn),
       if (widget.row.isLocked && widget.block != null)
@@ -882,44 +890,39 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       MarkOfficialSkip.waitingToSync => words.scoreMarkOfficialWaiting,
       _ => null,
     };
+    // The reason it is off is the tooltip; no line is drawn under the button.
     return Padding(
-      padding: const EdgeInsets.only(top: 6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Tooltip(
-            message: why ?? words.scoreMarkOfficialTooltip(row.pilot.name),
-            child: OutlinedButton.icon(
-              key: ValueKey(_k('mark-official')),
-              onPressed: skip == null ? widget.actions.onMarkOfficial : null,
-              icon: busy
-                  ? const SizedBox.square(
-                      dimension: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.verified_outlined, size: 18),
-              label: Text(
-                busy ? words.scoreMarkOfficialMarking : words.scoreMarkOfficial,
-              ),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(0, 40),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-            ),
+      padding: const EdgeInsets.only(top: 2),
+      child: Tooltip(
+        message: why ?? words.scoreMarkOfficialTooltip(row.pilot.name),
+        child: TextButton.icon(
+          key: ValueKey(_k('mark-official')),
+          onPressed: skip == null ? widget.actions.onMarkOfficial : null,
+          icon: _quickIcon(busy),
+          label: Text(
+            busy ? words.scoreMarkOfficialMarking : words.scoreMarkOfficial,
           ),
-          if (why != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                why,
-                key: ValueKey(_k('mark-official-why')),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-        ],
+          style: _quickStyle,
+        ),
       ),
     );
   }
+
+  /// The icon of a row's quick action: a spinner while its request is out.
+  Widget _quickIcon(bool busy) => busy
+      ? const SizedBox.square(
+          dimension: 16,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        )
+      : const Icon(Icons.verified_outlined, size: 16);
+
+  /// A quiet text button for the row's quick action, as in the design.
+  static final ButtonStyle _quickStyle = TextButton.styleFrom(
+    minimumSize: const Size(0, 32),
+    padding: const EdgeInsets.symmetric(horizontal: 8),
+    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    visualDensity: VisualDensity.compact,
+  );
 
   /// The Confirm button and its explanation under the "Accepted
   /// automatically" chip: the contest accepted this score when its round or
@@ -957,30 +960,17 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
             key: ValueKey(_k('automatic-note')),
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Tooltip(
             message: why ?? words.scoreConfirmTooltip(row.pilot.name),
-            child: OutlinedButton.icon(
+            child: TextButton.icon(
               key: ValueKey(_k('confirm-automatic')),
               onPressed: skip == null ? widget.actions.onMarkOfficial : null,
-              icon: busy
-                  ? const SizedBox.square(
-                      dimension: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.verified_outlined, size: 18),
+              icon: _quickIcon(busy),
               label: Text(busy ? words.scoreConfirming : words.scoreConfirm),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(0, 40),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
+              style: _quickStyle,
             ),
           ),
-          if (why != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(why, style: Theme.of(context).textTheme.bodySmall),
-            ),
         ],
       ),
     );

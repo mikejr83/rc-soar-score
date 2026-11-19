@@ -39,11 +39,12 @@ void main() {
     await tester.enterText(_key('score-height-${first.value}'), '99');
     await tester.pumpAndSettle();
 
-    final button = tester.widget<OutlinedButton>(
+    final button = tester.widget<TextButton>(
       _key('score-mark-official-${first.value}'),
     );
     expect(button.onPressed, isNull);
-    expect(find.text('Save or revert your edits first.'), findsOneWidget);
+    expect(find.byTooltip('Save or revert your edits first.'), findsOneWidget);
+    expect(find.text('Save or revert your edits first.'), findsNothing);
   });
 
   testWidgets('a busy server shows Retry, which asks again', (tester) async {
@@ -129,11 +130,12 @@ void main() {
       ..seedPendingSubmission(first, _flight);
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
-    final button = tester.widget<OutlinedButton>(
+    final button = tester.widget<TextButton>(
       _key('score-mark-official-${first.value}'),
     );
     expect(button.onPressed, isNull);
-    expect(find.text('Entry is closed for this row.'), findsOneWidget);
+    expect(find.byTooltip('Entry is closed for this row.'), findsOneWidget);
+    expect(find.text('Entry is closed for this row.'), findsNothing);
   });
 
   testWidgets('a queued Mark official shows as waiting and blocks a repeat', (
@@ -157,13 +159,17 @@ void main() {
     );
     // The row is not official; it says the adoption waits.
     expect(find.text('Mark official is queued'), findsOneWidget);
-    final button = tester.widget<OutlinedButton>(
+    final button = tester.widget<TextButton>(
       _key('score-mark-official-${first.value}'),
     );
     expect(button.onPressed, isNull);
     expect(
-      find.text('Queued; the service decides it when this device syncs.'),
+      find.byTooltip('Queued; the service decides it when this device syncs.'),
       findsOneWidget,
+    );
+    expect(
+      find.text('Queued; the service decides it when this device syncs.'),
+      findsNothing,
     );
     expect(find.text('Pilot entry'), findsOneWidget);
   });
@@ -209,7 +215,7 @@ void main() {
       find.textContaining('is queued and will be reviewed'),
       findsOneWidget,
     );
-    final button = tester.widget<OutlinedButton>(
+    final button = tester.widget<TextButton>(
       _key('score-mark-official-${first.value}'),
     );
     expect(button.onPressed, isNull);
