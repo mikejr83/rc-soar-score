@@ -14,7 +14,10 @@ enum ScoreGridMode {
   compact;
 
   static const double wideMin = 1140;
-  static const double mediumMin = 600;
+
+  /// The medium layout needs the width of the design's medium sheet (700 px):
+  /// its left block shares what the fixed right block leaves.
+  static const double mediumMin = 700;
 
   static ScoreGridMode of(double width) {
     if (width >= wideMin) return wide;
@@ -41,6 +44,15 @@ abstract final class ScoreGridColumns {
   /// The pilot column's least width; it takes the rest.
   static const double pilotMin = 150;
 
+  /// The medium table (two lines per pilot): the right block is the same on
+  /// both lines, [mediumTime] + [mediumHeight] + [mediumLand] + [mediumMenu]
+  /// and their gaps.
+  static const double mediumLane = 44;
+  static const double mediumTime = 120;
+  static const double mediumHeight = 104;
+  static const double mediumLand = 136;
+  static const double mediumMenu = 44;
+
   static const double gap = 6;
   static const double rowPadding = 8;
 
@@ -64,14 +76,18 @@ abstract final class ScoreGridColumns {
       rowPadding * 2;
 }
 
-/// The sticky column headings of the wide table: a name over its unit.
+/// The column headings of the wide and the medium table: a name over its
+/// unit. The medium table only heads the first line of each row (pilot, time,
+/// height, landing); the second line's cells carry their own labels.
 class ScoreGridHeader extends StatelessWidget {
   const ScoreGridHeader({
     super.key,
+    this.mode = ScoreGridMode.wide,
     this.showHeight = true,
     this.options = const ScoreGridOptions(),
   });
 
+  final ScoreGridMode mode;
   final bool showHeight;
   final ScoreGridOptions options;
 
@@ -133,47 +149,61 @@ class ScoreGridHeader extends StatelessWidget {
             cell(
               options.idLabel!,
               '',
-              ScoreGridColumns.lane,
+              mode == ScoreGridMode.medium
+                  ? ScoreGridColumns.mediumLane
+                  : ScoreGridColumns.lane,
               align: TextAlign.center,
             ),
             gap,
           ],
           cell(options.showTeams ? 'Pilot · team' : 'Pilot', '', null),
           gap,
-          cell('Time flown', 'm:ss', ScoreGridColumns.time),
-          gap,
-          if (showHeight) ...[
-            cell('Launch height', 'metres', ScoreGridColumns.height),
+          if (mode == ScoreGridMode.medium) ...[
+            cell('Time flown', 'm:ss', ScoreGridColumns.mediumTime),
             gap,
+            if (showHeight) ...[
+              cell('Launch height', 'metres', ScoreGridColumns.mediumHeight),
+              gap,
+            ],
+            cell('Landing · flags', 'points', ScoreGridColumns.mediumLand),
+            gap,
+            const SizedBox(width: ScoreGridColumns.mediumMenu),
+          ] else ...[
+            cell('Time flown', 'm:ss', ScoreGridColumns.time),
+            gap,
+            if (showHeight) ...[
+              cell('Launch height', 'metres', ScoreGridColumns.height),
+              gap,
+            ],
+            cell('Landing · flags', 'points', ScoreGridColumns.land),
+            gap,
+            cell(
+              'Raw score',
+              'points',
+              ScoreGridColumns.raw,
+              align: TextAlign.end,
+            ),
+            gap,
+            cell(
+              'Group score',
+              'of 1000',
+              ScoreGridColumns.group,
+              align: TextAlign.end,
+            ),
+            gap,
+            cell(
+              'Penalties',
+              'flight · cumulative',
+              ScoreGridColumns.pen,
+              align: TextAlign.center,
+            ),
+            gap,
+            cell('Indicators', 'source · review', ScoreGridColumns.ind),
+            gap,
+            cell('Status', 'official · lock', ScoreGridColumns.stat),
+            gap,
+            const SizedBox(width: ScoreGridColumns.menu),
           ],
-          cell('Landing · flags', 'table points', ScoreGridColumns.land),
-          gap,
-          cell(
-            'Raw score',
-            'points',
-            ScoreGridColumns.raw,
-            align: TextAlign.end,
-          ),
-          gap,
-          cell(
-            'Group score',
-            'of 1000',
-            ScoreGridColumns.group,
-            align: TextAlign.end,
-          ),
-          gap,
-          cell(
-            'Penalties',
-            'flight · cumulative',
-            ScoreGridColumns.pen,
-            align: TextAlign.center,
-          ),
-          gap,
-          cell('Indicators', 'source · review', ScoreGridColumns.ind),
-          gap,
-          cell('Status', 'official · lock', ScoreGridColumns.stat),
-          gap,
-          const SizedBox(width: ScoreGridColumns.menu),
         ],
       ),
     );

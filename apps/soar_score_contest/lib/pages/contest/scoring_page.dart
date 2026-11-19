@@ -533,7 +533,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     );
   }
 
-  /// One rounded table: the heading (wide only) and a row per pilot.
+  /// One rounded table: the heading (wide and medium) and a row per pilot.
   Widget _table(
     ScoringController c,
     List<ScoringRow> rows,
@@ -550,8 +550,8 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       ),
       child: Column(
         children: [
-          if (mode == ScoreGridMode.wide)
-            ScoreGridHeader(options: c.data!.gridOptions),
+          if (mode != ScoreGridMode.compact)
+            ScoreGridHeader(mode: mode, options: c.data!.gridOptions),
           Expanded(
             child: ListView(
               children: [for (final row in rows) _tile(c, row, mode)],

@@ -279,6 +279,16 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
 
   // Cells.
 
+  /// Space above a cell's content. The wide table sets its cells 12 px down
+  /// so they sit level with the fields; the medium and compact tables start
+  /// every cell at the top of its line (`cellTop` and `menuTop` in the design).
+  double get _cellTop => widget.mode == ScoreGridMode.wide ? 12 : 0;
+  double get _menuTop => widget.mode == ScoreGridMode.wide ? 6 : 0;
+
+  /// The entry fields are 44 px tall with 17 px text in the medium table, 48
+  /// px with 18 px text elsewhere.
+  bool get _mediumFields => widget.mode == ScoreGridMode.medium;
+
   Widget _label(
     BuildContext context,
     String text,
@@ -374,15 +384,14 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       onTap: widget.actions.onActivate,
       onChanged: onChanged,
       onSubmitted: onSubmitted,
-      style: const TextStyle(fontSize: 18),
+      style: TextStyle(fontSize: _mediumFields ? 17 : 18),
       decoration: InputDecoration(
         isDense: true,
         filled: !enabled,
         fillColor: scheme.onSurface.withValues(alpha: 0.06),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 14,
-        ),
+        // A fixed height, as in the design, whatever the font's line height.
+        constraints: BoxConstraints.tightFor(height: _mediumFields ? 44 : 48),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10),
         suffixText: suffix,
         border: _border(invalid ? scheme.error : scheme.outline),
         enabledBorder: _border(
@@ -676,9 +685,13 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       );
     }
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: EdgeInsets.only(top: _cellTop),
       child: Column(
-        crossAxisAlignment: hasValue
+        // Under a heading the number is right aligned; with its own label
+        // (medium, compact) everything starts at the left.
+        crossAxisAlignment: labels
+            ? CrossAxisAlignment.start
+            : hasValue
             ? CrossAxisAlignment.end
             : CrossAxisAlignment.center,
         children: [
@@ -686,7 +699,11 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
             context,
             label,
             labels,
-            hasValue ? TextAlign.end : TextAlign.center,
+            labels
+                ? TextAlign.start
+                : hasValue
+                ? TextAlign.end
+                : TextAlign.center,
           ),
           number,
           if (caption != null)
@@ -711,17 +728,27 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final flight = d.penalty ?? 0;
     final cumulative = d.cumulativePenalty;
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: EdgeInsets.only(top: _cellTop),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: labels
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
-          _label(context, 'Penalties', labels, TextAlign.center),
+          _label(
+            context,
+            'Penalties',
+            labels,
+            labels ? TextAlign.start : TextAlign.center,
+          ),
           if (flight > 0)
             FittedBox(
               fit: BoxFit.scaleDown,
+              alignment: labels ? Alignment.centerLeft : Alignment.center,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: labels
+                    ? MainAxisAlignment.start
+                    : MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.remove,
@@ -734,10 +761,18 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
               ),
             )
           else if (cumulative == null)
-            Text('None', textAlign: TextAlign.center, style: muted),
+            Text(
+              'None',
+              textAlign: labels ? TextAlign.start : TextAlign.center,
+              style: muted,
+            ),
           // A removal keeps its row: the value was applied earlier.
           if (cumulative == 0)
-            Text('Removed', textAlign: TextAlign.center, style: muted),
+            Text(
+              'Removed',
+              textAlign: labels ? TextAlign.start : TextAlign.center,
+              style: muted,
+            ),
           if (cumulative != null && cumulative > 0)
             Padding(
               padding: EdgeInsets.only(top: flight > 0 ? 4 : 0),
@@ -745,9 +780,12 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
               // test font instead of overflowing.
               child: FittedBox(
                 fit: BoxFit.scaleDown,
+                alignment: labels ? Alignment.centerLeft : Alignment.center,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: labels
+                      ? MainAxisAlignment.start
+                      : MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.push_pin_outlined,
@@ -802,7 +840,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         ),
     ];
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: EdgeInsets.only(top: _cellTop),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -859,11 +897,10 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         ),
     ];
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: EdgeInsets.only(top: _cellTop),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _label(context, 'Status', labels),
           RowStatusChip(
             status: widget.row.status,
             unsaved: dirty,
@@ -1010,7 +1047,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     return FocusStep(
       order: 12,
       child: Padding(
-        padding: const EdgeInsets.only(top: 6),
+        padding: EdgeInsets.only(top: _menuTop),
         child: PopupMenuButton<String>(
           key: ValueKey('row-menu-${row.id.value}'),
           tooltip: 'More for ${row.pilot.name}',
@@ -1057,7 +1094,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(top: 10),
+      padding: EdgeInsets.only(top: _cellTop),
       child: Column(
         children: [
           Container(
@@ -1096,7 +1133,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         'No. ${row.pilot.number}',
     ].join(' · ');
     return Padding(
-      padding: const EdgeInsets.only(top: 10),
+      padding: EdgeInsets.only(top: _cellTop),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1142,16 +1179,20 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final dirty = d.isDirty;
     final saved = widget.row.result;
     final editable = !_readOnly && !widget.save.isBusy;
+    // The score, penalty and indicator cells carry their own label wherever
+    // there is no column heading over them (medium second line, compact); the
+    // entry fields only in the compact card.
     final labels = widget.mode != ScoreGridMode.wide;
+    final fieldLabels = widget.mode == ScoreGridMode.compact;
     final rawValue = dirty ? widget.preview : saved?.rawPoints;
     final groupValue = dirty ? null : saved?.groupScore;
     String number(double? v) => v == null ? '–' : v.toStringAsFixed(1);
 
     final lane = _laneCell(context);
     final pilot = _pilotCell(context);
-    final time = _timeCell(context, labels, editable);
-    final height = _heightCell(context, labels, editable);
-    final land = _landingCell(context, labels, editable);
+    final time = _timeCell(context, fieldLabels, editable);
+    final height = _heightCell(context, fieldLabels, editable);
+    final land = _landingCell(context, fieldLabels, editable);
     final raw = _numberCell(
       context,
       'Raw score',
@@ -1210,50 +1251,67 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           SizedBox(width: ScoreGridColumns.menu, child: menu),
         ],
       ),
+      // Two lines per pilot (the design's medium sheet): the pilot, time,
+      // height and landing on the first; the score, penalty, indicator and
+      // status cells on the second. The right block has the same width on
+      // both lines, so the second line's three score cells share the pilot's
+      // width equally.
       ScoreGridMode.medium => Column(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.grid.showId) ...[
-                SizedBox(width: 44, child: lane),
+                SizedBox(width: ScoreGridColumns.mediumLane, child: lane),
                 gap,
               ],
-              Expanded(flex: 2, child: pilot),
+              Expanded(child: pilot),
               gap,
-              Expanded(flex: 2, child: stat),
+              SizedBox(width: ScoreGridColumns.mediumTime, child: time),
               gap,
-              SizedBox(width: 44, child: menu),
+              SizedBox(width: ScoreGridColumns.mediumHeight, child: height),
+              gap,
+              SizedBox(width: ScoreGridColumns.mediumLand, child: land),
+              gap,
+              SizedBox(width: ScoreGridColumns.mediumMenu, child: menu),
             ],
           ),
-          vgap,
+          const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (widget.grid.showId) ...[const SizedBox(width: 44), gap],
-              Expanded(child: time),
+              if (widget.grid.showId) ...[
+                const SizedBox(width: ScoreGridColumns.mediumLane),
+                gap,
+              ],
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: raw),
+                    gap,
+                    Expanded(child: grp),
+                    gap,
+                    Expanded(child: pen),
+                  ],
+                ),
+              ),
               gap,
-              Expanded(child: height),
+              SizedBox(
+                width:
+                    ScoreGridColumns.mediumTime +
+                    ScoreGridColumns.gap +
+                    ScoreGridColumns.mediumHeight,
+                child: ind,
+              ),
               gap,
-              Expanded(flex: 2, child: land),
-              gap,
-              const SizedBox(width: 44),
-            ],
-          ),
-          vgap,
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (widget.grid.showId) ...[const SizedBox(width: 44), gap],
-              Expanded(child: raw),
-              gap,
-              Expanded(child: grp),
-              gap,
-              Expanded(child: pen),
-              gap,
-              Expanded(child: ind),
-              gap,
-              const SizedBox(width: 44),
+              SizedBox(
+                width:
+                    ScoreGridColumns.mediumLand +
+                    ScoreGridColumns.gap +
+                    ScoreGridColumns.mediumMenu,
+                child: stat,
+              ),
             ],
           ),
         ],
@@ -1314,9 +1372,9 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           onTap: widget.actions.onActivate,
           child: Container(
             key: ValueKey('score-row-${widget.row.id.value}'),
-            padding: const EdgeInsets.symmetric(
+            padding: EdgeInsets.symmetric(
               horizontal: ScoreGridColumns.rowPadding,
-              vertical: 6,
+              vertical: widget.mode == ScoreGridMode.medium ? 10 : 6,
             ),
             decoration: BoxDecoration(
               // The whole row, band included, is the highlighted block.
