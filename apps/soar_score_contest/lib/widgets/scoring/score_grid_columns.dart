@@ -15,15 +15,56 @@ enum ScoreGridMode {
 
   static const double wideMin = 1140;
 
-  /// The medium layout needs the width of the design's medium sheet (700 px):
-  /// its left block shares what the fixed right block leaves.
-  static const double mediumMin = 700;
+  /// The medium layout starts at 660 px, the grid width of a portrait tablet
+  /// (768 px less the rail, its divider and the page padding is 663). From
+  /// [mediumDesign] up the columns have the design's widths; below it the
+  /// time, height and landing columns give up width ([MediumColumns]).
+  static const double mediumMin = 660;
+  static const double mediumDesign = 700;
 
   static ScoreGridMode of(double width) {
     if (width >= wideMin) return wide;
     if (width >= mediumMin) return medium;
     return compact;
   }
+}
+
+/// The right block of the medium table (two lines per pilot), shared by both
+/// lines: the time, height and landing columns and the row menu. They have the
+/// design's widths from [ScoreGridMode.mediumDesign] up and shrink evenly to
+/// their least at [ScoreGridMode.mediumMin].
+class MediumColumns {
+  const MediumColumns._(this.time, this.height, this.land);
+
+  /// The design's widths.
+  static const MediumColumns design = MediumColumns._(120, 104, 136);
+
+  /// The least widths, at [ScoreGridMode.mediumMin].
+  static const MediumColumns least = MediumColumns._(108, 92, 124);
+
+  factory MediumColumns.of(double width) {
+    final t =
+        ((width - ScoreGridMode.mediumMin) /
+                (ScoreGridMode.mediumDesign - ScoreGridMode.mediumMin))
+            .clamp(0.0, 1.0);
+    double lerp(double a, double b) => a + (b - a) * t;
+    return MediumColumns._(
+      lerp(least.time, design.time),
+      lerp(least.height, design.height),
+      lerp(least.land, design.land),
+    );
+  }
+
+  static const double lane = 44;
+  static const double menu = 44;
+
+  final double time;
+  final double height;
+  final double land;
+
+  /// The width of the right block with its gaps (time, height, landing, menu
+  /// and the gap before each).
+  double get right => time + height + land + menu + ScoreGridColumns.gap * 4;
 }
 
 /// The column widths of the wide score table (`Scoring Screen.dc.html`). The
@@ -43,15 +84,6 @@ abstract final class ScoreGridColumns {
 
   /// The pilot column's least width; it takes the rest.
   static const double pilotMin = 150;
-
-  /// The medium table (two lines per pilot): the right block is the same on
-  /// both lines, [mediumTime] + [mediumHeight] + [mediumLand] + [mediumMenu]
-  /// and their gaps.
-  static const double mediumLane = 44;
-  static const double mediumTime = 120;
-  static const double mediumHeight = 104;
-  static const double mediumLand = 136;
-  static const double mediumMenu = 44;
 
   static const double gap = 6;
   static const double rowPadding = 8;
@@ -83,11 +115,15 @@ class ScoreGridHeader extends StatelessWidget {
   const ScoreGridHeader({
     super.key,
     this.mode = ScoreGridMode.wide,
+    this.medium = MediumColumns.design,
     this.showHeight = true,
     this.options = const ScoreGridOptions(),
   });
 
   final ScoreGridMode mode;
+
+  /// The medium table's right block, for the width the page has.
+  final MediumColumns medium;
   final bool showHeight;
   final ScoreGridOptions options;
 
@@ -150,7 +186,7 @@ class ScoreGridHeader extends StatelessWidget {
               options.idLabel!,
               '',
               mode == ScoreGridMode.medium
-                  ? ScoreGridColumns.mediumLane
+                  ? MediumColumns.lane
                   : ScoreGridColumns.lane,
               align: TextAlign.center,
             ),
@@ -159,15 +195,15 @@ class ScoreGridHeader extends StatelessWidget {
           cell(options.showTeams ? 'Pilot · team' : 'Pilot', '', null),
           gap,
           if (mode == ScoreGridMode.medium) ...[
-            cell('Time flown', 'm:ss', ScoreGridColumns.mediumTime),
+            cell('Time flown', 'm:ss', medium.time),
             gap,
             if (showHeight) ...[
-              cell('Launch height', 'metres', ScoreGridColumns.mediumHeight),
+              cell('Launch height', 'metres', medium.height),
               gap,
             ],
-            cell('Landing · flags', 'points', ScoreGridColumns.mediumLand),
+            cell('Landing · flags', 'points', medium.land),
             gap,
-            const SizedBox(width: ScoreGridColumns.mediumMenu),
+            const SizedBox(width: MediumColumns.menu),
           ] else ...[
             cell('Time flown', 'm:ss', ScoreGridColumns.time),
             gap,

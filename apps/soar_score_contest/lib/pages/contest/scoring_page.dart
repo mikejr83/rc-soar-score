@@ -520,7 +520,12 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
                         : LayoutBuilder(
                             builder: (context, box) {
                               final mode = ScoreGridMode.of(box.maxWidth);
-                              return _table(c, rows, mode);
+                              return _table(
+                                c,
+                                rows,
+                                mode,
+                                MediumColumns.of(box.maxWidth),
+                              );
                             },
                           ),
                   ),
@@ -538,6 +543,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     ScoringController c,
     List<ScoringRow> rows,
     ScoreGridMode mode,
+    MediumColumns medium,
   ) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
@@ -551,10 +557,14 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       child: Column(
         children: [
           if (mode != ScoreGridMode.compact)
-            ScoreGridHeader(mode: mode, options: c.data!.gridOptions),
+            ScoreGridHeader(
+              mode: mode,
+              medium: medium,
+              options: c.data!.gridOptions,
+            ),
           Expanded(
             child: ListView(
-              children: [for (final row in rows) _tile(c, row, mode)],
+              children: [for (final row in rows) _tile(c, row, mode, medium)],
             ),
           ),
         ],
@@ -562,7 +572,12 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     );
   }
 
-  Widget _tile(ScoringController c, ScoringRow row, ScoreGridMode mode) {
+  Widget _tile(
+    ScoringController c,
+    ScoringRow row,
+    ScoreGridMode mode,
+    MediumColumns medium,
+  ) {
     final data = c.data!;
     final draft = c.draftOf(row);
     final save = c.saveOf(row.id);
@@ -576,6 +591,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       landings: data.landings,
       landingTableName: data.landingTableName,
       mode: mode,
+      medium: medium,
       grid: data.gridOptions,
       focusOrder: c.showFocusOrder,
       heightPenalty: draft.height != null && draft.height! > 0

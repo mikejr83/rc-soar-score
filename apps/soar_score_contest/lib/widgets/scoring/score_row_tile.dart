@@ -75,6 +75,7 @@ class ScoreRowTile extends StatefulWidget {
     required this.findings,
     required this.actions,
     required this.mode,
+    this.medium = MediumColumns.design,
     required this.grid,
     this.focusOrder = false,
     this.theirs,
@@ -99,6 +100,9 @@ class ScoreRowTile extends StatefulWidget {
   final List<ScoreFinding> findings;
   final ScoreRowActions actions;
   final ScoreGridMode mode;
+
+  /// The medium table's right block for the width the page has.
+  final MediumColumns medium;
 
   /// Whether the grid shows a lane or number column and teams.
   final ScoreGridOptions grid;
@@ -1000,9 +1004,9 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
 
   /// A quiet text button for the row's quick action, as in the design.
   static final ButtonStyle _quickStyle = TextButton.styleFrom(
-    // Compact density would take 8 px off the 32 px minimum, so the density
-    // stays standard and the height is fixed.
-    fixedSize: const Size.fromHeight(32),
+    // 32 px at least; a label that wraps (Extra large text) makes the button
+    // taller. Compact density would take 8 px off the minimum, so the density
+    // stays standard.
     minimumSize: const Size(0, 32),
     padding: const EdgeInsets.symmetric(horizontal: 8),
     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -1286,18 +1290,18 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.grid.showId) ...[
-                SizedBox(width: ScoreGridColumns.mediumLane, child: lane),
+                SizedBox(width: MediumColumns.lane, child: lane),
                 gap,
               ],
               Expanded(child: pilot),
               gap,
-              SizedBox(width: ScoreGridColumns.mediumTime, child: time),
+              SizedBox(width: widget.medium.time, child: time),
               gap,
-              SizedBox(width: ScoreGridColumns.mediumHeight, child: height),
+              SizedBox(width: widget.medium.height, child: height),
               gap,
-              SizedBox(width: ScoreGridColumns.mediumLand, child: land),
+              SizedBox(width: widget.medium.land, child: land),
               gap,
-              SizedBox(width: ScoreGridColumns.mediumMenu, child: menu),
+              SizedBox(width: MediumColumns.menu, child: menu),
             ],
           ),
           const SizedBox(height: 8),
@@ -1305,7 +1309,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.grid.showId) ...[
-                const SizedBox(width: ScoreGridColumns.mediumLane),
+                const SizedBox(width: MediumColumns.lane),
                 gap,
               ],
               Expanded(
@@ -1323,17 +1327,17 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
               gap,
               SizedBox(
                 width:
-                    ScoreGridColumns.mediumTime +
+                    widget.medium.time +
                     ScoreGridColumns.gap +
-                    ScoreGridColumns.mediumHeight,
+                    widget.medium.height,
                 child: ind,
               ),
               gap,
               SizedBox(
                 width:
-                    ScoreGridColumns.mediumLand +
+                    widget.medium.land +
                     ScoreGridColumns.gap +
-                    ScoreGridColumns.mediumMenu,
+                    MediumColumns.menu,
                 child: stat,
               ),
             ],

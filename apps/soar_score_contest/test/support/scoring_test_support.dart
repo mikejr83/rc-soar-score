@@ -803,6 +803,13 @@ Future<void> pumpScoringPage(
   int? round,
   int? group,
   ContestScope? shell,
+
+  /// The width the shell's rail and its divider take from the page (the real
+  /// rail is 72 px plus a 1 px divider); 0 shows the page alone.
+  double railWidth = 0,
+
+  /// The text size choice as a multiplier (Extra large is 1.5).
+  double textScale = 1,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -824,12 +831,21 @@ Future<void> pumpScoringPage(
               group: int.tryParse(state.uri.queryParameters['group'] ?? ''),
             ),
           );
-          return shell == null
+          final framed = railWidth == 0
               ? page
+              : Row(
+                  children: [
+                    SizedBox(width: railWidth - 1),
+                    const VerticalDivider(width: 1, thickness: 1),
+                    Expanded(child: page),
+                  ],
+                );
+          return shell == null
+              ? framed
               : ContestScope(
                   contest: shell.contest,
                   reload: shell.reload,
-                  child: page,
+                  child: framed,
                 );
         },
       ),
@@ -848,6 +864,11 @@ Future<void> pumpScoringPage(
       ),
       child: MaterialApp.router(
         routerConfig: router,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
       ),

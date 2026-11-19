@@ -26,8 +26,9 @@ class StatusChip extends StatelessWidget {
   final bool dashed;
 
   /// A small chip for flags and indicators (`Scoring Screen.dc.html`: 22 px
-  /// tall, 11 px radius, 12 px text, 14 px icon). It never wraps; its column
-  /// is wide enough for the longest word.
+  /// tall, 11 px radius, 12 px text, 14 px icon). Its column is wide enough
+  /// for the label at the default text size; a larger text size wraps the
+  /// label and the chip grows taller instead of cutting it off.
   final bool dense;
 
   @override
@@ -58,7 +59,6 @@ class StatusChip extends StatelessWidget {
             child: Text(
               label,
               overflow: dense ? null : TextOverflow.ellipsis,
-              softWrap: !dense,
               style: dense
                   ? Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: fg,

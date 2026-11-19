@@ -23,32 +23,42 @@ void main() {
     expect(ScoreGridColumns.pilotMin, 150);
   });
 
-  test('the medium table follows the design (700 px sheet)', () {
-    expect(ScoreGridMode.mediumMin, 700);
-    expect(ScoreGridColumns.mediumLane, 44);
-    expect(ScoreGridColumns.mediumTime, 120);
-    expect(ScoreGridColumns.mediumHeight, 104);
-    expect(ScoreGridColumns.mediumLand, 136);
-    expect(ScoreGridColumns.mediumMenu, 44);
-    // The left block must stay wider than its three score columns need.
-    const right =
-        ScoreGridColumns.mediumTime +
-        ScoreGridColumns.mediumHeight +
-        ScoreGridColumns.mediumLand +
-        ScoreGridColumns.mediumMenu +
-        ScoreGridColumns.gap * 4;
-    const left =
+  test('the medium table follows the design at 700 px and up', () {
+    expect(ScoreGridMode.mediumDesign, 700);
+    expect(MediumColumns.lane, 44);
+    expect(MediumColumns.menu, 44);
+    for (final width in [700.0, 900.0, 1100.0]) {
+      final columns = MediumColumns.of(width);
+      expect(columns.time, 120);
+      expect(columns.height, 104);
+      expect(columns.land, 136);
+    }
+  });
+
+  test('the medium columns give up width down to a portrait tablet', () {
+    // 768 px less the 72 px rail, its 1 px divider and 32 px of padding.
+    const portraitTablet = 768.0 - 72 - 1 - 32;
+    expect(ScoreGridMode.of(portraitTablet), ScoreGridMode.medium);
+    final least = MediumColumns.of(ScoreGridMode.mediumMin);
+    expect(least.time, 108);
+    expect(least.height, 92);
+    expect(least.land, 124);
+    final between = MediumColumns.of(680);
+    expect(between.time, inExclusiveRange(108, 120));
+    // What is left for the three score columns at the narrowest width.
+    final left =
         ScoreGridMode.mediumMin -
         ScoreGridColumns.rowPadding * 2 -
-        ScoreGridColumns.mediumLane -
+        MediumColumns.lane -
         ScoreGridColumns.gap -
-        right;
-    expect(left, greaterThan(180));
+        least.right -
+        ScoreGridColumns.gap;
+    expect((left - ScoreGridColumns.gap * 2) / 3, greaterThan(60));
   });
 
   test('a width picks wide, medium or compact', () {
     expect(ScoreGridMode.of(1200), ScoreGridMode.wide);
     expect(ScoreGridMode.of(900), ScoreGridMode.medium);
-    expect(ScoreGridMode.of(699), ScoreGridMode.compact);
+    expect(ScoreGridMode.of(659), ScoreGridMode.compact);
   });
 }

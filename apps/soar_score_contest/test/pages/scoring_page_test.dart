@@ -85,6 +85,33 @@ void main() {
       });
     }
 
+    testWidgets('a portrait tablet keeps two lines under the shell', (
+      tester,
+    ) async {
+      // 768 px less the rail and the page padding leaves about 663 px.
+      await pumpScoringPage(
+        tester,
+        ScoringServer(),
+        size: const Size(768, 1024),
+        railWidth: 73,
+        round: 1,
+        group: 1,
+      );
+      await tester.tap(_row(1, 1));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const ValueKey('score-grid-header')), findsOneWidget);
+      expect(find.text('Time flown (m:ss)'), findsNothing);
+      final time = tester.getBottomLeft(_time(1, 1));
+      final rawLabel = tester.getTopLeft(find.text('Raw score').first);
+      expect(rawLabel.dy, greaterThan(time.dy));
+      // The three score cells fit side by side with their labels.
+      final group = tester.getTopLeft(find.text('Group score').first).dx;
+      final penalties = tester.getTopLeft(find.text('Penalties').first).dx;
+      expect(group, greaterThan(rawLabel.dx + 40));
+      expect(penalties, greaterThan(group + 40));
+    });
+
     testWidgets('the entry fields are 44 px tall on a desktop theme', (
       tester,
     ) async {
