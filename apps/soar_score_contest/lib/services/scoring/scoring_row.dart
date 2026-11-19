@@ -76,6 +76,28 @@ class ScoringRow {
     _ => false,
   };
 
+  /// The authority the values on this row were first entered under: the
+  /// waiting submission's, else the adopted attempt of the official score,
+  /// or null when nothing is entered. A waiting submission the row cannot
+  /// see the attempt of counts as a participant's, which is how it got here.
+  Authority? get sourceAuthority {
+    if (hasPendingSubmission) {
+      return slot?.pendingAttempt?.authority ?? Authority.participant;
+    }
+    return slot?.officialAttemptAuthority;
+  }
+
+  /// Whether a pilot or helper entered the values, whether or not the
+  /// director has made them official since. The Indicators column says so.
+  bool get isPilotEntry =>
+      sourceAuthority == Authority.participant ||
+      sourceAuthority == Authority.helper;
+
+  /// Whether a review request waits for the director. Review decisions are
+  /// not built yet (#145), so this is false until they are; the Indicators
+  /// column already knows how to show it.
+  bool get hasOpenReview => false;
+
   /// Whether the director's Mark official waits to be sent to the service:
   /// the adoption is queued on this device and the service has not decided.
   bool get isAdoptionPending => slot?.pendingPromotion != null;
