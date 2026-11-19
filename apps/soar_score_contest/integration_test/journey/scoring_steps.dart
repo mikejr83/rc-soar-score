@@ -261,7 +261,7 @@ Future<void> _enterFlight(
     await enterIn(tester, _key('cumulative-penalty'), '$penalty');
     await pumpUntilFound(
       tester,
-      find.text('−$penalty pts from the contest total.'),
+      find.text('Applied: −$penalty points from the contest total.'),
     );
   }
 }

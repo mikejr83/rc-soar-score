@@ -2979,8 +2979,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scorePilotEntryChip => 'Pilot entry';
 
   @override
-  String get scorePilotEntryTooltip =>
-      'A pilot or helper entered these values. The submission is kept in history.';
+  String get scorePilotEntryTooltip => 'Entered by a pilot or helper.';
 
   @override
   String get scorePreviewTooltip => 'Preview. Saved when you save the row.';

@@ -424,7 +424,10 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await tapVisible(tester, _key('score-row-${owen.id.value}'));
       await pumpUntilFound(tester, _key('cumulative-penalty'));
       await enterIn(tester, _key('cumulative-penalty'), '0');
-      await pumpUntilFound(tester, find.text('Applied, then removed.'));
+      await pumpUntilFound(
+        tester,
+        find.text('Removed. Removing is recorded as an official correction.'),
+      );
       await tapVisible(tester, _key('score-save-${owen.id.value}'));
       await pumpUntilFound(tester, _key('penalty-removal-dialog'));
       await enterIn(tester, _key('penalty-removal-reason'), rowReason);
@@ -444,7 +447,10 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await tapVisible(tester, _key('score-row-${priya.id.value}'));
       await pumpUntilFound(tester, _key('cumulative-penalty'));
       await enterIn(tester, _key('cumulative-penalty'), '0');
-      await pumpUntilFound(tester, find.text('Applied, then removed.'));
+      await pumpUntilFound(
+        tester,
+        find.text('Removed. Removing is recorded as an official correction.'),
+      );
       await tapVisible(tester, _key('score-save-all'));
       await pumpUntilFound(tester, _key('penalty-removal-dialog'));
       // One pending removal asks about that pilot, not a count.

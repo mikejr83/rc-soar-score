@@ -62,6 +62,21 @@ class ScorePenaltyCards extends StatelessWidget {
         ),
       ],
     );
+    // The design's "pts" sits inside the field even while it is empty, which
+    // `suffixText` does not do.
+    final ptsSuffix = Padding(
+      padding: const EdgeInsets.only(right: 10, left: 4),
+      child: Text(
+        'pts',
+        style: TextStyle(fontSize: 14, color: scheme.onSurfaceVariant),
+      ),
+    );
+    final helpStyle = theme.textTheme.bodyMedium?.copyWith(
+      fontSize: 13,
+      height: 18 / 13,
+      color: scheme.onSurface,
+    );
+    final helpBold = helpStyle?.copyWith(fontWeight: FontWeight.bold);
     OutlineInputBorder border([Color? color, double width = 1]) =>
         OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
@@ -95,7 +110,8 @@ class ScorePenaltyCards extends StatelessWidget {
                     style: const TextStyle(fontSize: 18),
                     decoration: InputDecoration(
                       hintText: '0',
-                      suffixText: 'pts',
+                      suffixIcon: ptsSuffix,
+                      suffixIconConstraints: const BoxConstraints(),
                       errorText: errorText,
                       border: border(),
                       enabledBorder: border(),
@@ -109,23 +125,13 @@ class ScorePenaltyCards extends StatelessWidget {
                 TextSpan(
                   children: [
                     const TextSpan(text: 'Deducted from '),
-                    TextSpan(
-                      text: 'this flight',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    TextSpan(text: 'this flight', style: helpBold),
                     const TextSpan(text: ' (never below 0). '),
-                    TextSpan(
-                      text: 'Dropped',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    TextSpan(text: 'Dropped', style: helpBold),
                     const TextSpan(text: ' if this round is dropped.'),
                   ],
                 ),
-                style: theme.textTheme.bodyMedium,
+                style: helpStyle,
               ),
             ],
           ),
@@ -135,22 +141,27 @@ class ScorePenaltyCards extends StatelessWidget {
         final cumText = cumulativeController.text.trim();
         final cum = int.tryParse(cumText);
         String cumState;
-        var cumStateColor = scheme.onSurfaceVariant;
+        IconData cumStateIcon;
+        var cumStateColor = scheme.onSurface;
         if (cumText.isEmpty) {
-          cumState = 'None entered.';
+          cumState = 'No cumulative penalty.';
+          cumStateIcon = Icons.do_not_disturb_on;
         } else if (cum == null || cum < 0) {
           cumState = 'A whole number of points, 0 or more.';
-          cumStateColor = theme.colorScheme.error;
+          cumStateIcon = Icons.error_outline;
+          cumStateColor = scheme.error;
         } else if (cum == 0) {
-          cumState = 'Applied, then removed.';
+          cumState = 'Removed. Removing is recorded as an official correction.';
+          cumStateIcon = Icons.remove_circle_outline;
         } else {
-          cumState = '−$cum pts from the contest total.';
+          cumState = 'Applied: −$cum points from the contest total.';
+          cumStateIcon = Icons.push_pin;
         }
         final cumulative = card(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              title(Icons.push_pin_outlined, 'Cumulative penalty'),
+              title(Icons.push_pin, 'Cumulative penalty'),
               const SizedBox(height: 6),
               SizedBox(
                 width: 160,
@@ -167,8 +178,9 @@ class ScorePenaltyCards extends StatelessWidget {
                     onChanged: cumulativeOnChanged,
                     style: const TextStyle(fontSize: 18),
                     decoration: InputDecoration(
-                      hintText: '0',
-                      suffixText: 'pts',
+                      hintText: 'None',
+                      suffixIcon: ptsSuffix,
+                      suffixIconConstraints: const BoxConstraints(),
                       errorText: cumulativeErrorText,
                       border: border(),
                       enabledBorder: border(),
@@ -178,46 +190,32 @@ class ScorePenaltyCards extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 6),
-              Text(
-                cumState,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: cumStateColor,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text.rich(
-                TextSpan(
-                  children: [
-                    const TextSpan(text: 'Taken from the '),
-                    TextSpan(
-                      text: 'contest total',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(cumStateIcon, size: 16, color: scheme.onSurfaceVariant),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      cumState,
+                      style: helpStyle?.copyWith(color: cumStateColor),
                     ),
-                    const TextSpan(text: '. '),
-                    TextSpan(
-                      text: 'Never dropped',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const TextSpan(text: ' with its round.'),
-                  ],
-                ),
-                style: theme.textTheme.bodyMedium,
+                  ),
+                ],
               ),
             ],
           ),
         );
         return two
-            ? Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: flight),
-                  const SizedBox(width: 12),
-                  Expanded(child: cumulative),
-                ],
+            ? IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: flight),
+                    const SizedBox(width: 12),
+                    Expanded(child: cumulative),
+                  ],
+                ),
               )
             : Column(
                 children: [flight, const SizedBox(height: 12), cumulative],

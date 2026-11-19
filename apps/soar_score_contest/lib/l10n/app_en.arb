@@ -2833,7 +2833,7 @@
   "@participantRemoveUnavailable": {"description": "Reason Remove is off in a participant row menu: the contest is locked, completed or saving."},
   "scorePilotEntryChip": "Pilot entry",
   "@scorePilotEntryChip": {"description": "Indicator chip on a score row whose values a pilot or helper entered, whether or not the director has made them official."},
-  "scorePilotEntryTooltip": "A pilot or helper entered these values. The submission is kept in history.",
+  "scorePilotEntryTooltip": "Entered by a pilot or helper.",
   "@scorePilotEntryTooltip": {"description": "Tooltip of the Pilot entry chip."},
   "scorePreviewTooltip": "Preview. Saved when you save the row.",
   "@scorePreviewTooltip": {"description": "Tooltip of a Raw or Group score that is a preview of typed values not yet saved."},

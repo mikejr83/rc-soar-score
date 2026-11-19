@@ -4169,7 +4169,7 @@ abstract class AppLocalizations {
   /// Tooltip of the Pilot entry chip.
   ///
   /// In en, this message translates to:
-  /// **'A pilot or helper entered these values. The submission is kept in history.'**
+  /// **'Entered by a pilot or helper.'**
   String get scorePilotEntryTooltip;
 
   /// Tooltip of a Raw or Group score that is a preview of typed values not yet saved.
