@@ -54,9 +54,9 @@ class ScoreHistoryDialog extends StatelessWidget {
               );
             }
             if (pilots.isEmpty) {
-              return const Text(
-                'No scores have been entered yet.',
-                key: ValueKey('score-history-empty'),
+              return Text(
+                AppLocalizations.of(context).scoreHistoryEmpty,
+                key: const ValueKey('score-history-empty'),
               );
             }
             return ListView(
@@ -81,7 +81,7 @@ class ScoreHistoryDialog extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
                   child: Text(
-                    'Times are in the contest time zone ($zoneId).',
+                    AppLocalizations.of(context).scoreHistoryTimesZone(zoneId),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
@@ -94,7 +94,7 @@ class ScoreHistoryDialog extends StatelessWidget {
         FilledButton(
           key: const ValueKey('score-history-close'),
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: Text(AppLocalizations.of(context).commonClose),
         ),
       ],
     );
@@ -112,26 +112,25 @@ class _EntryTile extends StatelessWidget {
   final List<LandingResult> landings;
   final String zoneId;
 
-  String get _who => switch (entry.authority) {
-    Authority.director => 'Director',
-    Authority.participant => 'Participant',
-    Authority.helper => 'Helper',
-    Authority.system => 'System',
-    Authority.administrator => 'Administrator',
-  };
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final words = AppLocalizations.of(context);
+    String who() => switch (entry.authority) {
+      Authority.director => words.scoreHistoryAuthorityDirector,
+      Authority.participant => words.scoreHistoryAuthorityParticipant,
+      Authority.helper => words.scoreHistoryAuthorityHelper,
+      Authority.system => words.scoreHistoryAuthoritySystem,
+      Authority.administrator => words.scoreHistoryAuthorityAdmin,
+    };
     final (icon, word) = switch (entry.outcome) {
-      ScoreHistoryOutcome.current => (Icons.verified, 'Current'),
-      ScoreHistoryOutcome.superseded => (Icons.history, 'Replaced'),
-      ScoreHistoryOutcome.notAdopted => (Icons.block, 'Not adopted'),
-      ScoreHistoryOutcome.pending => (Icons.inbox, 'Awaiting decision'),
+      ScoreHistoryOutcome.current => (Icons.verified, words.scoreHistoryCurrent),
+      ScoreHistoryOutcome.superseded => (Icons.history, words.scoreHistoryReplaced),
+      ScoreHistoryOutcome.notAdopted => (Icons.block, words.scoreHistoryNotAdopted),
+      ScoreHistoryOutcome.pending => (Icons.inbox, words.scoreHistoryPending),
     };
     final revision = entry.scoreRevision;
-    final words = AppLocalizations.of(context);
     // No official actor and an automatic origin: the contest accepted it.
     final automatic =
         entry.selectionOrigin == SelectionOrigin.automatic &&
@@ -159,7 +158,9 @@ class _EntryTile extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    revision == null ? 'Submission' : 'Revision $revision',
+                    revision == null
+                        ? words.scoreHistorySubmission
+                        : words.scoreHistoryRevision(revision),
                     style: theme.textTheme.titleSmall,
                   ),
                 ),
@@ -183,7 +184,8 @@ class _EntryTile extends StatelessWidget {
                 landings: landings,
               ),
             ),
-            if (entry.reason != null) Text('Reason: ${entry.reason}'),
+            if (entry.reason != null)
+              Text(words.scoreHistoryReason(entry.reason!)),
             if (automatic)
               Text(
                 words.scoreHistoryMadeOfficialBy(words.scoreHistoryAutomatic),
@@ -202,8 +204,8 @@ class _EntryTile extends StatelessWidget {
               ),
             Text(
               adopted
-                  ? 'Submitted by $_who'
-                  : (when == null ? _who : '$_who · $when'),
+                  ? words.scoreHistorySubmittedBy(who())
+                  : (when == null ? who() : '${who()} · $when'),
               style: theme.textTheme.bodySmall,
             ),
           ],

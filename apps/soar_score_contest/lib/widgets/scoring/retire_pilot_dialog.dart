@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/scoring/retire_impact.dart';
 import '../api_error_text.dart';
 
@@ -51,13 +52,16 @@ class _RetireDialogState extends State<_RetireDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final words = AppLocalizations.of(context);
     final impact = widget.impact;
     final reinstating = impact.reinstating;
     final lines = impact.changeLines;
     return AlertDialog(
       key: const ValueKey('retire-dialog'),
       title: Text(
-        reinstating ? 'Reinstate ${impact.pilot}?' : 'Retire ${impact.pilot}?',
+        reinstating
+            ? words.scoreReinstateTitle(impact.pilot)
+            : words.scoreRetireTitle(impact.pilot),
       ),
       content: SizedBox(
         width: 440,
@@ -67,26 +71,18 @@ class _RetireDialogState extends State<_RetireDialog> {
           children: [
             Text(
               reinstating
-                  ? '${impact.pilot} will fly again from round '
-                        '${impact.fromRound} on. Their unscored flights count '
-                        'as missing again.'
-                  : '${impact.pilot} retires from round ${impact.fromRound} '
-                        'on. Their unscored flights from then on are not '
-                        'missing, and score entry is closed for them.',
+                  ? words.scoreReinstateBody(impact.pilot, impact.fromRound)
+                  : words.scoreRetireBody(impact.pilot, impact.fromRound),
             ),
             const SizedBox(height: 12),
             if (lines.isEmpty)
-              const Text('No round count changes.')
+              Text(words.scoreRetireNoChanges)
             else
               for (final line in lines) Text(line),
             if (impact.keptScores > 0) ...[
               const SizedBox(height: 8),
               Text(
-                '${impact.keptScores} '
-                '${impact.keptScores == 1 ? 'score' : 'scores'} already '
-                'entered from round ${impact.fromRound} on '
-                '${impact.keptScores == 1 ? 'stays' : 'stay'} and still '
-                '${impact.keptScores == 1 ? 'counts' : 'count'}.',
+                words.scoreRetireKeptScores(impact.keptScores, impact.fromRound),
               ),
             ],
             if (_error != null) ...[
@@ -104,12 +100,16 @@ class _RetireDialogState extends State<_RetireDialog> {
         TextButton(
           key: const ValueKey('retire-cancel'),
           onPressed: _busy ? null : () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context).cancelButton),
         ),
         FilledButton(
           key: const ValueKey('retire-confirm'),
           onPressed: _busy ? null : _confirm,
-          child: Text(reinstating ? 'Reinstate pilot' : 'Retire pilot'),
+          child: Text(
+            reinstating
+                ? words.scoreReinstateButton
+                : words.scoreRetireButton,
+          ),
         ),
       ],
     );

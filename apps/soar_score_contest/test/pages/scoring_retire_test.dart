@@ -1,7 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 
 import '../support/scoring_test_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 Finder _menu(int round, int pilot) =>
     find.byKey(ValueKey('row-menu-${scoringAssignmentId(round, pilot).value}'));
@@ -49,7 +52,7 @@ void main() {
     expect((update['body'] as Map)['base_revision'], 0);
     // The retired flight is shown as retired and is not missing.
     expect(find.text('Retired'), findsOneWidget);
-    expect(find.text('Retired from round 1'), findsOneWidget);
+    expect(find.text(_l10n.scoreRetiredNote(1)), findsOneWidget);
     expect(find.text('0 of 1 entered · 0 official'), findsOneWidget);
     expect(find.text('Bo Ray retired from round 1.'), findsOneWidget);
   });
@@ -86,7 +89,7 @@ void main() {
 
     // Bo has a score from before the retirement: it stays official.
     expect(find.text('Official'), findsOneWidget);
-    expect(find.text('Retired from round 1'), findsOneWidget);
+    expect(find.text(_l10n.scoreRetiredNote(1)), findsOneWidget);
     expect(find.text('1 of 2 entered · 1 official'), findsOneWidget);
     // Ann flies round 1; she retired at round 2, so round 2 shows her retired.
     await tester.tap(find.byKey(const ValueKey('round-next')));
@@ -216,7 +219,7 @@ void main() {
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
     await _openMenuItem(tester, 1, 2, 'menu-reinstate');
-    expect(find.text('Reinstate Bo Ray?'), findsOneWidget);
+    expect(find.text(_l10n.scoreReinstateTitle('Bo Ray')), findsOneWidget);
     expect(find.text('Round 1 counts 4 flights instead of 3.'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('retire-confirm')));
     await tester.pumpAndSettle();

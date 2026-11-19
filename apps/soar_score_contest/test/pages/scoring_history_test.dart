@@ -1,9 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 
 import '../support/scoring_test_support.dart';
 
 const _first = {'time_flown': 540, 'launch_height': 200};
+final _l10n = AppLocalizationsEn();
 
 Finder _menu(int round, int pilot) =>
     find.byKey(ValueKey('row-menu-${scoringAssignmentId(round, pilot).value}'));
@@ -31,19 +33,25 @@ void main() {
 
     await _openHistory(tester, 1, 1);
 
-    expect(find.text('Score history · Ann Lee'), findsOneWidget);
-    expect(find.text('Revision 2'), findsOneWidget);
-    expect(find.text('Revision 1'), findsOneWidget);
-    expect(find.text('Current'), findsOneWidget);
-    expect(find.text('Replaced'), findsOneWidget);
-    expect(find.text('Reason: Timer misread'), findsOneWidget);
-    expect(find.text('Reason: seeded'), findsOneWidget);
+    expect(
+      find.text(_l10n.scoreHistoryTitle('Ann Lee')),
+      findsOneWidget,
+    );
+    expect(find.text(_l10n.scoreHistoryRevision(2)), findsOneWidget);
+    expect(find.text(_l10n.scoreHistoryRevision(1)), findsOneWidget);
+    expect(find.text(_l10n.scoreHistoryCurrent), findsOneWidget);
+    expect(find.text(_l10n.scoreHistoryReplaced), findsOneWidget);
+    expect(
+      find.text(_l10n.scoreHistoryReason('Timer misread')),
+      findsOneWidget,
+    );
+    expect(find.text(_l10n.scoreHistoryReason('seeded')), findsOneWidget);
     expect(find.text('8:20 · 200 m · Late landing'), findsOneWidget);
     expect(find.text('9:00 · 200 m'), findsOneWidget);
     // Newest first: revision 2 sits above revision 1.
     expect(
-      tester.getTopLeft(find.text('Revision 2')).dy,
-      lessThan(tester.getTopLeft(find.text('Revision 1')).dy),
+      tester.getTopLeft(find.text(_l10n.scoreHistoryRevision(2))).dy,
+      lessThan(tester.getTopLeft(find.text(_l10n.scoreHistoryRevision(1))).dy),
     );
     // Times are in the contest zone.
     expect(find.textContaining('America/Denver'), findsOneWidget);
@@ -61,10 +69,13 @@ void main() {
 
     await _openHistory(tester, 1, 1);
 
-    expect(find.text('Not adopted'), findsOneWidget);
-    expect(find.text('Submission'), findsOneWidget);
+    expect(find.text(_l10n.scoreHistoryNotAdopted), findsOneWidget);
+    expect(find.text(_l10n.scoreHistorySubmission), findsOneWidget);
     expect(find.text('10:00 · 120 m'), findsOneWidget);
-    expect(find.text('Participant'), findsOneWidget);
+    expect(
+      find.text(_l10n.scoreHistoryAuthorityParticipant),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a submission awaiting the director is pending, not lost', (
@@ -79,8 +90,8 @@ void main() {
 
     await _openHistory(tester, 1, 1);
 
-    expect(find.text('Awaiting decision'), findsOneWidget);
-    expect(find.text('Not adopted'), findsNothing);
+    expect(find.text(_l10n.scoreHistoryPending), findsOneWidget);
+    expect(find.text(_l10n.scoreHistoryNotAdopted), findsNothing);
   });
 
   testWidgets('a waiting submission fills the form, not the row text', (
@@ -206,7 +217,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('menu-group-history')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Group history'), findsOneWidget);
+    expect(find.text(_l10n.scoreHistoryGroupTitle), findsOneWidget);
     final dialog = find.byKey(const ValueKey('score-history-dialog'));
     expect(
       find.descendant(of: dialog, matching: find.text('Ann Lee')),
@@ -216,9 +227,12 @@ void main() {
       find.descendant(of: dialog, matching: find.text('Bo Ray')),
       findsOneWidget,
     );
-    expect(find.text('Revision 2'), findsOneWidget);
-    expect(find.text('Revision 1'), findsNWidgets(2));
-    expect(find.text('Reason: Timer misread'), findsOneWidget);
+    expect(find.text(_l10n.scoreHistoryRevision(2)), findsOneWidget);
+    expect(find.text(_l10n.scoreHistoryRevision(1)), findsNWidgets(2));
+    expect(
+      find.text(_l10n.scoreHistoryReason('Timer misread')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('names the submitter and the director who made it official', (

@@ -1,8 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 
 import '../support/scoring_test_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 const _flight = {'time_flown': 540, 'launch_height': 120};
 
@@ -54,7 +57,7 @@ void main() {
     final chip = tester.getRect(
       find.byKey(ValueKey('score-indicator-pilot-entry-${first.value}')),
     );
-    expect(_textFits(tester, find.text('Pilot entry')), isTrue);
+    expect(_textFits(tester, find.text(_l10n.scorePilotEntryChip)), isTrue);
     // The column is narrower than the label, so the badge wrapped and grew.
     expect(chip.height, greaterThan(22));
   });
@@ -65,14 +68,14 @@ void main() {
     await pump(tester, 1.5);
     expect(tester.takeException(), isNull);
     final button = tester.getRect(
-      find.widgetWithText(TextButton, 'Mark official'),
+      find.widgetWithText(TextButton, _l10n.scoreMarkOfficial),
     );
     expect(button.height, greaterThanOrEqualTo(32));
-    expect(_textFits(tester, find.text('Mark official')), isTrue);
+    expect(_textFits(tester, find.text(_l10n.scoreMarkOfficial)), isTrue);
 
-    await tester.tap(find.text('Mark official'));
+    await tester.tap(find.text(_l10n.scoreMarkOfficial));
     await tester.pumpAndSettle();
-    expect(find.text('Mark official'), findsNothing);
+    expect(find.text(_l10n.scoreMarkOfficial), findsNothing);
     expect(find.text('Official'), findsOneWidget);
   });
 }

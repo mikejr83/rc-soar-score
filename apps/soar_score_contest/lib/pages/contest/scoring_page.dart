@@ -254,9 +254,8 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
   Future<void> _saveAll() async {
     final saved = await _saveAllWithRemovals();
     if (!mounted || saved == 0) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Saved $saved ${saved == 1 ? 'row' : 'rows'}.')),
-    );
+    final words = AppLocalizations.of(context);
+    _say(words.scoreSavedRows(saved));
   }
 
   /// The row's Mark official or Confirm button, or, for [retry], the banner's
@@ -331,10 +330,11 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
 
   Future<void> _showHistory(ScoringRow row) {
     final c = _controller!;
+    final words = AppLocalizations.of(context);
     return showDialog<void>(
       context: context,
       builder: (context) => ScoreHistoryDialog(
-        title: 'Score history · ${row.pilot.name}',
+        title: words.scoreHistoryTitle(row.pilot.name),
         load: () async => [
           PilotHistory(
             pilot: row.pilot.name,
@@ -349,10 +349,11 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
 
   Future<void> _showGroupHistory() {
     final c = _controller!;
+    final words = AppLocalizations.of(context);
     return showDialog<void>(
       context: context,
       builder: (context) => ScoreHistoryDialog(
-        title: 'Group history',
+        title: words.scoreHistoryGroupTitle,
         byPilot: true,
         load: c.groupHistory,
         landings: c.data!.landings,
@@ -370,7 +371,9 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       apply: () => c.retire(row),
     );
     if (done && mounted) {
-      _say('${row.pilot.name} retired from round ${c.round}.');
+      _say(
+        AppLocalizations.of(context).scoreRetiredFromRound(row.pilot.name, c.round),
+      );
     }
   }
 
@@ -383,7 +386,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
       apply: () => c.reinstate(row),
     );
     if (done && mounted) {
-      _say('${row.pilot.name} reinstated.');
+      _say(AppLocalizations.of(context).scoreReinstated(row.pilot.name));
     }
   }
 
@@ -420,37 +423,36 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
 
   Widget _scaffold(BuildContext context) {
     final c = _controller;
+    final words = AppLocalizations.of(context);
     return Scaffold(
       body: c == null
-          ? const PageStateView.unavailable(
-              title: 'No API client is available.',
-            )
-          : _body(c),
+          ? PageStateView.unavailable(title: words.scoreNoApiClient)
+          : _body(c, words),
     );
   }
 
-  Widget _body(ScoringController c) {
+  Widget _body(ScoringController c, AppLocalizations words) {
     if (c.data == null) {
       if (c.loadError != null) {
         return loadFailedView(
           c.loadError!,
-          title: 'The scores could not be loaded.',
+          title: words.scoreLoadFailed,
           onRetry: c.load,
         );
       }
-      return const PageStateView.loading(
-        key: ValueKey('scoring-loading'),
-        label: 'Loading the scores',
+      return PageStateView.loading(
+        key: const ValueKey('scoring-loading'),
+        label: words.scoreLoading,
       );
     }
     final data = c.data!;
     if (data.matrix.isEmpty) {
       return PageStateView.empty(
-        title: 'This contest has no matrix yet.',
-        body: 'Draw the matrix first. Then scores can be entered here.',
+        title: words.scoreNoMatrixTitle,
+        body: words.scoreNoMatrixBody,
         primary: PageStateAction(
           key: const ValueKey('scoring-open-matrix'),
-          label: 'Open the matrix',
+          label: words.scoreOpenMatrix,
           onPressed: () => context.go(contestMatrixPath(widget.contestId)),
         ),
       );
@@ -493,7 +495,7 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
                       actions: [
                         TextButton(
                           onPressed: c.refresh,
-                          child: const Text('Refresh'),
+                          child: Text(words.scoreRefresh),
                         ),
                       ],
                     ),
@@ -512,10 +514,10 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
                     ),
                   Expanded(
                     child: rows.isEmpty
-                        ? const PageStateView.empty(
-                            key: ValueKey('scoring-empty-group'),
-                            title: 'No pilots in this group.',
-                            body: 'Every pilot assigned here is absent or retired.',
+                        ? PageStateView.empty(
+                            key: const ValueKey('scoring-empty-group'),
+                            title: words.scoreNoPilotsTitle,
+                            body: words.scoreNoPilotsBody,
                           )
                         : LayoutBuilder(
                             builder: (context, box) {

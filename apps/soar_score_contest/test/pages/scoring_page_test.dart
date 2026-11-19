@@ -5,10 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/widgets/scoring/score_landing_chips.dart';
 
 import '../support/matrix_test_support.dart';
 import '../support/scoring_test_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 Finder _time(int round, int pilot) => find.byKey(
   ValueKey('score-time-${scoringAssignmentId(round, pilot).value}'),
@@ -42,7 +45,7 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byKey(const ValueKey('score-grid-header')), findsNothing);
     expect(find.text('Ann Lee'), findsOneWidget);
-    expect(find.text('Time flown (m:ss)'), findsWidgets);
+    expect(find.text(_l10n.scoreTimeLabel), findsWidgets);
   });
 
   group('medium width (an iPad)', () {
@@ -67,10 +70,10 @@ void main() {
         expect(find.text('Time flown'), findsOneWidget);
         expect(find.text('Launch height'), findsOneWidget);
         expect(find.text('Landing · flags'), findsOneWidget);
-        expect(find.text('Raw score'), findsWidgets);
-        expect(find.text('Indicators'), findsWidgets);
+        expect(find.text(_l10n.scoreRawLabel), findsWidgets);
+        expect(find.text(_l10n.scoreIndicatorsLabel), findsWidgets);
         // The entry fields have no label of their own under a heading.
-        expect(find.text('Time flown (m:ss)'), findsNothing);
+        expect(find.text(_l10n.scoreTimeLabel), findsNothing);
 
         // The heading and the first line share their columns.
         final head = tester.getTopLeft(find.text('Time flown'));
@@ -79,7 +82,7 @@ void main() {
 
         // The second line sits under the first and starts at the pilot.
         final pilot = tester.getTopLeft(find.text('Ann Lee').first);
-        final raw = tester.getTopLeft(find.text('Raw score').first);
+        final raw = tester.getTopLeft(find.text(_l10n.scoreRawLabel).first);
         expect(raw.dy, greaterThan(tester.getBottomLeft(_time(1, 1)).dy));
         expect(raw.dx, closeTo(pilot.dx - 36, 40));
       });
@@ -101,13 +104,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.byKey(const ValueKey('score-grid-header')), findsOneWidget);
-      expect(find.text('Time flown (m:ss)'), findsNothing);
+      expect(find.text(_l10n.scoreTimeLabel), findsNothing);
       final time = tester.getBottomLeft(_time(1, 1));
-      final rawLabel = tester.getTopLeft(find.text('Raw score').first);
+      final rawLabel = tester.getTopLeft(find.text(_l10n.scoreRawLabel).first);
       expect(rawLabel.dy, greaterThan(time.dy));
       // The three score cells fit side by side with their labels.
-      final group = tester.getTopLeft(find.text('Group score').first).dx;
-      final penalties = tester.getTopLeft(find.text('Penalties').first).dx;
+      final group = tester.getTopLeft(find.text(_l10n.scoreGroupLabel).first).dx;
+      final penalties = tester.getTopLeft(find.text(_l10n.scorePenaltiesLabel).first).dx;
       expect(group, greaterThan(rawLabel.dx + 40));
       expect(penalties, greaterThan(group + 40));
     });
@@ -141,7 +144,7 @@ void main() {
     await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
     expect(find.byKey(const ValueKey('score-grid-header')), findsOneWidget);
     expect(find.text('Landing · flags'), findsOneWidget);
-    expect(find.text('Indicators'), findsOneWidget);
+    expect(find.text(_l10n.scoreIndicatorsLabel), findsOneWidget);
     // The heading and the rows share their column positions.
     final head = tester.getTopLeft(find.text('Time flown'));
     final field = tester.getTopLeft(_time(1, 1));
@@ -159,8 +162,8 @@ void main() {
       'launch_height': 170,
     });
     await pumpScoringPage(tester, server);
-    expect(find.text('Round 1 of 2'), findsOneWidget);
-    expect(find.textContaining('Group B of 2'), findsOneWidget);
+    expect(find.text(_l10n.scoreToolbarRoundTitle(1, 2)), findsOneWidget);
+    expect(find.text(_l10n.scoreToolbarGroupTitle('B', 2)), findsOneWidget);
     expect(find.text('Cy Fox'), findsOneWidget);
     expect(find.text('Ann Lee'), findsNothing);
   });
@@ -181,8 +184,8 @@ void main() {
 
   testWidgets('honours the round and group of the route', (tester) async {
     await pumpScoringPage(tester, ScoringServer(), round: 2, group: 2);
-    expect(find.text('Round 2 of 2'), findsOneWidget);
-    expect(find.textContaining('Group B of 2'), findsOneWidget);
+    expect(find.text(_l10n.scoreToolbarRoundTitle(2, 2)), findsOneWidget);
+    expect(find.text(_l10n.scoreToolbarGroupTitle('B', 2)), findsOneWidget);
     expect(find.text('Bo Ray'), findsOneWidget);
     expect(find.text('Di Park'), findsOneWidget);
   });
@@ -227,7 +230,7 @@ void main() {
     await tester.enterText(_time(1, 1), '630');
     await tester.enterText(_height(1, 1), '180');
     await tester.pump();
-    expect(find.text('1 unsaved row'), findsOneWidget);
+    expect(find.text(_l10n.scoreToolbarSaveRows(1)), findsOneWidget);
     await tester.tap(
       find.byKey(
         ValueKey('score-landing-${scoringAssignmentId(1, 1).value}-within_1m'),
@@ -277,7 +280,7 @@ void main() {
     final id = scoringAssignmentId(1, 1).value;
     await tester.tap(find.byKey(ValueKey('score-oob-$id')));
     await tester.pump();
-    expect(find.text('Scores 0'), findsWidgets);
+    expect(find.textContaining('Scores 0'), findsWidgets);
     expect(tester.widget<TextField>(_time(1, 1)).enabled, isFalse);
     expect(tester.widget<TextField>(_time(1, 1)).controller!.text, isEmpty);
     // Motor restart cannot be turned on at the same time.
@@ -294,8 +297,8 @@ void main() {
       group: 1,
     );
     await _activate(tester, 1, 1);
-    expect(find.text('Motor restart'), findsNothing);
-    expect(find.text('Out of bounds'), findsOneWidget);
+    expect(find.text(_l10n.scoreMotorRestart), findsNothing);
+    expect(find.text(_l10n.scoreOutOfBounds), findsOneWidget);
   });
 
   testWidgets('a zero must be confirmed on the row before it saves', (
@@ -307,10 +310,10 @@ void main() {
     final id = scoringAssignmentId(1, 1).value;
     await tester.tap(find.byKey(ValueKey('score-oob-$id')));
     await tester.pump();
-    expect(find.text('Saving scores 0 for this pilot.'), findsOneWidget);
+    expect(find.text(_l10n.scoreZeroWhy), findsOneWidget);
     expect(tester.widget<FilledButton>(_save(1, 1)).onPressed, isNull);
     expect(
-      find.text('Confirm the zero above to enable Save row.'),
+      find.text(_l10n.scoreSaveNeedsZeroConfirm),
       findsOneWidget,
     );
     await tester.tap(find.byKey(ValueKey('score-confirm-zero-$id')));
@@ -464,7 +467,7 @@ void main() {
       await tester.pump();
     }
     // The toolbar offers the bulk save, nothing is saved yet.
-    expect(find.text('Save 2 rows'), findsOneWidget);
+    expect(find.text(_l10n.scoreToolbarSaveRows(2)), findsOneWidget);
     expect(server.entries, isEmpty);
     await tester.tap(find.byKey(const ValueKey('score-save-all')));
     await tester.pumpAndSettle();
@@ -473,7 +476,7 @@ void main() {
       find.byKey(const ValueKey('penalty-removal-dialog')),
       findsOneWidget,
     );
-    expect(find.text('Remove 2 penalties?'), findsOneWidget);
+    expect(find.text(_l10n.scorePenaltyRemoveTitleMany(2)), findsOneWidget);
     expect(find.text('Ann Lee, Bo Ray'), findsOneWidget);
     expect(
       tester
@@ -498,7 +501,7 @@ void main() {
       expect(body['reason'], 'Timer slip misread');
       expect(body['components']['cumulative_penalty'], 0);
     }
-    expect(find.text('Saved 2 rows.'), findsOneWidget);
+    expect(find.text(_l10n.scoreSavedRows(2)), findsOneWidget);
   });
 
   testWidgets('Save all sends one bulk request for several rows', (
@@ -512,14 +515,14 @@ void main() {
       await tester.enterText(_height(1, pilot), '180');
       await tester.pump();
     }
-    expect(find.text('Save 2 rows'), findsOneWidget);
+    expect(find.text(_l10n.scoreToolbarSaveRows(2)), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('score-save-all')));
     await tester.pumpAndSettle();
 
     expect(server.entryRequests, 1);
     expect(server.entries, hasLength(2));
-    expect(find.text('Saved 2 rows.'), findsOneWidget);
+    expect(find.text(_l10n.scoreSavedRows(2)), findsOneWidget);
   });
 
   testWidgets('Save all shows that rows are saving until the answer', (
@@ -537,7 +540,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('score-save-all')));
     await tester.pump();
 
-    expect(find.text('Saving 2 rows…'), findsOneWidget);
+    expect(find.text(_l10n.scoreSavingRows(2)), findsOneWidget);
     expect(find.byKey(const ValueKey('score-saving-progress')), findsOneWidget);
     expect(
       tester
@@ -549,7 +552,7 @@ void main() {
     server.holdBulk!.complete();
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('score-saving-progress')), findsNothing);
-    expect(find.text('Saved 2 rows.'), findsOneWidget);
+    expect(find.text(_l10n.scoreSavedRows(2)), findsOneWidget);
   });
 
   testWidgets('Save all asks to confirm a zero first', (tester) async {
@@ -566,7 +569,7 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('score-save-all')));
     await tester.pumpAndSettle();
-    expect(find.text('Confirm zero scores'), findsOneWidget);
+    expect(find.text(_l10n.scoreSaveAllZeroTitle), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('confirm-zeros-cancel')));
     await tester.pumpAndSettle();
@@ -597,7 +600,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(server.entryRequests, 1);
-    expect(find.text('Saved 1 row.'), findsOneWidget);
+    expect(find.text(_l10n.scoreSavedRows(1)), findsOneWidget);
     expect(find.textContaining('group_locked'), findsWidgets);
   });
 
@@ -625,7 +628,10 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('score-save-all')));
     await tester.pumpAndSettle();
     // Only one removal, so the dialog names that pilot alone.
-    expect(find.text('Remove Ann Lee\'s penalty?'), findsOneWidget);
+    expect(
+      find.text(_l10n.scorePenaltyRemoveTitleOne('Ann Lee')),
+      findsOneWidget,
+    );
     await tester.enterText(
       find.byKey(const ValueKey('penalty-removal-reason')),
       'Timer slip misread',
@@ -681,8 +687,8 @@ void main() {
             .text,
         '0',
       );
-      expect(find.text('1 unsaved row'), findsOneWidget);
-      expect(find.text('Saved 1 row.'), findsNothing);
+      expect(find.text(_l10n.scoreToolbarSaveRows(1)), findsOneWidget);
+      expect(find.text(_l10n.scoreSavedRows(1)), findsNothing);
     },
   );
 
@@ -721,7 +727,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('score-save-all')));
       await tester.pumpAndSettle();
       expect(server.entries, hasLength(1));
-      expect(find.text('Saved 1 row.'), findsNothing);
+      expect(find.text(_l10n.scoreSavedRows(1)), findsNothing);
       expect(find.byKey(const ValueKey('score-save-failed')), findsOneWidget);
       // Once the server answers again, the row's Save retries without a dialog.
       server.entryFailures.clear();
@@ -831,7 +837,7 @@ void main() {
         findsNothing,
       );
       expect(server.entries, hasLength(1));
-      expect(find.text('Saved 1 row.'), findsNothing);
+      expect(find.text(_l10n.scoreSavedRows(1)), findsNothing);
       expect(find.byKey(const ValueKey('score-stale')), findsOneWidget);
       // Keep mine re-saves the removal under the director-entered reason, not
       // the generic conflict message.
@@ -867,7 +873,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('group-next')));
     await tester.pumpAndSettle();
-    expect(find.text('Unsaved scores'), findsOneWidget);
+    expect(find.text(_l10n.scoreUnsavedTitle), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('unsaved-stay')));
     await tester.pumpAndSettle();
     expect(find.text('Ann Lee'), findsOneWidget);
@@ -890,7 +896,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('group-next')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Unsaved scores'), findsNothing);
+    expect(find.text(_l10n.scoreUnsavedTitle), findsNothing);
     expect(find.text('Cy Fox'), findsOneWidget);
   });
 
@@ -933,7 +939,7 @@ void main() {
   testWidgets('no matrix links to the Matrix page', (tester) async {
     final server = ScoringServer(matrix: CurrentMatrix());
     await pumpScoringPage(tester, server);
-    expect(find.text('This contest has no matrix yet.'), findsOneWidget);
+    expect(find.text(_l10n.scoreNoMatrixTitle), findsOneWidget);
     expect(find.byKey(const ValueKey('scoring-open-matrix')), findsOneWidget);
   });
 
@@ -978,15 +984,15 @@ void main() {
       await tester.enterText(_height(1, 1), '250');
       await tester.pump();
       // 200 m at 0.5 plus 50 m at 3.0.
-      expect(find.text('250 pts'), findsOneWidget);
+      expect(find.text(_l10n.scorePointsNote('250')), findsOneWidget);
     });
   });
 
   group('cell alignment', () {
     testWidgets('the penalties column is centered', (tester) async {
       await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
-      final heading = tester.getCenter(find.text('Penalties'));
-      final none = tester.getCenter(find.text('None').first);
+      final heading = tester.getCenter(find.text(_l10n.scorePenaltiesLabel));
+      final none = tester.getCenter(find.text(_l10n.scorePenaltyNone).first);
       expect(none.dx, closeTo(heading.dx, 4));
     });
 
@@ -1067,11 +1073,14 @@ void main() {
       await tester.tap(landing(1));
       await tester.pump();
       // Focused and empty: the hint lists the table's points.
-      expect(find.text('Type table points: 50, 30 … 10'), findsOneWidget);
+      expect(
+        find.text(_l10n.scoreLandingTypeHint('50, 30 … 10')),
+        findsOneWidget,
+      );
       expect(find.byKey(const ValueKey('landing-follows-tag')), findsOneWidget);
       await tester.enterText(landing(1), '30');
       await tester.pump();
-      expect(find.text('Within 5 m · 30 pts'), findsOneWidget);
+      expect(find.text(_l10n.scoreLandingSelected('Within 5 m', 30)), findsOneWidget);
       final id = scoringAssignmentId(1, 1).value;
       final chip = tester.widget<ScoreLandingChip>(
         find.byKey(ValueKey('score-landing-$id-within_5m')),
@@ -1087,7 +1096,7 @@ void main() {
       await tester.enterText(landing(1), '42');
       await tester.pump();
       expect(
-        find.text('42 isn’t in the landing table. Use 50, 30 … 10'),
+        find.text(_l10n.scoreLandingBad('42', '50, 30 … 10')),
         findsOneWidget,
       );
       expect(tester.widget<FilledButton>(_save(1, 1)).onPressed, isNull);
@@ -1099,7 +1108,7 @@ void main() {
       await tester.tap(_row(1, 1));
       await tester.pumpAndSettle();
       expect(tester.widget<TextField>(landing(1)).enabled, isFalse);
-      expect(find.text('No landing table'), findsWidgets);
+      expect(find.text(_l10n.scoreNoLandingTable), findsWidgets);
       // A flight without a landing can still be saved.
       await tester.enterText(_time(1, 1), '630');
       await tester.enterText(_height(1, 1), '150');
@@ -1132,7 +1141,7 @@ void main() {
       await tester.tap(find.byKey(ValueKey('score-landing-$id-within_10m')));
       await tester.pump();
       expect(tester.widget<TextField>(landing(1)).controller!.text, '10');
-      expect(find.text('Within 10 m · 10'), findsOneWidget);
+      expect(find.text(_l10n.scoreLandingBand('Within 10 m', 10)), findsOneWidget);
     });
 
     testWidgets('the saved landing is the matching table entry', (
@@ -1163,7 +1172,7 @@ void main() {
       await tester.tap(find.byKey(ValueKey('score-late-$id')));
       await tester.pump();
       expect(tester.widget<TextField>(landing(1)).enabled, isFalse);
-      expect(find.text('0 · late'), findsOneWidget);
+      expect(find.text(_l10n.scoreLandingLate), findsOneWidget);
     });
   });
 

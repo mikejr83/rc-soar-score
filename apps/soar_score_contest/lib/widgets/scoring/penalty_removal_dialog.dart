@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// Asks for a correction reason before applied cumulative penalties are
 /// removed (saved as 0). Removal is an official revision and must record
 /// why (ticket 020). [pilots] is the pilot or pilots whose applied penalty
@@ -45,13 +47,14 @@ class _PenaltyRemovalDialogState extends State<_PenaltyRemovalDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final words = AppLocalizations.of(context);
     final single = widget.pilots.length == 1 ? widget.pilots.single : null;
     return AlertDialog(
       key: const ValueKey('penalty-removal-dialog'),
       title: Text(
         single != null
-            ? "Remove $single's penalty?"
-            : 'Remove ${widget.pilots.length} penalties?',
+            ? words.scorePenaltyRemoveTitleOne(single)
+            : words.scorePenaltyRemoveTitleMany(widget.pilots.length),
       ),
       content: SizedBox(
         width: 440,
@@ -59,10 +62,7 @@ class _PenaltyRemovalDialogState extends State<_PenaltyRemovalDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Removal is an official score correction. Enter the reason '
-              'to record it.',
-            ),
+            Text(words.scorePenaltyRemoveBody),
             if (single == null) ...[
               const SizedBox(height: 8),
               Text(
@@ -77,7 +77,9 @@ class _PenaltyRemovalDialogState extends State<_PenaltyRemovalDialog> {
               autofocus: true,
               textInputAction: TextInputAction.done,
               maxLines: 3,
-              decoration: const InputDecoration(labelText: 'Correction reason'),
+              decoration: InputDecoration(
+                labelText: words.scorePenaltyRemoveReason,
+              ),
               onSubmitted: (_) => _done(),
             ),
           ],
@@ -87,12 +89,12 @@ class _PenaltyRemovalDialogState extends State<_PenaltyRemovalDialog> {
         TextButton(
           key: const ValueKey('penalty-removal-cancel'),
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context).cancelButton),
         ),
         FilledButton(
           key: const ValueKey('penalty-removal-confirm'),
           onPressed: _reason.text.trim().isEmpty ? null : _done,
-          child: const Text('Remove penalty'),
+          child: Text(words.scorePenaltyRemoveButton),
         ),
       ],
     );
