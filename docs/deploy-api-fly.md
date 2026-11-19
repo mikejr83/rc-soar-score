@@ -376,13 +376,18 @@ DNS record at it.
 `us-east-2`, SES v2 API). It answers 503 `support_unavailable` until every
 setting below is valid. Disabling it never stops the rest of the API.
 
-| Variable | Behaviour |
-| --- | --- |
-| `MAIL_DELIVERY_MODE` | On `rc-soar-score-api`, only `live` enables delivery. Elsewhere unset or `redirect` selects redirect (mail goes only to `test@rcsoarscore.com`, subject prefixed `[TEST] `); any other value disables delivery. |
-| `SES_ACCESS_KEY_ID`, `SES_SECRET_ACCESS_KEY` | A dedicated IAM key pair scoped to `ses:SendEmail` on the verified `rcsoarscore.com` identity, `FromAddress` `notifications@rcsoarscore.com`. Production uses its own pair, installed with `fly secrets set`. |
-| `TURNSTILE_SECRET_KEY` | Server-only Turnstile secret for the widget. Cloudflare's published dummy secrets are refused in live mode. |
-| `SUPPORT_ALLOWED_HOSTNAMES` | Comma-separated exact hostnames the widget may report, without scheme or port (for example `localhost` locally, the public site host in production). |
-| `SUPPORT_THROTTLE_SECRET` | At least 32 characters; keys the shared per-caller attempt count (5 attempts per 10 minutes). |
+| Variable                                     | Behaviour                                                                                                                                                                                                       |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MAIL_DELIVERY_MODE`                         | On `rc-soar-score-api`, only `live` enables delivery. Elsewhere unset or `redirect` selects redirect (mail goes only to `test@rcsoarscore.com`, subject prefixed `[TEST] `); any other value disables delivery. |
+| `SES_ACCESS_KEY_ID`, `SES_SECRET_ACCESS_KEY` | A dedicated IAM key pair scoped to `ses:SendEmail` on the verified `rcsoarscore.com` identity, `FromAddress` `notifications@rcsoarscore.com`. Production uses its own pair, installed with `fly secrets set`.   |
+| `TURNSTILE_SECRET_KEY`                       | Server-only Turnstile secret for the widget. Cloudflare's published dummy secrets are refused in live mode.                                                                                                     |
+| `SUPPORT_ALLOWED_HOSTNAMES`                  | Comma-separated exact hostnames the widget may report, without scheme or port (for example `localhost` locally, the public site host in production).                                                            |
+| `SUPPORT_THROTTLE_SECRET`                    | At least 32 characters; keys the shared per-caller attempt count (5 attempts per 10 minutes).                                                                                                                   |
+
+The public site needs the matching Turnstile site key, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`,
+in its Vercel production environment before the production build (see
+[deploying.md](deploying.md), "Environment variables on each host"). The site key is
+public and is not stored in this API's secrets.
 
 Live mail goes to `support@rcsoarscore.com` with Reply-To set to the submitter.
 Attempts are counted in the database before the body is read, so every machine
