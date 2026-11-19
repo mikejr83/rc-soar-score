@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// What the director chose when leaving a group with unsaved rows.
 enum UnsavedChoice { save, discard, stay }
 
@@ -8,29 +10,34 @@ Future<UnsavedChoice> askUnsavedEdits(
   required int rows,
   bool closingApp = false,
 }) async {
+  final words = AppLocalizations.of(context);
   final choice = await showDialog<UnsavedChoice>(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text(closingApp ? 'Close RC Soar Score?' : 'Unsaved scores'),
+      title: Text(
+        closingApp ? words.scoreUnsavedCloseTitle : words.scoreUnsavedTitle,
+      ),
       content: Text(
-        '$rows ${rows == 1 ? 'row has' : 'rows have'} scores that are not '
-        'saved. Save them before you ${closingApp ? 'close the app' : 'leave this group'}?',
+        words.scoreUnsavedBody(
+          rows,
+          closingApp ? words.scoreUnsavedActionClose : words.scoreUnsavedActionLeave,
+        ),
       ),
       actions: [
         TextButton(
           key: const ValueKey('unsaved-stay'),
           onPressed: () => Navigator.of(context).pop(UnsavedChoice.stay),
-          child: Text(closingApp ? 'Keep open' : 'Stay'),
+          child: Text(closingApp ? words.commonKeepOpen : words.scoreUnsavedStay),
         ),
         TextButton(
           key: const ValueKey('unsaved-discard'),
           onPressed: () => Navigator.of(context).pop(UnsavedChoice.discard),
-          child: const Text('Discard'),
+          child: Text(words.scoreUnsavedDiscard),
         ),
         FilledButton(
           key: const ValueKey('unsaved-save'),
           onPressed: () => Navigator.of(context).pop(UnsavedChoice.save),
-          child: const Text('Save'),
+          child: Text(words.commonSave),
         ),
       ],
     ),

@@ -3293,4 +3293,533 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncRefusedScorePromotion => 'Mark official';
+
+  @override
+  String get scoreCheckClose => 'Close';
+
+  @override
+  String scoreCheckClean(int count) {
+    return 'All $count pilots entered, nothing out of range.';
+  }
+
+  @override
+  String scoreCheckFindings(int findings, int pilots, int checked) {
+    return '$findings to look at for $pilots of $checked pilots.';
+  }
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String get commonSave => 'Save';
+
+  @override
+  String get commonKeepOpen => 'Keep open';
+
+  @override
+  String scoreSavedRows(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'rows',
+      one: 'row',
+    );
+    return 'Saved $count $_temp0.';
+  }
+
+  @override
+  String scoreHistoryTitle(String pilot) {
+    return 'Score history · $pilot';
+  }
+
+  @override
+  String get scoreHistoryGroupTitle => 'Group history';
+
+  @override
+  String scoreRetiredFromRound(String pilot, int round) {
+    return '$pilot retired from round $round.';
+  }
+
+  @override
+  String scoreReinstated(String pilot) {
+    return '$pilot reinstated.';
+  }
+
+  @override
+  String get scoreNoApiClient => 'No API client is available.';
+
+  @override
+  String get scoreLoadFailed => 'The scores could not be loaded.';
+
+  @override
+  String get scoreLoading => 'Loading the scores';
+
+  @override
+  String get scoreNoMatrixTitle => 'This contest has no matrix yet.';
+
+  @override
+  String get scoreNoMatrixBody =>
+      'Draw the matrix first. Then scores can be entered here.';
+
+  @override
+  String get scoreOpenMatrix => 'Open the matrix';
+
+  @override
+  String get scoreRefresh => 'Refresh';
+
+  @override
+  String get scoreNoPilotsTitle => 'No pilots in this group.';
+
+  @override
+  String get scoreNoPilotsBody =>
+      'Every pilot assigned here is absent or retired.';
+
+  @override
+  String get scoreTimeLabel => 'Time flown (m:ss)';
+
+  @override
+  String get scoreHeightLabel => 'Launch height (m)';
+
+  @override
+  String get scoreLandingLabel => 'Landing (pts)';
+
+  @override
+  String scorePointsNote(String points) {
+    return '$points pts';
+  }
+
+  @override
+  String get scoreLandingLate => '0 · late';
+
+  @override
+  String get scoreNoLandingTable => 'No landing table';
+
+  @override
+  String scoreLandingBad(String value, String hint) {
+    return '$value isn’t in the landing table. Use $hint';
+  }
+
+  @override
+  String scoreLandingTypeHint(String hint) {
+    return 'Type table points: $hint';
+  }
+
+  @override
+  String scoreLandingSelected(String display, int points) {
+    return '$display · $points pts';
+  }
+
+  @override
+  String scoreLandingBand(String display, int points) {
+    return '$display · $points';
+  }
+
+  @override
+  String get scoreFlagLateLanding => 'Late landing';
+
+  @override
+  String get scoreFlagMotorRestart => 'Motor restart';
+
+  @override
+  String get scoreFlagOutOfBounds => 'Out of bounds';
+
+  @override
+  String get scoreFlagNoAltitude => 'No altitude';
+
+  @override
+  String get scorePenaltiesLabel => 'Penalties';
+
+  @override
+  String scoreFlightPenalty(int count) {
+    return '$count flight';
+  }
+
+  @override
+  String get scorePenaltyNone => 'None';
+
+  @override
+  String get scorePenaltyRemoved => 'Removed';
+
+  @override
+  String scoreCumulativePenalty(int count) {
+    return '$count total';
+  }
+
+  @override
+  String get scoreIndicatorsLabel => 'Indicators';
+
+  @override
+  String scoreCheckCount(int count) {
+    return 'Check: $count';
+  }
+
+  @override
+  String scoreRetiredNote(int round) {
+    return 'Retired from round $round';
+  }
+
+  @override
+  String scoreMoreTooltip(String pilot) {
+    return 'More for $pilot';
+  }
+
+  @override
+  String get scoreHistoryMenu => 'Score history';
+
+  @override
+  String get scoreRetireMenu => 'Retire pilot from this round on';
+
+  @override
+  String scoreReinstateMenu(int round) {
+    return 'Reinstate pilot (retired from round $round)';
+  }
+
+  @override
+  String get scoreLockedLater => 'Correct a locked score · Later release';
+
+  @override
+  String get scoreNoTeam => 'No team';
+
+  @override
+  String scorePilotNo(int number) {
+    return 'No. $number';
+  }
+
+  @override
+  String get scoreRawLabel => 'Raw score';
+
+  @override
+  String get scoreGroupLabel => 'Group score';
+
+  @override
+  String get scoreSemUnsaved => 'unsaved changes';
+
+  @override
+  String get scoreSemNotEntered => 'not entered';
+
+  @override
+  String get scoreSemSubmitted => 'submitted by a participant';
+
+  @override
+  String get scoreSemAcceptedAuto => 'accepted automatically';
+
+  @override
+  String get scoreSemOfficial => 'official';
+
+  @override
+  String get scoreSemLocked => 'locked';
+
+  @override
+  String get scoreSemRetired => 'retired';
+
+  @override
+  String scoreHighLaunch(int height) {
+    return '$height m is a high launch. Is this correct? You can still save.';
+  }
+
+  @override
+  String get scoreZeroHeight =>
+      '0 m is not a launch height. Saving it as No altitude recorded scores 0.';
+
+  @override
+  String get scoreTurnOnNoAltitude => 'Turn on No altitude recorded';
+
+  @override
+  String get scoreLandingHeading => 'Landing';
+
+  @override
+  String get scoreLandingFollows =>
+      'Follows the Landing field · type table points, ↑↓ to step';
+
+  @override
+  String get scoreNoLandingTableBand =>
+      'The contest has no landing table. Choose one on the Configuration page.';
+
+  @override
+  String get scoreLateLanding => 'Late landing';
+
+  @override
+  String get scoreLateLandingNote => 'Landing bonus is not given.';
+
+  @override
+  String get scoreMotorRestart => 'Motor restart';
+
+  @override
+  String get scoreMotorRestartZero => 'Scores 0.';
+
+  @override
+  String get scoreMotorRestartNonDroppable =>
+      'Scores 0, and the zero cannot be dropped.';
+
+  @override
+  String get scoreOutOfBounds => 'Out of bounds';
+
+  @override
+  String get scoreOutOfBoundsNote =>
+      'Landed more than 75 m from the marker. Scores 0.';
+
+  @override
+  String get scoreNoAltitude => 'No altitude recorded';
+
+  @override
+  String get scoreNoAltitudeNote => 'Scores 0.';
+
+  @override
+  String get scoreSaving => 'Saving…';
+
+  @override
+  String get scoreSaveRow => 'Save row';
+
+  @override
+  String get scoreRevert => 'Revert';
+
+  @override
+  String get scoreEnterHint =>
+      'Enter moves on. Enter on the penalty saves and opens the next pilot.';
+
+  @override
+  String get scoreZeroWhyBlank =>
+      'Nothing is entered. Saving records No flight, a zero.';
+
+  @override
+  String get scoreZeroWhy => 'Saving scores 0 for this pilot.';
+
+  @override
+  String get scoreZeroConfirmed => 'Zero confirmed. Save the row to record it.';
+
+  @override
+  String get scoreConfirmZero => 'Confirm zero';
+
+  @override
+  String get scoreHistoryEmpty => 'No scores have been entered yet.';
+
+  @override
+  String scoreHistoryTimesZone(String zone) {
+    return 'Times are in the contest time zone ($zone).';
+  }
+
+  @override
+  String get scoreHistoryAuthorityDirector => 'Director';
+
+  @override
+  String get scoreHistoryAuthorityParticipant => 'Participant';
+
+  @override
+  String get scoreHistoryAuthorityHelper => 'Helper';
+
+  @override
+  String get scoreHistoryAuthoritySystem => 'System';
+
+  @override
+  String get scoreHistoryAuthorityAdmin => 'Administrator';
+
+  @override
+  String get scoreHistoryCurrent => 'Current';
+
+  @override
+  String get scoreHistoryReplaced => 'Replaced';
+
+  @override
+  String get scoreHistoryNotAdopted => 'Not adopted';
+
+  @override
+  String get scoreHistoryPending => 'Awaiting decision';
+
+  @override
+  String get scoreHistorySubmission => 'Submission';
+
+  @override
+  String scoreHistoryRevision(int revision) {
+    return 'Revision $revision';
+  }
+
+  @override
+  String scoreHistoryReason(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String scoreToolbarRoundTitle(int current, int total) {
+    return 'Round $current of $total';
+  }
+
+  @override
+  String scoreToolbarRoundChoice(int ordinal) {
+    return 'Round $ordinal';
+  }
+
+  @override
+  String scoreToolbarGroups(int count) {
+    return '$count groups';
+  }
+
+  @override
+  String scoreToolbarGroupTitle(String letter, int count) {
+    return 'Group $letter of $count';
+  }
+
+  @override
+  String scoreToolbarPilots(int count) {
+    return '$count pilots';
+  }
+
+  @override
+  String scoreToolbarGroupChoice(String letter) {
+    return 'Group $letter';
+  }
+
+  @override
+  String get scoreToolbarSave => 'Save';
+
+  @override
+  String scoreToolbarSaveRows(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'rows',
+      one: 'row',
+    );
+    return 'Save $count $_temp0';
+  }
+
+  @override
+  String get scoreToolbarLock => 'Lock…';
+
+  @override
+  String get scoreToolbarMoreTooltip => 'More group actions';
+
+  @override
+  String get scoreToolbarShowFocusOrder => 'Show keyboard order';
+
+  @override
+  String get scoreToolbarGroupHistory => 'Group history';
+
+  @override
+  String get scoreToolbarReflightGroup => 'Re-flight group · Later release';
+
+  @override
+  String get scoreToolbarReflightRound => 'Re-flight round · Later release';
+
+  @override
+  String get scoreToolbarFirstRound => 'First round';
+
+  @override
+  String get scoreToolbarPrevRound => 'Previous round';
+
+  @override
+  String get scoreToolbarNextRound => 'Next round';
+
+  @override
+  String get scoreToolbarLastRound => 'Last round';
+
+  @override
+  String get scoreToolbarFirstGroup => 'First group';
+
+  @override
+  String get scoreToolbarPrevGroup => 'Previous group';
+
+  @override
+  String get scoreToolbarNextGroup => 'Next group';
+
+  @override
+  String get scoreToolbarLastGroup => 'Last group';
+
+  @override
+  String get scoreToolbarScoreCheck => 'Score check';
+
+  @override
+  String get scoreToolbarLockHint =>
+      'Locking is not available in this build yet.';
+
+  @override
+  String scorePenaltyRemoveTitleOne(String pilot) {
+    return 'Remove $pilot\'s penalty?';
+  }
+
+  @override
+  String scorePenaltyRemoveTitleMany(int count) {
+    return 'Remove $count penalties?';
+  }
+
+  @override
+  String get scorePenaltyRemoveBody =>
+      'Removal is an official score correction. Enter the reason to record it.';
+
+  @override
+  String get scorePenaltyRemoveReason => 'Correction reason';
+
+  @override
+  String get scorePenaltyRemoveButton => 'Remove penalty';
+
+  @override
+  String scoreRetireTitle(String pilot) {
+    return 'Retire $pilot?';
+  }
+
+  @override
+  String scoreReinstateTitle(String pilot) {
+    return 'Reinstate $pilot?';
+  }
+
+  @override
+  String scoreRetireBody(String pilot, int round) {
+    return '$pilot retires from round $round on. Their unscored flights from then on are not missing, and score entry is closed for them.';
+  }
+
+  @override
+  String scoreReinstateBody(String pilot, int round) {
+    return '$pilot will fly again from round $round on. Their unscored flights count as missing again.';
+  }
+
+  @override
+  String get scoreRetireNoChanges => 'No round count changes.';
+
+  @override
+  String scoreRetireKeptScores(int count, int round) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count scores already entered from round $round on stay and still count.',
+      one:
+          '1 score already entered from round $round on stays and still counts.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scoreRetireButton => 'Retire pilot';
+
+  @override
+  String get scoreReinstateButton => 'Reinstate pilot';
+
+  @override
+  String get scoreUnsavedTitle => 'Unsaved scores';
+
+  @override
+  String get scoreUnsavedCloseTitle => 'Close RC Soar Score?';
+
+  @override
+  String scoreUnsavedBody(int count, String action) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count rows have scores that are not saved. Save them before you $action?',
+      one: '1 row has scores that are not saved. Save them before you $action?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scoreUnsavedActionClose => 'close the app';
+
+  @override
+  String get scoreUnsavedActionLeave => 'leave this group';
+
+  @override
+  String get scoreUnsavedStay => 'Stay';
+
+  @override
+  String get scoreUnsavedDiscard => 'Discard';
 }

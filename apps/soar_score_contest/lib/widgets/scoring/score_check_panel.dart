@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/scoring/score_check.dart';
 import '../matrix/matrix_colors.dart';
 
@@ -20,6 +21,7 @@ class ScoreCheckPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final colors = MatrixColors.of(context);
     final clean = result.isClean;
     final byPilot = <String, List<ScoreFinding>>{};
@@ -50,14 +52,19 @@ class ScoreCheckPanel extends StatelessWidget {
               Expanded(
                 child: Text(
                   clean
-                      ? 'All ${result.checked} pilots entered, nothing out '
-                            'of range.'
-                      : '${result.findings.length} to look at for '
-                            '${byPilot.length} of ${result.checked} pilots.',
+                      ? l10n.scoreCheckClean(result.checked)
+                      : l10n.scoreCheckFindings(
+                          result.findings.length,
+                          byPilot.length,
+                          result.checked,
+                        ),
                   style: theme.textTheme.titleSmall,
                 ),
               ),
-              TextButton(onPressed: onClose, child: const Text('Close')),
+              TextButton(
+                onPressed: onClose,
+                child: Text(l10n.scoreCheckClose),
+              ),
             ],
           ),
           for (final entry in byPilot.entries) ...[

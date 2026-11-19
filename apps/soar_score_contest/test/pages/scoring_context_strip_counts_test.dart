@@ -28,7 +28,10 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.descendant(of: strip, matching: find.text('Round in progress')),
+      find.descendant(
+        of: strip,
+        matching: find.textContaining('Round in progress'),
+      ),
       findsOneWidget,
     );
   });

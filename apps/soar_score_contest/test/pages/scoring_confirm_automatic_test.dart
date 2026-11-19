@@ -197,7 +197,7 @@ void main() {
     server.matrixServer.retirements[2] = 1;
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
-    expect(find.text('Retired from round 1'), findsOneWidget);
+    expect(find.text(_words.scoreRetiredNote(1)), findsOneWidget);
     expect(find.text('1 of 2 entered · 1 official'), findsOneWidget);
     expect(find.text('9:00'), findsWidgets);
     expect(find.text(_words.scoreConfirm), findsNothing);

@@ -4562,6 +4562,840 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark official'**
   String get syncRefusedScorePromotion;
+
+  /// Button that closes the Score check result panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get scoreCheckClose;
+
+  /// Header of the Score check panel when the check found nothing.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} pilots entered, nothing out of range.'**
+  String scoreCheckClean(int count);
+
+  /// Header of the Score check panel when the check found problems.
+  ///
+  /// In en, this message translates to:
+  /// **'{findings} to look at for {pilots} of {checked} pilots.'**
+  String scoreCheckFindings(int findings, int pilots, int checked);
+
+  /// Button that closes a dialog or panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get commonClose;
+
+  /// Button that saves the current values.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get commonSave;
+
+  /// Dialog button that keeps the app open instead of closing it.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep open'**
+  String get commonKeepOpen;
+
+  /// Snackbar after saving rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {count} {count, plural, =1{row} other{rows}}.'**
+  String scoreSavedRows(int count);
+
+  /// Title of a pilot's score history dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Score history · {pilot}'**
+  String scoreHistoryTitle(String pilot);
+
+  /// Title of the group score history dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Group history'**
+  String get scoreHistoryGroupTitle;
+
+  /// Snackbar after a pilot was retired.
+  ///
+  /// In en, this message translates to:
+  /// **'{pilot} retired from round {round}.'**
+  String scoreRetiredFromRound(String pilot, int round);
+
+  /// Snackbar after a pilot was reinstated.
+  ///
+  /// In en, this message translates to:
+  /// **'{pilot} reinstated.'**
+  String scoreReinstated(String pilot);
+
+  /// Page state when there is no API client.
+  ///
+  /// In en, this message translates to:
+  /// **'No API client is available.'**
+  String get scoreNoApiClient;
+
+  /// Title of the load-failed view on the scoring page.
+  ///
+  /// In en, this message translates to:
+  /// **'The scores could not be loaded.'**
+  String get scoreLoadFailed;
+
+  /// Loading label while the scoring page reads its data.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the scores'**
+  String get scoreLoading;
+
+  /// Empty-state title on the scoring page before the matrix is drawn.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest has no matrix yet.'**
+  String get scoreNoMatrixTitle;
+
+  /// Empty-state body on the scoring page before the matrix is drawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw the matrix first. Then scores can be entered here.'**
+  String get scoreNoMatrixBody;
+
+  /// Action on the empty scoring state that opens the Matrix page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the matrix'**
+  String get scoreOpenMatrix;
+
+  /// Button on the recalculation-warning banner that re-reads the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get scoreRefresh;
+
+  /// Empty-state title when the group has no pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilots in this group.'**
+  String get scoreNoPilotsTitle;
+
+  /// Empty-state body when the group has no pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Every pilot assigned here is absent or retired.'**
+  String get scoreNoPilotsBody;
+
+  /// Label of the time field.
+  ///
+  /// In en, this message translates to:
+  /// **'Time flown (m:ss)'**
+  String get scoreTimeLabel;
+
+  /// Label of the launch height field.
+  ///
+  /// In en, this message translates to:
+  /// **'Launch height (m)'**
+  String get scoreHeightLabel;
+
+  /// Label of the landing field.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing (pts)'**
+  String get scoreLandingLabel;
+
+  /// Note under a valid launch height: its height penalty in points.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} pts'**
+  String scorePointsNote(String points);
+
+  /// Caption of the landing field on a late landing.
+  ///
+  /// In en, this message translates to:
+  /// **'0 · late'**
+  String get scoreLandingLate;
+
+  /// Caption of the landing field when the contest has no landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'No landing table'**
+  String get scoreNoLandingTable;
+
+  /// Error caption when the typed landing points are not in the table.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} isn’t in the landing table. Use {hint}'**
+  String scoreLandingBad(String value, String hint);
+
+  /// Caption of an empty landing field that has focus.
+  ///
+  /// In en, this message translates to:
+  /// **'Type table points: {hint}'**
+  String scoreLandingTypeHint(String hint);
+
+  /// Caption of a focused landing field whose band is chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'{display} · {points} pts'**
+  String scoreLandingSelected(String display, int points);
+
+  /// Caption of a landing field whose band is chosen, not focused.
+  ///
+  /// In en, this message translates to:
+  /// **'{display} · {points}'**
+  String scoreLandingBand(String display, int points);
+
+  /// Status chip of a late landing.
+  ///
+  /// In en, this message translates to:
+  /// **'Late landing'**
+  String get scoreFlagLateLanding;
+
+  /// Status chip of a motor restart.
+  ///
+  /// In en, this message translates to:
+  /// **'Motor restart'**
+  String get scoreFlagMotorRestart;
+
+  /// Status chip of an out-of-bounds flight.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of bounds'**
+  String get scoreFlagOutOfBounds;
+
+  /// Status chip of a flight with no recorded altitude.
+  ///
+  /// In en, this message translates to:
+  /// **'No altitude'**
+  String get scoreFlagNoAltitude;
+
+  /// Label of the penalties column.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalties'**
+  String get scorePenaltiesLabel;
+
+  /// Penalty cell value for a flight penalty.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} flight'**
+  String scoreFlightPenalty(int count);
+
+  /// Penalty cell when there is no penalty.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get scorePenaltyNone;
+
+  /// Penalty cell when an applied cumulative penalty was removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get scorePenaltyRemoved;
+
+  /// Penalty cell value for a cumulative penalty.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} total'**
+  String scoreCumulativePenalty(int count);
+
+  /// Label of the indicators column.
+  ///
+  /// In en, this message translates to:
+  /// **'Indicators'**
+  String get scoreIndicatorsLabel;
+
+  /// Status line naming how many Score check findings a row has.
+  ///
+  /// In en, this message translates to:
+  /// **'Check: {count}'**
+  String scoreCheckCount(int count);
+
+  /// Status line of a retired row, naming the first round the pilot does not fly.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired from round {round}'**
+  String scoreRetiredNote(int round);
+
+  /// Tooltip of the row three-dot menu.
+  ///
+  /// In en, this message translates to:
+  /// **'More for {pilot}'**
+  String scoreMoreTooltip(String pilot);
+
+  /// Row menu action that opens the score history.
+  ///
+  /// In en, this message translates to:
+  /// **'Score history'**
+  String get scoreHistoryMenu;
+
+  /// Row menu action that retires the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire pilot from this round on'**
+  String get scoreRetireMenu;
+
+  /// Row menu action that takes a retirement back.
+  ///
+  /// In en, this message translates to:
+  /// **'Reinstate pilot (retired from round {round})'**
+  String scoreReinstateMenu(int round);
+
+  /// Disabled row menu action for correcting a locked score.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct a locked score · Later release'**
+  String get scoreLockedLater;
+
+  /// Tooltip of the team badge when the pilot has no team.
+  ///
+  /// In en, this message translates to:
+  /// **'No team'**
+  String get scoreNoTeam;
+
+  /// Line under a pilot's name: their pilot number.
+  ///
+  /// In en, this message translates to:
+  /// **'No. {number}'**
+  String scorePilotNo(int number);
+
+  /// Label of the raw score cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw score'**
+  String get scoreRawLabel;
+
+  /// Label of the group score cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Group score'**
+  String get scoreGroupLabel;
+
+  /// Accessibility status word for a row with unsaved changes.
+  ///
+  /// In en, this message translates to:
+  /// **'unsaved changes'**
+  String get scoreSemUnsaved;
+
+  /// Accessibility status word for a row with no score.
+  ///
+  /// In en, this message translates to:
+  /// **'not entered'**
+  String get scoreSemNotEntered;
+
+  /// Accessibility status word for a row with a waiting submission.
+  ///
+  /// In en, this message translates to:
+  /// **'submitted by a participant'**
+  String get scoreSemSubmitted;
+
+  /// Accessibility status word for a row whose score was accepted automatically.
+  ///
+  /// In en, this message translates to:
+  /// **'accepted automatically'**
+  String get scoreSemAcceptedAuto;
+
+  /// Accessibility status word for an official score.
+  ///
+  /// In en, this message translates to:
+  /// **'official'**
+  String get scoreSemOfficial;
+
+  /// Accessibility status word for a locked row.
+  ///
+  /// In en, this message translates to:
+  /// **'locked'**
+  String get scoreSemLocked;
+
+  /// Accessibility status word for a retired row.
+  ///
+  /// In en, this message translates to:
+  /// **'retired'**
+  String get scoreSemRetired;
+
+  /// Note when the typed launch height is unusually high.
+  ///
+  /// In en, this message translates to:
+  /// **'{height} m is a high launch. Is this correct? You can still save.'**
+  String scoreHighLaunch(int height);
+
+  /// Note when the launch height is 0.
+  ///
+  /// In en, this message translates to:
+  /// **'0 m is not a launch height. Saving it as No altitude recorded scores 0.'**
+  String get scoreZeroHeight;
+
+  /// Action of the zero-height note.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on No altitude recorded'**
+  String get scoreTurnOnNoAltitude;
+
+  /// Heading of the landing section in the entry band.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing'**
+  String get scoreLandingHeading;
+
+  /// Tag on the landing choice while the Landing field has focus.
+  ///
+  /// In en, this message translates to:
+  /// **'Follows the Landing field · type table points, ↑↓ to step'**
+  String get scoreLandingFollows;
+
+  /// Note in the entry band when the contest has no landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest has no landing table. Choose one on the Configuration page.'**
+  String get scoreNoLandingTableBand;
+
+  /// Toggle label for a late landing.
+  ///
+  /// In en, this message translates to:
+  /// **'Late landing'**
+  String get scoreLateLanding;
+
+  /// Note under the Late landing toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing bonus is not given.'**
+  String get scoreLateLandingNote;
+
+  /// Toggle label for a motor restart.
+  ///
+  /// In en, this message translates to:
+  /// **'Motor restart'**
+  String get scoreMotorRestart;
+
+  /// Note under the Motor restart toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores 0.'**
+  String get scoreMotorRestartZero;
+
+  /// Note under the Motor restart toggle when the zero cannot be dropped.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores 0, and the zero cannot be dropped.'**
+  String get scoreMotorRestartNonDroppable;
+
+  /// Toggle label for an out-of-bounds flight.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of bounds'**
+  String get scoreOutOfBounds;
+
+  /// Note under the Out of bounds toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Landed more than 75 m from the marker. Scores 0.'**
+  String get scoreOutOfBoundsNote;
+
+  /// Toggle label for a flight with no recorded altitude.
+  ///
+  /// In en, this message translates to:
+  /// **'No altitude recorded'**
+  String get scoreNoAltitude;
+
+  /// Note under the No altitude recorded toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores 0.'**
+  String get scoreNoAltitudeNote;
+
+  /// Label of the Save row button while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get scoreSaving;
+
+  /// Button that saves the active row.
+  ///
+  /// In en, this message translates to:
+  /// **'Save row'**
+  String get scoreSaveRow;
+
+  /// Button that reverts the active row's edits.
+  ///
+  /// In en, this message translates to:
+  /// **'Revert'**
+  String get scoreRevert;
+
+  /// Hint of the entry band about the Enter key.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter moves on. Enter on the penalty saves and opens the next pilot.'**
+  String get scoreEnterHint;
+
+  /// Zero-confirmation note when the row is blank.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is entered. Saving records No flight, a zero.'**
+  String get scoreZeroWhyBlank;
+
+  /// Zero-confirmation note when the row scores 0.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving scores 0 for this pilot.'**
+  String get scoreZeroWhy;
+
+  /// Note after the zero was confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Zero confirmed. Save the row to record it.'**
+  String get scoreZeroConfirmed;
+
+  /// Action of the zero-confirmation note.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm zero'**
+  String get scoreConfirmZero;
+
+  /// Empty state of the score history.
+  ///
+  /// In en, this message translates to:
+  /// **'No scores have been entered yet.'**
+  String get scoreHistoryEmpty;
+
+  /// Footer of the score history naming the zone.
+  ///
+  /// In en, this message translates to:
+  /// **'Times are in the contest time zone ({zone}).'**
+  String scoreHistoryTimesZone(String zone);
+
+  /// Author of a score history entry: the director.
+  ///
+  /// In en, this message translates to:
+  /// **'Director'**
+  String get scoreHistoryAuthorityDirector;
+
+  /// Author of a score history entry: the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant'**
+  String get scoreHistoryAuthorityParticipant;
+
+  /// Author of a score history entry: a helper.
+  ///
+  /// In en, this message translates to:
+  /// **'Helper'**
+  String get scoreHistoryAuthorityHelper;
+
+  /// Author of a score history entry: the system.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get scoreHistoryAuthoritySystem;
+
+  /// Author of a score history entry: an administrator.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrator'**
+  String get scoreHistoryAuthorityAdmin;
+
+  /// Outcome chip of the current score history entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get scoreHistoryCurrent;
+
+  /// Outcome chip of a superseded entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced'**
+  String get scoreHistoryReplaced;
+
+  /// Outcome chip of an entry the contest did not adopt.
+  ///
+  /// In en, this message translates to:
+  /// **'Not adopted'**
+  String get scoreHistoryNotAdopted;
+
+  /// Outcome chip of an entry awaiting a review decision.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting decision'**
+  String get scoreHistoryPending;
+
+  /// Heading of a score history entry with no revision.
+  ///
+  /// In en, this message translates to:
+  /// **'Submission'**
+  String get scoreHistorySubmission;
+
+  /// Heading of a score history entry naming its revision.
+  ///
+  /// In en, this message translates to:
+  /// **'Revision {revision}'**
+  String scoreHistoryRevision(int revision);
+
+  /// Line of a score history entry naming the correction reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String scoreHistoryReason(String reason);
+
+  /// Title of the round picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {current} of {total}'**
+  String scoreToolbarRoundTitle(int current, int total);
+
+  /// Choice in the round picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {ordinal}'**
+  String scoreToolbarRoundChoice(int ordinal);
+
+  /// Sub-line of a round picker choice: its number of groups.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} groups'**
+  String scoreToolbarGroups(int count);
+
+  /// Title of the group picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {letter} of {count}'**
+  String scoreToolbarGroupTitle(String letter, int count);
+
+  /// Sub-line of a round or group picker choice: its number of pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilots'**
+  String scoreToolbarPilots(int count);
+
+  /// Choice in the group picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {letter}'**
+  String scoreToolbarGroupChoice(String letter);
+
+  /// Primary action when entry is closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get scoreToolbarSave;
+
+  /// Primary action naming how many rows save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {count} {count, plural, =1{row} other{rows}}'**
+  String scoreToolbarSaveRows(int count);
+
+  /// Primary action when nothing is dirty (locking not built).
+  ///
+  /// In en, this message translates to:
+  /// **'Lock…'**
+  String get scoreToolbarLock;
+
+  /// Tooltip of the group three-dot menu.
+  ///
+  /// In en, this message translates to:
+  /// **'More group actions'**
+  String get scoreToolbarMoreTooltip;
+
+  /// Group menu item that toggles the keyboard path numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Show keyboard order'**
+  String get scoreToolbarShowFocusOrder;
+
+  /// Group menu item that opens the group history.
+  ///
+  /// In en, this message translates to:
+  /// **'Group history'**
+  String get scoreToolbarGroupHistory;
+
+  /// Disabled group menu action for a group re-flight.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-flight group · Later release'**
+  String get scoreToolbarReflightGroup;
+
+  /// Disabled group menu action for a round re-flight.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-flight round · Later release'**
+  String get scoreToolbarReflightRound;
+
+  /// Tooltip of the first-round navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'First round'**
+  String get scoreToolbarFirstRound;
+
+  /// Tooltip of the previous-round navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous round'**
+  String get scoreToolbarPrevRound;
+
+  /// Tooltip of the next-round navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Next round'**
+  String get scoreToolbarNextRound;
+
+  /// Tooltip of the last-round navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Last round'**
+  String get scoreToolbarLastRound;
+
+  /// Tooltip of the first-group navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'First group'**
+  String get scoreToolbarFirstGroup;
+
+  /// Tooltip of the previous-group navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous group'**
+  String get scoreToolbarPrevGroup;
+
+  /// Tooltip of the next-group navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Next group'**
+  String get scoreToolbarNextGroup;
+
+  /// Tooltip of the last-group navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Last group'**
+  String get scoreToolbarLastGroup;
+
+  /// Button that runs the Score check.
+  ///
+  /// In en, this message translates to:
+  /// **'Score check'**
+  String get scoreToolbarScoreCheck;
+
+  /// Tooltip of the disabled lock action.
+  ///
+  /// In en, this message translates to:
+  /// **'Locking is not available in this build yet.'**
+  String get scoreToolbarLockHint;
+
+  /// Title of the penalty removal dialog for one pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {pilot}\'s penalty?'**
+  String scorePenaltyRemoveTitleOne(String pilot);
+
+  /// Title of the penalty removal dialog for several pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {count} penalties?'**
+  String scorePenaltyRemoveTitleMany(int count);
+
+  /// Body of the penalty removal dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Removal is an official score correction. Enter the reason to record it.'**
+  String get scorePenaltyRemoveBody;
+
+  /// Label of the correction reason field.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction reason'**
+  String get scorePenaltyRemoveReason;
+
+  /// Button that removes the penalties.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove penalty'**
+  String get scorePenaltyRemoveButton;
+
+  /// Title of the retire dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire {pilot}?'**
+  String scoreRetireTitle(String pilot);
+
+  /// Title of the reinstate dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Reinstate {pilot}?'**
+  String scoreReinstateTitle(String pilot);
+
+  /// Body of the retire dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{pilot} retires from round {round} on. Their unscored flights from then on are not missing, and score entry is closed for them.'**
+  String scoreRetireBody(String pilot, int round);
+
+  /// Body of the reinstate dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{pilot} will fly again from round {round} on. Their unscored flights count as missing again.'**
+  String scoreReinstateBody(String pilot, int round);
+
+  /// Line of the retire dialog when no round count changes.
+  ///
+  /// In en, this message translates to:
+  /// **'No round count changes.'**
+  String get scoreRetireNoChanges;
+
+  /// Line of the retire dialog naming scores that stay.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 score already entered from round {round} on stays and still counts.} other{{count} scores already entered from round {round} on stay and still count.}}'**
+  String scoreRetireKeptScores(int count, int round);
+
+  /// Button that retires the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire pilot'**
+  String get scoreRetireButton;
+
+  /// Button that reinstates the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Reinstate pilot'**
+  String get scoreReinstateButton;
+
+  /// Title of the unsaved-edits dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved scores'**
+  String get scoreUnsavedTitle;
+
+  /// Title of the unsaved-edits dialog when closing the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Close RC Soar Score?'**
+  String get scoreUnsavedCloseTitle;
+
+  /// Body of the unsaved-edits dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 row has scores that are not saved. Save them before you {action}?} other{{count} rows have scores that are not saved. Save them before you {action}?}}'**
+  String scoreUnsavedBody(int count, String action);
+
+  /// Action word in the unsaved-edits dialog when closing the app.
+  ///
+  /// In en, this message translates to:
+  /// **'close the app'**
+  String get scoreUnsavedActionClose;
+
+  /// Action word in the unsaved-edits dialog when leaving the group.
+  ///
+  /// In en, this message translates to:
+  /// **'leave this group'**
+  String get scoreUnsavedActionLeave;
+
+  /// Dialog button that stays on the group.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get scoreUnsavedStay;
+
+  /// Dialog button that discards the unsaved rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get scoreUnsavedDiscard;
 }
 
 class _AppLocalizationsDelegate

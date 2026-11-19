@@ -1,7 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 
 import '../support/scoring_test_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 const _flight = {'time_flown': 540, 'launch_height': 120};
 
@@ -23,7 +26,7 @@ void main() {
     // No caption stands in for the preview; the number carries the meaning.
     expect(find.text('Preview, not saved'), findsNothing);
     expect(
-      find.byTooltip('Preview. Saved when you save the row.'),
+      find.byTooltip(_l10n.scorePreviewTooltip),
       findsOneWidget,
     );
     final number = tester.widget<Text>(
