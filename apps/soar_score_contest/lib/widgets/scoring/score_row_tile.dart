@@ -645,16 +645,36 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     );
   }
 
+  /// A score column. While the row's values are not saved the number is a
+  /// preview: muted and italic, so it does not rest on colour alone, with a
+  /// tooltip that says so. [caption] is a short note under it.
   Widget _numberCell(
     BuildContext context,
     String label,
     bool labels,
     String value,
-    bool dirty,
-  ) {
+    bool dirty, {
+    String? caption,
+  }) {
     final theme = Theme.of(context);
     // A value is right aligned; "–" is centered.
     final hasValue = value != '–';
+    final preview = dirty && hasValue;
+    Widget number = Text(
+      value,
+      style: theme.textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.w500,
+        fontFeatures: const [FontFeature.tabularFigures()],
+        color: dirty ? theme.colorScheme.onSurfaceVariant : null,
+        fontStyle: preview ? FontStyle.italic : null,
+      ),
+    );
+    if (preview) {
+      number = Tooltip(
+        message: AppLocalizations.of(context).scorePreviewTooltip,
+        child: number,
+      );
+    }
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
@@ -668,14 +688,15 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
             labels,
             hasValue ? TextAlign.end : TextAlign.center,
           ),
-          Text(
-            value,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              fontFeatures: const [FontFeature.tabularFigures()],
-              color: dirty ? theme.colorScheme.onSurfaceVariant : null,
+          number,
+          if (caption != null)
+            Text(
+              caption,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -1132,6 +1153,10 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       labels,
       number(rawValue),
       dirty,
+      // A partly typed row has no raw score yet.
+      caption: dirty && rawValue == null && !d.isBlank && !_readOnly
+          ? AppLocalizations.of(context).scoreIncomplete
+          : null,
     );
     final grp = _numberCell(
       context,

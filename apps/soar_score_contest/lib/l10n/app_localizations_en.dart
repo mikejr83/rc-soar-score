@@ -2983,6 +2983,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'A pilot or helper entered these values. The submission is kept in history.';
 
   @override
+  String get scorePreviewTooltip => 'Preview. Saved when you save the row.';
+
+  @override
+  String get scoreIncomplete => 'Incomplete';
+
+  @override
   String get scoreFixToSave => 'Fix to save';
 
   @override

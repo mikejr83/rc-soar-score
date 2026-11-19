@@ -4172,6 +4172,18 @@ abstract class AppLocalizations {
   /// **'A pilot or helper entered these values. The submission is kept in history.'**
   String get scorePilotEntryTooltip;
 
+  /// Tooltip of a Raw or Group score that is a preview of typed values not yet saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview. Saved when you save the row.'**
+  String get scorePreviewTooltip;
+
+  /// Short note under the Raw score of a row that is only partly entered, so no score can be shown yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete'**
+  String get scoreIncomplete;
+
   /// Red line under the status chip of a row the director left with a mistake that blocks saving it.
   ///
   /// In en, this message translates to:
