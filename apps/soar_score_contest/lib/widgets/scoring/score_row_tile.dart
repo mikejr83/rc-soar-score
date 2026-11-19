@@ -75,6 +75,7 @@ class ScoreRowTile extends StatefulWidget {
     required this.findings,
     required this.actions,
     required this.mode,
+    this.medium = MediumColumns.design,
     required this.grid,
     this.focusOrder = false,
     this.theirs,
@@ -99,6 +100,9 @@ class ScoreRowTile extends StatefulWidget {
   final List<ScoreFinding> findings;
   final ScoreRowActions actions;
   final ScoreGridMode mode;
+
+  /// The medium table's right block for the width the page has.
+  final MediumColumns medium;
 
   /// Whether the grid shows a lane or number column and teams.
   final ScoreGridOptions grid;
@@ -279,6 +283,18 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
 
   // Cells.
 
+  /// Space above a cell's content. The wide table sets its cells 12 px down
+  /// so they sit level with the fields; the medium and compact tables start
+  /// every cell at the top of its line (`cellTop` and `menuTop` in the design).
+  double get _cellTop => widget.mode == ScoreGridMode.wide ? 12 : 0;
+  double get _menuTop => widget.mode == ScoreGridMode.wide ? 6 : 0;
+
+  /// The entry fields are 44 px tall with 17 px text in the medium table, 48
+  /// px with 18 px text elsewhere.
+  bool get _mediumFields => widget.mode == ScoreGridMode.medium;
+  double get _fieldFont => _mediumFields ? 17 : 18;
+  double get _fieldHeight => _mediumFields ? 44 : 48;
+
   Widget _label(
     BuildContext context,
     String text,
@@ -374,16 +390,31 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       onTap: widget.actions.onActivate,
       onChanged: onChanged,
       onSubmitted: onSubmitted,
-      style: const TextStyle(fontSize: 18),
+      // The design's field is 44 px (medium) or 48 px tall with 17 or 18 px
+      // text. The line is pinned to the font size and the rest is padding, so
+      // the border is drawn at that height whatever the font's own metrics
+      // (a decoration's `constraints` reserve the room but leave the border
+      // at the height of the text).
+      style: TextStyle(fontSize: _fieldFont, height: 1),
+      strutStyle: StrutStyle(
+        fontSize: _fieldFont,
+        height: 1,
+        forceStrutHeight: true,
+      ),
       decoration: InputDecoration(
         isDense: true,
         filled: !enabled,
         fillColor: scheme.onSurface.withValues(alpha: 0.06),
-        contentPadding: const EdgeInsets.symmetric(
+        contentPadding: EdgeInsets.symmetric(
           horizontal: 10,
-          vertical: 14,
+          vertical: (_fieldHeight - _fieldFont) / 2,
         ),
         suffixText: suffix,
+        suffixStyle: TextStyle(
+          fontSize: 14,
+          height: 1,
+          color: scheme.onSurfaceVariant,
+        ),
         border: _border(invalid ? scheme.error : scheme.outline),
         enabledBorder: _border(
           invalid ? scheme.error : scheme.outline,
@@ -393,13 +424,19 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         focusedBorder: _border(scheme.primary, 3),
       ),
     );
+    // Desktop themes use compact density, which takes 8 px off a field's
+    // height. The design's heights are the standard ones.
+    final sized = Theme(
+      data: Theme.of(context).copyWith(visualDensity: VisualDensity.standard),
+      child: input,
+    );
     final field = onKey == null
-        ? input
+        ? sized
         : Focus(
             canRequestFocus: false,
             skipTraversal: true,
             onKeyEvent: (node, event) => onKey(event),
-            child: input,
+            child: sized,
           );
     return FocusStep(
       order: order,
@@ -645,20 +682,44 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     );
   }
 
+  /// A score column. While the row's values are not saved the number is a
+  /// preview: muted and italic, so it does not rest on colour alone, with a
+  /// tooltip that says so. [caption] is a short note under it.
   Widget _numberCell(
     BuildContext context,
     String label,
     bool labels,
     String value,
-    bool dirty,
-  ) {
+    bool dirty, {
+    String? caption,
+  }) {
     final theme = Theme.of(context);
     // A value is right aligned; "–" is centered.
     final hasValue = value != '–';
+    final preview = dirty && hasValue;
+    Widget number = Text(
+      value,
+      style: theme.textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.w500,
+        fontFeatures: const [FontFeature.tabularFigures()],
+        color: dirty ? theme.colorScheme.onSurfaceVariant : null,
+        fontStyle: preview ? FontStyle.italic : null,
+      ),
+    );
+    if (preview) {
+      number = Tooltip(
+        message: AppLocalizations.of(context).scorePreviewTooltip,
+        child: number,
+      );
+    }
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: EdgeInsets.only(top: _cellTop),
       child: Column(
-        crossAxisAlignment: hasValue
+        // Under a heading the number is right aligned; with its own label
+        // (medium, compact) everything starts at the left.
+        crossAxisAlignment: labels
+            ? CrossAxisAlignment.start
+            : hasValue
             ? CrossAxisAlignment.end
             : CrossAxisAlignment.center,
         children: [
@@ -666,16 +727,21 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
             context,
             label,
             labels,
-            hasValue ? TextAlign.end : TextAlign.center,
+            labels
+                ? TextAlign.start
+                : hasValue
+                ? TextAlign.end
+                : TextAlign.center,
           ),
-          Text(
-            value,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              fontFeatures: const [FontFeature.tabularFigures()],
-              color: dirty ? theme.colorScheme.onSurfaceVariant : null,
+          number,
+          if (caption != null)
+            Text(
+              caption,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -690,17 +756,27 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final flight = d.penalty ?? 0;
     final cumulative = d.cumulativePenalty;
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: EdgeInsets.only(top: _cellTop),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: labels
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
-          _label(context, 'Penalties', labels, TextAlign.center),
+          _label(
+            context,
+            'Penalties',
+            labels,
+            labels ? TextAlign.start : TextAlign.center,
+          ),
           if (flight > 0)
             FittedBox(
               fit: BoxFit.scaleDown,
+              alignment: labels ? Alignment.centerLeft : Alignment.center,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: labels
+                    ? MainAxisAlignment.start
+                    : MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.remove,
@@ -713,10 +789,18 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
               ),
             )
           else if (cumulative == null)
-            Text('None', textAlign: TextAlign.center, style: muted),
+            Text(
+              'None',
+              textAlign: labels ? TextAlign.start : TextAlign.center,
+              style: muted,
+            ),
           // A removal keeps its row: the value was applied earlier.
           if (cumulative == 0)
-            Text('Removed', textAlign: TextAlign.center, style: muted),
+            Text(
+              'Removed',
+              textAlign: labels ? TextAlign.start : TextAlign.center,
+              style: muted,
+            ),
           if (cumulative != null && cumulative > 0)
             Padding(
               padding: EdgeInsets.only(top: flight > 0 ? 4 : 0),
@@ -724,9 +808,12 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
               // test font instead of overflowing.
               child: FittedBox(
                 fit: BoxFit.scaleDown,
+                alignment: labels ? Alignment.centerLeft : Alignment.center,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: labels
+                      ? MainAxisAlignment.start
+                      : MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.push_pin_outlined,
@@ -747,30 +834,58 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     );
   }
 
+  /// Where the score came from and whether a review waits. They describe the
+  /// values, not their state, so they stay on an official row.
   Widget _indicatorCell(BuildContext context, bool labels) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final words = AppLocalizations.of(context);
+    final row = widget.row;
+    final chips = <Widget>[
+      if (row.isPilotEntry)
+        Tooltip(
+          message: words.scorePilotEntryTooltip,
+          child: StatusChip(
+            key: ValueKey(_k('indicator-pilot-entry')),
+            icon: Icons.smartphone,
+            label: words.scorePilotEntryChip,
+            background: scheme.surfaceContainerHigh,
+            foreground: scheme.onSurface,
+            dense: true,
+          ),
+        ),
+      if (row.hasOpenReview)
+        Tooltip(
+          message: words.scoreReviewTooltip,
+          child: StatusChip(
+            key: ValueKey(_k('indicator-review')),
+            icon: Icons.rate_review,
+            label: words.scoreReviewChip,
+            background: scheme.tertiaryContainer,
+            foreground: scheme.onTertiaryContainer,
+            dense: true,
+          ),
+        ),
+    ];
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: EdgeInsets.only(top: _cellTop),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _label(context, 'Indicators', labels),
-          if (widget.row.hasPendingSubmission) ...[
-            Tooltip(
-              message: AppLocalizations.of(context).scorePilotEntryTooltip,
-              child: StatusChip(
-                icon: Icons.smartphone,
-                label: AppLocalizations.of(context).scorePilotEntryChip,
-                dense: true,
-              ),
-            ),
-          ] else
+          if (chips.isEmpty)
             Text(
               '–',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: scheme.onSurfaceVariant,
               ),
-            ),
+            )
+          else
+            for (final (i, chip) in chips.indexed)
+              Padding(
+                padding: EdgeInsets.only(top: i == 0 ? 0 : 4),
+                child: chip,
+              ),
         ],
       ),
     );
@@ -781,7 +896,15 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final scheme = theme.colorScheme;
     final colors = MatrixColors.of(context);
     final subs = <(IconData, String, Color?)>[
-      if (dirty) (Icons.edit_note, 'Not saved yet', null),
+      // The Unsaved chip already says the values are not saved. Only a
+      // mistake that blocks the save is added, and only on a row the director
+      // has left: the open row lists its problems in the entry band.
+      if (dirty && !widget.active && widget.draft.problems.isNotEmpty)
+        (
+          Icons.error,
+          AppLocalizations.of(context).scoreFixToSave,
+          scheme.error,
+        ),
       if (widget.findings.isNotEmpty)
         (Icons.help_outline, 'Check: ${widget.findings.length}', colors.warn),
       if (widget.row.isLocked && widget.block != null)
@@ -802,11 +925,10 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         ),
     ];
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: EdgeInsets.only(top: _cellTop),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _label(context, 'Status', labels),
           RowStatusChip(
             status: widget.row.status,
             unsaved: dirty,
@@ -854,44 +976,44 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       MarkOfficialSkip.waitingToSync => words.scoreMarkOfficialWaiting,
       _ => null,
     };
+    // The reason it is off is the tooltip; no line is drawn under the button.
     return Padding(
-      padding: const EdgeInsets.only(top: 6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Tooltip(
-            message: why ?? words.scoreMarkOfficialTooltip(row.pilot.name),
-            child: OutlinedButton.icon(
-              key: ValueKey(_k('mark-official')),
-              onPressed: skip == null ? widget.actions.onMarkOfficial : null,
-              icon: busy
-                  ? const SizedBox.square(
-                      dimension: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.verified_outlined, size: 18),
-              label: Text(
-                busy ? words.scoreMarkOfficialMarking : words.scoreMarkOfficial,
-              ),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(0, 40),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-            ),
+      padding: const EdgeInsets.only(top: 2),
+      child: Tooltip(
+        message: why ?? words.scoreMarkOfficialTooltip(row.pilot.name),
+        child: TextButton.icon(
+          key: ValueKey(_k('mark-official')),
+          onPressed: skip == null ? widget.actions.onMarkOfficial : null,
+          icon: _quickIcon(busy),
+          label: Text(
+            busy ? words.scoreMarkOfficialMarking : words.scoreMarkOfficial,
           ),
-          if (why != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                why,
-                key: ValueKey(_k('mark-official-why')),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-        ],
+          style: _quickStyle,
+        ),
       ),
     );
   }
+
+  /// The icon of a row's quick action: a spinner while its request is out.
+  Widget _quickIcon(bool busy) => busy
+      ? const SizedBox.square(
+          dimension: 16,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        )
+      : const Icon(Icons.verified_outlined, size: 16);
+
+  /// A quiet text button for the row's quick action, as in the design.
+  static final ButtonStyle _quickStyle = TextButton.styleFrom(
+    // 32 px at least; a label that wraps (Extra large text) makes the button
+    // taller. Compact density would take 8 px off the minimum, so the density
+    // stays standard.
+    minimumSize: const Size(0, 32),
+    padding: const EdgeInsets.symmetric(horizontal: 8),
+    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    visualDensity: VisualDensity.standard,
+    textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+    shape: const StadiumBorder(),
+  );
 
   /// The Confirm button and its explanation under the "Accepted
   /// automatically" chip: the contest accepted this score when its round or
@@ -929,30 +1051,17 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
             key: ValueKey(_k('automatic-note')),
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Tooltip(
             message: why ?? words.scoreConfirmTooltip(row.pilot.name),
-            child: OutlinedButton.icon(
+            child: TextButton.icon(
               key: ValueKey(_k('confirm-automatic')),
               onPressed: skip == null ? widget.actions.onMarkOfficial : null,
-              icon: busy
-                  ? const SizedBox.square(
-                      dimension: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.verified_outlined, size: 18),
+              icon: _quickIcon(busy),
               label: Text(busy ? words.scoreConfirming : words.scoreConfirm),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(0, 40),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
+              style: _quickStyle,
             ),
           ),
-          if (why != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(why, style: Theme.of(context).textTheme.bodySmall),
-            ),
         ],
       ),
     );
@@ -966,7 +1075,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     return FocusStep(
       order: 12,
       child: Padding(
-        padding: const EdgeInsets.only(top: 6),
+        padding: EdgeInsets.only(top: _menuTop),
         child: PopupMenuButton<String>(
           key: ValueKey('row-menu-${row.id.value}'),
           tooltip: 'More for ${row.pilot.name}',
@@ -1013,7 +1122,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(top: 10),
+      padding: EdgeInsets.only(top: _cellTop),
       child: Column(
         children: [
           Container(
@@ -1052,7 +1161,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         'No. ${row.pilot.number}',
     ].join(' · ');
     return Padding(
-      padding: const EdgeInsets.only(top: 10),
+      padding: EdgeInsets.only(top: _cellTop),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1098,22 +1207,30 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final dirty = d.isDirty;
     final saved = widget.row.result;
     final editable = !_readOnly && !widget.save.isBusy;
+    // The score, penalty and indicator cells carry their own label wherever
+    // there is no column heading over them (medium second line, compact); the
+    // entry fields only in the compact card.
     final labels = widget.mode != ScoreGridMode.wide;
+    final fieldLabels = widget.mode == ScoreGridMode.compact;
     final rawValue = dirty ? widget.preview : saved?.rawPoints;
     final groupValue = dirty ? null : saved?.groupScore;
     String number(double? v) => v == null ? '–' : v.toStringAsFixed(1);
 
     final lane = _laneCell(context);
     final pilot = _pilotCell(context);
-    final time = _timeCell(context, labels, editable);
-    final height = _heightCell(context, labels, editable);
-    final land = _landingCell(context, labels, editable);
+    final time = _timeCell(context, fieldLabels, editable);
+    final height = _heightCell(context, fieldLabels, editable);
+    final land = _landingCell(context, fieldLabels, editable);
     final raw = _numberCell(
       context,
       'Raw score',
       labels,
       number(rawValue),
       dirty,
+      // A partly typed row has no raw score yet.
+      caption: dirty && rawValue == null && !d.isBlank && !_readOnly
+          ? AppLocalizations.of(context).scoreIncomplete
+          : null,
     );
     final grp = _numberCell(
       context,
@@ -1162,50 +1279,67 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           SizedBox(width: ScoreGridColumns.menu, child: menu),
         ],
       ),
+      // Two lines per pilot (the design's medium sheet): the pilot, time,
+      // height and landing on the first; the score, penalty, indicator and
+      // status cells on the second. The right block has the same width on
+      // both lines, so the second line's three score cells share the pilot's
+      // width equally.
       ScoreGridMode.medium => Column(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.grid.showId) ...[
-                SizedBox(width: 44, child: lane),
+                SizedBox(width: MediumColumns.lane, child: lane),
                 gap,
               ],
-              Expanded(flex: 2, child: pilot),
+              Expanded(child: pilot),
               gap,
-              Expanded(flex: 2, child: stat),
+              SizedBox(width: widget.medium.time, child: time),
               gap,
-              SizedBox(width: 44, child: menu),
+              SizedBox(width: widget.medium.height, child: height),
+              gap,
+              SizedBox(width: widget.medium.land, child: land),
+              gap,
+              SizedBox(width: MediumColumns.menu, child: menu),
             ],
           ),
-          vgap,
+          const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (widget.grid.showId) ...[const SizedBox(width: 44), gap],
-              Expanded(child: time),
+              if (widget.grid.showId) ...[
+                const SizedBox(width: MediumColumns.lane),
+                gap,
+              ],
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: raw),
+                    gap,
+                    Expanded(child: grp),
+                    gap,
+                    Expanded(child: pen),
+                  ],
+                ),
+              ),
               gap,
-              Expanded(child: height),
+              SizedBox(
+                width:
+                    widget.medium.time +
+                    ScoreGridColumns.gap +
+                    widget.medium.height,
+                child: ind,
+              ),
               gap,
-              Expanded(flex: 2, child: land),
-              gap,
-              const SizedBox(width: 44),
-            ],
-          ),
-          vgap,
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (widget.grid.showId) ...[const SizedBox(width: 44), gap],
-              Expanded(child: raw),
-              gap,
-              Expanded(child: grp),
-              gap,
-              Expanded(child: pen),
-              gap,
-              Expanded(child: ind),
-              gap,
-              const SizedBox(width: 44),
+              SizedBox(
+                width:
+                    widget.medium.land +
+                    ScoreGridColumns.gap +
+                    MediumColumns.menu,
+                child: stat,
+              ),
             ],
           ),
         ],
@@ -1266,9 +1400,9 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           onTap: widget.actions.onActivate,
           child: Container(
             key: ValueKey('score-row-${widget.row.id.value}'),
-            padding: const EdgeInsets.symmetric(
+            padding: EdgeInsets.symmetric(
               horizontal: ScoreGridColumns.rowPadding,
-              vertical: 6,
+              vertical: widget.mode == ScoreGridMode.medium ? 10 : 6,
             ),
             decoration: BoxDecoration(
               // The whole row, band included, is the highlighted block.

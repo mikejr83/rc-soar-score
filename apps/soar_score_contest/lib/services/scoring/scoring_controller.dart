@@ -458,12 +458,21 @@ class ScoringController extends ChangeNotifier {
 
   /// Takes a stored entry into the page: the slot, the contest and the row's
   /// draft and save state.
-  void _applySaved(ScoringRow row, ScoreEntryResult result) {
+  ///
+  /// [authority] is who entered the stored values: the director for an entry
+  /// of their own (the default), the pilot's or helper's for an adoption of a
+  /// submission (see [_sourceOf]).
+  void _applySaved(
+    ScoringRow row,
+    ScoreEntryResult result, {
+    Authority authority = Authority.director,
+  }) {
     _savedEpoch++;
     _mutationIds.remove(row.id);
     final slot = ScoreSlot(
       placeholder: result.placeholder,
       officialScore: result.officialScore,
+      officialAttemptAuthority: authority,
     );
     data = data!.withSlot(slot).withContest(result.contest);
     _slotApplied(row.id);
@@ -473,6 +482,13 @@ class ScoringController extends ChangeNotifier {
     // The row no longer removes a penalty, so its reason is done with.
     _clearRemovalReason(row.id);
   }
+
+  /// The authority of the values [row] holds before an adoption: the waiting
+  /// submission's, else the official score's own.
+  Authority _sourceOf(ScoringRow row) =>
+      row.slot?.pendingAttempt?.authority ??
+      row.slot?.officialAttemptAuthority ??
+      Authority.participant;
 
   /// Shows [queued] on [row]: the pilot's entry and the score stay as they
   /// were, and the slot holds the adoption waiting for the service.
@@ -487,6 +503,7 @@ class ScoringController extends ChangeNotifier {
         officialScore: slot.officialScore,
         pendingAttempt: slot.pendingAttempt,
         pendingPromotion: queued,
+        officialAttemptAuthority: slot.officialAttemptAuthority,
       ),
     );
     _slotApplied(row.id);
@@ -1026,7 +1043,7 @@ class ScoringController extends ChangeNotifier {
         if (_syncReads != readsBefore) await _reconcile([row]);
         return true;
       }
-      _applySaved(row, adopted.entry);
+      _applySaved(row, adopted.entry, authority: _sourceOf(row));
       recalculationWarning = adopted.entry.recalculationWarning;
       notifyListeners();
       await _loadResults();
@@ -1195,7 +1212,7 @@ class ScoringController extends ChangeNotifier {
           final outcome = byId[row.id];
           final promotion = outcome?.promotion;
           if (promotion != null) {
-            _applySaved(row, promotion.entry);
+            _applySaved(row, promotion.entry, authority: _sourceOf(row));
             promotion.replayed ? replayed++ : adopted++;
           } else if (outcome?.isQueued ?? false) {
             // Waiting for the service: show the adoption from its receipt.

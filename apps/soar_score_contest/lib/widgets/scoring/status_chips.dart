@@ -25,7 +25,10 @@ class StatusChip extends StatelessWidget {
   /// Draws an outline only, for a state that has no value yet.
   final bool dashed;
 
-  /// A small outlined chip for flags and indicators.
+  /// A small chip for flags and indicators (`Scoring Screen.dc.html`: 22 px
+  /// tall, 11 px radius, 12 px text, 14 px icon). Its column is wide enough
+  /// for the label at the default text size; a larger text size wraps the
+  /// label and the chip grows taller instead of cutting it off.
   final bool dense;
 
   @override
@@ -39,11 +42,13 @@ class StatusChip extends StatelessWidget {
           : const EdgeInsets.fromLTRB(6, 2, 10, 2),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(dense ? 6 : 8),
-        border: Border.all(
-          color: background == null ? scheme.outline : Colors.transparent,
-          width: 1,
-        ),
+        borderRadius: BorderRadius.circular(dense ? 11 : 8),
+        border: dense && background != null
+            ? null
+            : Border.all(
+                color: background == null ? scheme.outline : Colors.transparent,
+                width: 1,
+              ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -53,9 +58,16 @@ class StatusChip extends StatelessWidget {
           Flexible(
             child: Text(
               label,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelLarge
-                  ?.copyWith(color: fg, fontSize: dense ? 12 : 13),
+              overflow: dense ? null : TextOverflow.ellipsis,
+              style: dense
+                  ? Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: fg,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      height: 1.3,
+                    )
+                  : Theme.of(context).textTheme.labelLarge
+                        ?.copyWith(color: fg, fontSize: 13),
             ),
           ),
         ],

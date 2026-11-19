@@ -22,7 +22,8 @@ void main() {
 
     expect(server.promoteRequests, 1);
     expect(server.entries, isEmpty);
-    expect(find.text('Pilot entry'), findsNothing);
+    // Where the score came from is still true once it is official.
+    expect(find.text('Pilot entry'), findsOneWidget);
     expect(find.text('Mark official'), findsNothing);
   });
 
@@ -38,11 +39,12 @@ void main() {
     await tester.enterText(_key('score-height-${first.value}'), '99');
     await tester.pumpAndSettle();
 
-    final button = tester.widget<OutlinedButton>(
+    final button = tester.widget<TextButton>(
       _key('score-mark-official-${first.value}'),
     );
     expect(button.onPressed, isNull);
-    expect(find.text('Save or revert your edits first.'), findsOneWidget);
+    expect(find.byTooltip('Save or revert your edits first.'), findsOneWidget);
+    expect(find.text('Save or revert your edits first.'), findsNothing);
   });
 
   testWidgets('a busy server shows Retry, which asks again', (tester) async {
@@ -62,7 +64,7 @@ void main() {
 
     expect(server.entries, isEmpty);
     expect(_key('score-mark-official-failed'), findsNothing);
-    expect(find.text('Pilot entry'), findsNothing);
+    expect(find.text('Mark official'), findsNothing);
   });
 
   testWidgets('Mark all marks the valid rows at once and says what it left', (
@@ -79,7 +81,7 @@ void main() {
 
     expect(server.promoteRequests, 1);
     expect(find.text('Marked 2 rows official.'), findsOneWidget);
-    expect(find.text('Pilot entry'), findsNothing);
+    expect(find.text('Pilot entry'), findsNWidgets(2));
     // Nothing waits any more, so the group action is gone.
     expect(_key('score-mark-all-official'), findsNothing);
   });
@@ -128,11 +130,12 @@ void main() {
       ..seedPendingSubmission(first, _flight);
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
-    final button = tester.widget<OutlinedButton>(
+    final button = tester.widget<TextButton>(
       _key('score-mark-official-${first.value}'),
     );
     expect(button.onPressed, isNull);
-    expect(find.text('Entry is closed for this row.'), findsOneWidget);
+    expect(find.byTooltip('Entry is closed for this row.'), findsOneWidget);
+    expect(find.text('Entry is closed for this row.'), findsNothing);
   });
 
   testWidgets('a queued Mark official shows as waiting and blocks a repeat', (
@@ -156,13 +159,17 @@ void main() {
     );
     // The row is not official; it says the adoption waits.
     expect(find.text('Mark official is queued'), findsOneWidget);
-    final button = tester.widget<OutlinedButton>(
+    final button = tester.widget<TextButton>(
       _key('score-mark-official-${first.value}'),
     );
     expect(button.onPressed, isNull);
     expect(
-      find.text('Queued; the service decides it when this device syncs.'),
+      find.byTooltip('Queued; the service decides it when this device syncs.'),
       findsOneWidget,
+    );
+    expect(
+      find.text('Queued; the service decides it when this device syncs.'),
+      findsNothing,
     );
     expect(find.text('Pilot entry'), findsOneWidget);
   });
@@ -208,7 +215,7 @@ void main() {
       find.textContaining('is queued and will be reviewed'),
       findsOneWidget,
     );
-    final button = tester.widget<OutlinedButton>(
+    final button = tester.widget<TextButton>(
       _key('score-mark-official-${first.value}'),
     );
     expect(button.onPressed, isNull);

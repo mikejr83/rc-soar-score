@@ -4160,7 +4160,7 @@ abstract class AppLocalizations {
   /// **'Participants can’t be removed from this contest now.'**
   String get participantRemoveUnavailable;
 
-  /// Chip on a score row whose values a pilot or helper submitted and the director has not saved yet.
+  /// Indicator chip on a score row whose values a pilot or helper entered, whether or not the director has made them official.
   ///
   /// In en, this message translates to:
   /// **'Pilot entry'**
@@ -4169,8 +4169,38 @@ abstract class AppLocalizations {
   /// Tooltip of the Pilot entry chip.
   ///
   /// In en, this message translates to:
-  /// **'A pilot or helper submitted values. The submission is kept in history.'**
+  /// **'Entered by a pilot or helper.'**
   String get scorePilotEntryTooltip;
+
+  /// Tooltip of a Raw or Group score that is a preview of typed values not yet saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview. Saved when you save the row.'**
+  String get scorePreviewTooltip;
+
+  /// Short note under the Raw score of a row that is only partly entered, so no score can be shown yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete'**
+  String get scoreIncomplete;
+
+  /// Red line under the status chip of a row the director left with a mistake that blocks saving it.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix to save'**
+  String get scoreFixToSave;
+
+  /// Indicator chip on a score row whose review request waits for the director. Hidden until review decisions exist.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get scoreReviewChip;
+
+  /// Tooltip of the Review chip.
+  ///
+  /// In en, this message translates to:
+  /// **'A review request is pending. The review panel comes in a later release.'**
+  String get scoreReviewTooltip;
 
   /// Name of the contest setting that chooses when submitted scores become official: the wizard option, its summary line and the Configuration page row.
   ///

@@ -424,7 +424,10 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await tapVisible(tester, _key('score-row-${owen.id.value}'));
       await pumpUntilFound(tester, _key('cumulative-penalty'));
       await enterIn(tester, _key('cumulative-penalty'), '0');
-      await pumpUntilFound(tester, find.text('Applied, then removed.'));
+      await pumpUntilFound(
+        tester,
+        find.text('Removed. Removing is recorded as an official correction.'),
+      );
       await tapVisible(tester, _key('score-save-${owen.id.value}'));
       await pumpUntilFound(tester, _key('penalty-removal-dialog'));
       await enterIn(tester, _key('penalty-removal-reason'), rowReason);
@@ -444,7 +447,10 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await tapVisible(tester, _key('score-row-${priya.id.value}'));
       await pumpUntilFound(tester, _key('cumulative-penalty'));
       await enterIn(tester, _key('cumulative-penalty'), '0');
-      await pumpUntilFound(tester, find.text('Applied, then removed.'));
+      await pumpUntilFound(
+        tester,
+        find.text('Removed. Removing is recorded as an official correction.'),
+      );
       await tapVisible(tester, _key('score-save-all'));
       await pumpUntilFound(tester, _key('penalty-removal-dialog'));
       // One pending removal asks about that pilot, not a count.
@@ -497,16 +503,21 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
   // which only the web run's E2E server has; the Windows build's embedded
   // server gets one by sync, which this signed-out journey cannot show.
   await journey.step(
-    'Round 3: a pilot\'s own entry shows as Pilot entry until the director saves',
+    'Round 3: a pilot\'s own entry shows as Pilot entry until the director types over it',
     () => inContest(() async {
       // Tess retires in the next step, and the draw decides who the group
-      // Save above took, so the first pilot without a score submits.
+      // Save above took, so the first pilot without a score submits. The
+      // pilots of group 1, where that Save was, go first: the later steps
+      // need a group with three open rows, so the other group is left alone.
       final pilot = await submitAsPilot(
         contestName: data.contestName,
-        candidates: [
-          for (final name in data.pilotNames)
-            if (name != 'Tess Valdez') name,
-        ],
+        candidates: await pilotsStartingIn(
+          tester,
+          data,
+          3,
+          1,
+          skip: {'Tess Valdez'},
+        ),
         round: 3,
         timeFlown: 480,
       );
@@ -520,7 +531,8 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       expect(row.hasPendingSubmission, isTrue);
       expect(find.text('Pilot entry'), findsOneWidget);
 
-      // The director checks the values and saves: the chip goes.
+      // The director checks the values and saves their own: the director is
+      // then the source, so the chip goes.
       await tapVisible(tester, _key('score-row-${row.id.value}'));
       final time = fieldWithKey('score-time-${row.id.value}');
       await pumpUntilFound(tester, time);
@@ -546,10 +558,13 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
     () => inContest(() async {
       final pilot = await submitAsPilot(
         contestName: data.contestName,
-        candidates: [
-          for (final name in data.pilotNames)
-            if (name != 'Tess Valdez') name,
-        ],
+        candidates: await pilotsStartingIn(
+          tester,
+          data,
+          3,
+          1,
+          skip: {'Tess Valdez'},
+        ),
         round: 3,
         timeFlown: 470,
       );
@@ -565,15 +580,16 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       final height = fieldWithKey('score-height-${row.id.value}');
       await pumpUntilFound(tester, height);
       await enterIn(tester, height, '99');
+      // The reason it is off is the button's tooltip, not a line of text.
       await pumpUntilFound(
         tester,
-        find.text('Save or revert your edits first.'),
+        find.byTooltip('Save or revert your edits first.'),
       );
-      expect(tester.widget<OutlinedButton>(mark).onPressed, isNull);
+      expect(tester.widget<TextButton>(mark).onPressed, isNull);
       await tapVisible(tester, _key('score-revert-${row.id.value}'));
       await pumpUntilGone(
         tester,
-        find.text('Save or revert your edits first.'),
+        find.byTooltip('Save or revert your edits first.'),
       );
 
       await tapVisible(tester, mark);
@@ -582,6 +598,13 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       expect(saved, isNotNull);
       expect(saved!.hasPendingSubmission, isFalse);
       expect(saved.status, RowStatus.official);
+      // Where the score came from is still true once it is official, so the
+      // Pilot entry indicator stays on the row.
+      expect(saved.isPilotEntry, isTrue);
+      expect(
+        _key('score-indicator-pilot-entry-${row.id.value}'),
+        findsOneWidget,
+      );
     }),
     webOnly: true,
   );
@@ -605,9 +628,11 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       // rows is used (the next steps need three).
       var group = 0;
       var inGroup = <String>[];
+      final seen = <String>[];
       for (var g = 1; g <= data.groupsPerRound; g++) {
         await openRoundGroup(tester, 3, g);
         final open = openRowNames(tester, skip: {'Tess Valdez'});
+        seen.add('group $g: built ${builtRowNames(tester)}, open $open');
         if (open.length > inGroup.length) {
           inGroup = open;
           group = g;
@@ -616,7 +641,11 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await openRoundGroup(tester, 3, group);
       // Mark official, Mark all and the review need a plain, a second plain
       // and a reviewed entry in one group.
-      expect(inGroup.length, greaterThanOrEqualTo(3), reason: 'rows to fill');
+      expect(
+        inGroup.length,
+        greaterThanOrEqualTo(3),
+        reason: 'rows to fill; ${seen.join(' | ')}',
+      );
       final pilots = waiting = await submitAsPilots(
         contestName: data.contestName,
         candidates: inGroup,
@@ -682,15 +711,16 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       final height = fieldWithKey('score-height-${row.id.value}');
       await pumpUntilFound(tester, height);
       await enterIn(tester, height, '99');
+      // The reason it is off is the button's tooltip, not a line of text.
       await pumpUntilFound(
         tester,
-        find.text('Save or revert your edits first.'),
+        find.byTooltip('Save or revert your edits first.'),
       );
-      expect(tester.widget<OutlinedButton>(mark).onPressed, isNull);
+      expect(tester.widget<TextButton>(mark).onPressed, isNull);
       await tapVisible(tester, _key('score-revert-${row.id.value}'));
       await pumpUntilGone(
         tester,
-        find.text('Save or revert your edits first.'),
+        find.byTooltip('Save or revert your edits first.'),
       );
 
       await tapVisible(tester, mark);
@@ -864,6 +894,11 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
         expect(row.isAutomaticUnconfirmed, isTrue, reason: name);
         expect(find.text('Accepted automatically'), findsWidgets);
         expect(_key('score-confirm-automatic-${row.id.value}'), findsOneWidget);
+        // The submission it came from is still the row's source.
+        expect(
+          _key('score-indicator-pilot-entry-${row.id.value}'),
+          findsOneWidget,
+        );
       }
 
       // The history names the system, not a director.

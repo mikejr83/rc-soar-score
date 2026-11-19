@@ -516,6 +516,10 @@ void _tests(Backend backend) {
             .singleWhere((s) => s.placeholder.id == placeholder.id);
         expect(after.officialScore, isNotNull);
         expect(after.pendingAttempt, isNull);
+        // The director's own attempt was adopted, so the row's source is
+        // the director, not the pilot whose submission it replaced.
+        expect(after.officialAttemptAuthority, core.Authority.director);
+        expect(listed.officialAttemptAuthority, isNull);
       });
 
       test('refuses an unknown slot', () async {

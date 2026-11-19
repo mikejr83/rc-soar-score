@@ -29,26 +29,113 @@ Future<void> _activate(WidgetTester tester, int round, int pilot) async {
 }
 
 void main() {
-  for (final (name, size) in [
-    ('medium', const Size(700, 1400)),
-    ('compact', const Size(400, 1400)),
-  ]) {
-    testWidgets('lays out at $name width without overflow', (tester) async {
+  testWidgets('compact width lays out without overflow', (tester) async {
+    await pumpScoringPage(
+      tester,
+      ScoringServer(),
+      size: const Size(400, 1400),
+      round: 1,
+      group: 1,
+    );
+    await tester.tap(_row(1, 1));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('score-grid-header')), findsNothing);
+    expect(find.text('Ann Lee'), findsOneWidget);
+    expect(find.text('Time flown (m:ss)'), findsWidgets);
+  });
+
+  group('medium width (an iPad)', () {
+    for (final width in [760.0, 900.0, 1100.0]) {
+      testWidgets('two lines per pilot under a heading at $width', (
+        tester,
+      ) async {
+        await pumpScoringPage(
+          tester,
+          ScoringServer(),
+          size: Size(width, 1400),
+          round: 1,
+          group: 1,
+        );
+        await tester.tap(_row(1, 1));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+
+        // The heading covers the first line only.
+        expect(find.byKey(const ValueKey('score-grid-header')), findsOneWidget);
+        expect(find.text('Pilot'), findsOneWidget);
+        expect(find.text('Time flown'), findsOneWidget);
+        expect(find.text('Launch height'), findsOneWidget);
+        expect(find.text('Landing · flags'), findsOneWidget);
+        expect(find.text('Raw score'), findsWidgets);
+        expect(find.text('Indicators'), findsWidgets);
+        // The entry fields have no label of their own under a heading.
+        expect(find.text('Time flown (m:ss)'), findsNothing);
+
+        // The heading and the first line share their columns.
+        final head = tester.getTopLeft(find.text('Time flown'));
+        final field = tester.getTopLeft(_time(1, 1));
+        expect(field.dx, closeTo(head.dx, 12));
+
+        // The second line sits under the first and starts at the pilot.
+        final pilot = tester.getTopLeft(find.text('Ann Lee').first);
+        final raw = tester.getTopLeft(find.text('Raw score').first);
+        expect(raw.dy, greaterThan(tester.getBottomLeft(_time(1, 1)).dy));
+        expect(raw.dx, closeTo(pilot.dx - 36, 40));
+      });
+    }
+
+    testWidgets('a portrait tablet keeps two lines under the shell', (
+      tester,
+    ) async {
+      // 768 px less the rail and the page padding leaves about 663 px.
       await pumpScoringPage(
         tester,
         ScoringServer(),
-        size: size,
+        size: const Size(768, 1024),
+        railWidth: 73,
         round: 1,
         group: 1,
       );
       await tester.tap(_row(1, 1));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(find.byKey(const ValueKey('score-grid-header')), findsNothing);
-      expect(find.text('Ann Lee'), findsOneWidget);
-      expect(find.text('Time flown (m:ss)'), findsWidgets);
+      expect(find.byKey(const ValueKey('score-grid-header')), findsOneWidget);
+      expect(find.text('Time flown (m:ss)'), findsNothing);
+      final time = tester.getBottomLeft(_time(1, 1));
+      final rawLabel = tester.getTopLeft(find.text('Raw score').first);
+      expect(rawLabel.dy, greaterThan(time.dy));
+      // The three score cells fit side by side with their labels.
+      final group = tester.getTopLeft(find.text('Group score').first).dx;
+      final penalties = tester.getTopLeft(find.text('Penalties').first).dx;
+      expect(group, greaterThan(rawLabel.dx + 40));
+      expect(penalties, greaterThan(group + 40));
     });
-  }
+
+    testWidgets('the entry fields are 44 px tall on a desktop theme', (
+      tester,
+    ) async {
+      // Desktop platforms use compact density, which shrinks a field by 8 px.
+      await pumpScoringPage(
+        tester,
+        ScoringServer(),
+        size: const Size(900, 1400),
+        round: 1,
+        group: 1,
+      );
+      final id = scoringAssignmentId(1, 1).value;
+      for (final name in ['time', 'height', 'landing']) {
+        final field = find.byKey(ValueKey('score-$name-$id'));
+        // The border is drawn at the field's height, not just its text's.
+        final border = find.descendant(
+          of: field,
+          matching: find.byType(InputDecorator),
+        );
+        expect(tester.getSize(field).height, 44, reason: name);
+        expect(tester.getSize(border).height, 44, reason: name);
+      }
+    }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+  });
 
   testWidgets('wide width shows one heading over the columns', (tester) async {
     await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);

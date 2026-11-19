@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../enums/authority.dart';
 import '../enums/score_placeholder_state.dart';
 import '../models/id.dart';
 import '../models/matrix/matrix_assignment.dart';
@@ -17,6 +18,7 @@ class ScoreSlot extends Equatable {
     this.officialScore,
     this.pendingAttempt,
     this.pendingPromotion,
+    this.officialAttemptAuthority,
   });
 
   factory ScoreSlot.fromJson(Map<String, Object?> json) {
@@ -32,6 +34,13 @@ class ScoreSlot extends Equatable {
       pendingPromotion: promotion == null
           ? null
           : PendingPromotion.fromJson(promotion),
+      officialAttemptAuthority: switch (json['official_attempt_authority']) {
+        final String text => Authority.values.firstWhere(
+          (a) => _authorityText(a) == text,
+          orElse: () => Authority.director,
+        ),
+        _ => null,
+      },
     );
   }
 
@@ -49,11 +58,21 @@ class ScoreSlot extends Equatable {
   /// adoption: the slot is not official yet, and results do not count it.
   final PendingPromotion? pendingPromotion;
 
+  /// The authority the current official score's attempt was entered under:
+  /// a participant or helper when the score came from a submission, the
+  /// director when they entered it themselves. Null while there is no
+  /// official score. It says who first entered the values, whoever made them
+  /// official (see `OfficialScore.selectionOrigin` for that).
+  final Authority? officialAttemptAuthority;
+
   Map<String, Object?> toJson() => {
     'placeholder': placeholder.toJson(),
     'official_score': officialScore?.toJson(),
     'pending_attempt': pendingAttempt?.toJson(),
     'pending_promotion': pendingPromotion?.toJson(),
+    'official_attempt_authority': officialAttemptAuthority == null
+        ? null
+        : _authorityText(officialAttemptAuthority!),
   };
 
   @override
@@ -62,8 +81,18 @@ class ScoreSlot extends Equatable {
     officialScore,
     pendingAttempt,
     pendingPromotion,
+    officialAttemptAuthority,
   ];
 }
+
+/// The serialized text of [authority], as in `plan/data-model/enumerations.md`.
+String _authorityText(Authority authority) => switch (authority) {
+  Authority.director => 'Director',
+  Authority.participant => 'Participant',
+  Authority.helper => 'Helper',
+  Authority.system => 'System',
+  Authority.administrator => 'Administrator',
+};
 
 /// How far a round has been scored.
 class RoundProgress extends Equatable {

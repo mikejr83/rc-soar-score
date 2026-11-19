@@ -5,6 +5,7 @@ import 'package:soar_score_contest/widgets/scoring/score_row_tile.dart';
 
 import '../support/interact.dart';
 import '../support/launch_app.dart';
+import '../support/open_demo_contest.dart';
 import '../support/pump_until_gone.dart';
 import 'journey.dart';
 
@@ -77,6 +78,39 @@ List<String> openRowNames(WidgetTester tester, {Set<String> skip = const {}}) =>
             !skip.contains(tile.row.pilot.name))
           tile.row.pilot.name,
     ];
+
+/// Every pilot with a row built now, with its status, to say what a step saw.
+List<String> builtRowNames(WidgetTester tester) => [
+  for (final tile in _built(tester))
+    '${tile.row.pilot.name} (${tile.row.status.name})',
+];
+
+/// The pilots of [round]'s [group] first, then the rest of the roster, none of
+/// [skip]. A step that uses up unscored pilots takes them from this group
+/// first, so a group the draw put elsewhere keeps its open rows for the steps
+/// that need several at once. It ends back in the contest's workspace.
+Future<List<String>> pilotsStartingIn(
+  WidgetTester tester,
+  JourneyContext data,
+  int round,
+  int group, {
+  Set<String> skip = const {},
+}) async {
+  await openRoundGroup(tester, round, group);
+  final inGroup = [
+    for (final tile in _built(tester))
+      if (!skip.contains(tile.row.pilot.name)) tile.row.pilot.name,
+  ];
+  // Leave the page so the step that submits next reads the group fresh: an
+  // open page would not know about the submission.
+  await goToMainPage(tester);
+  await openContest(tester, data.contestName);
+  return [
+    ...inGroup,
+    for (final name in data.pilotNames)
+      if (!inGroup.contains(name) && !skip.contains(name)) name,
+  ];
+}
 
 /// Any row of the open group (the tree does not list them in screen order).
 ScoringRow anyRow(WidgetTester tester) => _built(tester).first.row;
@@ -227,7 +261,7 @@ Future<void> _enterFlight(
     await enterIn(tester, _key('cumulative-penalty'), '$penalty');
     await pumpUntilFound(
       tester,
-      find.text('−$penalty pts from the contest total.'),
+      find.text('Applied: −$penalty points from the contest total.'),
     );
   }
 }

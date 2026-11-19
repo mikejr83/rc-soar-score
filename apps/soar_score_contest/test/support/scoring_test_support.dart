@@ -130,6 +130,7 @@ class ScoringServer {
     );
     final official = _official(assignmentId, components, revision);
     _score[assignmentId] = official;
+    _authority[assignmentId] = Authority.director;
     _record(
       assignmentId,
       components,
@@ -158,12 +159,24 @@ class ScoringServer {
   /// The history of each slot, oldest first.
   final Map<Id, List<ScoreHistoryEntry>> _history = {};
 
+  /// The authority the attempt behind each official score was entered under,
+  /// as the server reports it on the slot. Missing means a director's entry.
+  final Map<Id, Authority> _authority = {};
+
   /// Makes every history read fail with this status when not 200.
   int historyStatus = 200;
 
   /// Pre-fills an official score for one slot.
-  void seedScore(Id assignmentId, Map<String, Object?> components) {
+  ///
+  /// [authority] is who entered the values: a director unless a pilot's
+  /// submission was adopted.
+  void seedScore(
+    Id assignmentId,
+    Map<String, Object?> components, {
+    Authority authority = Authority.director,
+  }) {
     _score[assignmentId] = _official(assignmentId, components, 1);
+    _authority[assignmentId] = authority;
     _record(assignmentId, components, 1, 'seeded');
   }
 
@@ -201,6 +214,7 @@ class ScoringServer {
   /// automatic, no official actor, review still open.
   void seedAutomaticScore(Id assignmentId, Map<String, Object?> components) {
     _automatic.add(assignmentId);
+    _authority[assignmentId] = Authority.participant;
     _score[assignmentId] = _official(
       assignmentId,
       components,
@@ -250,7 +264,11 @@ class ScoringServer {
     final pending = _pendingAttempt(assignmentId)!;
     _queued.remove(assignmentId);
     queuePromotions.remove(assignmentId);
-    seedScore(assignmentId, pending.rawComponents);
+    seedScore(
+      assignmentId,
+      pending.rawComponents,
+      authority: pending.authority,
+    );
   }
 
   /// While true, reading the score list fails (a server error).
@@ -278,7 +296,12 @@ class ScoringServer {
       'expected_score_revision': expectedRevision,
     });
     if (officialDuringPromote.remove(assignmentId)) {
-      seedScore(assignmentId, _pendingAttempt(assignmentId)!.rawComponents);
+      final pending = _pendingAttempt(assignmentId)!;
+      seedScore(
+        assignmentId,
+        pending.rawComponents,
+        authority: pending.authority,
+      );
     }
     final failure = promoteFailures[assignmentId];
     if (failure != null) {
@@ -344,6 +367,7 @@ class ScoringServer {
     }
     final components = Map<String, Object?>.from(pending.rawComponents);
     _score[assignmentId] = _official(assignmentId, components, revision + 1);
+    _authority[assignmentId] = pending.authority;
     _record(assignmentId, components, revision + 1, 'director_accepted');
     final result = ScoreEntryResult(
       officialScore: _score[assignmentId]!,
@@ -646,6 +670,11 @@ class ScoringServer {
               'official_score': _score[assignment.id]?.toJson(),
               'pending_attempt': _pendingAttempt(assignment.id)?.toJson(),
               'pending_promotion': _queued[assignment.id],
+              'official_attempt_authority': _score[assignment.id] == null
+                  ? null
+                  : _authorityText(
+                      _authority[assignment.id] ?? Authority.director,
+                    ),
             },
         ],
         'rounds': const <Object>[],
@@ -774,6 +803,13 @@ Future<void> pumpScoringPage(
   int? round,
   int? group,
   ContestScope? shell,
+
+  /// The width the shell's rail and its divider take from the page (the real
+  /// rail is 72 px plus a 1 px divider); 0 shows the page alone.
+  double railWidth = 0,
+
+  /// The text size choice as a multiplier (Extra large is 1.5).
+  double textScale = 1,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -795,12 +831,21 @@ Future<void> pumpScoringPage(
               group: int.tryParse(state.uri.queryParameters['group'] ?? ''),
             ),
           );
-          return shell == null
+          final framed = railWidth == 0
               ? page
+              : Row(
+                  children: [
+                    SizedBox(width: railWidth - 1),
+                    const VerticalDivider(width: 1, thickness: 1),
+                    Expanded(child: page),
+                  ],
+                );
+          return shell == null
+              ? framed
               : ContestScope(
                   contest: shell.contest,
                   reload: shell.reload,
-                  child: page,
+                  child: framed,
                 );
         },
       ),
@@ -819,6 +864,11 @@ Future<void> pumpScoringPage(
       ),
       child: MaterialApp.router(
         routerConfig: router,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
       ),
@@ -826,3 +876,7 @@ Future<void> pumpScoringPage(
   );
   await tester.pumpAndSettle();
 }
+
+/// The text an [Authority] serializes as (`plan/data-model/enumerations.md`).
+String _authorityText(Authority authority) =>
+    '${authority.name[0].toUpperCase()}${authority.name.substring(1)}';

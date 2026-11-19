@@ -35,6 +35,12 @@ class StubScoreAttemptRepository implements ScoreAttemptRepository {
   };
 
   @override
+  Future<Map<Id, ScoreAttempt>> findByIds(Iterable<Id> ids) async => {
+    for (final attempt in stored)
+      if (ids.contains(attempt.id)) attempt.id: attempt,
+  };
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not stubbed');
 }
