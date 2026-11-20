@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'participant_search.dart';
@@ -49,13 +50,15 @@ class ParticipantListPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final matches = [
       for (final profile in participants)
         if (matchesParticipantSearch(profile, search)) profile,
     ];
     final count = matches.length == participants.length
-        ? '${participants.length}'
-        : '${matches.length} of ${participants.length}';
+        ? l10n.participantsCount(participants.length)
+        : '${l10n.participantsCountOf(matches.length, participants.length)} '
+            '${l10n.participantsCount(participants.length)}';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -65,11 +68,11 @@ class ParticipantListPane extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text('Participants', style: theme.textTheme.titleLarge),
+              Text(l10n.participantsTitle, style: theme.textTheme.titleLarge),
               const SizedBox(width: 12),
               Flexible(
                 child: Text(
-                  '$count participants',
+                  count,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
@@ -83,18 +86,18 @@ class ParticipantListPane extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
           child: TextField(
             key: const ValueKey('participant-search'),
-            decoration: const InputDecoration(
-              prefixIcon: Icon(Icons.search),
-              hintText: 'Search by name, email, FAI number or national ID',
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.search),
+              hintText: l10n.participantsSearchHint,
             ),
             onChanged: onSearch,
           ),
         ),
         Expanded(
           child: matches.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.all(32),
-                  child: Text('No participants match.'),
+              ? Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Text(l10n.participantsNoMatch),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),

@@ -5566,4 +5566,95 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get landingOfflineNote =>
       'Offline contests stay on this device unless you publish them or sign in to enable synchronization.';
+
+  @override
+  String get participantsTitle => 'Participants';
+
+  @override
+  String participantsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String participantsCountOf(int shown, int total) {
+    return '$shown of $total';
+  }
+
+  @override
+  String get participantsSearchHint =>
+      'Search by name, email, FAI number or national ID';
+
+  @override
+  String get participantsNoMatch => 'No participants match.';
+
+  @override
+  String get participantsLoadFailed => 'Participants could not be loaded.';
+
+  @override
+  String get participantsLoading => 'Loading participants';
+
+  @override
+  String get participantsEmpty => 'No participants yet.';
+
+  @override
+  String get participantsDeleteTitle => 'Delete participant?';
+
+  @override
+  String participantsDeleteContent(String name) {
+    return '$name will be removed from your participant list.';
+  }
+
+  @override
+  String get participantsDeleteCancel => 'Cancel';
+
+  @override
+  String get participantsDeleteConfirm => 'Delete';
+
+  @override
+  String get participantsBackToParticipants => 'Back to participants';
+
+  @override
+  String get participantsEdit => 'Edit';
+
+  @override
+  String participantsDeleteTooltip(String name) {
+    return 'Delete $name';
+  }
+
+  @override
+  String get participantsSectionIdentification => 'Identification';
+
+  @override
+  String get participantsFaiNumber => 'FAI number';
+
+  @override
+  String get participantsNationalOrgId => 'National organization ID';
+
+  @override
+  String get participantsClub => 'Club';
+
+  @override
+  String get participantsSectionLocation => 'Location';
+
+  @override
+  String get participantsCity => 'City';
+
+  @override
+  String get participantsState => 'State/province';
+
+  @override
+  String get participantsCountry => 'Country';
+
+  @override
+  String get participantsSectionContact => 'Contact';
+
+  @override
+  String get participantsEmailPrivate =>
+      'Email (private, used for matching only)';
 }
