@@ -218,6 +218,8 @@ class ScoringController extends ChangeNotifier {
           RowSaveKind.stale,
           message: 'This row changed since you opened it.',
         );
+        // Revert goes to the newer values, so it compares to them.
+        draft.retarget(_shown(row));
       } else {
         // Same official score: a pilot may have replaced the waiting
         // submission. What was typed stays; Revert and the prefill follow
@@ -1443,6 +1445,7 @@ class ScoringController extends ChangeNotifier {
       final versions = {for (final id in ids) id: _slotVersion(id)};
       final fresh = await client.scores(contestId);
       final applied = <Id>{};
+      final revisions = {for (final row in stale) row.id: row.baseRevision};
       for (final slot in fresh.slots) {
         final id = slot.placeholder.assignmentId;
         if (!ids.contains(id)) continue;
@@ -1455,7 +1458,15 @@ class ScoringController extends ChangeNotifier {
         applied.add(id);
       }
       for (final row in rows) {
-        if (!applied.contains(row.id) || hasEdits(row)) continue;
+        if (!applied.contains(row.id)) continue;
+        if (hasEdits(row)) {
+          // Typed text stays. Under the same official score a pilot may have
+          // replaced the waiting submission, which Revert follows.
+          if (revisions[row.id] == row.baseRevision) {
+            _drafts[row.id]?.rebase(row.savedComponents, shown: _shown(row));
+          }
+          continue;
+        }
         _drafts[row.id]?.resetTo(row.savedComponents, shown: _shown(row));
       }
       return true;

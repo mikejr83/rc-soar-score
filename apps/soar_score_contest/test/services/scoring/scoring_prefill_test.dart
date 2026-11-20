@@ -180,6 +180,12 @@ void main() {
     expect(c.draftOf(_row(c, 1)).heightText, '99');
     expect(c.saveOf(first).kind, RowSaveKind.stale);
     expect(c.theirsOf(first), h130);
+
+    // Revert goes to the newer values, so typing the old value is an edit.
+    c.draftOf(_row(c, 1)).setHeight('120');
+    expect(c.draftOf(_row(c, 1)).canRevert, isTrue);
+    c.draftOf(_row(c, 1)).setHeight('130');
+    expect(c.draftOf(_row(c, 1)).canRevert, isFalse);
   });
 
   test('an untouched pilot prefill is not unsaved', () async {

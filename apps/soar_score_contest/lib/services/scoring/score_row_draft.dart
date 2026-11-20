@@ -128,6 +128,19 @@ class ScoreRowDraft extends ChangeNotifier {
   void rebase(Map<String, Object?> saved, {Map<String, Object?>? shown}) {
     _baseline = Map.of(saved);
     _prefill = null;
+    _retarget(saved, shown);
+    notifyListeners();
+  }
+
+  /// Makes [shown] what Revert restores and compares to, keeping the typed
+  /// fields, the saved baseline and a zero confirmation. For a row whose
+  /// saved score moved on and is resolved with Keep mine or Take theirs.
+  void retarget(Map<String, Object?> shown) {
+    _retarget(_baseline, shown);
+    notifyListeners();
+  }
+
+  void _retarget(Map<String, Object?> saved, Map<String, Object?>? shown) {
     final typed = _TypedFields(this);
     _load(shown ?? saved);
     // A refreshed pilot submission stays recognizable, so typing exactly its
@@ -136,7 +149,6 @@ class ScoreRowDraft extends ChangeNotifier {
     final starting = _loadedFields;
     typed.restore(this);
     _loadedFields = starting;
-    notifyListeners();
   }
 
   // Parsed values.
