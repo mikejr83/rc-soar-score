@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+import '../../public_site.dart';
+import '../settings/about_setting.dart' show ExternalLinkOpener, openInBrowser;
+
 /// A button of a [PageStateView]: its label, what it does and an optional key.
 class PageStateAction {
   const PageStateAction({
@@ -50,7 +54,8 @@ class PageStateView extends StatelessWidget {
       body = null,
       primary = null,
       secondary = null,
-      action = null;
+      action = null,
+      supportOpener = openInBrowser;
 
   const PageStateView.empty({
     super.key,
@@ -59,7 +64,8 @@ class PageStateView extends StatelessWidget {
     this.primary,
     this.secondary,
     this.action,
-  }) : kind = PageStateKind.empty;
+  }) : kind = PageStateKind.empty,
+       supportOpener = openInBrowser;
 
   const PageStateView.unavailable({
     super.key,
@@ -67,6 +73,7 @@ class PageStateView extends StatelessWidget {
     this.body,
     this.primary,
     this.secondary,
+    this.supportOpener = openInBrowser,
   }) : kind = PageStateKind.unavailable,
        action = null;
 
@@ -76,6 +83,7 @@ class PageStateView extends StatelessWidget {
     this.body,
     this.primary,
     this.secondary,
+    this.supportOpener = openInBrowser,
   }) : kind = PageStateKind.authorization,
        action = null;
 
@@ -86,7 +94,8 @@ class PageStateView extends StatelessWidget {
     this.primary,
     this.secondary,
   }) : kind = PageStateKind.conflict,
-       action = null;
+       action = null,
+       supportOpener = openInBrowser;
 
   const PageStateView.notFound({
     super.key,
@@ -94,6 +103,7 @@ class PageStateView extends StatelessWidget {
     this.body,
     this.primary,
     this.secondary,
+    this.supportOpener = openInBrowser,
   }) : kind = PageStateKind.notFound,
        action = null;
 
@@ -111,6 +121,28 @@ class PageStateView extends StatelessWidget {
   /// action depends on state (such as `Create contest` or `Continue`).
   final Widget? action;
 
+  /// Opens the support page from the "Get support" link; replaced in tests.
+  final ExternalLinkOpener supportOpener;
+
+  /// The states where something went wrong and the user may be stuck.
+  bool get _offersSupport =>
+      kind == PageStateKind.unavailable ||
+      kind == PageStateKind.authorization ||
+      kind == PageStateKind.notFound;
+
+  Future<void> _openSupport(BuildContext context, AppLocalizations l10n) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    var opened = false;
+    try {
+      opened = await supportOpener(PublicSite.support);
+    } on Object {
+      opened = false;
+    }
+    if (!opened) {
+      messenger?.showSnackBar(SnackBar(content: Text(l10n.aboutLinkFailed)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -118,6 +150,11 @@ class PageStateView extends StatelessWidget {
     final primary = this.primary;
     final secondary = this.secondary;
     final body = this.body;
+    // A screen without the app's localizations (a bare test host) shows no
+    // support link rather than failing.
+    final l10n = _offersSupport
+        ? Localizations.of<AppLocalizations>(context, AppLocalizations)
+        : null;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -183,6 +220,14 @@ class PageStateView extends StatelessWidget {
                   ),
                 ],
                 ?action,
+                if (l10n != null) ...[
+                  const SizedBox(height: 8),
+                  TextButton(
+                    key: const ValueKey('page-state-support'),
+                    onPressed: () => _openSupport(context, l10n),
+                    child: Text(l10n.aboutSupport),
+                  ),
+                ],
               ],
             ),
           ),

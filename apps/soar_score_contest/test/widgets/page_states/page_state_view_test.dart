@@ -1,12 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/public_site.dart';
 import 'package:soar_score_contest/widgets/page_states/page_states.dart';
 
 Future<void> _pump(WidgetTester tester, Widget view) =>
     tester.pumpWidget(MaterialApp(home: Scaffold(body: view)));
 
+Future<void> _pumpLocalized(WidgetTester tester, Widget view) =>
+    tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: view),
+      ),
+    );
+
 void main() {
+  group('Get support', () {
+    final support = find.byKey(const ValueKey('page-state-support'));
+
+    testWidgets('error states offer it and it opens the support page', (
+      tester,
+    ) async {
+      final opened = <Uri>[];
+      Future<bool> opener(Uri uri) async {
+        opened.add(uri);
+        return true;
+      }
+
+      final views = <Widget>[
+        PageStateView.unavailable(title: 'T', supportOpener: opener),
+        PageStateView.authorization(title: 'T', supportOpener: opener),
+        PageStateView.notFound(title: 'T', supportOpener: opener),
+      ];
+      for (final view in views) {
+        await _pumpLocalized(tester, view);
+        expect(find.text('Get support'), findsOneWidget);
+        await tester.tap(support);
+        await tester.pumpAndSettle();
+      }
+      expect(opened, List.filled(3, PublicSite.support));
+    });
+
+    testWidgets('loading, empty and conflict states do not', (tester) async {
+      const views = <Widget>[
+        PageStateView.loading(label: 'T'),
+        PageStateView.empty(title: 'T'),
+        PageStateView.conflict(title: 'T'),
+      ];
+      for (final view in views) {
+        await _pumpLocalized(tester, view);
+        expect(support, findsNothing);
+      }
+    });
+
+    testWidgets('a link that cannot open says so', (tester) async {
+      await _pumpLocalized(
+        tester,
+        PageStateView.unavailable(
+          title: 'T',
+          supportOpener: (_) async => false,
+        ),
+      );
+      await tester.tap(support);
+      await tester.pumpAndSettle();
+      expect(
+        find.text(AppLocalizations.of(tester.element(support)).aboutLinkFailed),
+        findsOneWidget,
+      );
+    });
+  });
+
   testWidgets('loading shows a spinner and its label', (tester) async {
     await _pump(tester, const PageStateView.loading(label: 'Loading things'));
 
