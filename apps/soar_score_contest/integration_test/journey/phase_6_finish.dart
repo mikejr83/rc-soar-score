@@ -196,6 +196,7 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
       );
       await tapVisible(tester, _key('report-open-standings'));
       await pumpUntilFound(tester, find.text('Rank'));
+      expect(_key('To round:${data.rounds}'), findsOneWidget);
 
       // The heading, the columns and a column for each round.
       expect(find.textContaining('Overall Results - '), findsWidgets);

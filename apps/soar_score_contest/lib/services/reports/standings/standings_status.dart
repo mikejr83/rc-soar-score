@@ -22,9 +22,16 @@ class StandingsStatus {
       for (final entry in standing.missingByRound.entries)
         if (entry.key <= options.to) entry,
     ]..sort((a, b) => a.key.compareTo(b.key));
-    final unofficial = standing.unofficialByRound.entries
-        .where((entry) => entry.key <= options.to)
-        .fold<int>(0, (sum, entry) => sum + entry.value);
+    // A completed report can end before the last entered round when that
+    // round has only pending scores. Those still affect its status.
+    final through = facts.isCompleted ? facts.lastScoredRound : options.to;
+    final unofficialByRound = standing.unofficialByRound.entries.where(
+      (entry) => entry.key <= through,
+    );
+    final unofficial = unofficialByRound.fold<int>(
+      0,
+      (sum, entry) => sum + entry.value,
+    );
     final completedWithGaps =
         facts.isCompleted && missing.isNotEmpty && !results.isStale;
     if ((!results.isPreliminary || completedWithGaps) &&
@@ -43,7 +50,7 @@ class StandingsStatus {
       parts.add('${missing.length - 2} more rounds are missing scores');
     }
     final review = facts.inReviewByRound.entries
-        .where((entry) => entry.key <= options.to)
+        .where((entry) => entry.key <= through)
         .fold<int>(0, (sum, entry) => sum + entry.value.length);
     if (review > 0) {
       parts.add(
@@ -83,7 +90,9 @@ class StandingsStatus {
       action: ReportAction(
         'Open Scoring',
         ReportDestination.scoring,
-        round: missing.isEmpty ? null : missing.first.key,
+        round: missing.isNotEmpty
+            ? missing.first.key
+            : unofficialByRound.firstOrNull?.key,
       ),
     );
   }

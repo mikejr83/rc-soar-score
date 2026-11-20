@@ -14,6 +14,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../support/fake_report_launcher.dart';
 import '../support/matrix_test_support.dart';
 import '../support/next_step_widget_support.dart';
+import '../support/standings_fixtures.dart';
 import '../support/workspace_facts_support.dart';
 
 Map<(int, int), DateTime> _scored(int rounds) => {
@@ -213,11 +214,7 @@ void main() {
   ) async {
     await _pump(
       tester,
-      _server(
-        matrix: drawnMatrix(),
-        scored: _scored(2),
-        state: LifecycleState.completed,
-      ),
+      StandingsServer(StandingsFixture(), state: LifecycleState.completed),
     );
 
     expect(find.text('Completed · Results are final'), findsOneWidget);

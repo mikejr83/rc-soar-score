@@ -31,7 +31,7 @@ class ScoreExportOptions {
     final lastShown = facts.standingsRoundLimit(provisional: provisional);
     final from = int.tryParse(filters['from'] ?? '') ?? 1;
     final requestedTo =
-        int.tryParse(filters['to'] ?? '') ?? facts.lastScoredRound;
+        int.tryParse(filters['to'] ?? '') ?? facts.defaultStandingsRound;
     final ordinals = facts.roundOrdinals;
     final cap = requestedTo < lastShown ? requestedTo : lastShown;
     final to = ordinals.where((round) => round <= cap).fold(0, math.max);

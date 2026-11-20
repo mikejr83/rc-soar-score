@@ -135,17 +135,26 @@ Id placeholderOf(
 /// | 4     | 600.0   | 650.0   | 1,250 less 50    |
 class StandingsFixture {
   /// [reviewPilot] has the score of round 2 in review.
+  /// Set [trailingScoreOfficial] for a round 2 with only one entered flight.
   StandingsFixture({
     bool preliminary = false,
     int? reviewPilot,
     bool round2Cancelled = false,
+    bool? trailingScoreOfficial,
   }) : matrix = drawnMatrix(
          round2Status: round2Cancelled
              ? RoundStatus.cancelled
              : RoundStatus.open,
        ) {
-    final recorded = recordedScores(matrix);
-    scores = reviewPilot == null
+    final recorded = trailingScoreOfficial == null
+        ? recordedScores(matrix)
+        : scoresFor(matrix, {
+            for (var pilot = 1; pilot <= 4; pilot++) (1, pilot): at(pilot),
+            (2, 1): at(10),
+          });
+    scores = trailingScoreOfficial == false
+        ? _withPendingScore(recorded, placeholderOf(matrix, recorded, 1, 2))
+        : reviewPilot == null
         ? recorded
         : _inReview(matrix, recorded, reviewPilot, 2);
     Id slot(int pilot, int round) =>
@@ -167,13 +176,16 @@ class StandingsFixture {
         ordinal: 2,
         flights: [
           for (final e in round2.entries)
-            RoundFlightResult(
-              group: e.key == 1 || e.key == 3 ? 1 : 2,
-              result: flight(e.key, 2, e.value, placeholder: slot(e.key, 2)),
-            ),
+            if (trailingScoreOfficial == null ||
+                (trailingScoreOfficial && e.key == 1))
+              RoundFlightResult(
+                group: e.key == 1 || e.key == 3 ? 1 : 2,
+                result: flight(e.key, 2, e.value, placeholder: slot(e.key, 2)),
+              ),
         ],
       ),
     };
+    final round2Preliminary = preliminary || trailingScoreOfficial == true;
     standings = {
       1: ContestResults(
         asOfRound: 1,
@@ -192,14 +204,14 @@ class StandingsFixture {
             asOf: 2,
             place: 1,
             overall: 1750,
-            preliminary: preliminary,
+            preliminary: round2Preliminary,
           ),
           standing(
             3,
             asOf: 2,
             place: 2,
             overall: 1400,
-            preliminary: preliminary,
+            preliminary: round2Preliminary,
           ),
           standing(
             4,
@@ -208,7 +220,7 @@ class StandingsFixture {
             overall: 1200,
             raw: 1250,
             penalty: 50,
-            preliminary: preliminary,
+            preliminary: round2Preliminary,
           ),
           standing(
             1,
@@ -217,12 +229,34 @@ class StandingsFixture {
             overall: 900,
             raw: 1400,
             dropped: const [2],
-            preliminary: preliminary,
+            preliminary: round2Preliminary,
           ),
         ],
       ),
     };
+    if (trailingScoreOfficial == false) standings.remove(2);
   }
+
+  static ContestScores _withPendingScore(ContestScores scores, Id target) =>
+      ContestScores(
+        rounds: scores.rounds,
+        slots: [
+          for (final slot in scores.slots)
+            if (slot.placeholder.id == target)
+              ScoreSlot(
+                placeholder: ScorePlaceholder(
+                  id: target,
+                  contestId: slot.placeholder.contestId,
+                  contestParticipationId:
+                      slot.placeholder.contestParticipationId,
+                  assignmentId: slot.placeholder.assignmentId,
+                  state: ScorePlaceholderState.submitted,
+                ),
+              )
+            else
+              slot,
+        ],
+      );
 
   static ContestScores _inReview(
     CurrentMatrix matrix,
@@ -316,6 +350,9 @@ class StandingsServer extends WorkspaceServer {
           : _json(results.toJson());
     }
     final asOf = int.tryParse(request.url.queryParameters['asOfRound'] ?? '');
+    if (asOf == null && fixture.standings.isEmpty) {
+      return _json(ContestResults().toJson());
+    }
     final latest = fixture.standings.keys.fold(0, (a, b) => a > b ? a : b);
     final results = fixture.standings[asOf ?? latest];
     return results == null
@@ -346,5 +383,10 @@ ReportsFacts factsOf(
     data: data,
     scores: read,
     workspace: WorkspaceFacts.derive(data: data, scores: read),
+    lastStoredStandingsRound: fixture.standings.keys.fold<int?>(
+      null,
+      (latest, ordinal) =>
+          latest == null || ordinal > latest ? ordinal : latest,
+    ),
   );
 }

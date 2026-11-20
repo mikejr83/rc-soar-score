@@ -24,6 +24,7 @@ class ReportsFacts {
     required this.configDrift,
     required this.rounds,
     required this.standing,
+    required this.lastStoredStandingsRound,
     required this.scoresSignature,
     required this.pilots,
     required this.teamsEnabled,
@@ -40,6 +41,7 @@ class ReportsFacts {
     required MatrixPageData data,
     required ContestScores scores,
     required WorkspaceFacts workspace,
+    int? lastStoredStandingsRound,
   }) {
     final liveRounds = {
       for (final round in data.matrix.rounds)
@@ -69,6 +71,7 @@ class ReportsFacts {
         roundOfAssignment: roundOfAssignment,
         completed: data.contest.lifecycleState == LifecycleState.completed,
       ),
+      lastStoredStandingsRound: lastStoredStandingsRound,
       scoresSignature: _signature(scores),
       pilots: _pilots(data),
       teamsEnabled: data.showTeams,
@@ -102,6 +105,9 @@ class ReportsFacts {
   /// Each round's scoring progress.
   final List<WorkspaceRoundFact> rounds;
   final ScoreStanding standing;
+
+  /// The latest persisted standings for a completed contest, if available.
+  final int? lastStoredStandingsRound;
 
   /// A digest of every score slot: its workflow state and the revision and
   /// time of its official score. It changes when a score is corrected even
@@ -220,9 +226,12 @@ class ReportsFacts {
   LifecycleState get lifecycle => contest.lifecycleState;
   bool get isCompleted => lifecycle == LifecycleState.completed;
 
+  int get defaultStandingsRound =>
+      isCompleted ? lastStoredStandingsRound ?? 0 : lastScoredRound;
+
   /// The upper bound shared by the standings viewer and its CSV export.
   int standingsRoundLimit({required bool provisional}) =>
-      isCompleted || provisional ? lastScoredRound : lastFullyScoredRound;
+      isCompleted || provisional ? defaultStandingsRound : lastFullyScoredRound;
 
   bool get hasScores => standing.hasScores;
   ResultStatus get resultStatus => standing.status;
@@ -264,6 +273,7 @@ class ReportsFacts {
     matrixRevision,
     configurationRevision,
     roundCount,
+    lastStoredStandingsRound,
     resultStatus.name,
     for (final round in rounds)
       '${round.ordinal}:${round.scored}/${round.total}',

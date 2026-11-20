@@ -149,6 +149,40 @@ void main() {
     expect(find.textContaining('Preliminary:'), findsOneWidget);
   });
 
+  testWidgets(
+    'a completed contest with a pending-only round shows its available standings',
+    (tester) async {
+      fixture = StandingsFixture(trailingScoreOfficial: false);
+      server = StandingsServer(fixture, state: LifecycleState.completed);
+      await _pump(tester, server);
+
+      expect(_text('R1'), findsOneWidget);
+      expect(_text('R2'), findsNothing);
+      expect(_text('PRELIMINARY'), findsWidgets);
+      expect(
+        find.textContaining('1 score is awaiting approval'),
+        findsOneWidget,
+      );
+      expect(
+        server.requests
+            .where((uri) => uri.path.endsWith('/results'))
+            .map((uri) => uri.queryParameters['asOfRound']),
+        [null, '1'],
+      );
+    },
+  );
+
+  testWidgets('a completed contest without any saved standings says so', (
+    tester,
+  ) async {
+    fixture.standings.clear();
+    server = StandingsServer(fixture, state: LifecycleState.completed);
+    await _pump(tester, server);
+
+    expect(_text('No standings stored yet'), findsWidgets);
+    expect(_text('Rank'), findsNothing);
+  });
+
   for (final stale in [false, true]) {
     testWidgets('completed standings show missing flights with stale=$stale', (
       tester,
