@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:soar_score_contest/pages/home_page.dart';
 import 'package:soar_score_contest/pages/landing_page.dart';
+import 'package:soar_score_contest/router.dart' show contestsPath;
 
 import '../support/interact.dart';
 import '../support/launch_app.dart';
@@ -85,6 +87,23 @@ Future<void> runStartPhase(Journey journey, JourneyContext data) async {
         expect(find.text('Refresh failed'), findsNothing);
         await pumpUntilFound(tester, find.text('Workspace'));
       }
+    },
+  );
+
+  await journey.step(
+    'An unknown contest link says not found and offers support',
+    () async {
+      await goToMainPage(tester);
+      GoRouter.of(tester.element(find.byType(HomePage)))
+          .go('$contestsPath/no-such-contest');
+      await pumpUntilFound(tester, find.text('Contest not found'));
+      await pumpUntilFound(
+        tester,
+        find.byKey(const ValueKey('page-state-support')),
+      );
+      expect(find.text('Get support'), findsOneWidget);
+      await goToMainPage(tester);
+      await pumpUntilFound(tester, find.byType(HomePage));
     },
   );
 
