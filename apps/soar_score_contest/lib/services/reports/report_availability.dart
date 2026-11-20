@@ -67,6 +67,12 @@ class ReportAvailability {
           _noScores,
         );
       }
+      if (facts.isCompleted && facts.lastStoredStandingsRound == null) {
+        return const ReportAvailability.unavailable(
+          'No standings stored yet.',
+          _noScores,
+        );
+      }
       return ReportAvailability.available(_scoreNotes(facts));
     }
     if (!facts.hasMatrix) {
@@ -92,6 +98,9 @@ class ReportAvailability {
     final standing = facts.standing;
     final first = standing.firstMissingRound;
     final parts = <String>[];
+    if (facts.storedStandingsStale) {
+      parts.add('The stored standings are out of date.');
+    }
     if (first != null) {
       final count = standing.missingByRound[first]!;
       parts.add(

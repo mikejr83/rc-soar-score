@@ -22,7 +22,7 @@ abstract final class ReportsFactsLoader {
       data: data,
       scores: scores,
       workspace: workspace,
-      lastStoredStandingsRound: latest?.asOfRound,
+      latestStandings: latest,
     );
   }
 }

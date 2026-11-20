@@ -135,25 +135,30 @@ Id placeholderOf(
 /// | 4     | 600.0   | 650.0   | 1,250 less 50    |
 class StandingsFixture {
   /// [reviewPilot] has the score of round 2 in review.
-  /// Set [trailingScoreOfficial] for a round 2 with only one entered flight.
+  /// Set [trailingScore] for a round 2 with only one entered flight.
   StandingsFixture({
     bool preliminary = false,
     int? reviewPilot,
     bool round2Cancelled = false,
-    bool? trailingScoreOfficial,
+    ScorePlaceholderState? trailingScore,
   }) : matrix = drawnMatrix(
          round2Status: round2Cancelled
              ? RoundStatus.cancelled
              : RoundStatus.open,
        ) {
-    final recorded = trailingScoreOfficial == null
+    final trailingIsOfficial = trailingScore == ScorePlaceholderState.official;
+    final recorded = trailingScore == null
         ? recordedScores(matrix)
         : scoresFor(matrix, {
             for (var pilot = 1; pilot <= 4; pilot++) (1, pilot): at(pilot),
             (2, 1): at(10),
           });
-    scores = trailingScoreOfficial == false
-        ? _withPendingScore(recorded, placeholderOf(matrix, recorded, 1, 2))
+    scores = trailingScore != null && !trailingIsOfficial
+        ? _withPendingScore(
+            recorded,
+            placeholderOf(matrix, recorded, 1, 2),
+            trailingScore,
+          )
         : reviewPilot == null
         ? recorded
         : _inReview(matrix, recorded, reviewPilot, 2);
@@ -176,8 +181,7 @@ class StandingsFixture {
         ordinal: 2,
         flights: [
           for (final e in round2.entries)
-            if (trailingScoreOfficial == null ||
-                (trailingScoreOfficial && e.key == 1))
+            if (trailingScore == null || (trailingIsOfficial && e.key == 1))
               RoundFlightResult(
                 group: e.key == 1 || e.key == 3 ? 1 : 2,
                 result: flight(e.key, 2, e.value, placeholder: slot(e.key, 2)),
@@ -185,7 +189,7 @@ class StandingsFixture {
         ],
       ),
     };
-    final round2Preliminary = preliminary || trailingScoreOfficial == true;
+    final round2Preliminary = preliminary || trailingIsOfficial;
     standings = {
       1: ContestResults(
         asOfRound: 1,
@@ -234,29 +238,31 @@ class StandingsFixture {
         ],
       ),
     };
-    if (trailingScoreOfficial == false) standings.remove(2);
+    if (trailingScore != null && !trailingIsOfficial) standings.remove(2);
   }
 
-  static ContestScores _withPendingScore(ContestScores scores, Id target) =>
-      ContestScores(
-        rounds: scores.rounds,
-        slots: [
-          for (final slot in scores.slots)
-            if (slot.placeholder.id == target)
-              ScoreSlot(
-                placeholder: ScorePlaceholder(
-                  id: target,
-                  contestId: slot.placeholder.contestId,
-                  contestParticipationId:
-                      slot.placeholder.contestParticipationId,
-                  assignmentId: slot.placeholder.assignmentId,
-                  state: ScorePlaceholderState.submitted,
-                ),
-              )
-            else
-              slot,
-        ],
-      );
+  static ContestScores _withPendingScore(
+    ContestScores scores,
+    Id target,
+    ScorePlaceholderState state,
+  ) => ContestScores(
+    rounds: scores.rounds,
+    slots: [
+      for (final slot in scores.slots)
+        if (slot.placeholder.id == target)
+          ScoreSlot(
+            placeholder: ScorePlaceholder(
+              id: target,
+              contestId: slot.placeholder.contestId,
+              contestParticipationId: slot.placeholder.contestParticipationId,
+              assignmentId: slot.placeholder.assignmentId,
+              state: state,
+            ),
+          )
+        else
+          slot,
+    ],
+  );
 
   static ContestScores _inReview(
     CurrentMatrix matrix,
@@ -290,6 +296,16 @@ class StandingsFixture {
   late final ContestScores scores;
   late final Map<int, RoundResults> roundResults;
   late final Map<int, ContestResults> standings;
+
+  void setStandingsStale(int round, bool stale) {
+    final snapshot = standings[round]!;
+    standings[round] = ContestResults(
+      asOfRound: snapshot.asOfRound,
+      isStale: stale,
+      standings: snapshot.standings,
+      teams: snapshot.teams,
+    );
+  }
 }
 
 /// The workspace fake server plus the results routes, serving a
@@ -379,14 +395,14 @@ ReportsFacts factsOf(
     participations: participations,
   );
   final read = scores ?? fixture.scores;
+  final latest = fixture.standings.keys.fold<int?>(
+    null,
+    (latest, ordinal) => latest == null || ordinal > latest ? ordinal : latest,
+  );
   return ReportsFacts.derive(
     data: data,
     scores: read,
     workspace: WorkspaceFacts.derive(data: data, scores: read),
-    lastStoredStandingsRound: fixture.standings.keys.fold<int?>(
-      null,
-      (latest, ordinal) =>
-          latest == null || ordinal > latest ? ordinal : latest,
-    ),
+    latestStandings: fixture.standings[latest],
   );
 }

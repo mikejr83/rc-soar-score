@@ -26,7 +26,11 @@ void main() {
     test(
       'completed report and CSV use the available snapshot with trailing official=$official',
       () async {
-        final fixture = StandingsFixture(trailingScoreOfficial: official);
+        final fixture = StandingsFixture(
+          trailingScore: official
+              ? ScorePlaceholderState.official
+              : ScorePlaceholderState.submitted,
+        );
         final server = StandingsServer(
           fixture,
           state: LifecycleState.completed,

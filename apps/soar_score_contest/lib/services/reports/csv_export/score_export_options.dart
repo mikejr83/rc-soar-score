@@ -100,6 +100,9 @@ class ScoreExportOptions {
 
   /// The reason the range cannot be exported, or null when it can.
   String? check() {
+    if (lastShown == 0 && requestedTo == 0) {
+      return 'No standings are stored for the requested rounds.';
+    }
     if (from > to || rounds.isEmpty) {
       final range = from == requestedTo ? '$from' : '$from–$requestedTo';
       return 'No rounds to export: nothing is scored in rounds $range.';

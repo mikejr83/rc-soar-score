@@ -151,6 +151,75 @@ void _tests(Backend backend) {
       expect(read.isPreliminary, isTrue);
     });
 
+    test('a pending-only last round does not persist standings', () async {
+      await scoreRoundOne();
+      final matrix = await MatrixService(repository).current(contestId);
+      final roundTwo = matrix.rounds.singleWhere((r) => r.ordinal == 2);
+      final assignment = matrix.assignments.firstWhere(
+        (a) => a.scheduledRoundId == roundTwo.id,
+      );
+      final placeholder = (await repository.scorePlaceholderRepository
+          .findForAssignment(assignment.id))!;
+      final configuration = (await repository
+          .contestConfigurationRevisionRepository
+          .latestForContest(contestId))!;
+      final pilot = core.Id.create();
+      final attempt = core.ScoreAttempt(
+        id: core.Id.create(),
+        contestId: contestId,
+        scorePlaceholderId: placeholder.id,
+        configRevisionId: configuration.id,
+        matrixRevisionId: assignment.matrixRevisionId,
+        rawComponents: const {'time_flown': 540, 'launch_height': 200},
+        actorId: pilot,
+        authority: core.Authority.participant,
+        clientMutationId: 'pending-round-two',
+        baseScoreRevision: 0,
+        acceptedAt: now,
+      );
+      await repository.scoreAttemptRepository.recordAttempt(
+        attempt,
+        core.ScorePlaceholder(
+          id: placeholder.id,
+          contestId: contestId,
+          contestParticipationId: assignment.contestParticipationId,
+          assignmentId: assignment.id,
+          state: core.ScorePlaceholderState.submitted,
+          revision: placeholder.revision,
+        ),
+        metadata: core.MutationMetadata(
+          clientMutationId: 'record-pending-round-two',
+          authority: core.Authority.participant,
+          clientTime: now,
+          actorId: pilot,
+        ),
+      );
+      final contests = ContestsService(repository);
+      final running = await contests.getContest(contestId);
+      await contests.applyAction(
+        contestId,
+        core.ContestAction.complete,
+        baseRevision: running.revision,
+        metadata: core.MutationMetadata(
+          clientMutationId: 'complete-with-pending-round-two',
+          authority: core.Authority.director,
+          clientTime: now,
+          actorId: actor,
+        ),
+      );
+      await results.recalculate(contestId);
+
+      final report = await ReportDataService(repository)
+          .read(contestId, include: const ReportInclude(asOfRound: 2));
+      expect(report.contest.lifecycleState, core.LifecycleState.completed);
+      expect(
+        report.scores!.rounds.singleWhere((r) => r.ordinal == 2).scored,
+        1,
+      );
+      expect(report.results, isNull);
+      expect((await results.read(contestId)).asOfRound, 1);
+    });
+
     test('a score entered after the calculation makes it stale', () async {
       await scoreRoundOne();
       await results.recalculate(contestId);

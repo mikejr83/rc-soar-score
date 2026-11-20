@@ -5,13 +5,17 @@ import 'package:go_router/go_router.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/app_sync_provider.dart';
 import 'package:soar_score_contest/pages/contest/reports_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/reports/report_kind.dart';
 import 'package:soar_score_contest/services/reports/report_launcher.dart';
+import 'package:soar_score_contest/services/sync/app_sync_state.dart';
+import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/fake_report_launcher.dart';
+import '../support/fake_app_sync.dart';
 import '../support/matrix_test_support.dart';
 import '../support/next_step_widget_support.dart';
 import '../support/standings_fixtures.dart';
@@ -39,6 +43,7 @@ Future<GoRouter> _pump(
   Size size = const Size(1280, 1400),
   String contestId = matrixContestId,
   ReportLauncher? launcher,
+  FakeAppSync? sync,
   bool settle = true,
 }) async {
   tester.view.physicalSize = size;
@@ -65,17 +70,18 @@ Future<GoRouter> _pump(
     ],
   );
   addTearDown(router.dispose);
-  await tester.pumpWidget(
-    ApiClientInherited(
-      client: ApiClient(
-        baseUrl: Uri.parse('http://localhost'),
-        httpClient: MockClient(server.handle),
-      ),
-      child: MaterialApp.router(
-        localizationsDelegates: appLocalizationDelegates,
-        routerConfig: router,
-      ),
+  final app = ApiClientInherited(
+    client: ApiClient(
+      baseUrl: Uri.parse('http://localhost'),
+      httpClient: MockClient(server.handle),
     ),
+    child: MaterialApp.router(
+      localizationsDelegates: appLocalizationDelegates,
+      routerConfig: router,
+    ),
+  );
+  await tester.pumpWidget(
+    sync == null ? app : AppSyncInherited(sync: sync, child: app),
   );
   if (settle) {
     await tester.pumpAndSettle();
@@ -221,6 +227,61 @@ void main() {
     for (final key in ['standings', 'matrix', 'sheet', 'cards']) {
       expect(_enabled(tester, key), isTrue, reason: key);
     }
+  });
+
+  testWidgets('completed Reports refreshes stale standings at the same round', (
+    tester,
+  ) async {
+    final fixture = StandingsFixture(
+      trailingScore: ScorePlaceholderState.official,
+    )..setStandingsStale(2, true);
+    final server = StandingsServer(fixture, state: LifecycleState.completed);
+    final sync = FakeAppSync();
+    await _pump(tester, server, sync: sync);
+
+    expect(find.text('Preliminary'), findsOneWidget);
+    expect(find.text('Official'), findsNothing);
+    expect(
+      find.textContaining('The stored standings are out of date.'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('3 pilots have no score in round 2.'),
+      findsOneWidget,
+    );
+
+    fixture.setStandingsStale(2, false);
+    sync.state = AppSyncState(
+      scopes: {
+        ContestScopeKey(contestId): const SyncScopeSummary(dataRevision: 1),
+      },
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Official'), findsOneWidget);
+    expect(find.text('Preliminary'), findsNothing);
+    expect(
+      find.textContaining('The stored standings are out of date.'),
+      findsNothing,
+    );
+    expect(
+      find.textContaining('3 pilots have no score in round 2.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('completed Reports needs a snapshot to open standings', (
+    tester,
+  ) async {
+    final fixture = StandingsFixture()..standings.clear();
+    await _pump(
+      tester,
+      StandingsServer(fixture, state: LifecycleState.completed),
+    );
+
+    expect(_enabled(tester, 'standings'), isFalse);
+    expect(_enabled(tester, 'matrix'), isTrue);
+    expect(find.text('No standings yet'), findsOneWidget);
+    expect(find.textContaining('No standings stored yet.'), findsOneWidget);
   });
 
   testWidgets('Open launches the report and the card says so', (tester) async {

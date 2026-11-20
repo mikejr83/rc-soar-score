@@ -46,6 +46,9 @@ ReportsFacts _facts({
     data: data,
     scores: scores,
     workspace: WorkspaceFacts.derive(data: data, scores: scores),
+    latestStandings: state == LifecycleState.completed
+        ? ContestResults(asOfRound: 2)
+        : null,
   );
 }
 

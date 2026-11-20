@@ -152,7 +152,9 @@ void main() {
   testWidgets(
     'a completed contest with a pending-only round shows its available standings',
     (tester) async {
-      fixture = StandingsFixture(trailingScoreOfficial: false);
+      fixture = StandingsFixture(
+        trailingScore: ScorePlaceholderState.submitted,
+      );
       server = StandingsServer(fixture, state: LifecycleState.completed);
       await _pump(tester, server);
 
@@ -168,6 +170,23 @@ void main() {
             .where((uri) => uri.path.endsWith('/results'))
             .map((uri) => uri.queryParameters['asOfRound']),
         [null, '1'],
+      );
+    },
+  );
+
+  testWidgets(
+    'a trailing flight in review keeps completed standings preliminary',
+    (tester) async {
+      fixture = StandingsFixture(trailingScore: ScorePlaceholderState.inReview);
+      server = StandingsServer(fixture, state: LifecycleState.completed);
+      await _pump(tester, server);
+
+      expect(_text('R1'), findsOneWidget);
+      expect(_text('R2'), findsNothing);
+      expect(_text('PRELIMINARY'), findsWidgets);
+      expect(
+        find.textContaining('1 pilot has a score in review'),
+        findsOneWidget,
       );
     },
   );
@@ -237,6 +256,31 @@ void main() {
       }
     });
   }
+
+  testWidgets('refresh catches recalculation at the same completed round', (
+    tester,
+  ) async {
+    fixture = StandingsFixture(trailingScore: ScorePlaceholderState.official)
+      ..setStandingsStale(2, true);
+    server = StandingsServer(fixture, state: LifecycleState.completed);
+    await _pump(tester, server, pollInterval: const Duration(seconds: 1));
+    expect(_text('R2 partial'), findsOneWidget);
+    expect(_text('PRELIMINARY'), findsWidgets);
+
+    fixture.setStandingsStale(2, false);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('viewer-refresh')));
+    await tester.pumpAndSettle();
+
+    expect(_text('R2 partial'), findsOneWidget);
+    expect(_text('PRELIMINARY'), findsNothing);
+    expect(find.textContaining('Official.'), findsOneWidget);
+    expect(
+      find.textContaining('3 flights have no recorded score'),
+      findsOneWidget,
+    );
+  });
 
   group('options', () {
     testWidgets('Raw score adds its column and Percentage removes its own', (

@@ -70,4 +70,17 @@ void main() {
     expect(options.rounds, [1, 2]);
     expect(options.check(), isNull);
   });
+
+  test('a completed contest without a snapshot has no standings to export', () {
+    final noSnapshots = StandingsFixture()..standings.clear();
+    final completed = factsOf(noSnapshots, state: LifecycleState.completed);
+    final options = ScoreExportOptions.of(const {}, completed);
+
+    expect(completed.lastScoredRound, 2);
+    expect(options.rounds, isEmpty);
+    expect(
+      options.check(),
+      'No standings are stored for the requested rounds.',
+    );
+  });
 }

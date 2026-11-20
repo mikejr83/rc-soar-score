@@ -26,7 +26,9 @@ ReportsFacts _facts(ContestScores scores, CurrentMatrix matrix) {
 
 void main() {
   test('a pending-only last round keeps standings at the prior snapshot', () {
-    final fixture = StandingsFixture(trailingScoreOfficial: false);
+    final fixture = StandingsFixture(
+      trailingScore: ScorePlaceholderState.submitted,
+    );
     final facts = factsOf(fixture, state: LifecycleState.completed);
 
     expect(facts.lastScoredRound, 2);
@@ -36,6 +38,21 @@ void main() {
     expect(facts.standing.unofficialByRound, {2: 1});
     expect(StandingsOptions.of(const {}, facts).requestedTo, 1);
     expect(ScoreExportOptions.of(const {}, facts).requestedTo, 1);
+  });
+
+  test('recalculation at the same round changes the refresh fingerprint', () {
+    final fixture = StandingsFixture(
+      trailingScore: ScorePlaceholderState.official,
+    )..setStandingsStale(2, true);
+    final before = factsOf(fixture, state: LifecycleState.completed);
+    fixture.setStandingsStale(2, false);
+    final after = factsOf(fixture, state: LifecycleState.completed);
+
+    expect(before.lastStoredStandingsRound, after.lastStoredStandingsRound);
+    expect(before.standing.missingByRound, after.standing.missingByRound);
+    expect(before.resultStatus, ResultStatus.preliminary);
+    expect(after.resultStatus, ResultStatus.official);
+    expect(before.fingerprint, isNot(after.fingerprint));
   });
 
   group('fingerprint', () {
