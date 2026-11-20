@@ -2969,6 +2969,8 @@
   "@scoreHistoryAutomatic": {"description": "Who made a score official in the score history when the contest accepted it on its own."},
   "scoreHistoryMadeOfficialBy": "Made official by {who}",
   "@scoreHistoryMadeOfficialBy": {"description": "Line on a score history entry naming who made it official.", "placeholders": {"who": {"type": "String"}}},
+  "scoreHistoryDirector": "Director",
+  "@scoreHistoryDirector": {"description": "Who made a stored submission official in the score history when a director did it."},
   "scoreHistoryConfirmed": "Confirmed by the director",
   "@scoreHistoryConfirmed": {"description": "Note on the current version in the score history when the director confirmed an automatically accepted score."},
   "scoreAdoptionWaiting": "Mark official is queued",

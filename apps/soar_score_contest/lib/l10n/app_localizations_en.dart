@@ -3273,6 +3273,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get scoreHistoryDirector => 'Director';
+
+  @override
   String get scoreHistoryConfirmed => 'Confirmed by the director';
 
   @override
