@@ -249,6 +249,12 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
     () => exportContestToFile(tester, data),
     nativeOnly: true,
   );
+
+  await journey.step(
+    'Export for support: the file holds the manifest, contest and log (native)',
+    () => exportContestForSupport(tester, data),
+    nativeOnly: true,
+  );
 }
 
 /// The public copy of publication [id], read past the browser's cache: public

@@ -15,11 +15,17 @@ class _FakeExchange implements ContestExchange {
 
   ExchangePreview next;
   final exports = <bool>[];
+  final supportExports = <bool>[];
   final imports = <ExchangeImportMode>[];
 
   @override
-  Future<ExchangeExport> export(Id contestId, {required bool redact}) async {
+  Future<ExchangeExport> export(
+    Id contestId, {
+    required bool redact,
+    bool forSupport = false,
+  }) async {
     exports.add(redact);
+    supportExports.add(forSupport);
     return ExchangeExport(fileName: 'Meet.rcsoar', bytes: Uint8List(3));
   }
 
@@ -154,6 +160,44 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(exchange.exports, [false]);
+  });
+
+  testWidgets('export for support keeps email addresses and locks the choice', (
+    tester,
+  ) async {
+    await pumpPage(tester);
+    await tester.tap(find.byKey(const ValueKey('go-export')));
+    await tester.pumpAndSettle();
+    CheckboxListTile redact() => tester.widget<CheckboxListTile>(
+      find.byKey(const ValueKey('export-redact')),
+    );
+    expect(
+      tester
+          .widget<CheckboxListTile>(
+            find.byKey(const ValueKey('export-for-support')),
+          )
+          .value,
+      isFalse,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('export-for-support')));
+    await tester.pumpAndSettle();
+    expect(redact().value, isFalse);
+    expect(redact().onChanged, isNull);
+
+    // Turning support off gives the redaction choice back, still on.
+    await tester.tap(find.byKey(const ValueKey('export-for-support')));
+    await tester.pumpAndSettle();
+    expect(redact().value, isTrue);
+    expect(redact().onChanged, isNotNull);
+
+    await tester.tap(find.byKey(const ValueKey('export-for-support')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('export-save')));
+    await tester.pumpAndSettle();
+
+    expect(exchange.exports, [false]);
+    expect(exchange.supportExports, [true]);
   });
 
   testWidgets('cancelling the export saves nothing', (tester) async {
@@ -332,6 +376,9 @@ class _ExportBreaks extends _FakeExchange {
   _ExportBreaks() : super(_preview());
 
   @override
-  Future<ExchangeExport> export(Id contestId, {required bool redact}) =>
-      throw Exception('database is closed');
+  Future<ExchangeExport> export(
+    Id contestId, {
+    required bool redact,
+    bool forSupport = false,
+  }) => throw Exception('database is closed');
 }

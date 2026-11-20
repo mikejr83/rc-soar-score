@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:archive/archive.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';
@@ -38,4 +39,49 @@ Future<void> exportContestToFile(
   final text = utf8.decode(saved.values.single);
   expect(text, contains(data.contestName));
   expect(text, contains('rcsoar'));
+
+  // A plain export carries no log and is not a container.
+  expect(saved.values.single.take(2), isNot([0x50, 0x4b]));
+  expect(text, isNot(contains('app.log')));
+}
+
+/// Saves the journey's contest as an export for support: ticking it turns the
+/// redaction choice off and locks it, and the file is a container with the
+/// manifest, the contest and the app log.
+Future<void> exportContestForSupport(
+  WidgetTester tester,
+  JourneyContext data,
+) async {
+  final saved = fakeExchangeFiles();
+  await goToMainPage(tester);
+  await selectContest(tester, data.contestName);
+  await tapVisible(tester, _key('export-contest'));
+  await pumpUntilFound(tester, _key('export-dialog'));
+
+  expect(
+    tester.widget<CheckboxListTile>(_key('export-for-support')).value,
+    isFalse,
+  );
+  await tapVisible(tester, _key('export-for-support'));
+  await tester.pumpAndSettle();
+  final redact = tester.widget<CheckboxListTile>(_key('export-redact'));
+  expect(redact.value, isFalse);
+  expect(redact.onChanged, isNull);
+
+  await tapVisible(tester, _key('export-save'));
+  await pumpUntilFound(
+    tester,
+    find.text(AppLocalizationsEn().exportSaved('${data.contestName}.rcsoar')),
+  );
+  final archive = ZipDecoder().decodeBytes(saved.values.single);
+  expect(archive.files.map((f) => f.name), [
+    'manifest.json',
+    'contest.json',
+    'app.log',
+  ]);
+  expect(
+    utf8.decode(archive.findFile('contest.json')!.readBytes()!),
+    contains(data.contestName),
+  );
+  expect(archive.findFile('app.log')!.size, greaterThan(0));
 }

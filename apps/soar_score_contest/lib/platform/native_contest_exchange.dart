@@ -7,42 +7,84 @@ import 'package:soar_score_data/soar_score_data.dart';
 import '../server/embedded_server.dart';
 import '../server/profile_access.dart';
 import '../services/exchange/contest_exchange.dart';
+import '../services/exchange/support_bundle.dart';
+import 'rolling_log_file.dart';
 
 /// Exports and imports contests of the embedded server's database.
 class NativeContestExchange implements ContestExchange {
-  NativeContestExchange(this._server, {DateTime Function()? clock})
-    : _clock = clock ?? DateTime.now;
+  /// [log] is the app log a support export carries, and [installation] says
+  /// which installation and build the file came from (its manifest).
+  NativeContestExchange(
+    this._server, {
+    DateTime Function()? clock,
+    this._log,
+    this._installation,
+  }) : _clock = clock ?? DateTime.now;
 
   final EmbeddedServer _server;
   final DateTime Function() _clock;
+  final RollingLogFile? _log;
+  final Future<Map<String, Object?>> Function()? _installation;
 
   @override
-  Future<ExchangeExport> export(core.Id contestId, {required bool redact}) =>
-      _guard(() async {
-        final database = _server.database;
-        final contest = await _server.repository.contestRepository.findById(
-          contestId,
-        );
-        final file = await ContestExporter(database, clock: _clock).export(
-          contestId,
-          redact: redact,
-          source: ExportSource(
-            label: Platform.localHostname,
-            diagnostics: {
-              'platform': Platform.operatingSystem,
-              'platform_version': Platform.operatingSystemVersion,
-            },
-          ),
-        );
-        return ExchangeExport(
-          fileName: '${_safeName(contest?.name ?? 'contest')}.rcsoar',
-          bytes: Uint8List.fromList(file.encode()),
-        );
-      });
+  Future<ExchangeExport> export(
+    core.Id contestId, {
+    required bool redact,
+    bool forSupport = false,
+  }) => _guard(() async {
+    final database = _server.database;
+    final contest = await _server.repository.contestRepository.findById(
+      contestId,
+    );
+    final file = await ContestExporter(database, clock: _clock).export(
+      contestId,
+      redact: redact && !forSupport,
+      source: ExportSource(
+        label: Platform.localHostname,
+        diagnostics: {
+          'platform': Platform.operatingSystem,
+          'platform_version': Platform.operatingSystemVersion,
+        },
+      ),
+    );
+    final fileName = '${_safeName(contest?.name ?? 'contest')}.rcsoar';
+    if (!forSupport) {
+      return ExchangeExport(
+        fileName: fileName,
+        bytes: Uint8List.fromList(file.encode()),
+      );
+    }
+    final log = _log;
+    return ExchangeExport(
+      fileName: fileName,
+      bytes: encodeSupportBundle(
+        manifest: {
+          'format': 'rcsoar-support',
+          'manifest_version': 1,
+          'exported_at': _clock().toUtc().toIso8601String(),
+          'contest': {'id': contestId.value, 'name': contest?.name},
+          'contains': {'contest': 'contest.json', 'log': 'app.log'},
+          'redacted': false,
+          'schema_version': database.schemaVersion,
+          'platform': Platform.operatingSystem,
+          'platform_version': Platform.operatingSystemVersion,
+          'locale': Platform.localeName,
+          'log_files': [
+            if (log != null)
+              for (final f in log.files())
+                {'name': f.uri.pathSegments.last, 'bytes': f.lengthSync()},
+          ],
+          ...?await _installation?.call(),
+        },
+        contest: file.encode(),
+        log: log?.readAll() ?? '',
+      ),
+    );
+  });
 
   @override
   Future<ExchangePreview> preview(Uint8List bytes) => _guard(() async {
-    final file = ExchangeFile.decode(bytes);
+    final file = ExchangeFile.decode(contestFileOf(bytes));
     final preview = await ContestImporter(
       _server.database,
       clock: _clock,
@@ -75,7 +117,7 @@ class NativeContestExchange implements ContestExchange {
   }) => _guard(() async {
     final result = await ContestImporter(_server.database, clock: _clock)
         .import(
-          ExchangeFile.decode(bytes),
+          ExchangeFile.decode(contestFileOf(bytes)),
           mode: mode == ExchangeImportMode.inspection
               ? ImportMode.inspection
               : ImportMode.editable,

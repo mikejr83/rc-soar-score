@@ -389,6 +389,18 @@ abstract class AppLocalizations {
   /// **'Turn this off for a full backup. Names, clubs and scores are kept either way.'**
   String get exportRedactionSubtitle;
 
+  /// Checkbox that exports the contest together with the app log, for the developers to debug a problem.
+  ///
+  /// In en, this message translates to:
+  /// **'Export for support'**
+  String get exportForSupportTitle;
+
+  /// Explains that an export for support is not redacted and carries the app log.
+  ///
+  /// In en, this message translates to:
+  /// **'For finding a problem. The file keeps email addresses and all other contest data and includes the app log and details of this installation.'**
+  String get exportForSupportSubtitle;
+
   /// Warning in the export dialog that the file is not encrypted.
   ///
   /// In en, this message translates to:

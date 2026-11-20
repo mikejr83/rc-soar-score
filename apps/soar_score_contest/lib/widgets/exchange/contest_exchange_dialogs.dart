@@ -15,14 +15,18 @@ Future<void> exportContest(BuildContext context, Contest contest) async {
   if (exchange == null) return;
   final messenger = ScaffoldMessenger.of(context);
   final l10n = AppLocalizations.of(context);
-  final redact = await showDialog<bool>(
+  final choice = await showDialog<({bool redact, bool forSupport})>(
     context: context,
     builder: (_) => _ExportDialog(contest: contest),
   );
-  if (redact == null) return;
+  if (choice == null) return;
   final ExchangeExport export;
   try {
-    export = await exchange.export(contest.id, redact: redact);
+    export = await exchange.export(
+      contest.id,
+      redact: choice.redact,
+      forSupport: choice.forSupport,
+    );
   } on ExchangeFailure catch (e) {
     messenger.showSnackBar(
       SnackBar(content: Text(l10n.exportFailedWithReason(e.message))),
@@ -72,6 +76,7 @@ class _ExportDialog extends StatefulWidget {
 
 class _ExportDialogState extends State<_ExportDialog> {
   bool _redact = true;
+  bool _forSupport = false;
 
   @override
   Widget build(BuildContext context) {
@@ -81,28 +86,44 @@ class _ExportDialogState extends State<_ExportDialog> {
       title: Text(l10n.exportDialogTitle(widget.contest.name)),
       content: SizedBox(
         width: 440,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.exportDialogDescription),
-            const SizedBox(height: 12),
-            CheckboxListTile(
-              key: const ValueKey('export-redact'),
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              value: _redact,
-              onChanged: (value) => setState(() => _redact = value ?? true),
-              title: Text(l10n.exportRedactionTitle),
-              subtitle: Text(l10n.exportRedactionSubtitle),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.exportNotice,
-              key: const ValueKey('export-notice'),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.exportDialogDescription),
+              const SizedBox(height: 12),
+              CheckboxListTile(
+                key: const ValueKey('export-redact'),
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                // An export for support keeps everything, so the choice is
+                // shown as off and cannot be changed while it is on.
+                value: _redact && !_forSupport,
+                onChanged: _forSupport
+                    ? null
+                    : (value) => setState(() => _redact = value ?? true),
+                title: Text(l10n.exportRedactionTitle),
+                subtitle: Text(l10n.exportRedactionSubtitle),
+              ),
+              CheckboxListTile(
+                key: const ValueKey('export-for-support'),
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                value: _forSupport,
+                onChanged: (value) =>
+                    setState(() => _forSupport = value ?? false),
+                title: Text(l10n.exportForSupportTitle),
+                subtitle: Text(l10n.exportForSupportSubtitle),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.exportNotice,
+                key: const ValueKey('export-notice'),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
@@ -112,7 +133,10 @@ class _ExportDialogState extends State<_ExportDialog> {
         ),
         FilledButton(
           key: const ValueKey('export-save'),
-          onPressed: () => Navigator.pop(context, _redact),
+          onPressed: () => Navigator.pop(context, (
+            redact: _redact && !_forSupport,
+            forSupport: _forSupport,
+          )),
           child: Text(l10n.exportSaveButton),
         ),
       ],
