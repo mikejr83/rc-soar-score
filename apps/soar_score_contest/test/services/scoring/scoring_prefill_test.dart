@@ -188,6 +188,23 @@ void main() {
     expect(c.draftOf(_row(c, 1)).canRevert, isFalse);
   });
 
+  test('a second sync leaves a stale row\'s baseline alone', () async {
+    final server = ScoringServer()..seedScore(first, h120);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setHeight('99');
+    server.seedCorrection(first, h130, 'Corrected elsewhere');
+    await c.refreshAfterSync();
+    expect(c.saveOf(first).kind, RowSaveKind.stale);
+
+    await c.refreshAfterSync();
+
+    expect(c.saveOf(first).kind, RowSaveKind.stale);
+    expect(c.draftOf(_row(c, 1)).heightText, '99');
+    expect(c.theirsOf(first), h130);
+    c.draftOf(_row(c, 1)).setHeight('130');
+    expect(c.draftOf(_row(c, 1)).canRevert, isFalse);
+  });
+
   test('an untouched pilot prefill is not unsaved', () async {
     final server = ScoringServer()..seedPendingSubmission(first, a);
     final c = await _open(server);

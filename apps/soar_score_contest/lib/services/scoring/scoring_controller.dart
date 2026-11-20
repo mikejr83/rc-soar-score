@@ -220,6 +220,9 @@ class ScoringController extends ChangeNotifier {
         );
         // Revert goes to the newer values, so it compares to them.
         draft.retarget(_shown(row));
+      } else if (saveOf(row.id).kind == RowSaveKind.stale) {
+        // Already marked stale: the baseline stays where the banner put it.
+        draft.retarget(_shown(row));
       } else {
         // Same official score: a pilot may have replaced the waiting
         // submission. What was typed stays; Revert and the prefill follow
@@ -401,6 +404,8 @@ class ScoringController extends ChangeNotifier {
 
   /// Puts one row back to what is saved.
   void revert(ScoringRow row) {
+    // The row as it is now, not as the caller last saw it.
+    row = _rowOf(row.id) ?? row;
     _drafts[row.id]?.resetTo(row.savedComponents, shown: _shown(row));
     _saves.remove(row.id);
     _theirs.remove(row.id);
@@ -1464,6 +1469,9 @@ class ScoringController extends ChangeNotifier {
           // replaced the waiting submission, which Revert follows.
           if (revisions[row.id] == row.baseRevision) {
             _drafts[row.id]?.rebase(row.savedComponents, shown: _shown(row));
+          } else {
+            // The official score moved on: Revert goes to the newer values.
+            _drafts[row.id]?.retarget(_shown(row));
           }
           continue;
         }

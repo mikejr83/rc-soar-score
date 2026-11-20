@@ -62,6 +62,14 @@ class ScoreEntryPanel extends StatelessWidget {
   /// Draws the keyboard path numbers over the controls.
   final bool focusOrder;
 
+  /// A failed, refused or stale save leaves a banner that Revert clears, even
+  /// when the form still holds its starting values.
+  bool get _hasSaveError => const {
+    RowSaveKind.failed,
+    RowSaveKind.refused,
+    RowSaveKind.stale,
+  }.contains(save.kind);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -375,7 +383,7 @@ class ScoreEntryPanel extends StatelessWidget {
                       order: 11,
                       child: TextButton(
                         key: ValueKey(keyOf('revert')),
-                        onPressed: enabled && draft.canRevert
+                        onPressed: enabled && (draft.canRevert || _hasSaveError)
                             ? actions.onRevert
                             : null,
                         child: const Text('Revert'),

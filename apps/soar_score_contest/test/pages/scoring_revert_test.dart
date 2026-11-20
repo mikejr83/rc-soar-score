@@ -169,4 +169,29 @@ void main() {
       expect(server.entries, hasLength(1));
     });
   }
+
+  testWidgets('Revert clears the banner of a failed save that changed '
+      'nothing', (tester) async {
+    final first = scoringAssignmentId(1, 1);
+    final id = first.value;
+    final server = ScoringServer()..seedPendingSubmission(first, _flight);
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    tester.view.physicalSize = const Size(1280, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpAndSettle();
+    await _open(tester, id);
+    // Save row on an untouched pilot prefill adopts it; the request fails.
+    server.entryFailures[first] = (422, 'invalid_score');
+    await _type(tester, 'score-height-$id', '99');
+    await _type(tester, 'score-height-$id', '120');
+    await tester.tap(_key('score-save-$id'));
+    await tester.pumpAndSettle();
+    expect(_key('score-refresh'), findsOneWidget);
+    expect(_revertOn(tester, id), isTrue);
+
+    await tester.tap(_key('score-revert-$id'));
+    await tester.pumpAndSettle();
+    expect(_key('score-refresh'), findsNothing);
+  });
 }
