@@ -1,11 +1,16 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/platform/native_contest_exchange.dart';
+import 'package:soar_score_contest/platform/app_log.dart';
 import 'package:soar_score_contest/server/embedded_server.dart';
 import 'package:soar_score_contest/services/exchange/contest_exchange.dart';
+import 'package:soar_score_contest/services/exchange/support_bundle.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 /// A contest sent from one installation to another, through the exchange the
@@ -51,6 +56,64 @@ void main() {
     final export = await from.export(contestId, redact: true);
 
     expect(export.fileName, 'Sent SpringFling.rcsoar');
+  });
+
+  test(
+    'an export for support is a container with the log, unredacted',
+    () async {
+      final logDir = Directory('${dir.path}/logs');
+      final log = AppLog(logDir)..attach();
+      Logger('Sync').info('pulled 3 mutations');
+      final exchange = NativeContestExchange(
+        source,
+        log: log,
+        installation: () async => {'installation_id': 'abc'},
+      );
+      addTearDown(log.close);
+
+      final export = await exchange.export(
+        contestId,
+        redact: true,
+        forSupport: true,
+      );
+
+      expect(export.fileName, 'Sent SpringFling.rcsoar');
+      final archive = ZipDecoder().decodeBytes(export.bytes);
+      String text(String name) =>
+          utf8.decode(archive.findFile(name)!.readBytes()!);
+      final manifest = jsonDecode(text('manifest.json')) as Map;
+      expect(manifest['format'], 'rcsoar-support');
+      expect(manifest['installation_id'], 'abc');
+      expect(manifest['redacted'], isFalse);
+      expect(manifest['log_files'], [
+        {'name': 'soar-score.log', 'bytes': greaterThan(0)},
+      ]);
+      expect(text('app.log'), contains('pulled 3 mutations'));
+      expect(
+        (jsonDecode(text('contest.json')) as Map)['header'],
+        containsPair('redacted', false),
+      );
+    },
+  );
+
+  test('an export for support imports like a plain one', () async {
+    final exchange = NativeContestExchange(source, log: null);
+    final bytes = (await exchange.export(
+      contestId,
+      redact: true,
+      forSupport: true,
+    )).bytes;
+
+    final preview = await to.preview(bytes);
+    expect(preview.contestName, 'Sent: Spring/Fling?');
+    final imported = await to.import(bytes, ExchangeImportMode.inspection);
+    expect(await to.inspectionContests(), {imported.contestId});
+  });
+
+  test('a plain export has no log and is not a container', () async {
+    final bytes = (await from.export(contestId, redact: true)).bytes;
+
+    expect(isSupportBundle(bytes), isFalse);
   });
 
   test('an imported copy is listed as inspection and not synced', () async {

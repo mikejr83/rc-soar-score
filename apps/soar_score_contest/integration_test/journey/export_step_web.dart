@@ -8,3 +8,9 @@ Future<void> exportContestToFile(
   WidgetTester tester,
   JourneyContext data,
 ) async {}
+
+/// Likewise native-only: the web build has no export for support either.
+Future<void> exportContestForSupport(
+  WidgetTester tester,
+  JourneyContext data,
+) async {}
