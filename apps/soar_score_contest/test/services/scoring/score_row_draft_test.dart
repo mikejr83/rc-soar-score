@@ -200,4 +200,36 @@ void main() {
       isFalse,
     );
   });
+
+  for (final flag in [
+    'motor_restart',
+    'out_of_bounds',
+    'no_altitude_recorded',
+  ]) {
+    test('a saved $flag score that also holds measurements is not dirty', () {
+      final d = _draft({
+        'time_flown': 500,
+        'launch_height': 190,
+        'landing': 'points_30',
+        flag: true,
+      });
+      expect(d.components, {flag: true});
+      expect(d.isDirty, isFalse);
+      d.setMotorRestart(false);
+      d
+        ..setOutOfBounds(false)
+        ..setNoAltitude(false);
+      expect(d.isDirty, isTrue);
+    });
+  }
+
+  test('a saved late landing that also holds a landing is not dirty', () {
+    final d = _draft({
+      'time_flown': 599,
+      'launch_height': 200,
+      'landing': 'points_30',
+      'late_landing': true,
+    });
+    expect(d.isDirty, isFalse);
+  });
 }
