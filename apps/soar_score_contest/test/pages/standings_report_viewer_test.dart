@@ -6,6 +6,7 @@ import 'package:soar_score_contest/services/reports/viewer/report_print_result.d
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/contest/report_viewer_page.dart';
 import 'package:soar_score_contest/services/reports/report_kind.dart';
 import 'package:soar_score_contest/services/reports/viewer/report_view_params.dart';
@@ -34,6 +35,8 @@ Future<void> _pump(
         httpClient: MockClient(server.handle),
       ),
       child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('en', 'US'),
         home: ReportViewerPage(
           printer: const NotWiredReportPrinter(),

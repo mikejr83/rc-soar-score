@@ -4158,6 +4158,216 @@ abstract class AppLocalizations {
   /// **'Nothing to show'**
   String get viewerNothingToShow;
 
+  /// Footer line of a printed page naming when it was produced.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated {time}'**
+  String viewerGenerated(String time);
+
+  /// Print job title for a named contest.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} – {name}'**
+  String viewerPrintTitle(String title, String name);
+
+  /// Heading of the filters and options panel and bottom sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter and options'**
+  String get viewerFilterOptions;
+
+  /// Button that closes the filter bottom sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get viewerDone;
+
+  /// Lead of the official status banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Official.'**
+  String get viewerOfficialLead;
+
+  /// Text of the official status banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Every score is official, no reviews are open, and the standings are current. Printed pages carry no stamp.'**
+  String get viewerOfficialDefault;
+
+  /// Lead of the preliminary status banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Preliminary:'**
+  String get viewerPreliminaryLead;
+
+  /// Text of the preliminary status banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Some scores are not final.'**
+  String get viewerPreliminaryDefault;
+
+  /// Lead of the crowded-sheet notice banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Crowded.'**
+  String get viewerCrowdedLead;
+
+  /// Lead of the out-of-date sheet banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of date.'**
+  String get viewerOutdatedLead;
+
+  /// Text of the out-of-date sheet banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores, the matrix or the configuration changed after this report was produced. The sheet hasn’t changed.'**
+  String get viewerOutdatedText;
+
+  /// Action on the out-of-date sheet banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get viewerRefresh;
+
+  /// Lead of the data-failure banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t load the scores for these rounds.'**
+  String get viewerDataLoadFailedLead;
+
+  /// Text of the data-failure banner.
+  ///
+  /// In en, this message translates to:
+  /// **'The sheet still shows the last rounds that loaded.'**
+  String get viewerDataLoadFailedText;
+
+  /// Lead of the print-failure banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t print.'**
+  String get viewerPrintFailedLead;
+
+  /// Text of the print-failure banner.
+  ///
+  /// In en, this message translates to:
+  /// **'The system reported a printer error. Your filters and options are unchanged.'**
+  String get viewerPrintFailedText;
+
+  /// Lead when printing is unavailable but saving a PDF is.
+  ///
+  /// In en, this message translates to:
+  /// **'Printing isn’t available here.'**
+  String get viewerPrintingUnavailableLead;
+
+  /// Lead when neither printing nor saving a PDF is available.
+  ///
+  /// In en, this message translates to:
+  /// **'This browser can’t print or save PDFs.'**
+  String get viewerPdfUnavailableLead;
+
+  /// Text when printing is unavailable but saving a PDF is.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as PDF, then print or email the file from another device.'**
+  String get viewerPrintingUnavailableText;
+
+  /// Text when neither printing nor saving a PDF is available.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the link and open it on a browser that can print.'**
+  String get viewerPdfUnavailableText;
+
+  /// Action that copies the link to this report.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get viewerCopyLink;
+
+  /// Action on the empty-filters state that clears the filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters'**
+  String get viewerClearFilters;
+
+  /// Legend when print preview is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Print preview: the white pages are exactly what prints.'**
+  String get viewerPrintPreviewLegend;
+
+  /// Legend of a compact window.
+  ///
+  /// In en, this message translates to:
+  /// **'White pages print as shown'**
+  String get viewerPrintAsShownCompact;
+
+  /// Legend of a wide window.
+  ///
+  /// In en, this message translates to:
+  /// **'The white pages print exactly as shown. Everything around them is screen only.'**
+  String get viewerPrintAsShown;
+
+  /// Page indicator when there are no pages.
+  ///
+  /// In en, this message translates to:
+  /// **'No pages'**
+  String get viewerNoPages;
+
+  /// Page indicator of the toolbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} of {count}'**
+  String viewerPageIndicator(int page, int count);
+
+  /// Legend and setup text when there is nothing to print.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to print'**
+  String get viewerNothingToPrint;
+
+  /// Compact toolbar button label with the active filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters · {summary}'**
+  String viewerFiltersSummary(String summary);
+
+  /// Title when the route's report is unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'This report doesn’t exist'**
+  String get viewerUnknownReportTitle;
+
+  /// Body when the route's report is unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The link doesn’t match one of the contest’s reports. There is nothing to print.'**
+  String get viewerUnknownReportBody;
+
+  /// Setup text when printing is unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Printing unavailable'**
+  String get viewerSetupPrintingUnavailable;
+
+  /// Setup text showing paper, orientation and page count.
+  ///
+  /// In en, this message translates to:
+  /// **'{setup} · {count} {word}'**
+  String viewerSetupSummary(String setup, int count, String word);
+
+  /// Subtitle under the panel heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes update the sheet straight away.'**
+  String get viewerPanelSubtitle;
+
+  /// Separator between items in the collapsed panel summary.
+  ///
+  /// In en, this message translates to:
+  /// **' · '**
+  String get viewerPanelSummarySeparator;
+
   /// Heading of the Settings card with the version, licences and legal links.
   ///
   /// In en, this message translates to:
