@@ -8335,6 +8335,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Email (private, used for matching only)'**
   String get participantsEmailPrivate;
+
+  /// Notice on the sync page when sync is unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing is only used in the Windows app.'**
+  String get syncWindowsOnly;
+
+  /// Title of the sync details card.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get syncTitle;
+
+  /// Loading text in the sync details card.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get syncChecking;
+
+  /// Notice for a local-only contest.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest is local only. It has no remote backup and does not sync until it is tied to an account.'**
+  String get syncLocalOnlyText;
+
+  /// Always-shown warning in the sync details card.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes made after the last successful sync cannot be recovered if this installation is lost.'**
+  String get syncUnrecoverableWarning;
+
+  /// Row label: last synced time.
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced'**
+  String get syncLastSynced;
+
+  /// Row value when never synced.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced yet'**
+  String get syncNotSyncedYet;
+
+  /// Row label: pending changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be sent'**
+  String get syncWaitingToSend;
+
+  /// Row label: rejected changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused by the service'**
+  String get syncRefusedByService;
+
+  /// Row label / card title for conflicts.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflicts to decide'**
+  String get syncConflictsToDecide;
+
+  /// Button label to trigger a sync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get syncNow;
+
+  /// Button label while syncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncSyncing;
+
+  /// Loading text in the conflicts card.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get syncConflictsLoading;
+
+  /// Empty state in the conflicts card.
+  ///
+  /// In en, this message translates to:
+  /// **'None. Nothing is waiting for your decision.'**
+  String get syncConflictsNone;
+
+  /// Button to review a conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get syncReview;
+
+  /// Title of the refused changes card.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes the service refused'**
+  String get syncRefusedTitle;
+
+  /// Loading text in the refused changes card.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get syncRefusedLoading;
+
+  /// Empty state in the refused changes card.
+  ///
+  /// In en, this message translates to:
+  /// **'None. The service accepted every change it has answered.'**
+  String get syncRefusedNone;
+
+  /// Snack bar after a successful conflict decision.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision saved.'**
+  String get syncDecisionSaved;
+
+  /// Snack bar when the post-decision sync failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision sent. The sync that follows failed ({problem}), so this screen updates after the next successful sync.'**
+  String syncDecisionFailed(String problem);
+
+  /// Button to close the conflict dialog without deciding.
+  ///
+  /// In en, this message translates to:
+  /// **'Decide later'**
+  String get syncDecideLater;
+
+  /// Button to cancel editing in the conflict dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get syncBack;
+
+  /// Button to save an edited conflict payload.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep edited value'**
+  String get syncKeepEdited;
+
+  /// Button to edit a conflict payload.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get syncEdit;
+
+  /// Button to keep the competing version.
+  ///
+  /// In en, this message translates to:
+  /// **'Use competing change'**
+  String get syncUseCompeting;
+
+  /// Button to keep the accepted version.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep accepted value'**
+  String get syncKeepAccepted;
+
+  /// Title of the conflict resolve dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve {entityType} conflict'**
+  String syncResolveTitle(String entityType);
 }
 
 class _AppLocalizationsDelegate
