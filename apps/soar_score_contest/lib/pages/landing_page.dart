@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
@@ -117,23 +118,21 @@ class _LandingPageState extends State<LandingPage> {
     String url,
     String label,
   ) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Opening external site'),
-        content: Text(
-          'You are about to leave Soar Score and open "$label" in a new '
-          'browser tab. Any unsaved local work is not affected.',
-        ),
+        title: Text(l10n.landingOpenExternalTitle),
+        content: Text(l10n.landingOpenExternalContent(label)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.landingOpenExternalCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Open'),
+            child: Text(l10n.landingOpenExternalOpen),
           ),
         ],
       ),
@@ -146,8 +145,9 @@ class _LandingPageState extends State<LandingPage> {
     final uri = Uri.parse(url);
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Could not open "$label".')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.landingOpenExternalFailed(label))),
+      );
     }
   }
 
@@ -176,6 +176,7 @@ class _LandingPageState extends State<LandingPage> {
     }
 
     Widget buttons(bool internetAvailable, bool apiAvailable) {
+      final l10n = AppLocalizations.of(context);
       final authUsable = internetAvailable && apiAvailable;
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -191,21 +192,21 @@ class _LandingPageState extends State<LandingPage> {
           FilledButton.icon(
             onPressed: authUsable
                 ? () => session == null
-                      ? showNotWiredUpDialog(context, 'Sign in')
+                      ? showNotWiredUpDialog(context, l10n.landingSignIn)
                       : _signIn(context, session)
                 : null,
             icon: const Icon(Icons.login),
-            label: const Text('Sign in'),
+            label: Text(l10n.landingSignIn),
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: authUsable
                 ? () => session == null
-                      ? showNotWiredUpDialog(context, 'Create account')
+                      ? showNotWiredUpDialog(context, l10n.landingCreateAccount)
                       : _signIn(context, session, createAccount: true)
                 : null,
             icon: const Icon(Icons.person_add_alt_1),
-            label: const Text('Create account'),
+            label: Text(l10n.landingCreateAccount),
           ),
         ],
       );
@@ -228,14 +229,15 @@ class _LandingPageState extends State<LandingPage> {
     return ListenableBuilder(
       listenable: check,
       builder: (context, _) {
+        final l10n = AppLocalizations.of(context);
         final status = check.status;
         if (status == IdentityProviderStatus.checking) {
           return Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
-              CircularProgressIndicator(),
-              SizedBox(height: 12),
-              Text('Checking sign-in…'),
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 12),
+              Text(l10n.landingCheckingSignIn),
             ],
           );
         }
@@ -247,14 +249,15 @@ class _LandingPageState extends State<LandingPage> {
               const Icon(Icons.cloud_off, size: 40),
               const SizedBox(height: 8),
               Text(
-                'Sign-in unavailable',
+                l10n.landingSignInUnavailable,
                 style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
               Text(
-                'The identity provider is currently unreachable: '
-                '${lastError ?? 'unknown error'}.',
+                l10n.landingSignInUnavailableDetail(
+                  lastError ?? 'unknown error',
+                ),
                 style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
@@ -262,7 +265,7 @@ class _LandingPageState extends State<LandingPage> {
               FilledButton.icon(
                 onPressed: () => check.check(),
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: Text(l10n.landingRetry),
               ),
             ],
           );
@@ -273,12 +276,13 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   Widget _signedInArea(AuthSession session) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (session.displayName != null) ...[
           Text(
-            'Signed in as ${session.displayName}',
+            l10n.landingSignedInAs(session.displayName!),
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 12),
@@ -286,13 +290,13 @@ class _LandingPageState extends State<LandingPage> {
         FilledButton.icon(
           onPressed: () => context.pushNamed('home'),
           icon: const Icon(Icons.arrow_forward),
-          label: const Text('Continue'),
+          label: Text(l10n.landingContinue),
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
           onPressed: session.signOut,
           icon: const Icon(Icons.logout),
-          label: const Text('Sign out'),
+          label: Text(l10n.landingSignOut),
         ),
       ],
     );
@@ -300,6 +304,7 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final actionWidgets = List<Widget>.empty(growable: true);
     final monitor = _monitor;
     final session = authSessionOf(context);
@@ -346,7 +351,7 @@ class _LandingPageState extends State<LandingPage> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Manage and score RC sailplane soaring contests.',
+                          l10n.landingTagline,
                           style: Theme.of(context).textTheme.bodyLarge,
                           textAlign: TextAlign.center,
                         ),
@@ -355,9 +360,7 @@ class _LandingPageState extends State<LandingPage> {
                         const SizedBox(height: 32),
                         if (!widget.isWeb) ...[
                           Text(
-                            'Offline contests stay on this device unless you '
-                            'publish them or sign in to enable '
-                            'synchronization.',
+                            l10n.landingOfflineNote,
                             style: Theme.of(context).textTheme.bodyMedium,
                             textAlign: TextAlign.center,
                           ),
@@ -380,25 +383,25 @@ class _LandingPageState extends State<LandingPage> {
                                   context.pushNamed('home');
                                 },
                                 icon: const Icon(Icons.wifi_off, size: 16),
-                                label: const Text('Continue offline'),
+                                label: Text(l10n.landingContinueOffline),
                               ),
                             TextButton.icon(
                               onPressed: () => _openExternalLink(
                                 context,
                                 'https://rcsoarscore.com/docs',
-                                'Help',
+                                l10n.landingHelp,
                               ),
                               icon: const Icon(Icons.open_in_new, size: 16),
-                              label: const Text('Help'),
+                              label: Text(l10n.landingHelp),
                             ),
                             TextButton.icon(
                               onPressed: () => _openExternalLink(
                                 context,
                                 'https://rcsoarscore.com/results/contests',
-                                'Public contest site',
+                                l10n.landingPublicSite,
                               ),
                               icon: const Icon(Icons.open_in_new, size: 16),
-                              label: const Text('Public contest site'),
+                              label: Text(l10n.landingPublicSite),
                             ),
                           ],
                         ),

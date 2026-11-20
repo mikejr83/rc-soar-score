@@ -1,5 +1,8 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_contest/auth/auth_session.dart';
 import 'package:soar_score_contest/auth/auth_session_inherited.dart';
@@ -11,6 +14,20 @@ import 'support/fake_app_connectivity.dart';
 import 'support/fake_auth_session.dart';
 import 'support/fake_identity_provider_check.dart';
 
+const _delegates = [
+  AppLocalizations.delegate,
+  GlobalMaterialLocalizations.delegate,
+  GlobalWidgetsLocalizations.delegate,
+  GlobalCupertinoLocalizations.delegate,
+];
+const _locales = [Locale('en')];
+
+Widget _l10nApp(Widget home) => MaterialApp(
+      localizationsDelegates: _delegates,
+      supportedLocales: _locales,
+      home: home,
+    );
+
 Widget _app({
   required AuthSession session,
   required FakeIdentityProviderCheck check,
@@ -21,14 +38,24 @@ Widget _app({
     monitor: monitor ?? FakeAppConnectivity(),
     child: AuthSessionInherited(
       session: session,
-      child: MaterialApp(
-        home: LandingPage(isWeb: isWeb, identityCheck: check),
-      ),
+      child: _l10nApp(LandingPage(isWeb: isWeb, identityCheck: check)),
     ),
   );
 }
 
+Widget _bareApp({
+  required Widget home,
+  FakeAppConnectivity? monitor,
+}) {
+  return AppConnectivityInherited(
+    monitor: monitor ?? FakeAppConnectivity(),
+    child: _l10nApp(home),
+  );
+}
+
 void main() {
+  final l10n = AppLocalizationsEn();
+
   testWidgets('shows the loading row instead of the auth buttons while the '
       'check is in flight', (tester) async {
     final session = FakeAuthSession();
@@ -38,10 +65,10 @@ void main() {
     await tester.pumpWidget(_app(session: session, check: check));
 
     expect(check.probeCalls, 1);
-    expect(find.text('Checking sign-in…'), findsOneWidget);
+    expect(find.text(l10n.landingCheckingSignIn), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.text('Sign in'), findsNothing);
-    expect(find.text('Create account'), findsNothing);
+    expect(find.text(l10n.landingSignIn), findsNothing);
+    expect(find.text(l10n.landingCreateAccount), findsNothing);
   });
 
   testWidgets('shows the auth buttons when the check resolves available', (
@@ -56,9 +83,9 @@ void main() {
     check.notifyListeners();
     await tester.pump();
 
-    expect(find.text('Checking sign-in…'), findsNothing);
-    expect(find.text('Sign in'), findsOneWidget);
-    expect(find.text('Create account'), findsOneWidget);
+    expect(find.text(l10n.landingCheckingSignIn), findsNothing);
+    expect(find.text(l10n.landingSignIn), findsOneWidget);
+    expect(find.text(l10n.landingCreateAccount), findsOneWidget);
   });
 
   testWidgets('shows the unavailable state with reason and a retry action', (
@@ -72,24 +99,24 @@ void main() {
 
     await tester.pumpWidget(_app(session: session, check: check, isWeb: false));
 
-    expect(find.text('Sign-in unavailable'), findsOneWidget);
+    expect(find.text(l10n.landingSignInUnavailable), findsOneWidget);
     expect(
-      find.text('The identity provider is currently unreachable: Timed out.'),
+      find.text(l10n.landingSignInUnavailableDetail('Timed out')),
       findsOneWidget,
     );
-    expect(find.text('Retry'), findsOneWidget);
-    expect(find.text('Sign in'), findsNothing);
+    expect(find.text(l10n.landingRetry), findsOneWidget);
+    expect(find.text(l10n.landingSignIn), findsNothing);
 
     // Retry issues a new probe.
     final probesBefore = check.probeCalls;
-    await tester.tap(find.text('Retry'));
+    await tester.tap(find.text(l10n.landingRetry));
     await tester.pump();
     expect(check.probeCalls, probesBefore + 1);
 
     // Continue offline stays usable in the error state on desktop.
     final continueOffline = tester.widget<TextButton>(
       find.ancestor(
-        of: find.text('Continue offline'),
+        of: find.text(l10n.landingContinueOffline),
         matching: find.byType(TextButton),
       ),
     );
@@ -99,8 +126,8 @@ void main() {
     check.status = IdentityProviderStatus.available;
     check.notifyListeners();
     await tester.pump();
-    expect(find.text('Sign in'), findsOneWidget);
-    expect(find.text('Sign-in unavailable'), findsNothing);
+    expect(find.text(l10n.landingSignIn), findsOneWidget);
+    expect(find.text(l10n.landingSignInUnavailable), findsNothing);
   });
 
   testWidgets('renders the normal buttons without a check when no session '
@@ -110,16 +137,16 @@ void main() {
     addTearDown(check.dispose);
 
     await tester.pumpWidget(
-      AppConnectivityInherited(
+      _bareApp(
         monitor: monitor,
-        child: MaterialApp(home: LandingPage(isWeb: true)),
+        home: LandingPage(isWeb: true),
       ),
     );
 
     expect(check.probeCalls, 0);
-    expect(find.text('Checking sign-in…'), findsNothing);
-    expect(find.text('Sign in'), findsOneWidget);
-    expect(find.text('Create account'), findsOneWidget);
+    expect(find.text(l10n.landingCheckingSignIn), findsNothing);
+    expect(find.text(l10n.landingSignIn), findsOneWidget);
+    expect(find.text(l10n.landingCreateAccount), findsOneWidget);
   });
 
   testWidgets('renders the signed-in area regardless of the probe status', (
@@ -131,19 +158,19 @@ void main() {
 
     await tester.pumpWidget(_app(session: session, check: check));
 
-    expect(find.text('Signed in as Pat Pilot'), findsOneWidget);
-    expect(find.text('Continue'), findsOneWidget);
-    expect(find.text('Sign out'), findsOneWidget);
-    expect(find.text('Checking sign-in…'), findsNothing);
-    expect(find.text('Sign in'), findsNothing);
+    expect(find.text(l10n.landingSignedInAs('Pat Pilot')), findsOneWidget);
+    expect(find.text(l10n.landingContinue), findsOneWidget);
+    expect(find.text(l10n.landingSignOut), findsOneWidget);
+    expect(find.text(l10n.landingCheckingSignIn), findsNothing);
+    expect(find.text(l10n.landingSignIn), findsNothing);
 
     check.status = IdentityProviderStatus.unavailable;
     check.lastError = 'HTTP 500';
     check.notifyListeners();
     await tester.pump();
 
-    expect(find.text('Continue'), findsOneWidget);
-    expect(find.text('Sign-in unavailable'), findsNothing);
+    expect(find.text(l10n.landingContinue), findsOneWidget);
+    expect(find.text(l10n.landingSignInUnavailable), findsNothing);
   });
 
   testWidgets('re-probes exactly once when the internet transitions to '
@@ -194,13 +221,13 @@ void main() {
 
     // No inherited session: no check is created and the one is untouched.
     await tester.pumpWidget(
-      AppConnectivityInherited(
+      _bareApp(
         monitor: monitor,
-        child: const MaterialApp(home: LandingPage(isWeb: true)),
+        home: LandingPage(isWeb: true),
       ),
     );
     expect(injected.probeCalls, 0);
-    expect(find.text('Checking sign-in…'), findsNothing);
+    expect(find.text(l10n.landingCheckingSignIn), findsNothing);
 
     // A session appears: the page adopts the injected check and starts one
     // probe.
@@ -209,14 +236,14 @@ void main() {
         monitor: monitor,
         child: AuthSessionInherited(
           session: session,
-          child: MaterialApp(
-            home: LandingPage(isWeb: true, identityCheck: injected),
+          child: _l10nApp(
+            LandingPage(isWeb: true, identityCheck: injected),
           ),
         ),
       ),
     );
     expect(injected.probeCalls, 1);
-    expect(find.text('Checking sign-in…'), findsOneWidget);
+    expect(find.text(l10n.landingCheckingSignIn), findsOneWidget);
 
     // The session instance swaps: the existing check is reused, not
     // re-created or re-probed.
@@ -225,26 +252,26 @@ void main() {
         monitor: monitor,
         child: AuthSessionInherited(
           session: FakeAuthSession(),
-          child: MaterialApp(
-            home: LandingPage(isWeb: true, identityCheck: injected),
+          child: _l10nApp(
+            LandingPage(isWeb: true, identityCheck: injected),
           ),
         ),
       ),
     );
     expect(injected.probeCalls, 1);
-    expect(find.text('Checking sign-in…'), findsOneWidget);
+    expect(find.text(l10n.landingCheckingSignIn), findsOneWidget);
 
     // The session disappears: the injected check is released, not disposed
     // (the owner still owns it), and it remains usable.
     await tester.pumpWidget(
-      AppConnectivityInherited(
+      _bareApp(
         monitor: monitor,
-        child: const MaterialApp(home: LandingPage(isWeb: true)),
+        home: LandingPage(isWeb: true),
       ),
     );
     expect(injected.probeCalls, 1);
-    expect(find.text('Checking sign-in…'), findsNothing);
-    expect(find.text('Sign in'), findsOneWidget);
+    expect(find.text(l10n.landingCheckingSignIn), findsNothing);
+    expect(find.text(l10n.landingSignIn), findsOneWidget);
     injected.status = IdentityProviderStatus.available;
     injected.notifyListeners();
   });
@@ -262,8 +289,8 @@ void main() {
         monitor: monitor,
         child: AuthSessionInherited(
           session: session,
-          child: MaterialApp(
-            home: LandingPage(isWeb: true, identityCheck: injected),
+          child: _l10nApp(
+            LandingPage(isWeb: true, identityCheck: injected),
           ),
         ),
       ),
@@ -273,9 +300,9 @@ void main() {
     // The page is removed, but the check is owned by the test, so the page
     // must release it without disposing it.
     await tester.pumpWidget(
-      AppConnectivityInherited(
+      _bareApp(
         monitor: monitor,
-        child: const MaterialApp(home: SizedBox()),
+        home: const SizedBox(),
       ),
     );
 

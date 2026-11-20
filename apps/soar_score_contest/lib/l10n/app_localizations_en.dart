@@ -5470,4 +5470,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get landingsEmpty => 'No landing tables yet.';
+
+  @override
+  String get landingEditorName => 'Name';
+
+  @override
+  String get landingEditorUnitLabel => 'What the keys mean';
+
+  @override
+  String get landingEditorEntries => 'Entries';
+
+  @override
+  String get landingEditorAddEntry => 'Add entry';
+
+  @override
+  String get landingEditorSave => 'Save';
+
+  @override
+  String get landingEditorCancel => 'Cancel';
+
+  @override
+  String get landingEditorEntryLabel => 'Label';
+
+  @override
+  String get landingEditorEntryPoints => 'Points';
+
+  @override
+  String landingEditorRemoveEntry(int n) {
+    return 'Remove entry $n';
+  }
+
+  @override
+  String get landingOpenExternalTitle => 'Opening external site';
+
+  @override
+  String get landingOpenExternalCancel => 'Cancel';
+
+  @override
+  String get landingOpenExternalOpen => 'Open';
+
+  @override
+  String landingOpenExternalFailed(String label) {
+    return 'Could not open \"$label\".';
+  }
+
+  @override
+  String get landingSignIn => 'Sign in';
+
+  @override
+  String get landingCreateAccount => 'Create account';
+
+  @override
+  String get landingCheckingSignIn => 'Checking sign-in…';
+
+  @override
+  String get landingRetry => 'Retry';
+
+  @override
+  String get landingContinue => 'Continue';
+
+  @override
+  String get landingSignOut => 'Sign out';
+
+  @override
+  String get landingContinueOffline => 'Continue offline';
+
+  @override
+  String get landingHelp => 'Help';
+
+  @override
+  String get landingPublicSite => 'Public contest site';
+
+  @override
+  String landingOpenExternalContent(String label) {
+    return 'You are about to leave Soar Score and open \"$label\" in a new browser tab. Any unsaved local work is not affected.';
+  }
+
+  @override
+  String get landingSignInUnavailable => 'Sign-in unavailable';
+
+  @override
+  String landingSignInUnavailableDetail(String error) {
+    return 'The identity provider is currently unreachable: $error.';
+  }
+
+  @override
+  String landingSignedInAs(String name) {
+    return 'Signed in as $name';
+  }
+
+  @override
+  String get landingTagline =>
+      'Manage and score RC sailplane soaring contests.';
+
+  @override
+  String get landingOfflineNote =>
+      'Offline contests stay on this device unless you publish them or sign in to enable synchronization.';
 }
