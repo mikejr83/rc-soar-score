@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_contest/pages/home_page.dart';
 import 'package:soar_score_contest/pages/landing_page.dart';
-import 'package:soar_score_contest/router.dart' show contestsPath;
+import 'package:soar_score_contest/router.dart' show contestWorkspacePath;
 
 import '../support/interact.dart';
 import '../support/launch_app.dart';
@@ -95,7 +95,7 @@ Future<void> runStartPhase(Journey journey, JourneyContext data) async {
     () async {
       await goToMainPage(tester);
       GoRouter.of(tester.element(find.byType(HomePage)))
-          .go('$contestsPath/no-such-contest');
+          .go(contestWorkspacePath('no-such-contest'));
       await pumpUntilFound(tester, find.text('Contest not found'));
       await pumpUntilFound(
         tester,
