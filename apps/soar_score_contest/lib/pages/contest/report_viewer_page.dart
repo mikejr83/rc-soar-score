@@ -185,6 +185,9 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
 
   // Document.
 
+  AppLocalizations get _l10n =>
+      Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+
   ReportDocument? _document() {
     final controller = _controller!;
     final facts = controller.facts;
@@ -208,7 +211,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
               ),
         preview: controller.preview,
         data: controller.data,
-        l10n: Localizations.of<AppLocalizations>(context, AppLocalizations),
+        l10n: _l10n,
         online: invitationsReachable(context),
       ),
     );
@@ -247,9 +250,9 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
           reportName: widget.report!.title,
           pageNumber: i + 1,
           pageCount: count,
-          extraSideMargin: _definition!.extraSideMargin,
-          generated: 'Generated $stamp',
-          status: document.status,
+           extraSideMargin: _definition!.extraSideMargin,
+           generated: _l10n.viewerGenerated(stamp),
+           status: document.status,
           body: document.pages[i],
         ),
     ];
@@ -257,11 +260,10 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
 
   // Actions.
 
-  String get _printTitle {
+  String _printTitle() {
     final name = _controller!.facts?.contest.name;
-    return name == null
-        ? widget.report!.title
-        : '${widget.report!.title} – $name';
+    final title = widget.report!.title;
+    return name == null ? title : _l10n.viewerPrintTitle(title, name);
   }
 
   /// The sheet pages for the printer. They are painted off screen, outside
@@ -310,7 +312,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
     }
     // The pages are built after the reminder: sending invitations from it adds
     // QR codes to the cards.
-    controller.print(_printTitle, _printPages());
+    controller.print(_printTitle(), _printPages());
   }
 
   Future<void> _savePdf() async {
@@ -323,7 +325,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
     if (!_rangeIsValid(_document()) || !await _confirmPrint()) {
       return;
     }
-    controller.savePdf(_printTitle, _printPages());
+    controller.savePdf(_printTitle(), _printPages());
   }
 
   void _goBack() => context.go(contestReportsPath(widget.contestId));
@@ -366,41 +368,44 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         ReportDestination.matrix => contestMatrixPath(widget.contestId),
       });
 
-  Future<void> _openFilterSheet() => showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    showDragHandle: true,
-    builder: (context) => DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: .8,
-      maxChildSize: .9,
-      builder: (context, scroll) => ListenableBuilder(
-        listenable: _controller!,
-        builder: (context, _) => ListView(
-          controller: scroll,
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Filter and options',
-                    style: Theme.of(context).textTheme.titleLarge,
+  Future<void> _openFilterSheet() {
+    final l10n = _l10n;
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: .8,
+        maxChildSize: .9,
+        builder: (context, scroll) => ListenableBuilder(
+          listenable: _controller!,
+          builder: (context, _) => ListView(
+            controller: scroll,
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.viewerFilterOptions,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Done'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _groups(columns: 1),
-          ],
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(l10n.viewerDone),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _groups(columns: 1),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 
   // Pieces.
 
@@ -436,6 +441,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
   }
 
   List<Widget> _banners(ReportDocument? document) {
+    final l10n = _l10n;
     final controller = _controller!;
     final printer = controller.printer;
     final banners = <Widget>[];
@@ -445,11 +451,8 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         ViewerBanner(
           kind: ViewerBannerKind.official,
           icon: Icons.verified,
-          lead: 'Official.',
-          text:
-              document?.statusReason ??
-              'Every recorded score is official, no reviews are open, and the '
-                  'standings are current. Printed pages carry no stamp.',
+          lead: l10n.viewerOfficialLead,
+            text: document?.statusReason ?? l10n.viewerOfficialDefault,
         ),
       );
     } else if (status == ResultStatus.preliminary) {
@@ -458,8 +461,8 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         ViewerBanner(
           kind: ViewerBannerKind.preliminary,
           icon: Icons.pending,
-          lead: 'Preliminary:',
-          text: document?.statusReason ?? 'Some scores are not final.',
+          lead: l10n.viewerPreliminaryLead,
+          text: document?.statusReason ?? l10n.viewerPreliminaryDefault,
           actions: [
             if (action != null)
               PageBannerAction(
@@ -506,7 +509,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         ViewerBanner(
           kind: ViewerBannerKind.info,
           icon: Icons.view_column,
-          lead: 'Crowded.',
+          lead: l10n.viewerCrowdedLead,
           text: notice,
         ),
       );
@@ -516,13 +519,11 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         ViewerBanner(
           kind: ViewerBannerKind.info,
           icon: Icons.update,
-          lead: 'Out of date.',
-          text:
-              'Scores, the matrix or the configuration changed after this '
-              'report was produced. The sheet hasn’t changed.',
+          lead: l10n.viewerOutdatedLead,
+          text: l10n.viewerOutdatedText,
           actions: [
             PageBannerAction(
-              'Refresh',
+              l10n.viewerRefresh,
               controller.refreshing ? null : controller.refresh,
               emphasis: PageBannerEmphasis.filled,
               key: const ValueKey('viewer-refresh'),
@@ -545,11 +546,11 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         ViewerBanner(
           kind: ViewerBannerKind.error,
           icon: Icons.error,
-          lead: 'Couldn’t load the scores for these rounds.',
-          text: 'The sheet still shows the last rounds that loaded.',
+          lead: l10n.viewerDataLoadFailedLead,
+          text: l10n.viewerDataLoadFailedText,
           actions: [
             PageBannerAction(
-              'Try again',
+              l10n.viewerTryAgain,
               controller.retryData,
               emphasis: PageBannerEmphasis.filled,
               key: const ValueKey('viewer-retry-data'),
@@ -563,18 +564,16 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         ViewerBanner(
           kind: ViewerBannerKind.error,
           icon: Icons.print_disabled,
-          lead: 'Couldn’t print.',
-          text:
-              'The system reported a printer error. Your filters and options '
-              'are unchanged.',
+          lead: l10n.viewerPrintFailedLead,
+          text: l10n.viewerPrintFailedText,
           actions: [
             PageBannerAction(
-              'Save as PDF',
+              l10n.viewerSaveAsPdf,
               _savePdf,
               emphasis: PageBannerEmphasis.outlined,
             ),
             PageBannerAction(
-              'Try again',
+              l10n.viewerTryAgain,
               _print,
               emphasis: PageBannerEmphasis.filled,
             ),
@@ -589,15 +588,15 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
           kind: ViewerBannerKind.neutral,
           icon: Icons.print_disabled,
           lead: caps.canSavePdf
-              ? 'Printing isn’t available here.'
-              : 'This browser can’t print or save PDFs.',
+              ? l10n.viewerPrintingUnavailableLead
+              : l10n.viewerPdfUnavailableLead,
           text: caps.canSavePdf
-              ? 'Save as PDF, then print or email the file from another device.'
-              : 'Copy the link and open it on a browser that can print.',
+              ? l10n.viewerPrintingUnavailableText
+              : l10n.viewerPdfUnavailableText,
           actions: [
             if (!caps.canSavePdf)
               PageBannerAction(
-                'Copy link',
+                l10n.viewerCopyLink,
                 () => Clipboard.setData(ClipboardData(text: _copyLinkUrl())),
                 emphasis: PageBannerEmphasis.filled,
               ),
@@ -617,7 +616,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         icon: Icons.filter_alt_off,
         title: check.title,
         body: check.body,
-        actionLabel: 'Reset filters',
+        actionLabel: _l10n.viewerClearFilters,
         onAction: controller.resetFilters,
       );
     }
@@ -646,17 +645,17 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
   }
 
   Widget _content(ReportDocument? document) {
+    final l10n = _l10n;
     final controller = _controller!;
     final width = MediaQuery.sizeOf(context).width;
     final compact = width < 600;
     final pageCount = document?.pages.length ?? 0;
     final nothing = document == null;
     final legend = controller.preview
-        ? 'Print preview: the white pages are exactly what prints.'
+        ? l10n.viewerPrintPreviewLegend
         : compact
-        ? 'White pages print as shown'
-        : 'The white pages print exactly as shown. Everything around them is '
-              'screen only.';
+        ? l10n.viewerPrintAsShownCompact
+        : l10n.viewerPrintAsShown;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -666,16 +665,17 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
             controller.noData != null)
           ViewerToolbar(
             pageText: nothing
-                ? 'No pages'
-                : 'Page ${_page.clamp(1, pageCount)} of $pageCount',
-            legend: nothing ? 'Nothing to print' : legend,
+                ? l10n.viewerNoPages
+                : l10n.viewerPageIndicator(_page.clamp(1, pageCount), pageCount),
+            legend: nothing ? l10n.viewerNothingToPrint : legend,
             zoom: controller.params.zoom,
             fit: _fit,
             onZoom: controller.setZoom,
             compact: compact,
             onFilters: _openFilterSheet,
-            filtersLabel:
-                'Filters · ${_definition!.filterSummary(controller.filters, controller.facts!)}',
+            filtersLabel: l10n.viewerFiltersSummary(
+              _definition!.filterSummary(controller.filters, controller.facts!),
+            ),
           ),
         Expanded(child: _body(document)),
       ],
@@ -698,17 +698,16 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
   }
 
   Widget _buildPage(BuildContext context) {
+    final l10n = _l10n;
     final report = widget.report;
     if (report == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Report')),
+        appBar: AppBar(title: Text(l10n.viewerReportWord)),
         body: ViewerMessage(
           icon: Icons.search_off,
-          title: 'This report doesn’t exist',
-          body:
-              'The link doesn’t match one of the contest’s reports. There is '
-              'nothing to print.',
-          actionLabel: 'Back to Reports',
+          title: l10n.viewerUnknownReportTitle,
+          body: l10n.viewerUnknownReportBody,
+          actionLabel: l10n.viewerBackToReports,
           onAction: _goBack,
         ),
       );
@@ -731,11 +730,14 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         !nothing && !controller.busy && caps.canSavePdf && rangeOk;
     final setup = controller.setup;
     final setupText = nothing
-        ? 'Nothing to print'
+        ? l10n.viewerNothingToPrint
         : !caps.canPrint
-        ? 'Printing unavailable'
-        : '${setup.label} · ${document.pages.length} '
-              '${document.pages.length == 1 ? 'page' : 'pages'}';
+        ? l10n.viewerSetupPrintingUnavailable
+        : l10n.viewerSetupSummary(
+            setup.label,
+            document.pages.length,
+            document.pages.length == 1 ? 'page' : 'pages',
+          );
     final shortcut = CallbackShortcuts(
       bindings: {
         const SingleActivator(LogicalKeyboardKey.keyP, control: true): _print,
@@ -774,13 +776,11 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
             ),
             ViewerLoad.notFound => ViewerMessage(
               icon: Icons.search_off,
-              title: 'This contest can’t be found',
-              body:
-                  'It may have been deleted, or the link points to a contest '
-                  'you no longer have access to. There is nothing to print.',
+              title: l10n.viewerNotFoundTitle,
+              body: l10n.viewerNotFoundBody,
               actionLabel: widget.openedInPlace
-                  ? 'Back to Reports'
-                  : 'Back to Contests',
+                  ? l10n.viewerBackToReports
+                  : l10n.viewerBackToContests,
               onAction: widget.openedInPlace
                   ? _goBack
                   : () => context.go(homePath),
@@ -788,27 +788,23 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
             ViewerLoad.unavailable => ViewerMessage(
               icon: Icons.error,
               isError: true,
-              title: 'Can’t read the contest data',
-              body:
-                  'The scores for this report couldn’t be loaded from this '
-                  'device or the server. Your filters are kept.',
-              actionLabel: 'Try again',
+              title: l10n.viewerUnavailableTitle,
+              body: l10n.viewerUnavailableBody,
+              actionLabel: l10n.viewerTryAgain,
               onAction: controller.retry,
             ),
             ViewerLoad.ready when controller.dataPending => ViewerLoading(
               pageAspect: setup.width / setup.height,
-              label: 'Building pages…',
+              label: l10n.viewerBuildingPages,
             ),
             ViewerLoad.ready
                 when controller.dataFailed && controller.data == null =>
               ViewerMessage(
                 icon: Icons.error,
                 isError: true,
-                title: 'Can’t read the scores for this report',
-                body:
-                    'They couldn’t be loaded from this device or the server. '
-                    'Your filters are kept.',
-                actionLabel: 'Try again',
+                title: l10n.viewerDataUnavailableTitle,
+                body: l10n.viewerDataUnavailableBody,
+                actionLabel: l10n.viewerTryAgain,
                 onAction: controller.retryData,
               ),
             ViewerLoad.ready => _ready(document, expanded, medium),
@@ -819,12 +815,13 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
     return AppWindowTitle(
       title: contestName.isEmpty
           ? report.title
-          : '${report.title} — $contestName',
+          : l10n.viewerPageWindow(report.title, contestName),
       child: shortcut,
     );
   }
 
   Widget _ready(ReportDocument? document, bool expanded, bool medium) {
+    final l10n = _l10n;
     final controller = _controller!;
     final content = _content(document);
     if (expanded) {
@@ -840,11 +837,11 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   Text(
-                    'Filter and options',
+                    l10n.viewerFilterOptions,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Text(
-                    'Changes update the sheet straight away.',
+                    l10n.viewerPanelSubtitle,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 16),
@@ -862,6 +859,11 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
         controller.filters,
         controller.facts!,
       );
+      final separator = l10n.viewerPanelSummarySeparator;
+      final paperOrientation = [
+        '${controller.setup.paper.label}, '
+            '${controller.setup.orientation.label.toLowerCase()}',
+      ].join(separator);
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -873,13 +875,12 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
                 ListTile(
                   key: const ValueKey('viewer-panel-toggle'),
                   leading: const Icon(Icons.tune),
-                  title: const Text('Filter and options'),
+                  title: Text(l10n.viewerFilterOptions),
                   subtitle: Text(
                     [
                       if (summary.isNotEmpty) summary,
-                      '${controller.setup.paper.label}, '
-                          '${controller.setup.orientation.label.toLowerCase()}',
-                    ].join(' · '),
+                      paperOrientation,
+                    ].join(separator),
                   ),
                   trailing: Icon(
                     _panelOpen ? Icons.expand_less : Icons.expand_more,

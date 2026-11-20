@@ -3415,6 +3415,183 @@
   "@viewerNothingToShow": {
     "description": "Subtitle of a data report that has nothing to show yet."
   },
+  "viewerGenerated": "Generated {time}",
+  "@viewerGenerated": {
+    "description": "Footer line of a printed page naming when it was produced.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerPrintTitle": "{title} – {name}",
+  "@viewerPrintTitle": {
+    "description": "Print job title for a named contest.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerFilterOptions": "Filter and options",
+  "@viewerFilterOptions": {
+    "description": "Heading of the filters and options panel and bottom sheet."
+  },
+  "viewerDone": "Done",
+  "@viewerDone": {
+    "description": "Button that closes the filter bottom sheet."
+  },
+  "viewerOfficialLead": "Official.",
+  "@viewerOfficialLead": {
+    "description": "Lead of the official status banner."
+  },
+  "viewerOfficialDefault": "Every score is official, no reviews are open, and the standings are current. Printed pages carry no stamp.",
+  "@viewerOfficialDefault": {
+    "description": "Text of the official status banner."
+  },
+  "viewerPreliminaryLead": "Preliminary:",
+  "@viewerPreliminaryLead": {
+    "description": "Lead of the preliminary status banner."
+  },
+  "viewerPreliminaryDefault": "Some scores are not final.",
+  "@viewerPreliminaryDefault": {
+    "description": "Text of the preliminary status banner."
+  },
+  "viewerCrowdedLead": "Crowded.",
+  "@viewerCrowdedLead": {
+    "description": "Lead of the crowded-sheet notice banner."
+  },
+  "viewerOutdatedLead": "Out of date.",
+  "@viewerOutdatedLead": {
+    "description": "Lead of the out-of-date sheet banner."
+  },
+  "viewerOutdatedText": "Scores, the matrix or the configuration changed after this report was produced. The sheet hasn’t changed.",
+  "@viewerOutdatedText": {
+    "description": "Text of the out-of-date sheet banner."
+  },
+  "viewerRefresh": "Refresh",
+  "@viewerRefresh": {
+    "description": "Action on the out-of-date sheet banner."
+  },
+  "viewerDataLoadFailedLead": "Couldn’t load the scores for these rounds.",
+  "@viewerDataLoadFailedLead": {
+    "description": "Lead of the data-failure banner."
+  },
+  "viewerDataLoadFailedText": "The sheet still shows the last rounds that loaded.",
+  "@viewerDataLoadFailedText": {
+    "description": "Text of the data-failure banner."
+  },
+  "viewerPrintFailedLead": "Couldn’t print.",
+  "@viewerPrintFailedLead": {
+    "description": "Lead of the print-failure banner."
+  },
+  "viewerPrintFailedText": "The system reported a printer error. Your filters and options are unchanged.",
+  "@viewerPrintFailedText": {
+    "description": "Text of the print-failure banner."
+  },
+  "viewerPrintingUnavailableLead": "Printing isn’t available here.",
+  "@viewerPrintingUnavailableLead": {
+    "description": "Lead when printing is unavailable but saving a PDF is."
+  },
+  "viewerPdfUnavailableLead": "This browser can’t print or save PDFs.",
+  "@viewerPdfUnavailableLead": {
+    "description": "Lead when neither printing nor saving a PDF is available."
+  },
+  "viewerPrintingUnavailableText": "Save as PDF, then print or email the file from another device.",
+  "@viewerPrintingUnavailableText": {
+    "description": "Text when printing is unavailable but saving a PDF is."
+  },
+  "viewerPdfUnavailableText": "Copy the link and open it on a browser that can print.",
+  "@viewerPdfUnavailableText": {
+    "description": "Text when neither printing nor saving a PDF is available."
+  },
+  "viewerCopyLink": "Copy link",
+  "@viewerCopyLink": {
+    "description": "Action that copies the link to this report."
+  },
+  "viewerClearFilters": "Reset filters",
+  "@viewerClearFilters": {
+    "description": "Action on the empty-filters state that clears the filters."
+  },
+  "viewerPrintPreviewLegend": "Print preview: the white pages are exactly what prints.",
+  "@viewerPrintPreviewLegend": {
+    "description": "Legend when print preview is on."
+  },
+  "viewerPrintAsShownCompact": "White pages print as shown",
+  "@viewerPrintAsShownCompact": {
+    "description": "Legend of a compact window."
+  },
+  "viewerPrintAsShown": "The white pages print exactly as shown. Everything around them is screen only.",
+  "@viewerPrintAsShown": {
+    "description": "Legend of a wide window."
+  },
+  "viewerNoPages": "No pages",
+  "@viewerNoPages": {
+    "description": "Page indicator when there are no pages."
+  },
+  "viewerPageIndicator": "Page {page} of {count}",
+  "@viewerPageIndicator": {
+    "description": "Page indicator of the toolbar.",
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "viewerNothingToPrint": "Nothing to print",
+  "@viewerNothingToPrint": {
+    "description": "Legend and setup text when there is nothing to print."
+  },
+  "viewerFiltersSummary": "Filters · {summary}",
+  "@viewerFiltersSummary": {
+    "description": "Compact toolbar button label with the active filters.",
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerUnknownReportTitle": "This report doesn’t exist",
+  "@viewerUnknownReportTitle": {
+    "description": "Title when the route's report is unknown."
+  },
+  "viewerUnknownReportBody": "The link doesn’t match one of the contest’s reports. There is nothing to print.",
+  "@viewerUnknownReportBody": {
+    "description": "Body when the route's report is unknown."
+  },
+  "viewerSetupPrintingUnavailable": "Printing unavailable",
+  "@viewerSetupPrintingUnavailable": {
+    "description": "Setup text when printing is unavailable."
+  },
+  "viewerSetupSummary": "{setup} · {count} {word}",
+  "@viewerSetupSummary": {
+    "description": "Setup text showing paper, orientation and page count.",
+    "placeholders": {
+      "setup": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerPanelSubtitle": "Changes update the sheet straight away.",
+  "@viewerPanelSubtitle": {
+    "description": "Subtitle under the panel heading."
+  },
+  "viewerPanelSummarySeparator": " · ",
+  "@viewerPanelSummarySeparator": {
+    "description": "Separator between items in the collapsed panel summary."
+  },
   "aboutHeading": "About",
   "@aboutHeading": {
     "description": "Heading of the Settings card with the version, licences and legal links."

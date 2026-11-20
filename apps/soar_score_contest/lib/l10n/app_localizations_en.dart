@@ -2671,6 +2671,132 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewerNothingToShow => 'Nothing to show';
 
   @override
+  String viewerGenerated(String time) {
+    return 'Generated $time';
+  }
+
+  @override
+  String viewerPrintTitle(String title, String name) {
+    return '$title – $name';
+  }
+
+  @override
+  String get viewerFilterOptions => 'Filter and options';
+
+  @override
+  String get viewerDone => 'Done';
+
+  @override
+  String get viewerOfficialLead => 'Official.';
+
+  @override
+  String get viewerOfficialDefault =>
+      'Every score is official, no reviews are open, and the standings are current. Printed pages carry no stamp.';
+
+  @override
+  String get viewerPreliminaryLead => 'Preliminary:';
+
+  @override
+  String get viewerPreliminaryDefault => 'Some scores are not final.';
+
+  @override
+  String get viewerCrowdedLead => 'Crowded.';
+
+  @override
+  String get viewerOutdatedLead => 'Out of date.';
+
+  @override
+  String get viewerOutdatedText =>
+      'Scores, the matrix or the configuration changed after this report was produced. The sheet hasn’t changed.';
+
+  @override
+  String get viewerRefresh => 'Refresh';
+
+  @override
+  String get viewerDataLoadFailedLead =>
+      'Couldn’t load the scores for these rounds.';
+
+  @override
+  String get viewerDataLoadFailedText =>
+      'The sheet still shows the last rounds that loaded.';
+
+  @override
+  String get viewerPrintFailedLead => 'Couldn’t print.';
+
+  @override
+  String get viewerPrintFailedText =>
+      'The system reported a printer error. Your filters and options are unchanged.';
+
+  @override
+  String get viewerPrintingUnavailableLead => 'Printing isn’t available here.';
+
+  @override
+  String get viewerPdfUnavailableLead =>
+      'This browser can’t print or save PDFs.';
+
+  @override
+  String get viewerPrintingUnavailableText =>
+      'Save as PDF, then print or email the file from another device.';
+
+  @override
+  String get viewerPdfUnavailableText =>
+      'Copy the link and open it on a browser that can print.';
+
+  @override
+  String get viewerCopyLink => 'Copy link';
+
+  @override
+  String get viewerClearFilters => 'Reset filters';
+
+  @override
+  String get viewerPrintPreviewLegend =>
+      'Print preview: the white pages are exactly what prints.';
+
+  @override
+  String get viewerPrintAsShownCompact => 'White pages print as shown';
+
+  @override
+  String get viewerPrintAsShown =>
+      'The white pages print exactly as shown. Everything around them is screen only.';
+
+  @override
+  String get viewerNoPages => 'No pages';
+
+  @override
+  String viewerPageIndicator(int page, int count) {
+    return 'Page $page of $count';
+  }
+
+  @override
+  String get viewerNothingToPrint => 'Nothing to print';
+
+  @override
+  String viewerFiltersSummary(String summary) {
+    return 'Filters · $summary';
+  }
+
+  @override
+  String get viewerUnknownReportTitle => 'This report doesn’t exist';
+
+  @override
+  String get viewerUnknownReportBody =>
+      'The link doesn’t match one of the contest’s reports. There is nothing to print.';
+
+  @override
+  String get viewerSetupPrintingUnavailable => 'Printing unavailable';
+
+  @override
+  String viewerSetupSummary(String setup, int count, String word) {
+    return '$setup · $count $word';
+  }
+
+  @override
+  String get viewerPanelSubtitle => 'Changes update the sheet straight away.';
+
+  @override
+  String get viewerPanelSummarySeparator => ' · ';
+
+  @override
   String get aboutHeading => 'About';
 
   @override
