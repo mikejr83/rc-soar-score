@@ -3843,6 +3843,131 @@
   "@standingsReviewChipSemantic": {
     "description": "Accessibility label of the review chip."
   },
+  "matrixRoundLabel": "Round {round}",
+  "@matrixRoundLabel": {
+    "description": "Dropdown label of a drawn round.",
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixRoundLabelNotDrawn": "Round {round} · not drawn",
+  "@matrixRoundLabelNotDrawn": {
+    "description": "Dropdown label of a round the contest has not drawn.",
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixShowAllDrawn": "Show all drawn rounds",
+  "@matrixShowAllDrawn": {
+    "description": "Button that shows every drawn round."
+  },
+  "matrixShowAllRounds": "Show all rounds",
+  "@matrixShowAllRounds": {
+    "description": "Button that shows every round."
+  },
+  "matrixColumns": "Columns",
+  "@matrixColumns": {
+    "description": "Heading of the draw matrix column group."
+  },
+  "matrixCompactMode": "Compact mode",
+  "@matrixCompactMode": {
+    "description": "Label of the compact mode option."
+  },
+  "matrixCompactHelp": "Two columns per page, 9 pt text",
+  "@matrixCompactHelp": {
+    "description": "Help for the compact mode option."
+  },
+  "matrixAdditionalInfo": "Additional pilot info",
+  "@matrixAdditionalInfo": {
+    "description": "Label of the additional pilot info option."
+  },
+  "matrixAdditionalUnavailable": "Not available in compact mode",
+  "@matrixAdditionalUnavailable": {
+    "description": "Help when additional pilot info is unavailable."
+  },
+  "matrixAdditionalChosenHelp": "Adds a column for each item you tick",
+  "@matrixAdditionalChosenHelp": {
+    "description": "Help when additional pilot info is on."
+  },
+  "matrixAdditionalDefaultHelp": "Club, FAI ID and National ID columns",
+  "@matrixAdditionalDefaultHelp": {
+    "description": "Help when additional pilot info is off."
+  },
+  "matrixClub": "Club",
+  "@matrixClub": {
+    "description": "Label of the club column option."
+  },
+  "matrixFaiId": "FAI ID",
+  "@matrixFaiId": {
+    "description": "Label of the FAI ID column option."
+  },
+  "matrixNationalId": "National ID",
+  "@matrixNationalId": {
+    "description": "Label of the National ID column option."
+  },
+  "matrixAdditionalKept": "Kept as set. They apply again when Compact mode is off.",
+  "@matrixAdditionalKept": {
+    "description": "Note when the additional columns are kept during compact mode."
+  },
+  "matrixTableLabel": "Page {page}",
+  "@matrixTableLabel": {
+    "description": "Screen-reader name of a draw matrix table on one page.",
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixTableLabelColumn": "Page {page}, column {column}",
+  "@matrixTableLabelColumn": {
+    "description": "Screen-reader name of a table in compact mode (two per page).",
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "column": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixRoundRow": "Round {ordinal}",
+  "@matrixRoundRow": {
+    "description": "Heading of a round row in the draw matrix.",
+    "placeholders": {
+      "ordinal": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixContinued": " (continued)",
+  "@matrixContinued": {
+    "description": "Suffix of a round or group row that continues on this page."
+  },
+  "matrixGroupRow": "Group {label}",
+  "@matrixGroupRow": {
+    "description": "Heading of a group row in the draw matrix.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixGroupSize": "{size} {word}",
+  "@matrixGroupSize": {
+    "description": "Group size in the draw matrix row heading.",
+    "placeholders": {
+      "size": {
+        "type": "int"
+      },
+      "word": {
+        "type": "String"
+      }
+    }
+  },
   "aboutHeading": "About",
   "@aboutHeading": {
     "description": "Heading of the Settings card with the version, licences and legal links."
