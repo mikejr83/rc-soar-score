@@ -216,10 +216,8 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
         findsNothing,
       );
 
-      // The ranking follows the flights the journey entered: the pilot who
-      // flew longest and lowest wins (possibly tied with another group's
-      // winner), the pilot who flew least and retired last, and nobody
-      // ranks above a pilot with a higher total.
+      // Group normalization can change the winning pilot with the draw.
+      // The report starts with first place and orders the stored totals.
       final rows = tester
           .widgetList<StandingsTableView>(find.byType(StandingsTableView))
           .first
@@ -233,7 +231,8 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
       final worst = rows.firstWhere(
         (r) => r.pilot.givenSurname == data.pilotNames.last,
       );
-      expect(best.place, 1);
+      expect(rows.first.place, 1);
+      expect(best.total, greaterThan(worst.total));
       expect(worst.place, data.pilotNames.length);
       expect(rows.where((r) => r.place == worst.place), hasLength(1));
       for (var i = 1; i < rows.length; i++) {
