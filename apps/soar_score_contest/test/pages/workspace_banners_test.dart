@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/widgets/workspace/workspace_banners.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -232,6 +233,8 @@ void main() {
   group('the banners widget', () {
     Widget app({ThemeMode mode = ThemeMode.light, double scale = 1}) =>
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           themeMode: mode,
           theme: ThemeData(),
           darkTheme: ThemeData.dark(),
@@ -273,7 +276,9 @@ void main() {
       'the offline banner on the web does not promise local scoring',
       (tester) async {
         await tester.pumpWidget(
-          const MaterialApp(
+          MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: WorkspaceBanners(offline: true, keepsLocalData: false),
             ),
@@ -299,7 +304,11 @@ void main() {
 
     testWidgets('with nothing to say, shows nothing', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: WorkspaceBanners())),
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(body: WorkspaceBanners()),
+        ),
       );
       expect(find.byKey(_offlineKey), findsNothing);
       expect(find.byKey(_staleKey), findsNothing);

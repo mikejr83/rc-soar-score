@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../router.dart';
 import '../../../services/workspace/progress/progress_summary.dart';
 import '../../../services/workspace/progress/progress_text.dart';
@@ -42,6 +43,7 @@ class _Placeholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Card(
       key: const ValueKey('progress-placeholder'),
@@ -77,7 +79,7 @@ class _Placeholder extends StatelessWidget {
                   TextButton(
                     key: const ValueKey('progress-retry'),
                     onPressed: onRetry,
-                    child: const Text('Retry'),
+                    child: Text(l10n.workspaceRetry),
                   ),
                 ],
               ),

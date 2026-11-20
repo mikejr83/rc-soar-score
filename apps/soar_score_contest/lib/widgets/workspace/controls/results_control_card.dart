@@ -98,6 +98,8 @@ class _ResultsControlCardState extends State<ResultsControlCard> {
         client: client,
         messenger: messenger,
         refresh: scope.refresh,
+        undoLabel: l10n.workspaceActionUndo,
+        refreshLabel: l10n.workspaceActionRefresh,
         onStale: scope.reportStale,
       ).run(
         widget.contest,

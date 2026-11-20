@@ -1,15 +1,19 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/workspace/workspace_control.dart';
 
 /// The title of a control card.
-String workspaceControlLabel(WorkspaceControl control) => switch (control) {
-  WorkspaceControl.lifecycle => 'Lifecycle',
-  WorkspaceControl.scoring => 'Participant scoring',
-  WorkspaceControl.results => 'Overall results',
-  WorkspaceControl.administration => 'Administration',
-  WorkspaceControl.publication => 'Publication',
-  WorkspaceControl.archive => 'Archive',
+String workspaceControlLabel(
+  AppLocalizations l10n,
+  WorkspaceControl control,
+) => switch (control) {
+  WorkspaceControl.lifecycle => l10n.workspaceControlLifecycle,
+  WorkspaceControl.scoring => l10n.workspaceControlScoring,
+  WorkspaceControl.results => l10n.workspaceControlResults,
+  WorkspaceControl.administration => l10n.workspaceControlAdministration,
+  WorkspaceControl.publication => l10n.workspaceControlPublication,
+  WorkspaceControl.archive => l10n.workspaceControlArchive,
 };
 
 /// One control card on the workspace page: the deep-link target for the status
@@ -45,11 +49,13 @@ class WorkspaceControlSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
+    final label = workspaceControlLabel(l10n, control);
     return Semantics(
       key: anchor,
       container: true,
-      label: workspaceControlLabel(control),
+      label: label,
       child: Focus(
         focusNode: focusNode,
         skipTraversal: true,
@@ -68,7 +74,7 @@ class WorkspaceControlSlot extends StatelessWidget {
             child:
                 child ??
                 Text(
-                  '${workspaceControlLabel(control)} goes here',
+                  l10n.workspaceControlGoesHere(label),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
           ),

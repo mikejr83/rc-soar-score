@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/services/workspace/checklist/checklist_item.dart';
 import 'package:soar_score_contest/services/workspace/checklist/setup_checklist.dart';
 import 'package:soar_score_contest/services/workspace/publication_facts.dart';
@@ -37,6 +38,8 @@ Future<List<ChecklistTarget>> _pump(
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(brightness: brightness),
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(context)

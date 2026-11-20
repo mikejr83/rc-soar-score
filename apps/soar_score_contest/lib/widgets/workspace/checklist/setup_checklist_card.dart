@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/workspace/checklist/checklist_item.dart';
 import '../../../services/workspace/checklist/setup_checklist.dart';
 import 'checklist_row.dart';
@@ -18,6 +19,7 @@ class SetupChecklistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Card(
       key: const ValueKey('setup-checklist-card'),
@@ -32,7 +34,10 @@ class SetupChecklistCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Semantics(
               header: true,
-              child: Text('Setup checklist', style: theme.textTheme.titleLarge),
+              child: Text(
+                l10n.workspaceChecklistTitle,
+                style: theme.textTheme.titleLarge,
+              ),
             ),
           ),
           Padding(
@@ -54,11 +59,14 @@ class SetupChecklistCard extends StatelessWidget {
               header: true,
               child: Row(
                 children: [
-                  Text('Optional', style: theme.textTheme.titleSmall),
+                  Text(
+                    l10n.workspaceChecklistOptional,
+                    style: theme.textTheme.titleSmall,
+                  ),
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
-                      'Not needed to run the contest',
+                      l10n.workspaceChecklistOptionalNote,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

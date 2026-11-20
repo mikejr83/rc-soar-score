@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/semantics.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/services/workspace/next_step/next_step_action.dart';
 import 'package:soar_score_contest/services/workspace/next_step/next_step_target.dart';
 import 'package:soar_score_contest/services/workspace/publication_facts.dart';
@@ -12,6 +13,8 @@ import '../../../support/next_step_support.dart';
 import '../../../support/next_step_widget_support.dart';
 
 Widget _card(dynamic step) => MaterialApp(
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
   home: Scaffold(
     body: NextStepCard(step: step, busy: false, onPressed: (_) {}),
   ),

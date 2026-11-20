@@ -2104,6 +2104,295 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matrixCopySeedTooltip => 'Copy random seed';
 
   @override
+  String get workspaceControlLifecycle => 'Lifecycle';
+
+  @override
+  String get workspaceControlScoring => 'Participant scoring';
+
+  @override
+  String get workspaceControlResults => 'Overall results';
+
+  @override
+  String get workspaceControlAdministration => 'Administration';
+
+  @override
+  String get workspaceControlPublication => 'Publication';
+
+  @override
+  String get workspaceControlArchive => 'Archive';
+
+  @override
+  String workspaceControlGoesHere(String label) {
+    return '$label goes here';
+  }
+
+  @override
+  String get workspaceSectionNextStep => 'Next step';
+
+  @override
+  String get workspaceSectionChecklist => 'Setup checklist';
+
+  @override
+  String get workspaceSectionInvitations => 'Pilot invitations';
+
+  @override
+  String get workspaceSectionAttention => 'Needs attention';
+
+  @override
+  String get workspaceSectionProgress => 'Round progress';
+
+  @override
+  String get workspaceSectionControls => 'Contest controls';
+
+  @override
+  String get workspaceSectionFacts => 'Contest facts';
+
+  @override
+  String get workspaceSectionActivity => 'Recent activity';
+
+  @override
+  String workspaceSectionGoesHere(String label) {
+    return '$label goes here';
+  }
+
+  @override
+  String workspaceBannerStaleChange(String change) {
+    return 'Your change to $change wasn\'t applied. This page is out of date.';
+  }
+
+  @override
+  String get workspaceBannerStaleRefresh => 'Refresh';
+
+  @override
+  String workspaceBannerUnreachable(String copyTime) {
+    return 'Can\'t reach the Soar Score server. Showing this device\'s copy from $copyTime. Scoring still works here and will sync; publishing, visibility and delisting are off until the server is back.';
+  }
+
+  @override
+  String get workspaceBannerTryAgain => 'Try again';
+
+  @override
+  String get workspaceBannerOfflineLocal =>
+      'Offline. Scoring and the other controls keep working on this device and sync when you\'re back. Publishing, visibility and delisting need a connection.';
+
+  @override
+  String get workspaceBannerOfflineNoLocal =>
+      'Offline. Changes can\'t be saved until you\'re back online; what is on screen may be out of date.';
+
+  @override
+  String get workspaceFactsTitle => 'Contest';
+
+  @override
+  String get workspaceFactsDates => 'Dates';
+
+  @override
+  String get workspaceFactsTimezone => 'Timezone';
+
+  @override
+  String get workspaceFactsHost => 'Host';
+
+  @override
+  String get workspaceFactsLocation => 'Location';
+
+  @override
+  String get workspaceAttentionLoading => 'Checking what needs attention…';
+
+  @override
+  String get workspaceAttentionTitle => 'Needs attention';
+
+  @override
+  String get workspaceAttentionIncomplete => 'This list may be incomplete';
+
+  @override
+  String get workspaceAttentionUnknown =>
+      'Needs attention could not be worked out';
+
+  @override
+  String get workspaceRetry => 'Retry';
+
+  @override
+  String get workspaceChecklistTitle => 'Setup checklist';
+
+  @override
+  String get workspaceChecklistOptional => 'Optional';
+
+  @override
+  String get workspaceChecklistOptionalNote => 'Not needed to run the contest';
+
+  @override
+  String get workspaceChecklistLoading => 'Loading the setup checklist…';
+
+  @override
+  String get workspaceChecklistLoadFailed =>
+      'The setup checklist could not be loaded.';
+
+  @override
+  String get workspaceArchiveArchived => 'Archived';
+
+  @override
+  String get workspaceArchiveNotArchived => 'Not archived';
+
+  @override
+  String get workspaceArchiveScope =>
+      'Archiving moves a contest out of the way on this installation.';
+
+  @override
+  String get workspaceArchiveUnavailable =>
+      'Archiving is not available yet: the server has no archive action.';
+
+  @override
+  String get workspaceArchiveButton => 'Archive contest';
+
+  @override
+  String get workspaceControlNow => 'Now: ';
+
+  @override
+  String get workspaceCompleteTitle => 'Complete contest?';
+
+  @override
+  String get workspaceCompleteButton => 'Complete contest';
+
+  @override
+  String get workspaceCompleteLifecycle => 'Lifecycle: Running → Completed';
+
+  @override
+  String get workspaceCompleteBody =>
+      'Completing closes participant scoring and ends results hiding. There is no way back to Running. Authorized score corrections stay possible.';
+
+  @override
+  String get workspaceCompleteScoresUnknown =>
+      'The scores could not be loaded, so the missing scores and unflown rounds are not listed.';
+
+  @override
+  String get workspaceCompleteAllClear =>
+      'Every flight has a score and every round has been flown.';
+
+  @override
+  String get workspaceCompleteStillOpen => 'Still open:';
+
+  @override
+  String workspaceCompleteMissingScores(int count, String word) {
+    return '• $count $word no score';
+  }
+
+  @override
+  String workspaceCompleteUnflownRounds(String word, String rounds) {
+    return '• $word $rounds not flown';
+  }
+
+  @override
+  String get workspaceNoApiClient => 'No API client is available.';
+
+  @override
+  String get workspaceLockTitle => 'Lock administration?';
+
+  @override
+  String get workspaceLockLifecycle => 'Administration: Unlocked → Locked';
+
+  @override
+  String get workspaceLockRejected =>
+      'While locked, these changes are rejected:';
+
+  @override
+  String get workspaceLockConfigItem => '• Contest configuration';
+
+  @override
+  String get workspaceLockParticipantsItem => '• Participants and their roles';
+
+  @override
+  String get workspaceLockMatrixItem => '• The matrix and its assignments';
+
+  @override
+  String get workspaceLockScoresItem => '• Scores';
+
+  @override
+  String get workspaceLockBody =>
+      'The contest can still be viewed and published. Locking does not complete it or close participant scoring.';
+
+  @override
+  String get workspaceLockButton => 'Lock administration';
+
+  @override
+  String get workspaceStatusTitle => 'Status';
+
+  @override
+  String get workspaceScoringOpen => 'Open';
+
+  @override
+  String get workspaceScoringCloseScope =>
+      'Closing stops pilots and helpers from entering their own scores.';
+
+  @override
+  String get workspaceScoringClosed => 'Closed';
+
+  @override
+  String get workspaceScoringOpenScope =>
+      'Opening lets pilots and helpers enter their own scores.';
+
+  @override
+  String get workspaceAdminLocked => 'Locked';
+
+  @override
+  String get workspaceAdminUnlockScope =>
+      'Unlocking allows changes to configuration, participants, the matrix and scores again.';
+
+  @override
+  String get workspaceAdminUnlocked => 'Unlocked';
+
+  @override
+  String get workspaceAdminLockScope =>
+      'Locking blocks changes to configuration, participants, the matrix and scores.';
+
+  @override
+  String get workspaceCompleteScope =>
+      'Completing ends the contest: scoring closes and the results are final.';
+
+  @override
+  String get workspaceActionUndo => 'Undo';
+
+  @override
+  String get workspaceActionRefresh => 'Refresh';
+
+  @override
+  String get workspaceNextStepUnavailable =>
+      'Some information could not be loaded.';
+
+  @override
+  String get workspaceNextStepLoading => 'Working out the next step…';
+
+  @override
+  String get workspaceNextStepFailed =>
+      'The next step could not be worked out.';
+
+  @override
+  String get workspaceSuggestionDismissed =>
+      'Suggestion dismissed. It returns if another 48 hours pass without scores.';
+
+  @override
+  String get workspaceLoadingLabel => 'Loading contest';
+
+  @override
+  String get workspaceLoadFailedTitle => 'Couldn\'t load this contest';
+
+  @override
+  String workspaceLoadFailedBody(String message) {
+    return '$message Nothing has changed.';
+  }
+
+  @override
+  String get workspaceLoadFailedRetry => 'Try again';
+
+  @override
+  String get workspaceNotFoundTitle => 'Contest not found';
+
+  @override
+  String get workspaceNotFoundBody =>
+      'This link doesn\'t match a contest on this device or the server. It may have been deleted, or the link is incomplete.';
+
+  @override
+  String get workspaceNotFoundBack => 'Back to Contests';
+
+  @override
   String get aboutHeading => 'About';
 
   @override

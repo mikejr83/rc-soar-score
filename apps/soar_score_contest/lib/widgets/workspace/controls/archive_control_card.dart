@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/workspace/workspace_control.dart';
 import 'control_card_body.dart';
 
@@ -12,18 +13,21 @@ class ArchiveControlCard extends StatelessWidget {
   final Contest contest;
 
   @override
-  Widget build(BuildContext context) => ControlCardBody(
-    control: WorkspaceControl.archive,
-    current: contest.localArchive ? 'Archived' : 'Not archived',
-    scope: 'Archiving moves a contest out of the way on this installation.',
-    disabledReason:
-        'Archiving is not available yet: the server has no '
-        'archive action.',
-    button: FilledButton.tonalIcon(
-      key: const ValueKey('control-archive'),
-      onPressed: null,
-      icon: const Icon(Icons.archive),
-      label: const Text('Archive contest'),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return ControlCardBody(
+      control: WorkspaceControl.archive,
+      current: contest.localArchive
+          ? l10n.workspaceArchiveArchived
+          : l10n.workspaceArchiveNotArchived,
+      scope: l10n.workspaceArchiveScope,
+      disabledReason: l10n.workspaceArchiveUnavailable,
+      button: FilledButton.tonalIcon(
+        key: const ValueKey('control-archive'),
+        onPressed: null,
+        icon: const Icon(Icons.archive),
+        label: Text(l10n.workspaceArchiveButton),
+      ),
+    );
+  }
 }

@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../../api_client_provider.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../services/workspace/controls/contest_transition.dart';
 import '../next_step/contest_action_runner.dart';
 import '../workspace_scope.dart';
@@ -34,9 +35,10 @@ Future<Contest?> runTransition(
 ) async {
   final client = apiClientOf(context);
   final messenger = ScaffoldMessenger.of(context);
+  final l10n = AppLocalizations.of(context);
   if (client == null) {
     messenger.showSnackBar(
-      const SnackBar(content: Text('No API client is available.')),
+      SnackBar(content: Text(l10n.workspaceNoApiClient)),
     );
     return null;
   }
@@ -44,6 +46,8 @@ Future<Contest?> runTransition(
     client: client,
     messenger: messenger,
     refresh: scope.refresh,
+    undoLabel: l10n.workspaceActionUndo,
+    refreshLabel: l10n.workspaceActionRefresh,
     onStale: scope.reportStale,
   );
   return runner.run(
