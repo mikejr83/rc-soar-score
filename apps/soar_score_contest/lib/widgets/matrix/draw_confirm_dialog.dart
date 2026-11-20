@@ -18,6 +18,7 @@ Future<bool> confirmDraw(
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (context) {
+      final l10n = AppLocalizations.of(context);
       final scheme = Theme.of(context).colorScheme;
       Widget item(IconData icon, String text) => Row(
         spacing: 10,
@@ -28,7 +29,10 @@ Future<bool> confirmDraw(
       );
       return AlertDialog(
         icon: Icon(Icons.grid_view, color: scheme.primary),
-        title: const Text('Draw the matrix?', textAlign: TextAlign.center),
+        title: Text(
+          l10n.matrixDrawConfirmTitle,
+          textAlign: TextAlign.center,
+        ),
         content: SizedBox(
           width: 420,
           child: Column(
@@ -38,25 +42,31 @@ Future<bool> confirmDraw(
             children: [
               item(
                 Icons.groups_outlined,
-                '${data.scoringPilots} scoring pilots',
+                l10n.matrixConfirmPilots(data.scoringPilots),
               ),
               item(
                 Icons.replay,
-                '$rounds ${seeded ? 'preliminary seeded rounds' : 'rounds'}',
+                l10n.matrixDrawConfirmRounds(
+                  rounds,
+                  seeded
+                      ? l10n.matrixDrawConfirmSeededRounds
+                      : l10n.matrixDrawConfirmRoundsWord,
+                ),
               ),
               item(
                 Icons.grid_view,
-                '${sizes.length} groups per round (${sizes.join(', ')} pilots)',
+                l10n.matrixDrawConfirmGroups(sizes.length, sizes.join(', ')),
               ),
               item(
                 Icons.history,
-                'Configuration revision '
-                '${data.configuration?.revisionNumber ?? '–'}',
+                l10n.matrixConfirmConfiguration(
+                  '${data.configuration?.revisionNumber ?? '–'}',
+                ),
               ),
               if (data.showNumbers)
                 item(
                   Icons.pin_outlined,
-                  'Contest pilot numbers are assigned by this draw.',
+                  l10n.matrixDrawConfirmNumbers,
                 ),
               const SizedBox(height: 4),
               DecoratedBox(
@@ -77,8 +87,7 @@ Future<bool> confirmDraw(
                       ),
                       Expanded(
                         child: Text(
-                          'The matrix can’t be undone. Unscored rounds can be '
-                          'redrawn afterwards.',
+                          l10n.matrixDrawConfirmWarning,
                           style: TextStyle(color: scheme.onTertiaryContainer),
                         ),
                       ),
@@ -92,12 +101,12 @@ Future<bool> confirmDraw(
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.matrixConfirmCancel),
           ),
           FilledButton(
             key: const ValueKey('confirm-draw'),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Draw matrix'),
+            child: Text(l10n.matrixDrawConfirmAction),
           ),
         ],
       );

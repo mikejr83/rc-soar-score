@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/matrix/team_marker.dart';
 import 'matrix_colors.dart';
 
@@ -47,8 +48,9 @@ class TeamBadge extends StatelessWidget {
         ),
       ),
     );
+    final l10n = AppLocalizations.of(context);
     return ExcludeSemantics(
-      child: Tooltip(message: marker?.name ?? 'No team', child: badge),
+      child: Tooltip(message: marker?.name ?? l10n.matrixNoTeam, child: badge),
     );
   }
 }

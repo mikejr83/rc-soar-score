@@ -1507,6 +1507,603 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matrixMoveChecking => 'Checking scores…';
 
   @override
+  String get matrixLoading => 'Loading matrix…';
+
+  @override
+  String get matrixLoadingLabel => 'Loading matrix';
+
+  @override
+  String get matrixLoadFailed => 'The matrix could not be loaded.';
+
+  @override
+  String get matrixUnavailableTitle => 'Matrix unavailable';
+
+  @override
+  String get matrixUnavailableBody =>
+      'Soar Score can’t reach the server, so the matrix can’t be shown. Nothing on this contest has changed.';
+
+  @override
+  String get matrixDrawn => 'Matrix drawn.';
+
+  @override
+  String get matrixSourceConfiguration => 'contest configuration';
+
+  @override
+  String get matrixSourceWizard => 'the New Contest wizard';
+
+  @override
+  String get matrixSeededRoundsLabel => 'Preliminary seeded rounds';
+
+  @override
+  String get matrixRoundsLabel => 'Number of rounds';
+
+  @override
+  String get matrixGroupsLabel => 'Groups per round';
+
+  @override
+  String matrixGroupsErrorLabel(String error) {
+    return 'Groups per round: $error';
+  }
+
+  @override
+  String get matrixNoteNoValue =>
+      'Contest configuration has no value. Enter one here, or set it in Configuration.';
+
+  @override
+  String matrixNoteFrom(String source, String text) {
+    return 'From $source: $text';
+  }
+
+  @override
+  String matrixNoteEdited(int configured) {
+    return 'Differs from the suggested value ($configured). Changing it here doesn’t change the contest configuration.';
+  }
+
+  @override
+  String matrixSeededRoundsText(int count) {
+    return '$count preliminary seeded rounds';
+  }
+
+  @override
+  String matrixRoundsText(int count) {
+    return '$count rounds';
+  }
+
+  @override
+  String matrixGroupsText(int count) {
+    return '$count groups per round';
+  }
+
+  @override
+  String matrixResetTo(String value) {
+    return 'Reset to $value';
+  }
+
+  @override
+  String get matrixEdited => 'Edited';
+
+  @override
+  String get matrixOpenConfiguration => 'Open Configuration';
+
+  @override
+  String get matrixReset => 'Reset';
+
+  @override
+  String get matrixNoMatrixTitle => 'No matrix drawn yet';
+
+  @override
+  String get matrixNoMatrixIntro =>
+      'No flight matrix has been drawn for this contest. Draw the first matrix here; afterwards you can add rounds and redraw the rounds without scores.';
+
+  @override
+  String get matrixDrawFirstTitle => 'Draw the first matrix';
+
+  @override
+  String get matrixServerRejected => 'The server rejected the draw';
+
+  @override
+  String matrixFixFields(int count, String plural) {
+    return 'Fix $count field$plural before drawing';
+  }
+
+  @override
+  String get matrixErrorsKept => 'Your values are kept. Nothing was drawn.';
+
+  @override
+  String get matrixNetworkTitle => 'Couldn’t reach the server';
+
+  @override
+  String get matrixNetworkFirstBody =>
+      'The matrix wasn’t drawn and the page hasn’t changed. Your values are kept.';
+
+  @override
+  String get matrixTryAgain => 'Try again';
+
+  @override
+  String get matrixConflictTitle => 'This contest changed on the server';
+
+  @override
+  String get matrixConflictFirstBody =>
+      'A matrix has already been drawn for this contest, or the contest can no longer be drawn. Reload to see the current state. Your values stay until you reload.';
+
+  @override
+  String get matrixReload => 'Reload';
+
+  @override
+  String get matrixActionReload => 'Reload the contest before drawing.';
+
+  @override
+  String matrixChangeInConfig(String label) {
+    return 'Change $label in Configuration';
+  }
+
+  @override
+  String get matrixChange => 'Change';
+
+  @override
+  String get matrixAdvancedTitle => 'Advanced';
+
+  @override
+  String get matrixAdvancedSubtitle =>
+      'Random seed, attempts per round, seed count';
+
+  @override
+  String get matrixDrawDetails => 'Draw details';
+
+  @override
+  String get matrixNeedsAttention => 'Needs attention';
+
+  @override
+  String get matrixSeedCopied => 'Random seed copied.';
+
+  @override
+  String get matrixJumpFirst => 'Jump to first';
+
+  @override
+  String get matrixAllTeams => 'All teams';
+
+  @override
+  String get matrixFindNameOrNumber => 'Find pilot by name or number';
+
+  @override
+  String get matrixFindName => 'Find pilot by name';
+
+  @override
+  String get matrixClearSearch => 'Clear search';
+
+  @override
+  String matrixPilotsMatch(int count, String plural, String es) {
+    return '$count pilot$plural match$es';
+  }
+
+  @override
+  String matrixNoPilotMatches(String query) {
+    return 'No pilot matches “$query”';
+  }
+
+  @override
+  String matrixTeamFilterLabel(String name) {
+    return 'Team: $name';
+  }
+
+  @override
+  String get matrixClearTeamFilter => 'Clear team filter';
+
+  @override
+  String get matrixTeamsOutlinedNote =>
+      'Teams 13 and up use outlined markers. Their letters stay unique.';
+
+  @override
+  String get matrixConfigChangedBanner =>
+      'Configuration changed since this draw';
+
+  @override
+  String matrixLiveSelected(String name, int rounds) {
+    return '$name highlighted in $rounds rounds. Opponent panel open.';
+  }
+
+  @override
+  String matrixLiveTeamFilter(String name, int count) {
+    return 'Showing $name only: $count pilots in each round.';
+  }
+
+  @override
+  String matrixLiveMatches(int count) {
+    return '$count pilots match.';
+  }
+
+  @override
+  String get matrixLiveNoMatches => 'No pilot matches.';
+
+  @override
+  String get matrixGridGroups => 'Groups';
+
+  @override
+  String get matrixGridLabel => 'Matrix grid, scrolls in both directions';
+
+  @override
+  String matrixGridUpToPilots(int count) {
+    return 'up to $count pilots';
+  }
+
+  @override
+  String matrixGridPilots(int count) {
+    return '$count pilots';
+  }
+
+  @override
+  String matrixGridCellSemantics(int round, String group, int count) {
+    return 'Round $round, group $group, $count pilots';
+  }
+
+  @override
+  String matrixOpponentsOf(String name) {
+    return 'Opponents of $name';
+  }
+
+  @override
+  String matrixOpponentsCount(int met, int total) {
+    return 'Opponents ($met of $total)';
+  }
+
+  @override
+  String get matrixOpponentsSub => 'Most meetings first. Repeats are marked.';
+
+  @override
+  String matrixNeverMeets(int count) {
+    return 'Never meets ($count)';
+  }
+
+  @override
+  String get matrixMeetsAll => 'Meets every other pilot at least once.';
+
+  @override
+  String matrixNoGroupWith(String name) {
+    return 'Pilots in no group with $name.';
+  }
+
+  @override
+  String matrixPilotNo(String number) {
+    return 'No. $number';
+  }
+
+  @override
+  String get matrixNoTeam => 'No team';
+
+  @override
+  String get matrixClearHighlight => 'Clear highlight (Esc)';
+
+  @override
+  String get matrixSelectAgain =>
+      'Select the pilot again or press Esc to clear.';
+
+  @override
+  String get matrixOpponentOnce => 'once';
+
+  @override
+  String matrixOpponentTimes(int count) {
+    return '$count times';
+  }
+
+  @override
+  String matrixPlace(int round, String group) {
+    return 'R$round · $group';
+  }
+
+  @override
+  String matrixPlaceLane(String place, int lane) {
+    return '$place · L$lane';
+  }
+
+  @override
+  String matrixRowPilot(String number, String name) {
+    return 'Pilot $number, $name';
+  }
+
+  @override
+  String get matrixRowNoTeam => 'no team';
+
+  @override
+  String matrixRowLane(int lane) {
+    return ', lane $lane';
+  }
+
+  @override
+  String matrixRowRoundGroup(int round, String group) {
+    return ', round $round, group $group';
+  }
+
+  @override
+  String get matrixRowHighlighted => ', highlighted';
+
+  @override
+  String get matrixRowMatched => ', search match';
+
+  @override
+  String matrixRowLaneShort(int lane) {
+    return 'L$lane';
+  }
+
+  @override
+  String matrixRoundTitle(int round) {
+    return 'Round $round';
+  }
+
+  @override
+  String get matrixRoundLocked => 'Round locked';
+
+  @override
+  String matrixDropTooltip(int dropNumber) {
+    return 'Drop $dropNumber: the lowest round score is dropped once this round is complete';
+  }
+
+  @override
+  String matrixDropSemantics(int dropNumber) {
+    return 'Drop $dropNumber starts after this round';
+  }
+
+  @override
+  String matrixPilotsOnce(int count) {
+    return '$count pilots, each once';
+  }
+
+  @override
+  String matrixDistinctOf(int distinct, int total) {
+    return '$distinct of $total';
+  }
+
+  @override
+  String get matrixExactlyOnce =>
+      'Every scoring pilot appears exactly once in this round';
+
+  @override
+  String get matrixServerPrefix => 'Server: ';
+
+  @override
+  String get matrixAdvancedSaveFailed =>
+      'The section choice could not be saved. It applies until you close the app.';
+
+  @override
+  String get matrixSeedLabel => 'Random seed';
+
+  @override
+  String get matrixSeedHint => 'Pick one for me';
+
+  @override
+  String get matrixSeedHelp =>
+      'Same seed and settings give the same matrix. Leave blank and the server picks one.';
+
+  @override
+  String get matrixAttemptsLabel => 'Attempts per round';
+
+  @override
+  String get matrixAttemptsHelp =>
+      'Groupings the server tries for each round. More attempts can improve fairness.';
+
+  @override
+  String get matrixSeedCountLabel => 'Seed count';
+
+  @override
+  String get matrixSeedCountHelp =>
+      'Independent starts the server runs. The fairest result is kept.';
+
+  @override
+  String get matrixConfigFromTitle => 'From contest configuration';
+
+  @override
+  String get matrixConfigReadOnlyNote =>
+      'Read-only here. Change these in Configuration.';
+
+  @override
+  String get matrixValueOn => 'On';
+
+  @override
+  String get matrixValueOff => 'Off';
+
+  @override
+  String get matrixBackToBackLabel => 'Back-to-back flights';
+
+  @override
+  String get matrixBackToBackOffNote =>
+      'No pilot flies the last group of one round and the first group of the next.';
+
+  @override
+  String get matrixLaneModeLabel => 'Lane mode';
+
+  @override
+  String get matrixLaneRandom => 'Random';
+
+  @override
+  String get matrixLaneNone => 'None';
+
+  @override
+  String get matrixLaneRandomNote => 'Each pilot gets a lane in every group.';
+
+  @override
+  String get matrixLaneNoneNote => 'Pilots are not given lanes.';
+
+  @override
+  String get matrixPilotsInDrawLabel => 'Pilots in the draw';
+
+  @override
+  String matrixPilotsInDrawValue(int count, String plural) {
+    return '$count scoring pilot$plural';
+  }
+
+  @override
+  String matrixNonFlyingExcluded(int count, String plural) {
+    return '$count non-flying participant$plural excluded.';
+  }
+
+  @override
+  String get matrixConfigRevisionLabel => 'Configuration revision';
+
+  @override
+  String get matrixTeamProtectionNote =>
+      'Teammates never fly in the same group.';
+
+  @override
+  String get matrixTeamProtectionSeededOffNote =>
+      'Off because Seeded order is on.';
+
+  @override
+  String matrixSeededPrelimNote(int count) {
+    return 'Only the $count preliminary rounds are drawn now.';
+  }
+
+  @override
+  String get matrixDrawConfirmTitle => 'Draw the matrix?';
+
+  @override
+  String matrixDrawConfirmRounds(int count, String rounds) {
+    return '$count $rounds';
+  }
+
+  @override
+  String get matrixDrawConfirmSeededRounds => 'preliminary seeded rounds';
+
+  @override
+  String get matrixDrawConfirmRoundsWord => 'rounds';
+
+  @override
+  String matrixDrawConfirmGroups(int groups, String sizes) {
+    return '$groups groups per round ($sizes pilots)';
+  }
+
+  @override
+  String get matrixDrawConfirmNumbers =>
+      'Contest pilot numbers are assigned by this draw.';
+
+  @override
+  String get matrixDrawConfirmWarning =>
+      'The matrix can’t be undone. Unscored rounds can be redrawn afterwards.';
+
+  @override
+  String get matrixDrawConfirmAction => 'Draw matrix';
+
+  @override
+  String get matrixDrawAction => 'Draw matrix';
+
+  @override
+  String get matrixDrawActionBusy => 'Drawing matrix…';
+
+  @override
+  String get matrixOpen => 'Open';
+
+  @override
+  String matrixGroupSizesTitle(
+    int groups,
+    String groupsPlural,
+    String sizes,
+    String pilotsPlural,
+  ) {
+    return '$groups group$groupsPlural: $sizes pilot$pilotsPlural';
+  }
+
+  @override
+  String get matrixGroupSizesMore => 'More groups than scoring pilots';
+
+  @override
+  String get matrixGroupSizesEnter =>
+      'Enter groups per round to see the group sizes.';
+
+  @override
+  String matrixGroupLabel(String letter) {
+    return 'Group $letter';
+  }
+
+  @override
+  String matrixGroupPilots(int count, String plural) {
+    return '$count pilot$plural';
+  }
+
+  @override
+  String matrixGroupMinimum(int min, String team) {
+    return 'Minimum $min groups. Team protection keeps teammates apart, and the largest team$team has $min scoring pilots.';
+  }
+
+  @override
+  String matrixGroupSeeded(int rounds) {
+    return 'Seeded Man on Man: only the $rounds preliminary rounds are drawn now. Seeded rounds are drawn later from the preliminary results.';
+  }
+
+  @override
+  String get matrixSummarySaveFailed =>
+      'The summary choice could not be saved. It applies until you close the app.';
+
+  @override
+  String get matrixShowSummary => 'Show summary';
+
+  @override
+  String get matrixHideSummary => 'Hide summary';
+
+  @override
+  String get matrixFairnessScore => 'FAIRNESS SCORE';
+
+  @override
+  String get matrixFairnessScale =>
+      '0% is the average of random draws, 100% is the best possible.';
+
+  @override
+  String get matrixUnmetLabel => 'Unmet opponents';
+
+  @override
+  String get matrixUnmetSub => 'pairs who never meet';
+
+  @override
+  String get matrixMaxRepeatsLabel => 'Max repeats';
+
+  @override
+  String get matrixMaxRepeatsSub => 'most meetings of one pair';
+
+  @override
+  String get matrixLaneUniformityLabel => 'Lane uniformity';
+
+  @override
+  String get matrixLaneUniformitySub =>
+      'spread of lane use, lower is more even; lanes are random within each group';
+
+  @override
+  String get matrixFairnessPairsTitle => 'Pilot pairs by number of meetings';
+
+  @override
+  String matrixMeanAbsDeviation(String value) {
+    return 'Mean absolute deviation $value';
+  }
+
+  @override
+  String matrixFairnessCompact(String score) {
+    return 'Fairness $score';
+  }
+
+  @override
+  String matrixFairnessCompactStats(
+    String unmet,
+    String maxRepeats,
+    String mad,
+  ) {
+    return '$unmet unmet pairs · max $maxRepeats× · MAD $mad';
+  }
+
+  @override
+  String get matrixDetailMatrixRevision => 'Matrix revision';
+
+  @override
+  String get matrixDetailConfigurationRevision => 'Configuration revision';
+
+  @override
+  String get matrixDetailAlgorithm => 'Algorithm';
+
+  @override
+  String get matrixDetailRandomSeed => 'Random seed';
+
+  @override
+  String get matrixDetailDrawn => 'Drawn';
+
+  @override
+  String get matrixCopySeedTooltip => 'Copy random seed';
+
+  @override
   String get aboutHeading => 'About';
 
   @override

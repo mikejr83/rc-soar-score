@@ -125,6 +125,7 @@ class _MatrixGridState extends State<MatrixGrid> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final model = widget.model;
@@ -145,13 +146,15 @@ class _MatrixGridState extends State<MatrixGrid> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Group ${DrawFormCheck.groupLetter(g)}',
+              l10n.matrixGroupLabel(DrawFormCheck.groupLetter(g)),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             Text(
-              mixed ? 'up to $size pilots' : '$size pilots',
+              mixed
+                  ? l10n.matrixGridUpToPilots(size)
+                  : l10n.matrixGridPilots(size),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
@@ -169,9 +172,11 @@ class _MatrixGridState extends State<MatrixGrid> {
         padding: const EdgeInsets.all(6),
         child: Semantics(
           container: true,
-          label:
-              'Round ${round.ordinal}, group '
-              '${DrawFormCheck.groupLetter(g)}, ${slots.length} pilots',
+          label: l10n.matrixGridCellSemantics(
+            round.ordinal,
+            DrawFormCheck.groupLetter(g),
+            slots.length,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -258,7 +263,7 @@ class _MatrixGridState extends State<MatrixGrid> {
                   padding: const EdgeInsets.all(12),
                   alignment: Alignment.bottomLeft,
                   color: scheme.surfaceContainer,
-                  child: Text('Groups', style: theme.textTheme.bodySmall),
+                  child: Text(l10n.matrixGridGroups, style: theme.textTheme.bodySmall),
                 ),
               );
             }
@@ -315,7 +320,7 @@ class _MatrixGridState extends State<MatrixGrid> {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           child: Semantics(
             container: true,
-            label: 'Matrix grid, scrolls in both directions',
+            label: l10n.matrixGridLabel,
             child: table,
           ),
         ),

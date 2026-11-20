@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../collapsible_areas_provider.dart';
 import '../../services/collapsible_areas/collapsible_area.dart';
 import '../../services/matrix/draw_form_controller.dart';
@@ -11,10 +12,6 @@ class DrawAdvancedSection extends StatefulWidget {
   const DrawAdvancedSection({super.key, required this.controller});
 
   final DrawFormController controller;
-
-  static const saveFailedMessage =
-      'The section choice could not be saved. It applies until you close '
-      'the app.';
 
   @override
   State<DrawAdvancedSection> createState() => _DrawAdvancedSectionState();
@@ -38,15 +35,17 @@ class _DrawAdvancedSectionState extends State<DrawAdvancedSection> {
       setState(() => _local = open);
       return;
     }
+    final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     if (await areas.setOpen(drawAdvancedArea, open)) return;
     messenger.showSnackBar(
-      const SnackBar(content: Text(DrawAdvancedSection.saveFailedMessage)),
+      SnackBar(content: Text(l10n.matrixAdvancedSaveFailed)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     Widget field(
@@ -99,8 +98,8 @@ class _DrawAdvancedSectionState extends State<DrawAdvancedSection> {
           key: ValueKey('draw-advanced-$open'),
           initiallyExpanded: open,
           onExpansionChanged: _openChanged,
-          title: const Text('Advanced'),
-          subtitle: const Text('Random seed, attempts per round, seed count'),
+          title: Text(l10n.matrixAdvancedTitle),
+          subtitle: Text(l10n.matrixAdvancedSubtitle),
           shape: const Border(),
           collapsedShape: const Border(),
           childrenPadding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -110,30 +109,27 @@ class _DrawAdvancedSectionState extends State<DrawAdvancedSection> {
               spacing: 16,
               runSpacing: 20,
               children: [
-                field(
-                  const ValueKey('draw-seed'),
-                  'Random seed',
-                  widget.controller.seed,
-                  'Pick one for me',
-                  'Same seed and settings give the same matrix. Leave blank '
-                      'and the server picks one.',
-                ),
-                field(
-                  const ValueKey('draw-attempts'),
-                  'Attempts per round',
-                  widget.controller.attempts,
-                  '${DrawFormController.defaultAttempts}',
-                  'Groupings the server tries for each round. More attempts '
-                      'can improve fairness.',
-                ),
-                field(
-                  const ValueKey('draw-seed-count'),
-                  'Seed count',
-                  widget.controller.seedCount,
-                  '${DrawFormController.defaultSeedCount}',
-                  'Independent starts the server runs. The fairest result is '
-                      'kept.',
-                ),
+                 field(
+                   const ValueKey('draw-seed'),
+                   l10n.matrixSeedLabel,
+                   widget.controller.seed,
+                   l10n.matrixSeedHint,
+                   l10n.matrixSeedHelp,
+                 ),
+                 field(
+                   const ValueKey('draw-attempts'),
+                   l10n.matrixAttemptsLabel,
+                   widget.controller.attempts,
+                   '${DrawFormController.defaultAttempts}',
+                   l10n.matrixAttemptsHelp,
+                 ),
+                 field(
+                   const ValueKey('draw-seed-count'),
+                   l10n.matrixSeedCountLabel,
+                   widget.controller.seedCount,
+                   '${DrawFormController.defaultSeedCount}',
+                   l10n.matrixSeedCountHelp,
+                 ),
               ],
             ),
           ],

@@ -2223,6 +2223,951 @@ abstract class AppLocalizations {
   /// **'Checking scores…'**
   String get matrixMoveChecking;
 
+  /// Text while the matrix loads.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading matrix…'**
+  String get matrixLoading;
+
+  /// Semantics label while the matrix loads.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading matrix'**
+  String get matrixLoadingLabel;
+
+  /// Title of the load-failure state.
+  ///
+  /// In en, this message translates to:
+  /// **'The matrix could not be loaded.'**
+  String get matrixLoadFailed;
+
+  /// Title of the offline state.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix unavailable'**
+  String get matrixUnavailableTitle;
+
+  /// Body of the offline state.
+  ///
+  /// In en, this message translates to:
+  /// **'Soar Score can’t reach the server, so the matrix can’t be shown. Nothing on this contest has changed.'**
+  String get matrixUnavailableBody;
+
+  /// Snackbar after the first draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix drawn.'**
+  String get matrixDrawn;
+
+  /// Where the configured rounds came from.
+  ///
+  /// In en, this message translates to:
+  /// **'contest configuration'**
+  String get matrixSourceConfiguration;
+
+  /// Where the configured groups came from.
+  ///
+  /// In en, this message translates to:
+  /// **'the New Contest wizard'**
+  String get matrixSourceWizard;
+
+  /// Label of the rounds field for a seeded draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Preliminary seeded rounds'**
+  String get matrixSeededRoundsLabel;
+
+  /// Label of the rounds field.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of rounds'**
+  String get matrixRoundsLabel;
+
+  /// Label of the groups field.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups per round'**
+  String get matrixGroupsLabel;
+
+  /// One problem in the draw error list.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups per round: {error}'**
+  String matrixGroupsErrorLabel(String error);
+
+  /// Note when the configuration holds no value for a field.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest configuration has no value. Enter one here, or set it in Configuration.'**
+  String get matrixNoteNoValue;
+
+  /// Note naming where a field value came from.
+  ///
+  /// In en, this message translates to:
+  /// **'From {source}: {text}'**
+  String matrixNoteFrom(String source, String text);
+
+  /// Note when a field differs from the suggested value.
+  ///
+  /// In en, this message translates to:
+  /// **'Differs from the suggested value ({configured}). Changing it here doesn’t change the contest configuration.'**
+  String matrixNoteEdited(int configured);
+
+  /// Rounds value text for a seeded draw.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} preliminary seeded rounds'**
+  String matrixSeededRoundsText(int count);
+
+  /// Rounds value text.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} rounds'**
+  String matrixRoundsText(int count);
+
+  /// Groups value text.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} groups per round'**
+  String matrixGroupsText(int count);
+
+  /// Reset action label of a draw number field.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to {value}'**
+  String matrixResetTo(String value);
+
+  /// Chip on a field that differs from its configured value.
+  ///
+  /// In en, this message translates to:
+  /// **'Edited'**
+  String get matrixEdited;
+
+  /// Action to open the configuration page from a draw field.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Configuration'**
+  String get matrixOpenConfiguration;
+
+  /// Fallback reset label of a draw number field.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get matrixReset;
+
+  /// Title of the first-draw card.
+  ///
+  /// In en, this message translates to:
+  /// **'No matrix drawn yet'**
+  String get matrixNoMatrixTitle;
+
+  /// Intro of the first-draw card.
+  ///
+  /// In en, this message translates to:
+  /// **'No flight matrix has been drawn for this contest. Draw the first matrix here; afterwards you can add rounds and redraw the rounds without scores.'**
+  String get matrixNoMatrixIntro;
+
+  /// Heading of the first-draw form.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw the first matrix'**
+  String get matrixDrawFirstTitle;
+
+  /// Title of the draw-error list after a server rejection.
+  ///
+  /// In en, this message translates to:
+  /// **'The server rejected the draw'**
+  String get matrixServerRejected;
+
+  /// Title of the draw-error list when fields must be fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix {count} field{plural} before drawing'**
+  String matrixFixFields(int count, String plural);
+
+  /// Body of the draw-error list.
+  ///
+  /// In en, this message translates to:
+  /// **'Your values are kept. Nothing was drawn.'**
+  String get matrixErrorsKept;
+
+  /// Title of the network-failure banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t reach the server'**
+  String get matrixNetworkTitle;
+
+  /// Body of the network-failure banner for the first draw.
+  ///
+  /// In en, this message translates to:
+  /// **'The matrix wasn’t drawn and the page hasn’t changed. Your values are kept.'**
+  String get matrixNetworkFirstBody;
+
+  /// Action of the network-failure banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get matrixTryAgain;
+
+  /// Title of the conflict banner.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest changed on the server'**
+  String get matrixConflictTitle;
+
+  /// Body of the conflict banner for the first draw.
+  ///
+  /// In en, this message translates to:
+  /// **'A matrix has already been drawn for this contest, or the contest can no longer be drawn. Reload to see the current state. Your values stay until you reload.'**
+  String get matrixConflictFirstBody;
+
+  /// Action of the conflict banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get matrixReload;
+
+  /// Reason the draw button is off while there is a conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload the contest before drawing.'**
+  String get matrixActionReload;
+
+  /// Semantics label of a link to Configuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Change {label} in Configuration'**
+  String matrixChangeInConfig(String label);
+
+  /// Visible label of a link to Configuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get matrixChange;
+
+  /// Title of the advanced section.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get matrixAdvancedTitle;
+
+  /// Subtitle of the advanced section.
+  ///
+  /// In en, this message translates to:
+  /// **'Random seed, attempts per round, seed count'**
+  String get matrixAdvancedSubtitle;
+
+  /// Semantics label of the fairness panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw details'**
+  String get matrixDrawDetails;
+
+  /// Semantics label of an attention list.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get matrixNeedsAttention;
+
+  /// Snackbar after copying the random seed.
+  ///
+  /// In en, this message translates to:
+  /// **'Random seed copied.'**
+  String get matrixSeedCopied;
+
+  /// Action to jump to the first pilot match.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to first'**
+  String get matrixJumpFirst;
+
+  /// Filter option for every team.
+  ///
+  /// In en, this message translates to:
+  /// **'All teams'**
+  String get matrixAllTeams;
+
+  /// Search hint when pilot numbers are shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Find pilot by name or number'**
+  String get matrixFindNameOrNumber;
+
+  /// Search hint when pilot numbers are hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Find pilot by name'**
+  String get matrixFindName;
+
+  /// Tooltip of the clear-search button.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get matrixClearSearch;
+
+  /// Result of the search when there are matches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilot{plural} match{es}'**
+  String matrixPilotsMatch(int count, String plural, String es);
+
+  /// Result of the search when there are no matches.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilot matches “{query}”'**
+  String matrixNoPilotMatches(String query);
+
+  /// Label of the team filter when a team is chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Team: {name}'**
+  String matrixTeamFilterLabel(String name);
+
+  /// Tooltip of the clear-team-filter button.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear team filter'**
+  String get matrixClearTeamFilter;
+
+  /// Note about outlined team markers.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams 13 and up use outlined markers. Their letters stay unique.'**
+  String get matrixTeamsOutlinedNote;
+
+  /// Title of the banner when configuration changed after a draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration changed since this draw'**
+  String get matrixConfigChangedBanner;
+
+  /// Live region when a pilot is selected.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} highlighted in {rounds} rounds. Opponent panel open.'**
+  String matrixLiveSelected(String name, int rounds);
+
+  /// Live region when a team filter is active.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {name} only: {count} pilots in each round.'**
+  String matrixLiveTeamFilter(String name, int count);
+
+  /// Live region when a query has matches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilots match.'**
+  String matrixLiveMatches(int count);
+
+  /// Live region when a query has no matches.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilot matches.'**
+  String get matrixLiveNoMatches;
+
+  /// Column heading of the matrix grid.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get matrixGridGroups;
+
+  /// Semantics label of the matrix grid.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix grid, scrolls in both directions'**
+  String get matrixGridLabel;
+
+  /// Group size when groups vary.
+  ///
+  /// In en, this message translates to:
+  /// **'up to {count} pilots'**
+  String matrixGridUpToPilots(int count);
+
+  /// Group size when all groups are the same size.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilots'**
+  String matrixGridPilots(int count);
+
+  /// Semantics label of a grid cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}, group {group}, {count} pilots'**
+  String matrixGridCellSemantics(int round, String group, int count);
+
+  /// Semantics label of a pilot's opponents.
+  ///
+  /// In en, this message translates to:
+  /// **'Opponents of {name}'**
+  String matrixOpponentsOf(String name);
+
+  /// Title of the opponents section.
+  ///
+  /// In en, this message translates to:
+  /// **'Opponents ({met} of {total})'**
+  String matrixOpponentsCount(int met, int total);
+
+  /// Sub of the opponents section.
+  ///
+  /// In en, this message translates to:
+  /// **'Most meetings first. Repeats are marked.'**
+  String get matrixOpponentsSub;
+
+  /// Title of the never-meets section.
+  ///
+  /// In en, this message translates to:
+  /// **'Never meets ({count})'**
+  String matrixNeverMeets(int count);
+
+  /// Sub when the pilot meets everyone.
+  ///
+  /// In en, this message translates to:
+  /// **'Meets every other pilot at least once.'**
+  String get matrixMeetsAll;
+
+  /// Sub when the pilot never meets some pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots in no group with {name}.'**
+  String matrixNoGroupWith(String name);
+
+  /// Pilot number in the panel header.
+  ///
+  /// In en, this message translates to:
+  /// **'No. {number}'**
+  String matrixPilotNo(String number);
+
+  /// Team shown when the pilot has none.
+  ///
+  /// In en, this message translates to:
+  /// **'No team'**
+  String get matrixNoTeam;
+
+  /// Tooltip of the clear-highlight button.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear highlight (Esc)'**
+  String get matrixClearHighlight;
+
+  /// Note under the panel on a tablet.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the pilot again or press Esc to clear.'**
+  String get matrixSelectAgain;
+
+  /// Meeting count of one.
+  ///
+  /// In en, this message translates to:
+  /// **'once'**
+  String get matrixOpponentOnce;
+
+  /// Meeting count of more than one.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} times'**
+  String matrixOpponentTimes(int count);
+
+  /// A pilot's place in a round and group.
+  ///
+  /// In en, this message translates to:
+  /// **'R{round} · {group}'**
+  String matrixPlace(int round, String group);
+
+  /// A pilot's place with a lane.
+  ///
+  /// In en, this message translates to:
+  /// **'{place} · L{lane}'**
+  String matrixPlaceLane(String place, int lane);
+
+  /// Semantics: a pilot with a number.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot {number}, {name}'**
+  String matrixRowPilot(String number, String name);
+
+  /// Semantics: a pilot with no team.
+  ///
+  /// In en, this message translates to:
+  /// **'no team'**
+  String get matrixRowNoTeam;
+
+  /// Semantics: a pilot's lane.
+  ///
+  /// In en, this message translates to:
+  /// **', lane {lane}'**
+  String matrixRowLane(int lane);
+
+  /// Semantics: a pilot's round and group.
+  ///
+  /// In en, this message translates to:
+  /// **', round {round}, group {group}'**
+  String matrixRowRoundGroup(int round, String group);
+
+  /// Semantics: a highlighted pilot.
+  ///
+  /// In en, this message translates to:
+  /// **', highlighted'**
+  String get matrixRowHighlighted;
+
+  /// Semantics: a pilot matching the search.
+  ///
+  /// In en, this message translates to:
+  /// **', search match'**
+  String get matrixRowMatched;
+
+  /// Short lane label on a row.
+  ///
+  /// In en, this message translates to:
+  /// **'L{lane}'**
+  String matrixRowLaneShort(int lane);
+
+  /// Title of a round column.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String matrixRoundTitle(int round);
+
+  /// Tooltip and semantics label of a locked round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round locked'**
+  String get matrixRoundLocked;
+
+  /// Tooltip for a round that starts a drop.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop {dropNumber}: the lowest round score is dropped once this round is complete'**
+  String matrixDropTooltip(int dropNumber);
+
+  /// Semantics for a round that starts a drop.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop {dropNumber} starts after this round'**
+  String matrixDropSemantics(int dropNumber);
+
+  /// Count when every scoring pilot flies exactly once.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilots, each once'**
+  String matrixPilotsOnce(int count);
+
+  /// Count when pilots fly more than once.
+  ///
+  /// In en, this message translates to:
+  /// **'{distinct} of {total}'**
+  String matrixDistinctOf(int distinct, int total);
+
+  /// Tooltip explaining the exactly-once check.
+  ///
+  /// In en, this message translates to:
+  /// **'Every scoring pilot appears exactly once in this round'**
+  String get matrixExactlyOnce;
+
+  /// Prefix of a server rejection message.
+  ///
+  /// In en, this message translates to:
+  /// **'Server: '**
+  String get matrixServerPrefix;
+
+  /// Snackbar when the advanced section choice cannot be saved.
+  ///
+  /// In en, this message translates to:
+  /// **'The section choice could not be saved. It applies until you close the app.'**
+  String get matrixAdvancedSaveFailed;
+
+  /// Label of the random seed field.
+  ///
+  /// In en, this message translates to:
+  /// **'Random seed'**
+  String get matrixSeedLabel;
+
+  /// Hint of the random seed field.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one for me'**
+  String get matrixSeedHint;
+
+  /// Help of the random seed field.
+  ///
+  /// In en, this message translates to:
+  /// **'Same seed and settings give the same matrix. Leave blank and the server picks one.'**
+  String get matrixSeedHelp;
+
+  /// Label of the attempts-per-round field.
+  ///
+  /// In en, this message translates to:
+  /// **'Attempts per round'**
+  String get matrixAttemptsLabel;
+
+  /// Help of the attempts-per-round field.
+  ///
+  /// In en, this message translates to:
+  /// **'Groupings the server tries for each round. More attempts can improve fairness.'**
+  String get matrixAttemptsHelp;
+
+  /// Label of the seed-count field.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed count'**
+  String get matrixSeedCountLabel;
+
+  /// Help of the seed-count field.
+  ///
+  /// In en, this message translates to:
+  /// **'Independent starts the server runs. The fairest result is kept.'**
+  String get matrixSeedCountHelp;
+
+  /// Heading of the read-only configuration rows.
+  ///
+  /// In en, this message translates to:
+  /// **'From contest configuration'**
+  String get matrixConfigFromTitle;
+
+  /// Note under the read-only configuration rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only here. Change these in Configuration.'**
+  String get matrixConfigReadOnlyNote;
+
+  /// Value for a setting that is on.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get matrixValueOn;
+
+  /// Value for a setting that is off.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get matrixValueOff;
+
+  /// Label of the back-to-back row.
+  ///
+  /// In en, this message translates to:
+  /// **'Back-to-back flights'**
+  String get matrixBackToBackLabel;
+
+  /// Note when back-to-back flights are avoided.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilot flies the last group of one round and the first group of the next.'**
+  String get matrixBackToBackOffNote;
+
+  /// Label of the lane mode row.
+  ///
+  /// In en, this message translates to:
+  /// **'Lane mode'**
+  String get matrixLaneModeLabel;
+
+  /// Lane mode value: random.
+  ///
+  /// In en, this message translates to:
+  /// **'Random'**
+  String get matrixLaneRandom;
+
+  /// Lane mode value: none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get matrixLaneNone;
+
+  /// Note for the random lane mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Each pilot gets a lane in every group.'**
+  String get matrixLaneRandomNote;
+
+  /// Note for the none lane mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots are not given lanes.'**
+  String get matrixLaneNoneNote;
+
+  /// Label of the pilots-in-the-draw row.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots in the draw'**
+  String get matrixPilotsInDrawLabel;
+
+  /// Value of the pilots-in-the-draw row.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} scoring pilot{plural}'**
+  String matrixPilotsInDrawValue(int count, String plural);
+
+  /// Note for non-flying participants excluded from the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} non-flying participant{plural} excluded.'**
+  String matrixNonFlyingExcluded(int count, String plural);
+
+  /// Label of the configuration revision row.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration revision'**
+  String get matrixConfigRevisionLabel;
+
+  /// Note when team protection is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Teammates never fly in the same group.'**
+  String get matrixTeamProtectionNote;
+
+  /// Note when team protection is off because the draw is seeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Off because Seeded order is on.'**
+  String get matrixTeamProtectionSeededOffNote;
+
+  /// Note for the seeded draw mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the {count} preliminary rounds are drawn now.'**
+  String matrixSeededPrelimNote(int count);
+
+  /// Title of the first-draw confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw the matrix?'**
+  String get matrixDrawConfirmTitle;
+
+  /// Rounds line of the first-draw confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {rounds}'**
+  String matrixDrawConfirmRounds(int count, String rounds);
+
+  /// Rounds word for a seeded first draw.
+  ///
+  /// In en, this message translates to:
+  /// **'preliminary seeded rounds'**
+  String get matrixDrawConfirmSeededRounds;
+
+  /// Rounds word for a first draw.
+  ///
+  /// In en, this message translates to:
+  /// **'rounds'**
+  String get matrixDrawConfirmRoundsWord;
+
+  /// Groups line of the first-draw confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'{groups} groups per round ({sizes} pilots)'**
+  String matrixDrawConfirmGroups(int groups, String sizes);
+
+  /// Note when the draw assigns pilot numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest pilot numbers are assigned by this draw.'**
+  String get matrixDrawConfirmNumbers;
+
+  /// Warning of the first-draw confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'The matrix can’t be undone. Unscored rounds can be redrawn afterwards.'**
+  String get matrixDrawConfirmWarning;
+
+  /// Confirm button of the first-draw confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw matrix'**
+  String get matrixDrawConfirmAction;
+
+  /// First-draw button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw matrix'**
+  String get matrixDrawAction;
+
+  /// First-draw button label while drawing.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawing matrix…'**
+  String get matrixDrawActionBusy;
+
+  /// Fallback link label to open a page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get matrixOpen;
+
+  /// Title of the group-size preview.
+  ///
+  /// In en, this message translates to:
+  /// **'{groups} group{groupsPlural}: {sizes} pilot{pilotsPlural}'**
+  String matrixGroupSizesTitle(
+    int groups,
+    String groupsPlural,
+    String sizes,
+    String pilotsPlural,
+  );
+
+  /// Title when there are more groups than pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'More groups than scoring pilots'**
+  String get matrixGroupSizesMore;
+
+  /// Title when no groups are entered yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter groups per round to see the group sizes.'**
+  String get matrixGroupSizesEnter;
+
+  /// Heading of one group in the preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {letter}'**
+  String matrixGroupLabel(String letter);
+
+  /// Pilot count of one group in the preview.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilot{plural}'**
+  String matrixGroupPilots(int count, String plural);
+
+  /// Note of the team-protection minimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum {min} groups. Team protection keeps teammates apart, and the largest team{team} has {min} scoring pilots.'**
+  String matrixGroupMinimum(int min, String team);
+
+  /// Note of the seeded preliminary rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded Man on Man: only the {rounds} preliminary rounds are drawn now. Seeded rounds are drawn later from the preliminary results.'**
+  String matrixGroupSeeded(int rounds);
+
+  /// Snackbar when the summary choice cannot be saved.
+  ///
+  /// In en, this message translates to:
+  /// **'The summary choice could not be saved. It applies until you close the app.'**
+  String get matrixSummarySaveFailed;
+
+  /// Button to show the fairness summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Show summary'**
+  String get matrixShowSummary;
+
+  /// Button to hide the fairness summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide summary'**
+  String get matrixHideSummary;
+
+  /// Heading of the fairness score.
+  ///
+  /// In en, this message translates to:
+  /// **'FAIRNESS SCORE'**
+  String get matrixFairnessScore;
+
+  /// Note under the fairness score.
+  ///
+  /// In en, this message translates to:
+  /// **'0% is the average of random draws, 100% is the best possible.'**
+  String get matrixFairnessScale;
+
+  /// Label of the unmet opponents figure.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmet opponents'**
+  String get matrixUnmetLabel;
+
+  /// Sub of the unmet opponents figure.
+  ///
+  /// In en, this message translates to:
+  /// **'pairs who never meet'**
+  String get matrixUnmetSub;
+
+  /// Label of the max repeats figure.
+  ///
+  /// In en, this message translates to:
+  /// **'Max repeats'**
+  String get matrixMaxRepeatsLabel;
+
+  /// Sub of the max repeats figure.
+  ///
+  /// In en, this message translates to:
+  /// **'most meetings of one pair'**
+  String get matrixMaxRepeatsSub;
+
+  /// Label of the lane uniformity figure.
+  ///
+  /// In en, this message translates to:
+  /// **'Lane uniformity'**
+  String get matrixLaneUniformityLabel;
+
+  /// Sub of the lane uniformity figure.
+  ///
+  /// In en, this message translates to:
+  /// **'spread of lane use, lower is more even; lanes are random within each group'**
+  String get matrixLaneUniformitySub;
+
+  /// Title of the pairs histogram.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot pairs by number of meetings'**
+  String get matrixFairnessPairsTitle;
+
+  /// Mean absolute deviation line of the histogram.
+  ///
+  /// In en, this message translates to:
+  /// **'Mean absolute deviation {value}'**
+  String matrixMeanAbsDeviation(String value);
+
+  /// Compact fairness score line.
+  ///
+  /// In en, this message translates to:
+  /// **'Fairness {score}'**
+  String matrixFairnessCompact(String score);
+
+  /// Compact fairness statistics line.
+  ///
+  /// In en, this message translates to:
+  /// **'{unmet} unmet pairs · max {maxRepeats}× · MAD {mad}'**
+  String matrixFairnessCompactStats(
+    String unmet,
+    String maxRepeats,
+    String mad,
+  );
+
+  /// Label in the draw details.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix revision'**
+  String get matrixDetailMatrixRevision;
+
+  /// Label in the draw details.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration revision'**
+  String get matrixDetailConfigurationRevision;
+
+  /// Label in the draw details.
+  ///
+  /// In en, this message translates to:
+  /// **'Algorithm'**
+  String get matrixDetailAlgorithm;
+
+  /// Label in the draw details.
+  ///
+  /// In en, this message translates to:
+  /// **'Random seed'**
+  String get matrixDetailRandomSeed;
+
+  /// Label in the draw details.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawn'**
+  String get matrixDetailDrawn;
+
+  /// Tooltip of the copy-seed button.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy random seed'**
+  String get matrixCopySeedTooltip;
+
   /// Heading of the Settings card with the version, licences and legal links.
   ///
   /// In en, this message translates to:
