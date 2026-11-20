@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 /// One landing choice: its label over its points, 52 dp tall.

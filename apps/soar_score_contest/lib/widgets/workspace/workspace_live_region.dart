@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A polite live region: assistive technology reads [message] when it
 /// changes. It draws nothing.

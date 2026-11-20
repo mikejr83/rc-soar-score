@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Asks the director to confirm locking administration, naming what the lock
 /// blocks. Resolves to true when confirmed.

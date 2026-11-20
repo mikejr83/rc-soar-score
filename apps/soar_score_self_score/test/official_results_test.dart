@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_self_score/data/sample_data.dart';
 import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_scope.dart';
-import 'package:soar_score_self_score/l10n/app_localizations.dart';
+import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/models/group_result_row.dart';
 import 'package:soar_score_self_score/models/group_results.dart';
 import 'package:soar_score_self_score/models/officialization_policy.dart';
@@ -77,7 +77,7 @@ Future<void> _pump(
     SelfScoreScope(
       repository: _Repository(preliminary, review: review),
       child: MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         home: page,
       ),
     ),
@@ -124,7 +124,7 @@ void main() {
     (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationDelegates,
           home: SelfScoreScope(
             repository: const _MixedRepository(),
             child: const GroupResultsPage(
@@ -156,7 +156,7 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         home: Scaffold(
           body: GroupResultTile(
             row: const GroupResultRow(
@@ -190,7 +190,7 @@ void main() {
         SelfScoreScope(
           repository: _Repository(true, policy: policy),
           child: MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: appLocalizationDelegates,
             home: overall,
           ),
         ),

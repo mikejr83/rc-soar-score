@@ -8,7 +8,7 @@ using Dart pub workspaces.
 
 | Tool    | Version                 | Notes                                          |
 | ------- | ----------------------- | ---------------------------------------------- |
-| Flutter | 3.47.x (stable channel) | Bundles Dart (3.13.x). Root SDK is `^3.13.3`.  |
+| Flutter | 3.50.x (stable channel) | Bundles Dart (3.14.x). Root SDK is `^3.13.3`.  |
 | Melos   | 8.x (`^8.9.0`)          | Installed globally, or via `dart run melos`.   |
 | Git     | any recent              |                                                |
 | Chrome  | current                 | Target for `flutter run -d chrome` (web apps). |
@@ -39,7 +39,7 @@ stable channel and confirm the version line:
 ```bash
 flutter channel stable
 flutter upgrade
-flutter --version   # expect Flutter 3.47.x, Dart 3.13.x
+flutter --version   # expect Flutter 3.50.x, Dart 3.14.x
 flutter doctor      # resolve anything it flags for the targets you use
 ```
 
@@ -345,7 +345,7 @@ npx prettier --check "**/*.md"
 | Symptom                                                     | Fix                                                                                                                                                                                                         |
 | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `melos: command not found`                                  | Add the pub cache `bin` directory to `PATH`, or use `dart run melos`.                                                                                                                                       |
-| `flutter --version` is not 3.47.x                           | `flutter channel stable && flutter upgrade`.                                                                                                                                                                |
+| `flutter --version` is not 3.50.x                           | `flutter channel stable && flutter upgrade`.                                                                                                                                                                |
 | Server says `DATABASE_URL or POSTGRES_PASSWORD is required` | Set one in `.env` or your shell, and make sure PostgreSQL is reachable.                                                                                                                                     |
 | Pub resolution error mentioning `.plugin_symlinks`          | Workspace globs are intentionally first-level only; do not widen `workspace:` in `pubspec.yaml`.                                                                                                            |
 | Missing `*.g.dart` files / undefined generated types        | Run `dart run build_runner build --delete-conflicting-outputs` in the affected package.                                                                                                                     |

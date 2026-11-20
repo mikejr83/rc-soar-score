@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/widgets/workspace/workspace_control_slot.dart';
 import 'package:soar_score_contest/widgets/workspace/workspace_live_region.dart';

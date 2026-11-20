@@ -2,7 +2,7 @@ import 'package:drift/drift.dart' show DriftWrappedException;
 import 'package:postgres/postgres.dart' show ServerException;
 import 'package:postgres/src/exceptions.dart'
     show buildExceptionFromErrorFields;
-import 'package:postgres/src/messages/server_messages.dart'
+import 'package:postgres/src/protocol/messages/server_messages.dart'
     show ErrorField, ErrorFieldId;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/repositories/unique_violation.dart';

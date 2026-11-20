@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
 /// The chosen theme: light, dark, or follow the device (the default).

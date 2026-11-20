@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Two versions of one record side by side, one row per field. Rows whose
 /// values differ are marked so the director sees what the choice changes.

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// An outlined text field for a setting. It keeps what is typed in its own
 /// controller and follows [value] when the draft changes it from elsewhere

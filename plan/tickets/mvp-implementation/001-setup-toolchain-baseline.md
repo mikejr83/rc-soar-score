@@ -12,12 +12,12 @@ This ticket is **ticket-level recording only**: it records the toolchain version
 
 Pinning convention: pins are version **lines** (major / maintenance track), not patch versions. Consumers of these pins (tickets 014, 011, 013) install the latest patch within the recorded line at consumption time. If a recorded line goes stale, the escalation rule in `plan/tickets/mvp-implementation/README.md` applies: update this ticket first, then anything that references it.
 
-## Recorded Pins (verified 2026-09-22)
+## Recorded Pins (verified 2026-11-20)
 
 | Tool    | Pinned line                               | Verified against                                                                   |
 | ------- | ----------------------------------------- | ---------------------------------------------------------------------------------- |
-| Flutter | 3.47.x (stable channel)                   | `flutter --version` → 3.47.4 stable, released 2026-09-10                           |
-| Dart    | Bundled with Flutter (no independent pin) | Dart 3.13.3 bundled with Flutter 3.47.4                                            |
+| Flutter | 3.50.x (stable channel)                   | `flutter --version` → 3.50.1 stable                                                |
+| Dart    | Bundled with Flutter (no independent pin) | Dart 3.14.0 bundled with Flutter 3.50.1                                            |
 | Melos   | 8.x                                       | pub.dev `melos` latest 8.9.0, published 2026-09-22; requires Dart ≥ 3.9, satisfied |
 
 Node.js and NX are no longer part of the toolchain (ticket 002 rejected); the Playwright line was dropped with ticket 012 (rejected).

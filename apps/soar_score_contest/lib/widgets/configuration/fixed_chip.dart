@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The `Fixed` tag of a setting the contest's state has locked. The reason
 /// is its tooltip and its accessible name (`Fixed: <reason>`), and the chip

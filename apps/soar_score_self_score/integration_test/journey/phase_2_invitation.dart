@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_self_score/router.dart';
@@ -10,7 +10,9 @@ import 'journey.dart';
 /// Opens [path] the way a followed link does.
 Future<void> openPath(WidgetTester tester, String path) async {
   router.go(path);
-  await tester.pump(const Duration(milliseconds: 300));
+  await tester.pump();
+  // Wait for the outgoing route to leave the tree before checking the page.
+  await tester.pumpAndSettle();
 }
 
 /// Phase 2: the pilot opens the link from the score card.

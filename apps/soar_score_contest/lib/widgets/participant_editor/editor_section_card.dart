@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A titled group of fields: an elevated card on wide screens, a plain headed
 /// group on phones and at large text sizes.

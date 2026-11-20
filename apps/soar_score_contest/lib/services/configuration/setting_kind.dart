@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// What changing a setting means, so the page can say it without colour.
 enum SettingKind {

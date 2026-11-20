@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../collapsible_areas_provider.dart';
 import '../local_ui_store_provider.dart';

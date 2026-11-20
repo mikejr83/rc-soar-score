@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import 'l10n/app_localization_delegates.dart';
 import 'l10n/app_localizations.dart';
 import 'router.dart';
 
@@ -15,12 +15,7 @@ class SelfScoreApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: SelfScoreAppTheme.lightTheme,
       darkTheme: SelfScoreAppTheme.darkTheme,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+      localizationsDelegates: appLocalizationDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,
     );

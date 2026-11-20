@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
@@ -71,7 +71,7 @@ Future<GoRouter> _pump(
         httpClient: MockClient(server.handle),
       ),
       child: MaterialApp.router(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         routerConfig: router,
       ),
     ),

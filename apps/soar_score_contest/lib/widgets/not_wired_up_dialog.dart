@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Shown when a feature (e.g. `Sign in` or `Create account`) is tapped before
 /// its backend integration is complete (tickets 021 and 010).

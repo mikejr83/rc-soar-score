@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
@@ -11,6 +11,7 @@ import 'app_mode_provider.dart';
 import 'auth/auth_session_inherited.dart';
 import 'connectivity_provider.dart';
 import 'contest_draft_provider.dart';
+import 'l10n/app_localization_delegates.dart';
 import 'l10n/app_localizations.dart';
 import 'preferences_controller_provider.dart';
 import 'services/preferences/preferences_controller.dart';
@@ -286,7 +287,7 @@ class _SoarScoreContestAppState extends State<SoarScoreContestApp>
         locale: _preferences.locale,
         localizationsDelegates: [
           ...widget.extraLocalizationDelegates,
-          ...AppLocalizations.localizationsDelegates,
+          ...appLocalizationDelegates,
         ],
         supportedLocales: [
           ...AppLocalizations.supportedLocales,

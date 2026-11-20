@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A switch with a check thumb and an `On` or `Off` label, so the state is
 /// not carried by colour alone.

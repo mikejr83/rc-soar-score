@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../services/workspace/controls/completion_blockers.dart';
 import '../../../services/workspace/workspace_fact_source.dart';

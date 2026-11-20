@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';

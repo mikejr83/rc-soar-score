@@ -75,8 +75,8 @@ Soar Score is an RC sailplane soaring contest scoring and management suite. It c
 
 **Toolchain pins** (recorded in `plan/tickets/mvp-implementation/001-setup-toolchain-baseline.md`, which is the source of truth — CI must not drift from it):
 
-- Flutter 3.47.x (stable channel)
-- Dart: bundled with Flutter (3.13.x current, no independent pin)
+- Flutter 3.50.x (stable channel)
+- Dart: bundled with Flutter (3.14.x current, no independent pin)
 - Melos 8.x
 
 ## Important Conventions

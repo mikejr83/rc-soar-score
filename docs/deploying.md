@@ -22,7 +22,7 @@ The full checklist (versions, release notes, rollback, hotfixes) is in
    2. **Public site:** `vercel pull`, `vercel build --prod`, `vercel deploy
 --prebuilt --prod`.
    3. **Contest app and self-scoring (Cloudflare):** after the API, in
-      parallel with the site. Flutter 3.47.4 builds each app with
+      parallel with the site. Flutter 3.50.1 builds each app with
       `--dart-define=SOAR_SCORE_API_BASE_URL=https://api.rcsoarscore.com`, then
       `wrangler deploy` uploads it (`--assets=apps/<app>/build/web`, or for the
       self-scoring app `--config apps/soar_score_self_score/wrangler.jsonc`, which

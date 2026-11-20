@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
 import 'package:soar_score_contest/services/ui_account/ui_account.dart';
 import 'package:soar_score_contest/ui_account_provider.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/contest/activity_page.dart';
 
@@ -31,7 +32,7 @@ Future<void> _pump(
           account,
           connectivity,
           MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: appLocalizationDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: ContestActivityPage(contestId: matrixContestId),

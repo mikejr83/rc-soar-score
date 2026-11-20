@@ -35,7 +35,7 @@ Version lines (not patch versions) form the toolchain baseline; consumers instal
 
 | Tool    | Pinned line                               |
 | ------- | ----------------------------------------- |
-| Flutter | 3.47.x (stable channel)                   |
+| Flutter | 3.50.x (stable channel)                   |
 | Dart    | Bundled with Flutter (no independent pin) |
 | Melos   | 8.x                                       |
 

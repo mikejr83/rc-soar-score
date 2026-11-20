@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A titled card grouping the fields of a wizard step.
 class WizardSectionCard extends StatelessWidget {

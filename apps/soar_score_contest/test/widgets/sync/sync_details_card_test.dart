@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/services/sync/sync_problem.dart';
 import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
@@ -9,11 +9,7 @@ import 'package:soar_score_contest/widgets/sync/sync_details_card.dart';
 Future<void> _pump(WidgetTester tester, SyncScopeSummary summary) =>
     tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
+        localizationsDelegates: appLocalizationDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: SyncDetailsCard(

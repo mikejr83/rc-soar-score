@@ -1,6 +1,6 @@
 import 'dart:ui' show PlatformDispatcher;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../services/reports/viewer/page_setup.dart';
 import '../../../services/reports/viewer/print_page_range.dart';

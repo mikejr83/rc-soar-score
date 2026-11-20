@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/startup_splash_page.dart';
 import 'package:soar_score_contest/services/startup/startup_mode.dart';
@@ -66,7 +67,7 @@ void main() {
   }
 
   Widget host(Future<StartupSplashControl?> control) => MaterialApp(
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    localizationsDelegates: appLocalizationDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     home: Scaffold(body: StartupSplashSetting(control: control)),
   );

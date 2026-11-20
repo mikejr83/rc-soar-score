@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../connectivity_provider.dart';

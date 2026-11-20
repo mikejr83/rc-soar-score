@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The cells of a participant row that can be marked as edited.
 enum ParticipantCell { role, classification, team }

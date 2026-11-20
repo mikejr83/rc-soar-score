@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:http/http.dart' as http;
@@ -10,6 +10,7 @@ import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/app_sync_provider.dart';
 import 'package:soar_score_contest/services/sync/app_sync_state.dart';
 import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/home_page.dart';
 import 'package:soar_score_contest/services/competition_import/competition_import.dart';
@@ -33,7 +34,7 @@ Contest _contest(String name, {int day = 17}) => Contest(
 Widget _app(ApiClient? client) {
   final page = MaterialApp(
     home: const Scaffold(body: HomePage()),
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    localizationsDelegates: appLocalizationDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
   );
   return client == null
@@ -46,7 +47,7 @@ Widget _app(ApiClient? client) {
 Widget _appWithAccount(ApiClient client, UiAccount account) {
   final page = MaterialApp(
     home: const Scaffold(body: HomePage()),
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    localizationsDelegates: appLocalizationDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
   );
   return UiAccountInherited(

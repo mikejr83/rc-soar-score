@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../services/matrix/matrix_page_data.dart';
 import '../../services/matrix/config_drift.dart';

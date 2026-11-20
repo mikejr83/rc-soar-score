@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
 /// A small label with an icon: a row tag (`Unsaved`, `House rule`, `Fixed`),

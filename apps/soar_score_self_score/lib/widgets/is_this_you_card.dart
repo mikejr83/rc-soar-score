@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Asks a signed-in person to confirm the pilot their email matches.
 class IsThisYouCard extends StatelessWidget {

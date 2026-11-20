@@ -1,5 +1,6 @@
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -58,7 +59,7 @@ void main() {
           store: ContestDraftStore(),
           child: MaterialApp.router(
             routerConfig: router,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: appLocalizationDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
           ),
         ),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/collapsible_areas/collapsible_areas_controller.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';

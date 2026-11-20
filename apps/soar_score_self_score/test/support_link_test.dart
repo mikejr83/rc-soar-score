@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/l10n/app_localizations.dart';
 import 'package:soar_score_self_score/public_site.dart';
 import 'package:soar_score_self_score/widgets/load_error_view.dart';
@@ -26,7 +27,7 @@ void main() {
     var retried = 0;
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: LoadErrorView(

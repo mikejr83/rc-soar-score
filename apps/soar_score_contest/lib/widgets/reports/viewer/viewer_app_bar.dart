@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// How the viewer was reached, which decides its leading button.
 enum ViewerLead {

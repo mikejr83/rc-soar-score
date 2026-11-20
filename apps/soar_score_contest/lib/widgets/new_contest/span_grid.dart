@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A child of a [SpanGrid] that takes [span] of its columns.
 class SpanGridItem {

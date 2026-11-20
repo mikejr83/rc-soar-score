@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The two-column layout of one setting: the label, its explanation and tags
 /// on the leading side, the control and its notes on the trailing side. Below

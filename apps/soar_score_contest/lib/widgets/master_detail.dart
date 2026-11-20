@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Builds one pane of a [MasterDetail]; [wide] says whether both panes are
 /// shown side by side.

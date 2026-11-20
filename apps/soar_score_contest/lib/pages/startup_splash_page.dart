@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../l10n/app_localization_delegates.dart';
 import '../l10n/app_localizations.dart';
 import '../services/startup/startup_mode.dart';
 
@@ -18,7 +19,7 @@ class StartupSplashApp extends StatelessWidget {
       theme: ContestAppTheme.lightTheme,
       darkTheme: ContestAppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       debugShowCheckedModeBanner: false,
       home: StartupSplashPage(mode: mode),

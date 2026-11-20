@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Where a step's number sits on its control.
 enum FocusBadgeCorner { topRight, topLeft }

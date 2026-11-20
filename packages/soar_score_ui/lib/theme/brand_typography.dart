@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The three brand fonts, bundled with this package (see `pubspec.yaml`).
 ///
