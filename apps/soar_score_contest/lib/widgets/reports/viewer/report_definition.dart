@@ -20,7 +20,7 @@ class ReportControlGroup {
 
 /// What a report's controls read and change. Changes apply at once.
 class ReportControlsContext {
-  const ReportControlsContext({
+  ReportControlsContext({
     required this.filters,
     required this.facts,
     required this.check,
@@ -28,7 +28,8 @@ class ReportControlsContext {
     required this.setFilters,
     this.setup = const PageSetup(PaperSize.letter, PageOrientation.landscape),
     this.data,
-  });
+    AppLocalizations? l10n,
+  }) : l10n = l10n ?? _fallbackL10n;
 
   /// The filters in force, defaults included.
   final Map<String, String> filters;
@@ -46,7 +47,12 @@ class ReportControlsContext {
   /// What the report's `loadData` returned; `null` for a report with no data
   /// of its own, or before it loads.
   final Object? data;
+
+  /// The app's strings, for the labels a report's controls show.
+  final AppLocalizations l10n;
 }
+
+final AppLocalizations _fallbackL10n = AppLocalizationsEn();
 
 /// What a report builds its pages from.
 class ReportPageContext {
@@ -60,8 +66,6 @@ class ReportPageContext {
     this.online = true,
     AppLocalizations? l10n,
   }) : l10n = l10n ?? _fallbackL10n;
-
-  static final AppLocalizations _fallbackL10n = AppLocalizationsEn();
 
   /// The app's strings in the language the sheet is built for, for the words a
   /// report puts outside the paper (banners).

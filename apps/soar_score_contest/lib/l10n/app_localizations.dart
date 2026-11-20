@@ -4368,6 +4368,300 @@ abstract class AppLocalizations {
   /// **' · '**
   String get viewerPanelSummarySeparator;
 
+  /// Heading of the standings round-range group.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get standingsFilter;
+
+  /// Label of the from-round dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'From round'**
+  String get standingsFromRound;
+
+  /// Label of the to-round dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'To round'**
+  String get standingsToRound;
+
+  /// Message when no rounds can be shown.
+  ///
+  /// In en, this message translates to:
+  /// **'No rounds can be shown yet.'**
+  String get standingsNoRounds;
+
+  /// Message explaining what the standings show.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank and total are the standings as of round {to}. Only rounds with scores are listed.'**
+  String standingsRangeText(int to);
+
+  /// Heading of the standings column group.
+  ///
+  /// In en, this message translates to:
+  /// **'Options'**
+  String get standingsOptions;
+
+  /// Label of the percentage column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage of total'**
+  String get standingsPercentage;
+
+  /// Help for the percentage column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Each total as a percentage of the winner’s'**
+  String get standingsPercentageHelp;
+
+  /// Label of the raw score column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw score'**
+  String get standingsRaw;
+
+  /// Help for the raw score column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Total plus the dropped rounds. Not the score of each round.'**
+  String get standingsRawHelp;
+
+  /// Label of the team column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get standingsTeam;
+
+  /// Label of the pilot number column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot number'**
+  String get standingsPilotNumber;
+
+  /// Label of the pilot class column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot class'**
+  String get standingsPilotClass;
+
+  /// Heading of the standings detail group.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail'**
+  String get standingsDetail;
+
+  /// Label of the flight details option.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight details'**
+  String get standingsFlightDetails;
+
+  /// Help for flight details in an F5J contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds flight time, landing points and launch height under each round score.'**
+  String get standingsFlightDetailsF5J;
+
+  /// Help for flight details in an F3J contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds flight time and landing points under each round score.'**
+  String get standingsFlightDetailsF3J;
+
+  /// Label of the provisional option.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional'**
+  String get standingsProvisional;
+
+  /// Dropdown label of a fully scored round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String standingsRoundLabel(int round);
+
+  /// Dropdown label of a partly scored round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} (partly scored)'**
+  String standingsRoundLabelPartial(int round);
+
+  /// Provisional help when no round is partly scored.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows rounds up to the last with any score.'**
+  String get standingsProvHelpNone;
+
+  /// Provisional help when a round is partly scored.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {partial} is partly scored. Shows rounds up to the last with any score.'**
+  String standingsProvHelpPartial(int partial);
+
+  /// Provisional help when no round is fully scored.
+  ///
+  /// In en, this message translates to:
+  /// **'No round is fully scored yet.'**
+  String get standingsProvHelpNoFull;
+
+  /// Provisional help when some rounds are fully scored.
+  ///
+  /// In en, this message translates to:
+  /// **'Only fully scored rounds (1 to {full}) are official.'**
+  String standingsProvHelpFull(int full);
+
+  /// Heading of the key line under the standings table.
+  ///
+  /// In en, this message translates to:
+  /// **'Key'**
+  String get standingsKeyHeading;
+
+  /// Rank column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank'**
+  String get standingsColRank;
+
+  /// Pilot column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot'**
+  String get standingsColPilot;
+
+  /// Total column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get standingsColTotal;
+
+  /// Percentage column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Pct'**
+  String get standingsColPct;
+
+  /// Accessibility label of the percentage column.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage of winner'**
+  String get standingsColPctSemantic;
+
+  /// Raw score column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw'**
+  String get standingsColRaw;
+
+  /// Accessibility label of the raw score column.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw score'**
+  String get standingsColRawSemantic;
+
+  /// Team column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get standingsColTeam;
+
+  /// Pilot number column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'No.'**
+  String get standingsColNo;
+
+  /// Accessibility label of the pilot number column.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot number'**
+  String get standingsColNoSemantic;
+
+  /// Pilot class column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get standingsColClass;
+
+  /// Accessibility label of the flight detail column.
+  ///
+  /// In en, this message translates to:
+  /// **'Line'**
+  String get standingsColLineSemantic;
+
+  /// Round column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'R{round}'**
+  String standingsRoundColumn(int round);
+
+  /// Round column heading for a partly scored round.
+  ///
+  /// In en, this message translates to:
+  /// **'R{round} partial'**
+  String standingsRoundColumnPartial(int round);
+
+  /// Accessibility label of a round column.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String standingsRoundSemantic(int round);
+
+  /// Penalty column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty'**
+  String get standingsColPenalty;
+
+  /// Sub-line of the penalty column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Deducted from total; not dropped'**
+  String get standingsPenaltySub;
+
+  /// Accessibility label of a standings table page.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall Results, page {page}'**
+  String standingsTableSemantics(int page);
+
+  /// Cell label of the flight detail column.
+  ///
+  /// In en, this message translates to:
+  /// **'Score'**
+  String get standingsScoreCell;
+
+  /// Accessibility label of a pilot's rank cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank {place}'**
+  String standingsRankCell(int place);
+
+  /// Accessibility label of an unscored round cell.
+  ///
+  /// In en, this message translates to:
+  /// **'no score'**
+  String get standingsNoScore;
+
+  /// Accessibility label of a dropped round cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropped round, {score}'**
+  String standingsDroppedLabel(String score);
+
+  /// Screen-only chip beside a pilot with an open review.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get standingsReviewChip;
+
+  /// Accessibility label of the review chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen only. Review open.'**
+  String get standingsReviewChipSemantic;
+
   /// Heading of the Settings card with the version, licences and legal links.
   ///
   /// In en, this message translates to:
