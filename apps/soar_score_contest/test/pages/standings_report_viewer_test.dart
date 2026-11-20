@@ -257,6 +257,28 @@ void main() {
     });
   }
 
+  testWidgets('a completed fresh snapshot with no pending scores is official', (
+    tester,
+  ) async {
+    // The viewer and the Reports card share one rule: completion closes
+    // scoring, so only stale standings or unresolved scores keep it
+    // preliminary, whatever flag the stored snapshot carries.
+    fixture = StandingsFixture(preliminary: true);
+    server = StandingsServer(
+      fixture,
+      state: LifecycleState.completed,
+      scores: scoresFor(fixture.matrix, {
+        for (var round = 1; round <= 2; round++)
+          for (var pilot = 1; pilot <= 4; pilot++)
+            (round, pilot): at(round * 10 + pilot),
+      }),
+    );
+
+    await _pump(tester, server);
+
+    expect(_text('PRELIMINARY'), findsNothing);
+  });
+
   testWidgets('refresh catches recalculation at the same completed round', (
     tester,
   ) async {

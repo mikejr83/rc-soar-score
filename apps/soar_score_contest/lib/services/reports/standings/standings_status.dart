@@ -32,10 +32,13 @@ class StandingsStatus {
       0,
       (sum, entry) => sum + entry.value,
     );
-    final completedWithGaps =
-        facts.isCompleted && missing.isNotEmpty && !results.isStale;
-    if ((!results.isPreliminary || completedWithGaps) &&
-        (!facts.isCompleted || unofficial == 0)) {
+    // Completion closes scoring, so a completed contest is official unless the
+    // stored standings are stale or a score is still unresolved. This is the
+    // same rule as the Reports card (`ReportsFacts.resultStatus`).
+    final official = facts.isCompleted
+        ? !results.isStale && unofficial == 0
+        : !results.isPreliminary;
+    if (official) {
       return const StandingsStatus(status: ResultStatus.official);
     }
     final parts = <String>[];

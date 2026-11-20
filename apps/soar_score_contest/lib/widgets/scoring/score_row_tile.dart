@@ -934,7 +934,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (status == RowStatus.locked && !dirty && lockReason != null)
+          if (widget.row.isLocked && !dirty && lockReason != null)
             Tooltip(message: lockReason, child: chip)
           else
             chip,
