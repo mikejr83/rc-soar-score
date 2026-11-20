@@ -2998,6 +2998,143 @@
   "@workspaceNotFoundBack": {
     "description": "Action of the not-found state."
   },
+  "reportsBuiltFrom": "Reports are built from",
+  "@reportsBuiltFrom": {
+    "description": "Title and semantics of the reports context strip."
+  },
+  "reportsFactLifecycle": "Lifecycle",
+  "@reportsFactLifecycle": {
+    "description": "Label of the lifecycle fact."
+  },
+  "reportsFactCompleted": "Completed · Results are final",
+  "@reportsFactCompleted": {
+    "description": "Lifecycle value of a completed contest."
+  },
+  "reportsFactMatrix": "Matrix",
+  "@reportsFactMatrix": {
+    "description": "Label of the matrix fact."
+  },
+  "reportsFactNoMatrix": "No matrix drawn",
+  "@reportsFactNoMatrix": {
+    "description": "Matrix value when none is drawn."
+  },
+  "reportsFactConfiguration": "Configuration",
+  "@reportsFactConfiguration": {
+    "description": "Label of the configuration fact."
+  },
+  "reportsFactNoneSaved": "None saved",
+  "@reportsFactNoneSaved": {
+    "description": "Configuration value when none is saved."
+  },
+  "reportsFactScoringProgress": "Scoring progress",
+  "@reportsFactScoringProgress": {
+    "description": "Label of the scoring-progress fact."
+  },
+  "reportsResultStatusLead": "Standings produced now would be",
+  "@reportsResultStatusLead": {
+    "description": "Lead of the result-status fact."
+  },
+  "reportsResultStatusLabel": "Result status: {status}",
+  "@reportsResultStatusLabel": {
+    "description": "Semantics label of the result-status chip.",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsOfflineLocalOnly": "Based on local data.",
+  "@reportsOfflineLocalOnly": {
+    "description": "Offline note with no pending changes."
+  },
+  "reportsOfflinePending": "Based on local data, {count} {change} not yet synced.",
+  "@reportsOfflinePending": {
+    "description": "Offline note with pending changes.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsOfflineSuffix": "Reports show what this device has.",
+  "@reportsOfflineSuffix": {
+    "description": "Suffix of the offline note."
+  },
+  "reportsOpenSync": "Open Sync",
+  "@reportsOpenSync": {
+    "description": "Link to the sync page in the offline note."
+  },
+  "reportsLoadingLabel": "Loading reports",
+  "@reportsLoadingLabel": {
+    "description": "Semantics label of the reports loading state."
+  },
+  "reportsLoadingText": "Loading reports…",
+  "@reportsLoadingText": {
+    "description": "Text of the reports loading state."
+  },
+  "reportsUnavailableTitle": "Can’t read this contest’s data",
+  "@reportsUnavailableTitle": {
+    "description": "Title of the reports unavailable state."
+  },
+  "reportsUnavailableBody": "The reports list needs the contest’s matrix and scores, and they couldn’t be loaded from this device or the server. Nothing has changed.",
+  "@reportsUnavailableBody": {
+    "description": "Body of the reports unavailable state."
+  },
+  "reportsUnavailableRetry": "Try again",
+  "@reportsUnavailableRetry": {
+    "description": "Retry button of the reports unavailable state."
+  },
+  "reportCardOpen": "Open",
+  "@reportCardOpen": {
+    "description": "Open button of a report card."
+  },
+  "reportCardOpened": "Opened in a new tab",
+  "@reportCardOpened": {
+    "description": "Note after a report opened in a new tab."
+  },
+  "reportCardBlocked": "Your browser blocked the new tab. Allow pop-ups for Soar Score, or open the report here and use Back to return.",
+  "@reportCardBlocked": {
+    "description": "Notice when the browser blocked the new tab."
+  },
+  "reportCardOpenHere": "Open here",
+  "@reportCardOpenHere": {
+    "description": "Action to open the report in this window."
+  },
+  "reportCardNeedsScores": "Needs scores",
+  "@reportCardNeedsScores": {
+    "description": "Fact: the report needs scores."
+  },
+  "reportCardNoScoresNeeded": "No scores needed",
+  "@reportCardNoScoresNeeded": {
+    "description": "Fact: the report needs no scores."
+  },
+  "reportCardNeedsMatrix": "Needs a matrix",
+  "@reportCardNeedsMatrix": {
+    "description": "Fact: the report needs a matrix."
+  },
+  "resultStatusHelpButton": "What do these mean?",
+  "@resultStatusHelpButton": {
+    "description": "Button that opens the result-status definitions."
+  },
+  "resultStatusHelpTitle": "Result status",
+  "@resultStatusHelpTitle": {
+    "description": "Title of the result-status popover."
+  },
+  "resultStatusOfficial": "Every round up to the last round shown is complete: each pilot has an official score and no reviews are open. Printed pages carry no stamp.",
+  "@resultStatusOfficial": {
+    "description": "Definition of the official status."
+  },
+  "resultStatusPreliminary": "A round up to the last round shown has a missing score, a score not yet marked official, or an open review. Every page is stamped PRELIMINARY.",
+  "@resultStatusPreliminary": {
+    "description": "Definition of the preliminary status."
+  },
+  "resultStatusHelpFooter": "Each printed page repeats the status in its footer.",
+  "@resultStatusHelpFooter": {
+    "description": "Footer of the result-status popover."
+  },
   "aboutHeading": "About",
   "@aboutHeading": {
     "description": "Heading of the Settings card with the version, licences and legal links."

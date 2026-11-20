@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/reports/result_status.dart';
 import 'result_status_chip.dart';
 
@@ -9,23 +10,16 @@ import 'result_status_chip.dart';
 class ResultStatusHelp extends StatelessWidget {
   const ResultStatusHelp({super.key});
 
-  static const _definitions = [
-    (
-      ResultStatus.official,
-      'Entered scores are official and no reviews are open. A completed '
-          'contest can have blank flights. Printed pages carry no stamp.',
-    ),
-    (
-      ResultStatus.preliminary,
-      'A score awaits approval or review, the standings are out of date, '
-          'or an open contest has a missing score in the rounds shown. '
-          'Every page is stamped PRELIMINARY.',
-    ),
+  static List<(ResultStatus, String)> _definitions(AppLocalizations l10n) => [
+    (ResultStatus.official, l10n.resultStatusOfficial),
+    (ResultStatus.preliminary, l10n.resultStatusPreliminary),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final definitions = _definitions(l10n);
     return MenuAnchor(
       crossAxisUnconstrained: false,
       alignmentOffset: const Offset(0, 4),
@@ -40,8 +34,8 @@ class ResultStatusHelp extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 12,
               children: [
-                Text('Result status', style: theme.textTheme.titleMedium),
-                for (final (status, text) in _definitions)
+                Text(l10n.resultStatusHelpTitle, style: theme.textTheme.titleMedium),
+                for (final (status, text) in definitions)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 4,
@@ -51,7 +45,7 @@ class ResultStatusHelp extends StatelessWidget {
                     ],
                   ),
                 Text(
-                  'Each printed page repeats the status in its footer.',
+                  l10n.resultStatusHelpFooter,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -66,7 +60,7 @@ class ResultStatusHelp extends StatelessWidget {
         onPressed: () =>
             controller.isOpen ? controller.close() : controller.open(),
         icon: const Icon(Icons.help_outline, size: 18),
-        label: const Text('What do these mean?'),
+        label: Text(l10n.resultStatusHelpButton),
       ),
     );
   }
