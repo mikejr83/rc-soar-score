@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/auth/auth_session_inherited.dart';
 import 'package:soar_score_contest/auth/identity_provider_check.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
@@ -30,7 +30,7 @@ void main() {
       child: AuthSessionInherited(
         session: session,
         child: MaterialApp.router(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationDelegates,
           routerConfig: router,
         ),
       ),

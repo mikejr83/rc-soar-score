@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_self_score/l10n/app_localizations.dart';
+import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/router.dart';
 
 void main() {
@@ -10,7 +10,7 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       MaterialApp.router(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         routerConfig: router,
       ),
     );

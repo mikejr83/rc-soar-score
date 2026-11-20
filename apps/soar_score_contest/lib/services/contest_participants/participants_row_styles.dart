@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../participants/participant_row.dart';
 import '../participants/participant_row_style.dart';

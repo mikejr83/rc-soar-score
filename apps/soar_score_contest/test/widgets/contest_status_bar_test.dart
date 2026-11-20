@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app_sync_provider.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/services/storage/storage_monitor.dart';
 import 'package:soar_score_contest/services/sync/app_sync_state.dart';
@@ -100,7 +101,7 @@ Contest _contest() => Contest(
 
 Widget _frame(Contest? contest, {FakeAppSync? sync, StorageMonitor? storage}) {
   Widget app = MaterialApp(
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    localizationsDelegates: appLocalizationDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     home: Scaffold(
       body: Column(

@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'dart:math' show min;
+
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/scoring/scoring_row.dart';
 import 'package:soar_score_contest/widgets/scoring/score_row_tile.dart';
@@ -69,15 +71,40 @@ Future<ScoringRow?> rowOf(WidgetTester tester, String name) async {
   return built();
 }
 
-/// The pilots of the open group's built rows that have no score yet, leaving
-/// out [skip].
-List<String> openRowNames(WidgetTester tester, {Set<String> skip = const {}}) =>
-    [
-      for (final tile in _built(tester))
-        if (tile.row.status == RowStatus.notEntered &&
-            !skip.contains(tile.row.pilot.name))
-          tile.row.pilot.name,
-    ];
+/// The pilots in the open group who have no score yet, leaving out [skip].
+/// Walk the list so rows outside the viewport are included.
+Future<List<String>> openRowNames(
+  WidgetTester tester, {
+  Set<String> skip = const {},
+}) async {
+  final list = find.descendant(
+    of: _key('score-table'),
+    matching: find.byType(Scrollable),
+  );
+  final position = tester.state<ScrollableState>(list.first).position;
+  final initialOffset = position.pixels;
+  final names = <String>{};
+  position.jumpTo(position.minScrollExtent);
+  try {
+    while (true) {
+      await tester.pump();
+      names.addAll([
+        for (final tile in _built(tester))
+          if (tile.row.status == RowStatus.notEntered &&
+              !skip.contains(tile.row.pilot.name))
+            tile.row.pilot.name,
+      ]);
+      final remaining = position.maxScrollExtent - position.pixels;
+      if (remaining <= 0) return names.toList();
+      position.jumpTo(
+        position.pixels + min(remaining, position.viewportDimension),
+      );
+    }
+  } finally {
+    position.jumpTo(initialOffset);
+    await tester.pump();
+  }
+}
 
 /// Every pilot with a row built now, with its status, to say what a step saw.
 List<String> builtRowNames(WidgetTester tester) => [

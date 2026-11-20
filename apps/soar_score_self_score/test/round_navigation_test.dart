@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_self_score/data/sample_data.dart';
 import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_scope.dart';
-import 'package:soar_score_self_score/l10n/app_localizations.dart';
+import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/models/entry_context.dart';
 import 'package:soar_score_self_score/pages/score_entry_page.dart';
 import 'package:soar_score_self_score/router.dart';
@@ -66,7 +66,7 @@ Future<GoRouter> _pump(WidgetTester tester) async {
       child: SelfScoreScope(
         repository: _Repository(),
         child: MaterialApp.router(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationDelegates,
           routerConfig: router,
         ),
       ),

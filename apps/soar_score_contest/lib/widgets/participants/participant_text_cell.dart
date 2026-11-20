@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A compact text input in a participant row (class, model name, model ID),
 /// with optional suggestions.

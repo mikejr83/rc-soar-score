@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A labelled checkbox with an optional line of help, for a report's options.
 /// Changes apply at once.

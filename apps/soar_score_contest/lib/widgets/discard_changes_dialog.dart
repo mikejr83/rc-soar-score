@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Asks whether to throw away unsaved edits. Returns `true` to discard and
 /// `false` (also when dismissed) to keep editing.

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// What the director chose when leaving a group with unsaved rows.
 enum UnsavedChoice { save, discard, stay }

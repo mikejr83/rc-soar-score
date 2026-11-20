@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/workspace/controls/contest_transition.dart';
 import 'package:soar_score_contest/widgets/workspace/next_step/next_step_card.dart';

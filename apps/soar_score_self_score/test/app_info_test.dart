@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:soar_score_self_score/l10n/app_localizations.dart';
+import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/pages/app_info_page.dart';
 import 'package:soar_score_self_score/public_site.dart';
 import 'package:soar_score_self_score/router.dart';
@@ -10,7 +10,7 @@ import 'package:soar_score_self_score/widgets/self_score_app_bar.dart';
 
 Widget _app(Widget home, {UrlOpener opener = openInBrowser}) =>
     MaterialApp.router(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationDelegates,
       routerConfig: GoRouter(
         routes: [
           GoRoute(path: '/', builder: (context, state) => home),

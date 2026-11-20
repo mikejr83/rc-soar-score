@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The rounded outlined card around a radio choice. The selected card has a
 /// thick outline. It is a [Material] so the tile inside paints its ink on the

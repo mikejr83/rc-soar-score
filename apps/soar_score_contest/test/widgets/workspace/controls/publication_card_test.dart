@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';

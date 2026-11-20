@@ -5,3 +5,6 @@ output-localization-file: app_localizations.dart
 output-class: AppLocalizations
 output-dir: lib/l10n
 nullable-getter: false
+
+# Flutter gen-l10n still emits delegates for the legacy design libraries.
+header: "// ignore_for_file: deprecated_member_use"

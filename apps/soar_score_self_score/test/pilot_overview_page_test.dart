@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_self_score/data/sample_data.dart';
@@ -6,7 +6,7 @@ import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
 import 'package:soar_score_self_score/data/score_changes.dart';
 import 'package:soar_score_self_score/data/self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_scope.dart';
-import 'package:soar_score_self_score/l10n/app_localizations.dart';
+import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/models/pilot_overview.dart';
 import 'package:soar_score_self_score/pages/pilot_overview_page.dart';
 
@@ -46,7 +46,7 @@ Future<void> _pump(WidgetTester tester, _CountingRepository repository) async {
     SelfScoreScope(
       repository: repository,
       child: const MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         home: PilotOverviewPage(contestId: SampleData.contestId, pilotId: '12'),
       ),
     ),

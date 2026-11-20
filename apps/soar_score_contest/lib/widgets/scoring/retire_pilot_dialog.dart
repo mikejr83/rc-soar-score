@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../services/scoring/retire_impact.dart';
 import '../api_error_text.dart';

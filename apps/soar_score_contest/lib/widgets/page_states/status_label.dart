@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A named status value shown as an icon plus text, spoken as "Field: value".
 ///

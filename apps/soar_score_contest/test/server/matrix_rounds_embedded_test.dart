@@ -1,9 +1,10 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/contest/matrix_page.dart';
 import 'package:soar_score_contest/server/embedded_server.dart';
@@ -56,7 +57,7 @@ void main() {
           ApiClientInherited(
             client: client,
             child: MaterialApp(
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              localizationsDelegates: appLocalizationDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
               home: Scaffold(
                 body: MatrixPage(key: UniqueKey(), contestId: contestId.value),

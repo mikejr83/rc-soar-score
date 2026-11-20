@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Icon plus word for the connection state, so it never relies on colour.
 class ConnectionIndicator extends StatelessWidget {

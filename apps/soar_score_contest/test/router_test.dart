@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
 import 'package:soar_score_contest/pages/contest/workspace_page.dart';
 import 'package:soar_score_contest/router.dart';
@@ -54,7 +54,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp.router(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationDelegates,
           routerConfig: router,
         ),
       );
@@ -69,7 +69,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp.router(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationDelegates,
           routerConfig: router,
         ),
       );
@@ -90,7 +90,7 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp.router(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: appLocalizationDelegates,
             routerConfig: router,
           ),
         );
@@ -112,7 +112,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp.router(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationDelegates,
           routerConfig: router,
         ),
       );
@@ -133,7 +133,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp.router(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationDelegates,
           routerConfig: router,
         ),
       );
@@ -158,7 +158,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp.router(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationDelegates,
           routerConfig: router,
         ),
       );
@@ -181,7 +181,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp.router(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationDelegates,
           routerConfig: router,
         ),
       );

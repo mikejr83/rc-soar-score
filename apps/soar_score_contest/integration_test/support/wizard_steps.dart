@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/pages/new_contest_wizard_page.dart';
 import 'package:soar_score_contest/services/new_contest/copy_mode.dart';

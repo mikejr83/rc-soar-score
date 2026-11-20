@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A toggle as a 52 dp tile: a switch track, the label and the state word,
 /// with the rule or its reason written under it. A rule that turns it off

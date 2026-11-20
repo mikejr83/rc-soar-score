@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../services/new_contest/wizard_discipline.dart';
 import 'discipline_card.dart';

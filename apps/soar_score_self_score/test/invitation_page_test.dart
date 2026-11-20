@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_scope.dart';
+import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/l10n/app_localizations.dart';
 import 'package:soar_score_self_score/models/guest_session.dart';
 import 'package:soar_score_self_score/models/pilot_overview.dart';
@@ -36,7 +37,7 @@ Future<void> _pump(
       child: SelfScoreScope(
         repository: repository,
         child: MaterialApp.router(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: router,
         ),

@@ -8,7 +8,7 @@ The Windows build starts an embedded API server inside the app, bound to `localh
 
 ### Prerequisites
 
-- Flutter 3.47.x with Windows desktop support (see the root [README](../../README.md#prerequisites--toolchain) for the toolchain pins)
+- Flutter 3.50.x with Windows desktop support (see the root [README](../../README.md#prerequisites--toolchain) for the toolchain pins)
 - Visual Studio with the "Desktop development with C++" workload
 - `melos bootstrap` run once from the repository root
 

@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/widgets/sync/unsynced_changes_dialog.dart';
 
@@ -7,7 +8,7 @@ Future<bool?> _ask(WidgetTester tester, int pending, {String? tap}) async {
   bool? result;
   await tester.pumpWidget(
     MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Builder(
         builder: (context) => TextButton(

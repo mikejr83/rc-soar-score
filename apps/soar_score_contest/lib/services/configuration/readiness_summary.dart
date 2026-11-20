@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../matrix/fairness_view.dart';
 import 'config_phase.dart';

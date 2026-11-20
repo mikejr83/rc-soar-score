@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../services/workspace/checklist/checklist_item.dart';
 import '../../../services/workspace/checklist/setup_checklist.dart';

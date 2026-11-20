@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/contest/workspace_page.dart';
 import 'package:soar_score_contest/services/competition_import/competition_import.dart';
@@ -55,7 +56,7 @@ void main() {
 
   Future<void> pump(WidgetTester tester) => tester.pumpWidget(
     MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: ValueListenableBuilder<String>(

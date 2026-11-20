@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/public_site.dart';
 import 'package:soar_score_contest/widgets/page_states/page_states.dart';
@@ -11,7 +12,7 @@ Future<void> _pump(WidgetTester tester, Widget view) =>
 Future<void> _pumpLocalized(WidgetTester tester, Widget view) =>
     tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(body: view),
       ),

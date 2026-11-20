@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The line of status text in the action bar ("Unsaved changes").
 class EditorBarStatus {

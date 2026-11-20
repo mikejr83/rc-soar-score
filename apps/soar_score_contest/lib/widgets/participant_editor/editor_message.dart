@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// One line of text under a field: an icon and a sentence, so no state
 /// relies on color alone.

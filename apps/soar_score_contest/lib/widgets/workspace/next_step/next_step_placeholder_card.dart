@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The card while the facts load, and when they could not be loaded at all.
 class NextStepPlaceholderCard extends StatelessWidget {

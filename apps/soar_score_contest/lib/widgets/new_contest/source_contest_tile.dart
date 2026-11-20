@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A contest that can be (or is) the copy source: an icon, its name and a
 /// one-line description, with an optional trailing action.

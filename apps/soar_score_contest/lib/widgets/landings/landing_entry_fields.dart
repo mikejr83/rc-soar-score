@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The text controllers of one entry row in the landing table form.
 class LandingEntryFields {

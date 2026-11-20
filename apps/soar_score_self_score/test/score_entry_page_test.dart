@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_self_score/l10n/app_localizations.dart';
+import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/data/sample_data.dart';
 import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_scope.dart';
@@ -23,7 +23,7 @@ Future<void> _pump(WidgetTester tester, List<LandingResult>? table) async {
           ? const SampleSelfScoreRepository()
           : SampleSelfScoreRepository(landingTable: table),
       child: const MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         home: ScoreEntryPage(
           contestId: SampleData.contestId,
           pilotId: '12',

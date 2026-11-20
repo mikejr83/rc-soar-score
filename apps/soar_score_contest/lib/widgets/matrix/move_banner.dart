@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A notice in the move dialog: a warning (tertiary) or an error.
 class MoveBanner extends StatelessWidget {

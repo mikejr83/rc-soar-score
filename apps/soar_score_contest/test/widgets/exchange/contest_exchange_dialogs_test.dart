@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/exchange/contest_exchange.dart';
@@ -96,7 +97,7 @@ void main() {
 
   Future<void> pumpPage(WidgetTester tester) => tester.pumpWidget(
     MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: Builder(

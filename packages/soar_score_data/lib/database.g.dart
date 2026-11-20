@@ -41676,10 +41676,11 @@ class $$ContestsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (contestConfigurationRevisionsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          ContestConfigurationRevisionData
+                          ContestConfigurationRevisionData,
+                          $ContestConfigurationRevisionsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41690,17 +41691,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).contestConfigurationRevisionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (contestParticipationsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          ContestParticipationData
+                          ContestParticipationData,
+                          $ContestParticipationsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41711,17 +41711,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).contestParticipationsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (teamsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          TeamData
+                          TeamData,
+                          $TeamsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41732,17 +41731,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).teamsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (teamMembershipsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          TeamMembershipData
+                          TeamMembershipData,
+                          $TeamMembershipsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41753,17 +41751,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).teamMembershipsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (contestModelLinksRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          ContestModelLinkData
+                          ContestModelLinkData,
+                          $ContestModelLinksTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41774,17 +41771,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).contestModelLinksRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (publicationIdentitiesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          PublicationIdentityData
+                          PublicationIdentityData,
+                          $PublicationIdentitiesTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41795,17 +41791,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).publicationIdentitiesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (invitationsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          InvitationData
+                          InvitationData,
+                          $InvitationsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41816,17 +41811,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).invitationsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (matrixRevisionsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          MatrixRevisionData
+                          MatrixRevisionData,
+                          $MatrixRevisionsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41837,17 +41831,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).matrixRevisionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (roundsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          RoundData
+                          RoundData,
+                          $RoundsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41858,17 +41851,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).roundsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (roundGroupsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          RoundGroupData
+                          RoundGroupData,
+                          $RoundGroupsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41879,17 +41871,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).roundGroupsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (reFlightsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          ReFlightData
+                          ReFlightData,
+                          $ReFlightsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41900,17 +41891,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).reFlightsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (matrixAssignmentsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          MatrixAssignmentData
+                          MatrixAssignmentData,
+                          $MatrixAssignmentsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41921,17 +41911,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).matrixAssignmentsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (reFlightParticipantsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          ReFlightParticipantData
+                          ReFlightParticipantData,
+                          $ReFlightParticipantsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41942,17 +41931,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).reFlightParticipantsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (scorePlaceholdersRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          ScorePlaceholderData
+                          ScorePlaceholderData,
+                          $ScorePlaceholdersTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41963,17 +41951,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).scorePlaceholdersRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (scoreAttemptsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          ScoreAttemptData
+                          ScoreAttemptData,
+                          $ScoreAttemptsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -41984,17 +41971,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).scoreAttemptsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (officialScoresRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          OfficialScoreData
+                          OfficialScoreData,
+                          $OfficialScoresTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -42005,17 +41991,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).officialScoresRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (reviewRequestsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          ReviewRequestData
+                          ReviewRequestData,
+                          $ReviewRequestsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -42026,17 +42011,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).reviewRequestsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (flightResultsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          FlightResultData
+                          FlightResultData,
+                          $FlightResultsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -42047,17 +42031,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).flightResultsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (participationStandingsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          ParticipationStandingData
+                          ParticipationStandingData,
+                          $ParticipationStandingsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -42068,17 +42051,16 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).participationStandingsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                       if (teamStandingsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestData,
                           $ContestsTable,
-                          TeamStandingData
+                          TeamStandingData,
+                          $TeamStandingsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ContestsTableReferences
@@ -42089,10 +42071,8 @@ class $$ContestsTableTableManager
                                 table,
                                 p0,
                               ).teamStandingsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_id',
                           typedResults: items,
                         ),
                     ];
@@ -42681,10 +42661,11 @@ class $$LandingTablesTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (landingResultsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           LandingTableData,
                           $LandingTablesTable,
-                          LandingResultData
+                          LandingResultData,
+                          $LandingResultsTable
                         >(
                           currentTable: table,
                           referencedTable: $$LandingTablesTableReferences
@@ -42695,17 +42676,16 @@ class $$LandingTablesTableTableManager
                                 table,
                                 p0,
                               ).landingResultsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.landingTableId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'landing_table_id',
                           typedResults: items,
                         ),
                       if (disciplineProfilesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           LandingTableData,
                           $LandingTablesTable,
-                          DisciplineProfileData
+                          DisciplineProfileData,
+                          $DisciplineProfilesTable
                         >(
                           currentTable: table,
                           referencedTable: $$LandingTablesTableReferences
@@ -42716,17 +42696,16 @@ class $$LandingTablesTableTableManager
                                 table,
                                 p0,
                               ).disciplineProfilesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.defaultLandingTableId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'default_landing_table_id',
                           typedResults: items,
                         ),
                       if (contestConfigurationPresetsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           LandingTableData,
                           $LandingTablesTable,
-                          ContestConfigurationPresetData
+                          ContestConfigurationPresetData,
+                          $ContestConfigurationPresetsTable
                         >(
                           currentTable: table,
                           referencedTable: $$LandingTablesTableReferences
@@ -42737,17 +42716,16 @@ class $$LandingTablesTableTableManager
                                 table,
                                 p0,
                               ).contestConfigurationPresetsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.landingTableId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'landing_table_id',
                           typedResults: items,
                         ),
                       if (contestConfigurationRevisionsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           LandingTableData,
                           $LandingTablesTable,
-                          ContestConfigurationRevisionData
+                          ContestConfigurationRevisionData,
+                          $ContestConfigurationRevisionsTable
                         >(
                           currentTable: table,
                           referencedTable: $$LandingTablesTableReferences
@@ -42758,10 +42736,8 @@ class $$LandingTablesTableTableManager
                                 table,
                                 p0,
                               ).contestConfigurationRevisionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.landingTableId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'landing_table_id',
                           typedResults: items,
                         ),
                     ];
@@ -44325,10 +44301,11 @@ class $$DisciplineProfilesTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (disciplineConfigFieldsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           DisciplineProfileData,
                           $DisciplineProfilesTable,
-                          DisciplineConfigFieldData
+                          DisciplineConfigFieldData,
+                          $DisciplineConfigFieldsTable
                         >(
                           currentTable: table,
                           referencedTable: $$DisciplineProfilesTableReferences
@@ -44339,17 +44316,16 @@ class $$DisciplineProfilesTableTableManager
                                 table,
                                 p0,
                               ).disciplineConfigFieldsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.disciplineProfileId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'discipline_profile_id',
                           typedResults: items,
                         ),
                       if (disciplineScoreFieldsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           DisciplineProfileData,
                           $DisciplineProfilesTable,
-                          DisciplineScoreFieldData
+                          DisciplineScoreFieldData,
+                          $DisciplineScoreFieldsTable
                         >(
                           currentTable: table,
                           referencedTable: $$DisciplineProfilesTableReferences
@@ -44360,17 +44336,16 @@ class $$DisciplineProfilesTableTableManager
                                 table,
                                 p0,
                               ).disciplineScoreFieldsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.disciplineProfileId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'discipline_profile_id',
                           typedResults: items,
                         ),
                       if (disciplineValidationsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           DisciplineProfileData,
                           $DisciplineProfilesTable,
-                          DisciplineValidationData
+                          DisciplineValidationData,
+                          $DisciplineValidationsTable
                         >(
                           currentTable: table,
                           referencedTable: $$DisciplineProfilesTableReferences
@@ -44381,17 +44356,16 @@ class $$DisciplineProfilesTableTableManager
                                 table,
                                 p0,
                               ).disciplineValidationsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.disciplineProfileId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'discipline_profile_id',
                           typedResults: items,
                         ),
                       if (disciplineFormulasRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           DisciplineProfileData,
                           $DisciplineProfilesTable,
-                          DisciplineFormulaData
+                          DisciplineFormulaData,
+                          $DisciplineFormulasTable
                         >(
                           currentTable: table,
                           referencedTable: $$DisciplineProfilesTableReferences
@@ -44402,17 +44376,16 @@ class $$DisciplineProfilesTableTableManager
                                 table,
                                 p0,
                               ).disciplineFormulasRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.disciplineProfileId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'discipline_profile_id',
                           typedResults: items,
                         ),
                       if (disciplineRulesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           DisciplineProfileData,
                           $DisciplineProfilesTable,
-                          DisciplineRuleData
+                          DisciplineRuleData,
+                          $DisciplineRulesTable
                         >(
                           currentTable: table,
                           referencedTable: $$DisciplineProfilesTableReferences
@@ -44423,17 +44396,16 @@ class $$DisciplineProfilesTableTableManager
                                 table,
                                 p0,
                               ).disciplineRulesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.disciplineProfileId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'discipline_profile_id',
                           typedResults: items,
                         ),
                       if (contestConfigurationPresetsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           DisciplineProfileData,
                           $DisciplineProfilesTable,
-                          ContestConfigurationPresetData
+                          ContestConfigurationPresetData,
+                          $ContestConfigurationPresetsTable
                         >(
                           currentTable: table,
                           referencedTable: $$DisciplineProfilesTableReferences
@@ -44444,17 +44416,16 @@ class $$DisciplineProfilesTableTableManager
                                 table,
                                 p0,
                               ).contestConfigurationPresetsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.disciplineProfileId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'discipline_profile_id',
                           typedResults: items,
                         ),
                       if (contestConfigurationRevisionsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           DisciplineProfileData,
                           $DisciplineProfilesTable,
-                          ContestConfigurationRevisionData
+                          ContestConfigurationRevisionData,
+                          $ContestConfigurationRevisionsTable
                         >(
                           currentTable: table,
                           referencedTable: $$DisciplineProfilesTableReferences
@@ -44465,10 +44436,8 @@ class $$DisciplineProfilesTableTableManager
                                 table,
                                 p0,
                               ).contestConfigurationRevisionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.disciplineProfileId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'discipline_profile_id',
                           typedResults: items,
                         ),
                     ];
@@ -47610,10 +47579,11 @@ class $$ContestConfigurationPresetsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (contestConfigurationRevisionsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestConfigurationPresetData,
                           $ContestConfigurationPresetsTable,
-                          ContestConfigurationRevisionData
+                          ContestConfigurationRevisionData,
+                          $ContestConfigurationRevisionsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -47625,10 +47595,8 @@ class $$ContestConfigurationPresetsTableTableManager
                                 table,
                                 p0,
                               ).contestConfigurationRevisionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.sourcePresetId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'source_preset_id',
                           typedResults: items,
                         ),
                     ];
@@ -48732,10 +48700,11 @@ class $$ContestConfigurationRevisionsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (reFlightsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestConfigurationRevisionData,
                           $ContestConfigurationRevisionsTable,
-                          ReFlightData
+                          ReFlightData,
+                          $ReFlightsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -48747,17 +48716,16 @@ class $$ContestConfigurationRevisionsTableTableManager
                                 table,
                                 p0,
                               ).reFlightsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.configRevisionId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'config_revision_id',
                           typedResults: items,
                         ),
                       if (scoreAttemptsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestConfigurationRevisionData,
                           $ContestConfigurationRevisionsTable,
-                          ScoreAttemptData
+                          ScoreAttemptData,
+                          $ScoreAttemptsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -48769,17 +48737,16 @@ class $$ContestConfigurationRevisionsTableTableManager
                                 table,
                                 p0,
                               ).scoreAttemptsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.configRevisionId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'config_revision_id',
                           typedResults: items,
                         ),
                       if (flightResultsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestConfigurationRevisionData,
                           $ContestConfigurationRevisionsTable,
-                          FlightResultData
+                          FlightResultData,
+                          $FlightResultsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -48791,17 +48758,16 @@ class $$ContestConfigurationRevisionsTableTableManager
                                 table,
                                 p0,
                               ).flightResultsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.configRevisionId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'config_revision_id',
                           typedResults: items,
                         ),
                       if (participationStandingsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestConfigurationRevisionData,
                           $ContestConfigurationRevisionsTable,
-                          ParticipationStandingData
+                          ParticipationStandingData,
+                          $ParticipationStandingsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -48813,17 +48779,16 @@ class $$ContestConfigurationRevisionsTableTableManager
                                 table,
                                 p0,
                               ).participationStandingsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.configRevisionId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'config_revision_id',
                           typedResults: items,
                         ),
                       if (teamStandingsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestConfigurationRevisionData,
                           $ContestConfigurationRevisionsTable,
-                          TeamStandingData
+                          TeamStandingData,
+                          $TeamStandingsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -48835,10 +48800,8 @@ class $$ContestConfigurationRevisionsTableTableManager
                                 table,
                                 p0,
                               ).teamStandingsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.configRevisionId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'config_revision_id',
                           typedResults: items,
                         ),
                     ];
@@ -49347,10 +49310,11 @@ class $$ParticipantProfilesTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (contestParticipationsRefs)
-                    await $_getPrefetchedData<
+                    await $_getPrefetchedDataByColumns<
                       ParticipantProfileData,
                       $ParticipantProfilesTable,
-                      ContestParticipationData
+                      ContestParticipationData,
+                      $ContestParticipationsTable
                     >(
                       currentTable: table,
                       referencedTable: $$ParticipantProfilesTableReferences
@@ -49361,10 +49325,8 @@ class $$ParticipantProfilesTableTableManager
                             table,
                             p0,
                           ).contestParticipationsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.participantProfileId == item.id,
-                          ),
+                      currentColumn: 'id',
+                      referencedColumn: 'participant_profile_id',
                       typedResults: items,
                     ),
                 ];
@@ -49684,10 +49646,11 @@ class $$RolesTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (contestParticipationsRefs)
-                    await $_getPrefetchedData<
+                    await $_getPrefetchedDataByColumns<
                       RoleData,
                       $RolesTable,
-                      ContestParticipationData
+                      ContestParticipationData,
+                      $ContestParticipationsTable
                     >(
                       currentTable: table,
                       referencedTable: $$RolesTableReferences
@@ -49697,8 +49660,8 @@ class $$RolesTableTableManager
                         table,
                         p0,
                       ).contestParticipationsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.roleId == item.id),
+                      currentColumn: 'id',
+                      referencedColumn: 'role_id',
                       typedResults: items,
                     ),
                 ];
@@ -50999,10 +50962,11 @@ class $$ContestParticipationsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (teamMembershipsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestParticipationData,
                           $ContestParticipationsTable,
-                          TeamMembershipData
+                          TeamMembershipData,
+                          $TeamMembershipsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -51014,17 +50978,16 @@ class $$ContestParticipationsTableTableManager
                                 table,
                                 p0,
                               ).teamMembershipsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestParticipationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_participation_id',
                           typedResults: items,
                         ),
                       if (contestModelLinksRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestParticipationData,
                           $ContestParticipationsTable,
-                          ContestModelLinkData
+                          ContestModelLinkData,
+                          $ContestModelLinksTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -51036,17 +50999,16 @@ class $$ContestParticipationsTableTableManager
                                 table,
                                 p0,
                               ).contestModelLinksRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestParticipationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_participation_id',
                           typedResults: items,
                         ),
                       if (invitationsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestParticipationData,
                           $ContestParticipationsTable,
-                          InvitationData
+                          InvitationData,
+                          $InvitationsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -51058,17 +51020,16 @@ class $$ContestParticipationsTableTableManager
                                 table,
                                 p0,
                               ).invitationsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestParticipationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_participation_id',
                           typedResults: items,
                         ),
                       if (matrixAssignmentsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestParticipationData,
                           $ContestParticipationsTable,
-                          MatrixAssignmentData
+                          MatrixAssignmentData,
+                          $MatrixAssignmentsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -51080,17 +51041,16 @@ class $$ContestParticipationsTableTableManager
                                 table,
                                 p0,
                               ).matrixAssignmentsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestParticipationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_participation_id',
                           typedResults: items,
                         ),
                       if (reFlightParticipantsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestParticipationData,
                           $ContestParticipationsTable,
-                          ReFlightParticipantData
+                          ReFlightParticipantData,
+                          $ReFlightParticipantsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -51102,17 +51062,16 @@ class $$ContestParticipationsTableTableManager
                                 table,
                                 p0,
                               ).reFlightParticipantsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestParticipationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_participation_id',
                           typedResults: items,
                         ),
                       if (scorePlaceholdersRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestParticipationData,
                           $ContestParticipationsTable,
-                          ScorePlaceholderData
+                          ScorePlaceholderData,
+                          $ScorePlaceholdersTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -51124,17 +51083,16 @@ class $$ContestParticipationsTableTableManager
                                 table,
                                 p0,
                               ).scorePlaceholdersRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestParticipationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_participation_id',
                           typedResults: items,
                         ),
                       if (flightResultsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestParticipationData,
                           $ContestParticipationsTable,
-                          FlightResultData
+                          FlightResultData,
+                          $FlightResultsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -51146,17 +51104,16 @@ class $$ContestParticipationsTableTableManager
                                 table,
                                 p0,
                               ).flightResultsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestParticipationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_participation_id',
                           typedResults: items,
                         ),
                       if (participationStandingsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ContestParticipationData,
                           $ContestParticipationsTable,
-                          ParticipationStandingData
+                          ParticipationStandingData,
+                          $ParticipationStandingsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -51168,10 +51125,8 @@ class $$ContestParticipationsTableTableManager
                                 table,
                                 p0,
                               ).participationStandingsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.contestParticipationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'contest_participation_id',
                           typedResults: items,
                         ),
                     ];
@@ -51634,10 +51589,11 @@ class $$TeamsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (teamMembershipsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           TeamData,
                           $TeamsTable,
-                          TeamMembershipData
+                          TeamMembershipData,
+                          $TeamMembershipsTable
                         >(
                           currentTable: table,
                           referencedTable: $$TeamsTableReferences
@@ -51648,17 +51604,16 @@ class $$TeamsTableTableManager
                                 table,
                                 p0,
                               ).teamMembershipsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.teamId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'team_id',
                           typedResults: items,
                         ),
                       if (teamStandingsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           TeamData,
                           $TeamsTable,
-                          TeamStandingData
+                          TeamStandingData,
+                          $TeamStandingsTable
                         >(
                           currentTable: table,
                           referencedTable: $$TeamsTableReferences
@@ -51669,10 +51624,8 @@ class $$TeamsTableTableManager
                                 table,
                                 p0,
                               ).teamStandingsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.teamId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'team_id',
                           typedResults: items,
                         ),
                     ];
@@ -52541,10 +52494,11 @@ class $$ModelCatalogsTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (contestModelLinksRefs)
-                    await $_getPrefetchedData<
+                    await $_getPrefetchedDataByColumns<
                       ModelCatalogData,
                       $ModelCatalogsTable,
-                      ContestModelLinkData
+                      ContestModelLinkData,
+                      $ContestModelLinksTable
                     >(
                       currentTable: table,
                       referencedTable: $$ModelCatalogsTableReferences
@@ -52555,10 +52509,8 @@ class $$ModelCatalogsTableTableManager
                             table,
                             p0,
                           ).contestModelLinksRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.modelCatalogId == item.id,
-                          ),
+                      currentColumn: 'id',
+                      referencedColumn: 'model_catalog_id',
                       typedResults: items,
                     ),
                 ];
@@ -54963,10 +54915,11 @@ class $$AccountsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (accountAliasesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           AccountData,
                           $AccountsTable,
-                          AccountAliasData
+                          AccountAliasData,
+                          $AccountAliasesTable
                         >(
                           currentTable: table,
                           referencedTable: $$AccountsTableReferences
@@ -54977,17 +54930,16 @@ class $$AccountsTableTableManager
                                 table,
                                 p0,
                               ).accountAliasesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.accountId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'account_id',
                           typedResults: items,
                         ),
                       if (accountIdentitiesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           AccountData,
                           $AccountsTable,
-                          AccountIdentityData
+                          AccountIdentityData,
+                          $AccountIdentitiesTable
                         >(
                           currentTable: table,
                           referencedTable: $$AccountsTableReferences
@@ -54998,17 +54950,16 @@ class $$AccountsTableTableManager
                                 table,
                                 p0,
                               ).accountIdentitiesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.accountId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'account_id',
                           typedResults: items,
                         ),
                       if (accountPublicProfilesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           AccountData,
                           $AccountsTable,
-                          AccountPublicProfileData
+                          AccountPublicProfileData,
+                          $AccountPublicProfilesTable
                         >(
                           currentTable: table,
                           referencedTable: $$AccountsTableReferences
@@ -55019,17 +54970,16 @@ class $$AccountsTableTableManager
                                 table,
                                 p0,
                               ).accountPublicProfilesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.accountId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'account_id',
                           typedResults: items,
                         ),
                       if (participantAccountLinksRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           AccountData,
                           $AccountsTable,
-                          ParticipantAccountLinkData
+                          ParticipantAccountLinkData,
+                          $ParticipantAccountLinksTable
                         >(
                           currentTable: table,
                           referencedTable: $$AccountsTableReferences
@@ -55040,17 +54990,16 @@ class $$AccountsTableTableManager
                                 table,
                                 p0,
                               ).participantAccountLinksRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.accountId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'account_id',
                           typedResults: items,
                         ),
                       if (participantDirectoryEntriesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           AccountData,
                           $AccountsTable,
-                          ParticipantDirectoryEntryData
+                          ParticipantDirectoryEntryData,
+                          $ParticipantDirectoryEntriesTable
                         >(
                           currentTable: table,
                           referencedTable: $$AccountsTableReferences
@@ -55061,17 +55010,16 @@ class $$AccountsTableTableManager
                                 table,
                                 p0,
                               ).participantDirectoryEntriesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.accountId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'account_id',
                           typedResults: items,
                         ),
                       if (installationsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           AccountData,
                           $AccountsTable,
-                          InstallationData
+                          InstallationData,
+                          $InstallationsTable
                         >(
                           currentTable: table,
                           referencedTable: $$AccountsTableReferences
@@ -55082,17 +55030,16 @@ class $$AccountsTableTableManager
                                 table,
                                 p0,
                               ).installationsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.ownerAccountId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'owner_account_id',
                           typedResults: items,
                         ),
                       if (installationActivationsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           AccountData,
                           $AccountsTable,
-                          InstallationActivationData
+                          InstallationActivationData,
+                          $InstallationActivationsTable
                         >(
                           currentTable: table,
                           referencedTable: $$AccountsTableReferences
@@ -55103,17 +55050,16 @@ class $$AccountsTableTableManager
                                 table,
                                 p0,
                               ).installationActivationsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.activatedBy == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'activated_by',
                           typedResults: items,
                         ),
                       if (syncCursorsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           AccountData,
                           $AccountsTable,
-                          SyncCursorData
+                          SyncCursorData,
+                          $SyncCursorsTable
                         >(
                           currentTable: table,
                           referencedTable: $$AccountsTableReferences
@@ -55124,17 +55070,16 @@ class $$AccountsTableTableManager
                                 table,
                                 p0,
                               ).syncCursorsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.ownerAccountId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'owner_account_id',
                           typedResults: items,
                         ),
                       if (publicationProjectionsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           AccountData,
                           $AccountsTable,
-                          PublicationProjectionData
+                          PublicationProjectionData,
+                          $PublicationProjectionsTable
                         >(
                           currentTable: table,
                           referencedTable: $$AccountsTableReferences
@@ -55145,10 +55090,8 @@ class $$AccountsTableTableManager
                                 table,
                                 p0,
                               ).publicationProjectionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.publishedBy == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'published_by',
                           typedResults: items,
                         ),
                     ];
@@ -56279,10 +56222,11 @@ class $$AccountPublicProfilesTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (publicationIdentitiesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           AccountPublicProfileData,
                           $AccountPublicProfilesTable,
-                          PublicationIdentityData
+                          PublicationIdentityData,
+                          $PublicationIdentitiesTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -56294,17 +56238,16 @@ class $$AccountPublicProfilesTableTableManager
                                 table,
                                 p0,
                               ).publicationIdentitiesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.ownerPublicProfileId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'owner_public_profile_id',
                           typedResults: items,
                         ),
                       if (publicationParticipantsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           AccountPublicProfileData,
                           $AccountPublicProfilesTable,
-                          PublicationParticipantData
+                          PublicationParticipantData,
+                          $PublicationParticipantsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -56316,10 +56259,8 @@ class $$AccountPublicProfilesTableTableManager
                                 table,
                                 p0,
                               ).publicationParticipantsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.publicProfileId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'public_profile_id',
                           typedResults: items,
                         ),
                     ];
@@ -57840,10 +57781,11 @@ class $$InstallationsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (installationActivationsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           InstallationData,
                           $InstallationsTable,
-                          InstallationActivationData
+                          InstallationActivationData,
+                          $InstallationActivationsTable
                         >(
                           currentTable: table,
                           referencedTable: $$InstallationsTableReferences
@@ -57854,17 +57796,16 @@ class $$InstallationsTableTableManager
                                 table,
                                 p0,
                               ).installationActivationsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.installationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'installation_id',
                           typedResults: items,
                         ),
                       if (syncCursorsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           InstallationData,
                           $InstallationsTable,
-                          SyncCursorData
+                          SyncCursorData,
+                          $SyncCursorsTable
                         >(
                           currentTable: table,
                           referencedTable: $$InstallationsTableReferences
@@ -57875,10 +57816,8 @@ class $$InstallationsTableTableManager
                                 table,
                                 p0,
                               ).syncCursorsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.installationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'installation_id',
                           typedResults: items,
                         ),
                     ];
@@ -59716,10 +59655,11 @@ class $$PublicationIdentitiesTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (publicationProjectionsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           PublicationIdentityData,
                           $PublicationIdentitiesTable,
-                          PublicationProjectionData
+                          PublicationProjectionData,
+                          $PublicationProjectionsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -59731,17 +59671,16 @@ class $$PublicationIdentitiesTableTableManager
                                 table,
                                 p0,
                               ).publicationProjectionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.publicationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'publication_id',
                           typedResults: items,
                         ),
                       if (publicationParticipantsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           PublicationIdentityData,
                           $PublicationIdentitiesTable,
-                          PublicationParticipantData
+                          PublicationParticipantData,
+                          $PublicationParticipantsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -59753,17 +59692,16 @@ class $$PublicationIdentitiesTableTableManager
                                 table,
                                 p0,
                               ).publicationParticipantsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.publicationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'publication_id',
                           typedResults: items,
                         ),
                       if (delistRequestsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           PublicationIdentityData,
                           $PublicationIdentitiesTable,
-                          DelistRequestData
+                          DelistRequestData,
+                          $DelistRequestsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -59775,10 +59713,8 @@ class $$PublicationIdentitiesTableTableManager
                                 table,
                                 p0,
                               ).delistRequestsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.publicationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'publication_id',
                           typedResults: items,
                         ),
                     ];
@@ -63744,10 +63680,11 @@ class $$MatrixRevisionsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (roundsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MatrixRevisionData,
                           $MatrixRevisionsTable,
-                          RoundData
+                          RoundData,
+                          $RoundsTable
                         >(
                           currentTable: table,
                           referencedTable: $$MatrixRevisionsTableReferences
@@ -63758,17 +63695,16 @@ class $$MatrixRevisionsTableTableManager
                                 table,
                                 p0,
                               ).roundsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.matrixRevisionId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'matrix_revision_id',
                           typedResults: items,
                         ),
                       if (matrixAssignmentsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MatrixRevisionData,
                           $MatrixRevisionsTable,
-                          MatrixAssignmentData
+                          MatrixAssignmentData,
+                          $MatrixAssignmentsTable
                         >(
                           currentTable: table,
                           referencedTable: $$MatrixRevisionsTableReferences
@@ -63779,17 +63715,16 @@ class $$MatrixRevisionsTableTableManager
                                 table,
                                 p0,
                               ).matrixAssignmentsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.matrixRevisionId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'matrix_revision_id',
                           typedResults: items,
                         ),
                       if (scoreAttemptsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MatrixRevisionData,
                           $MatrixRevisionsTable,
-                          ScoreAttemptData
+                          ScoreAttemptData,
+                          $ScoreAttemptsTable
                         >(
                           currentTable: table,
                           referencedTable: $$MatrixRevisionsTableReferences
@@ -63800,17 +63735,16 @@ class $$MatrixRevisionsTableTableManager
                                 table,
                                 p0,
                               ).scoreAttemptsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.matrixRevisionId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'matrix_revision_id',
                           typedResults: items,
                         ),
                       if (flightResultsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MatrixRevisionData,
                           $MatrixRevisionsTable,
-                          FlightResultData
+                          FlightResultData,
+                          $FlightResultsTable
                         >(
                           currentTable: table,
                           referencedTable: $$MatrixRevisionsTableReferences
@@ -63821,17 +63755,16 @@ class $$MatrixRevisionsTableTableManager
                                 table,
                                 p0,
                               ).flightResultsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.matrixRevisionId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'matrix_revision_id',
                           typedResults: items,
                         ),
                       if (participationStandingsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MatrixRevisionData,
                           $MatrixRevisionsTable,
-                          ParticipationStandingData
+                          ParticipationStandingData,
+                          $ParticipationStandingsTable
                         >(
                           currentTable: table,
                           referencedTable: $$MatrixRevisionsTableReferences
@@ -63842,17 +63775,16 @@ class $$MatrixRevisionsTableTableManager
                                 table,
                                 p0,
                               ).participationStandingsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.matrixRevisionId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'matrix_revision_id',
                           typedResults: items,
                         ),
                       if (teamStandingsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MatrixRevisionData,
                           $MatrixRevisionsTable,
-                          TeamStandingData
+                          TeamStandingData,
+                          $TeamStandingsTable
                         >(
                           currentTable: table,
                           referencedTable: $$MatrixRevisionsTableReferences
@@ -63863,10 +63795,8 @@ class $$MatrixRevisionsTableTableManager
                                 table,
                                 p0,
                               ).teamStandingsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.matrixRevisionId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'matrix_revision_id',
                           typedResults: items,
                         ),
                     ];
@@ -64576,10 +64506,11 @@ class $$RoundsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (roundGroupsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           RoundData,
                           $RoundsTable,
-                          RoundGroupData
+                          RoundGroupData,
+                          $RoundGroupsTable
                         >(
                           currentTable: table,
                           referencedTable: $$RoundsTableReferences
@@ -64590,17 +64521,16 @@ class $$RoundsTableTableManager
                                 table,
                                 p0,
                               ).roundGroupsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.roundId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'round_id',
                           typedResults: items,
                         ),
                       if (flightResultsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           RoundData,
                           $RoundsTable,
-                          FlightResultData
+                          FlightResultData,
+                          $FlightResultsTable
                         >(
                           currentTable: table,
                           referencedTable: $$RoundsTableReferences
@@ -64611,10 +64541,8 @@ class $$RoundsTableTableManager
                                 table,
                                 p0,
                               ).flightResultsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.creditedRoundId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'credited_round_id',
                           typedResults: items,
                         ),
                     ];
@@ -66486,10 +66414,11 @@ class $$ReFlightsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (matrixAssignmentsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ReFlightData,
                           $ReFlightsTable,
-                          MatrixAssignmentData
+                          MatrixAssignmentData,
+                          $MatrixAssignmentsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ReFlightsTableReferences
@@ -66500,17 +66429,16 @@ class $$ReFlightsTableTableManager
                                 table,
                                 p0,
                               ).matrixAssignmentsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.reFlightId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 're_flight_id',
                           typedResults: items,
                         ),
                       if (reFlightParticipantsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ReFlightData,
                           $ReFlightsTable,
-                          ReFlightParticipantData
+                          ReFlightParticipantData,
+                          $ReFlightParticipantsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ReFlightsTableReferences
@@ -66521,10 +66449,8 @@ class $$ReFlightsTableTableManager
                                 table,
                                 p0,
                               ).reFlightParticipantsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.reFlightId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 're_flight_id',
                           typedResults: items,
                         ),
                     ];
@@ -67912,10 +67838,11 @@ class $$MatrixAssignmentsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (reFlightParticipantsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MatrixAssignmentData,
                           $MatrixAssignmentsTable,
-                          ReFlightParticipantData
+                          ReFlightParticipantData,
+                          $ReFlightParticipantsTable
                         >(
                           currentTable: table,
                           referencedTable: $$MatrixAssignmentsTableReferences
@@ -67926,17 +67853,16 @@ class $$MatrixAssignmentsTableTableManager
                                 table,
                                 p0,
                               ).reFlightParticipantsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.assignmentId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'assignment_id',
                           typedResults: items,
                         ),
                       if (scorePlaceholdersRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MatrixAssignmentData,
                           $MatrixAssignmentsTable,
-                          ScorePlaceholderData
+                          ScorePlaceholderData,
+                          $ScorePlaceholdersTable
                         >(
                           currentTable: table,
                           referencedTable: $$MatrixAssignmentsTableReferences
@@ -67947,10 +67873,8 @@ class $$MatrixAssignmentsTableTableManager
                                 table,
                                 p0,
                               ).scorePlaceholdersRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.assignmentId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'assignment_id',
                           typedResults: items,
                         ),
                     ];
@@ -69725,10 +69649,11 @@ class $$ScorePlaceholdersTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (scoreAttemptsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ScorePlaceholderData,
                           $ScorePlaceholdersTable,
-                          ScoreAttemptData
+                          ScoreAttemptData,
+                          $ScoreAttemptsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ScorePlaceholdersTableReferences
@@ -69739,17 +69664,16 @@ class $$ScorePlaceholdersTableTableManager
                                 table,
                                 p0,
                               ).scoreAttemptsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.scorePlaceholderId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'score_placeholder_id',
                           typedResults: items,
                         ),
                       if (officialScoresRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ScorePlaceholderData,
                           $ScorePlaceholdersTable,
-                          OfficialScoreData
+                          OfficialScoreData,
+                          $OfficialScoresTable
                         >(
                           currentTable: table,
                           referencedTable: $$ScorePlaceholdersTableReferences
@@ -69760,17 +69684,16 @@ class $$ScorePlaceholdersTableTableManager
                                 table,
                                 p0,
                               ).officialScoresRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.scorePlaceholderId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'score_placeholder_id',
                           typedResults: items,
                         ),
                       if (reviewRequestsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ScorePlaceholderData,
                           $ScorePlaceholdersTable,
-                          ReviewRequestData
+                          ReviewRequestData,
+                          $ReviewRequestsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ScorePlaceholdersTableReferences
@@ -69781,17 +69704,16 @@ class $$ScorePlaceholdersTableTableManager
                                 table,
                                 p0,
                               ).reviewRequestsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.scorePlaceholderId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'score_placeholder_id',
                           typedResults: items,
                         ),
                       if (flightResultsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ScorePlaceholderData,
                           $ScorePlaceholdersTable,
-                          FlightResultData
+                          FlightResultData,
+                          $FlightResultsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ScorePlaceholdersTableReferences
@@ -69802,10 +69724,8 @@ class $$ScorePlaceholdersTableTableManager
                                 table,
                                 p0,
                               ).flightResultsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.scorePlaceholderId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'score_placeholder_id',
                           typedResults: items,
                         ),
                     ];
@@ -70729,10 +70649,11 @@ class $$ScoreAttemptsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (officialScoresRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ScoreAttemptData,
                           $ScoreAttemptsTable,
-                          OfficialScoreData
+                          OfficialScoreData,
+                          $OfficialScoresTable
                         >(
                           currentTable: table,
                           referencedTable: $$ScoreAttemptsTableReferences
@@ -70743,17 +70664,16 @@ class $$ScoreAttemptsTableTableManager
                                 table,
                                 p0,
                               ).officialScoresRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.scoreAttemptId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'score_attempt_id',
                           typedResults: items,
                         ),
                       if (reviewRequestsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ScoreAttemptData,
                           $ScoreAttemptsTable,
-                          ReviewRequestData
+                          ReviewRequestData,
+                          $ReviewRequestsTable
                         >(
                           currentTable: table,
                           referencedTable: $$ScoreAttemptsTableReferences
@@ -70764,10 +70684,8 @@ class $$ScoreAttemptsTableTableManager
                                 table,
                                 p0,
                               ).reviewRequestsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.resultingAttemptId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'resulting_attempt_id',
                           typedResults: items,
                         ),
                     ];
@@ -71461,10 +71379,11 @@ class $$OfficialScoresTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (flightResultsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           OfficialScoreData,
                           $OfficialScoresTable,
-                          FlightResultData
+                          FlightResultData,
+                          $FlightResultsTable
                         >(
                           currentTable: table,
                           referencedTable: $$OfficialScoresTableReferences
@@ -71475,10 +71394,8 @@ class $$OfficialScoresTableTableManager
                                 table,
                                 p0,
                               ).flightResultsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.officialScoreId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'official_score_id',
                           typedResults: items,
                         ),
                     ];

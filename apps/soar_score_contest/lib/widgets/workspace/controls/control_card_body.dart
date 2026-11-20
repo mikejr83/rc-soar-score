@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../services/workspace/workspace_control.dart';
 import '../workspace_control_slot.dart';

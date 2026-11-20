@@ -29,6 +29,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  material_ui: ^1.11.1
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -74,6 +75,7 @@ dependencies:
   file_selector: ^1.1.0
 
 dev_dependencies:
+  cupertino_ui: ^1.1.7
   flutter_test:
     sdk: flutter
   integration_test:

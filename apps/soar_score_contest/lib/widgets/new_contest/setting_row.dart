@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A note under a setting: a warning, an error or an explanation.
 class SettingNote {

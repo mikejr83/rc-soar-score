@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/services/workspace/activity/activity_entry.dart';
 import 'package:soar_score_contest/services/workspace/activity/activity_facts.dart';
@@ -20,11 +20,7 @@ Future<void> _pump(
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     MaterialApp(
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
+      localizationsDelegates: appLocalizationDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: SingleChildScrollView(

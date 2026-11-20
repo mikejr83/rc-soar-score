@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/landing_page.dart';
 import 'package:soar_score_contest/services/alpha_notice/alpha_notice_key.dart';
@@ -17,7 +18,7 @@ Widget _host({
   LocalUiStore? store,
   DateTime Function()? now,
 }) => MaterialApp(
-  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  localizationsDelegates: appLocalizationDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: AlphaNoticeGate(
     enabled: enabled,

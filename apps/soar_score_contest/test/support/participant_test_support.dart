@@ -1,12 +1,13 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/participant_editor_page.dart';
 import 'package:soar_score_contest/pages/participants_page.dart';
@@ -90,7 +91,7 @@ Widget participantsApp(ApiClient client, {String initial = participantsPath}) {
     client: client,
     child: MaterialApp.router(
       routerConfig: router,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
     ),
   );

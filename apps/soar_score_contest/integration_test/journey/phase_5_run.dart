@@ -1,7 +1,7 @@
 import 'dart:math' show min;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/scoring/scoring_row.dart';
 import 'package:soar_score_core/soar_score_core.dart'
@@ -631,7 +631,7 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       final seen = <String>[];
       for (var g = 1; g <= data.groupsPerRound; g++) {
         await openRoundGroup(tester, 3, g);
-        final open = openRowNames(tester, skip: {'Tess Valdez'});
+        final open = await openRowNames(tester, skip: {'Tess Valdez'});
         seen.add('group $g: built ${builtRowNames(tester)}, open $open');
         if (open.length > inGroup.length) {
           inGroup = open;
@@ -855,7 +855,7 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       final all = <String>[];
       for (var g = 1; g <= data.groupsPerRound; g++) {
         await openRoundGroup(tester, 3, g);
-        all.addAll(openRowNames(tester));
+        all.addAll(await openRowNames(tester));
       }
       expect(all, isNotEmpty, reason: 'rows still open in round 3');
       final early = all.take(all.length - 1).toList();

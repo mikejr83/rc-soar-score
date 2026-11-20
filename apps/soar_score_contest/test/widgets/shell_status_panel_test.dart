@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:flutter/semantics.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/services/workspace/shell_round_item.dart';
 import 'package:soar_score_contest/services/workspace/workspace_control_target.dart';
@@ -34,7 +35,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         home: Scaffold(
           body: ShellStatusPanel(contest: _contest(access: ScoringAccess.open)),
         ),
@@ -57,7 +58,7 @@ void main() {
     final opened = <WorkspaceControlTarget>[];
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         home: Scaffold(
           body: ShellStatusPanel(
             contest: _contest(access: ScoringAccess.open),
@@ -93,7 +94,7 @@ void main() {
   testWidgets('a value is at least 48 dp to hit', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         home: Scaffold(
           body: ShellStatusPanel(contest: _contest(), onOpen: (_) {}),
         ),
@@ -112,7 +113,7 @@ void main() {
   testWidgets('without a callback the values are not buttons', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         home: Scaffold(body: ShellStatusPanel(contest: _contest())),
       ),
     );
@@ -126,7 +127,7 @@ void main() {
       ValueChanged<ShellRoundItem>? onOpenRound,
     }) => tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: ShellStatusPanel(

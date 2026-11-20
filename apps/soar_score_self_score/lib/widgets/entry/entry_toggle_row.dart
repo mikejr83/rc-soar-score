@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// One on/off flag of the entry form, with an optional explanation.
 class EntryToggleRow extends StatelessWidget {

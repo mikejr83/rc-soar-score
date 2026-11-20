@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A participant option in step 3 of the New Contest wizard. Each one adds
 /// columns to the Participants step, and says so.

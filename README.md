@@ -145,7 +145,7 @@ The repository contains extensive business and architectural documentation under
 
 The repository enforces pinned toolchain baselines defined in `plan/tickets/mvp-implementation/001-setup-toolchain-baseline.md` and [`AGENTS.md`](AGENTS.md):
 
-- **Flutter**: `3.47.x` (stable channel)
+- **Flutter**: `3.50.x` (stable channel)
 - **Dart**: Bundled with Flutter (`^3.13.3` SDK constraint)
 - **Melos**: `^8.9.0` (Dart monorepo tool)
 
