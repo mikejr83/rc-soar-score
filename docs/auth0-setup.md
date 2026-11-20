@@ -126,6 +126,41 @@ the development tenant. Create your own Google OAuth client before release;
 Auth0's shared keys are not for production. Then open each application's
 Connections tab and switch the connections on.
 
+### Account linking Action
+
+[Suggest account linking](../scripts/auth0/suggest-account-linking.js) checks
+for other Auth0 profiles with the same verified email. On an exact match it
+adds `https://rcsoarscore.com/account_linking_available` to the ID token with
+the value `true`. Matching is case-sensitive because the Management API lookup
+is case-sensitive. The Action uses read-only permissions.
+
+1. In a test tenant, create a dedicated **Machine to Machine** application.
+   Authorize it for the **Auth0 Management API** and grant `read:users`.
+2. In **Actions → Library**, create a custom Action named **Suggest account
+   linking**. Choose **Login / Post Login** and a supported Node.js runtime
+   with built-in `fetch` (Node.js 22 or later). Paste the linked script.
+3. In the Action's secrets, set `MANAGEMENT_DOMAIN` to the canonical tenant
+   hostname from the Management API identifier, without `https://` or a
+   trailing slash. Set `MANAGEMENT_CLIENT_ID` and `MANAGEMENT_CLIENT_SECRET`
+   from the Machine to Machine application. Set `SOAR_SCORE_CLIENT_IDS` to a
+   comma-separated list of the Soar Score application client IDs to check.
+4. In the test tenant, deploy the Action and add it to the **Login** flow.
+   Sign in through a listed application with two test profiles that share an
+   exact verified email. Inspect the newly issued ID token for the claim. Sign
+   in with a test profile that has no match and confirm the claim is absent.
+
+The Soar Score apps need a consumer for the claim and a linking screen before
+users will see a prompt. Complete the initial login before starting that screen's
+second sign-in. Auth0 documents that a second sign-in on the same domain can
+replace the session of a suspended Post Login redirect.
+
+The linking screen must verify control of the second identity before the
+backend links it. Preserve the primary Auth0 profile that owns the existing Soar
+Score account. If both profiles already have app data, reconcile their Soar
+Score accounts first. The Action's ID token claim is a prompt signal.
+
+[Auth0 account linking implementation](https://auth0.com/docs/manage-users/user-accounts/user-account-linking/link-user-accounts)
+
 ## Who can do what
 
 Auth0 only proves who the caller is. It does not decide what they may do. RBAC
