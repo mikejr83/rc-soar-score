@@ -157,10 +157,29 @@ void main() {
     expect(c.draftOf(_row(c, 1)).heightText, '99');
     expect(c.markOfficialSkip(_row(c, 1)), isNotNull);
 
+    // Typing the old height back is still an edit: Revert shows 130.
+    c.draftOf(_row(c, 1)).setHeight('120');
+    expect(c.draftOf(_row(c, 1)).canRevert, isTrue);
+    expect(c.markOfficialSkip(_row(c, 1)), isNotNull);
+
     c.revert(_row(c, 1));
     expect(c.draftOf(_row(c, 1)).heightText, '130');
     expect(c.markOfficialSkip(_row(c, 1)), isNull);
     expect(await c.markOfficial(_row(c, 1)), isTrue);
+  });
+
+  test('a sync that advances the official revision keeps typed text '
+      'and marks the row stale', () async {
+    final server = ScoringServer()..seedScore(first, h120);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setHeight('99');
+
+    server.seedCorrection(first, h130, 'Corrected elsewhere');
+    await c.refreshAfterSync();
+
+    expect(c.draftOf(_row(c, 1)).heightText, '99');
+    expect(c.saveOf(first).kind, RowSaveKind.stale);
+    expect(c.theirsOf(first), h130);
   });
 
   test('an untouched pilot prefill is not unsaved', () async {

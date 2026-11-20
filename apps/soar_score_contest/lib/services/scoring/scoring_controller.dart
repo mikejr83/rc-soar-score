@@ -218,6 +218,11 @@ class ScoringController extends ChangeNotifier {
           RowSaveKind.stale,
           message: 'This row changed since you opened it.',
         );
+      } else {
+        // Same official score: a pilot may have replaced the waiting
+        // submission. What was typed stays; Revert and the prefill follow
+        // the row as it is now.
+        draft.rebase(row.savedComponents, shown: _shown(row));
       }
     }
     _syncReads++;
