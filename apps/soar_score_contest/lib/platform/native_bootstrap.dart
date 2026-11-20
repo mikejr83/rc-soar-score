@@ -37,7 +37,7 @@ import 'native_contest_exchange.dart';
 import 'native_competition_import_store.dart';
 import 'native_preferences.dart';
 import 'native_sync.dart';
-import 'rolling_log_file.dart';
+import 'app_log.dart';
 
 final _logger = Logger('NativeBootstrap');
 
@@ -62,7 +62,7 @@ class NativeBootstrap extends AppBootstrap {
     this.localUiStore,
     this._acting,
     this._preferences,
-    this._detachLog,
+    this._appLog,
   ) : _client = ApiClient(
         baseUrl: _server.baseUrl,
         tokenProvider: () async => _server.secret,
@@ -90,8 +90,8 @@ class NativeBootstrap extends AppBootstrap {
   /// The account's preferences, read and kept here.
   final NativePreferences _preferences;
 
-  /// Stops writing the log file; called when this bootstrap closes.
-  final void Function() _detachLog;
+  /// The log file; closed when this bootstrap closes.
+  final AppLog _appLog;
 
   @override
   late final UiAccount uiAccount = ActingUiAccount(_acting);
@@ -161,7 +161,7 @@ class NativeBootstrap extends AppBootstrap {
     _epoch.close();
     await sync.close();
     await _server.close();
-    _detachLog();
+    await _appLog.close();
     await localUiStore.close();
     (uiAccount as ActingUiAccount).dispose();
     _remoteClient.close();
@@ -222,10 +222,8 @@ class NativeBootstrap extends AppBootstrap {
     final baseUrl = Uri.parse(rawUrl.isEmpty ? defaultApiBaseUrl : rawUrl);
     _logger.info('Base URL: $baseUrl');
     final database = await databasePath(demo: demo);
-    final appLog = RollingLogFile(
-      Directory(p.join(p.dirname(database), 'logs')),
-    );
-    final detachLog = appLog.attach();
+    final appLog = AppLog(Directory(p.join(p.dirname(database), 'logs')));
+    appLog.attach();
     if (demoReset) {
       _logger.info('Resetting demo database');
       await deleteDatabaseFiles(database);
@@ -334,7 +332,7 @@ class NativeBootstrap extends AppBootstrap {
       uiStore,
       acting,
       preferences,
-      detachLog,
+      appLog,
     );
   }
 

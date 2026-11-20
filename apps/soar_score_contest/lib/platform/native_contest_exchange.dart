@@ -8,7 +8,7 @@ import '../server/embedded_server.dart';
 import '../server/profile_access.dart';
 import '../services/exchange/contest_exchange.dart';
 import '../services/exchange/support_bundle.dart';
-import 'rolling_log_file.dart';
+import 'app_log.dart';
 
 /// Exports and imports contests of the embedded server's database.
 class NativeContestExchange implements ContestExchange {
@@ -23,7 +23,7 @@ class NativeContestExchange implements ContestExchange {
 
   final EmbeddedServer _server;
   final DateTime Function() _clock;
-  final RollingLogFile? _log;
+  final AppLog? _log;
   final Future<Map<String, Object?>> Function()? _installation;
 
   @override
@@ -71,13 +71,13 @@ class NativeContestExchange implements ContestExchange {
           'locale': Platform.localeName,
           'log_files': [
             if (log != null)
-              for (final f in log.summaries())
+              for (final f in await log.summaries())
                 {'name': f.name, 'bytes': f.bytes},
           ],
           ...?await _installation?.call(),
         },
         contest: file.encode(),
-        log: log?.readAll() ?? '',
+        log: await log?.readAll() ?? '',
       ),
     );
   });

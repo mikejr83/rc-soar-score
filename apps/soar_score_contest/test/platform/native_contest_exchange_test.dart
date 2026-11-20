@@ -4,9 +4,10 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/platform/native_contest_exchange.dart';
-import 'package:soar_score_contest/platform/rolling_log_file.dart';
+import 'package:soar_score_contest/platform/app_log.dart';
 import 'package:soar_score_contest/server/embedded_server.dart';
 import 'package:soar_score_contest/services/exchange/contest_exchange.dart';
 import 'package:soar_score_contest/services/exchange/support_bundle.dart';
@@ -61,8 +62,8 @@ void main() {
     'an export for support is a container with the log, unredacted',
     () async {
       final logDir = Directory('${dir.path}/logs');
-      final log = RollingLogFile(logDir)
-        ..write('INFO Sync: pulled 3 mutations');
+      final log = AppLog(logDir)..attach();
+      Logger('Sync').info('pulled 3 mutations');
       final exchange = NativeContestExchange(
         source,
         log: log,
