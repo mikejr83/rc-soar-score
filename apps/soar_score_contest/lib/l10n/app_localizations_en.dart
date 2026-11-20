@@ -5250,4 +5250,131 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get rolesTitle => 'Roles';
+
+  @override
+  String rolesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count roles',
+      one: '1 role',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rolesSystemRole => 'System role';
+
+  @override
+  String get rolesYourRole => 'Your role';
+
+  @override
+  String get rolesNew => 'New role';
+
+  @override
+  String get rolesCreate => 'Create';
+
+  @override
+  String get rolesRename => 'Rename role';
+
+  @override
+  String get rolesRenameButton => 'Rename';
+
+  @override
+  String get rolesDeleteTitle => 'Delete role?';
+
+  @override
+  String rolesDeleteBody(String name) {
+    return '$name will be removed from your roles. Contests are not affected.';
+  }
+
+  @override
+  String get rolesDelete => 'Delete';
+
+  @override
+  String get rolesLoadFailed => 'Roles could not be loaded.';
+
+  @override
+  String get rolesLoading => 'Loading roles';
+
+  @override
+  String get rolesNameLabel => 'Role name';
+
+  @override
+  String get rolesNameError => 'Enter a name for the role.';
+
+  @override
+  String get rolesBackToRoles => 'Back to roles';
+
+  @override
+  String rolesDeleteTooltip(String name) {
+    return 'Delete $name';
+  }
+
+  @override
+  String get rolesInUseTooltip => 'In use, cannot delete';
+
+  @override
+  String get rolesType => 'Type';
+
+  @override
+  String get rolesPilot => 'Pilot';
+
+  @override
+  String get rolesNonFlier => 'Non-flier';
+
+  @override
+  String get rolesOwner => 'Owner';
+
+  @override
+  String get rolesOwnerSystem => 'System';
+
+  @override
+  String get rolesOwnerYou => 'You';
+
+  @override
+  String get rolesScores => 'Scores';
+
+  @override
+  String get rolesReceivesScores => 'Receives scores';
+
+  @override
+  String get rolesNoScores => 'No scores';
+
+  @override
+  String get rolesPilotExplanation =>
+      'The Pilot role is fixed. Every participant starts as a pilot, and only pilots fly and receive scores, so it cannot be renamed or deleted.';
+
+  @override
+  String get rolesSystemExplanation =>
+      'This is a system role shared by every director, so it cannot be renamed or deleted.';
+
+  @override
+  String get rolesInUseExplanation =>
+      'A role that participants have cannot be deleted. Change those participants to another role first.';
+
+  @override
+  String get rolesUsageTitle => 'Where it is used';
+
+  @override
+  String rolesUsageLoadFailed(String error) {
+    return 'Usage could not be loaded. $error';
+  }
+
+  @override
+  String get rolesUsageEmpty => 'No contest uses this role yet.';
+
+  @override
+  String rolesUsageItem(String contest, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return '$contest: $_temp0';
+  }
 }
