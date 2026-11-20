@@ -8497,6 +8497,521 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resolve {entityType} conflict'**
   String syncResolveTitle(String entityType);
+
+  /// Title of the add-participant dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {name}?'**
+  String contestParticipantsAddTitle(String name);
+
+  /// Title of the add-participant dialog after the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Add after the draw?'**
+  String get contestParticipantsAddAfterDrawTitle;
+
+  /// Add-participant dialog body after the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'The draw has already been made. {name} will be added to the contest. Place them in a group from the Matrix page. A redraw is also possible.'**
+  String contestParticipantsAddBodyLate(String name);
+
+  /// Add-participant dialog body.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be added to the contest{asRole}.'**
+  String contestParticipantsAddBody(String name, String asRole);
+
+  /// Label of the role dropdown in the add-participant dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get contestParticipantsAddRoleLabel;
+
+  /// Confirm button in the add-participant dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Add participant'**
+  String get contestParticipantsAddConfirm;
+
+  /// Title of the redraw-offer dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Redraw the matrix with {name}?'**
+  String contestParticipantsRedrawTitle(String name);
+
+  /// Body of the redraw-offer dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'No scores have been entered, so the matrix can be drawn again to include {name} fairly. Or keep the matrix as it is: {name} is then added to the last group of every round, within the contest’s group sizes and team protection.'**
+  String contestParticipantsRedrawBody(String name);
+
+  /// Button to keep the matrix in the redraw-offer dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the matrix'**
+  String get contestParticipantsRedrawKeep;
+
+  /// Button to redraw the matrix in the redraw-offer dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Redraw'**
+  String get contestParticipantsRedrawDo;
+
+  /// Title of the role-change confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Change {name} to {roleName}?'**
+  String contestParticipantsChangeRoleTitle(String name, String roleName);
+
+  /// First sentence of the role-change confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{roleName} is a non-flying role, so {name} {verb} no score rows{classCleared}.'**
+  String contestParticipantsChangeRoleBody(
+    String roleName,
+    String name,
+    String verb,
+    String classCleared,
+  );
+
+  /// Note when the pilot has places in the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Their places in the draw are removed when you save, and the draw will need redoing.'**
+  String get contestParticipantsChangeRoleDrawNote;
+
+  /// Final sentence of the role-change confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still undo this before you save.'**
+  String get contestParticipantsChangeRoleUndoNote;
+
+  /// Confirm button in the role-change confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Change role'**
+  String get contestParticipantsChangeRoleConfirm;
+
+  /// Title of the remove confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {count, plural, =1{1 person} other{{count} people}} from this contest?'**
+  String contestParticipantsRemoveTitle(int count);
+
+  /// Body of the remove confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes them from {contestName} only. Their saved profiles stay, and you can add them again later.'**
+  String contestParticipantsRemoveBody(String contestName);
+
+  /// Note about draw places in the remove confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} {verb} in the draw. Their places in it are removed too, and the draw will need redoing.'**
+  String contestParticipantsRemoveInDraw(String names, String verb);
+
+  /// Confirm button in the remove confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {count}'**
+  String contestParticipantsRemoveButton(int count);
+
+  /// Button to discard unsaved rows in the save bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes'**
+  String get contestParticipantsSaveDiscard;
+
+  /// Note that role changes are made in the Configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'Change in Configuration.'**
+  String get contestParticipantsChangeInConfiguration;
+
+  /// Banner line for a pilot without a class.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: enter a class'**
+  String contestParticipantsMissingClass(String name);
+
+  /// Save bar title while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving {count, plural, =1{1 participant} other{{count} participants}}…'**
+  String contestParticipantsSavingRows(int count);
+
+  /// Save bar note while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows are locked until it finishes.'**
+  String get contestParticipantsRowsLocked;
+
+  /// Save bar title when a row is stale.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone changed this participant. Refresh to continue.'**
+  String get contestParticipantsStaleTitle;
+
+  /// Link in the save bar to refresh a stale row.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get contestParticipantsRefresh;
+
+  /// Save bar title when rows are invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix {count, plural, =1{1 row} other{{count} rows}} before saving.'**
+  String contestParticipantsFixRows(int count);
+
+  /// Link in the save bar to an invalid row.
+  ///
+  /// In en, this message translates to:
+  /// **'Show row'**
+  String get contestParticipantsShowRow;
+
+  /// Save bar title with unsaved changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes to {count, plural, =1{1 participant} other{{count} participants}}'**
+  String contestParticipantsUnsavedChanges(int count);
+
+  /// Save bar note under unsaved changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Each participant saves on its own.'**
+  String get contestParticipantsEachSaves;
+
+  /// Save bar title when nothing is changed.
+  ///
+  /// In en, this message translates to:
+  /// **'No changes to save.'**
+  String get contestParticipantsNoChanges;
+
+  /// Save button in the save bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get contestParticipantsSaveChanges;
+
+  /// Count line when the contest has no participants.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants'**
+  String get contestParticipantsCountNone;
+
+  /// Count line of pilots and non-flying participants.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 pilot} other{{count} pilots}}{nonFlying}'**
+  String contestParticipantsCountPilots(int count, String nonFlying);
+
+  /// Suffix of the count line for non-flying participants.
+  ///
+  /// In en, this message translates to:
+  /// **', {count} non-flying'**
+  String contestParticipantsCountNonFlying(int count);
+
+  /// Options line when no participant option is on.
+  ///
+  /// In en, this message translates to:
+  /// **'No participant options are on.'**
+  String get contestParticipantsOptionsNone;
+
+  /// Options line naming the participant options that are on.
+  ///
+  /// In en, this message translates to:
+  /// **'{options} {verb} on.'**
+  String contestParticipantsOptionsOn(String options, String verb);
+
+  /// Name of the teams participant option.
+  ///
+  /// In en, this message translates to:
+  /// **'teams'**
+  String get contestParticipantsOptionTeams;
+
+  /// Name of the classes participant option.
+  ///
+  /// In en, this message translates to:
+  /// **'classes'**
+  String get contestParticipantsOptionClasses;
+
+  /// Name of the roles participant option.
+  ///
+  /// In en, this message translates to:
+  /// **'roles'**
+  String get contestParticipantsOptionRoles;
+
+  /// Name of the pilot numbers participant option.
+  ///
+  /// In en, this message translates to:
+  /// **'pilot numbers'**
+  String get contestParticipantsOptionPilotNumbers;
+
+  /// Name of the pilot models participant option.
+  ///
+  /// In en, this message translates to:
+  /// **'pilot models'**
+  String get contestParticipantsOptionPilotModels;
+
+  /// Banner when the contest is read-only.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest is completed. Participants can’t be changed.'**
+  String get contestParticipantsReadOnlyText;
+
+  /// Banner title when administration is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration is locked. Unlock to change.'**
+  String get contestParticipantsLockedTitle;
+
+  /// Banner text when administration is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Role, class and team feed the matrix, so they’re off while locked. Adding and removing people are off too.'**
+  String get contestParticipantsLockedText;
+
+  /// Button to unlock administration.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get contestParticipantsUnlock;
+
+  /// Banner when fewer than 2 scoring pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least 2 scoring pilots before the draw.'**
+  String get contestParticipantsMinPilots;
+
+  /// Banner when exactly 2 scoring pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'With fewer than 3 pilots, use 1 group per round.'**
+  String get contestParticipantsFewPilots;
+
+  /// Banner title after a failed add.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t add {name}'**
+  String contestParticipantsAddFailedTitle(String name);
+
+  /// Banner text when the add needs room in the groups.
+  ///
+  /// In en, this message translates to:
+  /// **'{failure} Nothing was added. Add them again once the groups are changed.'**
+  String contestParticipantsAddFailedRoom(String failure);
+
+  /// Banner text after a failed add.
+  ///
+  /// In en, this message translates to:
+  /// **'{failure} Nothing was added. Trying again won’t add them twice.'**
+  String contestParticipantsAddFailedRetry(String failure);
+
+  /// Button to open the Matrix page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Matrix'**
+  String get contestParticipantsOpenMatrix;
+
+  /// Button to retry a failed add.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get contestParticipantsTryAgain;
+
+  /// Banner title when a removal was partial.
+  ///
+  /// In en, this message translates to:
+  /// **'{removed} of {total} removed'**
+  String contestParticipantsPartialRemoved(int removed, int total);
+
+  /// Banner title when a removal was refused.
+  ///
+  /// In en, this message translates to:
+  /// **'Not removed'**
+  String get contestParticipantsNotRemoved;
+
+  /// Line naming the participants removed.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} {verb} removed from this contest.'**
+  String contestParticipantsRemovedFrom(String names, String verb);
+
+  /// Line for a participant that was not removed.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wasn’t: {reason}'**
+  String contestParticipantsRefused(String name, String reason);
+
+  /// Note about retiring a pilot with scores.
+  ///
+  /// In en, this message translates to:
+  /// **'To take a pilot with scores out of the results, retire them in Scoring.'**
+  String get contestParticipantsRetireNote;
+
+  /// Button to open the Scoring page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Scoring'**
+  String get contestParticipantsOpenScoring;
+
+  /// Button to dismiss a banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get contestParticipantsDismiss;
+
+  /// Banner title when people left the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'The draw needs redoing'**
+  String get contestParticipantsRedoDrawTitle;
+
+  /// Banner text when people left the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} {wasWere} in the draw and {hasHave} no scores, so their places were removed from it. The groups are not balanced for the pilots who are left until the matrix is drawn again.'**
+  String contestParticipantsRedoDrawText(
+    String names,
+    String wasWere,
+    String hasHave,
+  );
+
+  /// Button to redo the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo the draw'**
+  String get contestParticipantsRedoDraw;
+
+  /// Banner title after a change in a running contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Results are recalculated'**
+  String get contestParticipantsRecalculatedTitle;
+
+  /// Banner text after a change in a running contest.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} changed. All results will be recalculated.'**
+  String contestParticipantsRecalculatedText(String names);
+
+  /// Banner title when a pilot is placed in every round.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is in every round'**
+  String contestParticipantsPlacedEverywhere(String name);
+
+  /// Banner title when a pilot is not in every round.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is not in every round'**
+  String contestParticipantsNotPlacedEverywhere(String name);
+
+  /// Line naming the rounds a pilot was placed in.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} was added to the last group that could take them in {count} {roundWord}.'**
+  String contestParticipantsPlacedInRounds(
+    String name,
+    int count,
+    String roundWord,
+  );
+
+  /// Line about rounds that were already scored.
+  ///
+  /// In en, this message translates to:
+  /// **'{rounds} {wasWere} already scored, so they got a zero {where}. Correct the scores in Scoring if needed.'**
+  String contestParticipantsZeroedRounds(
+    String rounds,
+    String wasWere,
+    String where,
+  );
+
+  /// Line for a skipped round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}: {reason}.'**
+  String contestParticipantsRoundReason(int round, String reason);
+
+  /// Note when a pilot is not in every round.
+  ///
+  /// In en, this message translates to:
+  /// **'Place them in those rounds from the Matrix page.'**
+  String get contestParticipantsPlaceFromMatrix;
+
+  /// Banner title for unplaced pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} {isnt} placed yet'**
+  String contestParticipantsUnplacedTitle(String names, String isnt);
+
+  /// Banner text for unplaced pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Put them in the last group of every round, or place them from the Matrix page. A redraw is also possible.'**
+  String get contestParticipantsUnplacedText;
+
+  /// Button to place unplaced pilots in all rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Place in all rounds'**
+  String get contestParticipantsPlaceAllRounds;
+
+  /// Banner title for pilots without a class.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant has} other{{count} participants have}} no class'**
+  String contestParticipantsMissingClassTitle(int count);
+
+  /// Banner text for pilots without a class.
+  ///
+  /// In en, this message translates to:
+  /// **'Results are grouped by class. This does not stop you saving, drawing or scoring.'**
+  String get contestParticipantsMissingClassText;
+
+  /// Title of the empty participants state.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants yet'**
+  String get participantsEmptyTitle;
+
+  /// Text under the empty participants state.
+  ///
+  /// In en, this message translates to:
+  /// **'Add people you’ve saved before, or create a new one.'**
+  String get participantsEmptyText;
+
+  /// One round named in a list.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {number}'**
+  String contestParticipantsRound(String number);
+
+  /// Several rounds named in a list.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds {numbers}'**
+  String contestParticipantsRounds(String numbers);
+
+  /// Save button label while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get contestParticipantsSavingShort;
+
+  /// Semantics label of the progress bar while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving participants'**
+  String get contestParticipantsSavingProgress;
+
+  /// Summary of a save that left rows unsaved.
+  ///
+  /// In en, this message translates to:
+  /// **'{saved} saved. {failed} not saved. Their typed values are kept.'**
+  String contestParticipantsSavedSummary(int saved, int failed);
 }
 
 class _AppLocalizationsDelegate

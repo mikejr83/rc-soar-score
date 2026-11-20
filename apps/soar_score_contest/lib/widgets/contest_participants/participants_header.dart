@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/contest_participants/participants_controller.dart';
 import '../../services/participants/participant_option.dart';
 
@@ -15,32 +16,32 @@ class ParticipantsHeader extends StatelessWidget {
   final ParticipantsController controller;
   final VoidCallback onOpenConfiguration;
 
-  static const _names = {
-    ParticipantOption.teams: 'teams',
-    ParticipantOption.classes: 'classes',
-    ParticipantOption.roles: 'roles',
-    ParticipantOption.pilotNumbers: 'pilot numbers',
-    ParticipantOption.models: 'pilot models',
-  };
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final c = controller;
     final pilots = c.scoringPilots;
     final nonFlying = c.nonFlying;
     final count = c.rows.isEmpty
-        ? 'No participants'
-        : '$pilots pilot${pilots == 1 ? '' : 's'}'
-              '${nonFlying > 0 ? ', $nonFlying non-flying' : ''}';
+        ? l10n.contestParticipantsCountNone
+        : l10n.contestParticipantsCountPilots(
+            pilots,
+            nonFlying > 0
+                ? l10n.contestParticipantsCountNonFlying(nonFlying)
+                : '',
+          );
     final on = [
       for (final option in ParticipantOption.values)
-        if (c.options.contains(option)) _names[option]!,
+        if (c.options.contains(option)) _name(l10n, option),
     ];
     final optionLine = on.isEmpty
-        ? 'No participant options are on.'
-        : '${_sentence(on)} ${on.length == 1 ? 'is' : 'are'} on.';
+        ? l10n.contestParticipantsOptionsNone
+        : l10n.contestParticipantsOptionsOn(
+            _sentence(on),
+            on.length == 1 ? 'is' : 'are',
+          );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -62,7 +63,7 @@ class ParticipantsHeader extends StatelessWidget {
             TextButton(
               key: const ValueKey('participants-open-configuration'),
               onPressed: onOpenConfiguration,
-              child: const Text('Change in Configuration.'),
+              child: Text(l10n.contestParticipantsChangeInConfiguration),
             ),
           ],
         ),
@@ -78,4 +79,14 @@ class ParticipantsHeader extends StatelessWidget {
               '${items.last}';
     return text[0].toUpperCase() + text.substring(1);
   }
+
+  static String _name(AppLocalizations l10n, ParticipantOption option) =>
+      switch (option) {
+        ParticipantOption.teams => l10n.contestParticipantsOptionTeams,
+        ParticipantOption.classes => l10n.contestParticipantsOptionClasses,
+        ParticipantOption.roles => l10n.contestParticipantsOptionRoles,
+        ParticipantOption.pilotNumbers =>
+          l10n.contestParticipantsOptionPilotNumbers,
+        ParticipantOption.models => l10n.contestParticipantsOptionPilotModels,
+      };
 }

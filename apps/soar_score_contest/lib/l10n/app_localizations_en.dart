@@ -5745,4 +5745,394 @@ class AppLocalizationsEn extends AppLocalizations {
   String syncResolveTitle(String entityType) {
     return 'Resolve $entityType conflict';
   }
+
+  @override
+  String contestParticipantsAddTitle(String name) {
+    return 'Add $name?';
+  }
+
+  @override
+  String get contestParticipantsAddAfterDrawTitle => 'Add after the draw?';
+
+  @override
+  String contestParticipantsAddBodyLate(String name) {
+    return 'The draw has already been made. $name will be added to the contest. Place them in a group from the Matrix page. A redraw is also possible.';
+  }
+
+  @override
+  String contestParticipantsAddBody(String name, String asRole) {
+    return '$name will be added to the contest$asRole.';
+  }
+
+  @override
+  String get contestParticipantsAddRoleLabel => 'Role';
+
+  @override
+  String get contestParticipantsAddConfirm => 'Add participant';
+
+  @override
+  String contestParticipantsRedrawTitle(String name) {
+    return 'Redraw the matrix with $name?';
+  }
+
+  @override
+  String contestParticipantsRedrawBody(String name) {
+    return 'No scores have been entered, so the matrix can be drawn again to include $name fairly. Or keep the matrix as it is: $name is then added to the last group of every round, within the contest’s group sizes and team protection.';
+  }
+
+  @override
+  String get contestParticipantsRedrawKeep => 'Keep the matrix';
+
+  @override
+  String get contestParticipantsRedrawDo => 'Redraw';
+
+  @override
+  String contestParticipantsChangeRoleTitle(String name, String roleName) {
+    return 'Change $name to $roleName?';
+  }
+
+  @override
+  String contestParticipantsChangeRoleBody(
+    String roleName,
+    String name,
+    String verb,
+    String classCleared,
+  ) {
+    return '$roleName is a non-flying role, so $name $verb no score rows$classCleared.';
+  }
+
+  @override
+  String get contestParticipantsChangeRoleDrawNote =>
+      'Their places in the draw are removed when you save, and the draw will need redoing.';
+
+  @override
+  String get contestParticipantsChangeRoleUndoNote =>
+      'You can still undo this before you save.';
+
+  @override
+  String get contestParticipantsChangeRoleConfirm => 'Change role';
+
+  @override
+  String contestParticipantsRemoveTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: '1 person',
+    );
+    return 'Remove $_temp0 from this contest?';
+  }
+
+  @override
+  String contestParticipantsRemoveBody(String contestName) {
+    return 'This removes them from $contestName only. Their saved profiles stay, and you can add them again later.';
+  }
+
+  @override
+  String contestParticipantsRemoveInDraw(String names, String verb) {
+    return '$names $verb in the draw. Their places in it are removed too, and the draw will need redoing.';
+  }
+
+  @override
+  String contestParticipantsRemoveButton(int count) {
+    return 'Remove $count';
+  }
+
+  @override
+  String get contestParticipantsSaveDiscard => 'Discard changes';
+
+  @override
+  String get contestParticipantsChangeInConfiguration =>
+      'Change in Configuration.';
+
+  @override
+  String contestParticipantsMissingClass(String name) {
+    return '$name: enter a class';
+  }
+
+  @override
+  String contestParticipantsSavingRows(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return 'Saving $_temp0…';
+  }
+
+  @override
+  String get contestParticipantsRowsLocked =>
+      'Rows are locked until it finishes.';
+
+  @override
+  String get contestParticipantsStaleTitle =>
+      'Someone changed this participant. Refresh to continue.';
+
+  @override
+  String get contestParticipantsRefresh => 'Refresh';
+
+  @override
+  String contestParticipantsFixRows(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rows',
+      one: '1 row',
+    );
+    return 'Fix $_temp0 before saving.';
+  }
+
+  @override
+  String get contestParticipantsShowRow => 'Show row';
+
+  @override
+  String contestParticipantsUnsavedChanges(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return 'Unsaved changes to $_temp0';
+  }
+
+  @override
+  String get contestParticipantsEachSaves =>
+      'Each participant saves on its own.';
+
+  @override
+  String get contestParticipantsNoChanges => 'No changes to save.';
+
+  @override
+  String get contestParticipantsSaveChanges => 'Save changes';
+
+  @override
+  String get contestParticipantsCountNone => 'No participants';
+
+  @override
+  String contestParticipantsCountPilots(int count, String nonFlying) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pilots',
+      one: '1 pilot',
+    );
+    return '$_temp0$nonFlying';
+  }
+
+  @override
+  String contestParticipantsCountNonFlying(int count) {
+    return ', $count non-flying';
+  }
+
+  @override
+  String get contestParticipantsOptionsNone => 'No participant options are on.';
+
+  @override
+  String contestParticipantsOptionsOn(String options, String verb) {
+    return '$options $verb on.';
+  }
+
+  @override
+  String get contestParticipantsOptionTeams => 'teams';
+
+  @override
+  String get contestParticipantsOptionClasses => 'classes';
+
+  @override
+  String get contestParticipantsOptionRoles => 'roles';
+
+  @override
+  String get contestParticipantsOptionPilotNumbers => 'pilot numbers';
+
+  @override
+  String get contestParticipantsOptionPilotModels => 'pilot models';
+
+  @override
+  String get contestParticipantsReadOnlyText =>
+      'This contest is completed. Participants can’t be changed.';
+
+  @override
+  String get contestParticipantsLockedTitle =>
+      'Administration is locked. Unlock to change.';
+
+  @override
+  String get contestParticipantsLockedText =>
+      'Role, class and team feed the matrix, so they’re off while locked. Adding and removing people are off too.';
+
+  @override
+  String get contestParticipantsUnlock => 'Unlock';
+
+  @override
+  String get contestParticipantsMinPilots =>
+      'Add at least 2 scoring pilots before the draw.';
+
+  @override
+  String get contestParticipantsFewPilots =>
+      'With fewer than 3 pilots, use 1 group per round.';
+
+  @override
+  String contestParticipantsAddFailedTitle(String name) {
+    return 'Couldn’t add $name';
+  }
+
+  @override
+  String contestParticipantsAddFailedRoom(String failure) {
+    return '$failure Nothing was added. Add them again once the groups are changed.';
+  }
+
+  @override
+  String contestParticipantsAddFailedRetry(String failure) {
+    return '$failure Nothing was added. Trying again won’t add them twice.';
+  }
+
+  @override
+  String get contestParticipantsOpenMatrix => 'Open Matrix';
+
+  @override
+  String get contestParticipantsTryAgain => 'Try again';
+
+  @override
+  String contestParticipantsPartialRemoved(int removed, int total) {
+    return '$removed of $total removed';
+  }
+
+  @override
+  String get contestParticipantsNotRemoved => 'Not removed';
+
+  @override
+  String contestParticipantsRemovedFrom(String names, String verb) {
+    return '$names $verb removed from this contest.';
+  }
+
+  @override
+  String contestParticipantsRefused(String name, String reason) {
+    return '$name wasn’t: $reason';
+  }
+
+  @override
+  String get contestParticipantsRetireNote =>
+      'To take a pilot with scores out of the results, retire them in Scoring.';
+
+  @override
+  String get contestParticipantsOpenScoring => 'Open Scoring';
+
+  @override
+  String get contestParticipantsDismiss => 'Dismiss';
+
+  @override
+  String get contestParticipantsRedoDrawTitle => 'The draw needs redoing';
+
+  @override
+  String contestParticipantsRedoDrawText(
+    String names,
+    String wasWere,
+    String hasHave,
+  ) {
+    return '$names $wasWere in the draw and $hasHave no scores, so their places were removed from it. The groups are not balanced for the pilots who are left until the matrix is drawn again.';
+  }
+
+  @override
+  String get contestParticipantsRedoDraw => 'Redo the draw';
+
+  @override
+  String get contestParticipantsRecalculatedTitle => 'Results are recalculated';
+
+  @override
+  String contestParticipantsRecalculatedText(String names) {
+    return '$names changed. All results will be recalculated.';
+  }
+
+  @override
+  String contestParticipantsPlacedEverywhere(String name) {
+    return '$name is in every round';
+  }
+
+  @override
+  String contestParticipantsNotPlacedEverywhere(String name) {
+    return '$name is not in every round';
+  }
+
+  @override
+  String contestParticipantsPlacedInRounds(
+    String name,
+    int count,
+    String roundWord,
+  ) {
+    return '$name was added to the last group that could take them in $count $roundWord.';
+  }
+
+  @override
+  String contestParticipantsZeroedRounds(
+    String rounds,
+    String wasWere,
+    String where,
+  ) {
+    return '$rounds $wasWere already scored, so they got a zero $where. Correct the scores in Scoring if needed.';
+  }
+
+  @override
+  String contestParticipantsRoundReason(int round, String reason) {
+    return 'Round $round: $reason.';
+  }
+
+  @override
+  String get contestParticipantsPlaceFromMatrix =>
+      'Place them in those rounds from the Matrix page.';
+
+  @override
+  String contestParticipantsUnplacedTitle(String names, String isnt) {
+    return '$names $isnt placed yet';
+  }
+
+  @override
+  String get contestParticipantsUnplacedText =>
+      'Put them in the last group of every round, or place them from the Matrix page. A redraw is also possible.';
+
+  @override
+  String get contestParticipantsPlaceAllRounds => 'Place in all rounds';
+
+  @override
+  String contestParticipantsMissingClassTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants have',
+      one: '1 participant has',
+    );
+    return '$_temp0 no class';
+  }
+
+  @override
+  String get contestParticipantsMissingClassText =>
+      'Results are grouped by class. This does not stop you saving, drawing or scoring.';
+
+  @override
+  String get participantsEmptyTitle => 'No participants yet';
+
+  @override
+  String get participantsEmptyText =>
+      'Add people you’ve saved before, or create a new one.';
+
+  @override
+  String contestParticipantsRound(String number) {
+    return 'Round $number';
+  }
+
+  @override
+  String contestParticipantsRounds(String numbers) {
+    return 'Rounds $numbers';
+  }
+
+  @override
+  String get contestParticipantsSavingShort => 'Saving…';
+
+  @override
+  String get contestParticipantsSavingProgress => 'Saving participants';
+
+  @override
+  String contestParticipantsSavedSummary(int saved, int failed) {
+    return '$saved saved. $failed not saved. Their typed values are kept.';
+  }
 }
