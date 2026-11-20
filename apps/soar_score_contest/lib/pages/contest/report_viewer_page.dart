@@ -423,6 +423,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
           setFilters: controller.setFilters,
           setup: setup,
           data: controller.data,
+          l10n: _l10n,
         ),
       ),
       setup: setup,

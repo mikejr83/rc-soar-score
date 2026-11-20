@@ -3592,6 +3592,257 @@
   "@viewerPanelSummarySeparator": {
     "description": "Separator between items in the collapsed panel summary."
   },
+  "standingsFilter": "Filter",
+  "@standingsFilter": {
+    "description": "Heading of the standings round-range group."
+  },
+  "standingsFromRound": "From round",
+  "@standingsFromRound": {
+    "description": "Label of the from-round dropdown."
+  },
+  "standingsToRound": "To round",
+  "@standingsToRound": {
+    "description": "Label of the to-round dropdown."
+  },
+  "standingsNoRounds": "No rounds can be shown yet.",
+  "@standingsNoRounds": {
+    "description": "Message when no rounds can be shown."
+  },
+  "standingsRangeText": "Rank and total are the standings as of round {to}. Only rounds with scores are listed.",
+  "@standingsRangeText": {
+    "description": "Message explaining what the standings show.",
+    "placeholders": {
+      "to": {
+        "type": "int"
+      }
+    }
+  },
+  "standingsOptions": "Options",
+  "@standingsOptions": {
+    "description": "Heading of the standings column group."
+  },
+  "standingsPercentage": "Percentage of total",
+  "@standingsPercentage": {
+    "description": "Label of the percentage column option."
+  },
+  "standingsPercentageHelp": "Each total as a percentage of the winner’s",
+  "@standingsPercentageHelp": {
+    "description": "Help for the percentage column option."
+  },
+  "standingsRaw": "Raw score",
+  "@standingsRaw": {
+    "description": "Label of the raw score column option."
+  },
+  "standingsRawHelp": "Total plus the dropped rounds. Not the score of each round.",
+  "@standingsRawHelp": {
+    "description": "Help for the raw score column option."
+  },
+  "standingsTeam": "Team",
+  "@standingsTeam": {
+    "description": "Label of the team column option."
+  },
+  "standingsPilotNumber": "Pilot number",
+  "@standingsPilotNumber": {
+    "description": "Label of the pilot number column option."
+  },
+  "standingsPilotClass": "Pilot class",
+  "@standingsPilotClass": {
+    "description": "Label of the pilot class column option."
+  },
+  "standingsDetail": "Detail",
+  "@standingsDetail": {
+    "description": "Heading of the standings detail group."
+  },
+  "standingsFlightDetails": "Flight details",
+  "@standingsFlightDetails": {
+    "description": "Label of the flight details option."
+  },
+  "standingsFlightDetailsF5J": "Adds flight time, landing points and launch height under each round score.",
+  "@standingsFlightDetailsF5J": {
+    "description": "Help for flight details in an F5J contest."
+  },
+  "standingsFlightDetailsF3J": "Adds flight time and landing points under each round score.",
+  "@standingsFlightDetailsF3J": {
+    "description": "Help for flight details in an F3J contest."
+  },
+  "standingsProvisional": "Provisional",
+  "@standingsProvisional": {
+    "description": "Label of the provisional option."
+  },
+  "standingsRoundLabel": "Round {round}",
+  "@standingsRoundLabel": {
+    "description": "Dropdown label of a fully scored round.",
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "standingsRoundLabelPartial": "Round {round} (partly scored)",
+  "@standingsRoundLabelPartial": {
+    "description": "Dropdown label of a partly scored round.",
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "standingsProvHelpNone": "Shows rounds up to the last with any score.",
+  "@standingsProvHelpNone": {
+    "description": "Provisional help when no round is partly scored."
+  },
+  "standingsProvHelpPartial": "Round {partial} is partly scored. Shows rounds up to the last with any score.",
+  "@standingsProvHelpPartial": {
+    "description": "Provisional help when a round is partly scored.",
+    "placeholders": {
+      "partial": {
+        "type": "int"
+      }
+    }
+  },
+  "standingsProvHelpNoFull": "No round is fully scored yet.",
+  "@standingsProvHelpNoFull": {
+    "description": "Provisional help when no round is fully scored."
+  },
+  "standingsProvHelpFull": "Only fully scored rounds (1 to {full}) are official.",
+  "@standingsProvHelpFull": {
+    "description": "Provisional help when some rounds are fully scored.",
+    "placeholders": {
+      "full": {
+        "type": "int"
+      }
+    }
+  },
+  "standingsKeyHeading": "Key",
+  "@standingsKeyHeading": {
+    "description": "Heading of the key line under the standings table."
+  },
+  "standingsColRank": "Rank",
+  "@standingsColRank": {
+    "description": "Rank column heading."
+  },
+  "standingsColPilot": "Pilot",
+  "@standingsColPilot": {
+    "description": "Pilot column heading."
+  },
+  "standingsColTotal": "Total",
+  "@standingsColTotal": {
+    "description": "Total column heading."
+  },
+  "standingsColPct": "Pct",
+  "@standingsColPct": {
+    "description": "Percentage column heading."
+  },
+  "standingsColPctSemantic": "Percentage of winner",
+  "@standingsColPctSemantic": {
+    "description": "Accessibility label of the percentage column."
+  },
+  "standingsColRaw": "Raw",
+  "@standingsColRaw": {
+    "description": "Raw score column heading."
+  },
+  "standingsColRawSemantic": "Raw score",
+  "@standingsColRawSemantic": {
+    "description": "Accessibility label of the raw score column."
+  },
+  "standingsColTeam": "Team",
+  "@standingsColTeam": {
+    "description": "Team column heading."
+  },
+  "standingsColNo": "No.",
+  "@standingsColNo": {
+    "description": "Pilot number column heading."
+  },
+  "standingsColNoSemantic": "Pilot number",
+  "@standingsColNoSemantic": {
+    "description": "Accessibility label of the pilot number column."
+  },
+  "standingsColClass": "Class",
+  "@standingsColClass": {
+    "description": "Pilot class column heading."
+  },
+  "standingsColLineSemantic": "Line",
+  "@standingsColLineSemantic": {
+    "description": "Accessibility label of the flight detail column."
+  },
+  "standingsRoundColumn": "R{round}",
+  "@standingsRoundColumn": {
+    "description": "Round column heading.",
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "standingsRoundColumnPartial": "R{round} partial",
+  "@standingsRoundColumnPartial": {
+    "description": "Round column heading for a partly scored round.",
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "standingsRoundSemantic": "Round {round}",
+  "@standingsRoundSemantic": {
+    "description": "Accessibility label of a round column.",
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "standingsColPenalty": "Penalty",
+  "@standingsColPenalty": {
+    "description": "Penalty column heading."
+  },
+  "standingsPenaltySub": "Deducted from total; not dropped",
+  "@standingsPenaltySub": {
+    "description": "Sub-line of the penalty column heading."
+  },
+  "standingsTableSemantics": "Overall Results, page {page}",
+  "@standingsTableSemantics": {
+    "description": "Accessibility label of a standings table page.",
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "standingsScoreCell": "Score",
+  "@standingsScoreCell": {
+    "description": "Cell label of the flight detail column."
+  },
+  "standingsRankCell": "Rank {place}",
+  "@standingsRankCell": {
+    "description": "Accessibility label of a pilot's rank cell.",
+    "placeholders": {
+      "place": {
+        "type": "int"
+      }
+    }
+  },
+  "standingsNoScore": "no score",
+  "@standingsNoScore": {
+    "description": "Accessibility label of an unscored round cell."
+  },
+  "standingsDroppedLabel": "Dropped round, {score}",
+  "@standingsDroppedLabel": {
+    "description": "Accessibility label of a dropped round cell.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "standingsReviewChip": "Review",
+  "@standingsReviewChip": {
+    "description": "Screen-only chip beside a pilot with an open review."
+  },
+  "standingsReviewChipSemantic": "Screen only. Review open.",
+  "@standingsReviewChipSemantic": {
+    "description": "Accessibility label of the review chip."
+  },
   "aboutHeading": "About",
   "@aboutHeading": {
     "description": "Heading of the Settings card with the version, licences and legal links."

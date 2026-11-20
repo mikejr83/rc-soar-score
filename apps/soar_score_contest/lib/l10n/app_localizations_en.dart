@@ -2797,6 +2797,180 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewerPanelSummarySeparator => ' · ';
 
   @override
+  String get standingsFilter => 'Filter';
+
+  @override
+  String get standingsFromRound => 'From round';
+
+  @override
+  String get standingsToRound => 'To round';
+
+  @override
+  String get standingsNoRounds => 'No rounds can be shown yet.';
+
+  @override
+  String standingsRangeText(int to) {
+    return 'Rank and total are the standings as of round $to. Only rounds with scores are listed.';
+  }
+
+  @override
+  String get standingsOptions => 'Options';
+
+  @override
+  String get standingsPercentage => 'Percentage of total';
+
+  @override
+  String get standingsPercentageHelp =>
+      'Each total as a percentage of the winner’s';
+
+  @override
+  String get standingsRaw => 'Raw score';
+
+  @override
+  String get standingsRawHelp =>
+      'Total plus the dropped rounds. Not the score of each round.';
+
+  @override
+  String get standingsTeam => 'Team';
+
+  @override
+  String get standingsPilotNumber => 'Pilot number';
+
+  @override
+  String get standingsPilotClass => 'Pilot class';
+
+  @override
+  String get standingsDetail => 'Detail';
+
+  @override
+  String get standingsFlightDetails => 'Flight details';
+
+  @override
+  String get standingsFlightDetailsF5J =>
+      'Adds flight time, landing points and launch height under each round score.';
+
+  @override
+  String get standingsFlightDetailsF3J =>
+      'Adds flight time and landing points under each round score.';
+
+  @override
+  String get standingsProvisional => 'Provisional';
+
+  @override
+  String standingsRoundLabel(int round) {
+    return 'Round $round';
+  }
+
+  @override
+  String standingsRoundLabelPartial(int round) {
+    return 'Round $round (partly scored)';
+  }
+
+  @override
+  String get standingsProvHelpNone =>
+      'Shows rounds up to the last with any score.';
+
+  @override
+  String standingsProvHelpPartial(int partial) {
+    return 'Round $partial is partly scored. Shows rounds up to the last with any score.';
+  }
+
+  @override
+  String get standingsProvHelpNoFull => 'No round is fully scored yet.';
+
+  @override
+  String standingsProvHelpFull(int full) {
+    return 'Only fully scored rounds (1 to $full) are official.';
+  }
+
+  @override
+  String get standingsKeyHeading => 'Key';
+
+  @override
+  String get standingsColRank => 'Rank';
+
+  @override
+  String get standingsColPilot => 'Pilot';
+
+  @override
+  String get standingsColTotal => 'Total';
+
+  @override
+  String get standingsColPct => 'Pct';
+
+  @override
+  String get standingsColPctSemantic => 'Percentage of winner';
+
+  @override
+  String get standingsColRaw => 'Raw';
+
+  @override
+  String get standingsColRawSemantic => 'Raw score';
+
+  @override
+  String get standingsColTeam => 'Team';
+
+  @override
+  String get standingsColNo => 'No.';
+
+  @override
+  String get standingsColNoSemantic => 'Pilot number';
+
+  @override
+  String get standingsColClass => 'Class';
+
+  @override
+  String get standingsColLineSemantic => 'Line';
+
+  @override
+  String standingsRoundColumn(int round) {
+    return 'R$round';
+  }
+
+  @override
+  String standingsRoundColumnPartial(int round) {
+    return 'R$round partial';
+  }
+
+  @override
+  String standingsRoundSemantic(int round) {
+    return 'Round $round';
+  }
+
+  @override
+  String get standingsColPenalty => 'Penalty';
+
+  @override
+  String get standingsPenaltySub => 'Deducted from total; not dropped';
+
+  @override
+  String standingsTableSemantics(int page) {
+    return 'Overall Results, page $page';
+  }
+
+  @override
+  String get standingsScoreCell => 'Score';
+
+  @override
+  String standingsRankCell(int place) {
+    return 'Rank $place';
+  }
+
+  @override
+  String get standingsNoScore => 'no score';
+
+  @override
+  String standingsDroppedLabel(String score) {
+    return 'Dropped round, $score';
+  }
+
+  @override
+  String get standingsReviewChip => 'Review';
+
+  @override
+  String get standingsReviewChipSemantic => 'Screen only. Review open.';
+
+  @override
   String get aboutHeading => 'About';
 
   @override
