@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/configuration/configuration_data.dart';
 import '../../services/configuration/configuration_draft.dart';
 import '../../services/configuration/setting_keys.dart';
@@ -20,13 +21,15 @@ class ParticipantsSectionBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final pilots = data.scoringPilots;
     final counts = [
-      ('Scoring pilots', pilots),
-      ('Other participants', data.participations.length - pilots),
-      if (draft?[SettingKeys.teams] == true) ('Teams', data.teamCount),
+      (l10n.configParticipantsScoringPilots, pilots),
+      (l10n.configParticipantsOther, data.participations.length - pilots),
+      if (draft?[SettingKeys.teams] == true)
+        (l10n.configParticipantsTeams, data.teamCount),
     ];
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 20),
@@ -87,15 +90,14 @@ class ParticipantsSectionBody extends StatelessWidget {
                     color: scheme.onTertiaryContainer,
                   ),
                   const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'A matrix needs at least 2 scoring pilots. This contest '
-                      'has $pilots.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: scheme.onTertiaryContainer,
+                    Expanded(
+                      child: Text(
+                        l10n.configParticipantsMinPilotsNote(pilots),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: scheme.onTertiaryContainer,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -109,10 +111,10 @@ class ParticipantsSectionBody extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onOpenParticipants,
                 icon: const Icon(Icons.groups_outlined, size: 18),
-                label: const Text('Open Participants'),
+                label: Text(l10n.configOpenParticipants),
               ),
               Text(
-                'Participants are edited there.',
+                l10n.configParticipantsEditedThere,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),

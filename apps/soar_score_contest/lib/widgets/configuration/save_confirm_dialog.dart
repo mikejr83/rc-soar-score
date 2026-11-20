@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/configuration/configuration_draft.dart';
 import '../../services/configuration/readiness_summary.dart';
 
@@ -19,6 +20,7 @@ class SaveConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final matrix = draft.matrixChanges;
@@ -26,6 +28,10 @@ class SaveConfirmDialog extends StatelessWidget {
     final other = draft.otherChanges;
     String names(List<SettingChange> changes) =>
         ReadinessSummary.lowerList([for (final c in changes) c.def.label]);
+
+    final revision = matrixRevision;
+    final revisionText =
+        revision == null ? '' : l10n.configSaveMatrixRevision(revision);
 
     Widget item(IconData icon, String head, String text, Color bg, Color fg) =>
         Container(
@@ -63,7 +69,7 @@ class SaveConfirmDialog extends StatelessWidget {
 
     return AlertDialog(
       icon: const Icon(Icons.save_outlined),
-      title: const Text('Save configuration?'),
+      title: Text(l10n.configSaveTitle),
       scrollable: true,
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -72,11 +78,11 @@ class SaveConfirmDialog extends StatelessWidget {
           if (matrix.isNotEmpty)
             item(
               Icons.sync_problem,
-              'The drawn matrix becomes out of date',
-              '${names(matrix)} changed. The drawn matrix'
-                  '${matrixRevision == null ? '' : ' (revision $matrixRevision)'} '
-                  'no longer matches; redraw unscored rounds on the Matrix '
-                  'page.',
+              l10n.configSaveMatrixHead,
+              l10n.configSaveMatrixText(
+                names(matrix),
+                revisionText,
+              ),
               scheme.tertiaryContainer,
               scheme.onTertiaryContainer,
             ),
@@ -84,8 +90,8 @@ class SaveConfirmDialog extends StatelessWidget {
             if (matrix.isNotEmpty) const SizedBox(height: 12),
             item(
               Icons.calculate_outlined,
-              'Results are recalculated',
-              '${names(recalc)} changed. All results will be recalculated.',
+              l10n.contestParticipantsRecalculatedTitle,
+              l10n.contestParticipantsRecalculatedText(names(recalc)),
               scheme.primaryContainer,
               scheme.onPrimaryContainer,
             ),
@@ -99,8 +105,7 @@ class SaveConfirmDialog extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Also saving, with no effect on the matrix or results: '
-                    '${names(other)}.',
+                    l10n.configSaveOtherText(names(other)),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
@@ -114,13 +119,13 @@ class SaveConfirmDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancelButton),
         ),
         FilledButton(
           key: const ValueKey('confirm-save'),
           autofocus: true,
           onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Save configuration'),
+          child: Text(l10n.configSaveConfirm),
         ),
       ],
     );

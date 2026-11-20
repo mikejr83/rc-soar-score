@@ -148,33 +148,42 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
     final closing = UnsavedChangesGuard.closingApp;
     final leave = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        icon: const Icon(Icons.edit_note),
-        title: Text(
-          closing ? UnsavedChangesGuard.closeTitle : 'Leave without saving?',
-        ),
-        content: Text(
-          'You have ${draft.changes.length} unsaved '
-          'change${draft.changes.length == 1 ? '' : 's'} in '
-          '${ReadinessSummary.lowerList(_changedSections(draft))}. '
-          '${closing ? 'Closing the app' : 'Leaving'} discards them.',
-        ),
-        actions: [
-          TextButton(
-            autofocus: true,
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep editing'),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          icon: const Icon(Icons.edit_note),
+          title: Text(
+            closing ? UnsavedChangesGuard.closeTitle : l10n.configLeaveTitle,
           ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
+          content: Text(
+            l10n.configLeaveBody(
+              draft.changes.length,
+              draft.changes.length == 1 ? 'change' : 'changes',
+              ReadinessSummary.lowerList(_changedSections(draft)),
+              closing ? l10n.configActionClosing : l10n.configActionLeaving,
             ),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(closing ? 'Close and discard' : 'Discard and leave'),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              autofocus: true,
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.configKeepEditing),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error,
+                foregroundColor: Theme.of(context).colorScheme.onError,
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(
+                closing
+                    ? l10n.configCloseAndDiscard
+                    : l10n.configDiscardAndLeave,
+              ),
+            ),
+          ],
+        );
+      },
     );
     return leave ?? false;
   }
@@ -191,7 +200,7 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
       _draft!.discard();
       _saveError = null;
     });
-    _message('Changes discarded.');
+    _message(AppLocalizations.of(context).configChangesDiscarded);
   }
 
   void _message(String text) => ScaffoldMessenger.of(context)
@@ -249,12 +258,16 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
         _saving = false;
         _show(current);
       });
+      final l10n = AppLocalizations.of(context);
       _message(
         draft.configurationChanged
-            ? 'Configuration saved as revision '
-                  '${current.configuration!.revisionNumber}.'
-                  '${recalculationWarning == null ? '' : ' $recalculationWarning.'}'
-            : 'Contest details saved.',
+            ? l10n.configSavedRevision(
+                current.configuration!.revisionNumber,
+                recalculationWarning == null
+                    ? ''
+                    : ' $recalculationWarning.',
+              )
+            : l10n.configDetailsSaved,
       );
     } on ApiHttpError catch (error) {
       if (!mounted) {
@@ -307,27 +320,26 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
       });
       await showDialog<void>(
         context: context,
-        builder: (context) => AlertDialog(
-          icon: const Icon(Icons.sync),
-          title: const Text('Configuration updated'),
-          content: Text(
-            fresh.configuration == null
-                ? 'This contest was changed from another device. This page '
-                      'now shows the latest version. Your unsaved changes are '
-                      'kept.'
-                : 'Revision ${fresh.configuration!.revisionNumber} was saved '
-                      'from another device. This page now shows the latest '
-                      'version. Your unsaved changes are kept; check them '
-                      'before saving again.',
-          ),
-          actions: [
-            FilledButton(
-              autofocus: true,
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
+        builder: (context) {
+          final l10n = AppLocalizations.of(context);
+          final revision = fresh.configuration?.revisionNumber;
+          return AlertDialog(
+            icon: const Icon(Icons.sync),
+            title: Text(l10n.configUpdatedTitle),
+            content: Text(
+              revision == null
+                  ? l10n.configUpdatedText
+                  : l10n.configUpdatedRevision(revision),
             ),
-          ],
-        ),
+            actions: [
+              FilledButton(
+                autofocus: true,
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.commonOk),
+              ),
+            ],
+          );
+        },
       );
     } on Object catch (error) {
       if (mounted) {
@@ -405,16 +417,17 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
   Widget _loaded(BuildContext context) => FutureBuilder<ConfigurationData>(
     future: _loading,
     builder: (context, snapshot) {
+      final l10n = AppLocalizations.of(context);
       if (snapshot.hasError) {
         return loadFailedView(
           snapshot.error!,
-          title: 'The configuration could not be loaded.',
+          title: l10n.configLoadFailed,
           onRetry: _retry,
         );
       }
       final data = _data;
       if (data == null) {
-        return const PageStateView.loading(label: 'Loading the configuration');
+        return PageStateView.loading(label: l10n.configLoading);
       }
       return _page(context, data, _draft);
     },
@@ -615,44 +628,35 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
   }
 
   List<Widget> _banners(ConfigurationData data) {
+    final l10n = AppLocalizations.of(context);
     final contest = data.contest;
     return [
       if (contest.adminLock == AdminLock.locked)
         ConfigBanner(
           icon: Icons.lock_outline,
-          title: 'Administration is locked',
-          body:
-              'The configuration is read-only while administration is locked. '
-              'Unlock it from the Workspace.',
-          actionLabel: 'Go to Workspace',
+          title: l10n.configAdminLockedTitle,
+          body: l10n.configAdminLockedBody,
+          actionLabel: l10n.configGoToWorkspace,
           onAction: () => context.go(contestWorkspacePath(widget.contestId)),
         )
       else if (data.phase == ConfigPhase.completed)
-        const ConfigBanner(
+        ConfigBanner(
           icon: Icons.flag_outlined,
-          title: 'Contest completed',
-          body:
-              'The configuration is read-only. Only score corrections remain, '
-              'and those are made on the Scoring page.',
+          title: l10n.configCompletedTitle,
+          body: l10n.configCompletedBody,
         ),
       if (data.configuration == null)
-        const ConfigBanner(
+        ConfigBanner(
           icon: Icons.info_outline,
           info: true,
-          title: 'Configuration not saved yet',
-          body:
-              'This contest has no saved configuration, and its discipline '
-              'can’t be chosen on this page. Create the contest again with '
-              'the New contest wizard to set one.',
+          title: l10n.configNotSavedTitle,
+          body: l10n.configNotSavedBody,
         ),
       if (data.phase.isRunning && !data.readOnly)
-        const ConfigBanner(
+        ConfigBanner(
           icon: Icons.play_circle_outline,
-          title: 'Scoring has started',
-          body:
-              'Structural settings, discipline options and the landing table '
-              'are fixed. Scoring settings can still change; saving them '
-              'recalculates all results.',
+          title: l10n.configScoringStartedTitle,
+          body: l10n.configScoringStartedBody,
         ),
     ];
   }

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/configuration/configuration_draft.dart';
 import '../../services/configuration/house_rules.dart';
 import '../../services/configuration/setting_def.dart';
@@ -12,6 +13,7 @@ import 'config_note.dart';
 /// change will do.
 abstract final class SettingNotes {
   static List<Widget> of({
+    required AppLocalizations l10n,
     required ConfigurationDraft draft,
     required SettingDef def,
     required bool editable,
@@ -46,11 +48,9 @@ abstract final class SettingNotes {
       notes.add(
         ConfigNote(
           icon: Icons.block,
-          text:
-              'Not available with Seeded Man on Man. Seeded groups are formed '
-              'by score, so teammates may have to fly together.',
+          text: l10n.configNoteTeamProtectionSeeded,
           tone: ConfigNoteTone.block,
-          actionLabel: fixed ? null : 'Use Man on Man instead',
+          actionLabel: fixed ? null : l10n.configNoteUseManOnMan,
           actionIcon: Icons.swap_horiz,
           onAction: () => set({SettingKeys.drawMode: SettingKeys.standard}),
         ),
@@ -65,9 +65,9 @@ abstract final class SettingNotes {
       notes.add(
         ConfigNote(
           icon: Icons.home_outlined,
-          text: '$label: $official$seconds.',
+          text: l10n.configNoteHouseRule(label, official, seconds),
           tone: ConfigNoteTone.block,
-          actionLabel: fixed ? null : 'Reset to $label',
+          actionLabel: fixed ? null : l10n.configNoteResetTo(label),
           actionIcon: Icons.restart_alt,
           onAction: () => set({key: def.official}),
         ),
@@ -79,36 +79,35 @@ abstract final class SettingNotes {
         notes.add(
           ConfigNote(
             icon: Icons.timer_outlined,
-            text:
-                'Entered as minutes:seconds. '
-                '${SettingValues.formatDuration(seconds)} = $seconds s.',
+            text: l10n.configNoteDuration(
+              SettingValues.formatDuration(seconds),
+              seconds,
+            ),
           ),
         );
       }
     }
     if (key == SettingKeys.decimalPlaces) {
-      notes.add(_example(draft));
+      notes.add(_example(l10n, draft));
     }
     if (key == SettingKeys.drops) {
-      notes.addAll(_dropNotes(draft));
+      notes.addAll(_dropNotes(l10n, draft));
     }
     if (key == SettingKeys.teamProtection &&
         draft[key] == true &&
         draft[SettingKeys.drawMode] != SettingKeys.seeded) {
       notes.add(
-        const ConfigNote(
+        ConfigNote(
           icon: Icons.info_outline,
-          text:
-              'Groups per round, set on the Matrix page, must be at least the '
-              'size of the largest team.',
+          text: l10n.configNoteTeamProtectionSize,
         ),
       );
     }
     if (key == SettingKeys.participantNumbers && draft.phase.isDrawn) {
       notes.add(
-        const ConfigNote(
+        ConfigNote(
           icon: Icons.info_outline,
-          text: 'Numbers assigned at the draw don’t change.',
+          text: l10n.configNoteNumbersFixed,
         ),
       );
     }
@@ -116,9 +115,9 @@ abstract final class SettingNotes {
         !draft.phase.isDrawn &&
         error == null) {
       notes.add(
-        const ConfigNote(
+        ConfigNote(
           icon: Icons.info_outline,
-          text: 'Checked against the rounds drawn on the Matrix page.',
+          text: l10n.configNoteDropsChecked,
         ),
       );
     }
@@ -126,10 +125,10 @@ abstract final class SettingNotes {
       notes.add(
         ConfigNote(
           icon: Icons.delete_sweep_outlined,
-          text:
-              '${cleared.def.label} '
-              '(${SettingValues.display(cleared.def, draft.saved[cleared.def.key])}) '
-              'is hidden and will be cleared when you save.',
+          text: l10n.configNoteCleared(
+            cleared.def.label,
+            SettingValues.display(cleared.def, draft.saved[cleared.def.key]),
+          ),
         ),
       );
     }
@@ -137,26 +136,27 @@ abstract final class SettingNotes {
       notes.add(
         ConfigNote(
           icon: Icons.history,
-          text: 'Saved: ${SettingValues.display(def, draft.saved[key])}',
-          actionLabel: 'Undo',
+          text:
+              l10n.configNoteSaved(SettingValues.display(def, draft.saved[key])),
+          actionLabel: l10n.commonUndo,
           actionIcon: Icons.undo,
           onAction: () => set({key: draft.saved[key]}),
         ),
       );
       if (effect.outdatesMatrix) {
         notes.add(
-          const ConfigNote(
+          ConfigNote(
             icon: Icons.sync_problem,
-            text: 'Saving makes the drawn matrix out of date.',
+            text: l10n.configLandingOutdatesMatrix,
             tone: ConfigNoteTone.warning,
           ),
         );
       }
       if (effect.recalculates) {
         notes.add(
-          const ConfigNote(
+          ConfigNote(
             icon: Icons.calculate_outlined,
-            text: 'Saving recalculates all results.',
+            text: l10n.configNoteRecalculates,
           ),
         );
       }
@@ -164,7 +164,7 @@ abstract final class SettingNotes {
     return notes;
   }
 
-  static Widget _example(ConfigurationDraft draft) {
+  static Widget _example(AppLocalizations l10n, ConfigurationDraft draft) {
     final places = SettingValues.parseNumber(draft[SettingKeys.decimalPlaces]);
     final truncate = draft[SettingKeys.roundingMode] == 'Truncate';
     const sample = 987.654;
@@ -179,12 +179,14 @@ abstract final class SettingNotes {
     return ConfigNote(
       icon: Icons.functions,
       tone: ConfigNoteTone.block,
-      text:
-          'Example: 987.654 → $result ${truncate ? '(truncated)' : '(rounded)'}',
+      text: l10n.configNoteExample(
+        result,
+        truncate ? l10n.configNoteTruncated : l10n.configNoteRounded,
+      ),
     );
   }
 
-  static List<Widget> _dropNotes(ConfigurationDraft draft) {
+  static List<Widget> _dropNotes(AppLocalizations l10n, ConfigurationDraft draft) {
     final drops =
         SettingValues.parseNumber(draft[SettingKeys.drops])?.toInt() ?? 0;
     String round(String key) {
@@ -197,18 +199,18 @@ abstract final class SettingNotes {
         icon: Icons.playlist_remove,
         tone: ConfigNoteTone.block,
         text: drops == 0
-            ? 'No rounds are dropped.'
+            ? l10n.configNoteNoDrops
             : drops == 1
-            ? 'Drop the worst round after round ${round(SettingKeys.drop1)}.'
-            : 'Drop the worst round after round ${round(SettingKeys.drop1)}, '
-                  'and a second after round ${round(SettingKeys.drop2)}.',
+            ? l10n.configNoteDropOne(round(SettingKeys.drop1))
+            : l10n.configNoteDropTwo(
+                round(SettingKeys.drop1),
+                round(SettingKeys.drop2),
+              ),
       ),
       if (drops > 0 && draft['d_motor_restart_mode'] == 'non_droppable')
-        const ConfigNote(
+        ConfigNote(
           icon: Icons.info_outline,
-          text:
-              'A round with a motor restart can’t be dropped (Motor restart '
-              'mode: Allowed, not dropped).',
+          text: l10n.configNoteMotorRestart,
         ),
     ];
   }

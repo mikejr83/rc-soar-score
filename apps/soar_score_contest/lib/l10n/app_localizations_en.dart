@@ -6116,6 +6116,332 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add people you’ve saved before, or create a new one.';
 
   @override
+  String get configSaveTitle => 'Save configuration?';
+
+  @override
+  String get configSaveMatrixHead => 'The drawn matrix becomes out of date';
+
+  @override
+  String configSaveMatrixText(String names, String revision) {
+    return '$names changed. The drawn matrix$revision no longer matches; redraw unscored rounds on the Matrix page.';
+  }
+
+  @override
+  String configSaveMatrixRevision(int revision) {
+    return ' (revision $revision)';
+  }
+
+  @override
+  String configSaveOtherText(String names) {
+    return 'Also saving, with no effect on the matrix or results: $names.';
+  }
+
+  @override
+  String get configSaveConfirm => 'Save configuration';
+
+  @override
+  String get configBarSaving => 'Saving configuration…';
+
+  @override
+  String get configBarSavingLocked =>
+      'The page is locked until the save finishes.';
+
+  @override
+  String get configBarSaveFailed => 'Couldn’t save the configuration';
+
+  @override
+  String configBarSaveFailedSub(String error) {
+    return '$error Every value you entered is kept.';
+  }
+
+  @override
+  String configBarUnsaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count unsaved changes',
+      one: '1 unsaved change',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configBarMatrixChip => 'Makes the drawn matrix out of date';
+
+  @override
+  String get configBarRecalcChip => 'Recalculates all results';
+
+  @override
+  String get configBarNoEffectChip => 'No effect on the matrix or results';
+
+  @override
+  String configBarFixErrors(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count errors',
+      one: '1 error',
+    );
+    return 'Fix $_temp0 to save';
+  }
+
+  @override
+  String get configBarUnsavedLabel => 'Unsaved changes';
+
+  @override
+  String get configBarSavingProgress => 'Saving configuration';
+
+  @override
+  String get configBarSaveShort => 'Saving…';
+
+  @override
+  String get configBarRetry => 'Retry';
+
+  @override
+  String configBarSettingsNeedFixing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count settings need',
+      one: '1 setting needs',
+    );
+    return '$_temp0 fixing before you can save';
+  }
+
+  @override
+  String configBarErrorItem(String label, String value) {
+    return '$label: $value';
+  }
+
+  @override
+  String get landingPickerTitle => 'Choose a landing table';
+
+  @override
+  String get landingPickerNote =>
+      'Any table works for any discipline. Check the unit matches how your scorers measure.';
+
+  @override
+  String get landingPickerCreateTable => 'Create a table in Landings';
+
+  @override
+  String get landingPickerUse => 'Use this table';
+
+  @override
+  String get landingPickerProfileDefault => 'Profile default';
+
+  @override
+  String get landingPickerCurrent => 'Current';
+
+  @override
+  String get landingPickerPreview => 'Preview';
+
+  @override
+  String get configChipUnsaved => 'Unsaved';
+
+  @override
+  String get configChipHouseRule => 'House rule';
+
+  @override
+  String get configChipError => 'Error';
+
+  @override
+  String get configSummaryOnly => 'Summary only';
+
+  @override
+  String configDefaultMatches(String label) {
+    return 'Every option matches the $label';
+  }
+
+  @override
+  String configHouseRules(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count house rules',
+      one: '1 house rule',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get configStateScoringOpenDetail => 'Participants can submit scores.';
+
+  @override
+  String get configStateScoringClosedDetail =>
+      'Participants can’t submit scores.';
+
+  @override
+  String get configStateAdminLockedDetail =>
+      'The configuration, participants and matrix are read-only.';
+
+  @override
+  String get configStateAdminUnlockedDetail =>
+      'The contest can be administered.';
+
+  @override
+  String get configChangeInWorkspace => 'Change in Workspace';
+
+  @override
+  String get configParticipantsScoringPilots => 'Scoring pilots';
+
+  @override
+  String get configParticipantsOther => 'Other participants';
+
+  @override
+  String get configParticipantsTeams => 'Teams';
+
+  @override
+  String configParticipantsMinPilotsNote(int count) {
+    return 'A matrix needs at least 2 scoring pilots. This contest has $count.';
+  }
+
+  @override
+  String get configOpenParticipants => 'Open Participants';
+
+  @override
+  String get configParticipantsEditedThere => 'Participants are edited there.';
+
+  @override
+  String get configMatrixReadiness => 'Matrix readiness';
+
+  @override
+  String get configGoToMatrix => 'Go to matrix';
+
+  @override
+  String get configLandingNoTable =>
+      'No landing table chosen. Scorers can’t record landing bonuses until one is set.';
+
+  @override
+  String get configLandingChoose => 'Choose table';
+
+  @override
+  String get configLandingChange => 'Change table';
+
+  @override
+  String get configLandingHideEntries => 'Hide entries';
+
+  @override
+  String get configLandingShowEntries => 'Show entries';
+
+  @override
+  String get configOpenLandings => 'Open Landings';
+
+  @override
+  String configLandingNotDefault(
+    String defaultLabel,
+    String name,
+    String unit,
+  ) {
+    return 'Not the $defaultLabel ($name). That’s fine; any table works for any discipline. The unit is $unit.';
+  }
+
+  @override
+  String configLandingSaved(String name) {
+    return 'Saved: $name';
+  }
+
+  @override
+  String get configLandingNone => 'None';
+
+  @override
+  String get configLandingOutdatesMatrix =>
+      'Saving makes the drawn matrix out of date.';
+
+  @override
+  String get configLandingUnit => 'Unit';
+
+  @override
+  String get configLandingEntries => 'Entries';
+
+  @override
+  String get configLandingPointsRange => 'Points range';
+
+  @override
+  String get commonUndo => 'Undo';
+
+  @override
+  String get configNoteTeamProtectionSeeded =>
+      'Not available with Seeded Man on Man. Seeded groups are formed by score, so teammates may have to fly together.';
+
+  @override
+  String get configNoteUseManOnMan => 'Use Man on Man instead';
+
+  @override
+  String configNoteHouseRule(String label, String official, String seconds) {
+    return '$label: $official$seconds.';
+  }
+
+  @override
+  String configNoteResetTo(String label) {
+    return 'Reset to $label';
+  }
+
+  @override
+  String configNoteDuration(String display, int seconds) {
+    return 'Entered as minutes:seconds. $display = $seconds s.';
+  }
+
+  @override
+  String get configNoteTeamProtectionSize =>
+      'Groups per round, set on the Matrix page, must be at least the size of the largest team.';
+
+  @override
+  String get configNoteNumbersFixed =>
+      'Numbers assigned at the draw don’t change.';
+
+  @override
+  String get configNoteDropsChecked =>
+      'Checked against the rounds drawn on the Matrix page.';
+
+  @override
+  String configNoteCleared(String label, String saved) {
+    return '$label ($saved) is hidden and will be cleared when you save.';
+  }
+
+  @override
+  String configNoteSaved(String value) {
+    return 'Saved: $value';
+  }
+
+  @override
+  String get configNoteRecalculates => 'Saving recalculates all results.';
+
+  @override
+  String configNoteExample(String result, String mode) {
+    return 'Example: 987.654 → $result $mode';
+  }
+
+  @override
+  String get configNoteTruncated => '(truncated)';
+
+  @override
+  String get configNoteRounded => '(rounded)';
+
+  @override
+  String get configNoteNoDrops => 'No rounds are dropped.';
+
+  @override
+  String configNoteDropOne(String round1) {
+    return 'Drop the worst round after round $round1.';
+  }
+
+  @override
+  String configNoteDropTwo(String round1, String round2) {
+    return 'Drop the worst round after round $round1, and a second after round $round2.';
+  }
+
+  @override
+  String get configNoteMotorRestart =>
+      'A round with a motor restart can’t be dropped (Motor restart mode: Allowed, not dropped).';
+
+  @override
+  String get configBlockedTeamProtection =>
+      'Not available while team protection is on. Seeded groups are formed by score, so teammates may have to fly together.';
+
+  @override
+  String get configFixTurnOffTeamProtection => 'Turn off team protection';
+
+  @override
   String contestParticipantsRound(String number) {
     return 'Round $number';
   }
@@ -6134,5 +6460,131 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String contestParticipantsSavedSummary(int saved, int failed) {
     return '$saved saved. $failed not saved. Their typed values are kept.';
+  }
+
+  @override
+  String get commonOk => 'OK';
+
+  @override
+  String get configKeepEditing => 'Keep editing';
+
+  @override
+  String get configDiscardAndLeave => 'Discard and leave';
+
+  @override
+  String get configCloseAndDiscard => 'Close and discard';
+
+  @override
+  String get configLeaveTitle => 'Leave without saving?';
+
+  @override
+  String configLeaveBody(
+    int count,
+    String changes,
+    String sections,
+    String action,
+  ) {
+    return 'You have $count unsaved $changes in $sections. $action discards them.';
+  }
+
+  @override
+  String get configChangesDiscarded => 'Changes discarded.';
+
+  @override
+  String get configActionClosing => 'Closing the app';
+
+  @override
+  String get configActionLeaving => 'Leaving';
+
+  @override
+  String configSavedRevision(int revision, String warning) {
+    return 'Configuration saved as revision $revision.$warning';
+  }
+
+  @override
+  String get configDetailsSaved => 'Contest details saved.';
+
+  @override
+  String get configUpdatedTitle => 'Configuration updated';
+
+  @override
+  String get configUpdatedText =>
+      'This contest was changed from another device. This page now shows the latest version. Your unsaved changes are kept.';
+
+  @override
+  String configUpdatedRevision(int revision) {
+    return 'Revision $revision was saved from another device. This page now shows the latest version. Your unsaved changes are kept; check them before saving again.';
+  }
+
+  @override
+  String get configLoadFailed => 'The configuration could not be loaded.';
+
+  @override
+  String get configLoading => 'Loading the configuration';
+
+  @override
+  String get configAdminLockedTitle => 'Administration is locked';
+
+  @override
+  String get configAdminLockedBody =>
+      'The configuration is read-only while administration is locked. Unlock it from the Workspace.';
+
+  @override
+  String get configGoToWorkspace => 'Go to Workspace';
+
+  @override
+  String get configCompletedTitle => 'Contest completed';
+
+  @override
+  String get configCompletedBody =>
+      'The configuration is read-only. Only score corrections remain, and those are made on the Scoring page.';
+
+  @override
+  String get configNotSavedTitle => 'Configuration not saved yet';
+
+  @override
+  String get configNotSavedBody =>
+      'This contest has no saved configuration, and its discipline can’t be chosen on this page. Create the contest again with the New contest wizard to set one.';
+
+  @override
+  String get configScoringStartedTitle => 'Scoring has started';
+
+  @override
+  String get configScoringStartedBody =>
+      'Structural settings, discipline options and the landing table are fixed. Scoring settings can still change; saving them recalculates all results.';
+
+  @override
+  String get configFixedChip => 'Fixed';
+
+  @override
+  String configFixedChipSemantics(String reason) {
+    return 'Fixed: $reason';
+  }
+
+  @override
+  String get configLandingKeyHeaderMeters => 'Distance (m)';
+
+  @override
+  String get configLandingKeyHeaderFeet => 'Distance (ft)';
+
+  @override
+  String get configLandingKeyHeaderPoints => 'Landing key';
+
+  @override
+  String get configLandingNoEntries => 'No entries';
+
+  @override
+  String configLandingPointsRangeValue(int low, int high) {
+    return '$low–$high points';
+  }
+
+  @override
+  String configLandingEntriesCount(int count) {
+    return '$count entries';
+  }
+
+  @override
+  String configLandingEntriesLabel(String name) {
+    return '$name entries';
   }
 }

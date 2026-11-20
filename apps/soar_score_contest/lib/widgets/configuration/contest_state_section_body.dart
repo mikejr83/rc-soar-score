@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/configuration/section_id.dart';
 
 /// The Scoring access and Administration lock sections: the current value in
@@ -20,23 +21,32 @@ class ContestStateSectionBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final (icon, value, detail) = switch (id) {
       SectionId.scoringAccess
           when contest.scoringAccess == ScoringAccess.open =>
-        (Icons.lock_open, 'Open', 'Participants can submit scores.'),
+        (
+          Icons.lock_open,
+          l10n.shellScoringOpen,
+          l10n.configStateScoringOpenDetail,
+        ),
       SectionId.scoringAccess => (
         Icons.block,
-        'Closed',
-        'Participants can’t submit scores.',
+        l10n.shellScoringClosed,
+        l10n.configStateScoringClosedDetail,
       ),
       _ when contest.adminLock == AdminLock.locked => (
         Icons.lock_outline,
-        'Locked',
-        'The configuration, participants and matrix are read-only.',
+        l10n.shellAdminLocked,
+        l10n.configStateAdminLockedDetail,
       ),
-      _ => (Icons.lock_open, 'Unlocked', 'The contest can be administered.'),
+      _ => (
+        Icons.lock_open,
+        l10n.shellAdminUnlocked,
+        l10n.configStateAdminUnlockedDetail,
+      ),
     };
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 20),
@@ -66,7 +76,7 @@ class ContestStateSectionBody extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: onOpenWorkspace,
             icon: const Icon(Icons.dashboard_outlined, size: 18),
-            label: const Text('Change in Workspace'),
+            label: Text(l10n.configChangeInWorkspace),
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/configuration/configuration_data.dart';
 import '../../services/configuration/configuration_draft.dart';
 import '../../services/configuration/draw_readiness.dart';
@@ -64,6 +65,7 @@ class ConfigurationSections extends StatelessWidget {
   );
 
   Widget _section(BuildContext context, SectionId id) {
+    final l10n = AppLocalizations.of(context);
     final readOnly = data.readOnly;
     final children = switch (id) {
       SectionId.landing => [
@@ -121,7 +123,7 @@ class ConfigurationSections extends StatelessWidget {
           ConfigChip.neutral(
             context,
             icon: Icons.visibility_outlined,
-            text: 'Summary only',
+            text: l10n.configSummaryOnly,
             dense: false,
           ),
       ],
@@ -130,6 +132,7 @@ class ConfigurationSections extends StatelessWidget {
   }
 
   Widget _disciplineChip(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final houseRules = HouseRules.count(
       draft.catalog.disciplineSettings,
       (def) => draft[def.key],
@@ -139,12 +142,12 @@ class ConfigurationSections extends StatelessWidget {
             context,
             icon: Icons.verified_outlined,
             text: draft.catalog.defaultLabel,
-            tooltip: 'Every option matches the ${draft.catalog.defaultLabel}',
+            tooltip: l10n.configDefaultMatches(draft.catalog.defaultLabel),
             dense: false,
           )
         : ConfigChip.houseRule(
             context,
-            text: '$houseRules house rule${houseRules == 1 ? '' : 's'}',
+            text: l10n.configHouseRules(houseRules),
             dense: false,
           );
   }
