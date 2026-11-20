@@ -1674,6 +1674,949 @@
   "@matrixMoveChecking": {
     "description": "Snackbar while the scores are read before the move dialog opens."
   },
+  "matrixLoading": "Loading matrix…",
+  "@matrixLoading": {
+    "description": "Text while the matrix loads."
+  },
+  "matrixLoadingLabel": "Loading matrix",
+  "@matrixLoadingLabel": {
+    "description": "Semantics label while the matrix loads."
+  },
+  "matrixLoadFailed": "The matrix could not be loaded.",
+  "@matrixLoadFailed": {
+    "description": "Title of the load-failure state."
+  },
+  "matrixUnavailableTitle": "Matrix unavailable",
+  "@matrixUnavailableTitle": {
+    "description": "Title of the offline state."
+  },
+  "matrixUnavailableBody": "Soar Score can’t reach the server, so the matrix can’t be shown. Nothing on this contest has changed.",
+  "@matrixUnavailableBody": {
+    "description": "Body of the offline state."
+  },
+  "matrixDrawn": "Matrix drawn.",
+  "@matrixDrawn": {
+    "description": "Snackbar after the first draw."
+  },
+  "matrixSourceConfiguration": "contest configuration",
+  "@matrixSourceConfiguration": {
+    "description": "Where the configured rounds came from."
+  },
+  "matrixSourceWizard": "the New Contest wizard",
+  "@matrixSourceWizard": {
+    "description": "Where the configured groups came from."
+  },
+  "matrixSeededRoundsLabel": "Preliminary seeded rounds",
+  "@matrixSeededRoundsLabel": {
+    "description": "Label of the rounds field for a seeded draw."
+  },
+  "matrixRoundsLabel": "Number of rounds",
+  "@matrixRoundsLabel": {
+    "description": "Label of the rounds field."
+  },
+  "matrixGroupsLabel": "Groups per round",
+  "@matrixGroupsLabel": {
+    "description": "Label of the groups field."
+  },
+  "matrixGroupsErrorLabel": "Groups per round: {error}",
+  "@matrixGroupsErrorLabel": {
+    "description": "One problem in the draw error list.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixNoteNoValue": "Contest configuration has no value. Enter one here, or set it in Configuration.",
+  "@matrixNoteNoValue": {
+    "description": "Note when the configuration holds no value for a field."
+  },
+  "matrixNoteFrom": "From {source}: {text}",
+  "@matrixNoteFrom": {
+    "description": "Note naming where a field value came from.",
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixNoteEdited": "Differs from the suggested value ({configured}). Changing it here doesn’t change the contest configuration.",
+  "@matrixNoteEdited": {
+    "description": "Note when a field differs from the suggested value.",
+    "placeholders": {
+      "configured": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixSeededRoundsText": "{count} preliminary seeded rounds",
+  "@matrixSeededRoundsText": {
+    "description": "Rounds value text for a seeded draw.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixRoundsText": "{count} rounds",
+  "@matrixRoundsText": {
+    "description": "Rounds value text.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixGroupsText": "{count} groups per round",
+  "@matrixGroupsText": {
+    "description": "Groups value text.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixResetTo": "Reset to {value}",
+  "@matrixResetTo": {
+    "description": "Reset action label of a draw number field.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixEdited": "Edited",
+  "@matrixEdited": {
+    "description": "Chip on a field that differs from its configured value."
+  },
+  "matrixOpenConfiguration": "Open Configuration",
+  "@matrixOpenConfiguration": {
+    "description": "Action to open the configuration page from a draw field."
+  },
+  "matrixReset": "Reset",
+  "@matrixReset": {
+    "description": "Fallback reset label of a draw number field."
+  },
+  "matrixNoMatrixTitle": "No matrix drawn yet",
+  "@matrixNoMatrixTitle": {
+    "description": "Title of the first-draw card."
+  },
+  "matrixNoMatrixIntro": "No flight matrix has been drawn for this contest. Draw the first matrix here; afterwards you can add rounds and redraw the rounds without scores.",
+  "@matrixNoMatrixIntro": {
+    "description": "Intro of the first-draw card."
+  },
+  "matrixDrawFirstTitle": "Draw the first matrix",
+  "@matrixDrawFirstTitle": {
+    "description": "Heading of the first-draw form."
+  },
+  "matrixServerRejected": "The server rejected the draw",
+  "@matrixServerRejected": {
+    "description": "Title of the draw-error list after a server rejection."
+  },
+  "matrixFixFields": "Fix {count} field{plural} before drawing",
+  "@matrixFixFields": {
+    "description": "Title of the draw-error list when fields must be fixed.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixErrorsKept": "Your values are kept. Nothing was drawn.",
+  "@matrixErrorsKept": {
+    "description": "Body of the draw-error list."
+  },
+  "matrixNetworkTitle": "Couldn’t reach the server",
+  "@matrixNetworkTitle": {
+    "description": "Title of the network-failure banner."
+  },
+  "matrixNetworkFirstBody": "The matrix wasn’t drawn and the page hasn’t changed. Your values are kept.",
+  "@matrixNetworkFirstBody": {
+    "description": "Body of the network-failure banner for the first draw."
+  },
+  "matrixTryAgain": "Try again",
+  "@matrixTryAgain": {
+    "description": "Action of the network-failure banner."
+  },
+  "matrixConflictTitle": "This contest changed on the server",
+  "@matrixConflictTitle": {
+    "description": "Title of the conflict banner."
+  },
+  "matrixConflictFirstBody": "A matrix has already been drawn for this contest, or the contest can no longer be drawn. Reload to see the current state. Your values stay until you reload.",
+  "@matrixConflictFirstBody": {
+    "description": "Body of the conflict banner for the first draw."
+  },
+  "matrixReload": "Reload",
+  "@matrixReload": {
+    "description": "Action of the conflict banner."
+  },
+  "matrixActionReload": "Reload the contest before drawing.",
+  "@matrixActionReload": {
+    "description": "Reason the draw button is off while there is a conflict."
+  },
+  "matrixChangeInConfig": "Change {label} in Configuration",
+  "@matrixChangeInConfig": {
+    "description": "Semantics label of a link to Configuration.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixChange": "Change",
+  "@matrixChange": {
+    "description": "Visible label of a link to Configuration."
+  },
+  "matrixAdvancedTitle": "Advanced",
+  "@matrixAdvancedTitle": {
+    "description": "Title of the advanced section."
+  },
+  "matrixAdvancedSubtitle": "Random seed, attempts per round, seed count",
+  "@matrixAdvancedSubtitle": {
+    "description": "Subtitle of the advanced section."
+  },
+  "matrixDrawDetails": "Draw details",
+  "@matrixDrawDetails": {
+    "description": "Semantics label of the fairness panel."
+  },
+  "matrixNeedsAttention": "Needs attention",
+  "@matrixNeedsAttention": {
+    "description": "Semantics label of an attention list."
+  },
+  "matrixSeedCopied": "Random seed copied.",
+  "@matrixSeedCopied": {
+    "description": "Snackbar after copying the random seed."
+  },
+  "matrixJumpFirst": "Jump to first",
+  "@matrixJumpFirst": {
+    "description": "Action to jump to the first pilot match."
+  },
+  "matrixAllTeams": "All teams",
+  "@matrixAllTeams": {
+    "description": "Filter option for every team."
+  },
+  "matrixFindNameOrNumber": "Find pilot by name or number",
+  "@matrixFindNameOrNumber": {
+    "description": "Search hint when pilot numbers are shown."
+  },
+  "matrixFindName": "Find pilot by name",
+  "@matrixFindName": {
+    "description": "Search hint when pilot numbers are hidden."
+  },
+  "matrixClearSearch": "Clear search",
+  "@matrixClearSearch": {
+    "description": "Tooltip of the clear-search button."
+  },
+  "matrixPilotsMatch": "{count} pilot{plural} match{es}",
+  "@matrixPilotsMatch": {
+    "description": "Result of the search when there are matches.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plural": {
+        "type": "String"
+      },
+      "es": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixNoPilotMatches": "No pilot matches “{query}”",
+  "@matrixNoPilotMatches": {
+    "description": "Result of the search when there are no matches.",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixTeamFilterLabel": "Team: {name}",
+  "@matrixTeamFilterLabel": {
+    "description": "Label of the team filter when a team is chosen.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixClearTeamFilter": "Clear team filter",
+  "@matrixClearTeamFilter": {
+    "description": "Tooltip of the clear-team-filter button."
+  },
+  "matrixTeamsOutlinedNote": "Teams 13 and up use outlined markers. Their letters stay unique.",
+  "@matrixTeamsOutlinedNote": {
+    "description": "Note about outlined team markers."
+  },
+  "matrixConfigChangedBanner": "Configuration changed since this draw",
+  "@matrixConfigChangedBanner": {
+    "description": "Title of the banner when configuration changed after a draw."
+  },
+  "matrixLiveSelected": "{name} highlighted in {rounds} rounds. Opponent panel open.",
+  "@matrixLiveSelected": {
+    "description": "Live region when a pilot is selected.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rounds": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixLiveTeamFilter": "Showing {name} only: {count} pilots in each round.",
+  "@matrixLiveTeamFilter": {
+    "description": "Live region when a team filter is active.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixLiveMatches": "{count} pilots match.",
+  "@matrixLiveMatches": {
+    "description": "Live region when a query has matches.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixLiveNoMatches": "No pilot matches.",
+  "@matrixLiveNoMatches": {
+    "description": "Live region when a query has no matches."
+  },
+  "matrixGridGroups": "Groups",
+  "@matrixGridGroups": {
+    "description": "Column heading of the matrix grid."
+  },
+  "matrixGridLabel": "Matrix grid, scrolls in both directions",
+  "@matrixGridLabel": {
+    "description": "Semantics label of the matrix grid."
+  },
+  "matrixGridUpToPilots": "up to {count} pilots",
+  "@matrixGridUpToPilots": {
+    "description": "Group size when groups vary.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixGridPilots": "{count} pilots",
+  "@matrixGridPilots": {
+    "description": "Group size when all groups are the same size.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixGridCellSemantics": "Round {round}, group {group}, {count} pilots",
+  "@matrixGridCellSemantics": {
+    "description": "Semantics label of a grid cell.",
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "group": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixOpponentsOf": "Opponents of {name}",
+  "@matrixOpponentsOf": {
+    "description": "Semantics label of a pilot's opponents.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixOpponentsCount": "Opponents ({met} of {total})",
+  "@matrixOpponentsCount": {
+    "description": "Title of the opponents section.",
+    "placeholders": {
+      "met": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixOpponentsSub": "Most meetings first. Repeats are marked.",
+  "@matrixOpponentsSub": {
+    "description": "Sub of the opponents section."
+  },
+  "matrixNeverMeets": "Never meets ({count})",
+  "@matrixNeverMeets": {
+    "description": "Title of the never-meets section.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixMeetsAll": "Meets every other pilot at least once.",
+  "@matrixMeetsAll": {
+    "description": "Sub when the pilot meets everyone."
+  },
+  "matrixNoGroupWith": "Pilots in no group with {name}.",
+  "@matrixNoGroupWith": {
+    "description": "Sub when the pilot never meets some pilots.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixPilotNo": "No. {number}",
+  "@matrixPilotNo": {
+    "description": "Pilot number in the panel header.",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixNoTeam": "No team",
+  "@matrixNoTeam": {
+    "description": "Team shown when the pilot has none."
+  },
+  "matrixClearHighlight": "Clear highlight (Esc)",
+  "@matrixClearHighlight": {
+    "description": "Tooltip of the clear-highlight button."
+  },
+  "matrixSelectAgain": "Select the pilot again or press Esc to clear.",
+  "@matrixSelectAgain": {
+    "description": "Note under the panel on a tablet."
+  },
+  "matrixOpponentOnce": "once",
+  "@matrixOpponentOnce": {
+    "description": "Meeting count of one."
+  },
+  "matrixOpponentTimes": "{count} times",
+  "@matrixOpponentTimes": {
+    "description": "Meeting count of more than one.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixPlace": "R{round} · {group}",
+  "@matrixPlace": {
+    "description": "A pilot's place in a round and group.",
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixPlaceLane": "{place} · L{lane}",
+  "@matrixPlaceLane": {
+    "description": "A pilot's place with a lane.",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      },
+      "lane": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixRowPilot": "Pilot {number}, {name}",
+  "@matrixRowPilot": {
+    "description": "Semantics: a pilot with a number.",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixRowNoTeam": "no team",
+  "@matrixRowNoTeam": {
+    "description": "Semantics: a pilot with no team."
+  },
+  "matrixRowLane": ", lane {lane}",
+  "@matrixRowLane": {
+    "description": "Semantics: a pilot's lane.",
+    "placeholders": {
+      "lane": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixRowRoundGroup": ", round {round}, group {group}",
+  "@matrixRowRoundGroup": {
+    "description": "Semantics: a pilot's round and group.",
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixRowHighlighted": ", highlighted",
+  "@matrixRowHighlighted": {
+    "description": "Semantics: a highlighted pilot."
+  },
+  "matrixRowMatched": ", search match",
+  "@matrixRowMatched": {
+    "description": "Semantics: a pilot matching the search."
+  },
+  "matrixRowLaneShort": "L{lane}",
+  "@matrixRowLaneShort": {
+    "description": "Short lane label on a row.",
+    "placeholders": {
+      "lane": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixRoundTitle": "Round {round}",
+  "@matrixRoundTitle": {
+    "description": "Title of a round column.",
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixRoundLocked": "Round locked",
+  "@matrixRoundLocked": {
+    "description": "Tooltip and semantics for a locked round."
+  },
+  "matrixDropTooltip": "Drop {dropNumber}: the lowest round score is dropped once this round is complete",
+  "@matrixDropTooltip": {
+    "description": "Tooltip for a round that starts a drop.",
+    "placeholders": {
+      "dropNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixDropSemantics": "Drop {dropNumber} starts after this round",
+  "@matrixDropSemantics": {
+    "description": "Semantics for a round that starts a drop.",
+    "placeholders": {
+      "dropNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixPilotsOnce": "{count} pilots, each once",
+  "@matrixPilotsOnce": {
+    "description": "Count when every scoring pilot flies exactly once.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixDistinctOf": "{distinct} of {total}",
+  "@matrixDistinctOf": {
+    "description": "Count when pilots fly more than once.",
+    "placeholders": {
+      "distinct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixExactlyOnce": "Every scoring pilot appears exactly once in this round",
+  "@matrixExactlyOnce": {
+    "description": "Tooltip explaining the exactly-once check."
+  },
+  "matrixServerPrefix": "Server: ",
+  "@matrixServerPrefix": {
+    "description": "Prefix of a server rejection message."
+  },
+  "matrixRoundLocked": "Round locked",
+  "@matrixRoundLocked": {
+    "description": "Tooltip and semantics label of a locked round."
+  },
+  "matrixAdvancedSaveFailed": "The section choice could not be saved. It applies until you close the app.",
+  "@matrixAdvancedSaveFailed": {
+    "description": "Snackbar when the advanced section choice cannot be saved."
+  },
+  "matrixSeedLabel": "Random seed",
+  "@matrixSeedLabel": {
+    "description": "Label of the random seed field."
+  },
+  "matrixSeedHint": "Pick one for me",
+  "@matrixSeedHint": {
+    "description": "Hint of the random seed field."
+  },
+  "matrixSeedHelp": "Same seed and settings give the same matrix. Leave blank and the server picks one.",
+  "@matrixSeedHelp": {
+    "description": "Help of the random seed field."
+  },
+  "matrixAttemptsLabel": "Attempts per round",
+  "@matrixAttemptsLabel": {
+    "description": "Label of the attempts-per-round field."
+  },
+  "matrixAttemptsHelp": "Groupings the server tries for each round. More attempts can improve fairness.",
+  "@matrixAttemptsHelp": {
+    "description": "Help of the attempts-per-round field."
+  },
+  "matrixSeedCountLabel": "Seed count",
+  "@matrixSeedCountLabel": {
+    "description": "Label of the seed-count field."
+  },
+  "matrixSeedCountHelp": "Independent starts the server runs. The fairest result is kept.",
+  "@matrixSeedCountHelp": {
+    "description": "Help of the seed-count field."
+  },
+  "matrixConfigFromTitle": "From contest configuration",
+  "@matrixConfigFromTitle": {
+    "description": "Heading of the read-only configuration rows."
+  },
+  "matrixConfigReadOnlyNote": "Read-only here. Change these in Configuration.",
+  "@matrixConfigReadOnlyNote": {
+    "description": "Note under the read-only configuration rows."
+  },
+  "matrixValueOn": "On",
+  "@matrixValueOn": {
+    "description": "Value for a setting that is on."
+  },
+  "matrixValueOff": "Off",
+  "@matrixValueOff": {
+    "description": "Value for a setting that is off."
+  },
+  "matrixBackToBackLabel": "Back-to-back flights",
+  "@matrixBackToBackLabel": {
+    "description": "Label of the back-to-back row."
+  },
+  "matrixBackToBackOffNote": "No pilot flies the last group of one round and the first group of the next.",
+  "@matrixBackToBackOffNote": {
+    "description": "Note when back-to-back flights are avoided."
+  },
+  "matrixLaneModeLabel": "Lane mode",
+  "@matrixLaneModeLabel": {
+    "description": "Label of the lane mode row."
+  },
+  "matrixLaneRandom": "Random",
+  "@matrixLaneRandom": {
+    "description": "Lane mode value: random."
+  },
+  "matrixLaneNone": "None",
+  "@matrixLaneNone": {
+    "description": "Lane mode value: none."
+  },
+  "matrixLaneRandomNote": "Each pilot gets a lane in every group.",
+  "@matrixLaneRandomNote": {
+    "description": "Note for the random lane mode."
+  },
+  "matrixLaneNoneNote": "Pilots are not given lanes.",
+  "@matrixLaneNoneNote": {
+    "description": "Note for the none lane mode."
+  },
+  "matrixPilotsInDrawLabel": "Pilots in the draw",
+  "@matrixPilotsInDrawLabel": {
+    "description": "Label of the pilots-in-the-draw row."
+  },
+  "matrixPilotsInDrawValue": "{count} scoring pilot{plural}",
+  "@matrixPilotsInDrawValue": {
+    "description": "Value of the pilots-in-the-draw row.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixNonFlyingExcluded": "{count} non-flying participant{plural} excluded.",
+  "@matrixNonFlyingExcluded": {
+    "description": "Note for non-flying participants excluded from the draw.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixConfigRevisionLabel": "Configuration revision",
+  "@matrixConfigRevisionLabel": {
+    "description": "Label of the configuration revision row."
+  },
+  "matrixTeamProtectionNote": "Teammates never fly in the same group.",
+  "@matrixTeamProtectionNote": {
+    "description": "Note when team protection is on."
+  },
+  "matrixTeamProtectionSeededOffNote": "Off because Seeded order is on.",
+  "@matrixTeamProtectionSeededOffNote": {
+    "description": "Note when team protection is off because the draw is seeded."
+  },
+  "matrixSeededPrelimNote": "Only the {count} preliminary rounds are drawn now.",
+  "@matrixSeededPrelimNote": {
+    "description": "Note for the seeded draw mode.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixDrawConfirmTitle": "Draw the matrix?",
+  "@matrixDrawConfirmTitle": {
+    "description": "Title of the first-draw confirmation."
+  },
+  "matrixDrawConfirmRounds": "{count} {rounds}",
+  "@matrixDrawConfirmRounds": {
+    "description": "Rounds line of the first-draw confirmation.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "rounds": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixDrawConfirmSeededRounds": "preliminary seeded rounds",
+  "@matrixDrawConfirmSeededRounds": {
+    "description": "Rounds word for a seeded first draw."
+  },
+  "matrixDrawConfirmRoundsWord": "rounds",
+  "@matrixDrawConfirmRoundsWord": {
+    "description": "Rounds word for a first draw."
+  },
+  "matrixDrawConfirmGroups": "{groups} groups per round ({sizes} pilots)",
+  "@matrixDrawConfirmGroups": {
+    "description": "Groups line of the first-draw confirmation.",
+    "placeholders": {
+      "groups": {
+        "type": "int"
+      },
+      "sizes": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixDrawConfirmNumbers": "Contest pilot numbers are assigned by this draw.",
+  "@matrixDrawConfirmNumbers": {
+    "description": "Note when the draw assigns pilot numbers."
+  },
+  "matrixDrawConfirmWarning": "The matrix can’t be undone. Unscored rounds can be redrawn afterwards.",
+  "@matrixDrawConfirmWarning": {
+    "description": "Warning of the first-draw confirmation."
+  },
+  "matrixDrawConfirmAction": "Draw matrix",
+  "@matrixDrawConfirmAction": {
+    "description": "Confirm button of the first-draw confirmation."
+  },
+  "matrixDrawAction": "Draw matrix",
+  "@matrixDrawAction": {
+    "description": "First-draw button label."
+  },
+  "matrixDrawActionBusy": "Drawing matrix…",
+  "@matrixDrawActionBusy": {
+    "description": "First-draw button label while drawing."
+  },
+  "matrixOpen": "Open",
+  "@matrixOpen": {
+    "description": "Fallback link label to open a page."
+  },
+  "matrixGroupSizesTitle": "{groups} group{groupsPlural}: {sizes} pilot{pilotsPlural}",
+  "@matrixGroupSizesTitle": {
+    "description": "Title of the group-size preview.",
+    "placeholders": {
+      "groups": {
+        "type": "int"
+      },
+      "groupsPlural": {
+        "type": "String"
+      },
+      "sizes": {
+        "type": "String"
+      },
+      "pilotsPlural": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixGroupSizesMore": "More groups than scoring pilots",
+  "@matrixGroupSizesMore": {
+    "description": "Title when there are more groups than pilots."
+  },
+  "matrixGroupSizesEnter": "Enter groups per round to see the group sizes.",
+  "@matrixGroupSizesEnter": {
+    "description": "Title when no groups are entered yet."
+  },
+  "matrixGroupLabel": "Group {letter}",
+  "@matrixGroupLabel": {
+    "description": "Heading of one group in the preview.",
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixGroupPilots": "{count} pilot{plural}",
+  "@matrixGroupPilots": {
+    "description": "Pilot count of one group in the preview.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixGroupMinimum": "Minimum {min} groups. Team protection keeps teammates apart, and the largest team{team} has {min} scoring pilots.",
+  "@matrixGroupMinimum": {
+    "description": "Note of the team-protection minimum.",
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixGroupSeeded": "Seeded Man on Man: only the {rounds} preliminary rounds are drawn now. Seeded rounds are drawn later from the preliminary results.",
+  "@matrixGroupSeeded": {
+    "description": "Note of the seeded preliminary rounds.",
+    "placeholders": {
+      "rounds": {
+        "type": "int"
+      }
+    }
+  },
+  "matrixSummarySaveFailed": "The summary choice could not be saved. It applies until you close the app.",
+  "@matrixSummarySaveFailed": {
+    "description": "Snackbar when the summary choice cannot be saved."
+  },
+  "matrixShowSummary": "Show summary",
+  "@matrixShowSummary": {
+    "description": "Button to show the fairness summary."
+  },
+  "matrixHideSummary": "Hide summary",
+  "@matrixHideSummary": {
+    "description": "Button to hide the fairness summary."
+  },
+  "matrixFairnessScore": "FAIRNESS SCORE",
+  "@matrixFairnessScore": {
+    "description": "Heading of the fairness score."
+  },
+  "matrixFairnessScale": "0% is the average of random draws, 100% is the best possible.",
+  "@matrixFairnessScale": {
+    "description": "Note under the fairness score."
+  },
+  "matrixUnmetLabel": "Unmet opponents",
+  "@matrixUnmetLabel": {
+    "description": "Label of the unmet opponents figure."
+  },
+  "matrixUnmetSub": "pairs who never meet",
+  "@matrixUnmetSub": {
+    "description": "Sub of the unmet opponents figure."
+  },
+  "matrixMaxRepeatsLabel": "Max repeats",
+  "@matrixMaxRepeatsLabel": {
+    "description": "Label of the max repeats figure."
+  },
+  "matrixMaxRepeatsSub": "most meetings of one pair",
+  "@matrixMaxRepeatsSub": {
+    "description": "Sub of the max repeats figure."
+  },
+  "matrixLaneUniformityLabel": "Lane uniformity",
+  "@matrixLaneUniformityLabel": {
+    "description": "Label of the lane uniformity figure."
+  },
+  "matrixLaneUniformitySub": "spread of lane use, lower is more even; lanes are random within each group",
+  "@matrixLaneUniformitySub": {
+    "description": "Sub of the lane uniformity figure."
+  },
+  "matrixFairnessPairsTitle": "Pilot pairs by number of meetings",
+  "@matrixFairnessPairsTitle": {
+    "description": "Title of the pairs histogram."
+  },
+  "matrixMeanAbsDeviation": "Mean absolute deviation {value}",
+  "@matrixMeanAbsDeviation": {
+    "description": "Mean absolute deviation line of the histogram.",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixFairnessCompact": "Fairness {score}",
+  "@matrixFairnessCompact": {
+    "description": "Compact fairness score line.",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixFairnessCompactStats": "{unmet} unmet pairs · max {maxRepeats}× · MAD {mad}",
+  "@matrixFairnessCompactStats": {
+    "description": "Compact fairness statistics line.",
+    "placeholders": {
+      "unmet": {
+        "type": "String"
+      },
+      "maxRepeats": {
+        "type": "String"
+      },
+      "mad": {
+        "type": "String"
+      }
+    }
+  },
+  "matrixDetailMatrixRevision": "Matrix revision",
+  "@matrixDetailMatrixRevision": {
+    "description": "Label in the draw details."
+  },
+  "matrixDetailConfigurationRevision": "Configuration revision",
+  "@matrixDetailConfigurationRevision": {
+    "description": "Label in the draw details."
+  },
+  "matrixDetailAlgorithm": "Algorithm",
+  "@matrixDetailAlgorithm": {
+    "description": "Label in the draw details."
+  },
+  "matrixDetailRandomSeed": "Random seed",
+  "@matrixDetailRandomSeed": {
+    "description": "Label in the draw details."
+  },
+  "matrixDetailDrawn": "Drawn",
+  "@matrixDetailDrawn": {
+    "description": "Label in the draw details."
+  },
+  "matrixCopySeedTooltip": "Copy random seed",
+  "@matrixCopySeedTooltip": {
+    "description": "Tooltip of the copy-seed button."
+  },
   "aboutHeading": "About",
   "@aboutHeading": {
     "description": "Heading of the Settings card with the version, licences and legal links."

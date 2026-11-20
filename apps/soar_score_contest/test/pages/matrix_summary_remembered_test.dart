@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_contest/widgets/matrix/fairness_panel.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/collapsible_areas/collapsible_areas_controller.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
@@ -13,6 +13,8 @@ MatrixServer _server() => MatrixServer(
 
 final _toggle = find.byKey(const ValueKey('summary-toggle'));
 const _phone = Size(400, 800);
+
+final _l10n = AppLocalizationsEn();
 
 CollapsibleAreasController _controller(LocalUiStore store) {
   final controller = CollapsibleAreasController(store: store);
@@ -30,7 +32,7 @@ void main() {
 
     await tester.tap(_toggle);
     await tester.pumpAndSettle();
-    expect(find.text('Show summary'), findsOneWidget);
+    expect(find.text(_l10n.matrixShowSummary), findsOneWidget);
 
     // A fresh app on the same store, as after closing and reopening.
     await tester.pumpWidget(const SizedBox());
@@ -38,8 +40,8 @@ void main() {
     await second.load();
     await pumpMatrixPage(tester, _server(), areas: second);
 
-    expect(find.text('Show summary'), findsOneWidget);
-    expect(find.text('Pilot pairs by number of meetings'), findsNothing);
+    expect(find.text(_l10n.matrixShowSummary), findsOneWidget);
+    expect(find.text(_l10n.matrixFairnessPairsTitle), findsNothing);
   });
 
   testWidgets('showing the summary again is kept too', (tester) async {
@@ -52,23 +54,23 @@ void main() {
     await tester.tap(_toggle);
     await tester.pumpAndSettle();
 
-    expect(find.text('Hide summary'), findsOneWidget);
+    expect(find.text(_l10n.matrixHideSummary), findsOneWidget);
     final fresh = _controller(store);
     await fresh.load();
     await tester.pumpWidget(const SizedBox());
     await pumpMatrixPage(tester, _server(), areas: fresh);
-    expect(find.text('Hide summary'), findsOneWidget);
+    expect(find.text(_l10n.matrixHideSummary), findsOneWidget);
   });
 
   testWidgets('a remembered choice beats the phone default', (tester) async {
     final controller = _controller(BackendLocalUiStore(MemoryLocalUiBackend()));
     await pumpMatrixPage(tester, _server(), size: _phone, areas: controller);
-    expect(find.text('Show summary'), findsOneWidget);
+    expect(find.text(_l10n.matrixShowSummary), findsOneWidget);
 
     await tester.tap(_toggle);
     await tester.pumpAndSettle();
 
-    expect(find.text('Hide summary'), findsOneWidget);
+    expect(find.text(_l10n.matrixHideSummary), findsOneWidget);
   });
 
   testWidgets('reset brings the summary back to how it starts', (tester) async {
@@ -76,12 +78,12 @@ void main() {
     await pumpMatrixPage(tester, _server(), areas: controller);
     await tester.tap(_toggle);
     await tester.pumpAndSettle();
-    expect(find.text('Show summary'), findsOneWidget);
+    expect(find.text(_l10n.matrixShowSummary), findsOneWidget);
 
     await controller.resetAll();
     await tester.pumpAndSettle();
 
-    expect(find.text('Hide summary'), findsOneWidget);
+    expect(find.text(_l10n.matrixHideSummary), findsOneWidget);
   });
 
   testWidgets('a failed save is reported and the choice still applies', (
@@ -93,8 +95,8 @@ void main() {
     await tester.tap(_toggle);
     await tester.pumpAndSettle();
 
-    expect(find.text('Show summary'), findsOneWidget);
-    expect(find.text(FairnessPanel.saveFailedMessage), findsOneWidget);
+    expect(find.text(_l10n.matrixShowSummary), findsOneWidget);
+    expect(find.text(_l10n.matrixSummarySaveFailed), findsOneWidget);
   });
 }
 

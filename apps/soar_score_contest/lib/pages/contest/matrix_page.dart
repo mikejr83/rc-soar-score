@@ -236,14 +236,15 @@ class _MatrixPageState extends State<MatrixPage> {
       final suggestion = contestDraftStoreOf(context)
           ?.drawSuggestions[data.contest.id];
       final fromConfiguration = seeded ? options?.preliminaryRounds : null;
-      _form = DrawFormController(
-        configuredRounds:
-            fromConfiguration ?? int.tryParse(suggestion?.rounds?.trim() ?? ''),
-        roundsSource: fromConfiguration != null
-            ? 'contest configuration'
-            : 'the New Contest wizard',
-        configuredGroups: int.tryParse(suggestion?.groups?.trim() ?? ''),
-      )..addListener(_onForm);
+       final l10n = AppLocalizations.of(context);
+       _form = DrawFormController(
+         configuredRounds:
+             fromConfiguration ?? int.tryParse(suggestion?.rounds?.trim() ?? ''),
+         roundsSource: fromConfiguration != null
+             ? l10n.matrixSourceConfiguration
+             : l10n.matrixSourceWizard,
+         configuredGroups: int.tryParse(suggestion?.groups?.trim() ?? ''),
+       )..addListener(_onForm);
     }
   }
 
@@ -437,7 +438,7 @@ class _MatrixPageState extends State<MatrixPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(switch (intent) {
-            null => 'Matrix drawn.',
+             null => l10n.matrixDrawn,
             MatrixIntent.addRounds => l10n.matrixRoundsAdded,
             MatrixIntent.redraw => l10n.matrixRoundsRedrawn,
           }),
@@ -724,15 +725,20 @@ class _Loading extends StatelessWidget {
   const _Loading();
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    label: 'Loading matrix',
-    child: const Column(
-      children: [
-        LinearProgressIndicator(),
-        Expanded(child: Center(child: Text('Loading matrix…'))),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Semantics(
+      label: l10n.matrixLoadingLabel,
+      child: Column(
+        children: [
+          const LinearProgressIndicator(),
+          Expanded(
+            child: Center(child: Text(l10n.matrixLoading)),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Unavailable extends StatelessWidget {
@@ -743,10 +749,11 @@ class _Unavailable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (error is! ApiNetworkError) {
       return loadFailedView(
         error,
-        title: 'The matrix could not be loaded.',
+        title: l10n.matrixLoadFailed,
         onRetry: onRetry,
       );
     }
@@ -770,18 +777,17 @@ class _Unavailable extends StatelessWidget {
                 ),
               ),
               Text(
-                'Matrix unavailable',
+                l10n.matrixUnavailableTitle,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              const Text(
-                'Soar Score can’t reach the server, so the matrix can’t be '
-                'shown. Nothing on this contest has changed.',
+              Text(
+                l10n.matrixUnavailableBody,
                 textAlign: TextAlign.center,
               ),
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Try again'),
+                label: Text(l10n.matrixTryAgain),
               ),
             ],
           ),

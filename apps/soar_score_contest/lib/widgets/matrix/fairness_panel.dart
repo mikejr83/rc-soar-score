@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../collapsible_areas_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/collapsible_areas/collapsible_area.dart';
 import '../../services/matrix/fairness_view.dart';
 import '../../services/preferences/director_time.dart';
@@ -28,10 +29,6 @@ class FairnessPanel extends StatefulWidget {
   final int? configurationRevision;
   final bool startCollapsed;
 
-  static const saveFailedMessage =
-      'The summary choice could not be saved. It applies until you close the '
-      'app.';
-
   @override
   State<FairnessPanel> createState() => _FairnessPanelState();
 }
@@ -45,6 +42,7 @@ class _FairnessPanelState extends State<FairnessPanel> {
       FairnessView.of(widget.revision.fairnessSummary);
 
   Future<void> _toggleSummary(bool open) async {
+    final l10n = AppLocalizations.of(context);
     final areas = collapsibleAreasOf(context);
     if (areas == null) {
       setState(() => _localOpen = !open);
@@ -53,11 +51,12 @@ class _FairnessPanelState extends State<FairnessPanel> {
     final messenger = ScaffoldMessenger.of(context);
     if (await areas.setOpen(matrixSummaryArea, !open)) return;
     messenger.showSnackBar(
-      const SnackBar(content: Text(FairnessPanel.saveFailedMessage)),
+      SnackBar(content: Text(l10n.matrixSummarySaveFailed)),
     );
   }
 
   Future<void> _toggleDetails(bool open) async {
+    final l10n = AppLocalizations.of(context);
     final areas = collapsibleAreasOf(context);
     if (areas == null) {
       setState(() => _localDetails = !open);
@@ -66,12 +65,13 @@ class _FairnessPanelState extends State<FairnessPanel> {
     final messenger = ScaffoldMessenger.of(context);
     if (await areas.setOpen(drawDetailsArea, !open)) return;
     messenger.showSnackBar(
-      const SnackBar(content: Text(FairnessPanel.saveFailedMessage)),
+      SnackBar(content: Text(l10n.matrixSummarySaveFailed)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final fairness = _fairness;
     final startOpen = !widget.startCollapsed;
@@ -113,7 +113,7 @@ class _FairnessPanelState extends State<FairnessPanel> {
                       details ? Icons.expand_less : Icons.expand_more,
                       size: 18,
                     ),
-                    label: const Text('Draw details'),
+                    label: Text(l10n.matrixDrawDetails),
                   ),
                 ];
                 final toggle = TextButton.icon(
@@ -123,7 +123,7 @@ class _FairnessPanelState extends State<FairnessPanel> {
                     open ? Icons.expand_less : Icons.expand_more,
                     size: 18,
                   ),
-                  label: Text(open ? 'Hide summary' : 'Show summary'),
+                  label: Text(open ? l10n.matrixHideSummary : l10n.matrixShowSummary),
                 );
                 // As in the design, "Hide summary" sits at the right end.
                 // There is no room for that on a narrow bar, so it wraps in
@@ -230,6 +230,7 @@ class _Score extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 220, maxWidth: 270),
@@ -237,7 +238,7 @@ class _Score extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'FAIRNESS SCORE',
+            l10n.matrixFairnessScore,
             style: theme.textTheme.labelSmall?.copyWith(
               letterSpacing: .5,
               color: theme.colorScheme.onSurfaceVariant,
@@ -258,7 +259,7 @@ class _Score extends StatelessWidget {
             ],
           ),
           Text(
-            '0% is the average of random draws, 100% is the best possible.',
+            l10n.matrixFairnessScale,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -277,28 +278,28 @@ class _Stats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = MatrixColors.of(context);
     final unmet = fairness.unmet;
     final maxRepeats = fairness.maxRepeats;
     final stats = <(String, String, String, bool)>[
       (
-        'Unmet opponents',
+        l10n.matrixUnmetLabel,
         unmet?.toString() ?? '–',
-        'pairs who never meet',
+        l10n.matrixUnmetSub,
         unmet != null && unmet > 0 && (fairness.tier == FairnessTier.poor),
       ),
       (
-        'Max repeats',
+        l10n.matrixMaxRepeatsLabel,
         maxRepeats == null ? '–' : '$maxRepeats×',
-        'most meetings of one pair',
+        l10n.matrixMaxRepeatsSub,
         maxRepeats != null && fairness.tier == FairnessTier.poor,
       ),
       if (hasLanes && fairness.laneUniformity != null)
         (
-          'Lane uniformity',
+          l10n.matrixLaneUniformityLabel,
           fairness.laneUniformity!.toStringAsFixed(2),
-          'spread of lane use, lower is more even; lanes are random within '
-              'each group',
+          l10n.matrixLaneUniformitySub,
           false,
         ),
     ];
@@ -325,7 +326,7 @@ class _Stats extends StatelessWidget {
                     ),
                     if (warn)
                       Semantics(
-                        label: 'Needs attention',
+                        label: l10n.matrixNeedsAttention,
                         child: Icon(
                           Icons.warning_amber,
                           size: 18,
@@ -355,6 +356,7 @@ class _Histogram extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final bars = fairness.bars;
@@ -366,7 +368,7 @@ class _Histogram extends StatelessWidget {
         spacing: 4,
         children: [
           Text(
-            'Pilot pairs by number of meetings',
+            l10n.matrixFairnessPairsTitle,
             style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
@@ -402,8 +404,9 @@ class _Histogram extends StatelessWidget {
               ],
             ),
           Text(
-            'Mean absolute deviation '
-            '${fairness.meanAbsoluteDeviation?.toStringAsFixed(2) ?? '–'}',
+            l10n.matrixMeanAbsDeviation(
+              fairness.meanAbsoluteDeviation?.toStringAsFixed(2) ?? '–',
+            ),
             style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
@@ -421,20 +424,23 @@ class _Compact extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: 8,
       children: [
         Text(
-          'Fairness ${fairness.scoreText}',
+          l10n.matrixFairnessCompact(fairness.scoreText),
           style: const TextStyle(fontWeight: FontWeight.w500),
         ),
         _TierChip(tier: fairness.tier),
         Text(
-          '${fairness.unmet ?? '–'} unmet pairs · max '
-          '${fairness.maxRepeats ?? '–'}× · MAD '
-          '${fairness.meanAbsoluteDeviation?.toStringAsFixed(2) ?? '–'}',
+          l10n.matrixFairnessCompactStats(
+            '${fairness.unmet ?? '–'}',
+            '${fairness.maxRepeats ?? '–'}',
+            fairness.meanAbsoluteDeviation?.toStringAsFixed(2) ?? '–',
+          ),
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -452,13 +458,18 @@ class _Details extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final rows = <(String, String)>[
-      ('Matrix revision', '${revision.revisionNumber}'),
-      ('Configuration revision', '${configurationRevision ?? '–'}'),
-      ('Algorithm', revision.algorithmVersion),
-      ('Random seed', '${revision.randomSeed}'),
-      ('Drawn', DirectorTime.of(context)(revision.createdAt)),
+    final rows = <(String, String, bool)>[
+      (l10n.matrixDetailMatrixRevision, '${revision.revisionNumber}', false),
+      (
+        l10n.matrixDetailConfigurationRevision,
+        '${configurationRevision ?? '–'}',
+        false,
+      ),
+      (l10n.matrixDetailAlgorithm, revision.algorithmVersion, false),
+      (l10n.matrixDetailRandomSeed, '${revision.randomSeed}', true),
+      (l10n.matrixDetailDrawn, DirectorTime.of(context)(revision.createdAt), false),
     ];
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
@@ -466,7 +477,7 @@ class _Details extends StatelessWidget {
         spacing: 24,
         runSpacing: 10,
         children: [
-          for (final (label, value) in rows)
+          for (final (label, value, copyable) in rows)
             ConstrainedBox(
               constraints: const BoxConstraints(minWidth: 150),
               child: Column(
@@ -482,16 +493,16 @@ class _Details extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(value, key: ValueKey('detail-$label')),
-                      if (label == 'Random seed')
+                      if (copyable)
                         IconButton(
-                          tooltip: 'Copy random seed',
+                          tooltip: l10n.matrixCopySeedTooltip,
                           icon: const Icon(Icons.content_copy, size: 18),
                           onPressed: () async {
                             await Clipboard.setData(ClipboardData(text: value));
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Random seed copied.'),
+                                SnackBar(
+                                  content: Text(l10n.matrixSeedCopied),
                                 ),
                               );
                             }
