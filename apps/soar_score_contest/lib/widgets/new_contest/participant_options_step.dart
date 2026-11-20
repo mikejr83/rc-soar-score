@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/contest_draft.dart';
 import '../../services/new_contest/draft_validation.dart';
 import '../../services/participants/participant_option.dart';
@@ -54,11 +55,12 @@ class _ParticipantOptionsStepState extends State<ParticipantOptionsStep> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final draft = widget.draft;
     final countError = widget.showErrors
-        ? DraftValidation.teamPilotCount(draft)
+        ? DraftValidation.teamPilotCount(draft, l10n)
         : null;
 
     Widget panel(Widget child) => Container(
@@ -96,8 +98,8 @@ class _ParticipantOptionsStepState extends State<ParticipantOptionsStep> {
                   onChanged: widget.onTeamPilotCount,
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
-                    labelText: 'Pilots counted for team score *',
-                    helperText: 'Best N pilots per team make the team score.',
+                    labelText: l10n.wizardTeamPilotCountLabel,
+                    helperText: l10n.wizardTeamPilotCountHelper,
                     errorText: countError,
                   ),
                 ),
@@ -108,8 +110,7 @@ class _ParticipantOptionsStepState extends State<ParticipantOptionsStep> {
                   padding: const EdgeInsets.only(top: 4),
                   child: note(
                     Icons.shield_outlined,
-                    'Team protection is now available in Draw options. It '
-                    'keeps teammates out of the same group.',
+                    l10n.wizardTeamProtectionAvailable,
                   ),
                 ),
               ),
@@ -117,7 +118,7 @@ class _ParticipantOptionsStepState extends State<ParticipantOptionsStep> {
           ),
         );
       }
-      final text = option.note;
+      final text = option.note(l10n);
       return text == null
           ? null
           : Container(
@@ -131,18 +132,18 @@ class _ParticipantOptionsStepState extends State<ParticipantOptionsStep> {
     }
 
     final columns = <(IconData, String, String)>[
-      (Icons.person_outline, 'Name', ''),
-      (Icons.mail_outline, 'Email', ''),
+      (Icons.person_outline, l10n.wizardColumnName, ''),
+      (Icons.mail_outline, l10n.wizardColumnEmail, ''),
       if (draft.has(ParticipantOption.roles))
-        (Icons.badge_outlined, 'Role', ''),
+        (Icons.badge_outlined, l10n.wizardColumnRole, ''),
       if (draft.has(ParticipantOption.classes))
-        (Icons.workspace_premium_outlined, 'Class', 'required'),
+        (Icons.workspace_premium_outlined, l10n.wizardColumnClass, l10n.wizardColumnRequired),
       if (draft.has(ParticipantOption.teams))
-        (Icons.diversity_3, 'Team', 'optional'),
+        (Icons.diversity_3, l10n.wizardColumnTeam, l10n.wizardColumnOptional),
       if (draft.has(ParticipantOption.pilotNumbers))
-        (Icons.pin_outlined, 'Pilot no.', 'provisional'),
+        (Icons.pin_outlined, l10n.wizardColumnPilotNo, l10n.wizardColumnProvisional),
       if (draft.has(ParticipantOption.models))
-        (Icons.flight, 'Models', 'optional'),
+        (Icons.flight, l10n.wizardColumnModels, l10n.wizardColumnOptional),
     ];
 
     return Column(
@@ -150,7 +151,7 @@ class _ParticipantOptionsStepState extends State<ParticipantOptionsStep> {
       children: [
         Semantics(
           container: true,
-          label: 'Participant options',
+          label: l10n.wizardParticipantsStepLabel,
           child: Card(
             margin: EdgeInsets.zero,
             elevation: 1,
@@ -176,12 +177,12 @@ class _ParticipantOptionsStepState extends State<ParticipantOptionsStep> {
         const SizedBox(height: 20),
         Semantics(
           container: true,
-          label: 'Columns preview',
+          label: l10n.wizardColumnsPreview,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Columns in the Participants step',
+                l10n.wizardColumnsPreview,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                   color: scheme.onSurfaceVariant,

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/contest_draft.dart';
 import '../../services/new_contest/draft_dates.dart';
 import '../../services/new_contest/draft_validation.dart';
@@ -92,7 +93,9 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
       initialDate: current,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      helpText: start ? 'Start date' : 'End date',
+      helpText: start
+          ? AppLocalizations.of(context).wizardStartDateHelp
+          : AppLocalizations.of(context).wizardEndDateHelp,
     );
     if (picked == null || !mounted) {
       return;
@@ -108,9 +111,10 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final draft = widget.draft;
     final errors = widget.showErrors
-        ? DraftValidation.details(draft)
+        ? DraftValidation.details(draft, l10n)
         : const <DetailsField, String>{};
     final narrow = widget.narrow;
 
@@ -148,14 +152,14 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
     Widget dateField(TextEditingController controller, bool start) => field(
       keyName: start ? 'start' : 'end',
       controller: controller,
-      label: start ? 'Start date *' : 'End date *',
-      hint: 'MMM D, YYYY',
+      label: start ? l10n.wizardStartDateLabel : l10n.wizardEndDateLabel,
+      hint: l10n.wizardDateHint,
       check: start ? DetailsField.startDate : DetailsField.endDate,
       onChanged: (value) => start
           ? _changeStart(value)
           : widget.onChanged(draft.copyWith(endDate: value)),
       suffix: IconButton(
-        tooltip: start ? 'Choose the start date' : 'Choose the end date',
+        tooltip: start ? l10n.wizardChooseStartDate : l10n.wizardChooseEndDate,
         icon: Icon(
           Icons.calendar_today,
           color:
@@ -171,8 +175,8 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
 
     final zone = TimeZones.effective(draft.timeZone, draft.country);
     return WizardSectionCard(
-      title: 'Contest details',
-      trailing: '* Required',
+      title: l10n.wizardContestDetails,
+      trailing: l10n.wizardRequired,
       child: SpanGrid(
         items: [
           SpanGridItem(
@@ -180,7 +184,7 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
             child: field(
               keyName: 'name',
               controller: _name,
-              label: 'Contest name *',
+              label: l10n.wizardContestNameLabel,
               check: DetailsField.name,
               onChanged: (value) =>
                   widget.onChanged(draft.copyWith(name: value)),
@@ -191,9 +195,9 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
             child: field(
               keyName: 'venue',
               controller: _venue,
-              label: 'Venue / host *',
+              label: l10n.wizardVenueLabel,
               check: DetailsField.venue,
-              helper: 'Field name or host club as it should appear on results.',
+              helper: l10n.wizardVenueHelper,
               onChanged: (value) =>
                   widget.onChanged(draft.copyWith(venue: value)),
             ),
@@ -205,7 +209,7 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
             child: field(
               keyName: 'city',
               controller: _city,
-              label: 'City',
+              label: l10n.wizardCityLabel,
               onChanged: (value) =>
                   widget.onChanged(draft.copyWith(city: value)),
             ),
@@ -215,7 +219,7 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
             child: field(
               keyName: 'region',
               controller: _region,
-              label: 'State / province',
+              label: l10n.wizardRegionLabel,
               onChanged: (value) =>
                   widget.onChanged(draft.copyWith(region: value)),
             ),
@@ -225,7 +229,7 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
             child: field(
               keyName: 'country',
               controller: _country,
-              label: 'Country',
+              label: l10n.wizardCountryLabel,
               onChanged: (value) =>
                   widget.onChanged(draft.copyWith(country: value)),
             ),
@@ -236,7 +240,7 @@ class _ContestDetailsSectionState extends State<ContestDetailsSection> {
               zone: zone,
               at: DraftValidation.parseDate(draft.startDate),
               helperText: draft.timeZone == null
-                  ? 'Defaults from the country, else this device’s time zone.'
+                  ? l10n.wizardTimeZoneDefault
                   : null,
               onChanged: (value) =>
                   widget.onChanged(draft.copyWith(timeZone: value)),

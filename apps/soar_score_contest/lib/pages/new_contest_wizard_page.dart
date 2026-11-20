@@ -7,6 +7,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
 import '../connectivity_provider.dart';
+import '../l10n/app_localizations.dart';
+import '../l10n/app_localizations_en.dart';
 import '../contest_draft_provider.dart';
 import '../router.dart';
 import '../services/new_contest/contest_creator.dart';
@@ -57,37 +59,30 @@ class NewContestWizardPage extends StatefulWidget {
   /// The window width from which the step list sits beside the content.
   static const double wideWidth = 1100;
 
-  static const List<String> stepTitles = [
-    'Details & copy source',
-    'Discipline',
-    'Participant options',
-    'Participants',
-    'Scoring & publication',
-    'Draw options',
-    'Summary & create',
+  static List<String> stepTitles(AppLocalizations l10n) => [
+    l10n.wizardStepDetailsCopySource,
+    l10n.wizardStepDiscipline,
+    l10n.wizardStepParticipantOptions,
+    l10n.wizardStepParticipants,
+    l10n.wizardStepScoringPublication,
+    l10n.wizardStepDrawOptions,
+    l10n.wizardStepSummaryCreate,
   ];
 
-  static const List<String> stepIntros = [
-    'Name the contest and say where it’s held. You can also start from an '
-        'earlier contest.',
-    'Choose one discipline. It sets the default task, landing bonus and '
-        'scoring rules.',
-    'Turn on only what this contest needs. Each option adds columns to the '
-        'Participants step.',
-    'Add pilots and helpers. Every scoring pilot needs the columns marked '
-        'with *.',
-    'Review the defaults for this discipline and change anything this '
-        'contest does differently.',
-    'Set how pilots are grouped. You draw the matrix after the contest is '
-        'created.',
-    'Check each section, then create the contest.',
+  static List<String> stepIntros(AppLocalizations l10n) => [
+    l10n.wizardIntroDetailsCopySource,
+    l10n.wizardIntroDiscipline,
+    l10n.wizardIntroParticipantOptions,
+    l10n.wizardIntroParticipants,
+    l10n.wizardIntroScoringPublication,
+    l10n.wizardIntroDrawOptions,
+    l10n.wizardIntroSummaryCreate,
   ];
 
-  static const String draftNotDeletedMessage =
-      'Contest created, but its saved draft couldn’t be deleted. You may be '
-      'offered it again; choose Start fresh.';
+  static String draftNotDeletedMessage(AppLocalizations l10n) =>
+      l10n.wizardDraftNotDeleted;
 
-  static const String leftMessage = 'Left the wizard. Your draft is kept.';
+  static String leftMessage(AppLocalizations l10n) => l10n.wizardLeftMessage;
 
   @override
   State<NewContestWizardPage> createState() => _NewContestWizardPageState();
@@ -139,7 +134,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
 
   int get _resumeStep => _store.draft.visitedThrough.clamp(
     1,
-    NewContestWizardPage.stepTitles.length,
+    NewContestWizardPage.stepTitles(AppLocalizationsEn()).length,
   );
 
   void _startDraft() {
@@ -209,15 +204,18 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   // --- Validation ---------------------------------------------------------
 
   /// Whether step [step] is valid, or `null` for steps not built yet.
-  bool? _valid(int step) => switch (step) {
-    1 => DraftValidation.details(_draft).isEmpty,
-    2 => DraftValidation.discipline(_draft) == null,
-    3 => DraftValidation.teamPilotCount(_draft) == null,
-    4 => DraftValidation.participants(_draft),
-    5 => DraftValidation.scoring(_draft),
-    6 => DraftValidation.drawOptions(_draft),
-    _ => null,
-  };
+  bool? _valid(int step) {
+    final l10n = AppLocalizations.of(context);
+    return switch (step) {
+      1 => DraftValidation.details(_draft, l10n).isEmpty,
+      2 => DraftValidation.discipline(_draft, l10n) == null,
+      3 => DraftValidation.teamPilotCount(_draft, l10n) == null,
+      4 => DraftValidation.participants(_draft),
+      5 => DraftValidation.scoring(_draft, l10n),
+      6 => DraftValidation.drawOptions(_draft, l10n),
+      _ => null,
+    };
+  }
 
   /// Whether step [step] shows its errors (after trying to continue, or as
   /// soon as a typed team count is invalid).
@@ -228,14 +226,18 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       step == 5 ||
       step == 6;
 
-  List<WizardStepEntry> get _entries => [
-    for (var n = 1; n <= NewContestWizardPage.stepTitles.length; n++)
-      WizardStepEntry(
-        number: n,
-        title: NewContestWizardPage.stepTitles[n - 1],
-        status: _status(n),
-      ),
-  ];
+  List<WizardStepEntry> get _entries {
+    final l10n = AppLocalizations.of(context);
+    final titles = NewContestWizardPage.stepTitles(l10n);
+    return [
+      for (var n = 1; n <= titles.length; n++)
+        WizardStepEntry(
+          number: n,
+          title: titles[n - 1],
+          status: _status(n),
+        ),
+    ];
+  }
 
   WizardStepStatus _status(int n) {
     final current = n == _step;
@@ -266,12 +268,16 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     if (_scroll.hasClients) {
       _scroll.jumpTo(0);
     }
+    final l10n = AppLocalizations.of(context);
     final view = View.of(context);
     unawaited(
       SemanticsService.sendAnnouncement(
         view,
-        'Step $step of ${NewContestWizardPage.stepTitles.length}, '
-        '${NewContestWizardPage.stepTitles[step - 1]}.',
+        l10n.wizardStepOf(
+          step,
+          NewContestWizardPage.stepTitles(l10n).length,
+          NewContestWizardPage.stepTitles(l10n)[step - 1],
+        ),
         Directionality.of(context),
       ),
     );
@@ -292,8 +298,9 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     if (!mounted || _created != null) {
       return true;
     }
+    final l10n = AppLocalizations.of(context);
     if (_creating) {
-      _message('The contest is being created. Wait for it to finish.');
+      _message(l10n.wizardCreatingContest);
       return false;
     }
     if (_unsaved) {
@@ -301,23 +308,20 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       final leave = await showWizardConfirmDialog(
         context,
         icon: Icons.logout,
-        title: closing ? UnsavedChangesGuard.closeTitle : 'Leave new contest?',
-        body:
-            'Your draft is kept on this device. You can finish it '
-            'later from Contests.',
+        title: closing ? UnsavedChangesGuard.closeTitle : l10n.wizardLeaveTitle,
+        body: l10n.wizardLeaveBody,
         warning: _store.saveFailed
-            ? 'Your latest changes couldn’t be saved and will be lost.'
-            : 'Fields with errors on this step need fixing before the '
-                  'contest can be created.',
-        cancelLabel: 'Keep editing',
-        confirmLabel: closing ? 'Close' : 'Leave',
+            ? l10n.wizardLeaveSaveFailed
+            : l10n.wizardLeaveErrors,
+        cancelLabel: l10n.wizardKeepEditing,
+        confirmLabel: closing ? 'Close' : l10n.wizardLeave,
       );
       if (!leave) {
         return false;
       }
     }
     if (mounted) {
-      _message(NewContestWizardPage.leftMessage);
+      _message(NewContestWizardPage.leftMessage(l10n));
     }
     return true;
   }
@@ -325,6 +329,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   // --- Step actions -------------------------------------------------------
 
   Future<void> _selectDiscipline(WizardDiscipline discipline) async {
+    final l10n = AppLocalizations.of(context);
     final current = _draft.discipline;
     if (current == null) {
       _update(_draft.copyWith(discipline: discipline));
@@ -333,34 +338,27 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     final change = await showWizardConfirmDialog(
       context,
       icon: Icons.swap_horiz,
-      title: 'Change discipline to ${discipline.name}?',
-      body:
-          'Some values set for ${current.name} don’t apply to '
-          '${discipline.name} and will be cleared:',
+      title: l10n.wizardChangeDisciplineTitle(discipline.name),
+      body: l10n.wizardChangeDisciplineBody(current.name, discipline.name),
       items: [
         WizardConfirmItem(
           Icons.remove_circle_outline,
-          '${current.name} landing-bonus table',
+          l10n.wizardChangeDisciplineLanding(current.name),
         ),
         WizardConfirmItem(
           Icons.remove_circle_outline,
-          '${current.name}-specific rules (${current.rules.first})',
+          l10n.wizardChangeDisciplineRules(current.name, current.rules.first),
         ),
-        const WizardConfirmItem(
+        WizardConfirmItem(
           Icons.remove_circle_outline,
-          'Group-score mode and precision, reset to the new defaults',
+          l10n.wizardChangeDisciplineGroupScore,
         ),
       ],
-      footnote: 'Details, participants and draw options stay as they are.',
-      cancelLabel: 'Keep ${current.name}',
-      confirmLabel: 'Change and clear',
+      footnote: l10n.wizardChangeDisciplineFootnote,
+      cancelLabel: l10n.wizardChangeDisciplineCancel(current.name),
+      confirmLabel: l10n.wizardChangeDisciplineConfirm,
     );
     if (change && mounted) {
-      // The discipline's own scoring values are reset to the new defaults.
-      // The choices that do not depend on the discipline stay as the
-      // director made them: whether pilots may ask for reviews, the public
-      // update policy and when scores become official (a director who chose
-      // Manually must not end up with a contest that accepts scores itself).
       final kept = _draft.scoring;
       _update(
         _draft.copyWith(
@@ -374,14 +372,12 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
                 ),
         ),
       );
-      _message(
-        'Discipline changed to ${discipline.name}. Incompatible values were '
-        'cleared.',
-      );
+      _message(l10n.wizardDisciplineChanged(discipline.name));
     }
   }
 
   Future<void> _toggleOption(ParticipantOption option, bool value) async {
+    final l10n = AppLocalizations.of(context);
     final options = {..._draft.options};
     if (value) {
       options.add(option);
@@ -402,37 +398,33 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       final turnOff = await showWizardConfirmDialog(
         context,
         icon: Icons.group_off,
-        title: 'Turn off teams?',
+        title: l10n.wizardTurnOffTeams,
         items: [
           WizardConfirmItem(
             Icons.group_off,
-            'Team assignments are removed from ${assigned.length} '
-            'participant${assigned.length == 1 ? '' : 's'} '
-            '($teams team${teams == 1 ? '' : 's'}).',
+            l10n.wizardTurnOffTeamsAssignments(
+              assigned.length,
+              assigned.length == 1 ? '' : 's',
+              teams,
+              teams == 1 ? '' : 's',
+            ),
           ),
           WizardConfirmItem(
             Icons.person_remove,
-            nonPilots == 1
-                ? '1 participant who isn’t a pilot is removed from the '
-                      'contest.'
-                : '$nonPilots participants who aren’t pilots are removed '
-                      'from the contest.',
+            l10n.wizardTurnOffTeamsNonPilots(nonPilots),
           ),
-          const WizardConfirmItem(
+          WizardConfirmItem(
             Icons.grid_view,
-            'Check the group size in Draw options. Team protection no longer '
-            'sets a minimum.',
+            l10n.wizardTurnOffTeamsGroupSize,
           ),
         ],
-        cancelLabel: 'Keep teams',
-        confirmLabel: 'Turn off and remove',
+        cancelLabel: l10n.wizardKeepTeams,
+        confirmLabel: l10n.wizardTurnOffAndRemove,
       );
       if (!turnOff || !mounted) {
         return;
       }
-      _message(
-        'Teams turned off. Team assignments and non-pilots were removed.',
-      );
+      _message(l10n.wizardTeamsTurnedOff);
     }
     _update(
       _draft.copyWith(
@@ -449,6 +441,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   // --- Building -----------------------------------------------------------
 
   List<Widget> _banners() {
+    final l10n = AppLocalizations.of(context);
     final banners = <Widget>[];
     if (_store.saveFailed) {
       banners.add(
@@ -456,23 +449,21 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
           key: const ValueKey('banner-save-failed'),
           tone: WizardBannerTone.error,
           icon: Icons.sync_problem,
-          title: 'Draft not saved',
-          body:
-              'Your last changes weren’t saved. Everything you entered is '
-              'still on screen.',
+          title: l10n.wizardDraftNotSaved,
+          body: l10n.wizardDraftNotSavedBody,
           actions: [
             WizardBannerAction(
               key: const ValueKey('draft-retry'),
-              label: 'Retry save',
+              label: l10n.wizardRetrySave,
               onPressed: () async {
                 await _store.retry();
                 if (mounted && !_store.saveFailed) {
-                  _message('Draft saved.');
+                  _message(l10n.wizardDraftSaved);
                 }
               },
             ),
             WizardBannerAction(
-              label: 'Cancel',
+              label: l10n.wizardCancel,
               onPressed: _store.dismissFailure,
             ),
           ],
@@ -481,14 +472,12 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     }
     if (_step == 5) {
       banners.add(
-        const WizardBanner(
-          key: ValueKey('banner-unpublished'),
+        WizardBanner(
+          key: const ValueKey('banner-unpublished'),
           tone: WizardBannerTone.info,
           icon: Icons.lock,
-          title: 'Created unpublished and private',
-          body:
-              'Nobody outside the contest team can see it. You publish it '
-              'later from the contest configuration page.',
+          title: l10n.wizardCreatedUnpublished,
+          body: l10n.wizardCreatedUnpublishedBody,
         ),
       );
     }
@@ -498,18 +487,16 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
           key: const ValueKey('banner-create-failed'),
           tone: WizardBannerTone.error,
           icon: Icons.error,
-          title: 'The contest wasn’t created',
-          body:
-              '${apiErrorText(_createError!)} Everything you entered is kept '
-              'in the draft.',
+          title: l10n.wizardNotCreated,
+          body: l10n.wizardNotCreatedBody(apiErrorText(_createError!)),
           actions: [
             WizardBannerAction(
               key: const ValueKey('create-retry'),
-              label: 'Retry',
+              label: l10n.wizardRetry,
               onPressed: () => unawaited(_create()),
             ),
             WizardBannerAction(
-              label: 'Cancel',
+              label: l10n.wizardCancel,
               onPressed: () => setState(() => _createError = null),
             ),
           ],
@@ -518,14 +505,12 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     }
     if (_step == 6) {
       banners.add(
-        const WizardBanner(
-          key: ValueKey('banner-no-matrix'),
+        WizardBanner(
+          key: const ValueKey('banner-no-matrix'),
           tone: WizardBannerTone.info,
           icon: Icons.grid_view,
-          title: 'The matrix isn’t drawn here',
-          body:
-              'After creating the contest, draw the matrix from contest '
-              'configuration. It will use these settings.',
+          title: l10n.wizardMatrixNotDrawn,
+          body: l10n.wizardMatrixNotDrawnBody,
         ),
       );
     }
@@ -536,47 +521,46 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     switch (_step) {
       case 1:
         for (final MapEntry(key: field, value: error)
-            in DraftValidation.details(_draft).entries) {
+            in DraftValidation.details(_draft, l10n).entries) {
           links.add(
             WizardBannerLink(
-              text: '${field.label}: $error',
+              text: '${field.label(l10n)}: $error',
               onTap: () => _detailsFocus[field]!.requestFocus(),
             ),
           );
         }
       case 2:
-        final error = DraftValidation.discipline(_draft);
+        final error = DraftValidation.discipline(_draft, l10n);
         if (error != null) {
           links.add(WizardBannerLink(text: error, onTap: () {}));
         }
       case 5:
-        final drops = DraftValidation.drops(_draft);
+        final drops = DraftValidation.drops(_draft, l10n);
         for (final (label, error) in [
-          ('Drop after round', drops.first),
-          ('Second drop after round', drops.second),
+          (l10n.wizardDropAfterRound, drops.first),
+          (l10n.wizardSecondDropAfterRound, drops.second),
         ]) {
           if (error != null) {
             links.add(WizardBannerLink(text: '$label: $error', onTap: () {}));
           }
         }
       case 6:
-        final draw = DraftValidation.draw(_draft);
+        final draw = DraftValidation.draw(_draft, l10n);
         for (final (label, error) in [
-          ('Groups per round', draw.groups),
-          ('Preliminary rounds', draw.rounds),
-          ('Seeded rounds', draw.seededRounds),
+          (l10n.wizardGroupsPerRound, draw.groups),
+          (l10n.wizardPreliminaryRounds, draw.rounds),
+          (l10n.wizardSeededRounds, draw.seededRounds),
         ]) {
           if (error != null) {
             links.add(WizardBannerLink(text: '$label: $error', onTap: () {}));
           }
         }
       case 3:
-        if (DraftValidation.teamPilotCount(_draft) != null) {
+        final teamError = DraftValidation.teamPilotCount(_draft, l10n);
+        if (teamError != null) {
           links.add(
             WizardBannerLink(
-              text:
-                  'Pilots counted for team score: enter a whole number above '
-                  '0.',
+              text: '${l10n.wizardTeamPilotCountLabel}: $teamError',
               onTap: _teamCountFocus.requestFocus,
             ),
           );
@@ -589,9 +573,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
           key: const ValueKey('banner-validation'),
           tone: WizardBannerTone.error,
           icon: Icons.error,
-          title:
-              '$n field${n == 1 ? ' needs' : 's need'} attention before you '
-              'continue',
+          title: l10n.wizardFieldsNeedAttention(n),
           links: links,
         ),
       );
@@ -646,7 +628,8 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
 
   /// The first step (1 to 6) that blocks creating, if any.
   int? get _firstInvalidStep {
-    for (var n = 1; n < NewContestWizardPage.stepTitles.length; n++) {
+    final l10n = AppLocalizations.of(context);
+    for (var n = 1; n < NewContestWizardPage.stepTitles(l10n).length; n++) {
       if (_valid(n) == false) {
         return n;
       }
@@ -655,21 +638,22 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   }
 
   WizardBlockedReason? get _createBlocked {
+    final l10n = AppLocalizations.of(context);
     final step = _firstInvalidStep;
     if (step == null || _creating) {
       return null;
     }
-    final title = NewContestWizardPage.stepTitles[step - 1];
+    final titles = NewContestWizardPage.stepTitles(l10n);
+    final title = titles[step - 1];
     final needing = _draft.participantsNeedingFixes.length;
     final what = step != 4
-        ? '$title needs attention.'
+        ? l10n.wizardNeedsAttention(title)
         : _draft.scoringCount < DraftValidation.minScoringPilots
-        ? 'add at least 2 scoring pilots.'
-        : '$needing participant${needing == 1 ? ' needs' : 's need'} '
-              'fixing.';
+        ? l10n.wizardAddScoringPilots
+        : l10n.wizardParticipantsNeedFixing(needing);
     return WizardBlockedReason(
-      text: 'Can’t create yet: $what',
-      fixLabel: 'Go to $title',
+      text: l10n.wizardCannotCreate(what),
+      fixLabel: l10n.wizardGoToStep(title),
       onFix: () => _go(step),
     );
   }
@@ -678,6 +662,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     if (_creating || _firstInvalidStep != null) {
       return;
     }
+    final l10n = AppLocalizations.of(context);
     final client = apiClientOf(context);
     final draft = _draft;
     setState(() {
@@ -687,7 +672,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     final view = View.of(context);
     final direction = Directionality.of(context);
     unawaited(
-      SemanticsService.sendAnnouncement(view, 'Creating contest.', direction),
+      SemanticsService.sendAnnouncement(view, l10n.wizardCreatingAnnouncement, direction),
     );
     try {
       if (client == null) {
@@ -695,8 +680,6 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
       }
       final contest = await ContestCreator(client)
           .create(draft, _store.creationIdsFor(draft));
-      // Resolve the values the director saw, so the matrix page can prefill
-      // them even where the draft only had a suggestion.
       _store.drawSuggestions[contest.id] = draft.drawSettings.copyWith(
         groups: '${GroupPlan.of(draft).groups}',
         rounds: draft.roundsText,
@@ -706,16 +689,15 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
         return;
       }
       if (_store.saveFailed) {
-        _message(NewContestWizardPage.draftNotDeletedMessage);
+        _message(NewContestWizardPage.draftNotDeletedMessage(l10n));
       }
       setState(() {
         _creating = false;
         _created = contest;
       });
       unawaited(
-        SemanticsService.sendAnnouncement(view, 'Contest created.', direction),
+        SemanticsService.sendAnnouncement(view, l10n.wizardCreatedAnnouncement, direction),
       );
-      // A new contest has no matrix yet, so its configuration comes next.
       context.go(contestConfigurationPath(contest.id.value));
     } on Object catch (error) {
       if (mounted) {
@@ -731,19 +713,18 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: _store,
     builder: (context, _) {
+      final l10n = AppLocalizations.of(context);
       final theme = Theme.of(context);
       final scheme = theme.colorScheme;
       final wide =
           MediaQuery.sizeOf(context).width >= NewContestWizardPage.wideWidth;
       final entries = _entries;
-      final titles = NewContestWizardPage.stepTitles;
+      final titles = NewContestWizardPage.stepTitles(l10n);
       final last = _step == titles.length;
       if (_restoring) {
-        // Blank while the stored draft loads and the director chooses.
         return const SizedBox.shrink();
       }
       if (_created != null) {
-        // Navigating to the new contest's configuration; nothing to show.
         return const SizedBox.shrink();
       }
 
@@ -763,33 +744,33 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            'STEP $_step OF ${titles.length}',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: scheme.primary,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Semantics(
-                            header: true,
-                            child: Text(
-                              titles[_step - 1],
-                              key: const ValueKey('wizard-step-title'),
-                              style: theme.textTheme.headlineMedium,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 640),
-                            child: Text(
-                              NewContestWizardPage.stepIntros[_step - 1],
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: scheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
+                           Text(
+                             l10n.wizardStepHeader(_step, titles.length),
+                             style: theme.textTheme.labelSmall?.copyWith(
+                               color: scheme.primary,
+                               fontWeight: FontWeight.w500,
+                               letterSpacing: 0.5,
+                             ),
+                           ),
+                           const SizedBox(height: 4),
+                           Semantics(
+                             header: true,
+                             child: Text(
+                               titles[_step - 1],
+                               key: const ValueKey('wizard-step-title'),
+                               style: theme.textTheme.headlineMedium,
+                             ),
+                           ),
+                           const SizedBox(height: 4),
+                           ConstrainedBox(
+                             constraints: const BoxConstraints(maxWidth: 640),
+                             child: Text(
+                               NewContestWizardPage.stepIntros(l10n)[_step - 1],
+                               style: theme.textTheme.bodyMedium?.copyWith(
+                                 color: scheme.onSurfaceVariant,
+                               ),
+                             ),
+                           ),
                           for (final banner in _banners()) ...[
                             const SizedBox(height: 20),
                             banner,
@@ -807,10 +788,10 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
           WizardFooter(
             onBack: _step > 1 ? () => _go(_step - 1) : null,
             primaryLabel: !last
-                ? 'Next: ${titles[_step]}'
+                ? l10n.wizardNext(titles[_step])
                 : _creating
-                ? 'Creating contest…'
-                : 'Create contest',
+                ? l10n.wizardCreating
+                : l10n.wizardCreateContest,
             showArrow: !last,
             busy: _creating,
             onPrimary: last ? () => unawaited(_create()) : _next,

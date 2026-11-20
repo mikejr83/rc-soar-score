@@ -1,32 +1,31 @@
+import '../../l10n/app_localizations.dart';
+
 /// What the New Contest wizard copies from an existing contest (step 1).
 ///
 /// Copying never brings scores, the flight matrix, publication history,
 /// invitations, deletion state or audit history
 /// (`plan/ui/contest-administration/new-contest-wizard.md`).
 enum CopyMode {
-  none(
-    label: 'Don’t copy',
-    description: 'Start with a blank configuration and no pilots.',
-  ),
-  configuration(
-    label: 'Configuration only',
-    description: 'Discipline, options, scoring and draw settings.',
-  ),
-  allPilots(
-    label: 'Configuration + all pilots',
-    description: 'Every pilot in the source contest, with their class.',
-  ),
-  selectedPilots(
-    label: 'Configuration + selected pilots',
-    description:
-        'Pick some pilots, with their class, for example for a '
-        'fly-off.',
-  );
+  none,
+  configuration,
+  allPilots,
+  selectedPilots;
 
-  const CopyMode({required this.label, required this.description});
+  /// The user-visible label for this mode.
+  String label(AppLocalizations l10n) => switch (this) {
+    none => l10n.wizardCopyModeNone,
+    configuration => l10n.wizardCopyModeConfiguration,
+    allPilots => l10n.wizardCopyModeAllPilots,
+    selectedPilots => l10n.wizardCopyModeSelectedPilots,
+  };
 
-  final String label;
-  final String description;
+  /// The user-visible description for this mode.
+  String description(AppLocalizations l10n) => switch (this) {
+    none => l10n.wizardCopyModeNoneDesc,
+    configuration => l10n.wizardCopyModeConfigurationDesc,
+    allPilots => l10n.wizardCopyModeAllPilotsDesc,
+    selectedPilots => l10n.wizardCopyModeSelectedPilotsDesc,
+  };
 
   /// Whether a source contest is needed.
   bool get usesSource => this != none;

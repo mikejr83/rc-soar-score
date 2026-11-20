@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import 'wizard_step_indicator.dart';
 import 'wizard_step_status.dart';
 
@@ -22,14 +23,16 @@ class WizardStepList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final complete = steps
         .where((step) => step.status == WizardStepStatus.complete)
         .length;
+    final progressText = l10n.wizardStepsComplete(complete, steps.length);
     return Semantics(
       container: true,
-      label: 'Wizard steps',
+      label: l10n.wizardStepListLabel,
       child: Container(
         width: width,
         decoration: BoxDecoration(
@@ -43,7 +46,7 @@ class WizardStepList extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
-                'New contest',
+                l10n.wizardNewContest,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
@@ -52,7 +55,7 @@ class WizardStepList extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
               child: Text(
-                '$complete of ${steps.length} steps complete',
+                progressText,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
@@ -66,14 +69,17 @@ class WizardStepList extends StatelessWidget {
                   value: complete / steps.length,
                   minHeight: 4,
                   backgroundColor: scheme.surfaceContainerHighest,
-                  semanticsLabel: '$complete of ${steps.length} steps complete',
+                  semanticsLabel: progressText,
                 ),
               ),
             ),
             for (final step in steps)
               Padding(
                 padding: const EdgeInsets.only(bottom: 2),
-                child: _StepRow(step: step, onSelect: onSelect),
+                child: _StepRow(
+                    step: step,
+                    total: steps.length,
+                    onSelect: onSelect),
               ),
             const SizedBox(height: 16),
             Padding(
@@ -89,8 +95,7 @@ class WizardStepList extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Configuration in process is kept until the app is closed or '
-                      'the contest is created.',
+                      l10n.wizardDraftKeptNote,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -107,13 +112,19 @@ class WizardStepList extends StatelessWidget {
 }
 
 class _StepRow extends StatelessWidget {
-  const _StepRow({required this.step, required this.onSelect});
+  const _StepRow({
+    required this.step,
+    required this.total,
+    required this.onSelect,
+  });
 
   final WizardStepEntry step;
+  final int total;
   final ValueChanged<int> onSelect;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final status = step.status;
@@ -123,7 +134,7 @@ class _StepRow extends StatelessWidget {
       button: true,
       enabled: !status.locked,
       selected: current,
-      label: step.semanticLabel,
+      label: step.semanticLabel(l10n, total),
       excludeSemantics: true,
       child: Material(
         color: current ? scheme.secondaryContainer : Colors.transparent,
@@ -157,7 +168,7 @@ class _StepRow extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          status.label,
+                          status.label(l10n),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: status.hasError
                                 ? scheme.error

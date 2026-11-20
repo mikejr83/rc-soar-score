@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/wizard_discipline.dart';
 
 /// One discipline's selection card: name, task type, default time, landing
@@ -23,6 +24,7 @@ class DisciplineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final supported = discipline.supported;
@@ -37,7 +39,7 @@ class DisciplineCard extends StatelessWidget {
       enabled: supported,
       label: supported
           ? '${discipline.name}. ${discipline.task}'
-          : '${discipline.name}, ${WizardDiscipline.unsupportedLabel}. '
+          : '${discipline.name}, ${l10n.wizardDisciplineUnsupported}. '
                 '${discipline.task}',
       excludeSemantics: true,
       child: Material(
@@ -75,14 +77,14 @@ class DisciplineCard extends StatelessWidget {
                     if (selected)
                       _Badge(
                         icon: Icons.check,
-                        label: 'Selected',
+                        label: l10n.wizardSelected,
                         background: scheme.primaryContainer,
                         foreground: scheme.onPrimaryContainer,
                       )
                     else if (!supported)
                       _Badge(
                         icon: Icons.block,
-                        label: WizardDiscipline.unsupportedLabel,
+                        label: l10n.wizardDisciplineUnsupported,
                         background: scheme.surfaceContainerHighest,
                         foreground: scheme.onSurfaceVariant,
                       ),
@@ -110,8 +112,8 @@ class DisciplineCard extends StatelessWidget {
                     },
                     children: [
                       for (final (label, value) in [
-                        ('Time', discipline.time!),
-                        ('Landing', discipline.landing!),
+                        (l10n.wizardTimeLabel, discipline.time!),
+                        (l10n.wizardLandingLabel, discipline.landing!),
                       ])
                         TableRow(
                           children: [

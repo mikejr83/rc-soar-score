@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// A short whole-number input for a setting (rounds, groups).
 ///
 /// It keeps what is typed so an invalid value stays on screen until fixed.
@@ -66,6 +68,7 @@ class _WizardNumberFieldState extends State<WizardNumberField> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final current = int.tryParse(widget.value.trim());
     final field = SizedBox(
@@ -95,7 +98,7 @@ class _WizardNumberFieldState extends State<WizardNumberField> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton.outlined(
-                  tooltip: 'Fewer',
+                  tooltip: l10n.wizardFewer,
                   onPressed:
                       widget.enabled &&
                           (current == null || current > widget.min)
@@ -107,7 +110,7 @@ class _WizardNumberFieldState extends State<WizardNumberField> {
                 field,
                 const SizedBox(width: 8),
                 IconButton.outlined(
-                  tooltip: 'More',
+                  tooltip: l10n.wizardMore,
                   onPressed:
                       widget.enabled &&
                           (widget.max == null ||

@@ -1,63 +1,55 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// A participant option in step 3 of the New Contest wizard. Each one adds
 /// columns to the Participants step, and says so.
 enum ParticipantOption {
-  teams(
-    title: 'Teams',
-    icon: Icons.diversity_3,
-    description: 'Group pilots into teams for a team score.',
-    effect:
-        'Adds a Team column. Type a name to create a team. Pilots with no '
-        'team are unassigned. Team protection becomes available in Draw '
-        'options.',
-  ),
-  pilotNumbers(
-    title: 'Contest pilot numbers',
-    icon: Icons.pin_outlined,
-    description: 'Give each pilot a number for this contest.',
-    effect: 'Adds a Pilot no. column. Numbers are assigned at the first draw.',
-    note: 'Any number shown before the first draw is labelled provisional.',
-  ),
-  classes(
-    title: 'Classes',
-    icon: Icons.workspace_premium_outlined,
-    description: 'Score pilots in classes such as Open or Sportsman.',
-    effect: 'Adds a required Class column for every scoring pilot.',
-  ),
-  roles(
-    title: 'Contest roles',
-    icon: Icons.badge_outlined,
-    description: 'Include non-flying people such as timers and the CD.',
-    effect:
-        'Adds a Role column. New people start as Pilot. Non-flying roles get '
-        'no score rows.',
-  ),
-  models(
-    title: 'Pilot models',
-    icon: Icons.flight,
-    description: 'Record the models each pilot flies.',
-    effect: 'Adds a Models column for scoring pilots.',
-    note:
-        'Add models any time. A pilot without a model never holds up the '
-        'contest.',
-  );
+  teams,
+  pilotNumbers,
+  classes,
+  roles,
+  models;
 
-  const ParticipantOption({
-    required this.title,
-    required this.icon,
-    required this.description,
-    required this.effect,
-    this.note,
-  });
+  IconData get icon => switch (this) {
+    teams => Icons.diversity_3,
+    pilotNumbers => Icons.pin_outlined,
+    classes => Icons.workspace_premium_outlined,
+    roles => Icons.badge_outlined,
+    models => Icons.flight,
+  };
 
-  final String title;
-  final IconData icon;
-  final String description;
+  /// The user-visible title for this option.
+  String title(AppLocalizations l10n) => switch (this) {
+    teams => l10n.wizardOptionTeamsTitle,
+    pilotNumbers => l10n.wizardOptionPilotNumbersTitle,
+    classes => l10n.wizardOptionClassesTitle,
+    roles => l10n.wizardOptionRolesTitle,
+    models => l10n.wizardOptionModelsTitle,
+  };
+
+  /// The user-visible description for this option.
+  String description(AppLocalizations l10n) => switch (this) {
+    teams => l10n.wizardOptionTeamsDesc,
+    pilotNumbers => l10n.wizardOptionPilotNumbersDesc,
+    classes => l10n.wizardOptionClassesDesc,
+    roles => l10n.wizardOptionRolesDesc,
+    models => l10n.wizardOptionModelsDesc,
+  };
 
   /// How the option changes the Participants step.
-  final String effect;
+  String effect(AppLocalizations l10n) => switch (this) {
+    teams => l10n.wizardOptionTeamsEffect,
+    pilotNumbers => l10n.wizardOptionPilotNumbersEffect,
+    classes => l10n.wizardOptionClassesEffect,
+    roles => l10n.wizardOptionRolesEffect,
+    models => l10n.wizardOptionModelsEffect,
+  };
 
   /// Shown under the option while it is on.
-  final String? note;
+  String? note(AppLocalizations l10n) => switch (this) {
+    pilotNumbers => l10n.wizardOptionPilotNumbersNote,
+    models => l10n.wizardOptionModelsNote,
+    _ => null,
+  };
 }

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/draw_settings.dart';
 
 /// The live pilots-per-group calculation for step 6 (a polite live region),
@@ -16,6 +17,7 @@ class GroupCalculationPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final muted = scheme.onSurfaceVariant;
@@ -27,31 +29,29 @@ class GroupCalculationPanel extends StatelessWidget {
               Icons.check_circle,
               scheme.secondary,
               'OK:',
-              'every group has at least 2 scoring pilots.',
+              l10n.wizardPilotsPerGroupOk,
             )
           : (
               Icons.error,
               scheme.error,
               'Blocked:',
               plan.groupsValid
-                  ? 'with $groups groups some would have fewer than 2 '
-                        'scoring pilots. Use ${plan.maxGroups} or fewer.'
-                  : 'enter at least 1 group.',
+                  ? l10n.wizardPilotsPerGroupBlocked(groups, plan.maxGroups)
+                  : l10n.wizardPilotsPerGroupEnter1,
             ),
       if (plan.teamProtection)
         (
           plan.protectionMet ? Icons.check_circle : Icons.error,
           plan.protectionMet ? scheme.secondary : scheme.error,
           plan.protectionMet ? 'OK:' : 'Blocked:',
-          'team protection needs at least ${plan.minGroups} groups. Your '
-              'largest team has ${plan.largestTeam} scoring pilots.',
+          l10n.wizardPilotsPerGroupProtection(plan.minGroups, plan.largestTeam),
         )
       else if (teamsOn)
         (
           Icons.info,
           muted,
           '',
-          'Team protection is off, so teammates can share a group.',
+          l10n.wizardPilotsPerGroupProtectionOff,
         ),
     ];
 
@@ -69,7 +69,7 @@ class GroupCalculationPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'PILOTS PER GROUP · UPDATES AS YOU EDIT',
+              l10n.wizardPilotsPerGroupTitle,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: muted,
                 fontWeight: FontWeight.w500,
@@ -84,10 +84,10 @@ class GroupCalculationPanel extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               plan.groupsValid
-                  ? '${plan.scoring} scoring pilots in $groups '
-                        'group${groups == 1 ? '' : 's'} · smallest group '
-                        '${plan.smallestGroup}, largest ${plan.largestGroup}'
-                  : '${plan.scoring} scoring pilots',
+                  ? l10n.wizardPilotsPerGroupCount(
+                      plan.scoring, groups, groups == 1 ? '' : 's',
+                      plan.smallestGroup, plan.largestGroup)
+                  : l10n.wizardPilotsPerGroupCountNoGroups(plan.scoring),
               style: theme.textTheme.bodyMedium?.copyWith(color: muted),
             ),
             if (plan.groupsValid) ...[

@@ -1,16 +1,20 @@
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import 'wizard_discipline.dart';
 
 /// How many rounds are dropped from each pilot's total.
 enum DropPolicy {
-  disabled('Disabled'),
-  one('One dropped'),
-  two('Two dropped');
+  disabled,
+  one,
+  two;
 
-  const DropPolicy(this.label);
-
-  final String label;
+  /// The user-visible label for this policy.
+  String label(AppLocalizations l10n) => switch (this) {
+    disabled => l10n.wizardDropDisabled,
+    one => l10n.wizardDropOne,
+    two => l10n.wizardDropTwo,
+  };
 }
 
 /// The scoring and publication values of step 5.

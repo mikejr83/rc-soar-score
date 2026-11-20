@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/wizard_discipline.dart';
 import 'discipline_card_slot.dart';
 
@@ -20,13 +21,14 @@ class DisciplineStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Semantics(
           container: true,
-          label: 'Discipline',
+          label: l10n.wizardStepDiscipline,
           child: LayoutBuilder(
             builder: (context, constraints) {
               final columns =
@@ -65,9 +67,7 @@ class DisciplineStep extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'These are starting defaults. You can override task times, '
-                'landing bonuses and rules after the contest is created, on '
-                'the contest configuration page.',
+                l10n.wizardDisciplineNote,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

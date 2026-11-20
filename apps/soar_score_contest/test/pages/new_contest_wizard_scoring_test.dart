@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/new_contest/scoring_settings.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -21,6 +22,7 @@ void main() {
   testWidgets('ALES defaults to Time; changing it warns and can be reset', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(
       participants: [row(0), row(1)],
       discipline: WizardDiscipline.ales,
@@ -29,30 +31,31 @@ void main() {
     );
     await pumpWizard(tester, respond: stepApi, store: store);
 
-    expect(stepTitle(tester), 'Scoring & publication');
-    expect(find.text('Created unpublished and private'), findsOneWidget);
+    expect(stepTitle(tester), l10n.wizardStepScoringPublication);
+    expect(find.text(l10n.wizardCreatedUnpublished), findsOneWidget);
     expect(store.draft.scoringSettings.groupScoreMode, GroupScoreMode.time);
     expect(find.text('ALES default'), findsWidgets);
 
-    await _segment(tester, 'group-score', 'Normalized');
+    await _segment(tester, 'group-score', l10n.wizardGroupScoreNormalized);
     expect(
       store.draft.scoringSettings.groupScoreMode,
       GroupScoreMode.normalized,
     );
-    expect(find.text('No longer a traditional ALES contest'), findsOneWidget);
-    expect(find.text('Changed from Time'), findsOneWidget);
+    expect(find.text(l10n.wizardGroupScoreTraditional('ALES')), findsOneWidget);
+    expect(find.text(l10n.wizardChangedFrom('Time')), findsOneWidget);
 
-    await tester.ensureVisible(find.text('Reset to default'));
+    await tester.ensureVisible(find.text(l10n.wizardResetToDefault));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Reset to default'));
+    await tester.tap(find.text(l10n.wizardResetToDefault));
     await tester.pumpAndSettle();
     expect(store.draft.scoringSettings.groupScoreMode, GroupScoreMode.time);
-    expect(find.text('No longer a traditional ALES contest'), findsNothing);
+    expect(find.text(l10n.wizardGroupScoreTraditional('ALES')), findsNothing);
   });
 
   testWidgets('scores become official: a new contest starts at end of round', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(
       participants: [row(0), row(1)],
       options: const {},
@@ -60,7 +63,7 @@ void main() {
     );
     await pumpWizard(tester, respond: stepApi, store: store);
 
-    expect(find.text('Scores become official'), findsOneWidget);
+    expect(find.text(l10n.scoresBecomeOfficialLabel), findsOneWidget);
     expect(
       store.draft.scoringSettings.scoresBecomeOfficial,
       OfficializationMode.endOfRound,
@@ -95,6 +98,7 @@ void main() {
   testWidgets('the precision example follows rounding and places', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(
       participants: [row(0), row(1)],
       options: const {},
@@ -102,16 +106,17 @@ void main() {
     );
     await pumpWizard(tester, respond: stepApi, store: store);
 
-    expect(find.text('Example: 987.4567 → 987.5'), findsOneWidget);
-    await _segment(tester, 'rounding', 'Truncate');
-    expect(find.text('Example: 987.4567 → 987.4'), findsOneWidget);
+    expect(find.text(l10n.wizardPrecisionExample('987.5')), findsOneWidget);
+    await _segment(tester, 'rounding', l10n.wizardRoundingTruncate);
+    expect(find.text(l10n.wizardPrecisionExample('987.4')), findsOneWidget);
     await _segment(tester, 'decimal-places', '3');
-    expect(find.text('Example: 987.4567 → 987.456'), findsOneWidget);
+    expect(find.text(l10n.wizardPrecisionExample('987.456')), findsOneWidget);
   });
 
   testWidgets('two dropped rounds: the second must come after the first', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(
       participants: [row(0), row(1)],
       options: const {},
@@ -121,7 +126,7 @@ void main() {
     // F5J drops one round after round 6 by default.
     expect(store.draft.scoringSettings.dropPolicy, DropPolicy.one);
 
-    await _segment(tester, 'drop-policy', 'Two dropped');
+    await _segment(tester, 'drop-policy', l10n.wizardDropTwo);
     final second = find.descendant(
       of: find.byKey(const ValueKey('second-drop')),
       matching: find.byType(TextField),
@@ -129,16 +134,16 @@ void main() {
     await tester.ensureVisible(second);
     await tester.enterText(second, '4');
     await tester.pumpAndSettle();
-    expect(find.text('Must be after round 6.'), findsWidgets);
+    expect(find.text(l10n.wizardValidationMustBeAfterRound(6)), findsWidgets);
 
     await next(tester);
-    expect(stepTitle(tester), 'Scoring & publication');
+    expect(stepTitle(tester), l10n.wizardStepScoringPublication);
 
     await tester.enterText(second, '10');
     await tester.pumpAndSettle();
     expect(store.draft.scoringSettings.dropAfterRounds, [6, 10]);
     await next(tester);
-    expect(stepTitle(tester), 'Draw options');
+    expect(stepTitle(tester), l10n.wizardStepDrawOptions);
   });
 
   test('defaults come from the platform and each discipline profile', () {
