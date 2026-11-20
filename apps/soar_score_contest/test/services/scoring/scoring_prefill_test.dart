@@ -122,6 +122,47 @@ void main() {
     expect(_row(c, 1).savedComponents, isNotEmpty);
   });
 
+  test('refresh keeps a newer pilot submission recognizable', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, h120);
+    final c = await _open(server);
+    final draft = c.draftOf(_row(c, 1));
+    draft.setHeight('99');
+
+    server.seedPendingSubmission(first, h130);
+    await c.refresh();
+
+    // The director's text stays and still differs from the submission.
+    expect(draft.heightText, '99');
+    expect(c.hasUnsavedInput(_row(c, 1)), isTrue);
+    expect(c.markOfficialSkip(_row(c, 1)), isNotNull);
+
+    // Typing the submitted values back leaves an untouched prefill.
+    draft.setHeight('130');
+    expect(draft.canRevert, isFalse);
+    expect(c.hasUnsavedInput(_row(c, 1)), isFalse);
+    expect(c.markOfficialSkip(_row(c, 1)), isNull);
+    expect(await c.markOfficial(_row(c, 1)), isTrue);
+    expect(server.entries, isEmpty);
+  });
+
+  test('a newer submission after a sync is adopted by Mark official '
+      'only after Revert shows it', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, h120);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setHeight('99');
+
+    server.seedPendingSubmission(first, h130);
+    await c.refreshAfterSync();
+
+    expect(c.draftOf(_row(c, 1)).heightText, '99');
+    expect(c.markOfficialSkip(_row(c, 1)), isNotNull);
+
+    c.revert(_row(c, 1));
+    expect(c.draftOf(_row(c, 1)).heightText, '130');
+    expect(c.markOfficialSkip(_row(c, 1)), isNull);
+    expect(await c.markOfficial(_row(c, 1)), isTrue);
+  });
+
   test('an untouched pilot prefill is not unsaved', () async {
     final server = ScoringServer()..seedPendingSubmission(first, a);
     final c = await _open(server);

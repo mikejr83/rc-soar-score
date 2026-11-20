@@ -130,6 +130,9 @@ class ScoreRowDraft extends ChangeNotifier {
     _prefill = null;
     final typed = _TypedFields(this);
     _load(shown ?? saved);
+    // A refreshed pilot submission stays recognizable, so typing exactly its
+    // values leaves the row as an untouched prefill, not a director entry.
+    _markPrefill(saved, shown);
     final starting = _loadedFields;
     typed.restore(this);
     _loadedFields = starting;

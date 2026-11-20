@@ -115,5 +115,51 @@ void main() {
     await tester.pumpAndSettle();
     expect(_key('score-confirm-zero-$id'), findsOneWidget);
     expect(_revertOn(tester, id), isFalse);
+    // Save row needs the confirmation again.
+    expect(
+      tester.widget<FilledButton>(_key('score-save-$id')).onPressed,
+      isNull,
+    );
+  });
+
+  testWidgets('Refresh after a failed save keeps typed text and the new '
+      'pilot submission can be adopted', (tester) async {
+    final first = scoringAssignmentId(1, 1);
+    final id = first.value;
+    final server = ScoringServer()..seedPendingSubmission(first, _flight);
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    await _open(tester, id);
+
+    await _type(tester, 'score-height-$id', '99');
+    server.entryFailures[first] = (422, 'invalid_score');
+    await tester.tap(_key('score-save-$id'));
+    await tester.pumpAndSettle();
+    expect(_key('score-refresh'), findsOneWidget);
+
+    server.entryFailures.clear();
+    server.seedPendingSubmission(first, const {
+      'time_flown': 540,
+      'launch_height': 130,
+    });
+    await tester.tap(_key('score-refresh'));
+    await tester.pumpAndSettle();
+
+    expect(_text(tester, 'score-height-$id'), '99');
+    expect(
+      tester.widget<TextButton>(_key('score-mark-official-$id')).onPressed,
+      isNull,
+    );
+
+    await _type(tester, 'score-height-$id', '130');
+    expect(_revertOn(tester, id), isFalse);
+    expect(
+      tester.widget<TextButton>(_key('score-mark-official-$id')).onPressed,
+      isNotNull,
+    );
+    await tester.tap(_key('score-mark-official-$id'));
+    await tester.pumpAndSettle();
+    expect(server.promoteRequests, 1);
+    // Only the refused save was recorded: Mark official wrote no entry.
+    expect(server.entries, hasLength(1));
   });
 }
