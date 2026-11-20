@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'package:soar_score_contest/services/pilot_import/pilot_import.dart';
@@ -13,6 +14,8 @@ import '../support/pilot_import_fakes.dart' show FakePilotImportStore;
 Finder _row(String name) => find.widgetWithText(ListTile, name);
 
 void main() {
+  final l10n = AppLocalizationsEn();
+
   group('GliderScore pilot import', () {
     tearDown(() => PilotImportStore.current = null);
 
@@ -156,7 +159,7 @@ void main() {
     expect(find.byType(ListTile), findsOneWidget);
 
     await search('zzz');
-    expect(find.text('No participants match.'), findsOneWidget);
+    expect(find.text(l10n.participantsNoMatch), findsOneWidget);
 
     await search('');
     expect(find.byType(ListTile), findsNWidgets(3));
@@ -199,7 +202,7 @@ void main() {
     await tester.pumpWidget(participantsApp(client));
     await tester.pumpAndSettle();
 
-    expect(find.text('No participants yet.'), findsOneWidget);
+    expect(find.text(l10n.participantsEmpty), findsOneWidget);
   });
 
   testWidgets('shows the failure and retries', (tester) async {
@@ -215,7 +218,7 @@ void main() {
 
     await tester.pumpWidget(participantsApp(client));
     await tester.pumpAndSettle();
-    expect(find.text('Participants could not be loaded.'), findsOneWidget);
+    expect(find.text(l10n.participantsLoadFailed), findsOneWidget);
     expect(find.text('Something broke.'), findsOneWidget);
 
     await tester.tap(find.text('Retry'));
@@ -291,12 +294,12 @@ void main() {
 
     await tester.pumpWidget(participantsApp(client));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Delete Ada Lovelace'));
+    await tester.tap(find.byTooltip(l10n.participantsDeleteTooltip('Ada Lovelace')));
     await tester.pumpAndSettle();
-    expect(find.text('Delete participant?'), findsOneWidget);
+    expect(find.text(l10n.participantsDeleteTitle), findsOneWidget);
     expect(requests.where((r) => r.method == 'DELETE'), isEmpty);
 
-    await tester.tap(find.text('Delete'));
+    await tester.tap(find.text(l10n.participantsDeleteConfirm));
     await tester.pumpAndSettle();
     expect(requests.where((r) => r.method == 'DELETE'), hasLength(1));
   });
@@ -319,9 +322,9 @@ void main() {
 
     await tester.pumpWidget(participantsApp(client));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Delete Ada Lovelace'));
+    await tester.tap(find.byTooltip(l10n.participantsDeleteTooltip('Ada Lovelace')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Delete'));
+    await tester.tap(find.text(l10n.participantsDeleteConfirm));
     await tester.pumpAndSettle();
 
     expect(find.text('The participant is in a contest.'), findsOneWidget);

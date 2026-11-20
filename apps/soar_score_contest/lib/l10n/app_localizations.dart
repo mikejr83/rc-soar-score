@@ -8185,6 +8185,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Offline contests stay on this device unless you publish them or sign in to enable synchronization.'**
   String get landingOfflineNote;
+
+  /// Title of the Participants page list pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get participantsTitle;
+
+  /// Number of participants.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant} other{{count} participants}}'**
+  String participantsCount(int count);
+
+  /// Filtered count of participants.
+  ///
+  /// In en, this message translates to:
+  /// **'{shown} of {total}'**
+  String participantsCountOf(int shown, int total);
+
+  /// Search field hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, email, FAI number or national ID'**
+  String get participantsSearchHint;
+
+  /// Empty state when search has no results.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants match.'**
+  String get participantsNoMatch;
+
+  /// Error title when participants fail to load.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants could not be loaded.'**
+  String get participantsLoadFailed;
+
+  /// Loading indicator label.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading participants'**
+  String get participantsLoading;
+
+  /// Empty state when no participants exist.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants yet.'**
+  String get participantsEmpty;
+
+  /// Title of the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete participant?'**
+  String get participantsDeleteTitle;
+
+  /// Content of the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be removed from your participant list.'**
+  String participantsDeleteContent(String name);
+
+  /// Cancel button in the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get participantsDeleteCancel;
+
+  /// Confirm button in the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get participantsDeleteConfirm;
+
+  /// Tooltip for the back arrow in the detail pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to participants'**
+  String get participantsBackToParticipants;
+
+  /// Edit button in the detail pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get participantsEdit;
+
+  /// Tooltip for the delete button.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}'**
+  String participantsDeleteTooltip(String name);
+
+  /// Section title: identification.
+  ///
+  /// In en, this message translates to:
+  /// **'Identification'**
+  String get participantsSectionIdentification;
+
+  /// Label for the FAI number field.
+  ///
+  /// In en, this message translates to:
+  /// **'FAI number'**
+  String get participantsFaiNumber;
+
+  /// Label for the national organization ID field.
+  ///
+  /// In en, this message translates to:
+  /// **'National organization ID'**
+  String get participantsNationalOrgId;
+
+  /// Label for the club field.
+  ///
+  /// In en, this message translates to:
+  /// **'Club'**
+  String get participantsClub;
+
+  /// Section title: location.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get participantsSectionLocation;
+
+  /// Label for the city field.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get participantsCity;
+
+  /// Label for the state/province field.
+  ///
+  /// In en, this message translates to:
+  /// **'State/province'**
+  String get participantsState;
+
+  /// Label for the country field.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get participantsCountry;
+
+  /// Section title: contact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get participantsSectionContact;
+
+  /// Label for the email field in the detail pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (private, used for matching only)'**
+  String get participantsEmailPrivate;
 }
 
 class _AppLocalizationsDelegate
