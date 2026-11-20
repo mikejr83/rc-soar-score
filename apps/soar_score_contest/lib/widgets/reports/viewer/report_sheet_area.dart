@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/reports/viewer/page_setup.dart';
 import 'paper_style.dart';
 
@@ -99,6 +100,7 @@ class _ReportSheetAreaState extends State<ReportSheetArea> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return ColoredBox(
       color: PaperStyle.backdrop(theme.brightness),
@@ -144,7 +146,7 @@ class _ReportSheetAreaState extends State<ReportSheetArea> {
             child: Column(mainAxisSize: MainAxisSize.min, children: children),
           );
           return Semantics(
-            label: 'Report pages',
+            label: l10n.viewerReportPages,
             container: true,
             child: Opacity(
               opacity: widget.dimmed ? .55 : 1,
@@ -178,6 +180,7 @@ class _PageBreak extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final color = theme.colorScheme.onSurfaceVariant;
     return ExcludeSemantics(
@@ -195,7 +198,7 @@ class _PageBreak extends StatelessWidget {
                   Icon(Icons.insert_page_break, size: 16, color: color),
                   const SizedBox(width: 4),
                   Text(
-                    'Page break · Page $page',
+                    l10n.viewerPageBreak(page),
                     style: theme.textTheme.labelMedium?.copyWith(color: color),
                   ),
                 ],

@@ -206,7 +206,7 @@ abstract class DataReportDefinition<D extends Object> extends ReportDefinition {
   /// What stands in when the viewer has no [D] yet (it does not build then).
   ReportDocument buildWithout(ReportPageContext context) => ReportDocument(
     title: '${kind.title} - ${context.facts.contest.name}',
-    subtitle: 'Nothing to show',
+    subtitle: context.l10n.viewerNothingToShow,
     pages: const [SizedBox.shrink()],
   );
 

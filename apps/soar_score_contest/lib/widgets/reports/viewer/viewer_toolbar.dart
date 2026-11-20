@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
 import 'report_sheet_area.dart';
 
 /// The strip above the sheet: page indicator, a one-line legend of what
@@ -35,6 +36,7 @@ class ViewerToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
     final percent = '${(_current * 100).round()}%';
@@ -65,7 +67,7 @@ class ViewerToolbar extends StatelessWidget {
                 key: const ValueKey('viewer-filters-button'),
                 onPressed: onFilters,
                 icon: const Icon(Icons.tune, size: 18),
-                label: Text(filtersLabel ?? 'Filters'),
+                label: Text(filtersLabel ?? l10n.viewerFiltersButton),
               ),
             Semantics(
               liveRegion: true,
@@ -94,12 +96,12 @@ class ViewerToolbar extends StatelessWidget {
             ),
             Semantics(
               container: true,
-              label: 'Zoom',
+              label: l10n.viewerZoom,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    tooltip: 'Zoom out',
+                    tooltip: l10n.viewerZoomOut,
                     onPressed: () => onZoom(zoomOut),
                     icon: const Icon(Icons.zoom_out),
                   ),
@@ -108,16 +110,18 @@ class ViewerToolbar extends StatelessWidget {
                     onPressed: () => onZoom(zoom == null ? 1 : null),
                     child: Semantics(
                       label: zoom == null
-                          ? 'Zoom: fit width. Switch to 100 percent.'
-                          : 'Zoom $percent. Switch to fit width.',
+                          ? l10n.viewerZoomFitSwitchTo
+                          : l10n.viewerZoomFixedSwitchTo(percent),
                       excludeSemantics: true,
                       child: Text(
-                        zoom == null && !compact ? 'Fit · $percent' : percent,
+                        zoom == null && !compact
+                            ? l10n.viewerZoomFitPrefix(percent)
+                            : percent,
                       ),
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Zoom in',
+                    tooltip: l10n.viewerZoomIn,
                     onPressed: () => onZoom(zoomIn),
                     icon: const Icon(Icons.zoom_in),
                   ),

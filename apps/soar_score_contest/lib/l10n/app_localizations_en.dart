@@ -2495,6 +2495,182 @@ class AppLocalizationsEn extends AppLocalizations {
       'Each printed page repeats the status in its footer.';
 
   @override
+  String get viewerSaveAsPdf => 'Save as PDF';
+
+  @override
+  String get viewerBackToReports => 'Back to Reports';
+
+  @override
+  String get viewerPrint => 'Print';
+
+  @override
+  String get viewerPrintPreview => 'Print preview';
+
+  @override
+  String get viewerPageSetup => 'Page setup…';
+
+  @override
+  String get viewerResetFilters => 'Reset filters and options';
+
+  @override
+  String get viewerShortcutPrint => 'Ctrl+P';
+
+  @override
+  String get viewerOverflowTooltip => 'Page setup and more';
+
+  @override
+  String get viewerOffline => 'Offline.';
+
+  @override
+  String get viewerOfflineLocalOnly => 'Produced from data on this device.';
+
+  @override
+  String viewerOfflinePending(int count, String change) {
+    return 'Produced from data on this device. $count $change not yet synced.';
+  }
+
+  @override
+  String get viewerOpenSync => 'Open Sync';
+
+  @override
+  String get viewerPageGroup => 'Page';
+
+  @override
+  String get viewerPaper => 'Paper';
+
+  @override
+  String get viewerOrientation => 'Orientation';
+
+  @override
+  String viewerOrientationDefault(String orientation) {
+    return 'This report’s default is $orientation.';
+  }
+
+  @override
+  String get viewerHideScreenMarks =>
+      'Hide screen-only marks and page-break labels';
+
+  @override
+  String get viewerPagesToPrint => 'Pages to print';
+
+  @override
+  String viewerPagesToPrintHint(int count) {
+    return 'All $count';
+  }
+
+  @override
+  String viewerPagesToPrintAll(int count, String word) {
+    return 'All $count $word. Type 1 or 2-4 to print only some.';
+  }
+
+  @override
+  String viewerPagesToPrintSome(int count, int total, String word) {
+    return '$count of $total $word will print.';
+  }
+
+  @override
+  String get viewerFiltersButton => 'Filters';
+
+  @override
+  String get viewerZoom => 'Zoom';
+
+  @override
+  String get viewerZoomOut => 'Zoom out';
+
+  @override
+  String get viewerZoomIn => 'Zoom in';
+
+  @override
+  String get viewerZoomFitSwitchTo => 'Zoom: fit width. Switch to 100 percent.';
+
+  @override
+  String viewerZoomFixedSwitchTo(String percent) {
+    return 'Zoom $percent. Switch to fit width.';
+  }
+
+  @override
+  String viewerZoomFitPrefix(String percent) {
+    return 'Fit · $percent';
+  }
+
+  @override
+  String get viewerLoadingLabel => 'Loading contest data…';
+
+  @override
+  String get viewerBuildingPages => 'Building pages…';
+
+  @override
+  String get viewerNotFoundTitle => 'This contest can’t be found';
+
+  @override
+  String get viewerNotFoundBody =>
+      'It may have been deleted, or the link points to a contest you no longer have access to. There is nothing to print.';
+
+  @override
+  String get viewerBackToContests => 'Back to Contests';
+
+  @override
+  String get viewerUnavailableTitle => 'Can’t read the contest data';
+
+  @override
+  String get viewerUnavailableBody =>
+      'The scores for this report couldn’t be loaded from this device or the server. Your filters are kept.';
+
+  @override
+  String get viewerTryAgain => 'Try again';
+
+  @override
+  String get viewerDataUnavailableTitle =>
+      'Can’t read the scores for this report';
+
+  @override
+  String get viewerDataUnavailableBody =>
+      'They couldn’t be loaded from this device or the server. Your filters are kept.';
+
+  @override
+  String get viewerReportPages => 'Report pages';
+
+  @override
+  String viewerPageBreak(int page) {
+    return 'Page break · Page $page';
+  }
+
+  @override
+  String viewerPageWindow(String title, String name) {
+    return '$title — $name';
+  }
+
+  @override
+  String get viewerReportWord => 'Report';
+
+  @override
+  String viewerSheetPageLabel(String reportName, int page, int count) {
+    return '$reportName, page $page of $count';
+  }
+
+  @override
+  String viewerPageOf(int page, int count) {
+    return 'Page $page of $count';
+  }
+
+  @override
+  String get viewerStatusOfficial => 'OFFICIAL';
+
+  @override
+  String get viewerStatusPreliminary => 'PRELIMINARY';
+
+  @override
+  String viewerResultStampSemantics(String text) {
+    return '$text result';
+  }
+
+  @override
+  String get viewerStampNotFinal => 'Not final · scores incomplete';
+
+  @override
+  String get viewerNothingToShow => 'Nothing to show';
+
+  @override
   String get aboutHeading => 'About';
 
   @override
