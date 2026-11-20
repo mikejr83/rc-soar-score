@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../sync/sync_summary_builder.dart';
 
 /// Tells the director that reports come from this device's data, with how
@@ -26,11 +27,14 @@ class ReportsOfflineNote extends StatelessWidget {
     return SyncSummaryBuilder(
       scope: ContestScopeKey(contestId),
       builder: (context, sync, summary, syncing) {
+        final l10n = AppLocalizations.of(context);
         final pending = summary?.pendingChanges ?? 0;
         final changes = pending == 0
-            ? 'Based on local data.'
-            : 'Based on local data, $pending '
-                  '${pending == 1 ? 'change' : 'changes'} not yet synced.';
+            ? l10n.reportsOfflineLocalOnly
+            : l10n.reportsOfflinePending(
+                pending,
+                pending == 1 ? 'change' : 'changes',
+              );
         return DecoratedBox(
           key: const ValueKey('reports-offline-note'),
           decoration: BoxDecoration(
@@ -44,13 +48,13 @@ class ReportsOfflineNote extends StatelessWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Icon(Icons.cloud_off, size: 20, color: warning),
-                Text('$changes Reports show what this device has.'),
+                Text('$changes ${l10n.reportsOfflineSuffix}'),
                 if (sync.available && onOpenSync != null)
                   TextButton.icon(
                     onPressed: onOpenSync,
                     icon: const Icon(Icons.chevron_right, size: 18),
                     iconAlignment: IconAlignment.end,
-                    label: const Text('Open Sync'),
+                    label: Text(l10n.reportsOpenSync),
                   ),
               ],
             ),

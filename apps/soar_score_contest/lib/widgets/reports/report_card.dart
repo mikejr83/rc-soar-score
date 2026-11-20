@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/reports/report_availability.dart';
 import '../../services/reports/report_kind.dart';
 import 'report_thumbnail.dart';
@@ -46,6 +47,7 @@ class ReportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final available = availability.isAvailable;
     final reason = availability.reason;
@@ -91,7 +93,7 @@ class ReportCard extends StatelessWidget {
                         key: ValueKey('report-open-${kind.key}'),
                         onPressed: available ? onOpen : null,
                         icon: const Icon(Icons.open_in_new, size: 18),
-                        label: const Text('Open'),
+                        label: Text(l10n.reportCardOpen),
                       ),
                       if (reason != null && action != null)
                         _Reason(
@@ -117,7 +119,7 @@ class ReportCard extends StatelessWidget {
                               theme.brightness == Brightness.dark,
                             ),
                           ),
-                          const Text('Opened in a new tab'),
+                          Text(l10n.reportCardOpened),
                         ],
                       ),
                     ),
@@ -147,6 +149,7 @@ class _BlockedNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     return Semantics(
       container: true,
@@ -166,15 +169,15 @@ class _BlockedNotice extends StatelessWidget {
               Icon(Icons.tab_unselected, color: scheme.onSurfaceVariant),
               ConstrainedBox(
                 constraints: BoxConstraints(minWidth: 160, maxWidth: 360),
-                child: Text(
-                  'Your browser blocked the new tab. Allow pop-ups for Soar '
-                  'Score, or open the report here and use Back to return.',
-                ),
+                child: Text(l10n.reportCardBlocked),
               ),
-              TextButton(onPressed: onTryAgain, child: const Text('Try again')),
+              TextButton(
+                onPressed: onTryAgain,
+                child: Text(l10n.reportsUnavailableRetry),
+              ),
               FilledButton.tonal(
                 onPressed: onOpenHere,
-                child: const Text('Open here'),
+                child: Text(l10n.reportCardOpenHere),
               ),
             ],
           ),
@@ -191,6 +194,7 @@ class _Facts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
     Widget fact(IconData icon, String text) => Row(
@@ -207,9 +211,9 @@ class _Facts extends StatelessWidget {
       children: [
         fact(
           Icons.scoreboard_outlined,
-          kind.needsScores ? 'Needs scores' : 'No scores needed',
+          kind.needsScores ? l10n.reportCardNeedsScores : l10n.reportCardNoScoresNeeded,
         ),
-        fact(Icons.grid_view, 'Needs a matrix'),
+        fact(Icons.grid_view, l10n.reportCardNeedsMatrix),
       ],
     );
   }

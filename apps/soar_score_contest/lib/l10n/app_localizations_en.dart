@@ -2393,6 +2393,108 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workspaceNotFoundBack => 'Back to Contests';
 
   @override
+  String get reportsBuiltFrom => 'Reports are built from';
+
+  @override
+  String get reportsFactLifecycle => 'Lifecycle';
+
+  @override
+  String get reportsFactCompleted => 'Completed · Results are final';
+
+  @override
+  String get reportsFactMatrix => 'Matrix';
+
+  @override
+  String get reportsFactNoMatrix => 'No matrix drawn';
+
+  @override
+  String get reportsFactConfiguration => 'Configuration';
+
+  @override
+  String get reportsFactNoneSaved => 'None saved';
+
+  @override
+  String get reportsFactScoringProgress => 'Scoring progress';
+
+  @override
+  String get reportsResultStatusLead => 'Standings produced now would be';
+
+  @override
+  String reportsResultStatusLabel(String status) {
+    return 'Result status: $status';
+  }
+
+  @override
+  String get reportsOfflineLocalOnly => 'Based on local data.';
+
+  @override
+  String reportsOfflinePending(int count, String change) {
+    return 'Based on local data, $count $change not yet synced.';
+  }
+
+  @override
+  String get reportsOfflineSuffix => 'Reports show what this device has.';
+
+  @override
+  String get reportsOpenSync => 'Open Sync';
+
+  @override
+  String get reportsLoadingLabel => 'Loading reports';
+
+  @override
+  String get reportsLoadingText => 'Loading reports…';
+
+  @override
+  String get reportsUnavailableTitle => 'Can’t read this contest’s data';
+
+  @override
+  String get reportsUnavailableBody =>
+      'The reports list needs the contest’s matrix and scores, and they couldn’t be loaded from this device or the server. Nothing has changed.';
+
+  @override
+  String get reportsUnavailableRetry => 'Try again';
+
+  @override
+  String get reportCardOpen => 'Open';
+
+  @override
+  String get reportCardOpened => 'Opened in a new tab';
+
+  @override
+  String get reportCardBlocked =>
+      'Your browser blocked the new tab. Allow pop-ups for Soar Score, or open the report here and use Back to return.';
+
+  @override
+  String get reportCardOpenHere => 'Open here';
+
+  @override
+  String get reportCardNeedsScores => 'Needs scores';
+
+  @override
+  String get reportCardNoScoresNeeded => 'No scores needed';
+
+  @override
+  String get reportCardNeedsMatrix => 'Needs a matrix';
+
+  @override
+  String get resultStatusHelpButton => 'What do these mean?';
+
+  @override
+  String get resultStatusHelpTitle => 'Result status';
+
+  @override
+  String get resultStatusOfficial =>
+      'Every round up to the last round shown is complete: each pilot has an official score and no reviews are open. Printed pages carry no stamp.';
+
+  @override
+  String get resultStatusPreliminary =>
+      'A round up to the last round shown has a missing score, a score not yet marked official, or an open review. Every page is stamped PRELIMINARY.';
+
+  @override
+  String get resultStatusHelpFooter =>
+      'Each printed page repeats the status in its footer.';
+
+  @override
   String get aboutHeading => 'About';
 
   @override

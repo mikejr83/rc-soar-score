@@ -3678,6 +3678,192 @@ abstract class AppLocalizations {
   /// **'Back to Contests'**
   String get workspaceNotFoundBack;
 
+  /// Title and semantics of the reports context strip.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports are built from'**
+  String get reportsBuiltFrom;
+
+  /// Label of the lifecycle fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifecycle'**
+  String get reportsFactLifecycle;
+
+  /// Lifecycle value of a completed contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed · Results are final'**
+  String get reportsFactCompleted;
+
+  /// Label of the matrix fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix'**
+  String get reportsFactMatrix;
+
+  /// Matrix value when none is drawn.
+  ///
+  /// In en, this message translates to:
+  /// **'No matrix drawn'**
+  String get reportsFactNoMatrix;
+
+  /// Label of the configuration fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration'**
+  String get reportsFactConfiguration;
+
+  /// Configuration value when none is saved.
+  ///
+  /// In en, this message translates to:
+  /// **'None saved'**
+  String get reportsFactNoneSaved;
+
+  /// Label of the scoring-progress fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring progress'**
+  String get reportsFactScoringProgress;
+
+  /// Lead of the result-status fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Standings produced now would be'**
+  String get reportsResultStatusLead;
+
+  /// Semantics label of the result-status chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Result status: {status}'**
+  String reportsResultStatusLabel(String status);
+
+  /// Offline note with no pending changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on local data.'**
+  String get reportsOfflineLocalOnly;
+
+  /// Offline note with pending changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on local data, {count} {change} not yet synced.'**
+  String reportsOfflinePending(int count, String change);
+
+  /// Suffix of the offline note.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports show what this device has.'**
+  String get reportsOfflineSuffix;
+
+  /// Link to the sync page in the offline note.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Sync'**
+  String get reportsOpenSync;
+
+  /// Semantics label of the reports loading state.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading reports'**
+  String get reportsLoadingLabel;
+
+  /// Text of the reports loading state.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading reports…'**
+  String get reportsLoadingText;
+
+  /// Title of the reports unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'Can’t read this contest’s data'**
+  String get reportsUnavailableTitle;
+
+  /// Body of the reports unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'The reports list needs the contest’s matrix and scores, and they couldn’t be loaded from this device or the server. Nothing has changed.'**
+  String get reportsUnavailableBody;
+
+  /// Retry button of the reports unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get reportsUnavailableRetry;
+
+  /// Open button of a report card.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get reportCardOpen;
+
+  /// Note after a report opened in a new tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened in a new tab'**
+  String get reportCardOpened;
+
+  /// Notice when the browser blocked the new tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Your browser blocked the new tab. Allow pop-ups for Soar Score, or open the report here and use Back to return.'**
+  String get reportCardBlocked;
+
+  /// Action to open the report in this window.
+  ///
+  /// In en, this message translates to:
+  /// **'Open here'**
+  String get reportCardOpenHere;
+
+  /// Fact: the report needs scores.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs scores'**
+  String get reportCardNeedsScores;
+
+  /// Fact: the report needs no scores.
+  ///
+  /// In en, this message translates to:
+  /// **'No scores needed'**
+  String get reportCardNoScoresNeeded;
+
+  /// Fact: the report needs a matrix.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a matrix'**
+  String get reportCardNeedsMatrix;
+
+  /// Button that opens the result-status definitions.
+  ///
+  /// In en, this message translates to:
+  /// **'What do these mean?'**
+  String get resultStatusHelpButton;
+
+  /// Title of the result-status popover.
+  ///
+  /// In en, this message translates to:
+  /// **'Result status'**
+  String get resultStatusHelpTitle;
+
+  /// Definition of the official status.
+  ///
+  /// In en, this message translates to:
+  /// **'Every round up to the last round shown is complete: each pilot has an official score and no reviews are open. Printed pages carry no stamp.'**
+  String get resultStatusOfficial;
+
+  /// Definition of the preliminary status.
+  ///
+  /// In en, this message translates to:
+  /// **'A round up to the last round shown has a missing score, a score not yet marked official, or an open review. Every page is stamped PRELIMINARY.'**
+  String get resultStatusPreliminary;
+
+  /// Footer of the result-status popover.
+  ///
+  /// In en, this message translates to:
+  /// **'Each printed page repeats the status in its footer.'**
+  String get resultStatusHelpFooter;
+
   /// Heading of the Settings card with the version, licences and legal links.
   ///
   /// In en, this message translates to:
