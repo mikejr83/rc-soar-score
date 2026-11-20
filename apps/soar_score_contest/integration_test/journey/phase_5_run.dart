@@ -591,6 +591,11 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
         tester,
         find.byTooltip('Save or revert your edits first.'),
       );
+      // Revert goes back to what the row held before the edit: the pilot's
+      // values, not an empty form.
+      final reverted = tester.widget<TextField>(height).controller!.text;
+      expect(reverted, isNotEmpty);
+      expect(reverted, isNot('99'));
 
       await tapVisible(tester, mark);
       await pumpUntilGone(tester, mark);
@@ -722,6 +727,11 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
         tester,
         find.byTooltip('Save or revert your edits first.'),
       );
+      // Revert goes back to what the row held before the edit: the pilot's
+      // values, not an empty form.
+      final reverted = tester.widget<TextField>(height).controller!.text;
+      expect(reverted, isNotEmpty);
+      expect(reverted, isNot('99'));
 
       await tapVisible(tester, mark);
       await pumpUntilGone(tester, mark);

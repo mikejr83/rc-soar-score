@@ -45,25 +45,19 @@ void main() {
     expect(c.draftOf(_row(c, 1)).heightText, '130');
   });
 
-  test(
-    'a dismissed submission stays hidden until a newer one arrives',
-    () async {
-      final server = ScoringServer()..seedPendingSubmission(first, a);
-      final c = await _open(server);
-      expect(c.draftOf(_row(c, 1)).timeText, '9:00');
-      c.revert(_row(c, 1));
+  test('revert returns an edited pilot prefill to the pilot values', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setHeight('99');
+    expect(c.hasUnsavedInput(_row(c, 1)), isTrue);
 
-      await c.refresh();
-      expect(c.draftOf(_row(c, 1)).timeText, '');
-      expect(c.dirtyCount, 0);
+    c.revert(_row(c, 1));
 
-      server.seedPendingSubmission(first, b);
-      await c.refresh();
-
-      expect(c.draftOf(_row(c, 1)).timeText, '8:20');
-      expect(c.dirtyCount, 1);
-    },
-  );
+    expect(c.draftOf(_row(c, 1)).timeText, '9:00');
+    expect(c.draftOf(_row(c, 1)).heightText, '120');
+    expect(c.hasUnsavedInput(_row(c, 1)), isFalse);
+    expect(c.unsavedCount, 0);
+  });
 
   test('an untouched pilot prefill is not unsaved', () async {
     final server = ScoringServer()..seedPendingSubmission(first, a);
@@ -227,37 +221,25 @@ void main() {
   for (final inReview in [false, true]) {
     final state = inReview ? 'InReview' : 'Submitted';
 
-    test(
-      'revert clears a $state prefill and a reload keeps it cleared',
-      () async {
-        final server = ScoringServer()
-          ..seedPendingSubmission(first, a, inReview: inReview);
-        final c = await _open(server);
-        expect(c.draftOf(_row(c, 1)).timeText, '9:00');
-        expect(c.dirtyCount, 1);
-
-        c.revert(_row(c, 1));
-        expect(c.draftOf(_row(c, 1)).timeText, '');
-        expect(c.dirtyCount, 0);
-
-        await c.refresh();
-        expect(c.draftOf(_row(c, 1)).timeText, '');
-        expect(c.dirtyCount, 0);
-        expect(_row(c, 1).status, RowStatus.submitted);
-      },
-    );
-
-    test('discard all clears a $state prefill', () async {
+    test('revert and discard all restore a $state prefill', () async {
       final server = ScoringServer()
         ..seedPendingSubmission(first, a, inReview: inReview);
       final c = await _open(server);
+      c.draftOf(_row(c, 1)).setHeight('99');
+
+      c.revert(_row(c, 1));
       expect(c.draftOf(_row(c, 1)).timeText, '9:00');
-      expect(c.dirtyCount, 1);
+      expect(c.draftOf(_row(c, 1)).heightText, '120');
+      expect(c.hasUnsavedInput(_row(c, 1)), isFalse);
 
+      c.draftOf(_row(c, 1)).setHeight('99');
       c.discardAll();
+      expect(c.draftOf(_row(c, 1)).heightText, '120');
+      expect(c.hasUnsavedInput(_row(c, 1)), isFalse);
 
-      expect(c.draftOf(_row(c, 1)).timeText, '');
-      expect(c.dirtyCount, 0);
+      await c.refresh();
+      expect(c.draftOf(_row(c, 1)).heightText, '120');
+      expect(_row(c, 1).status, RowStatus.submitted);
     });
 
     test('save all makes an untouched $state prefill official', () async {
