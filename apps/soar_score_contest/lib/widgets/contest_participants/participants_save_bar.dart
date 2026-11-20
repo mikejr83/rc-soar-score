@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/contest_participants/participants_controller.dart';
 import '../../services/contest_participants/stored_participant.dart';
 
@@ -29,6 +30,7 @@ class ParticipantsSaveBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final c = controller;
@@ -37,7 +39,6 @@ class ParticipantsSaveBar extends StatelessWidget {
     final stale = c.staleIds;
     final invalid = c.invalidChanged;
     final failed = c.failedRows;
-    final plural = changed == 1 ? '' : 's';
 
     // The state, as an icon, a title, an optional sentence and an optional
     // link that fixes it. Icon and words carry the meaning, not colour.
@@ -50,34 +51,32 @@ class ParticipantsSaveBar extends StatelessWidget {
     Key titleKey = const ValueKey('save-reason');
     if (busy) {
       icon = Icons.sync;
-      title = 'Saving $changed participant$plural…';
-      sub = 'Rows are locked until it finishes.';
+      title = l10n.contestParticipantsSavingRows(changed);
+      sub = l10n.contestParticipantsRowsLocked;
       color = scheme.onSurface;
     } else if (stale.isNotEmpty) {
       icon = Icons.sync_problem;
-      title = 'Someone changed this participant. Refresh to continue.';
+      title = l10n.contestParticipantsStaleTitle;
       sub = null;
       color = scheme.onSurface;
-      linkLabel = 'Refresh';
+      linkLabel = l10n.contestParticipantsRefresh;
       onLink = () => c.refreshRow(stale.first);
     } else if (invalid.isNotEmpty) {
       icon = Icons.error;
-      title =
-          'Fix ${invalid.length} row${invalid.length == 1 ? '' : 's'} before '
-          'saving.';
+      title = l10n.contestParticipantsFixRows(invalid.length);
       sub = null;
       color = scheme.error;
-      linkLabel = 'Show row';
+      linkLabel = l10n.contestParticipantsShowRow;
       onLink = () => onShowRow(invalid.first);
     } else if (changed > 0) {
       icon = Icons.edit_note;
-      title = 'Unsaved changes to $changed participant$plural';
-      sub = 'Each participant saves on its own.';
+      title = l10n.contestParticipantsUnsavedChanges(changed);
+      sub = l10n.contestParticipantsEachSaves;
       color = scheme.onSurface;
       titleKey = const ValueKey('unsaved-count');
     } else {
       icon = Icons.check;
-      title = 'No changes to save.';
+      title = l10n.contestParticipantsNoChanges;
       sub = null;
       color = scheme.onSurface;
     }
@@ -88,7 +87,7 @@ class ParticipantsSaveBar extends StatelessWidget {
       elevation: 3,
       child: Semantics(
         container: true,
-        label: 'Save changes',
+        label: l10n.contestParticipantsSaveChanges,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -96,7 +95,7 @@ class ParticipantsSaveBar extends StatelessWidget {
             if (busy)
               LinearProgressIndicator(
                 minHeight: 4,
-                semanticsLabel: 'Saving participants',
+                semanticsLabel: l10n.contestParticipantsSavingProgress,
                 backgroundColor: scheme.primaryContainer,
               ),
             if (failed.isNotEmpty && !busy) _failureSummary(context, failed),
@@ -155,7 +154,7 @@ class ParticipantsSaveBar extends StatelessWidget {
                         OutlinedButton(
                           key: const ValueKey('discard-participants'),
                           onPressed: c.discardAll,
-                          child: const Text('Discard changes'),
+                          child: Text(l10n.contestParticipantsSaveDiscard),
                         ),
                       FilledButton.icon(
                         key: const ValueKey('save-participants'),
@@ -168,7 +167,11 @@ class ParticipantsSaveBar extends StatelessWidget {
                                 ),
                               )
                             : const Icon(Icons.save_outlined),
-                        label: Text(busy ? 'Saving…' : 'Save changes'),
+                        label: Text(
+                          busy
+                              ? l10n.contestParticipantsSavingShort
+                              : l10n.contestParticipantsSaveChanges,
+                        ),
                       ),
                     ],
                   ),
@@ -184,6 +187,7 @@ class ParticipantsSaveBar extends StatelessWidget {
   /// After a save that left rows unsaved: how many went through and which
   /// did not, with a link to each row.
   Widget _failureSummary(BuildContext context, List<StoredParticipant> failed) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Semantics(
@@ -207,8 +211,10 @@ class ParticipantsSaveBar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${controller.savedCount} saved. ${failed.length} not '
-                    'saved. Their typed values are kept.',
+                    l10n.contestParticipantsSavedSummary(
+                      controller.savedCount,
+                      failed.length,
+                    ),
                     style: theme.textTheme.titleSmall?.copyWith(
                       color: scheme.onErrorContainer,
                     ),

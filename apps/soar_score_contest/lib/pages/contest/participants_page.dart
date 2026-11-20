@@ -486,23 +486,26 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     final others = <ParticipantProfile>[];
     final profile = await showDialog<ParticipantProfile>(
       context: context,
-      builder: (context) => Dialog.fullscreen(
-        child: Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              tooltip: 'Cancel',
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(),
+      builder: (dialogContext) {
+        final l10n = AppLocalizations.of(dialogContext);
+        return Dialog.fullscreen(
+            child: Scaffold(
+              appBar: AppBar(
+                leading: IconButton(
+                  tooltip: l10n.cancelButton,
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                ),
+                title: Text(l10n.contestParticipantsAddConfirm),
+              ),
+              body: ParticipantEditorPage(
+                onDone: (profile) => Navigator.of(dialogContext).pop(profile),
+                onCancel: () => Navigator.of(dialogContext).pop(),
+                onSavedAnother: others.add,
+              ),
             ),
-            title: const Text('Add participant'),
-          ),
-          body: ParticipantEditorPage(
-            onDone: (profile) => Navigator.of(context).pop(profile),
-            onCancel: () => Navigator.of(context).pop(),
-            onSavedAnother: others.add,
-          ),
-        ),
-      ),
+          );
+      },
     );
     if (!mounted) return;
     final added = [...others, ?profile];
@@ -624,6 +627,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         for (final banner in participantBanners(
+                          context: context,
                           controller: c,
                           onAdd: _addNew,
                           onRetryAdd: () {
@@ -741,6 +745,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     List<StoredParticipant> visible,
     bool narrow,
   ) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     if (c.rows.isEmpty) {
@@ -756,10 +761,10 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
             children: [
               Icon(Icons.group_add, size: 48, color: scheme.onSurfaceVariant),
               const SizedBox(height: 12),
-              Text('No participants yet', style: theme.textTheme.titleLarge),
+              Text(l10n.participantsEmptyTitle, style: theme.textTheme.titleLarge),
               const SizedBox(height: 12),
               Text(
-                'Add people you’ve saved before, or create a new one.',
+                l10n.participantsEmptyText,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: scheme.onSurfaceVariant,
