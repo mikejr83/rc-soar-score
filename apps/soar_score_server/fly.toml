@@ -22,6 +22,8 @@ primary_region = "iad"
   AUTH0_DOMAIN = "login.rcsoarscore.com"
   API_AUDIENCE = "https://soar-score.com/server"
   CORS_ALLOWED_ORIGINS = "https://app.rcsoarscore.com,https://score.rcsoarscore.com,https://rcsoarscore.com"
+  SUPPORT_ALLOWED_HOSTNAMES = "rcsoarscore.com"
+  MAIL_DELIVERY_MODE = "live"
 
 [http_service]
   internal_port = 8080
