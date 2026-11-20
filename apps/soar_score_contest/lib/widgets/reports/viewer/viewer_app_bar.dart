@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 /// How the viewer was reached, which decides its leading button.
 enum ViewerLead {
   /// A browser tab: the tab's own close button does the job.
@@ -59,19 +61,20 @@ class ViewerAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final pdf = pdfPrimary
         ? FilledButton.icon(
             key: const ValueKey('viewer-pdf'),
             onPressed: pdfEnabled ? onPdf : null,
             icon: const Icon(Icons.picture_as_pdf, size: 18),
-            label: const Text('Save as PDF'),
+            label: Text(l10n.viewerSaveAsPdf),
           )
         : OutlinedButton.icon(
             key: const ValueKey('viewer-pdf'),
             onPressed: pdfEnabled ? onPdf : null,
             icon: const Icon(Icons.picture_as_pdf, size: 18),
-            label: const Text('Save as PDF'),
+            label: Text(l10n.viewerSaveAsPdf),
           );
     return AppBar(
       // The preview scrolls under the bar: keep it opaque and untinted.
@@ -83,7 +86,7 @@ class ViewerAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: lead == ViewerLead.back
           ? IconButton(
               key: const ValueKey('viewer-back'),
-              tooltip: 'Back to Reports',
+              tooltip: l10n.viewerBackToReports,
               onPressed: onLead,
               icon: const Icon(Icons.arrow_back),
             )
@@ -136,7 +139,7 @@ class ViewerAppBar extends StatelessWidget implements PreferredSizeWidget {
           key: const ValueKey('viewer-print'),
           onPressed: printEnabled ? onPrint : null,
           icon: const Icon(Icons.print, size: 18),
-          label: const Text('Print'),
+          label: Text(l10n.viewerPrint),
         ),
         MenuAnchor(
           menuChildren: [
@@ -144,34 +147,34 @@ class ViewerAppBar extends StatelessWidget implements PreferredSizeWidget {
               MenuItemButton(
                 leadingIcon: const Icon(Icons.picture_as_pdf),
                 onPressed: pdfEnabled ? onPdf : null,
-                child: const Text('Save as PDF'),
+                child: Text(l10n.viewerSaveAsPdf),
               ),
             CheckboxMenuButton(
               value: preview,
               onChanged: (value) => onPreview(value ?? false),
-              child: const Text('Print preview'),
+              child: Text(l10n.viewerPrintPreview),
             ),
             MenuItemButton(
               leadingIcon: const Icon(Icons.description_outlined),
               onPressed: onPageSetup,
-              child: const Text('Page setup…'),
+              child: Text(l10n.viewerPageSetup),
             ),
             MenuItemButton(
               leadingIcon: const Icon(Icons.restart_alt),
               onPressed: onReset,
-              child: const Text('Reset filters and options'),
+              child: Text(l10n.viewerResetFilters),
             ),
             const Divider(height: 1),
             MenuItemButton(
               leadingIcon: const Icon(Icons.print_outlined),
-              trailingIcon: const Text('Ctrl+P'),
+              trailingIcon: Text(l10n.viewerShortcutPrint),
               onPressed: printEnabled ? onPrint : null,
-              child: const Text('Print'),
+              child: Text(l10n.viewerPrint),
             ),
           ],
           builder: (context, controller, _) => IconButton(
             key: const ValueKey('viewer-overflow'),
-            tooltip: 'Page setup and more',
+            tooltip: l10n.viewerOverflowTooltip,
             onPressed: () =>
                 controller.isOpen ? controller.close() : controller.open(),
             icon: const Icon(Icons.more_vert),

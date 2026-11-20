@@ -3864,6 +3864,300 @@ abstract class AppLocalizations {
   /// **'Each printed page repeats the status in its footer.'**
   String get resultStatusHelpFooter;
 
+  /// Viewer app bar button that downloads the sheet as a PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as PDF'**
+  String get viewerSaveAsPdf;
+
+  /// Viewer app bar back button when the report was opened in place.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Reports'**
+  String get viewerBackToReports;
+
+  /// Viewer app bar primary button that prints the sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get viewerPrint;
+
+  /// Viewer app bar menu entry and panel switch that hide screen-only marks.
+  ///
+  /// In en, this message translates to:
+  /// **'Print preview'**
+  String get viewerPrintPreview;
+
+  /// Viewer app bar menu entry that opens the page setup.
+  ///
+  /// In en, this message translates to:
+  /// **'Page setup…'**
+  String get viewerPageSetup;
+
+  /// Viewer app bar menu entry that clears filters and options.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters and options'**
+  String get viewerResetFilters;
+
+  /// Keyboard shortcut shown beside the print menu entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl+P'**
+  String get viewerShortcutPrint;
+
+  /// Tooltip of the viewer app bar overflow button.
+  ///
+  /// In en, this message translates to:
+  /// **'Page setup and more'**
+  String get viewerOverflowTooltip;
+
+  /// Lead of the offline banner above the sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline.'**
+  String get viewerOffline;
+
+  /// Offline banner text when no changes are pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Produced from data on this device.'**
+  String get viewerOfflineLocalOnly;
+
+  /// Offline banner text when changes are still pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Produced from data on this device. {count} {change} not yet synced.'**
+  String viewerOfflinePending(int count, String change);
+
+  /// Offline banner action that opens the sync page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Sync'**
+  String get viewerOpenSync;
+
+  /// Heading of the viewer's Page control group.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get viewerPageGroup;
+
+  /// Label of the paper size segments.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper'**
+  String get viewerPaper;
+
+  /// Label of the page orientation segments.
+  ///
+  /// In en, this message translates to:
+  /// **'Orientation'**
+  String get viewerOrientation;
+
+  /// Help line under the orientation segments.
+  ///
+  /// In en, this message translates to:
+  /// **'This report’s default is {orientation}.'**
+  String viewerOrientationDefault(String orientation);
+
+  /// Subtitle of the print preview switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide screen-only marks and page-break labels'**
+  String get viewerHideScreenMarks;
+
+  /// Label of the pages-to-print field.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages to print'**
+  String get viewerPagesToPrint;
+
+  /// Hint of the pages-to-print field when it is blank.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count}'**
+  String viewerPagesToPrintHint(int count);
+
+  /// Helper shown when every page will print.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} {word}. Type 1 or 2-4 to print only some.'**
+  String viewerPagesToPrintAll(int count, String word);
+
+  /// Helper shown when a subset of pages will print.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total} {word} will print.'**
+  String viewerPagesToPrintSome(int count, int total, String word);
+
+  /// Compact viewer toolbar button that opens the filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get viewerFiltersButton;
+
+  /// Accessibility label of the viewer zoom controls.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom'**
+  String get viewerZoom;
+
+  /// Tooltip of the zoom out button.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom out'**
+  String get viewerZoomOut;
+
+  /// Tooltip of the zoom in button.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in'**
+  String get viewerZoomIn;
+
+  /// Accessibility label of the zoom toggle while fitting the width.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom: fit width. Switch to 100 percent.'**
+  String get viewerZoomFitSwitchTo;
+
+  /// Accessibility label of the zoom toggle at a fixed zoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom {percent}. Switch to fit width.'**
+  String viewerZoomFixedSwitchTo(String percent);
+
+  /// Zoom toggle label while fitting the width.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit · {percent}'**
+  String viewerZoomFitPrefix(String percent);
+
+  /// Default label of the viewer loading state.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading contest data…'**
+  String get viewerLoadingLabel;
+
+  /// Viewer label while a report builds its pages.
+  ///
+  /// In en, this message translates to:
+  /// **'Building pages…'**
+  String get viewerBuildingPages;
+
+  /// Title of the viewer not-found state.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest can’t be found'**
+  String get viewerNotFoundTitle;
+
+  /// Body of the viewer not-found state.
+  ///
+  /// In en, this message translates to:
+  /// **'It may have been deleted, or the link points to a contest you no longer have access to. There is nothing to print.'**
+  String get viewerNotFoundBody;
+
+  /// Not-found action when the report was opened in a new tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Contests'**
+  String get viewerBackToContests;
+
+  /// Title of the viewer unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'Can’t read the contest data'**
+  String get viewerUnavailableTitle;
+
+  /// Body of the viewer unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'The scores for this report couldn’t be loaded from this device or the server. Your filters are kept.'**
+  String get viewerUnavailableBody;
+
+  /// Action label on the viewer error states.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get viewerTryAgain;
+
+  /// Title of the viewer data-unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'Can’t read the scores for this report'**
+  String get viewerDataUnavailableTitle;
+
+  /// Body of the viewer data-unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'They couldn’t be loaded from this device or the server. Your filters are kept.'**
+  String get viewerDataUnavailableBody;
+
+  /// Accessibility label of the report sheet area.
+  ///
+  /// In en, this message translates to:
+  /// **'Report pages'**
+  String get viewerReportPages;
+
+  /// Label of the on-screen page break separator.
+  ///
+  /// In en, this message translates to:
+  /// **'Page break · Page {page}'**
+  String viewerPageBreak(int page);
+
+  /// Window title of the viewer for a named contest.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} — {name}'**
+  String viewerPageWindow(String title, String name);
+
+  /// App bar title of the viewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get viewerReportWord;
+
+  /// Accessibility label of a printed sheet page.
+  ///
+  /// In en, this message translates to:
+  /// **'{reportName}, page {page} of {count}'**
+  String viewerSheetPageLabel(String reportName, int page, int count);
+
+  /// Page number in the sheet footer.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} of {count}'**
+  String viewerPageOf(int page, int count);
+
+  /// Official stamp word in the sheet footer.
+  ///
+  /// In en, this message translates to:
+  /// **'OFFICIAL'**
+  String get viewerStatusOfficial;
+
+  /// Preliminary stamp word on the page and in the footer.
+  ///
+  /// In en, this message translates to:
+  /// **'PRELIMINARY'**
+  String get viewerStatusPreliminary;
+
+  /// Accessibility label of the result stamp.
+  ///
+  /// In en, this message translates to:
+  /// **'{text} result'**
+  String viewerResultStampSemantics(String text);
+
+  /// Second line of the preliminary result stamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Not final · scores incomplete'**
+  String get viewerStampNotFinal;
+
+  /// Subtitle of a data report that has nothing to show yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to show'**
+  String get viewerNothingToShow;
+
   /// Heading of the Settings card with the version, licences and legal links.
   ///
   /// In en, this message translates to:

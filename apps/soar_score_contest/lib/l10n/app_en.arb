@@ -3135,6 +3135,286 @@
   "@resultStatusHelpFooter": {
     "description": "Footer of the result-status popover."
   },
+  "viewerSaveAsPdf": "Save as PDF",
+  "@viewerSaveAsPdf": {
+    "description": "Viewer app bar button that downloads the sheet as a PDF."
+  },
+  "viewerBackToReports": "Back to Reports",
+  "@viewerBackToReports": {
+    "description": "Viewer app bar back button when the report was opened in place."
+  },
+  "viewerPrint": "Print",
+  "@viewerPrint": {
+    "description": "Viewer app bar primary button that prints the sheet."
+  },
+  "viewerPrintPreview": "Print preview",
+  "@viewerPrintPreview": {
+    "description": "Viewer app bar menu entry and panel switch that hide screen-only marks."
+  },
+  "viewerPageSetup": "Page setup…",
+  "@viewerPageSetup": {
+    "description": "Viewer app bar menu entry that opens the page setup."
+  },
+  "viewerResetFilters": "Reset filters and options",
+  "@viewerResetFilters": {
+    "description": "Viewer app bar menu entry that clears filters and options."
+  },
+  "viewerShortcutPrint": "Ctrl+P",
+  "@viewerShortcutPrint": {
+    "description": "Keyboard shortcut shown beside the print menu entry."
+  },
+  "viewerOverflowTooltip": "Page setup and more",
+  "@viewerOverflowTooltip": {
+    "description": "Tooltip of the viewer app bar overflow button."
+  },
+  "viewerOffline": "Offline.",
+  "@viewerOffline": {
+    "description": "Lead of the offline banner above the sheet."
+  },
+  "viewerOfflineLocalOnly": "Produced from data on this device.",
+  "@viewerOfflineLocalOnly": {
+    "description": "Offline banner text when no changes are pending."
+  },
+  "viewerOfflinePending": "Produced from data on this device. {count} {change} not yet synced.",
+  "@viewerOfflinePending": {
+    "description": "Offline banner text when changes are still pending.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerOpenSync": "Open Sync",
+  "@viewerOpenSync": {
+    "description": "Offline banner action that opens the sync page."
+  },
+  "viewerPageGroup": "Page",
+  "@viewerPageGroup": {
+    "description": "Heading of the viewer's Page control group."
+  },
+  "viewerPaper": "Paper",
+  "@viewerPaper": {
+    "description": "Label of the paper size segments."
+  },
+  "viewerOrientation": "Orientation",
+  "@viewerOrientation": {
+    "description": "Label of the page orientation segments."
+  },
+  "viewerOrientationDefault": "This report’s default is {orientation}.",
+  "@viewerOrientationDefault": {
+    "description": "Help line under the orientation segments.",
+    "placeholders": {
+      "orientation": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerHideScreenMarks": "Hide screen-only marks and page-break labels",
+  "@viewerHideScreenMarks": {
+    "description": "Subtitle of the print preview switch."
+  },
+  "viewerPagesToPrint": "Pages to print",
+  "@viewerPagesToPrint": {
+    "description": "Label of the pages-to-print field."
+  },
+  "viewerPagesToPrintHint": "All {count}",
+  "@viewerPagesToPrintHint": {
+    "description": "Hint of the pages-to-print field when it is blank.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "viewerPagesToPrintAll": "All {count} {word}. Type 1 or 2-4 to print only some.",
+  "@viewerPagesToPrintAll": {
+    "description": "Helper shown when every page will print.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerPagesToPrintSome": "{count} of {total} {word} will print.",
+  "@viewerPagesToPrintSome": {
+    "description": "Helper shown when a subset of pages will print.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerFiltersButton": "Filters",
+  "@viewerFiltersButton": {
+    "description": "Compact viewer toolbar button that opens the filters."
+  },
+  "viewerZoom": "Zoom",
+  "@viewerZoom": {
+    "description": "Accessibility label of the viewer zoom controls."
+  },
+  "viewerZoomOut": "Zoom out",
+  "@viewerZoomOut": {
+    "description": "Tooltip of the zoom out button."
+  },
+  "viewerZoomIn": "Zoom in",
+  "@viewerZoomIn": {
+    "description": "Tooltip of the zoom in button."
+  },
+  "viewerZoomFitSwitchTo": "Zoom: fit width. Switch to 100 percent.",
+  "@viewerZoomFitSwitchTo": {
+    "description": "Accessibility label of the zoom toggle while fitting the width."
+  },
+  "viewerZoomFixedSwitchTo": "Zoom {percent}. Switch to fit width.",
+  "@viewerZoomFixedSwitchTo": {
+    "description": "Accessibility label of the zoom toggle at a fixed zoom.",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerZoomFitPrefix": "Fit · {percent}",
+  "@viewerZoomFitPrefix": {
+    "description": "Zoom toggle label while fitting the width.",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerLoadingLabel": "Loading contest data…",
+  "@viewerLoadingLabel": {
+    "description": "Default label of the viewer loading state."
+  },
+  "viewerBuildingPages": "Building pages…",
+  "@viewerBuildingPages": {
+    "description": "Viewer label while a report builds its pages."
+  },
+  "viewerNotFoundTitle": "This contest can’t be found",
+  "@viewerNotFoundTitle": {
+    "description": "Title of the viewer not-found state."
+  },
+  "viewerNotFoundBody": "It may have been deleted, or the link points to a contest you no longer have access to. There is nothing to print.",
+  "@viewerNotFoundBody": {
+    "description": "Body of the viewer not-found state."
+  },
+  "viewerBackToContests": "Back to Contests",
+  "@viewerBackToContests": {
+    "description": "Not-found action when the report was opened in a new tab."
+  },
+  "viewerUnavailableTitle": "Can’t read the contest data",
+  "@viewerUnavailableTitle": {
+    "description": "Title of the viewer unavailable state."
+  },
+  "viewerUnavailableBody": "The scores for this report couldn’t be loaded from this device or the server. Your filters are kept.",
+  "@viewerUnavailableBody": {
+    "description": "Body of the viewer unavailable state."
+  },
+  "viewerTryAgain": "Try again",
+  "@viewerTryAgain": {
+    "description": "Action label on the viewer error states."
+  },
+  "viewerDataUnavailableTitle": "Can’t read the scores for this report",
+  "@viewerDataUnavailableTitle": {
+    "description": "Title of the viewer data-unavailable state."
+  },
+  "viewerDataUnavailableBody": "They couldn’t be loaded from this device or the server. Your filters are kept.",
+  "@viewerDataUnavailableBody": {
+    "description": "Body of the viewer data-unavailable state."
+  },
+  "viewerReportPages": "Report pages",
+  "@viewerReportPages": {
+    "description": "Accessibility label of the report sheet area."
+  },
+  "viewerPageBreak": "Page break · Page {page}",
+  "@viewerPageBreak": {
+    "description": "Label of the on-screen page break separator.",
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "viewerPageWindow": "{title} — {name}",
+  "@viewerPageWindow": {
+    "description": "Window title of the viewer for a named contest.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerReportWord": "Report",
+  "@viewerReportWord": {
+    "description": "App bar title of the viewer."
+  },
+  "viewerSheetPageLabel": "{reportName}, page {page} of {count}",
+  "@viewerSheetPageLabel": {
+    "description": "Accessibility label of a printed sheet page.",
+    "placeholders": {
+      "reportName": {
+        "type": "String"
+      },
+      "page": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "viewerPageOf": "Page {page} of {count}",
+  "@viewerPageOf": {
+    "description": "Page number in the sheet footer.",
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "viewerStatusOfficial": "OFFICIAL",
+  "@viewerStatusOfficial": {
+    "description": "Official stamp word in the sheet footer."
+  },
+  "viewerStatusPreliminary": "PRELIMINARY",
+  "@viewerStatusPreliminary": {
+    "description": "Preliminary stamp word on the page and in the footer."
+  },
+  "viewerResultStampSemantics": "{text} result",
+  "@viewerResultStampSemantics": {
+    "description": "Accessibility label of the result stamp.",
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "viewerStampNotFinal": "Not final · scores incomplete",
+  "@viewerStampNotFinal": {
+    "description": "Second line of the preliminary result stamp."
+  },
+  "viewerNothingToShow": "Nothing to show",
+  "@viewerNothingToShow": {
+    "description": "Subtitle of a data report that has nothing to show yet."
+  },
   "aboutHeading": "About",
   "@aboutHeading": {
     "description": "Heading of the Settings card with the version, licences and legal links."
