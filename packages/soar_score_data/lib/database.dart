@@ -170,7 +170,10 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) => createCurrentSchema(m, profileTables),
+    // One transaction: each DDL statement would otherwise commit and sync to
+    // disk by itself (about 120 times on a first run). Upgrades already run
+    // in one.
+    onCreate: (m) => transaction(() => createCurrentSchema(m, profileTables)),
     beforeOpen: (details) async {
       // SQLite ignores foreign keys unless asked; PostgreSQL always checks.
       if (executor.dialect == SqlDialect.sqlite) {
