@@ -2971,6 +2971,86 @@ class AppLocalizationsEn extends AppLocalizations {
   String get standingsReviewChipSemantic => 'Screen only. Review open.';
 
   @override
+  String matrixRoundLabel(int round) {
+    return 'Round $round';
+  }
+
+  @override
+  String matrixRoundLabelNotDrawn(int round) {
+    return 'Round $round · not drawn';
+  }
+
+  @override
+  String get matrixShowAllDrawn => 'Show all drawn rounds';
+
+  @override
+  String get matrixShowAllRounds => 'Show all rounds';
+
+  @override
+  String get matrixColumns => 'Columns';
+
+  @override
+  String get matrixCompactMode => 'Compact mode';
+
+  @override
+  String get matrixCompactHelp => 'Two columns per page, 9 pt text';
+
+  @override
+  String get matrixAdditionalInfo => 'Additional pilot info';
+
+  @override
+  String get matrixAdditionalUnavailable => 'Not available in compact mode';
+
+  @override
+  String get matrixAdditionalChosenHelp =>
+      'Adds a column for each item you tick';
+
+  @override
+  String get matrixAdditionalDefaultHelp =>
+      'Club, FAI ID and National ID columns';
+
+  @override
+  String get matrixClub => 'Club';
+
+  @override
+  String get matrixFaiId => 'FAI ID';
+
+  @override
+  String get matrixNationalId => 'National ID';
+
+  @override
+  String get matrixAdditionalKept =>
+      'Kept as set. They apply again when Compact mode is off.';
+
+  @override
+  String matrixTableLabel(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String matrixTableLabelColumn(int page, int column) {
+    return 'Page $page, column $column';
+  }
+
+  @override
+  String matrixRoundRow(int ordinal) {
+    return 'Round $ordinal';
+  }
+
+  @override
+  String get matrixContinued => ' (continued)';
+
+  @override
+  String matrixGroupRow(String label) {
+    return 'Group $label';
+  }
+
+  @override
+  String matrixGroupSize(int size, String word) {
+    return '$size $word';
+  }
+
+  @override
   String get aboutHeading => 'About';
 
   @override

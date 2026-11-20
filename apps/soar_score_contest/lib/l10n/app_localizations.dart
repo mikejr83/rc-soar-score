@@ -4662,6 +4662,132 @@ abstract class AppLocalizations {
   /// **'Screen only. Review open.'**
   String get standingsReviewChipSemantic;
 
+  /// Dropdown label of a drawn round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String matrixRoundLabel(int round);
+
+  /// Dropdown label of a round the contest has not drawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} · not drawn'**
+  String matrixRoundLabelNotDrawn(int round);
+
+  /// Button that shows every drawn round.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all drawn rounds'**
+  String get matrixShowAllDrawn;
+
+  /// Button that shows every round.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all rounds'**
+  String get matrixShowAllRounds;
+
+  /// Heading of the draw matrix column group.
+  ///
+  /// In en, this message translates to:
+  /// **'Columns'**
+  String get matrixColumns;
+
+  /// Label of the compact mode option.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact mode'**
+  String get matrixCompactMode;
+
+  /// Help for the compact mode option.
+  ///
+  /// In en, this message translates to:
+  /// **'Two columns per page, 9 pt text'**
+  String get matrixCompactHelp;
+
+  /// Label of the additional pilot info option.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional pilot info'**
+  String get matrixAdditionalInfo;
+
+  /// Help when additional pilot info is unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available in compact mode'**
+  String get matrixAdditionalUnavailable;
+
+  /// Help when additional pilot info is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a column for each item you tick'**
+  String get matrixAdditionalChosenHelp;
+
+  /// Help when additional pilot info is off.
+  ///
+  /// In en, this message translates to:
+  /// **'Club, FAI ID and National ID columns'**
+  String get matrixAdditionalDefaultHelp;
+
+  /// Label of the club column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Club'**
+  String get matrixClub;
+
+  /// Label of the FAI ID column option.
+  ///
+  /// In en, this message translates to:
+  /// **'FAI ID'**
+  String get matrixFaiId;
+
+  /// Label of the National ID column option.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID'**
+  String get matrixNationalId;
+
+  /// Note when the additional columns are kept during compact mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept as set. They apply again when Compact mode is off.'**
+  String get matrixAdditionalKept;
+
+  /// Screen-reader name of a draw matrix table on one page.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}'**
+  String matrixTableLabel(int page);
+
+  /// Screen-reader name of a table in compact mode (two per page).
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}, column {column}'**
+  String matrixTableLabelColumn(int page, int column);
+
+  /// Heading of a round row in the draw matrix.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {ordinal}'**
+  String matrixRoundRow(int ordinal);
+
+  /// Suffix of a round or group row that continues on this page.
+  ///
+  /// In en, this message translates to:
+  /// **' (continued)'**
+  String get matrixContinued;
+
+  /// Heading of a group row in the draw matrix.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {label}'**
+  String matrixGroupRow(String label);
+
+  /// Group size in the draw matrix row heading.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} {word}'**
+  String matrixGroupSize(int size, String word);
+
   /// Heading of the Settings card with the version, licences and legal links.
   ///
   /// In en, this message translates to:

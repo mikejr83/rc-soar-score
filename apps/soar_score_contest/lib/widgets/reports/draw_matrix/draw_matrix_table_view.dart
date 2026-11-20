@@ -1,9 +1,17 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_localizations_en.dart';
 import '../../../services/reports/draw_matrix/draw_matrix_columns.dart';
 import '../../../services/reports/draw_matrix/draw_matrix_layout.dart';
 import '../../../services/reports/draw_matrix/draw_matrix_style.dart';
 import '../viewer/paper_style.dart';
+
+final AppLocalizations _fallbackL10n = AppLocalizationsEn();
+
+AppLocalizations _l10nOf(BuildContext context) =>
+    Localizations.of<AppLocalizations>(context, AppLocalizations) ??
+    _fallbackL10n;
 
 /// One table of the Draw Matrix: the column headings, then the round, group and
 /// pilot rows [items] holds. Black and white: nothing depends on the shade or
@@ -37,6 +45,7 @@ class DrawMatrixTableView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = _l10nOf(context);
     final width = columns.fold(0.0, (sum, column) => sum + column.width);
     return Semantics(
       container: true,
@@ -45,7 +54,7 @@ class DrawMatrixTableView extends StatelessWidget {
         width: width,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [_headings(), for (final item in items) _row(item)],
+          children: [_headings(), for (final item in items) _row(item, l10n)],
         ),
       ),
     );
@@ -85,13 +94,13 @@ class DrawMatrixTableView extends StatelessWidget {
     );
   }
 
-  Widget _row(DrawMatrixItem item) => switch (item) {
-    DrawMatrixRoundRow() => _round(item),
-    DrawMatrixGroupRow() => _group(item),
+  Widget _row(DrawMatrixItem item, AppLocalizations l10n) => switch (item) {
+    DrawMatrixRoundRow() => _round(item, l10n),
+    DrawMatrixGroupRow() => _group(item, l10n),
     DrawMatrixPilotRow() => _pilot(item),
   };
 
-  Widget _round(DrawMatrixRoundRow row) {
+  Widget _round(DrawMatrixRoundRow row, AppLocalizations l10n) {
     final bold = _text(
       style.roundFont,
       style.roundLine,
@@ -114,12 +123,12 @@ class DrawMatrixTableView extends StatelessWidget {
             ),
             child: Text.rich(
               TextSpan(
-                text: 'Round ${row.ordinal}',
+                text: l10n.matrixRoundRow(row.ordinal),
                 children: [
                   if (row.continued)
-                    const TextSpan(
-                      text: ' (continued)',
-                      style: TextStyle(fontWeight: FontWeight.w400),
+                    TextSpan(
+                      text: l10n.matrixContinued,
+                      style: const TextStyle(fontWeight: FontWeight.w400),
                     ),
                 ],
               ),
@@ -131,7 +140,7 @@ class DrawMatrixTableView extends StatelessWidget {
     );
   }
 
-  Widget _group(DrawMatrixGroupRow row) {
+  Widget _group(DrawMatrixGroupRow row, AppLocalizations l10n) {
     final bold = _text(
       style.groupFont,
       style.groupLine,
@@ -153,12 +162,12 @@ class DrawMatrixTableView extends StatelessWidget {
           ),
           child: Text.rich(
             TextSpan(
-              text: 'Group ${row.label}',
+              text: l10n.matrixGroupRow(row.label),
               children: [
                 TextSpan(
                   text:
-                      '${row.continued ? ' (continued)' : ''} · '
-                      '${row.size} ${row.size == 1 ? 'pilot' : 'pilots'}',
+                      '${row.continued ? l10n.matrixContinued : ''} · '
+                      '${l10n.matrixGroupSize(row.size, row.size == 1 ? 'pilot' : 'pilots')}',
                   style: const TextStyle(fontWeight: FontWeight.w400),
                 ),
               ],
