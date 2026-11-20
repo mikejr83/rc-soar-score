@@ -26,6 +26,7 @@ class ConflictsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final conflicts = this.conflicts;
     return Card(
       key: const ValueKey('conflicts-card'),
@@ -40,15 +41,15 @@ class ConflictsCard extends StatelessWidget {
             Semantics(
               header: true,
               child: Text(
-                'Conflicts to decide',
+                l10n.syncConflictsToDecide,
                 style: theme.textTheme.titleLarge,
               ),
             ),
             const SizedBox(height: 8),
             if (conflicts == null)
-              const Text('Loading…')
+              Text(l10n.syncConflictsLoading)
             else if (conflicts.isEmpty)
-              const Text('None. Nothing is waiting for your decision.')
+              Text(l10n.syncConflictsNone)
             else
               for (final conflict in conflicts)
                 Padding(
@@ -72,7 +73,7 @@ class ConflictsCard extends StatelessWidget {
                       OutlinedButton(
                         key: ValueKey('conflict-review-${conflict.id}'),
                         onPressed: () => onReview(conflict),
-                        child: const Text('Review'),
+                        child: Text(l10n.syncReview),
                       ),
                     ],
                   ),

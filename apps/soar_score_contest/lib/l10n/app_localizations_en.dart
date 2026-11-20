@@ -5657,4 +5657,92 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get participantsEmailPrivate =>
       'Email (private, used for matching only)';
+
+  @override
+  String get syncWindowsOnly => 'Syncing is only used in the Windows app.';
+
+  @override
+  String get syncTitle => 'Sync';
+
+  @override
+  String get syncChecking => 'Checking…';
+
+  @override
+  String get syncLocalOnlyText =>
+      'This contest is local only. It has no remote backup and does not sync until it is tied to an account.';
+
+  @override
+  String get syncUnrecoverableWarning =>
+      'Changes made after the last successful sync cannot be recovered if this installation is lost.';
+
+  @override
+  String get syncLastSynced => 'Last synced';
+
+  @override
+  String get syncNotSyncedYet => 'Not synced yet';
+
+  @override
+  String get syncWaitingToSend => 'Waiting to be sent';
+
+  @override
+  String get syncRefusedByService => 'Refused by the service';
+
+  @override
+  String get syncConflictsToDecide => 'Conflicts to decide';
+
+  @override
+  String get syncNow => 'Sync now';
+
+  @override
+  String get syncSyncing => 'Syncing…';
+
+  @override
+  String get syncConflictsLoading => 'Loading…';
+
+  @override
+  String get syncConflictsNone => 'None. Nothing is waiting for your decision.';
+
+  @override
+  String get syncReview => 'Review';
+
+  @override
+  String get syncRefusedTitle => 'Changes the service refused';
+
+  @override
+  String get syncRefusedLoading => 'Loading…';
+
+  @override
+  String get syncRefusedNone =>
+      'None. The service accepted every change it has answered.';
+
+  @override
+  String get syncDecisionSaved => 'Decision saved.';
+
+  @override
+  String syncDecisionFailed(String problem) {
+    return 'Decision sent. The sync that follows failed ($problem), so this screen updates after the next successful sync.';
+  }
+
+  @override
+  String get syncDecideLater => 'Decide later';
+
+  @override
+  String get syncBack => 'Back';
+
+  @override
+  String get syncKeepEdited => 'Keep edited value';
+
+  @override
+  String get syncEdit => 'Edit';
+
+  @override
+  String get syncUseCompeting => 'Use competing change';
+
+  @override
+  String get syncKeepAccepted => 'Keep accepted value';
+
+  @override
+  String syncResolveTitle(String entityType) {
+    return 'Resolve $entityType conflict';
+  }
 }

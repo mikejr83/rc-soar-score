@@ -158,13 +158,14 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final conflict = widget.conflict;
     return AlertDialog(
       key: const ValueKey('conflict-dialog'),
       title: Text(
         _isLinkReview
-            ? AppLocalizations.of(context).shellNavAccountSync
-            : 'Resolve ${conflict.entityType} conflict',
+            ? l10n.shellNavAccountSync
+            : l10n.syncResolveTitle(conflict.entityType),
       ),
       content: SizedBox(
         width: 640,
@@ -225,18 +226,18 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
         TextButton(
           key: const ValueKey('conflict-close'),
           onPressed: _sending ? null : () => Navigator.of(context).pop(),
-          child: const Text('Decide later'),
+          child: Text(l10n.syncDecideLater),
         ),
         if (_editing) ...[
           TextButton(
             key: const ValueKey('conflict-edit-cancel'),
             onPressed: _sending ? null : () => setState(() => _editing = false),
-            child: const Text('Back'),
+            child: Text(l10n.syncBack),
           ),
           FilledButton(
             key: const ValueKey('conflict-edit-save'),
             onPressed: _sending ? null : _sendEdited,
-            child: const Text('Keep edited value'),
+            child: Text(l10n.syncKeepEdited),
           ),
         ] else ...[
           if (conflict.entityType != 'PilotImportLink')
@@ -245,7 +246,7 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
               onPressed: _sending
                   ? null
                   : () => setState(() => _editing = true),
-              child: const Text('Edit'),
+              child: Text(l10n.syncEdit),
             ),
           OutlinedButton(
             key: const ValueKey('conflict-take-competing'),
@@ -256,9 +257,9 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
                 ? _LinkChoiceLabel(
                     participants: _participants,
                     payload: conflict.competingPayload,
-                    label: AppLocalizations.of(context).pilotLinkReviewUse,
+                    label: l10n.pilotLinkReviewUse,
                   )
-                : const Text('Use competing change'),
+                : Text(l10n.syncUseCompeting),
           ),
           FilledButton(
             key: const ValueKey('conflict-keep-accepted'),
@@ -269,9 +270,9 @@ class _ConflictResolveDialogState extends State<ConflictResolveDialog> {
                 ? _LinkChoiceLabel(
                     participants: _participants,
                     payload: conflict.acceptedPayload,
-                    label: AppLocalizations.of(context).pilotLinkReviewKeep,
+                    label: l10n.pilotLinkReviewKeep,
                   )
-                : const Text('Keep accepted value'),
+                : Text(l10n.syncKeepAccepted),
           ),
         ],
       ],
