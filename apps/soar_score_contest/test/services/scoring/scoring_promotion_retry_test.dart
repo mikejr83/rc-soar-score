@@ -203,6 +203,64 @@ void main() {
     expect(await c.retryPromotion(_row(c, 1)), isFalse);
   });
 
+  test('a reread after a failed Mark official keeps typed text and '
+      'follows a replaced submission', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, flight);
+    final hold = server.holdPromote = Completer<void>();
+    final c = await _open(server);
+
+    final sent = c.markOfficial(_row(c, 1));
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    expect(server.promoteRequests, 1);
+    final draft = c.draftOf(_row(c, 1));
+    final shown = draft.heightText;
+    draft.setHeight('99');
+
+    // The pilot replaces the entry and a sync is applied; the row is busy,
+    // so the page keeps its copy until the request has failed.
+    server.seedPendingSubmission(first, const {
+      'time_flown': 540,
+      'launch_height': 130,
+    });
+    await c.refreshAfterSync();
+    server.promoteFailures[first] = (503, 'contest_busy');
+    hold.complete();
+    expect(await sent, isFalse);
+
+    expect(draft.heightText, '99');
+    draft.setHeight(shown);
+    expect(draft.canRevert, isTrue, reason: 'the old height is an edit now');
+    c.revert(_row(c, 1));
+    expect(c.draftOf(_row(c, 1)).heightText, '130');
+  });
+
+  test('a reread after the official score changed retargets Revert', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, flight);
+    final hold = server.holdPromote = Completer<void>();
+    final c = await _open(server);
+
+    final sent = c.markOfficial(_row(c, 1));
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    final draft = c.draftOf(_row(c, 1));
+    final shown = draft.heightText;
+    draft.setHeight('99');
+
+    // Another director enters an official score meanwhile.
+    server.seedScore(first, const {'time_flown': 540, 'launch_height': 130});
+    await c.refreshAfterSync();
+    server.promoteFailures[first] = (503, 'contest_busy');
+    hold.complete();
+    await sent;
+
+    expect(draft.heightText, '99');
+    draft.setHeight(shown);
+    expect(draft.canRevert, isTrue, reason: 'Revert restores the new score');
+    c.revert(_row(c, 1));
+    expect(c.draftOf(_row(c, 1)).heightText, '130');
+  });
+
   test('a failed catch-up read leaves Refresh, not a stale Retry', () async {
     final server = ScoringServer()..seedAutomaticScore(first, flight);
     final hold = server.holdPromote = Completer<void>();
