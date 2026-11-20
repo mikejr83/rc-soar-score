@@ -375,7 +375,7 @@ class ScoreEntryPanel extends StatelessWidget {
                       order: 11,
                       child: TextButton(
                         key: ValueKey(keyOf('revert')),
-                        onPressed: enabled && draft.isDirty
+                        onPressed: enabled && draft.canRevert
                             ? actions.onRevert
                             : null,
                         child: const Text('Revert'),

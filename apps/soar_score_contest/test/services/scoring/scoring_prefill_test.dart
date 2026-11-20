@@ -59,6 +59,25 @@ void main() {
     expect(c.unsavedCount, 0);
   });
 
+  test('discard all returns a pending and a saved row to their own starting values', () async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(first, a)
+      ..seedScore(scoringAssignmentId(1, 2), b);
+    final c = await _open(server);
+    for (final pilot in [1, 2]) {
+      c.draftOf(_row(c, pilot)).setHeight('99');
+    }
+    expect(c.unsavedCount, 2);
+
+    c.discardAll();
+
+    expect(c.unsavedCount, 0);
+    expect(c.draftOf(_row(c, 1)).heightText, '120');
+    expect(c.draftOf(_row(c, 2)).heightText, '130');
+    // The waiting submission can still be marked official.
+    expect(await c.markOfficial(_row(c, 1)), isTrue);
+  });
+
   test('an untouched pilot prefill is not unsaved', () async {
     final server = ScoringServer()..seedPendingSubmission(first, a);
     final c = await _open(server);

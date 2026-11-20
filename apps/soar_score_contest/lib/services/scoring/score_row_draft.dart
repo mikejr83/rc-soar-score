@@ -95,6 +95,12 @@ class ScoreRowDraft extends ChangeNotifier {
   /// to nothing and so compares equal to an empty row.
   bool get editedSinceLoad => _fields != _loadedFields;
 
+  /// Whether Revert has anything to undo: the fields differ from the values
+  /// the form started with (the saved score or the pilot's submission), or a
+  /// zero was confirmed since. [isDirty] compares with the saved score only,
+  /// so it stays true for an untouched pilot prefill.
+  bool get canRevert => editedSinceLoad || zeroConfirmed;
+
   /// Replaces the draft with [saved], after a save or a reload. [shown]
   /// fills the fields instead when it is given (see the constructor).
   void resetTo(Map<String, Object?> saved, {Map<String, Object?>? shown}) {

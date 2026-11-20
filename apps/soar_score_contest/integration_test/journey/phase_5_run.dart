@@ -579,6 +579,8 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await tapVisible(tester, _key('score-row-${row.id.value}'));
       final height = fieldWithKey('score-height-${row.id.value}');
       await pumpUntilFound(tester, height);
+      final submitted = tester.widget<TextField>(height).controller!.text;
+      expect(submitted, isNotEmpty, reason: "the pilot's height is shown");
       await enterIn(tester, height, '99');
       // The reason it is off is the button's tooltip, not a line of text.
       await pumpUntilFound(
@@ -593,9 +595,7 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       );
       // Revert goes back to what the row held before the edit: the pilot's
       // values, not an empty form.
-      final reverted = tester.widget<TextField>(height).controller!.text;
-      expect(reverted, isNotEmpty);
-      expect(reverted, isNot('99'));
+      expect(tester.widget<TextField>(height).controller!.text, submitted);
 
       await tapVisible(tester, mark);
       await pumpUntilGone(tester, mark);
@@ -715,6 +715,8 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await tapVisible(tester, _key('score-row-${row.id.value}'));
       final height = fieldWithKey('score-height-${row.id.value}');
       await pumpUntilFound(tester, height);
+      final submitted = tester.widget<TextField>(height).controller!.text;
+      expect(submitted, isNotEmpty, reason: "the pilot's height is shown");
       await enterIn(tester, height, '99');
       // The reason it is off is the button's tooltip, not a line of text.
       await pumpUntilFound(
@@ -729,9 +731,7 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       );
       // Revert goes back to what the row held before the edit: the pilot's
       // values, not an empty form.
-      final reverted = tester.widget<TextField>(height).controller!.text;
-      expect(reverted, isNotEmpty);
-      expect(reverted, isNot('99'));
+      expect(tester.widget<TextField>(height).controller!.text, submitted);
 
       await tapVisible(tester, mark);
       await pumpUntilGone(tester, mark);
