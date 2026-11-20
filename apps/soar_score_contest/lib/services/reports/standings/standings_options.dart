@@ -30,14 +30,11 @@ class StandingsOptions {
         filters[key] == null ? fallback : filters[key] == '1';
     final provisional =
         provisionalApplies(facts) && on('prov', defaultProvisional(facts));
-    final lastShown = provisional
-        ? facts.lastScoredRound
-        : facts.lastFullyScoredRound;
+    final lastShown = facts.standingsRoundLimit(provisional: provisional);
     final from = int.tryParse(filters['from'] ?? '') ?? 1;
-    // An unset To is the last round with any score, so the dropdown names a
-    // real round; the sheet itself never goes past [lastShown].
+    // The sheet itself never goes past [lastShown].
     final requestedTo =
-        int.tryParse(filters['to'] ?? '') ?? facts.lastScoredRound;
+        int.tryParse(filters['to'] ?? '') ?? facts.defaultStandingsRound;
     // Only rounds that can be reported count: a cancelled round has no
     // results, so the range is built from the rounds that exist.
     final ordinals = facts.roundOrdinals;
@@ -63,7 +60,7 @@ class StandingsOptions {
   }
 
   /// Provisional only means something while a round is partly scored or not
-  /// flown, and never once the contest is completed: every score is final.
+  /// flown while scoring is open. A completed contest uses stored standings.
   static bool provisionalApplies(ReportsFacts facts) =>
       !facts.isCompleted &&
       (facts.partlyScoredRounds > 0 || facts.notFlownRounds > 0);
@@ -88,8 +85,7 @@ class StandingsOptions {
   /// The last round shown, and the round rank and total are as of.
   final int to;
 
-  /// The last round the report can show: the last with any score when
-  /// Provisional is on, else the last that is fully scored.
+  /// The last round the report can show given the contest state and filters.
   final int lastShown;
   final bool provisional;
 
@@ -112,6 +108,12 @@ class StandingsOptions {
   /// Judges the range: invalid when the lower bound is above the upper one,
   /// empty when nothing in it can be shown.
   ReportCheck check(ReportsFacts facts) {
+    if (facts.isCompleted && lastShown == 0) {
+      return const ReportEmpty(
+        title: 'No standings stored yet',
+        body: 'Standings are stored when scores are saved or recalculated.',
+      );
+    }
     if (from > requestedTo) {
       return const ReportInvalid(
         'From round must be on or before To round. The sheet still shows the '
@@ -120,10 +122,14 @@ class StandingsOptions {
     }
     if (from > lastShown || rounds.isEmpty) {
       final range = from == requestedTo ? '$from' : '$from–$requestedTo';
-      final scored = facts.lastScoredRound;
+      final scored = facts.defaultStandingsRound;
       return ReportEmpty(
         title: 'No scores in rounds $range',
-        body: provisional
+        body: scored == 0
+            ? 'No scores have been entered yet.'
+            : facts.isCompleted
+            ? 'Choose a round from 1 to $scored with stored standings.'
+            : provisional
             ? 'No scores have been entered in these rounds yet. Choose rounds '
                   '1 to $scored.'
             : (facts.lastFullyScoredRound == 0

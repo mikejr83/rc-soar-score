@@ -12,15 +12,14 @@ class ResultStatusHelp extends StatelessWidget {
   static const _definitions = [
     (
       ResultStatus.official,
-      'Every round up to the last round shown is complete: each pilot has an '
-          'official score and no reviews are open. Printed pages carry no '
-          'stamp.',
+      'Entered scores are official and no reviews are open. A completed '
+          'contest can have blank flights. Printed pages carry no stamp.',
     ),
     (
       ResultStatus.preliminary,
-      'A round up to the last round shown has a missing score, a score not '
-          'yet marked official, or an open review. Every page is stamped '
-          'PRELIMINARY.',
+      'A score awaits approval or review, the standings are out of date, '
+          'or an open contest has a missing score in the rounds shown. '
+          'Every page is stamped PRELIMINARY.',
     ),
   ];
 

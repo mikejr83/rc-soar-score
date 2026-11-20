@@ -1,6 +1,10 @@
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 
+import '../support/matrix_test_support.dart';
 import '../support/scoring_test_support.dart';
 
 const _flight = {'time_flown': 540, 'launch_height': 120};
@@ -8,6 +12,32 @@ const _flight = {'time_flown': 540, 'launch_height': 120};
 Finder _key(String key) => find.byKey(ValueKey(key));
 
 void main() {
+  testWidgets('completed rows give the lock reason on hover and long press', (
+    tester,
+  ) async {
+    final server = ScoringServer(
+      contest: matrixContest(state: LifecycleState.completed),
+    );
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    const reason = 'This contest is completed. Scores cannot be entered.';
+    final message = find.text(reason);
+    final locked = find.byTooltip(reason);
+    expect(locked, findsNWidgets(2));
+    expect(message, findsOneWidget);
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: tester.getCenter(locked.first));
+    await tester.pumpAndSettle();
+    expect(message, findsNWidgets(2));
+    await mouse.removePointer();
+    await tester.pumpAndSettle();
+    expect(message, findsOneWidget);
+
+    await tester.longPress(locked.last);
+    await tester.pump();
+    expect(message, findsNWidgets(2));
+  });
+
   testWidgets('typed values say Unsaved once, with no second Not saved line', (
     tester,
   ) async {

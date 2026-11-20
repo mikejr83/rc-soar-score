@@ -32,6 +32,8 @@ void main() {
   final first = scoringAssignmentId(1, 1);
   const a = {'time_flown': 540, 'launch_height': 120};
   const b = {'time_flown': 500, 'launch_height': 130};
+  const h120 = {'time_flown': 540, 'launch_height': 120};
+  const h130 = {'time_flown': 540, 'launch_height': 130};
 
   test('an untouched pilot prefill follows a later submission', () async {
     final server = ScoringServer()..seedPendingSubmission(first, a);
@@ -45,25 +47,163 @@ void main() {
     expect(c.draftOf(_row(c, 1)).heightText, '130');
   });
 
-  test(
-    'a dismissed submission stays hidden until a newer one arrives',
-    () async {
-      final server = ScoringServer()..seedPendingSubmission(first, a);
-      final c = await _open(server);
-      expect(c.draftOf(_row(c, 1)).timeText, '9:00');
-      c.revert(_row(c, 1));
+  test('revert returns an edited pilot prefill to the pilot values', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, a);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setHeight('99');
+    expect(c.hasUnsavedInput(_row(c, 1)), isTrue);
 
-      await c.refresh();
-      expect(c.draftOf(_row(c, 1)).timeText, '');
-      expect(c.dirtyCount, 0);
+    c.revert(_row(c, 1));
 
-      server.seedPendingSubmission(first, b);
-      await c.refresh();
+    expect(c.draftOf(_row(c, 1)).timeText, '9:00');
+    expect(c.draftOf(_row(c, 1)).heightText, '120');
+    expect(c.hasUnsavedInput(_row(c, 1)), isFalse);
+    expect(c.unsavedCount, 0);
+  });
 
-      expect(c.draftOf(_row(c, 1)).timeText, '8:20');
-      expect(c.dirtyCount, 1);
-    },
-  );
+  test('discard all returns a pending and a saved row to their own starting values', () async {
+    final server = ScoringServer()
+      ..seedPendingSubmission(first, a)
+      ..seedScore(scoringAssignmentId(1, 2), b);
+    final c = await _open(server);
+    for (final pilot in [1, 2]) {
+      c.draftOf(_row(c, pilot)).setHeight('99');
+    }
+    expect(c.unsavedCount, 2);
+
+    c.discardAll();
+
+    expect(c.unsavedCount, 0);
+    expect(c.draftOf(_row(c, 1)).heightText, '120');
+    expect(c.draftOf(_row(c, 2)).heightText, '130');
+    // The waiting submission can still be marked official.
+    expect(await c.markOfficial(_row(c, 1)), isTrue);
+  });
+
+  test('refresh moves what Revert compares to and restores', () async {
+    final server = ScoringServer()..seedScore(first, h120);
+    final c = await _open(server);
+    final draft = c.draftOf(_row(c, 1));
+    draft.setHeight('99');
+    expect(draft.canRevert, isTrue);
+
+    server.seedCorrection(first, h130, 'Corrected elsewhere');
+    await c.refresh();
+
+    // What was typed stays; the saved values are the newer ones.
+    expect(draft.heightText, '99');
+    expect(draft.canRevert, isTrue);
+    draft.setHeight('120');
+    expect(draft.canRevert, isTrue);
+    draft.setHeight('130');
+    expect(draft.canRevert, isFalse);
+    draft.setHeight('99');
+    c.revert(_row(c, 1));
+    expect(c.draftOf(_row(c, 1)).heightText, '130');
+    expect(c.draftOf(_row(c, 1)).canRevert, isFalse);
+  });
+
+  test('refresh after another director made the entry official', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, h120);
+    final c = await _open(server);
+    final draft = c.draftOf(_row(c, 1));
+    draft.setHeight('99');
+
+    server.seedScore(first, h130);
+    await c.refresh();
+
+    expect(draft.heightText, '99');
+    expect(draft.canRevert, isTrue);
+    draft.setHeight('130');
+    expect(draft.canRevert, isFalse);
+    draft.setHeight('99');
+    c.revert(_row(c, 1));
+    expect(c.draftOf(_row(c, 1)).heightText, '130');
+    expect(_row(c, 1).savedComponents, isNotEmpty);
+  });
+
+  test('refresh keeps a newer pilot submission recognizable', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, h120);
+    final c = await _open(server);
+    final draft = c.draftOf(_row(c, 1));
+    draft.setHeight('99');
+
+    server.seedPendingSubmission(first, h130);
+    await c.refresh();
+
+    // The director's text stays and still differs from the submission.
+    expect(draft.heightText, '99');
+    expect(c.hasUnsavedInput(_row(c, 1)), isTrue);
+    expect(c.markOfficialSkip(_row(c, 1)), isNotNull);
+
+    // Typing the submitted values back leaves an untouched prefill.
+    draft.setHeight('130');
+    expect(draft.canRevert, isFalse);
+    expect(c.hasUnsavedInput(_row(c, 1)), isFalse);
+    expect(c.markOfficialSkip(_row(c, 1)), isNull);
+    expect(await c.markOfficial(_row(c, 1)), isTrue);
+    expect(server.entries, isEmpty);
+  });
+
+  test('a newer submission after a sync is adopted by Mark official '
+      'only after Revert shows it', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, h120);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setHeight('99');
+
+    server.seedPendingSubmission(first, h130);
+    await c.refreshAfterSync();
+
+    expect(c.draftOf(_row(c, 1)).heightText, '99');
+    expect(c.markOfficialSkip(_row(c, 1)), isNotNull);
+
+    // Typing the old height back is still an edit: Revert shows 130.
+    c.draftOf(_row(c, 1)).setHeight('120');
+    expect(c.draftOf(_row(c, 1)).canRevert, isTrue);
+    expect(c.markOfficialSkip(_row(c, 1)), isNotNull);
+
+    c.revert(_row(c, 1));
+    expect(c.draftOf(_row(c, 1)).heightText, '130');
+    expect(c.markOfficialSkip(_row(c, 1)), isNull);
+    expect(await c.markOfficial(_row(c, 1)), isTrue);
+  });
+
+  test('a sync that advances the official revision keeps typed text '
+      'and marks the row stale', () async {
+    final server = ScoringServer()..seedScore(first, h120);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setHeight('99');
+
+    server.seedCorrection(first, h130, 'Corrected elsewhere');
+    await c.refreshAfterSync();
+
+    expect(c.draftOf(_row(c, 1)).heightText, '99');
+    expect(c.saveOf(first).kind, RowSaveKind.stale);
+    expect(c.theirsOf(first), h130);
+
+    // Revert goes to the newer values, so typing the old value is an edit.
+    c.draftOf(_row(c, 1)).setHeight('120');
+    expect(c.draftOf(_row(c, 1)).canRevert, isTrue);
+    c.draftOf(_row(c, 1)).setHeight('130');
+    expect(c.draftOf(_row(c, 1)).canRevert, isFalse);
+  });
+
+  test('a second sync leaves a stale row\'s baseline alone', () async {
+    final server = ScoringServer()..seedScore(first, h120);
+    final c = await _open(server);
+    c.draftOf(_row(c, 1)).setHeight('99');
+    server.seedCorrection(first, h130, 'Corrected elsewhere');
+    await c.refreshAfterSync();
+    expect(c.saveOf(first).kind, RowSaveKind.stale);
+
+    await c.refreshAfterSync();
+
+    expect(c.saveOf(first).kind, RowSaveKind.stale);
+    expect(c.draftOf(_row(c, 1)).heightText, '99');
+    expect(c.theirsOf(first), h130);
+    c.draftOf(_row(c, 1)).setHeight('130');
+    expect(c.draftOf(_row(c, 1)).canRevert, isFalse);
+  });
 
   test('an untouched pilot prefill is not unsaved', () async {
     final server = ScoringServer()..seedPendingSubmission(first, a);
@@ -227,37 +367,25 @@ void main() {
   for (final inReview in [false, true]) {
     final state = inReview ? 'InReview' : 'Submitted';
 
-    test(
-      'revert clears a $state prefill and a reload keeps it cleared',
-      () async {
-        final server = ScoringServer()
-          ..seedPendingSubmission(first, a, inReview: inReview);
-        final c = await _open(server);
-        expect(c.draftOf(_row(c, 1)).timeText, '9:00');
-        expect(c.dirtyCount, 1);
-
-        c.revert(_row(c, 1));
-        expect(c.draftOf(_row(c, 1)).timeText, '');
-        expect(c.dirtyCount, 0);
-
-        await c.refresh();
-        expect(c.draftOf(_row(c, 1)).timeText, '');
-        expect(c.dirtyCount, 0);
-        expect(_row(c, 1).status, RowStatus.submitted);
-      },
-    );
-
-    test('discard all clears a $state prefill', () async {
+    test('revert and discard all restore a $state prefill', () async {
       final server = ScoringServer()
         ..seedPendingSubmission(first, a, inReview: inReview);
       final c = await _open(server);
+      c.draftOf(_row(c, 1)).setHeight('99');
+
+      c.revert(_row(c, 1));
       expect(c.draftOf(_row(c, 1)).timeText, '9:00');
-      expect(c.dirtyCount, 1);
+      expect(c.draftOf(_row(c, 1)).heightText, '120');
+      expect(c.hasUnsavedInput(_row(c, 1)), isFalse);
 
+      c.draftOf(_row(c, 1)).setHeight('99');
       c.discardAll();
+      expect(c.draftOf(_row(c, 1)).heightText, '120');
+      expect(c.hasUnsavedInput(_row(c, 1)), isFalse);
 
-      expect(c.draftOf(_row(c, 1)).timeText, '');
-      expect(c.dirtyCount, 0);
+      await c.refresh();
+      expect(c.draftOf(_row(c, 1)).heightText, '120');
+      expect(_row(c, 1).status, RowStatus.submitted);
     });
 
     test('save all makes an untouched $state prefill official', () async {

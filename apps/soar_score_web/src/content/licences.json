@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "inputs": {
-    "pubspec.lock": "4095c7c7b52aa334",
-    "apps/soar_score_web/package-lock.json": "e6df44d8ff8dbdad",
+    "pubspec.lock": "e966a014881a9ac2",
+    "apps/soar_score_web/package-lock.json": "0a4a6e047036ac6d",
     "scripts/licence-overrides.json": "ae8995a315f7f5ab"
   },
   "products": [
@@ -2438,9 +2438,9 @@
         },
         {
           "name": "@next/env",
-          "version": "16.4.3",
+          "version": "16.4.6",
           "license": "MIT",
-          "homepage": "https://www.npmjs.com/package/@next/env/v/16.4.3",
+          "homepage": "https://www.npmjs.com/package/@next/env/v/16.4.6",
           "source": "npm",
           "texts": [
             77
@@ -2448,9 +2448,9 @@
         },
         {
           "name": "@next/swc-linux-x64-gnu",
-          "version": "16.4.3",
+          "version": "16.4.6",
           "license": "MIT",
-          "homepage": "https://www.npmjs.com/package/@next/swc-linux-x64-gnu/v/16.4.3",
+          "homepage": "https://www.npmjs.com/package/@next/swc-linux-x64-gnu/v/16.4.6",
           "source": "npm",
           "texts": [
             77
@@ -2530,9 +2530,9 @@
         },
         {
           "name": "next",
-          "version": "16.4.3",
+          "version": "16.4.6",
           "license": "MIT",
-          "homepage": "https://www.npmjs.com/package/next/v/16.4.3",
+          "homepage": "https://www.npmjs.com/package/next/v/16.4.6",
           "source": "npm",
           "direct": true,
           "texts": [

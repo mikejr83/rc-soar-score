@@ -218,6 +218,16 @@ class ScoringController extends ChangeNotifier {
           RowSaveKind.stale,
           message: 'This row changed since you opened it.',
         );
+        // Revert goes to the newer values, so it compares to them.
+        draft.retarget(_shown(row));
+      } else if (saveOf(row.id).kind == RowSaveKind.stale) {
+        // Already marked stale: the baseline stays where the banner put it.
+        draft.retarget(_shown(row));
+      } else {
+        // Same official score: a pilot may have replaced the waiting
+        // submission. What was typed stays; Revert and the prefill follow
+        // the row as it is now.
+        draft.rebase(row.savedComponents, shown: _shown(row));
       }
     }
     _syncReads++;
@@ -280,27 +290,10 @@ class ScoringController extends ChangeNotifier {
     return _drafts[row.id] = draft;
   }
 
-  /// The pilot submission (attempt id) the director discarded or reverted, by
-  /// row: the form shows what is saved instead of that submission. A different
-  /// attempt, which means a newer submission, fills the form again.
-  final Map<Id, Id> _prefillDismissed = {};
-
-  void _dismissPrefill(ScoringRow row) {
-    final attempt = row.slot?.pendingAttempt;
-    if (row.hasPendingSubmission && attempt != null) {
-      _prefillDismissed[row.id] = attempt.id;
-    }
-  }
-
-  /// What [row]'s form starts with.
-  Map<String, Object?> _shown(ScoringRow row) {
-    final dismissed = _prefillDismissed[row.id];
-    if (dismissed != null && dismissed == row.slot?.pendingAttempt?.id) {
-      return row.savedComponents;
-    }
-    _prefillDismissed.remove(row.id);
-    return row.formComponents;
-  }
+  /// What [row]'s form starts with: the saved score, else the pilot's
+  /// waiting submission. Revert and discard return to this, the state the
+  /// director started from.
+  Map<String, Object?> _shown(ScoringRow row) => row.formComponents;
 
   RowSave saveOf(Id id) => _saves[id] ?? RowSave.idle;
 
@@ -401,7 +394,6 @@ class ScoringController extends ChangeNotifier {
   }
 
   void discardAll() {
-    rows.forEach(_dismissPrefill);
     _drafts.clear();
     _saves.clear();
     _seedUnreadSaves();
@@ -412,7 +404,8 @@ class ScoringController extends ChangeNotifier {
 
   /// Puts one row back to what is saved.
   void revert(ScoringRow row) {
-    _dismissPrefill(row);
+    // The row as it is now, not as the caller last saw it.
+    row = _rowOf(row.id) ?? row;
     _drafts[row.id]?.resetTo(row.savedComponents, shown: _shown(row));
     _saves.remove(row.id);
     _theirs.remove(row.id);
@@ -792,7 +785,6 @@ class ScoringController extends ChangeNotifier {
   /// Drops the typed values and shows the newer revision.
   void takeTheirs(ScoringRow row) {
     final fresh = rows.firstWhere((r) => r.id == row.id, orElse: () => row);
-    _prefillDismissed.remove(row.id);
     _drafts[row.id]?.resetTo(
       fresh.savedComponents,
       shown: fresh.formComponents,
@@ -820,7 +812,7 @@ class ScoringController extends ChangeNotifier {
         // An untouched form follows the reload (a pilot may have submitted
         // since); what the director typed stays.
         if (hasUnsavedInput(row)) {
-          draft.rebase(row.savedComponents);
+          draft.rebase(row.savedComponents, shown: _shown(row));
         } else {
           draft.resetTo(row.savedComponents, shown: _shown(row));
         }
@@ -1458,6 +1450,7 @@ class ScoringController extends ChangeNotifier {
       final versions = {for (final id in ids) id: _slotVersion(id)};
       final fresh = await client.scores(contestId);
       final applied = <Id>{};
+      final revisions = {for (final row in stale) row.id: row.baseRevision};
       for (final slot in fresh.slots) {
         final id = slot.placeholder.assignmentId;
         if (!ids.contains(id)) continue;
@@ -1470,7 +1463,18 @@ class ScoringController extends ChangeNotifier {
         applied.add(id);
       }
       for (final row in rows) {
-        if (!applied.contains(row.id) || hasEdits(row)) continue;
+        if (!applied.contains(row.id)) continue;
+        if (hasEdits(row)) {
+          // Typed text stays. Under the same official score a pilot may have
+          // replaced the waiting submission, which Revert follows.
+          if (revisions[row.id] == row.baseRevision) {
+            _drafts[row.id]?.rebase(row.savedComponents, shown: _shown(row));
+          } else {
+            // The official score moved on: Revert goes to the newer values.
+            _drafts[row.id]?.retarget(_shown(row));
+          }
+          continue;
+        }
         _drafts[row.id]?.resetTo(row.savedComponents, shown: _shown(row));
       }
       return true;

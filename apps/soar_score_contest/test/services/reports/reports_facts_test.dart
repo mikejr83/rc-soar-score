@@ -1,9 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/services/reports/csv_export/score_export_options.dart';
 import 'package:soar_score_contest/services/reports/reports_facts.dart';
+import 'package:soar_score_contest/services/reports/result_status.dart';
+import 'package:soar_score_contest/services/reports/standings/standings_options.dart';
 import 'package:soar_score_contest/services/workspace/workspace_facts.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../support/matrix_test_support.dart';
+import '../../support/standings_fixtures.dart';
 import '../../support/workspace_facts_support.dart';
 
 Map<(int, int), DateTime> _scored({int minuteOffset = 0}) => {
@@ -21,6 +25,36 @@ ReportsFacts _facts(ContestScores scores, CurrentMatrix matrix) {
 }
 
 void main() {
+  test('a pending-only last round keeps standings at the prior snapshot', () {
+    final fixture = StandingsFixture(
+      trailingScore: ScorePlaceholderState.submitted,
+    );
+    final facts = factsOf(fixture, state: LifecycleState.completed);
+
+    expect(facts.lastScoredRound, 2);
+    expect(facts.lastStoredStandingsRound, 1);
+    expect(facts.resultStatus, ResultStatus.preliminary);
+    expect(facts.standing.missingByRound, {2: 3});
+    expect(facts.standing.unofficialByRound, {2: 1});
+    expect(StandingsOptions.of(const {}, facts).requestedTo, 1);
+    expect(ScoreExportOptions.of(const {}, facts).requestedTo, 1);
+  });
+
+  test('recalculation at the same round changes the refresh fingerprint', () {
+    final fixture = StandingsFixture(
+      trailingScore: ScorePlaceholderState.official,
+    )..setStandingsStale(2, true);
+    final before = factsOf(fixture, state: LifecycleState.completed);
+    fixture.setStandingsStale(2, false);
+    final after = factsOf(fixture, state: LifecycleState.completed);
+
+    expect(before.lastStoredStandingsRound, after.lastStoredStandingsRound);
+    expect(before.standing.missingByRound, after.standing.missingByRound);
+    expect(before.resultStatus, ResultStatus.preliminary);
+    expect(after.resultStatus, ResultStatus.official);
+    expect(before.fingerprint, isNot(after.fingerprint));
+  });
+
   group('fingerprint', () {
     final matrix = drawnMatrix();
 

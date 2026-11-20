@@ -9,6 +9,8 @@ import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/pages/contest/report_viewer_page.dart';
 import 'package:soar_score_contest/services/reports/report_kind.dart';
 import 'package:soar_score_contest/services/reports/viewer/report_view_params.dart';
+import 'package:soar_score_contest/widgets/reports/standings/standings_table_view.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/matrix_test_support.dart';
 import '../support/standings_fixtures.dart';
@@ -145,6 +147,161 @@ void main() {
     await _pump(tester, server);
     expect(_text('PRELIMINARY'), findsWidgets);
     expect(find.textContaining('Preliminary:'), findsOneWidget);
+  });
+
+  testWidgets(
+    'a completed contest with a pending-only round shows its available standings',
+    (tester) async {
+      fixture = StandingsFixture(
+        trailingScore: ScorePlaceholderState.submitted,
+      );
+      server = StandingsServer(fixture, state: LifecycleState.completed);
+      await _pump(tester, server);
+
+      expect(_text('R1'), findsOneWidget);
+      expect(_text('R2'), findsNothing);
+      expect(_text('PRELIMINARY'), findsWidgets);
+      expect(
+        find.textContaining('1 score is awaiting approval'),
+        findsOneWidget,
+      );
+      expect(
+        server.requests
+            .where((uri) => uri.path.endsWith('/results'))
+            .map((uri) => uri.queryParameters['asOfRound']),
+        [null, '1'],
+      );
+    },
+  );
+
+  testWidgets(
+    'a trailing flight in review keeps completed standings preliminary',
+    (tester) async {
+      fixture = StandingsFixture(trailingScore: ScorePlaceholderState.inReview);
+      server = StandingsServer(fixture, state: LifecycleState.completed);
+      await _pump(tester, server);
+
+      expect(_text('R1'), findsOneWidget);
+      expect(_text('R2'), findsNothing);
+      expect(_text('PRELIMINARY'), findsWidgets);
+      expect(
+        find.textContaining('1 pilot has a score in review'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets('a completed contest without any saved standings says so', (
+    tester,
+  ) async {
+    fixture.standings.clear();
+    server = StandingsServer(fixture, state: LifecycleState.completed);
+    await _pump(tester, server);
+
+    expect(_text('No standings stored yet'), findsWidgets);
+    expect(_text('Rank'), findsNothing);
+  });
+
+  for (final stale in [false, true]) {
+    testWidgets('completed standings show missing flights with stale=$stale', (
+      tester,
+    ) async {
+      fixture = StandingsFixture(preliminary: true);
+      final firstRound = fixture.roundResults[1]!;
+      fixture.roundResults[1] = RoundResults(
+        ordinal: 1,
+        flights: firstRound.flights.where(
+          (flight) => flight.participationId != participationId(4),
+        ),
+      );
+      final standings = fixture.standings[2]!;
+      fixture.standings[2] = ContestResults(
+        asOfRound: 2,
+        isStale: stale,
+        standings: standings.standings,
+      );
+      server = StandingsServer(
+        fixture,
+        state: LifecycleState.completed,
+        scores: scoresFor(fixture.matrix, {
+          for (var pilot = 1; pilot <= 3; pilot++) (1, pilot): at(pilot),
+          for (var pilot = 1; pilot <= 4; pilot++) (2, pilot): at(10 + pilot),
+        }),
+      );
+
+      await _pump(tester, server);
+
+      expect(_text('R2'), findsOneWidget);
+      expect(
+        find.widgetWithText(CheckboxListTile, 'Provisional'),
+        findsNothing,
+      );
+      final table = tester
+          .widget<StandingsTableView>(find.byType(StandingsTableView))
+          .table;
+      final pilot = table.rows.singleWhere(
+        (row) => row.pilot.participationId == participationId(4),
+      );
+      expect(pilot.cells[1]!.score, isNull);
+      if (stale) {
+        expect(_text('PRELIMINARY'), findsWidgets);
+        expect(find.textContaining('before the latest change'), findsOneWidget);
+      } else {
+        expect(_text('PRELIMINARY'), findsNothing);
+        expect(find.textContaining('Official.'), findsOneWidget);
+        expect(
+          find.textContaining('1 flight has no recorded score through round 2'),
+          findsOneWidget,
+        );
+      }
+    });
+  }
+
+  testWidgets('a completed fresh snapshot with no pending scores is official', (
+    tester,
+  ) async {
+    // The viewer and the Reports card share one rule: completion closes
+    // scoring, so only stale standings or unresolved scores keep it
+    // preliminary, whatever flag the stored snapshot carries.
+    fixture = StandingsFixture(preliminary: true);
+    server = StandingsServer(
+      fixture,
+      state: LifecycleState.completed,
+      scores: scoresFor(fixture.matrix, {
+        for (var round = 1; round <= 2; round++)
+          for (var pilot = 1; pilot <= 4; pilot++)
+            (round, pilot): at(round * 10 + pilot),
+      }),
+    );
+
+    await _pump(tester, server);
+
+    expect(_text('PRELIMINARY'), findsNothing);
+  });
+
+  testWidgets('refresh catches recalculation at the same completed round', (
+    tester,
+  ) async {
+    fixture = StandingsFixture(trailingScore: ScorePlaceholderState.official)
+      ..setStandingsStale(2, true);
+    server = StandingsServer(fixture, state: LifecycleState.completed);
+    await _pump(tester, server, pollInterval: const Duration(seconds: 1));
+    expect(_text('R2 partial'), findsOneWidget);
+    expect(_text('PRELIMINARY'), findsWidgets);
+
+    fixture.setStandingsStale(2, false);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('viewer-refresh')));
+    await tester.pumpAndSettle();
+
+    expect(_text('R2 partial'), findsOneWidget);
+    expect(_text('PRELIMINARY'), findsNothing);
+    expect(find.textContaining('Official.'), findsOneWidget);
+    expect(
+      find.textContaining('3 flights have no recorded score'),
+      findsOneWidget,
+    );
   });
 
   group('options', () {

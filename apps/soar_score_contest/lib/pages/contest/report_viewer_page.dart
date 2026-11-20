@@ -448,7 +448,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
           lead: 'Official.',
           text:
               document?.statusReason ??
-              'Every score is official, no reviews are open, and the '
+              'Every recorded score is official, no reviews are open, and the '
                   'standings are current. Printed pages carry no stamp.',
         ),
       );

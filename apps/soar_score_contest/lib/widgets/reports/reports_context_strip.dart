@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../services/reports/reports_facts.dart';
+import '../../services/reports/result_status.dart';
 import '../contest_status_chip.dart';
 import 'reports_offline_note.dart';
 import 'result_status_chip.dart';
@@ -59,7 +60,9 @@ class ReportsContextStrip extends StatelessWidget {
                       key: const ValueKey('reports-fact-lifecycle'),
                       icon: completed ? Icons.task_alt : Icons.flag_outlined,
                       label: 'Lifecycle',
-                      value: completed
+                      value:
+                          completed &&
+                              facts.resultStatus == ResultStatus.official
                           ? 'Completed · Results are final'
                           : ContestStatusChip.label(
                               AppLocalizations.of(context),

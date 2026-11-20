@@ -6,9 +6,8 @@ import 'standings_report_data.dart';
 
 /// Whether the standings the sheet shows are official, and if not, why.
 ///
-/// The stored standings carry their own flags: preliminary while a score
-/// counted is missing or in review, and stale after a change to the
-/// configuration, matrix or calculation. Either makes the sheet Preliminary.
+/// The stored standings carry preliminary and stale flags. Completion closes
+/// scoring, so blank flights alone do not make the sheet preliminary.
 class StandingsStatus {
   const StandingsStatus({required this.status, this.reason, this.action});
 
@@ -18,14 +17,30 @@ class StandingsStatus {
     StandingsReportData data,
   ) {
     final results = data.results;
-    if (!results.isPreliminary) {
-      return const StandingsStatus(status: ResultStatus.official);
-    }
     final standing = facts.standing;
     final missing = [
       for (final entry in standing.missingByRound.entries)
         if (entry.key <= options.to) entry,
     ]..sort((a, b) => a.key.compareTo(b.key));
+    // A completed report can end before the last entered round when that
+    // round has only pending scores. Those still affect its status.
+    final through = facts.isCompleted ? facts.lastScoredRound : options.to;
+    final unofficialByRound = standing.unofficialByRound.entries.where(
+      (entry) => entry.key <= through,
+    );
+    final unofficial = unofficialByRound.fold<int>(
+      0,
+      (sum, entry) => sum + entry.value,
+    );
+    // Completion closes scoring, so a completed contest is official unless the
+    // stored standings are stale or a score is still unresolved. This is the
+    // same rule as the Reports card (`ReportsFacts.resultStatus`).
+    final official = facts.isCompleted
+        ? !results.isStale && unofficial == 0
+        : !results.isPreliminary;
+    if (official) {
+      return const StandingsStatus(status: ResultStatus.official);
+    }
     final parts = <String>[];
     for (final entry in missing.take(2)) {
       final count = entry.value;
@@ -38,7 +53,7 @@ class StandingsStatus {
       parts.add('${missing.length - 2} more rounds are missing scores');
     }
     final review = facts.inReviewByRound.entries
-        .where((entry) => entry.key <= options.to)
+        .where((entry) => entry.key <= through)
         .fold<int>(0, (sum, entry) => sum + entry.value.length);
     if (review > 0) {
       parts.add(
@@ -46,12 +61,22 @@ class StandingsStatus {
         'in review',
       );
     }
+    final submitted = unofficial - review;
+    if (facts.isCompleted && submitted > 0) {
+      parts.add(
+        '$submitted ${submitted == 1 ? 'score is' : 'scores are'} '
+        'awaiting approval',
+      );
+    }
+    if (results.isStale) {
+      parts.add(
+        'these results were calculated before the latest change to the '
+        'scores, the configuration or the matrix',
+      );
+    }
     final String reason;
     if (parts.isEmpty) {
-      reason = results.isStale
-          ? 'these results were calculated before the latest change to the '
-                'scores, the configuration or the matrix.'
-          : 'some scores are not final yet.';
+      reason = 'some scores are not final yet.';
     } else {
       final hint =
           options.provisional &&
@@ -68,7 +93,9 @@ class StandingsStatus {
       action: ReportAction(
         'Open Scoring',
         ReportDestination.scoring,
-        round: missing.isEmpty ? null : missing.first.key,
+        round: missing.isNotEmpty
+            ? missing.first.key
+            : unofficialByRound.firstOrNull?.key,
       ),
     );
   }

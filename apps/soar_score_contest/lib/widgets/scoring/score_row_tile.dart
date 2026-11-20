@@ -907,8 +907,6 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         ),
       if (widget.findings.isNotEmpty)
         (Icons.help_outline, 'Check: ${widget.findings.length}', colors.warn),
-      if (widget.row.isLocked && widget.block != null)
-        (Icons.lock, widget.block!.message, null),
       if (widget.row.isAdoptionPending)
         (
           Icons.cloud_upload_outlined,
@@ -924,16 +922,22 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           null,
         ),
     ];
+    final status = widget.row.status;
+    final chip = RowStatusChip(
+      status: status,
+      unsaved: dirty,
+      automatic: widget.row.isAutomaticUnconfirmed,
+    );
+    final lockReason = widget.block?.message;
     return Padding(
       padding: EdgeInsets.only(top: _cellTop),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RowStatusChip(
-            status: widget.row.status,
-            unsaved: dirty,
-            automatic: widget.row.isAutomaticUnconfirmed,
-          ),
+          if (widget.row.isLocked && !dirty && lockReason != null)
+            Tooltip(message: lockReason, child: chip)
+          else
+            chip,
           _markOfficial(context),
           for (final (icon, text, color) in subs)
             Padding(

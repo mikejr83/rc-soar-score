@@ -28,14 +28,10 @@ class ScoreExportOptions {
         filters[key] == null ? fallback : filters[key] == '1';
     final provisional =
         provisionalApplies(facts) && on('prov', defaultProvisional(facts));
-    // The last round the export can show: the last with any score when
-    // Provisional is on, else the last that is fully scored.
-    final lastShown = provisional
-        ? facts.lastScoredRound
-        : facts.lastFullyScoredRound;
+    final lastShown = facts.standingsRoundLimit(provisional: provisional);
     final from = int.tryParse(filters['from'] ?? '') ?? 1;
     final requestedTo =
-        int.tryParse(filters['to'] ?? '') ?? facts.lastScoredRound;
+        int.tryParse(filters['to'] ?? '') ?? facts.defaultStandingsRound;
     final ordinals = facts.roundOrdinals;
     final cap = requestedTo < lastShown ? requestedTo : lastShown;
     final to = ordinals.where((round) => round <= cap).fold(0, math.max);
@@ -104,6 +100,9 @@ class ScoreExportOptions {
 
   /// The reason the range cannot be exported, or null when it can.
   String? check() {
+    if (lastShown == 0 && requestedTo == 0) {
+      return 'No standings are stored for the requested rounds.';
+    }
     if (from > to || rounds.isEmpty) {
       final range = from == requestedTo ? '$from' : '$from–$requestedTo';
       return 'No rounds to export: nothing is scored in rounds $range.';
