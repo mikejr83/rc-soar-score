@@ -79,6 +79,10 @@ final _logger = Logger('Handler');
 /// `promote_score` intent (an installation whose contest syncs) or adopts the
 /// submission directly; the default always adopts.
 ///
+/// [supportHandler], when provided, serves `POST /public/support` (the public
+/// support form). Only the hosted server wires it; the embedded instance
+/// omits it, so the route answers 404.
+///
 /// [corsAllowedOrigins] are the exact browser origins (for example
 /// `http://127.0.0.1:8091`) allowed to call the API cross-origin. Empty, the
 /// default, adds no CORS headers.
@@ -99,6 +103,7 @@ Handler buildApiHandler({
   String? trustedProxySecret,
   String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
   PromotionIntentPolicy? promotionIntents,
+  Handler? supportHandler,
 }) {
   final handlers = createHandlers(
     name,
@@ -132,7 +137,13 @@ Handler buildApiHandler({
     ..mount('/', handlers.healthHandler)
     // Before `/api/v1`, so these routes keep the DTO paths but answer to
     // their own guest session instead of the account sign-in.
-    ..mount('/api/v1/self-scoring', handlers.participantHandler)
+    ..mount('/api/v1/self-scoring', handlers.participantHandler);
+  if (supportHandler != null) {
+    // Anonymous, outside the Auth0 subtree. Registered before `/public`
+    // so the publication router never sees it.
+    app.post('/public/support', supportHandler);
+  }
+  app
     ..mount('/api/v1', api)
     ..mount('/public', handlers.publicHandler);
 

@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:soar_score_data/soar_score_data.dart';
 
 import 'config_exception.dart';
+import 'support_config.dart';
 
 import 'package:soar_score_core/config/log_format.dart';
 
@@ -37,6 +38,7 @@ class ServerConfig {
     this.selfScoringBaseUrl,
     this.trustedProxySecret,
     this.logStatementDurations = false,
+    this.support,
   });
 
   /// The variables [ServerConfig.parse] reads.
@@ -51,6 +53,7 @@ class ServerConfig {
     'SELF_SCORING_BASE_URL',
     'TRUSTED_PROXY_SECRET',
     'LOG_DB_STATEMENT_DURATIONS',
+    ...SupportConfig.environmentKeys,
     'DATABASE_URL',
     'POSTGRES_PASSWORD',
     'POSTGRES_HOST',
@@ -86,6 +89,10 @@ class ServerConfig {
 
   /// Whether each database statement's duration is logged (off by default).
   final bool logStatementDurations;
+
+  /// The public support endpoint's settings, or null when it is disabled
+  /// (see [SupportConfig.parse]). Disabling never stops the server.
+  final SupportConfig? support;
 
   /// Parses [environment].
   ///
@@ -265,6 +272,7 @@ class ServerConfig {
       selfScoringBaseUrl: selfScoring,
       trustedProxySecret: proxySecret,
       logStatementDurations: logStatementDurations,
+      support: SupportConfig.parse(environment),
     );
   }
 

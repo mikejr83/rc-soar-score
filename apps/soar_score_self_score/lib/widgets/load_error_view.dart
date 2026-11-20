@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../public_site.dart';
+
 /// A page that could not load: icon and words, and a way to try again.
 class LoadErrorView extends StatelessWidget {
   const LoadErrorView({
@@ -7,6 +9,9 @@ class LoadErrorView extends StatelessWidget {
     required this.onRetry,
     this.actionLabel = 'Retry',
     this.actionIcon = Icons.refresh,
+    this.supportUri,
+    this.supportLabel = 'Get support',
+    this.opener = openInBrowser,
     super.key,
   });
 
@@ -16,6 +21,12 @@ class LoadErrorView extends StatelessWidget {
   /// What the button says and shows. Retry unless the page cannot be retried.
   final String actionLabel;
   final IconData actionIcon;
+
+  /// When set, a secondary action opens this page (the public support form)
+  /// through [opener]; [supportLabel] names it.
+  final Uri? supportUri;
+  final String supportLabel;
+  final UrlOpener opener;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +58,17 @@ class LoadErrorView extends StatelessWidget {
               icon: Icon(actionIcon),
               label: Text(actionLabel),
             ),
+            if (supportUri case final uri?) ...[
+              const SizedBox(height: 8),
+              TextButton.icon(
+                key: const ValueKey('load-error-support'),
+                style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+                onPressed: () =>
+                    openLinkOrExplain(context, uri, opener: opener),
+                icon: const Icon(Icons.help_outline),
+                label: Text(supportLabel),
+              ),
+            ],
           ],
         ),
       ),

@@ -31,6 +31,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get licencesInThisAppLink => 'Licences in this app';
 
   @override
+  String get supportLink => 'Get support';
+
+  @override
   String get privacyPolicyLink => 'Privacy Policy';
 
   @override

@@ -25,6 +25,9 @@ export default function NotFound() {
         <Link href="/docs" className="btn btn--ghost">
           Documentation
         </Link>
+        <Link href="/support" className="btn btn--ghost">
+          Support
+        </Link>
       </div>
     </div>
   );

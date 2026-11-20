@@ -78,6 +78,13 @@ class AboutSetting extends StatelessWidget {
               onTap: () => _open(context, Uri.parse(sourceCodeUrl)),
             ),
             ListTile(
+              key: const ValueKey('about-support'),
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.help_outline),
+              title: Text(l10n.aboutSupport),
+              onTap: () => _open(context, PublicSite.support),
+            ),
+            ListTile(
               key: const ValueKey('about-privacy'),
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.privacy_tip_outlined),

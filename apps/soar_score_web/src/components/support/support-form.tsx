@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
 import styles from "./support-form.module.css";
+import { normalizeSupportEmail, postSupport, type SubmitOutcome } from "./submit";
+import { Turnstile, type TurnstileHandle } from "./turnstile";
 
 export const userTypes = ["Contest Director", "Pilot", "Participant"] as const;
 
@@ -30,13 +32,14 @@ const labels: Record<Field, string> = {
   message: "Message",
 };
 
-/** The error for one field, or null. Exported for the test. */
+/** The errors for the fields, or an empty object. Exported for the test. */
 export function validate(values: Values): Partial<Record<Field, string>> {
   const errors: Partial<Record<Field, string>> = {};
   if (!values.name.trim()) errors.name = "Enter your name.";
   if (!values.email.trim()) errors.email = "Enter your email address.";
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim()))
-    errors.email = "Enter an email address like name@example.com.";
+  else if (normalizeSupportEmail(values.email) === null)
+    errors.email =
+      "Enter one email address using only English letters, numbers and common symbols, such as name@example.com.";
   if (!values.requestType) errors.requestType = "Choose a request type.";
   if (!values.message.trim()) errors.message = "Describe what happened.";
   else if (values.message.length > messageLimit)
@@ -51,6 +54,15 @@ export function SupportForm() {
   const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
   const [attempted, setAttempted] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [pending, setPending] = useState(false);
+  const inFlight = useRef(false);
+  const [token, setToken] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [retryWait, setRetryWait] = useState<number | null>(null);
+  const [unconfirmed, setUnconfirmed] = useState(false);
+  const challenge = useRef<TurnstileHandle>(null);
+  const serverErrorRef = useRef<HTMLDivElement>(null);
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   const errors = validate(values);
   const shown = (field: Field) => (attempted || touched[field]) && errors[field];
@@ -58,15 +70,67 @@ export function SupportForm() {
     setValues((v) => ({ ...v, [field]: value }));
   const touch = (field: Field) => () => setTouched((t) => ({ ...t, [field]: true }));
 
-  function submit(event: FormEvent) {
+  function fail(outcome: Extract<SubmitOutcome, { kind: "retry" | "unconfirmed" }>) {
+    // An unconfirmed send may already have spent the challenge, so a retry
+    // always needs a new token, whatever the outcome.
+    const resetChallenge = outcome.kind === "unconfirmed" || outcome.resetChallenge;
+    if (outcome.kind === "unconfirmed") {
+      setUnconfirmed(true);
+      setServerError(
+        "We could not confirm that your request was delivered. It may have been sent, so check before submitting again.",
+      );
+      setRetryWait(null);
+    } else {
+      setUnconfirmed(false);
+      setServerError(outcome.message);
+      setRetryWait(outcome.waitSeconds ?? null);
+    }
+    if (resetChallenge) {
+      // A spent token cannot be reused; the widget issues a new one.
+      setToken(null);
+      challenge.current?.reset();
+    }
+    requestAnimationFrame(() => serverErrorRef.current?.focus());
+  }
+
+  async function submit(event: FormEvent) {
     event.preventDefault();
+    if (inFlight.current) return;
     setAttempted(true);
+    setServerError(null);
     if (Object.keys(errors).length > 0) {
       document.getElementById("support-errors")?.focus();
       return;
     }
-    // TODO(#220): send the request to the support channel once one is chosen.
-    setSubmitted(true);
+    const email = normalizeSupportEmail(values.email);
+    if (!token || email === null) {
+      fail({
+        kind: "retry",
+        message: "Complete the spam check before submitting.",
+        resetChallenge: false,
+      });
+      return;
+    }
+    inFlight.current = true;
+    setPending(true);
+    try {
+      const outcome = await postSupport(fetch, {
+        name: values.name.trim(),
+        email,
+        userType: values.userType,
+        requestType: values.requestType,
+        message: values.message,
+        captchaToken: token,
+      });
+      if (outcome.kind === "accepted") {
+        setSubmitted(true);
+      } else {
+        fail(outcome);
+      }
+    } finally {
+      inFlight.current = false;
+      setPending(false);
+    }
   }
 
   if (submitted) {
@@ -79,9 +143,10 @@ export function SupportForm() {
           Thank you. Your support request has been received.
         </h2>
         <p style={{ marginTop: 10, color: "var(--text-muted)" }}>
-          The support channel is still being set up, so nothing has been sent
-          anywhere yet. For anything urgent, contact your contest director
-          directly.
+          I read support requests personally and reply as time allows. If your
+          contest is underway, contact your contest director for immediate help.
+          If you arranged live support with me in advance, use the contact
+          method we agreed on.
         </p>
       </div>
     );
@@ -91,6 +156,19 @@ export function SupportForm() {
 
   return (
     <form className={styles.form} onSubmit={submit} noValidate>
+      {serverError && (
+        <div
+          ref={serverErrorRef}
+          className={styles.summary}
+          role="alert"
+          tabIndex={-1}
+        >
+          <strong>{serverError}</strong>
+          {retryWait !== null && <p>You can try again in {retryWait} seconds.</p>}
+          {unconfirmed && <p>Submitting again may send a second copy.</p>}
+        </div>
+      )}
+
       {errorList.length > 0 && (
         <div
           id="support-errors"
@@ -223,9 +301,10 @@ export function SupportForm() {
         )}
       </div>
 
-      <p className="hint">
-        Spam protection and delivery are not connected yet (#220).
-      </p>
+      <div className="field">
+        <span className="hint">Spam check</span>
+        <Turnstile ref={challenge} siteKey={siteKey} onToken={setToken} />
+      </div>
 
       <p className="hint">
         We use these details only to answer your request. See the{" "}
@@ -233,8 +312,8 @@ export function SupportForm() {
       </p>
 
       <div>
-        <button type="submit" className="btn btn--primary">
-          Submit request
+        <button type="submit" className="btn btn--primary" disabled={pending}>
+          {pending ? "Sending..." : "Submit request"}
         </button>
       </div>
     </form>

@@ -19,6 +19,10 @@ Uri privacyPageUri({String base = publicSiteBaseUrl}) =>
 
 Uri termsPageUri({String base = publicSiteBaseUrl}) => _page(base, '/terms');
 
+/// The public support request form. It carries no invitation credential.
+Uri supportPageUri({String base = publicSiteBaseUrl}) =>
+    _page(base, '/support');
+
 Uri _page(String base, String path, {String? fragment}) {
   final root = Uri.parse(base);
   return root.replace(path: path, fragment: fragment);

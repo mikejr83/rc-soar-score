@@ -4,6 +4,8 @@ import 'package:soar_score_core/soar_score_core.dart'
     show InvitationCodec, InvitationService, PromotionIntentPolicy;
 import 'package:soar_score_data/soar_score_data.dart';
 
+import 'support/support_wiring.dart';
+
 const String serverName = 'soar_score_server';
 const String serverDisplayName = 'Soar Score API Server';
 const String serverVersion = '0.1.0';
@@ -20,6 +22,10 @@ const String serverVersion = '0.1.0';
 /// [trustedProxySecret] is what the site's `/api` proxy sends with the
 /// visitor's address (see `clientAddressOf`).
 ///
+/// [supportHandler] serves `POST /public/support`; it defaults to an
+/// unavailable (503) handler so a hosted server without support settings
+/// still serves everything else.
+///
 /// Opening an invitation link is throttled per caller address with counters in
 /// [database] (`request_throttles`), so every machine counts together and a
 /// restart forgets nothing. [invitationThrottle] replaces that (tests).
@@ -32,6 +38,7 @@ Handler createServerHandler(
   String? trustedProxySecret,
   InvitationThrottle? invitationThrottle,
   PromotionIntentPolicy? promotionIntents,
+  Handler? supportHandler,
 }) {
   final repository = Repository(database);
   return buildApiHandler(
@@ -46,6 +53,7 @@ Handler createServerHandler(
     selfScoringBaseUrl: selfScoringBaseUrl ?? defaultSelfScoringBaseUrl,
     corsAllowedOrigins: corsAllowedOrigins,
     trustedProxySecret: trustedProxySecret,
+    supportHandler: supportHandler ?? unavailableSupportHandler(),
     invitationThrottle: invitationSecret == null
         ? null
         : invitationThrottle ??

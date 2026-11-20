@@ -15,8 +15,13 @@ export default function SupportPage() {
       <h1 style={{ marginTop: 8 }}>Request support</h1>
       <p className="lede" style={{ marginTop: 16 }}>
         Questions about running a contest, trouble entering a score, a result
-        that looks wrong, or an idea. A contest running right now gets
-        priority: choose Emergency Contest Issue.
+        that looks wrong, or an idea.
+      </p>
+      <p className="lede" style={{ marginTop: 12 }}>
+        I read support requests personally and reply as time allows. If your
+        contest is underway, contact your contest director for immediate help.
+        If you arranged live support with me in advance, use the contact method
+        we agreed on.
       </p>
       <SupportForm />
     </div>

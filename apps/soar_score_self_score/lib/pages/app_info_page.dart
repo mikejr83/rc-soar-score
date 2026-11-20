@@ -43,6 +43,16 @@ class AppInfoPage extends StatelessWidget {
                 onTap: () => showAppLicences(context),
               ),
               ListTile(
+                key: const ValueKey('app-info-support'),
+                title: Text(l10n.supportLink),
+                trailing: const Icon(Icons.open_in_new),
+                onTap: () => openLinkOrExplain(
+                  context,
+                  supportPageUri(),
+                  opener: opener,
+                ),
+              ),
+              ListTile(
                 title: Text(l10n.privacyPolicyLink),
                 trailing: const Icon(Icons.open_in_new),
                 onTap: () => openLinkOrExplain(

@@ -22,3 +22,4 @@ export 'middleware/client_address.dart';
 export 'middleware/failure_rate_limiter.dart';
 export 'middleware/invitation_throttle.dart';
 export 'middleware/middleware.dart';
+export 'handlers/support_handler.dart';
