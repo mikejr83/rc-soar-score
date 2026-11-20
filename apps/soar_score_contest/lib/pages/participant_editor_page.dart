@@ -451,18 +451,24 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
                 onSubmit: _save,
               ),
               if (c.creating)
-                CheckboxListTile(
-                  key: const ValueKey('keep-club-location'),
-                  contentPadding: EdgeInsets.zero,
-                  controlAffinity: ListTileControlAffinity.leading,
-                  value: c.keepClubAndLocation,
-                  onChanged: (keep) => c.toggleKeep(keep: keep ?? false),
-                  title: const Text(
-                    'Keep club and location for the next participant',
-                  ),
-                  subtitle: const Text(
-                    'Used by Save and add another, so a row of pilots from '
-                    'one club needs them once.',
+                // The page route paints an opaque box above the shell's Material
+                // while it animates; the tile needs its own Material so its
+                // ink is not hidden (Flutter 3.50 asserts on this).
+                Material(
+                  type: MaterialType.transparency,
+                  child: CheckboxListTile(
+                    key: const ValueKey('keep-club-location'),
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    value: c.keepClubAndLocation,
+                    onChanged: (keep) => c.toggleKeep(keep: keep ?? false),
+                    title: const Text(
+                      'Keep club and location for the next participant',
+                    ),
+                    subtitle: const Text(
+                      'Used by Save and add another, so a row of pilots from '
+                      'one club needs them once.',
+                    ),
                   ),
                 ),
             ],
