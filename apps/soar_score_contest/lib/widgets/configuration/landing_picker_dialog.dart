@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'choice_card.dart';
@@ -48,6 +49,7 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final scheme = theme.colorScheme;
     final view = _pickedView;
     return Dialog(
@@ -100,7 +102,7 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
                               padding: const EdgeInsets.only(top: 12),
                               child: Column(
                                 children: [
-                                  for (final view in widget.tables) _item(view),
+                                  for (final view in widget.tables) _item(l10n, view),
                                 ],
                               ),
                             ),
@@ -114,7 +116,7 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
                           minWidth: 260,
                           maxWidth: 420,
                         ),
-                        child: _preview(theme, view),
+                        child: _preview(l10n, theme, view),
                       ),
                   ],
                 ),
@@ -159,7 +161,7 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
     );
   }
 
-  Widget _item(LandingTableView view) {
+  Widget _item(AppLocalizations l10n, LandingTableView view) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final selected = view.table.id == _picked;
@@ -188,13 +190,13 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
                 ConfigChip.neutral(context, icon: Icons.check, text: 'Current'),
             ],
           ),
-          subtitle: Text(LandingEntriesTable.summary(view)),
+          subtitle: Text(LandingEntriesTable.summary(l10n, view)),
         ),
       ),
     );
   }
 
-  Widget _preview(ThemeData theme, LandingTableView view) {
+  Widget _preview(AppLocalizations l10n, ThemeData theme, LandingTableView view) {
     final scheme = theme.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,7 +211,7 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
         const SizedBox(height: 8),
         Text(view.table.name, style: theme.textTheme.titleMedium),
         Text(
-          LandingEntriesTable.summary(view),
+          LandingEntriesTable.summary(l10n, view),
           style: theme.textTheme.bodyMedium?.copyWith(
             color: scheme.onSurfaceVariant,
           ),

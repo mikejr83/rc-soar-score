@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../collapsible_areas_provider.dart';
@@ -84,6 +85,7 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final scheme = theme.colorScheme;
     final def = _draft.catalog.byKey[SettingKeys.landingTable]!;
     final effect = _draft.effectOf(def);
@@ -188,7 +190,7 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
                 text:
                     'Not the ${_draft.catalog.defaultLabel} (${defaultView.table.name}). '
                     'That’s fine; any table works for any discipline. The unit '
-                    'is ${landingUnitLabel(view.table.inputUnit).toLowerCase()}.',
+                    'is ${landingUnitLabel(l10n, view.table.inputUnit).toLowerCase()}.',
               ),
             ],
             if (change != null) ...[
@@ -233,9 +235,10 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
     Id? defaultId,
   ) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final scheme = theme.colorScheme;
     final meta = [
-      ('Unit', landingUnitLabel(view.table.inputUnit)),
+      ('Unit', landingUnitLabel(l10n, view.table.inputUnit)),
       ('Entries', '${view.results.length}'),
       ('Points range', LandingEntriesTable.pointsRange(view)),
     ];

@@ -7879,6 +7879,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{contest}: {count, plural, =1{1 participant} other{{count} participants}}'**
   String rolesUsageItem(String contest, int count);
+
+  /// Title of the Landings page list pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Landings'**
+  String get landingsTitle;
+
+  /// Number of landing tables.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 table} other{{count} tables}}'**
+  String landingsCount(int count);
+
+  /// Label for a system landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get landingsSystem;
+
+  /// Label for a director-owned landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'Yours'**
+  String get landingsYours;
+
+  /// Number of entries in a landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 entry} other{{count} entries}}'**
+  String landingsEntries(int count);
+
+  /// Landing input unit: meters.
+  ///
+  /// In en, this message translates to:
+  /// **'Meters'**
+  String get landingsUnitMeters;
+
+  /// Landing input unit: feet.
+  ///
+  /// In en, this message translates to:
+  /// **'Feet'**
+  String get landingsUnitFeet;
+
+  /// Landing input unit: points.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get landingsUnitPoints;
+
+  /// Reason a system table cannot be deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'System tables are read-only and cannot be removed.'**
+  String get landingsLockedSystem;
+
+  /// Reason a table in use cannot be deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked: a contest uses this table, so it cannot be removed.'**
+  String get landingsLockedInUse;
+
+  /// Notice under a locked table.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason} A table never changes; create a copy to make a different one.'**
+  String landingsLockedNote(String reason);
+
+  /// Tooltip for the back arrow in the detail pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to landings'**
+  String get landingsBackToLandings;
+
+  /// Button label for creating a copy of a landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'Create copy'**
+  String get landingsCreateCopy;
+
+  /// Tooltip for the delete button.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}'**
+  String landingsDeleteTooltip(String name);
+
+  /// Column heading for entry labels.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get landingsLabelHeading;
+
+  /// Column heading for entry points.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get landingsPointsHeading;
+
+  /// Title of the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete landing table?'**
+  String get landingsDeleteConfirmTitle;
+
+  /// Content of the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be removed.'**
+  String landingsDeleteConfirmContent(String name);
+
+  /// Cancel button in the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get landingsDeleteCancel;
+
+  /// Confirm button in the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get landingsDeleteConfirm;
+
+  /// Error title when landing tables fail to load.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing tables could not be loaded.'**
+  String get landingsLoadFailed;
+
+  /// Loading indicator label.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading landing tables'**
+  String get landingsLoading;
+
+  /// Empty state when no tables exist.
+  ///
+  /// In en, this message translates to:
+  /// **'No landing tables yet.'**
+  String get landingsEmpty;
 }
 
 class _AppLocalizationsDelegate
