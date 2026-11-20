@@ -132,8 +132,7 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'No landing table chosen. Scorers can’t record landing '
-                        'bonuses until one is set.',
+                        l10n.configLandingNoTable,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: scheme.error,
                         ),
@@ -154,7 +153,11 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
                   ),
                   onPressed: fixed ? null : _choose,
                   icon: const Icon(Icons.swap_horiz),
-                  label: Text(view == null ? 'Choose table' : 'Change table'),
+                  label: Text(
+                    view == null
+                        ? l10n.configLandingChoose
+                        : l10n.configLandingChange,
+                  ),
                 ),
                 if (view != null)
                   OutlinedButton.icon(
@@ -163,12 +166,16 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
                     icon: Icon(
                       showEntries ? Icons.expand_less : Icons.expand_more,
                     ),
-                    label: Text(showEntries ? 'Hide entries' : 'Show entries'),
+                    label: Text(
+                      showEntries
+                          ? l10n.configLandingHideEntries
+                          : l10n.configLandingShowEntries,
+                    ),
                   ),
                 TextButton.icon(
                   onPressed: widget.onOpenLandings,
                   icon: const Icon(Icons.open_in_new, size: 18),
-                  label: const Text('Open Landings'),
+                  label: Text(l10n.configOpenLandings),
                 ),
               ],
             ),
@@ -187,18 +194,21 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
               const SizedBox(height: 12),
               ConfigNote(
                 icon: Icons.info_outline,
-                text:
-                    'Not the ${_draft.catalog.defaultLabel} (${defaultView.table.name}). '
-                    'That’s fine; any table works for any discipline. The unit '
-                    'is ${landingUnitLabel(l10n, view.table.inputUnit).toLowerCase()}.',
+                text: l10n.configLandingNotDefault(
+                  _draft.catalog.defaultLabel,
+                  defaultView.table.name,
+                  landingUnitLabel(l10n, view.table.inputUnit).toLowerCase(),
+                ),
               ),
             ],
             if (change != null) ...[
               const SizedBox(height: 12),
               ConfigNote(
                 icon: Icons.history,
-                text: 'Saved: ${savedView?.table.name ?? 'None'}',
-                actionLabel: 'Undo',
+                text: l10n.configLandingSaved(
+                  savedView?.table.name ?? l10n.configLandingNone,
+                ),
+                actionLabel: l10n.commonUndo,
                 actionIcon: Icons.undo,
                 onAction: () {
                   _draft.set(
@@ -210,9 +220,9 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
               ),
               if (change.effect.outdatesMatrix) ...[
                 const SizedBox(height: 8),
-                const ConfigNote(
+                ConfigNote(
                   icon: Icons.sync_problem,
-                  text: 'Saving makes the drawn matrix out of date.',
+                  text: l10n.configLandingOutdatesMatrix,
                   tone: ConfigNoteTone.warning,
                 ),
               ],
@@ -238,9 +248,12 @@ class _LandingSectionBodyState extends State<LandingSectionBody> {
     final l10n = AppLocalizations.of(context);
     final scheme = theme.colorScheme;
     final meta = [
-      ('Unit', landingUnitLabel(l10n, view.table.inputUnit)),
-      ('Entries', '${view.results.length}'),
-      ('Points range', LandingEntriesTable.pointsRange(view)),
+      (l10n.configLandingUnit, landingUnitLabel(l10n, view.table.inputUnit)),
+      (l10n.configLandingEntries, '${view.results.length}'),
+      (
+        l10n.configLandingPointsRange,
+        LandingEntriesTable.pointsRange(l10n, view),
+      ),
     ];
     return Container(
       padding: const EdgeInsets.all(16),

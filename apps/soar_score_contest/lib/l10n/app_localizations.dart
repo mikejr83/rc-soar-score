@@ -8983,6 +8983,492 @@ abstract class AppLocalizations {
   /// **'Add people you’ve saved before, or create a new one.'**
   String get participantsEmptyText;
 
+  /// Title of the save-configuration confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Save configuration?'**
+  String get configSaveTitle;
+
+  /// Heading for matrix-affecting changes in the save dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'The drawn matrix becomes out of date'**
+  String get configSaveMatrixHead;
+
+  /// Text for matrix-affecting changes in the save dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} changed. The drawn matrix{revision} no longer matches; redraw unscored rounds on the Matrix page.'**
+  String configSaveMatrixText(String names, String revision);
+
+  /// Matrix revision in the save dialog text.
+  ///
+  /// In en, this message translates to:
+  /// **' (revision {revision})'**
+  String configSaveMatrixRevision(int revision);
+
+  /// Text for changes with no effect in the save dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Also saving, with no effect on the matrix or results: {names}.'**
+  String configSaveOtherText(String names);
+
+  /// Confirm button in the save dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Save configuration'**
+  String get configSaveConfirm;
+
+  /// Save bar title while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving configuration…'**
+  String get configBarSaving;
+
+  /// Save bar note while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'The page is locked until the save finishes.'**
+  String get configBarSavingLocked;
+
+  /// Save bar title after a failed save.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t save the configuration'**
+  String get configBarSaveFailed;
+
+  /// Save bar note after a failed save.
+  ///
+  /// In en, this message translates to:
+  /// **'{error} Every value you entered is kept.'**
+  String configBarSaveFailedSub(String error);
+
+  /// Save bar title with unsaved changes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 unsaved change} other{{count} unsaved changes}}'**
+  String configBarUnsaved(int count);
+
+  /// Chip when the change makes the drawn matrix out of date.
+  ///
+  /// In en, this message translates to:
+  /// **'Makes the drawn matrix out of date'**
+  String get configBarMatrixChip;
+
+  /// Chip when the change recalculates results.
+  ///
+  /// In en, this message translates to:
+  /// **'Recalculates all results'**
+  String get configBarRecalcChip;
+
+  /// Chip when the change has no effect.
+  ///
+  /// In en, this message translates to:
+  /// **'No effect on the matrix or results'**
+  String get configBarNoEffectChip;
+
+  /// Save bar note when errors stop a save.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix {count, plural, =1{1 error} other{{count} errors}} to save'**
+  String configBarFixErrors(int count);
+
+  /// Semantics label of the configuration save bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get configBarUnsavedLabel;
+
+  /// Semantics label of the progress bar while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving configuration'**
+  String get configBarSavingProgress;
+
+  /// Save button label while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get configBarSaveShort;
+
+  /// Save button label after a failed save.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get configBarRetry;
+
+  /// Error summary title.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 setting needs} other{{count} settings need}} fixing before you can save'**
+  String configBarSettingsNeedFixing(int count);
+
+  /// One error in the error summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {value}'**
+  String configBarErrorItem(String label, String value);
+
+  /// Title of the landing table picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a landing table'**
+  String get landingPickerTitle;
+
+  /// Note under the picker title.
+  ///
+  /// In en, this message translates to:
+  /// **'Any table works for any discipline. Check the unit matches how your scorers measure.'**
+  String get landingPickerNote;
+
+  /// Button that opens the Landings page to create a table.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a table in Landings'**
+  String get landingPickerCreateTable;
+
+  /// Button that picks the highlighted table.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this table'**
+  String get landingPickerUse;
+
+  /// Chip for the profile's default table.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile default'**
+  String get landingPickerProfileDefault;
+
+  /// Chip for the table the draft uses now.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get landingPickerCurrent;
+
+  /// Heading above the table preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get landingPickerPreview;
+
+  /// Chip: the setting differs from the saved one.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved'**
+  String get configChipUnsaved;
+
+  /// Chip: the value differs from the official profile.
+  ///
+  /// In en, this message translates to:
+  /// **'House rule'**
+  String get configChipHouseRule;
+
+  /// Chip: the value cannot be saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get configChipError;
+
+  /// Chip on the participants section: the list is a summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary only'**
+  String get configSummaryOnly;
+
+  /// Tooltip when every discipline option matches the profile default.
+  ///
+  /// In en, this message translates to:
+  /// **'Every option matches the {label}'**
+  String configDefaultMatches(String label);
+
+  /// Chip naming the number of house rules.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 house rule} other{{count} house rules}}'**
+  String configHouseRules(int count);
+
+  /// Detail under Open scoring access.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants can submit scores.'**
+  String get configStateScoringOpenDetail;
+
+  /// Detail under Closed scoring access.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants can’t submit scores.'**
+  String get configStateScoringClosedDetail;
+
+  /// Detail under a locked administration.
+  ///
+  /// In en, this message translates to:
+  /// **'The configuration, participants and matrix are read-only.'**
+  String get configStateAdminLockedDetail;
+
+  /// Detail under an unlocked administration.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest can be administered.'**
+  String get configStateAdminUnlockedDetail;
+
+  /// Button to change a contest state in the Workspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Change in Workspace'**
+  String get configChangeInWorkspace;
+
+  /// Label of the scoring pilots count.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring pilots'**
+  String get configParticipantsScoringPilots;
+
+  /// Label of the other participants count.
+  ///
+  /// In en, this message translates to:
+  /// **'Other participants'**
+  String get configParticipantsOther;
+
+  /// Label of the teams count.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get configParticipantsTeams;
+
+  /// Note when fewer than 2 scoring pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'A matrix needs at least 2 scoring pilots. This contest has {count}.'**
+  String configParticipantsMinPilotsNote(int count);
+
+  /// Button to open the Participants page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Participants'**
+  String get configOpenParticipants;
+
+  /// Note under the Open Participants button.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants are edited there.'**
+  String get configParticipantsEditedThere;
+
+  /// Heading and semantics label of the matrix readiness panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix readiness'**
+  String get configMatrixReadiness;
+
+  /// Button to open the Matrix page from the readiness panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to matrix'**
+  String get configGoToMatrix;
+
+  /// Error when no landing table is chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'No landing table chosen. Scorers can’t record landing bonuses until one is set.'**
+  String get configLandingNoTable;
+
+  /// Button to choose a landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose table'**
+  String get configLandingChoose;
+
+  /// Button to change the landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'Change table'**
+  String get configLandingChange;
+
+  /// Button to hide the entries table.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide entries'**
+  String get configLandingHideEntries;
+
+  /// Button to show the entries table.
+  ///
+  /// In en, this message translates to:
+  /// **'Show entries'**
+  String get configLandingShowEntries;
+
+  /// Button to open the Landings page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Landings'**
+  String get configOpenLandings;
+
+  /// Note when the table is not the profile default.
+  ///
+  /// In en, this message translates to:
+  /// **'Not the {defaultLabel} ({name}). That’s fine; any table works for any discipline. The unit is {unit}.'**
+  String configLandingNotDefault(String defaultLabel, String name, String unit);
+
+  /// Note of the saved table after a change.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved: {name}'**
+  String configLandingSaved(String name);
+
+  /// The saved table when there is none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get configLandingNone;
+
+  /// Warning when the change makes the drawn matrix out of date.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving makes the drawn matrix out of date.'**
+  String get configLandingOutdatesMatrix;
+
+  /// Label of the unit fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get configLandingUnit;
+
+  /// Label of the entries fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Entries'**
+  String get configLandingEntries;
+
+  /// Label of the points range fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Points range'**
+  String get configLandingPointsRange;
+
+  /// Button to undo a change.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get commonUndo;
+
+  /// Note when team protection is off with seeded draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available with Seeded Man on Man. Seeded groups are formed by score, so teammates may have to fly together.'**
+  String get configNoteTeamProtectionSeeded;
+
+  /// Action to switch the draw mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Man on Man instead'**
+  String get configNoteUseManOnMan;
+
+  /// House rule note naming the official value.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {official}{seconds}.'**
+  String configNoteHouseRule(String label, String official, String seconds);
+
+  /// Action to reset to the official value.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to {label}'**
+  String configNoteResetTo(String label);
+
+  /// Note for a duration entered as minutes:seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered as minutes:seconds. {display} = {seconds} s.'**
+  String configNoteDuration(String display, int seconds);
+
+  /// Note about group sizes with team protection.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups per round, set on the Matrix page, must be at least the size of the largest team.'**
+  String get configNoteTeamProtectionSize;
+
+  /// Note when the draw already assigns numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Numbers assigned at the draw don’t change.'**
+  String get configNoteNumbersFixed;
+
+  /// Note about drop rounds before the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked against the rounds drawn on the Matrix page.'**
+  String get configNoteDropsChecked;
+
+  /// Note for a setting hidden and cleared by this one.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} ({saved}) is hidden and will be cleared when you save.'**
+  String configNoteCleared(String label, String saved);
+
+  /// Note of the saved value after a change.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved: {value}'**
+  String configNoteSaved(String value);
+
+  /// Note when the change recalculates results.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving recalculates all results.'**
+  String get configNoteRecalculates;
+
+  /// Example note for decimal places.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: 987.654 → {result} {mode}'**
+  String configNoteExample(String result, String mode);
+
+  /// Example mode: truncated.
+  ///
+  /// In en, this message translates to:
+  /// **'(truncated)'**
+  String get configNoteTruncated;
+
+  /// Example mode: rounded.
+  ///
+  /// In en, this message translates to:
+  /// **'(rounded)'**
+  String get configNoteRounded;
+
+  /// Drop note when no rounds are dropped.
+  ///
+  /// In en, this message translates to:
+  /// **'No rounds are dropped.'**
+  String get configNoteNoDrops;
+
+  /// Drop note for one dropped round.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop the worst round after round {round1}.'**
+  String configNoteDropOne(String round1);
+
+  /// Drop note for two dropped rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop the worst round after round {round1}, and a second after round {round2}.'**
+  String configNoteDropTwo(String round1, String round2);
+
+  /// Note about a non-droppable motor restart round.
+  ///
+  /// In en, this message translates to:
+  /// **'A round with a motor restart can’t be dropped (Motor restart mode: Allowed, not dropped).'**
+  String get configNoteMotorRestart;
+
+  /// Reason the seeded draw mode is blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available while team protection is on. Seeded groups are formed by score, so teammates may have to fly together.'**
+  String get configBlockedTeamProtection;
+
+  /// Fix action to turn off team protection.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off team protection'**
+  String get configFixTurnOffTeamProtection;
+
   /// One round named in a list.
   ///
   /// In en, this message translates to:
@@ -9012,6 +9498,215 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{saved} saved. {failed} not saved. Their typed values are kept.'**
   String contestParticipantsSavedSummary(int saved, int failed);
+
+  /// Generic confirm button label.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get commonOk;
+
+  /// Cancel button of the unsaved-changes dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get configKeepEditing;
+
+  /// Confirm button of the unsaved-changes dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard and leave'**
+  String get configDiscardAndLeave;
+
+  /// Confirm button of the unsaved-changes dialog on app close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close and discard'**
+  String get configCloseAndDiscard;
+
+  /// Title of the unsaved-changes dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave without saving?'**
+  String get configLeaveTitle;
+
+  /// Body of the unsaved-changes dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {count} unsaved {changes} in {sections}. {action} discards them.'**
+  String configLeaveBody(
+    int count,
+    String changes,
+    String sections,
+    String action,
+  );
+
+  /// Message after discarding configuration changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes discarded.'**
+  String get configChangesDiscarded;
+
+  /// Action that discards changes on app close.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing the app'**
+  String get configActionClosing;
+
+  /// Action that discards changes when leaving the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaving'**
+  String get configActionLeaving;
+
+  /// Message after saving configuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration saved as revision {revision}.{warning}'**
+  String configSavedRevision(int revision, String warning);
+
+  /// Message after saving only the contest details.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest details saved.'**
+  String get configDetailsSaved;
+
+  /// Title of the other-device-updated dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration updated'**
+  String get configUpdatedTitle;
+
+  /// Body when the contest has no saved configuration.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest was changed from another device. This page now shows the latest version. Your unsaved changes are kept.'**
+  String get configUpdatedText;
+
+  /// Body when another device saved a revision.
+  ///
+  /// In en, this message translates to:
+  /// **'Revision {revision} was saved from another device. This page now shows the latest version. Your unsaved changes are kept; check them before saving again.'**
+  String configUpdatedRevision(int revision);
+
+  /// Title of the load-failure state.
+  ///
+  /// In en, this message translates to:
+  /// **'The configuration could not be loaded.'**
+  String get configLoadFailed;
+
+  /// Label of the loading state.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the configuration'**
+  String get configLoading;
+
+  /// Title of the administration-locked banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration is locked'**
+  String get configAdminLockedTitle;
+
+  /// Body of the administration-locked banner.
+  ///
+  /// In en, this message translates to:
+  /// **'The configuration is read-only while administration is locked. Unlock it from the Workspace.'**
+  String get configAdminLockedBody;
+
+  /// Action of the administration-locked banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Workspace'**
+  String get configGoToWorkspace;
+
+  /// Title of the completed-contest banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest completed'**
+  String get configCompletedTitle;
+
+  /// Body of the completed-contest banner.
+  ///
+  /// In en, this message translates to:
+  /// **'The configuration is read-only. Only score corrections remain, and those are made on the Scoring page.'**
+  String get configCompletedBody;
+
+  /// Title of the not-saved banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration not saved yet'**
+  String get configNotSavedTitle;
+
+  /// Body of the not-saved banner.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest has no saved configuration, and its discipline can’t be chosen on this page. Create the contest again with the New contest wizard to set one.'**
+  String get configNotSavedBody;
+
+  /// Title of the scoring-started banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring has started'**
+  String get configScoringStartedTitle;
+
+  /// Body of the scoring-started banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Structural settings, discipline options and the landing table are fixed. Scoring settings can still change; saving them recalculates all results.'**
+  String get configScoringStartedBody;
+
+  /// Label of a setting the contest state has locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get configFixedChip;
+
+  /// Accessible name of a locked setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed: {reason}'**
+  String configFixedChipSemantics(String reason);
+
+  /// Key column header for a meters table.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance (m)'**
+  String get configLandingKeyHeaderMeters;
+
+  /// Key column header for a feet table.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance (ft)'**
+  String get configLandingKeyHeaderFeet;
+
+  /// Key column header for a points table.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing key'**
+  String get configLandingKeyHeaderPoints;
+
+  /// Points range when a table has no entries.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries'**
+  String get configLandingNoEntries;
+
+  /// Points range of a landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'{low}–{high} points'**
+  String configLandingPointsRangeValue(int low, int high);
+
+  /// Entry count in a landing table summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries'**
+  String configLandingEntriesCount(int count);
+
+  /// Accessible name of a landing entries table.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} entries'**
+  String configLandingEntriesLabel(String name);
 }
 
 class _AppLocalizationsDelegate

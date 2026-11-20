@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/configuration/draw_readiness.dart';
 import '../../services/configuration/readiness_summary.dart';
 import '../matrix/matrix_colors.dart';
@@ -25,6 +26,7 @@ class MatrixReadinessPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final colors = MatrixColors.of(context);
@@ -81,7 +83,7 @@ class MatrixReadinessPanel extends StatelessWidget {
     ];
     return Semantics(
       container: true,
-      label: 'Matrix readiness',
+      label: l10n.configMatrixReadiness,
       child: Container(
         margin: inline ? const EdgeInsets.only(top: 8, bottom: 20) : null,
         padding: const EdgeInsets.all(16),
@@ -99,7 +101,7 @@ class MatrixReadinessPanel extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Matrix readiness',
+                    l10n.configMatrixReadiness,
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
@@ -145,7 +147,7 @@ class MatrixReadinessPanel extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: onGoToMatrix,
                 icon: const Icon(Icons.grid_view, size: 18),
-                label: const Text('Go to matrix'),
+                label: Text(l10n.configGoToMatrix),
               ),
             ),
           ],

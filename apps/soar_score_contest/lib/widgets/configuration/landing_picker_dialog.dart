@@ -66,13 +66,12 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Choose a landing table',
+                    l10n.landingPickerTitle,
                     style: theme.textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Any table works for any discipline. Check the unit matches '
-                    'how your scorers measure.',
+                    l10n.landingPickerNote,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
@@ -134,21 +133,21 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
                   TextButton.icon(
                     onPressed: widget.onCreateTable,
                     icon: const Icon(Icons.add),
-                    label: const Text('Create a table in Landings'),
+                    label: Text(l10n.landingPickerCreateTable),
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
+                        child: Text(l10n.cancelButton),
                       ),
                       const SizedBox(width: 8),
                       FilledButton(
                         onPressed: _picked == null
                             ? null
                             : () => Navigator.of(context).pop(_picked),
-                        child: const Text('Use this table'),
+                        child: Text(l10n.landingPickerUse),
                       ),
                     ],
                   ),
@@ -182,12 +181,16 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
               if (view.table.id == widget.defaultTableId)
                 ConfigChip(
                   icon: Icons.star_outline,
-                  text: 'Profile default',
+                  text: l10n.landingPickerProfileDefault,
                   background: scheme.secondaryContainer,
                   foreground: scheme.onSecondaryContainer,
                 ),
               if (view.table.id == widget.current)
-                ConfigChip.neutral(context, icon: Icons.check, text: 'Current'),
+                ConfigChip.neutral(
+                  context,
+                  icon: Icons.check,
+                  text: l10n.landingPickerCurrent,
+                ),
             ],
           ),
           subtitle: Text(LandingEntriesTable.summary(l10n, view)),
