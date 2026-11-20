@@ -43,10 +43,10 @@ void main() {
       expect(facts.lastFullyScoredRound, 1);
     });
 
-    test('a completed contest has nothing provisional, even if asked', () {
+    test('a completed contest shows later rounds after a gap', () {
       final matrix = drawnMatrix();
       final scores = scoresFor(matrix, {
-        for (var p = 1; p <= 4; p++) (1, p): at(p),
+        for (var p = 1; p <= 3; p++) (1, p): at(p),
         (2, 1): at(10),
       });
       final facts = factsOf(
@@ -55,7 +55,10 @@ void main() {
         state: LifecycleState.completed,
       );
       expect(StandingsOptions.provisionalApplies(facts), isFalse);
-      expect(StandingsOptions.of({'prov': '1'}, facts).provisional, isFalse);
+      final options = StandingsOptions.of({'prov': '1'}, facts);
+      expect(options.provisional, isFalse);
+      expect(options.rounds, [1, 2]);
+      expect(options.check(facts), ReportCheck.ok);
       expect(StandingsOptions.defaults(facts)['prov'], '0');
     });
 

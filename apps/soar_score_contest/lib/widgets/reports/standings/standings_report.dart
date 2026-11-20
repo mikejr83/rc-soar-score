@@ -4,6 +4,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../../../services/new_contest/date_range_text.dart';
 import '../../../services/reports/report_kind.dart';
 import '../../../services/reports/reports_facts.dart';
+import '../../../services/reports/result_status.dart';
 import '../../../services/reports/standings/standings_layout.dart';
 import '../../../services/reports/standings/standings_options.dart';
 import '../../../services/reports/standings/standings_report_data.dart';
@@ -12,6 +13,7 @@ import '../../../services/reports/standings/standings_table.dart';
 import '../../../services/reports/viewer/page_setup.dart';
 import '../../../services/reports/viewer/report_spec.dart';
 import '../viewer/report_definition.dart';
+import '../viewer/viewer_banner.dart';
 import 'standings_controls.dart';
 import 'standings_page_body.dart';
 
@@ -131,6 +133,9 @@ class StandingsReport extends DataReportDefinition<StandingsReportData> {
     );
     final format = StandingsFormat(facts.decimalPlaces);
     final status = StandingsStatus.of(facts, options, data);
+    final missing = facts.standing.missingByRound.entries
+        .where((entry) => entry.key <= options.to)
+        .fold<int>(0, (sum, entry) => sum + entry.value);
     return ReportDocument(
       title: 'Overall Results - ${contest.name}',
       subtitle: _subtitle(facts, options, partial),
@@ -141,6 +146,19 @@ class StandingsReport extends DataReportDefinition<StandingsReportData> {
       status: status.status,
       statusReason: status.reason,
       statusAction: status.action,
+      banners: [
+        if (facts.isCompleted &&
+            status.status == ResultStatus.official &&
+            missing > 0)
+          ReportBanner(
+            kind: ViewerBannerKind.info,
+            icon: Icons.info_outline,
+            lead: 'Missing scores:',
+            text:
+                '$missing ${missing == 1 ? 'flight has' : 'flights have'} '
+                'no recorded score through round ${options.to}.',
+          ),
+      ],
       pages: [
         for (final page in layout.pages)
           StandingsPageBody(

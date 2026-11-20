@@ -28,11 +28,7 @@ class ScoreExportOptions {
         filters[key] == null ? fallback : filters[key] == '1';
     final provisional =
         provisionalApplies(facts) && on('prov', defaultProvisional(facts));
-    // The last round the export can show: the last with any score when
-    // Provisional is on, else the last that is fully scored.
-    final lastShown = provisional
-        ? facts.lastScoredRound
-        : facts.lastFullyScoredRound;
+    final lastShown = facts.standingsRoundLimit(provisional: provisional);
     final from = int.tryParse(filters['from'] ?? '') ?? 1;
     final requestedTo =
         int.tryParse(filters['to'] ?? '') ?? facts.lastScoredRound;

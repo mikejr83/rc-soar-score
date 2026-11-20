@@ -1,5 +1,6 @@
 import 'report_kind.dart';
 import 'reports_facts.dart';
+import 'result_status.dart';
 
 /// Where a reason or warning on a card sends the director.
 enum ReportDestination { scoring, matrix }
@@ -116,7 +117,9 @@ class ReportAvailability {
     }
     return [
       ReportNote(
-        lead: 'Preliminary:',
+        lead: facts.resultStatus == ResultStatus.official
+            ? 'Missing scores:'
+            : 'Preliminary:',
         text: parts.join(' '),
         action: ReportAction(
           'Open Scoring',

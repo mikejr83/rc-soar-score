@@ -9,6 +9,8 @@ import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/pages/contest/report_viewer_page.dart';
 import 'package:soar_score_contest/services/reports/report_kind.dart';
 import 'package:soar_score_contest/services/reports/viewer/report_view_params.dart';
+import 'package:soar_score_contest/widgets/reports/standings/standings_table_view.dart';
+import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/matrix_test_support.dart';
 import '../support/standings_fixtures.dart';
@@ -146,6 +148,61 @@ void main() {
     expect(_text('PRELIMINARY'), findsWidgets);
     expect(find.textContaining('Preliminary:'), findsOneWidget);
   });
+
+  for (final stale in [false, true]) {
+    testWidgets('completed standings show missing flights with stale=$stale', (
+      tester,
+    ) async {
+      fixture = StandingsFixture(preliminary: true);
+      final firstRound = fixture.roundResults[1]!;
+      fixture.roundResults[1] = RoundResults(
+        ordinal: 1,
+        flights: firstRound.flights.where(
+          (flight) => flight.participationId != participationId(4),
+        ),
+      );
+      final standings = fixture.standings[2]!;
+      fixture.standings[2] = ContestResults(
+        asOfRound: 2,
+        isStale: stale,
+        standings: standings.standings,
+      );
+      server = StandingsServer(
+        fixture,
+        state: LifecycleState.completed,
+        scores: scoresFor(fixture.matrix, {
+          for (var pilot = 1; pilot <= 3; pilot++) (1, pilot): at(pilot),
+          for (var pilot = 1; pilot <= 4; pilot++) (2, pilot): at(10 + pilot),
+        }),
+      );
+
+      await _pump(tester, server);
+
+      expect(_text('R2'), findsOneWidget);
+      expect(
+        find.widgetWithText(CheckboxListTile, 'Provisional'),
+        findsNothing,
+      );
+      final table = tester
+          .widget<StandingsTableView>(find.byType(StandingsTableView))
+          .table;
+      final pilot = table.rows.singleWhere(
+        (row) => row.pilot.participationId == participationId(4),
+      );
+      expect(pilot.cells[1]!.score, isNull);
+      if (stale) {
+        expect(_text('PRELIMINARY'), findsWidgets);
+        expect(find.textContaining('before the latest change'), findsOneWidget);
+      } else {
+        expect(_text('PRELIMINARY'), findsNothing);
+        expect(find.textContaining('Official.'), findsOneWidget);
+        expect(
+          find.textContaining('1 flight has no recorded score through round 2'),
+          findsOneWidget,
+        );
+      }
+    });
+  }
 
   group('options', () {
     testWidgets('Raw score adds its column and Percentage removes its own', (

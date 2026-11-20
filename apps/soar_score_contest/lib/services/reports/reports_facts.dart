@@ -67,6 +67,7 @@ class ReportsFacts {
         rounds: workspace.rounds,
         slots: scores.slots,
         roundOfAssignment: roundOfAssignment,
+        completed: data.contest.lifecycleState == LifecycleState.completed,
       ),
       scoresSignature: _signature(scores),
       pilots: _pilots(data),
@@ -218,6 +219,11 @@ class ReportsFacts {
 
   LifecycleState get lifecycle => contest.lifecycleState;
   bool get isCompleted => lifecycle == LifecycleState.completed;
+
+  /// The upper bound shared by the standings viewer and its CSV export.
+  int standingsRoundLimit({required bool provisional}) =>
+      isCompleted || provisional ? lastScoredRound : lastFullyScoredRound;
+
   bool get hasScores => standing.hasScores;
   ResultStatus get resultStatus => standing.status;
 

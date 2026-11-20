@@ -30,9 +30,7 @@ class StandingsOptions {
         filters[key] == null ? fallback : filters[key] == '1';
     final provisional =
         provisionalApplies(facts) && on('prov', defaultProvisional(facts));
-    final lastShown = provisional
-        ? facts.lastScoredRound
-        : facts.lastFullyScoredRound;
+    final lastShown = facts.standingsRoundLimit(provisional: provisional);
     final from = int.tryParse(filters['from'] ?? '') ?? 1;
     // An unset To is the last round with any score, so the dropdown names a
     // real round; the sheet itself never goes past [lastShown].
@@ -63,7 +61,7 @@ class StandingsOptions {
   }
 
   /// Provisional only means something while a round is partly scored or not
-  /// flown, and never once the contest is completed: every score is final.
+  /// flown while scoring is open. A completed contest shows its scored rounds.
   static bool provisionalApplies(ReportsFacts facts) =>
       !facts.isCompleted &&
       (facts.partlyScoredRounds > 0 || facts.notFlownRounds > 0);
@@ -88,8 +86,7 @@ class StandingsOptions {
   /// The last round shown, and the round rank and total are as of.
   final int to;
 
-  /// The last round the report can show: the last with any score when
-  /// Provisional is on, else the last that is fully scored.
+  /// The last round the report can show given the contest state and filters.
   final int lastShown;
   final bool provisional;
 
@@ -123,7 +120,9 @@ class StandingsOptions {
       final scored = facts.lastScoredRound;
       return ReportEmpty(
         title: 'No scores in rounds $range',
-        body: provisional
+        body: scored == 0
+            ? 'No scores have been entered yet.'
+            : provisional || facts.isCompleted
             ? 'No scores have been entered in these rounds yet. Choose rounds '
                   '1 to $scored.'
             : (facts.lastFullyScoredRound == 0

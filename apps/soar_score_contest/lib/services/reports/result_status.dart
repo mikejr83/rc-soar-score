@@ -1,14 +1,13 @@
 /// What standings produced now would be called. Never colour alone: every
 /// status has a word and an icon where it is shown.
 ///
-/// The rules come from `plan/architecture-requirements/discipline-scoring.md`:
-/// a result with missing scores or open reviews is marked preliminary and is
-/// not presented as official.
+/// In director reports, completed standings can be official with blank flights.
 enum ResultStatus {
   /// Every score counted is official.
   official('Official'),
 
-  /// A score counted is missing, submitted but not official, or in review.
+  /// Standings are stale, a score is unresolved, or scoring is still open
+  /// with missing scores.
   preliminary('Preliminary'),
 
   /// Nothing is scored yet, so there are no standings.

@@ -63,6 +63,8 @@ F3J example
 
 **Provisional** - This report may be run mid contest. If this is selected it should show up to the last round with scores even if that round does not have all scores. Regardless of this being selected or not, rounds that have no scores not be shown. This should default to checked if there are more rounds that have not been scored.
 
+For completed contests, the report and its CSV export include standings through the last scored round. An unscored flight for an active pilot stays blank and appears in the missing scores note. The standings are official when the only gaps are missing flights. Unresolved submissions or reviews and stale standings still make the report preliminary.
+
 ## Filtering
 
 The report needs to be able to be filterable so that a select set of rounds can be selected. It should default to "All rounds". An lower and upper bound for rounds (inclusive) should be able to be set so such that the output show from the lower to the upper rounds.

@@ -6,9 +6,8 @@ import 'standings_report_data.dart';
 
 /// Whether the standings the sheet shows are official, and if not, why.
 ///
-/// The stored standings carry their own flags: preliminary while a score
-/// counted is missing or in review, and stale after a change to the
-/// configuration, matrix or calculation. Either makes the sheet Preliminary.
+/// The stored standings carry preliminary and stale flags. Completion closes
+/// scoring, so blank flights alone do not make the sheet preliminary.
 class StandingsStatus {
   const StandingsStatus({required this.status, this.reason, this.action});
 
@@ -18,14 +17,20 @@ class StandingsStatus {
     StandingsReportData data,
   ) {
     final results = data.results;
-    if (!results.isPreliminary) {
-      return const StandingsStatus(status: ResultStatus.official);
-    }
     final standing = facts.standing;
     final missing = [
       for (final entry in standing.missingByRound.entries)
         if (entry.key <= options.to) entry,
     ]..sort((a, b) => a.key.compareTo(b.key));
+    final unofficial = standing.unofficialByRound.entries
+        .where((entry) => entry.key <= options.to)
+        .fold<int>(0, (sum, entry) => sum + entry.value);
+    final completedWithGaps =
+        facts.isCompleted && missing.isNotEmpty && !results.isStale;
+    if ((!results.isPreliminary || completedWithGaps) &&
+        (!facts.isCompleted || unofficial == 0)) {
+      return const StandingsStatus(status: ResultStatus.official);
+    }
     final parts = <String>[];
     for (final entry in missing.take(2)) {
       final count = entry.value;
@@ -46,12 +51,22 @@ class StandingsStatus {
         'in review',
       );
     }
+    final submitted = unofficial - review;
+    if (facts.isCompleted && submitted > 0) {
+      parts.add(
+        '$submitted ${submitted == 1 ? 'score is' : 'scores are'} '
+        'awaiting approval',
+      );
+    }
+    if (results.isStale) {
+      parts.add(
+        'these results were calculated before the latest change to the '
+        'scores, the configuration or the matrix',
+      );
+    }
     final String reason;
     if (parts.isEmpty) {
-      reason = results.isStale
-          ? 'these results were calculated before the latest change to the '
-                'scores, the configuration or the matrix.'
-          : 'some scores are not final yet.';
+      reason = 'some scores are not final yet.';
     } else {
       final hint =
           options.provisional &&

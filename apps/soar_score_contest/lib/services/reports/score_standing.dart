@@ -6,14 +6,14 @@ import 'result_status.dart';
 /// What the scores entered so far say about standings produced now.
 ///
 /// The standings run up to the last round that has a score. Within those
-/// rounds a slot without a score, or with a score that is submitted or in
-/// review, makes the result preliminary.
+/// rounds a submission or review makes the result preliminary. A blank
+/// flight also does while the contest is open.
 class ScoreStanding {
   const ScoreStanding._({
     required this.status,
     required this.lastScoredRound,
     required this.missingByRound,
-    required this.unofficial,
+    required this.unofficialByRound,
   });
 
   /// Derives the standing from the [rounds] progress and the [slots] of the
@@ -24,6 +24,7 @@ class ScoreStanding {
     required List<WorkspaceRoundFact> rounds,
     required Iterable<ScoreSlot> slots,
     required Map<Id, int> roundOfAssignment,
+    required bool completed,
   }) {
     int? last;
     for (final round in rounds) {
@@ -36,7 +37,7 @@ class ScoreStanding {
         status: ResultStatus.none,
         lastScoredRound: null,
         missingByRound: {},
-        unofficial: 0,
+        unofficialByRound: {},
       );
     }
     final missing = <int, int>{};
@@ -45,7 +46,7 @@ class ScoreStanding {
         missing[round.ordinal] = round.total - round.scored;
       }
     }
-    var unofficial = 0;
+    final unofficial = <int, int>{};
     for (final slot in slots) {
       final ordinal = roundOfAssignment[slot.placeholder.assignmentId];
       if (ordinal == null || ordinal > last) {
@@ -54,16 +55,16 @@ class ScoreStanding {
       final state = slot.placeholder.state;
       if (state == ScorePlaceholderState.submitted ||
           state == ScorePlaceholderState.inReview) {
-        unofficial++;
+        unofficial.update(ordinal, (count) => count + 1, ifAbsent: () => 1);
       }
     }
     return ScoreStanding._(
-      status: missing.isEmpty && unofficial == 0
+      status: (completed || missing.isEmpty) && unofficial.isEmpty
           ? ResultStatus.official
           : ResultStatus.preliminary,
       lastScoredRound: last,
       missingByRound: Map.unmodifiable(missing),
-      unofficial: unofficial,
+      unofficialByRound: Map.unmodifiable(unofficial),
     );
   }
 
@@ -76,7 +77,9 @@ class ScoreStanding {
   final Map<int, int> missingByRound;
 
   /// Scores that are submitted or in review.
-  final int unofficial;
+  final Map<int, int> unofficialByRound;
+
+  int get unofficial => unofficialByRound.values.fold(0, (sum, n) => sum + n);
 
   bool get hasScores => lastScoredRound != null;
 

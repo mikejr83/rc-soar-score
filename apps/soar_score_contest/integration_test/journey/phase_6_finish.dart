@@ -12,6 +12,7 @@ import '../support/open_demo_contest.dart';
 import '../support/pump_until_gone.dart';
 import 'export_step.dart';
 import 'journey.dart';
+import 'scoring_steps.dart';
 
 Finder _key(String key) => find.byKey(ValueKey(key));
 const _apiBase = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
@@ -53,6 +54,16 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
         isNull,
       );
       expect(_key('control-lifecycle-reason'), findsOneWidget);
+    }),
+  );
+
+  await journey.step(
+    'Completed scoring: the lock reason appears in the banner and on the chip',
+    () => inContest(() async {
+      await openRoundGroup(tester, 1, 1);
+      const reason = 'This contest is completed. Scores cannot be entered.';
+      expect(find.text(reason), findsOneWidget);
+      expect(find.byTooltip(reason), findsWidgets);
     }),
   );
 
@@ -176,6 +187,13 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
     () => inContest(() async {
       await tapRail(tester, 'Reports');
       await pumpUntilFound(tester, find.text('Reports are built from'));
+      expect(
+        find.descendant(
+          of: _key('reports-fact-result-status'),
+          matching: find.text('Official'),
+        ),
+        findsOneWidget,
+      );
       await tapVisible(tester, _key('report-open-standings'));
       await pumpUntilFound(tester, find.text('Rank'));
 
