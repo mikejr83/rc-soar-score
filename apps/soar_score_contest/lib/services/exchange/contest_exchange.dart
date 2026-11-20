@@ -94,7 +94,14 @@ abstract class ContestExchange {
   static ContestExchange? current;
 
   /// The file of [contestId], with contact details removed when [redact].
-  Future<ExchangeExport> export(Id contestId, {required bool redact});
+  ///
+  /// With [forSupport] the file is a container that also holds the app log
+  /// and a manifest about this installation; it is never redacted.
+  Future<ExchangeExport> export(
+    Id contestId, {
+    required bool redact,
+    bool forSupport = false,
+  });
 
   /// Reads [bytes] and says what importing them would do. Throws an
   /// [ExchangeFailure] when they are not a contest file.
