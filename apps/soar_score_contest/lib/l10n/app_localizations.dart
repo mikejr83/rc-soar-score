@@ -7675,6 +7675,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 pilot} other{{count} pilots}}'**
   String wizardPilotsCountShort(int count);
+
+  /// Page title.
+  ///
+  /// In en, this message translates to:
+  /// **'Roles'**
+  String get rolesTitle;
+
+  /// Count of roles.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 role} other{{count} roles}}'**
+  String rolesCount(int count);
+
+  /// Subtitle for a system role.
+  ///
+  /// In en, this message translates to:
+  /// **'System role'**
+  String get rolesSystemRole;
+
+  /// Subtitle for a director's role.
+  ///
+  /// In en, this message translates to:
+  /// **'Your role'**
+  String get rolesYourRole;
+
+  /// Dialog title for creating a role.
+  ///
+  /// In en, this message translates to:
+  /// **'New role'**
+  String get rolesNew;
+
+  /// Confirm button in the create dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get rolesCreate;
+
+  /// Dialog title for renaming a role.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename role'**
+  String get rolesRename;
+
+  /// Button to rename a role.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get rolesRenameButton;
+
+  /// Dialog title for deleting a role.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete role?'**
+  String get rolesDeleteTitle;
+
+  /// Dialog body for deleting a role.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be removed from your roles. Contests are not affected.'**
+  String rolesDeleteBody(String name);
+
+  /// Confirm button in the delete dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get rolesDelete;
+
+  /// Title when the role list fails to load.
+  ///
+  /// In en, this message translates to:
+  /// **'Roles could not be loaded.'**
+  String get rolesLoadFailed;
+
+  /// Loading label.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading roles'**
+  String get rolesLoading;
+
+  /// Field label in the name dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Role name'**
+  String get rolesNameLabel;
+
+  /// Validation error for a blank name.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name for the role.'**
+  String get rolesNameError;
+
+  /// Tooltip for the back button.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to roles'**
+  String get rolesBackToRoles;
+
+  /// Tooltip for the delete button.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}'**
+  String rolesDeleteTooltip(String name);
+
+  /// Tooltip when delete is off.
+  ///
+  /// In en, this message translates to:
+  /// **'In use, cannot delete'**
+  String get rolesInUseTooltip;
+
+  /// Detail label for role type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get rolesType;
+
+  /// Role type: pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot'**
+  String get rolesPilot;
+
+  /// Role type: non-flier.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-flier'**
+  String get rolesNonFlier;
+
+  /// Detail label for role owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get rolesOwner;
+
+  /// Owner: system.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get rolesOwnerSystem;
+
+  /// Owner: the director.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get rolesOwnerYou;
+
+  /// Detail label for scoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores'**
+  String get rolesScores;
+
+  /// Pilot receives scores.
+  ///
+  /// In en, this message translates to:
+  /// **'Receives scores'**
+  String get rolesReceivesScores;
+
+  /// Non-flier has no scores.
+  ///
+  /// In en, this message translates to:
+  /// **'No scores'**
+  String get rolesNoScores;
+
+  /// Why the Pilot role cannot be changed.
+  ///
+  /// In en, this message translates to:
+  /// **'The Pilot role is fixed. Every participant starts as a pilot, and only pilots fly and receive scores, so it cannot be renamed or deleted.'**
+  String get rolesPilotExplanation;
+
+  /// Why a system role cannot be changed.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a system role shared by every director, so it cannot be renamed or deleted.'**
+  String get rolesSystemExplanation;
+
+  /// Why an in-use role cannot be deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'A role that participants have cannot be deleted. Change those participants to another role first.'**
+  String get rolesInUseExplanation;
+
+  /// Title of the usage card.
+  ///
+  /// In en, this message translates to:
+  /// **'Where it is used'**
+  String get rolesUsageTitle;
+
+  /// Error text when usage fails to load.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage could not be loaded. {error}'**
+  String rolesUsageLoadFailed(String error);
+
+  /// Empty state in the usage card.
+  ///
+  /// In en, this message translates to:
+  /// **'No contest uses this role yet.'**
+  String get rolesUsageEmpty;
+
+  /// One usage line.
+  ///
+  /// In en, this message translates to:
+  /// **'{contest}: {count, plural, =1{1 participant} other{{count} participants}}'**
+  String rolesUsageItem(String contest, int count);
 }
 
 class _AppLocalizationsDelegate

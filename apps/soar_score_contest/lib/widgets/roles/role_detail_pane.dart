@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../detail_section_card.dart';
 import 'role_usage_card.dart';
 
@@ -30,20 +31,17 @@ class RoleDetailPane extends StatelessWidget {
   final VoidCallback? onBack;
 
   /// Why the system roles cannot be changed.
-  static const String pilotExplanation =
-      'The Pilot role is fixed. Every participant starts as a pilot, and '
-      'only pilots fly and receive scores, so it cannot be renamed or '
-      'deleted.';
-  static const String systemExplanation =
-      'This is a system role shared by every director, so it cannot be '
-      'renamed or deleted.';
+  static String pilotExplanation(AppLocalizations l10n) =>
+      l10n.rolesPilotExplanation;
+  static String systemExplanation(AppLocalizations l10n) =>
+      l10n.rolesSystemExplanation;
 
-  static const String inUseExplanation =
-      'A role that participants have cannot be deleted. Change those '
-      'participants to another role first.';
+  static String inUseExplanation(AppLocalizations l10n) =>
+      l10n.rolesInUseExplanation;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
@@ -53,7 +51,7 @@ class RoleDetailPane extends StatelessWidget {
             if (onBack != null)
               IconButton(
                 key: const ValueKey('role-detail-back'),
-                tooltip: 'Back to roles',
+                tooltip: l10n.rolesBackToRoles,
                 icon: const Icon(Icons.arrow_back),
                 onPressed: onBack,
               ),
@@ -70,7 +68,7 @@ class RoleDetailPane extends StatelessWidget {
                 key: const ValueKey('rename-role'),
                 onPressed: onRename,
                 icon: const Icon(Icons.edit, size: 18),
-                label: const Text('Rename'),
+                label: Text(l10n.rolesRenameButton),
               ),
               FutureBuilder<List<RoleUsage>>(
                 future: usage,
@@ -80,8 +78,8 @@ class RoleDetailPane extends StatelessWidget {
                   return IconButton(
                     key: const ValueKey('delete-role'),
                     tooltip: deletable
-                        ? 'Delete ${role.displayName}'
-                        : 'In use, cannot delete',
+                        ? l10n.rolesDeleteTooltip(role.displayName)
+                        : l10n.rolesInUseTooltip,
                     icon: const Icon(Icons.delete_outline),
                     onPressed: deletable ? onDelete : null,
                   );
@@ -96,21 +94,28 @@ class RoleDetailPane extends StatelessWidget {
             key: const ValueKey('system-role-note'),
             icon: Icons.lock_outline,
             text: role.id == SystemRoles.pilotId
-                ? pilotExplanation
-                : systemExplanation,
+                ? pilotExplanation(l10n)
+                : systemExplanation(l10n),
           ),
         if (role.isSystem) const SizedBox(height: 24),
         DetailSectionCard(
-          title: 'Role',
+          title: l10n.rolesType,
           items: [
             DetailItem(
-              'Type',
-              role.type == RoleType.pilot ? 'Pilot' : 'Non-flier',
+              l10n.rolesType,
+              role.type == RoleType.pilot
+                  ? l10n.rolesPilot
+                  : l10n.rolesNonFlier,
             ),
-            DetailItem('Owner', role.isSystem ? 'System' : 'You'),
             DetailItem(
-              'Scores',
-              role.type == RoleType.pilot ? 'Receives scores' : 'No scores',
+              l10n.rolesOwner,
+              role.isSystem ? l10n.rolesOwnerSystem : l10n.rolesOwnerYou,
+            ),
+            DetailItem(
+              l10n.rolesScores,
+              role.type == RoleType.pilot
+                  ? l10n.rolesReceivesScores
+                  : l10n.rolesNoScores,
             ),
           ],
         ),
@@ -120,12 +125,12 @@ class RoleDetailPane extends StatelessWidget {
           FutureBuilder<List<RoleUsage>>(
             future: usage,
             builder: (context, snapshot) => (snapshot.data?.isNotEmpty ?? false)
-                ? const Padding(
-                    padding: EdgeInsets.only(top: 24),
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 24),
                     child: _Note(
-                      key: ValueKey('in-use-note'),
+                      key: const ValueKey('in-use-note'),
                       icon: Icons.info_outline,
-                      text: inUseExplanation,
+                      text: inUseExplanation(l10n),
                     ),
                   )
                 : const SizedBox.shrink(),

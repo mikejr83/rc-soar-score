@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/pages/roles_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -111,6 +112,10 @@ Widget rolesApp(ApiClient client, {String initial = rolesPath}) {
   );
   return ApiClientInherited(
     client: client,
-    child: MaterialApp.router(routerConfig: router),
+    child: MaterialApp.router(
+      routerConfig: router,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+    ),
   );
 }
