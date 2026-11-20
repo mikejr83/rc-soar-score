@@ -739,6 +739,14 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       expect(saved, isNotNull);
       expect(saved!.hasPendingSubmission, isFalse);
       expect(saved.status, RowStatus.official);
+
+      // The history keeps the pilot's submission as the official revision and
+      // names who sent it and who made it official.
+      await openRowHistory(tester, saved);
+      expect(find.text('Revision 1'), findsOneWidget);
+      expect(find.text('Made official by Director'), findsOneWidget);
+      expect(find.textContaining('Submitted by '), findsOneWidget);
+      await closeHistory(tester);
       await leaveGroupDiscardingPending(tester);
     }),
     webOnly: true,

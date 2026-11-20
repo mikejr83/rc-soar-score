@@ -137,6 +137,15 @@ class _EntryTile extends StatelessWidget {
         entry.selectionOrigin == SelectionOrigin.automatic &&
         entry.outcome != ScoreHistoryOutcome.notAdopted &&
         entry.outcome != ScoreHistoryOutcome.pending;
+    // A director adopted a stored participant or helper submission: the
+    // entry is that submission, so name who sent it and who made it official.
+    final adopted =
+        entry.selectionOrigin != null &&
+        entry.selectionOrigin != SelectionOrigin.automatic &&
+        (entry.authority == Authority.participant ||
+            entry.authority == Authority.helper) &&
+        entry.outcome != ScoreHistoryOutcome.notAdopted &&
+        entry.outcome != ScoreHistoryOutcome.pending;
     final when = entry.at == null ? null : NextStepText.when(entry.at!, zoneId);
     return Card(
       key: ValueKey('history-entry-${entry.attemptId.value}'),
@@ -180,13 +189,20 @@ class _EntryTile extends StatelessWidget {
                 words.scoreHistoryMadeOfficialBy(words.scoreHistoryAutomatic),
                 key: ValueKey('history-automatic-${entry.attemptId.value}'),
               ),
+            if (adopted)
+              Text(
+                words.scoreHistoryMadeOfficialBy(words.scoreHistoryDirector),
+                key: ValueKey('history-adopted-${entry.attemptId.value}'),
+              ),
             if (automatic && entry.reviewClosed)
               Text(
                 words.scoreHistoryConfirmed,
                 key: ValueKey('history-confirmed-${entry.attemptId.value}'),
               ),
             Text(
-              when == null ? _who : '$_who · $when',
+              adopted
+                  ? 'Submitted by $_who${when == null ? '' : ' · $when'}'
+                  : (when == null ? _who : '$_who · $when'),
               style: theme.textTheme.bodySmall,
             ),
           ],
