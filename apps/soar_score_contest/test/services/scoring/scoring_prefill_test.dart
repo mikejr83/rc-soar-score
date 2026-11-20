@@ -32,6 +32,8 @@ void main() {
   final first = scoringAssignmentId(1, 1);
   const a = {'time_flown': 540, 'launch_height': 120};
   const b = {'time_flown': 500, 'launch_height': 130};
+  const h120 = {'time_flown': 540, 'launch_height': 120};
+  const h130 = {'time_flown': 540, 'launch_height': 130};
 
   test('an untouched pilot prefill follows a later submission', () async {
     final server = ScoringServer()..seedPendingSubmission(first, a);
@@ -76,6 +78,48 @@ void main() {
     expect(c.draftOf(_row(c, 2)).heightText, '130');
     // The waiting submission can still be marked official.
     expect(await c.markOfficial(_row(c, 1)), isTrue);
+  });
+
+  test('refresh moves what Revert compares to and restores', () async {
+    final server = ScoringServer()..seedScore(first, h120);
+    final c = await _open(server);
+    final draft = c.draftOf(_row(c, 1));
+    draft.setHeight('99');
+    expect(draft.canRevert, isTrue);
+
+    server.seedCorrection(first, h130, 'Corrected elsewhere');
+    await c.refresh();
+
+    // What was typed stays; the saved values are the newer ones.
+    expect(draft.heightText, '99');
+    expect(draft.canRevert, isTrue);
+    draft.setHeight('120');
+    expect(draft.canRevert, isTrue);
+    draft.setHeight('130');
+    expect(draft.canRevert, isFalse);
+    draft.setHeight('99');
+    c.revert(_row(c, 1));
+    expect(c.draftOf(_row(c, 1)).heightText, '130');
+    expect(c.draftOf(_row(c, 1)).canRevert, isFalse);
+  });
+
+  test('refresh after another director made the entry official', () async {
+    final server = ScoringServer()..seedPendingSubmission(first, h120);
+    final c = await _open(server);
+    final draft = c.draftOf(_row(c, 1));
+    draft.setHeight('99');
+
+    server.seedScore(first, h130);
+    await c.refresh();
+
+    expect(draft.heightText, '99');
+    expect(draft.canRevert, isTrue);
+    draft.setHeight('130');
+    expect(draft.canRevert, isFalse);
+    draft.setHeight('99');
+    c.revert(_row(c, 1));
+    expect(c.draftOf(_row(c, 1)).heightText, '130');
+    expect(_row(c, 1).savedComponents, isNotEmpty);
   });
 
   test('an untouched pilot prefill is not unsaved', () async {

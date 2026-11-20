@@ -800,7 +800,7 @@ class ScoringController extends ChangeNotifier {
         // An untouched form follows the reload (a pilot may have submitted
         // since); what the director typed stays.
         if (hasUnsavedInput(row)) {
-          draft.rebase(row.savedComponents);
+          draft.rebase(row.savedComponents, shown: _shown(row));
         } else {
           draft.resetTo(row.savedComponents, shown: _shown(row));
         }

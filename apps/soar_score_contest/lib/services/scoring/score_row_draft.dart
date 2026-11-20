@@ -121,9 +121,18 @@ class ScoreRowDraft extends ChangeNotifier {
       _prefill != null && _same(components, _prefill!);
 
   /// Keeps what was typed and makes [saved] the baseline it is compared to.
-  void rebase(Map<String, Object?> saved) {
+  ///
+  /// [shown] is what Revert would restore now (see [resetTo]). It becomes the
+  /// starting values [editedSinceLoad] and [canRevert] compare to, while the
+  /// typed fields and a zero confirmation stay as they are.
+  void rebase(Map<String, Object?> saved, {Map<String, Object?>? shown}) {
     _baseline = Map.of(saved);
     _prefill = null;
+    final typed = _TypedFields(this);
+    _load(shown ?? saved);
+    final starting = _loadedFields;
+    typed.restore(this);
+    _loadedFields = starting;
     notifyListeners();
   }
 
@@ -426,4 +435,47 @@ class ScoreRowDraft extends ChangeNotifier {
 
   /// Whether the height is 0, which saves as No altitude recorded.
   bool get heightZero => height != null && height! == 0;
+}
+
+/// The fields of a [ScoreRowDraft] as typed, kept while the draft's starting
+/// values are replaced (see [ScoreRowDraft.rebase]).
+class _TypedFields {
+  _TypedFields(ScoreRowDraft d)
+    : timeText = d.timeText,
+      heightText = d.heightText,
+      landing = d.landing,
+      landingText = d.landingText,
+      lateLanding = d.lateLanding,
+      motorRestart = d.motorRestart,
+      outOfBounds = d.outOfBounds,
+      noAltitude = d.noAltitude,
+      penaltyText = d.penaltyText,
+      cumulativePenaltyText = d.cumulativePenaltyText,
+      zeroConfirmed = d.zeroConfirmed;
+
+  final String timeText;
+  final String heightText;
+  final String? landing;
+  final String landingText;
+  final bool lateLanding;
+  final bool motorRestart;
+  final bool outOfBounds;
+  final bool noAltitude;
+  final String penaltyText;
+  final String cumulativePenaltyText;
+  final bool zeroConfirmed;
+
+  void restore(ScoreRowDraft d) {
+    d.timeText = timeText;
+    d.heightText = heightText;
+    d.landing = landing;
+    d.landingText = landingText;
+    d.lateLanding = lateLanding;
+    d.motorRestart = motorRestart;
+    d.outOfBounds = outOfBounds;
+    d.noAltitude = noAltitude;
+    d.penaltyText = penaltyText;
+    d.cumulativePenaltyText = cumulativePenaltyText;
+    d.zeroConfirmed = zeroConfirmed;
+  }
 }
