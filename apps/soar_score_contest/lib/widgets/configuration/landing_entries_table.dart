@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../landings/landing_unit_text.dart';
@@ -29,8 +30,8 @@ class LandingEntriesTable extends StatelessWidget {
   }
 
   /// `Meters · 10 entries · 5–50 points`.
-  static String summary(LandingTableView view) =>
-      '${landingUnitLabel(view.table.inputUnit)} · '
+  static String summary(AppLocalizations l10n, LandingTableView view) =>
+      '${landingUnitLabel(l10n, view.table.inputUnit)} · '
       '${view.results.length} entries · ${pointsRange(view)}';
 
   @override

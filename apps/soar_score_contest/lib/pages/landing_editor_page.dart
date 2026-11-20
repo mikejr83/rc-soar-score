@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
@@ -198,6 +199,7 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return PopScope(
       canPop: !_dirty,
       onPopInvokedWithResult: (didPop, _) async {
@@ -262,7 +264,7 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
                       for (final unit in LandingInputUnit.values)
                         DropdownMenuItem(
                           value: unit,
-                          child: Text(landingUnitLabel(unit)),
+                          child: Text(landingUnitLabel(l10n, unit)),
                         ),
                     ],
                     onChanged: (unit) => setState(() {

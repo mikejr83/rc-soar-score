@@ -5377,4 +5377,97 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$contest: $_temp0';
   }
+
+  @override
+  String get landingsTitle => 'Landings';
+
+  @override
+  String landingsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tables',
+      one: '1 table',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get landingsSystem => 'System';
+
+  @override
+  String get landingsYours => 'Yours';
+
+  @override
+  String landingsEntries(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries',
+      one: '1 entry',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get landingsUnitMeters => 'Meters';
+
+  @override
+  String get landingsUnitFeet => 'Feet';
+
+  @override
+  String get landingsUnitPoints => 'Points';
+
+  @override
+  String get landingsLockedSystem =>
+      'System tables are read-only and cannot be removed.';
+
+  @override
+  String get landingsLockedInUse =>
+      'Locked: a contest uses this table, so it cannot be removed.';
+
+  @override
+  String landingsLockedNote(String reason) {
+    return '$reason A table never changes; create a copy to make a different one.';
+  }
+
+  @override
+  String get landingsBackToLandings => 'Back to landings';
+
+  @override
+  String get landingsCreateCopy => 'Create copy';
+
+  @override
+  String landingsDeleteTooltip(String name) {
+    return 'Delete $name';
+  }
+
+  @override
+  String get landingsLabelHeading => 'Label';
+
+  @override
+  String get landingsPointsHeading => 'Points';
+
+  @override
+  String get landingsDeleteConfirmTitle => 'Delete landing table?';
+
+  @override
+  String landingsDeleteConfirmContent(String name) {
+    return '$name will be removed.';
+  }
+
+  @override
+  String get landingsDeleteCancel => 'Cancel';
+
+  @override
+  String get landingsDeleteConfirm => 'Delete';
+
+  @override
+  String get landingsLoadFailed => 'Landing tables could not be loaded.';
+
+  @override
+  String get landingsLoading => 'Loading landing tables';
+
+  @override
+  String get landingsEmpty => 'No landing tables yet.';
 }

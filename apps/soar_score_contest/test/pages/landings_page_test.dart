@@ -1,11 +1,13 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 
 import '../support/landing_test_support.dart';
 import '../support/participant_test_support.dart';
 
 void main() {
+  final l10n = AppLocalizationsEn();
   final system = landingView('F5J Standard', 1, system: true);
   final unused = landingView('Club table', 2);
   final used = landingView('Spring table', 3, inUse: true);
@@ -28,7 +30,7 @@ void main() {
         .map((tile) => (tile.title! as Text).data)
         .toList();
     expect(titles, ['Club table', 'Spring table', 'F5J Standard']);
-    expect(find.text('Landings'), findsOneWidget);
+    expect(find.text(l10n.landingsTitle), findsOneWidget);
     // Only the table in use shows a lock in the list.
     expect(find.byIcon(Icons.lock_outline), findsWidgets);
   });
@@ -87,8 +89,8 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('delete-landing')));
     await tester.pumpAndSettle();
-    expect(find.text('Delete landing table?'), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    expect(find.text(l10n.landingsDeleteConfirmTitle), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, l10n.landingsDeleteConfirm));
     await tester.pumpAndSettle();
 
     final delete = requests.singleWhere((r) => r.method == 'DELETE');
@@ -110,7 +112,7 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('delete-landing')));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    await tester.tap(find.widgetWithText(FilledButton, l10n.landingsDeleteConfirm));
     await tester.pumpAndSettle();
 
     expect(find.text('the landing table is used'), findsOneWidget);
@@ -145,7 +147,7 @@ void main() {
           : json(landingList([unused]));
     });
 
-    expect(find.text('Landing tables could not be loaded.'), findsOneWidget);
+    expect(find.text(l10n.landingsLoadFailed), findsOneWidget);
     await tester.tap(find.text('Retry'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(ListTile, 'Club table'), findsOneWidget);

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 
 import 'landing_unit_text.dart';
 
@@ -25,16 +26,17 @@ class LandingDetailPane extends StatelessWidget {
   final VoidCallback? onBack;
 
   /// Why [view] cannot be removed, or `null` when it can.
-  String? get lockedReason => view.table.isSystem
-      ? 'System tables are read-only and cannot be removed.'
+  String? lockedReason(AppLocalizations l10n) => view.table.isSystem
+      ? l10n.landingsLockedSystem
       : view.inUse
-      ? 'Locked: a contest uses this table, so it cannot be removed.'
-      : null;
+          ? l10n.landingsLockedInUse
+          : null;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final locked = lockedReason;
+    final l10n = AppLocalizations.of(context);
+    final locked = lockedReason(l10n);
     final muted = theme.textTheme.bodyMedium?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
     );
@@ -46,7 +48,7 @@ class LandingDetailPane extends StatelessWidget {
             if (onBack != null)
               IconButton(
                 key: const ValueKey('landing-detail-back'),
-                tooltip: 'Back to landings',
+                tooltip: l10n.landingsBackToLandings,
                 icon: const Icon(Icons.arrow_back),
                 onPressed: onBack,
               ),
@@ -56,8 +58,8 @@ class LandingDetailPane extends StatelessWidget {
                 children: [
                   Text(view.table.name, style: theme.textTheme.headlineSmall),
                   Text(
-                    '${landingUnitLabel(view.table.inputUnit)} · '
-                    '${view.results.length} entries',
+                    '${landingUnitLabel(l10n, view.table.inputUnit)} · '
+                    '${l10n.landingsEntries(view.results.length)}',
                     style: muted,
                   ),
                 ],
@@ -67,12 +69,12 @@ class LandingDetailPane extends StatelessWidget {
               key: const ValueKey('copy-landing'),
               onPressed: onCopy,
               icon: const Icon(Icons.copy_outlined, size: 18),
-              label: const Text('Create copy'),
+              label: Text(l10n.landingsCreateCopy),
             ),
             if (locked == null)
               IconButton(
                 key: const ValueKey('delete-landing'),
-                tooltip: 'Delete ${view.table.name}',
+                tooltip: l10n.landingsDeleteTooltip(view.table.name),
                 icon: const Icon(Icons.delete_outline),
                 onPressed: onDelete,
               )
@@ -100,10 +102,7 @@ class LandingDetailPane extends StatelessWidget {
                   const Icon(Icons.lock_outline, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      '$locked A table never changes; create a copy to '
-                      'make a different one.',
-                    ),
+                    child: Text(l10n.landingsLockedNote(locked)),
                   ),
                 ],
               ),
@@ -120,7 +119,10 @@ class LandingDetailPane extends StatelessWidget {
               children: [
                 TableRow(
                   children: [
-                    for (final heading in ['Label', 'Points'])
+                    for (final heading in [
+                      l10n.landingsLabelHeading,
+                      l10n.landingsPointsHeading,
+                    ])
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Text(

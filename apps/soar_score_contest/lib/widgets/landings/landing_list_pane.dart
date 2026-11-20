@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'landing_unit_text.dart';
@@ -24,6 +25,7 @@ class LandingListPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -33,11 +35,11 @@ class LandingListPane extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text('Landings', style: theme.textTheme.titleLarge),
+              Text(l10n.landingsTitle, style: theme.textTheme.titleLarge),
               const SizedBox(width: 12),
               Flexible(
                 child: Text(
-                  '${tables.length} tables',
+                  l10n.landingsCount(tables.length),
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
@@ -65,9 +67,9 @@ class LandingListPane extends StatelessWidget {
                 ),
                 title: Text(view.table.name),
                 subtitle: Text(
-                  '${view.table.isSystem ? 'System' : 'Yours'} · '
-                  '${landingUnitLabel(view.table.inputUnit)} · '
-                  '${view.results.length} entries',
+                  '${view.table.isSystem ? l10n.landingsSystem : l10n.landingsYours} · '
+                  '${landingUnitLabel(l10n, view.table.inputUnit)} · '
+                  '${l10n.landingsEntries(view.results.length)}',
                 ),
                 trailing: view.inUse
                     ? const Icon(Icons.lock_outline, size: 18)
