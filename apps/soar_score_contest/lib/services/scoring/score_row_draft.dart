@@ -359,7 +359,25 @@ class ScoreRowDraft extends ChangeNotifier {
   }
 
   /// Whether the typed values differ from what is saved.
-  bool get isDirty => !_same(components, _baseline);
+  bool get isDirty => !_same(components, _asEntered(_baseline));
+
+  /// [saved] as this form would send it: a zeroing flight keeps no time,
+  /// height or landing, and a late landing keeps no landing, because the form
+  /// leaves those off. A score saved with both (seed data, an import) then
+  /// compares equal to the untouched form instead of showing as unsaved.
+  static Map<String, Object?> _asEntered(Map<String, Object?> saved) {
+    const flags = ['no_altitude_recorded', 'motor_restart', 'out_of_bounds'];
+    const measured = ['time_flown', 'launch_height', 'landing', 'late_landing'];
+    final zeroFlag = flags.where((f) => saved[f] == true).firstOrNull;
+    final out = Map.of(saved);
+    if (zeroFlag != null) {
+      out.removeWhere((k, _) => flags.contains(k) || measured.contains(k));
+      out[zeroFlag] = true;
+    } else if (saved['late_landing'] == true) {
+      out.remove('landing');
+    }
+    return out;
+  }
 
   static bool _same(Map<String, Object?> a, Map<String, Object?> b) {
     Map<String, Object?> clean(Map<String, Object?> m) => {
