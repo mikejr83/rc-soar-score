@@ -46,6 +46,9 @@ ReportsFacts _facts({
     data: data,
     scores: scores,
     workspace: WorkspaceFacts.derive(data: data, scores: scores),
+    latestStandings: state == LifecycleState.completed
+        ? ContestResults(asOfRound: 2)
+        : null,
   );
 }
 
@@ -131,23 +134,45 @@ void main() {
     });
 
     test('a score that is submitted or in review makes it preliminary', () {
-      for (final state in [
-        ScorePlaceholderState.submitted,
-        ScorePlaceholderState.inReview,
-      ]) {
+      for (final state in [LifecycleState.running, LifecycleState.completed]) {
+        for (final slotState in [
+          ScorePlaceholderState.submitted,
+          ScorePlaceholderState.inReview,
+        ]) {
+          final facts = _facts(
+            matrix: drawnMatrix(),
+            scored: _all(2),
+            state: state,
+            slotState: slotState,
+          );
+          expect(facts.resultStatus, ResultStatus.preliminary);
+          final note = ReportAvailability.of(
+            ReportKind.standings,
+            facts,
+          ).notes.single;
+          expect(note.text, '1 score is not official yet.');
+        }
+      }
+    });
+
+    test(
+      'a completed contest keeps its official label and missing score note',
+      () {
         final facts = _facts(
+          state: LifecycleState.completed,
           matrix: drawnMatrix(),
-          scored: _all(2),
-          slotState: state,
+          scored: _all(2)..remove((1, 1)),
         );
-        expect(facts.resultStatus, ResultStatus.preliminary);
+        expect(facts.resultStatus, ResultStatus.official);
         final note = ReportAvailability.of(
           ReportKind.standings,
           facts,
         ).notes.single;
-        expect(note.text, '1 score is not official yet.');
-      }
-    });
+        expect(note.lead, 'Missing scores:');
+        expect(note.text, '1 pilot has no score in round 1.');
+        expect(note.action!.round, 1);
+      },
+    );
   });
 
   group('warnings on the documents', () {

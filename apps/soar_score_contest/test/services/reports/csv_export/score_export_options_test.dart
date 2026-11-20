@@ -2,7 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/reports/csv_export/score_export_options.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../../support/matrix_test_support.dart';
 import '../../../support/standings_fixtures.dart';
+import '../../../support/workspace_facts_support.dart';
 
 void main() {
   final fixture = StandingsFixture();
@@ -56,10 +58,29 @@ void main() {
     expect(options.check(), isNotNull);
   });
 
-  test('a completed contest is never provisional', () {
-    final completed = factsOf(fixture, state: LifecycleState.completed);
-    // Provisional is gone from the options; the default filters still turn it
-    // off for a completed contest.
-    expect(ScoreExportOptions.defaults(completed)['prov'], '0');
+  test('a completed contest exports later rounds after a gap', () {
+    final completed = factsOf(
+      fixture,
+      state: LifecycleState.completed,
+      scores: scoresFor(drawnMatrix(), {(1, 1): at(1), (2, 1): at(2)}),
+    );
+    final defaults = ScoreExportOptions.defaults(completed);
+    expect(defaults['prov'], '0');
+    final options = ScoreExportOptions.of(defaults, completed);
+    expect(options.rounds, [1, 2]);
+    expect(options.check(), isNull);
+  });
+
+  test('a completed contest without a snapshot has no standings to export', () {
+    final noSnapshots = StandingsFixture()..standings.clear();
+    final completed = factsOf(noSnapshots, state: LifecycleState.completed);
+    final options = ScoreExportOptions.of(const {}, completed);
+
+    expect(completed.lastScoredRound, 2);
+    expect(options.rounds, isEmpty);
+    expect(
+      options.check(),
+      'No standings are stored for the requested rounds.',
+    );
   });
 }

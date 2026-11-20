@@ -148,6 +148,11 @@ class WorkspaceFacts extends Equatable {
             onlyRoundOrdinal: frontier,
           );
     final assignmentIds = {for (final a in assignments) a.id};
+    final placeholders = {
+      for (final slot in scores?.slots ?? const <ScoreSlot>[])
+        slot.placeholder.assignmentId: slot.placeholder,
+    };
+    final participations = {for (final p in data.participations) p.id: p};
     return WorkspaceFacts._(
       contest: data.contest,
       configuration: data.configuration,
@@ -179,12 +184,26 @@ class WorkspaceFacts extends Equatable {
           : sizes.values.reduce((a, b) => a > b ? a : b),
       rounds: List.unmodifiable(rounds),
       latestScore: latest?.$1,
-      currentGroup: latest == null || scores == null
+      currentGroup: latest == null
           ? null
-          : _currentGroup(latest, scores, assignments, roundById, sizes),
-      frontierGroup: frontierScore == null || scores == null
+          : _currentGroup(
+              latest,
+              assignments,
+              roundById,
+              sizes,
+              placeholders,
+              participations,
+            ),
+      frontierGroup: frontierScore == null
           ? null
-          : _currentGroup(frontierScore, scores, assignments, roundById, sizes),
+          : _currentGroup(
+              frontierScore,
+              assignments,
+              roundById,
+              sizes,
+              placeholders,
+              participations,
+            ),
       scoreCount: scores == null
           ? 0
           : scores.slots
@@ -351,26 +370,24 @@ class WorkspaceFacts extends Equatable {
 
   static CurrentGroupFacts _currentGroup(
     (LatestScore, MatrixAssignment) latest,
-    ContestScores scores,
     List<MatrixAssignment> assignments,
     Map<Id, Round> roundById,
     Map<(Id, int), int> sizes,
+    Map<Id, ScorePlaceholder> placeholders,
+    Map<Id, ContestParticipation> participations,
   ) {
     final (score, assignment) = latest;
     final roundId = assignment.scheduledRoundId;
-    final inGroup = {
-      for (final other in assignments)
-        if (other.scheduledRoundId == roundId &&
-            other.group == score.groupNumber)
-          other.id,
-    };
-    final scored = scores.slots
-        .where(
-          (slot) =>
-              _isEntered(slot) &&
-              inGroup.contains(slot.placeholder.assignmentId),
-        )
-        .length;
+    final progress = RoundProgress.count(
+      roundById[roundId]!,
+      assignments.where(
+        (other) =>
+            other.scheduledRoundId == roundId &&
+            other.group == score.groupNumber,
+      ),
+      placeholders: placeholders,
+      participations: participations,
+    );
     final laterGroups = [
       for (final key in sizes.keys)
         if (key.$1 == roundId && key.$2 > score.groupNumber) key.$2,
@@ -395,8 +412,8 @@ class WorkspaceFacts extends Equatable {
     return CurrentGroupFacts(
       roundOrdinal: score.roundOrdinal,
       groupNumber: score.groupNumber,
-      scored: scored,
-      total: inGroup.length,
+      scored: progress.scored,
+      total: progress.total,
       nextRoundOrdinal: nextRound,
       nextGroupNumber: nextGroup,
     );

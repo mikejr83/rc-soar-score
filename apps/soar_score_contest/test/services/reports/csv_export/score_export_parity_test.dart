@@ -1,10 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/testing.dart';
+import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'package:soar_score_contest/services/matrix/matrix_page_data.dart';
+import 'package:soar_score_contest/services/reports/csv_export/overall_results_format.dart';
+import 'package:soar_score_contest/services/reports/csv_export/score_csv_exporter.dart';
 import 'package:soar_score_contest/services/reports/csv_export/score_export_options.dart';
 import 'package:soar_score_contest/services/reports/csv_export/score_export_source.dart';
 import 'package:soar_score_contest/services/reports/reports_facts.dart';
+import 'package:soar_score_contest/services/reports/reports_facts_loader.dart';
 import 'package:soar_score_contest/services/reports/standings/standings_options.dart';
 import 'package:soar_score_contest/services/reports/standings/standings_report_data.dart';
 import 'package:soar_score_contest/services/reports/standings/standings_table.dart';
@@ -17,6 +22,55 @@ import '../../../support/standings_fixtures.dart';
 /// the Overall Standings report read the same contest and must agree on the
 /// rounds, the option columns, the decimals, and every pilot's numbers.
 void main() {
+  for (final official in [false, true]) {
+    test(
+      'completed report and CSV use the available snapshot with trailing official=$official',
+      () async {
+        final fixture = StandingsFixture(
+          trailingScore: official
+              ? ScorePlaceholderState.official
+              : ScorePlaceholderState.submitted,
+        );
+        final server = StandingsServer(
+          fixture,
+          state: LifecycleState.completed,
+        );
+        final client = ApiClient(
+          baseUrl: Uri.parse('http://localhost'),
+          httpClient: MockClient(server.handle),
+        );
+        final facts = await ReportsFactsLoader.load(client, contestId);
+        final options = ScoreExportOptions.of(const {}, facts);
+        final expectedRound = official ? 2 : 1;
+
+        expect(options.requestedTo, expectedRound);
+        expect(options.to, expectedRound);
+        expect(StandingsOptions.of(const {}, facts).rounds, options.rounds);
+
+        final data = await client.reportData(
+          contestId,
+          asOfRound: options.to,
+          rounds: options.rounds,
+        );
+        final source = ScoreExportSource.of(data, options);
+        final csv = ScoreCsvExporter().exportCsv(
+          source,
+          OverallResultsFormat(options),
+        );
+        final header = csv.split('\n').first;
+        expect(header, contains('R1'));
+        expect(header, official ? contains('R2') : isNot(contains('R2')));
+        expect(source.standings, hasLength(4));
+        if (official) {
+          expect(
+            source.standings.where((r) => r.cells[2]?.score == null),
+            hasLength(3),
+          );
+        }
+      },
+    );
+  }
+
   final fixture = StandingsFixture();
 
   // A configuration that uses teams, numbers and classes, with two decimals,

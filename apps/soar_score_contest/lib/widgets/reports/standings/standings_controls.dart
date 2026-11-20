@@ -17,7 +17,7 @@ List<ReportControlGroup> standingsControls(
   final facts = context.facts;
   final check = context.check;
   final rounds = {
-    for (var r = 1; r <= facts.lastScoredRound; r++)
+    for (var r = 1; r <= facts.defaultStandingsRound; r++)
       '$r': _roundLabel(facts, r),
   };
   void toggle(String key, bool value) =>

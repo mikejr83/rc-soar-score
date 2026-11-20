@@ -93,6 +93,20 @@ void main() {
     expect(headline.latestScoreAt, at(9));
   });
 
+  test('a current group excuses an unscored retired pilot', () {
+    final matrix = drawnMatrix();
+    final facts = WorkspaceFacts.derive(
+      data: workspaceData(
+        matrix: matrix,
+        participations: matrixParticipations(retired: {3: 2}),
+      ),
+      scores: scoresFor(matrix, {(2, 1): at(10)}),
+    );
+    final group = facts.frontierGroup!;
+    expect((group.scored, group.total), (1, 1));
+    expect(ProgressSummary.of(facts).lag, isNull);
+  });
+
   test('a completed contest reads as finished', () {
     final matrix = drawnMatrix();
     final facts = WorkspaceFacts.derive(

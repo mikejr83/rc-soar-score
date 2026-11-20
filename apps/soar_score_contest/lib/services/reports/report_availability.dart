@@ -1,5 +1,6 @@
 import 'report_kind.dart';
 import 'reports_facts.dart';
+import 'result_status.dart';
 
 /// Where a reason or warning on a card sends the director.
 enum ReportDestination { scoring, matrix }
@@ -66,6 +67,12 @@ class ReportAvailability {
           _noScores,
         );
       }
+      if (facts.isCompleted && facts.lastStoredStandingsRound == null) {
+        return const ReportAvailability.unavailable(
+          'No standings stored yet.',
+          _noScores,
+        );
+      }
       return ReportAvailability.available(_scoreNotes(facts));
     }
     if (!facts.hasMatrix) {
@@ -91,6 +98,9 @@ class ReportAvailability {
     final standing = facts.standing;
     final first = standing.firstMissingRound;
     final parts = <String>[];
+    if (facts.storedStandingsStale) {
+      parts.add('The stored standings are out of date.');
+    }
     if (first != null) {
       final count = standing.missingByRound[first]!;
       parts.add(
@@ -116,7 +126,9 @@ class ReportAvailability {
     }
     return [
       ReportNote(
-        lead: 'Preliminary:',
+        lead: facts.resultStatus == ResultStatus.official
+            ? 'Missing scores:'
+            : 'Preliminary:',
         text: parts.join(' '),
         action: ReportAction(
           'Open Scoring',

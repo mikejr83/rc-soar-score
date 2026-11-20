@@ -30,6 +30,9 @@ ScoreSlot scoreSlot(MatrixAssignment assignment, {DateTime? setAt}) {
     contestId: contestId,
     contestParticipationId: assignment.contestParticipationId,
     assignmentId: assignment.id,
+    state: setAt == null
+        ? ScorePlaceholderState.notEntered
+        : ScorePlaceholderState.official,
   );
   return ScoreSlot(
     placeholder: placeholder,

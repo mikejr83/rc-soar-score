@@ -12,6 +12,7 @@ import '../support/open_demo_contest.dart';
 import '../support/pump_until_gone.dart';
 import 'export_step.dart';
 import 'journey.dart';
+import 'scoring_steps.dart';
 
 Finder _key(String key) => find.byKey(ValueKey(key));
 const _apiBase = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
@@ -53,6 +54,16 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
         isNull,
       );
       expect(_key('control-lifecycle-reason'), findsOneWidget);
+    }),
+  );
+
+  await journey.step(
+    'Completed scoring: the lock reason appears in the banner and on the chip',
+    () => inContest(() async {
+      await openRoundGroup(tester, 1, 1);
+      const reason = 'This contest is completed. Scores cannot be entered.';
+      expect(find.text(reason), findsOneWidget);
+      expect(find.byTooltip(reason), findsWidgets);
     }),
   );
 
@@ -176,8 +187,16 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
     () => inContest(() async {
       await tapRail(tester, 'Reports');
       await pumpUntilFound(tester, find.text('Reports are built from'));
+      expect(
+        find.descendant(
+          of: _key('reports-fact-result-status'),
+          matching: find.text('Official'),
+        ),
+        findsOneWidget,
+      );
       await tapVisible(tester, _key('report-open-standings'));
       await pumpUntilFound(tester, find.text('Rank'));
+      expect(_key('To round:${data.rounds}'), findsOneWidget);
 
       // The heading, the columns and a column for each round.
       expect(find.textContaining('Overall Results - '), findsWidgets);
@@ -197,10 +216,8 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
         findsNothing,
       );
 
-      // The ranking follows the flights the journey entered: the pilot who
-      // flew longest and lowest wins (possibly tied with another group's
-      // winner), the pilot who flew least and retired last, and nobody
-      // ranks above a pilot with a higher total.
+      // Group normalization can change the winning pilot with the draw.
+      // The report starts with first place and orders the stored totals.
       final rows = tester
           .widgetList<StandingsTableView>(find.byType(StandingsTableView))
           .first
@@ -214,7 +231,8 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
       final worst = rows.firstWhere(
         (r) => r.pilot.givenSurname == data.pilotNames.last,
       );
-      expect(best.place, 1);
+      expect(rows.first.place, 1);
+      expect(best.total, greaterThan(worst.total));
       expect(worst.place, data.pilotNames.length);
       expect(rows.where((r) => r.place == worst.place), hasLength(1));
       for (var i = 1; i < rows.length; i++) {
