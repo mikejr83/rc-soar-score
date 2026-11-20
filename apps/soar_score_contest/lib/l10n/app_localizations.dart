@@ -8017,6 +8017,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No landing tables yet.'**
   String get landingsEmpty;
+
+  /// Label for the name field in the landing editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get landingEditorName;
+
+  /// Label for the unit dropdown in the landing editor.
+  ///
+  /// In en, this message translates to:
+  /// **'What the keys mean'**
+  String get landingEditorUnitLabel;
+
+  /// Section header for the entries list.
+  ///
+  /// In en, this message translates to:
+  /// **'Entries'**
+  String get landingEditorEntries;
+
+  /// Button to add another entry row.
+  ///
+  /// In en, this message translates to:
+  /// **'Add entry'**
+  String get landingEditorAddEntry;
+
+  /// Save button in the landing editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get landingEditorSave;
+
+  /// Cancel button in the landing editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get landingEditorCancel;
+
+  /// Label for the entry label field.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get landingEditorEntryLabel;
+
+  /// Label for the entry points field.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get landingEditorEntryPoints;
+
+  /// Tooltip for the remove-entry button.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove entry {n}'**
+  String landingEditorRemoveEntry(int n);
+
+  /// Title of the external site confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening external site'**
+  String get landingOpenExternalTitle;
+
+  /// Cancel button in the external site dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get landingOpenExternalCancel;
+
+  /// Open button in the external site dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get landingOpenExternalOpen;
+
+  /// Snack bar when opening a link fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open \"{label}\".'**
+  String landingOpenExternalFailed(String label);
+
+  /// Sign in button on the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get landingSignIn;
+
+  /// Create account button on the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get landingCreateAccount;
+
+  /// Loading text while checking sign-in.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking sign-in…'**
+  String get landingCheckingSignIn;
+
+  /// Retry button after a failed sign-in check.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get landingRetry;
+
+  /// Continue button on the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get landingContinue;
+
+  /// Sign out button on the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get landingSignOut;
+
+  /// Continue offline button on the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue offline'**
+  String get landingContinueOffline;
+
+  /// Help button on the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get landingHelp;
+
+  /// Link to the public contest site.
+  ///
+  /// In en, this message translates to:
+  /// **'Public contest site'**
+  String get landingPublicSite;
+
+  /// Content of the external site dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'You are about to leave Soar Score and open \"{label}\" in a new browser tab. Any unsaved local work is not affected.'**
+  String landingOpenExternalContent(String label);
+
+  /// Title when the identity provider is unreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in unavailable'**
+  String get landingSignInUnavailable;
+
+  /// Detail text when the identity provider is unreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'The identity provider is currently unreachable: {error}.'**
+  String landingSignInUnavailableDetail(String error);
+
+  /// Label showing the signed-in user.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {name}'**
+  String landingSignedInAs(String name);
+
+  /// Tagline under the brand logo.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage and score RC sailplane soaring contests.'**
+  String get landingTagline;
+
+  /// Note about offline contests (native only).
+  ///
+  /// In en, this message translates to:
+  /// **'Offline contests stay on this device unless you publish them or sign in to enable synchronization.'**
+  String get landingOfflineNote;
 }
 
 class _AppLocalizationsDelegate
