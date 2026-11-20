@@ -27,6 +27,7 @@ import 'services/theme/theme_controller.dart';
 final _logger = Logger('Main');
 
 Future<void> main() async {
+  StartupTrace.mark('main begin');
   configureLogging(level: Level.FINER, format: LogFormat.text);
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +36,12 @@ Future<void> main() async {
 
   try {
     _logger.info('Starting Soar Score Contest App');
-    runApp(await _startWithSplash());
+    final app = await StartupTrace.step(
+      'start (splash + bootstrap)',
+      _startWithSplash,
+    );
+    StartupTrace.mark('runApp');
+    runApp(app);
   } catch (error, stackTrace) {
     _logger.severe('Soar Score startup failed: $error\n$stackTrace');
     debugPrintStack(
@@ -74,9 +80,15 @@ Future<Widget> _startWithSplash() => startWithSplash(
 /// Starts the platform bootstrap and prepares the app around it, without
 /// showing it. A failure in either releases what was already opened.
 Future<Widget> _startApp() async {
-  final appBootstrap = await bootstrap.start();
+  final appBootstrap = await StartupTrace.step(
+    'bootstrap.start',
+    bootstrap.start,
+  );
   try {
-    return await _prepareContestApp(appBootstrap);
+    return await StartupTrace.step(
+      'prepare contest app (theme, text size, panels)',
+      () => _prepareContestApp(appBootstrap),
+    );
   } catch (_) {
     await appBootstrap.close();
     rethrow;

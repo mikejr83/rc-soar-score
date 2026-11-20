@@ -5,6 +5,7 @@
 library;
 
 export 'config/log_format.dart';
+export 'logging/startup_trace.dart';
 export 'errors/account_claim_error.dart';
 export 'errors/backend_only_error.dart';
 export 'errors/contest_state_error.dart';

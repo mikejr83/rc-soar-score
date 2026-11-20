@@ -267,21 +267,39 @@ class EmbeddedServer {
   Future<void> initializeDatabase() async {
     final dbPath = File(_databasePath);
     _logger.finer('Using database path: ${dbPath.path}');
+    core.StartupTrace.mark(
+      'db file exists before open: ${dbPath.existsSync()}',
+    );
     await dbPath.parent.create(recursive: true);
+    final trace = StartupTraceInterceptor();
     _database = createLocalDatabase(
       dbPath,
       interceptor: WriteGuardInterceptor(
         beforeWrite: () => _guardWrite(commit: false),
         beforeCommit: () => _guardWrite(commit: true),
       ),
+      traceInterceptor: trace,
     );
+    // The file is opened and migrated by the first statement.
+    await core.StartupTrace.step(
+      'open + migrate database',
+      () => _database.customSelect('SELECT 1').get(),
+    );
+    trace.summary('after open');
     // First launch installs the shipped system data so a director who has
     // never synchronized can create and score contests offline. A failure
     // closes the database and reaches the startup failure page, so the app
     // never starts with partial data.
     try {
-      await SystemDataSeeder(_database).seed();
-      _localAccountId = await LocalAccountRepository(_database).ensure();
+      await core.StartupTrace.step(
+        'system data seed',
+        () => SystemDataSeeder(_database).seed(),
+      );
+      trace.summary('after system seed');
+      _localAccountId = await core.StartupTrace.step(
+        'local account',
+        () => LocalAccountRepository(_database).ensure(),
+      );
       // A claimed installation owns its data as the account, so it starts as
       // that account even offline; the sign-in only decides what is synced.
       _linkedAccountId = await LocalAccountRepository(_database)
@@ -299,12 +317,16 @@ class EmbeddedServer {
         _logger.finer('Seeding demo data');
         // One transaction for the whole demo: each service call would
         // otherwise commit (and sync to disk) on its own, 300 times over.
-        await _database.transaction(
-          () => DemoDataSeeder(
-            Repository(_database),
-            localAccountId: _localAccountId,
-          ).seed(),
+        await core.StartupTrace.step(
+          'demo seed',
+          () => _database.transaction(
+            () => DemoDataSeeder(
+              Repository(_database),
+              localAccountId: _localAccountId,
+            ).seed(),
+          ),
         );
+        trace.summary('after demo seed');
       }
     } catch (_) {
       await _database.close();
@@ -394,8 +416,8 @@ Future<EmbeddedServer> startEmbeddedServer(
     seedDemo: seedDemo,
     drawRunner: drawRunner,
   );
-  await server.initializeDatabase();
-  await server.initialize();
+  await core.StartupTrace.step('initializeDatabase', server.initializeDatabase);
+  await core.StartupTrace.step('initialize (http server)', server.initialize);
   return server;
 }
 

@@ -3,7 +3,8 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:soar_score_core/soar_score_core.dart' show SyncScopeKey;
+import 'package:soar_score_core/soar_score_core.dart'
+    show StartupTrace, SyncScopeKey;
 import 'package:soar_score_data/postgres_config.dart';
 
 import 'contests_table.dart';
@@ -170,44 +171,54 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) => createCurrentSchema(m, profileTables),
+    onCreate: (m) => StartupTrace.step(
+      'schema create (${profileTables.length} tables)',
+      () => createCurrentSchema(m, profileTables),
+    ),
     beforeOpen: (details) async {
+      StartupTrace.mark(
+        'beforeOpen: wasCreated=${details.wasCreated} '
+        'versionBefore=${details.versionBefore} versionNow=${details.versionNow}',
+      );
       // SQLite ignores foreign keys unless asked; PostgreSQL always checks.
       if (executor.dialect == SqlDialect.sqlite) {
         await customStatement('PRAGMA foreign_keys = ON');
       }
     },
-    onUpgrade: (m, from, to) async {
-      if (from != 1 || to != 2) {
-        throw UnsupportedError(
-          'Schema upgrade from $from to $to is not supported.',
-        );
-      }
-      // Rebuilding official_scores on SQLite drops a table other tables point
-      // at. Foreign keys cannot be switched off inside a transaction, so do
-      // it before one (they are already off while Drift upgrades, but do not
-      // rely on that) and restore them afterwards.
-      final sqlite = executor.dialect == SqlDialect.sqlite;
-      final keysWereOn =
-          sqlite &&
-          (await customSelect(
-            'PRAGMA foreign_keys',
-          ).getSingle()).read<bool>('foreign_keys');
-      if (keysWereOn) await customStatement('PRAGMA foreign_keys = OFF');
-      try {
-        await _upgradeFromVersion1(m);
-        if (sqlite) {
-          final broken = await customSelect('PRAGMA foreign_key_check').get();
-          if (broken.isNotEmpty) {
-            throw StateError(
-              'The upgrade left ${broken.length} broken foreign keys.',
-            );
-          }
+    onUpgrade: (m, from, to) => StartupTrace.step(
+      'schema upgrade $from to $to',
+      () async {
+        if (from != 1 || to != 2) {
+          throw UnsupportedError(
+            'Schema upgrade from $from to $to is not supported.',
+          );
         }
-      } finally {
-        if (keysWereOn) await customStatement('PRAGMA foreign_keys = ON');
-      }
-    },
+        // Rebuilding official_scores on SQLite drops a table other tables point
+        // at. Foreign keys cannot be switched off inside a transaction, so do
+        // it before one (they are already off while Drift upgrades, but do not
+        // rely on that) and restore them afterwards.
+        final sqlite = executor.dialect == SqlDialect.sqlite;
+        final keysWereOn =
+            sqlite &&
+            (await customSelect(
+              'PRAGMA foreign_keys',
+            ).getSingle()).read<bool>('foreign_keys');
+        if (keysWereOn) await customStatement('PRAGMA foreign_keys = OFF');
+        try {
+          await _upgradeFromVersion1(m);
+          if (sqlite) {
+            final broken = await customSelect('PRAGMA foreign_key_check').get();
+            if (broken.isNotEmpty) {
+              throw StateError(
+                'The upgrade left ${broken.length} broken foreign keys.',
+              );
+            }
+          }
+        } finally {
+          if (keysWereOn) await customStatement('PRAGMA foreign_keys = ON');
+        }
+      },
+    ),
   );
 
   Future<void> _upgradeFromVersion1(Migrator m) async {
@@ -451,13 +462,16 @@ SoarScoreDatabase createLocalDatabase(
   File dbFilePath, {
   bool inBackground = true,
   QueryInterceptor? interceptor,
+  QueryInterceptor? traceInterceptor,
 }) {
   final native = inBackground
       ? NativeDatabase.createInBackground(dbFilePath, enableMigrations: true)
       : NativeDatabase(dbFilePath, enableMigrations: true);
-  final executor = interceptor == null
+  var executor = interceptor == null
       ? native
       : native.interceptWith(interceptor);
+  if (traceInterceptor != null)
+    executor = executor.interceptWith(traceInterceptor);
   return SoarScoreDatabase(executor, profile: DatabaseProfile.native);
 }
 

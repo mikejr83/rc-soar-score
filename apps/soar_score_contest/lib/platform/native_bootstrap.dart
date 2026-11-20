@@ -213,17 +213,22 @@ class NativeBootstrap extends AppBootstrap {
     const String rawUrl = String.fromEnvironment('SOAR_SCORE_API_BASE_URL');
     final baseUrl = Uri.parse(rawUrl.isEmpty ? defaultApiBaseUrl : rawUrl);
     _logger.info('Base URL: $baseUrl');
+    core.StartupTrace.mark('bootstrap.start begin');
     final database = await databasePath(demo: demo);
+    core.StartupTrace.mark('database path: $database');
     if (demoReset) {
       _logger.info('Resetting demo database');
       await deleteDatabaseFiles(database);
     }
-    final server = await startEmbeddedServer(
-      database,
-      seedDemo: demo,
-      drawRunner: slowDraws
-          ? const DelayedDrawRunner(IsolateDrawRunner())
-          : null,
+    final server = await core.StartupTrace.step(
+      'startEmbeddedServer',
+      () => startEmbeddedServer(
+        database,
+        seedDemo: demo,
+        drawRunner: slowDraws
+            ? const DelayedDrawRunner(IsolateDrawRunner())
+            : null,
+      ),
     );
     _logger.info('Embedded API server listening on ${server.baseUrl}');
     ContestExchange.current = NativeContestExchange(server);
@@ -236,7 +241,7 @@ class NativeBootstrap extends AppBootstrap {
     // The embedded client carries the server's per-launch secret; only the
     // remote client carries the sign-in token.
     final auth = createAuthSession();
-    await auth.restore();
+    await core.StartupTrace.step('auth.restore', auth.restore);
     // Requests the app binds to a sign-in carry that sign-in's token or are
     // not sent (see AuthEpoch).
     final epoch = AuthEpoch(auth);
@@ -245,14 +250,17 @@ class NativeBootstrap extends AppBootstrap {
       baseUrl: baseUrl,
       tokenProvider: epoch.boundToken(auth.accessToken),
     );
-    final sync = await NativeSync.start(
-      database: server.database,
-      localAccountId: server.localAccountId,
-      acting: acting,
-      remote: remote,
-      databasePath: database,
-      inspectionOwners: server.inspectionOwners,
-      promotionIntents: server.promotionIntents,
+    final sync = await core.StartupTrace.step(
+      'NativeSync.start',
+      () => NativeSync.start(
+        database: server.database,
+        localAccountId: server.localAccountId,
+        acting: acting,
+        remote: remote,
+        databasePath: database,
+        inspectionOwners: server.inspectionOwners,
+        promotionIntents: server.promotionIntents,
+      ),
     );
     final preferences = NativePreferences(
       epoch: epoch,
@@ -295,7 +303,11 @@ class NativeBootstrap extends AppBootstrap {
         p.join(p.dirname(database), 'soar_score_ui.db'),
       );
     }
-    final uiStore = await openLocalUiStore(directory: p.dirname(database));
+    final uiStore = await core.StartupTrace.step(
+      'openLocalUiStore',
+      () => openLocalUiStore(directory: p.dirname(database)),
+    );
+    core.StartupTrace.mark('bootstrap.start end');
     return NativeBootstrap._(
       server,
       remote,
@@ -331,6 +343,7 @@ void quitApplication() => exit(0);
 /// A first run (no database file) is [StartupMode.initializing], an older
 /// database [StartupMode.updating], otherwise [StartupMode.starting].
 Future<StartupPlan?> startupPlan() async {
+  _traceToFile();
   if (splashSuppressedByBuild ||
       noSplashRequested(Platform.environment[noSplashVariable])) {
     return null;
@@ -345,6 +358,19 @@ Future<StartupPlan?> startupPlan() async {
       currentVersion: SoarScoreDatabase.currentSchemaVersion,
     ),
   );
+}
+
+/// Also writes the startup timing lines to
+/// `soar_score_startup_trace.log` in the system temp folder (a release build
+/// has no console). The file starts empty on every launch.
+void _traceToFile() {
+  final file = File(
+    p.join(Directory.systemTemp.path, 'soar_score_startup_trace.log'),
+  );
+  file.writeAsStringSync('');
+  core.StartupTrace.sink = (line) =>
+      file.writeAsStringSync('$line\n', mode: FileMode.append);
+  core.StartupTrace.mark('trace file: ${file.path}');
 }
 
 /// The Settings switch for the startup splash.

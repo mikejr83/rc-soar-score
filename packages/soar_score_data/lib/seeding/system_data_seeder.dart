@@ -1,4 +1,5 @@
 import 'package:soar_score_core/soar_score_core.dart' as core;
+import 'package:soar_score_core/soar_score_core.dart' show StartupTrace;
 
 import '../database.dart';
 import '../repositories/discipline_profile_repository.dart';
@@ -70,13 +71,17 @@ class SystemDataSeeder {
     final landingTables = LandingTableRepository(_db, stores: stores);
     final profiles = DisciplineProfileRepository(_db, stores: stores);
     final roles = RoleRepository(_db, stores: stores);
+    StartupTrace.mark('system seed: installing');
     for (final table in _landingTables) {
       await landingTables.installSystemTable(table, atomic: false);
     }
+    StartupTrace.mark('system seed: landing tables done');
     for (final profile in _profiles) {
       await profiles.installSystemProfile(profile, atomic: false);
     }
+    StartupTrace.mark('system seed: profiles done');
     await roles.installSystemRoles(_roles);
+    StartupTrace.mark('system seed: roles done');
     await syncStore?.writeCursor(scope, sequence);
     return SystemSeedOutcome.installed;
   });
