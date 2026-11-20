@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart'
@@ -31,10 +32,12 @@ import 'acting_ui_account.dart';
 import 'app_bootstrap.dart';
 import 'auth_epoch.dart';
 import 'local_account_claimer.dart';
+import 'installation_id_file.dart';
 import 'native_contest_exchange.dart';
 import 'native_competition_import_store.dart';
 import 'native_preferences.dart';
 import 'native_sync.dart';
+import 'app_log.dart';
 
 final _logger = Logger('NativeBootstrap');
 
@@ -59,6 +62,7 @@ class NativeBootstrap extends AppBootstrap {
     this.localUiStore,
     this._acting,
     this._preferences,
+    this._appLog,
   ) : _client = ApiClient(
         baseUrl: _server.baseUrl,
         tokenProvider: () async => _server.secret,
@@ -85,6 +89,9 @@ class NativeBootstrap extends AppBootstrap {
 
   /// The account's preferences, read and kept here.
   final NativePreferences _preferences;
+
+  /// The log file; closed when this bootstrap closes.
+  final AppLog _appLog;
 
   @override
   late final UiAccount uiAccount = ActingUiAccount(_acting);
@@ -154,6 +161,7 @@ class NativeBootstrap extends AppBootstrap {
     _epoch.close();
     await sync.close();
     await _server.close();
+    await _appLog.close();
     await localUiStore.close();
     (uiAccount as ActingUiAccount).dispose();
     _remoteClient.close();
@@ -214,6 +222,8 @@ class NativeBootstrap extends AppBootstrap {
     final baseUrl = Uri.parse(rawUrl.isEmpty ? defaultApiBaseUrl : rawUrl);
     _logger.info('Base URL: $baseUrl');
     final database = await databasePath(demo: demo);
+    final appLog = AppLog(Directory(p.join(p.dirname(database), 'logs')));
+    appLog.attach();
     if (demoReset) {
       _logger.info('Resetting demo database');
       await deleteDatabaseFiles(database);
@@ -226,7 +236,23 @@ class NativeBootstrap extends AppBootstrap {
           : null,
     );
     _logger.info('Embedded API server listening on ${server.baseUrl}');
-    ContestExchange.current = NativeContestExchange(server);
+    ContestExchange.current = NativeContestExchange(
+      server,
+      log: appLog,
+      installation: () async {
+        final info = await PackageInfo.fromPlatform();
+        return {
+          'app': {
+            'name': info.appName,
+            'version': info.version,
+            'build': info.buildNumber,
+          },
+          'installation_id': (await InstallationIdFile.besides(
+            database,
+          ).readOrCreate()).value,
+        };
+      },
+    );
     final importStore = NativeCompetitionImportStore(server);
     PilotImportStore.current = importStore;
     CompetitionImportStore.current = importStore;
@@ -306,6 +332,7 @@ class NativeBootstrap extends AppBootstrap {
       uiStore,
       acting,
       preferences,
+      appLog,
     );
   }
 

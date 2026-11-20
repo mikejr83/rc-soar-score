@@ -201,6 +201,14 @@
   "@exportRedactionSubtitle": {
     "description": "Explains the effect of the redaction checkbox."
   },
+  "exportForSupportTitle": "Export for support",
+  "@exportForSupportTitle": {
+    "description": "Checkbox that exports the contest together with the app log, for the developers to debug a problem."
+  },
+  "exportForSupportSubtitle": "For finding a problem. The file keeps email addresses and all other contest data and includes the app log and details of this installation.",
+  "@exportForSupportSubtitle": {
+    "description": "Explains that an export for support is not redacted and carries the app log."
+  },
   "exportNotice": "The file is not encrypted. Anyone who has it can read the contest. Send it only to people you trust.",
   "@exportNotice": {
     "description": "Warning in the export dialog that the file is not encrypted."

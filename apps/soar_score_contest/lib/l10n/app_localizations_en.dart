@@ -178,6 +178,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Turn this off for a full backup. Names, clubs and scores are kept either way.';
 
   @override
+  String get exportForSupportTitle => 'Export for support';
+
+  @override
+  String get exportForSupportSubtitle =>
+      'For finding a problem. The file keeps email addresses and all other contest data and includes the app log and details of this installation.';
+
+  @override
   String get exportNotice =>
       'The file is not encrypted. Anyone who has it can read the contest. Send it only to people you trust.';
 
