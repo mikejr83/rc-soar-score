@@ -3,12 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/services/workspace/next_step/next_step.dart';
 import 'package:soar_score_contest/services/workspace/next_step/next_step_action.dart';
 import 'package:soar_score_contest/services/workspace/next_step/next_step_target.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/workspace/publication_facts.dart';
 import 'package:soar_score_contest/widgets/workspace/next_step/next_step_card.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../../support/matrix_test_support.dart';
 import '../../../support/next_step_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 Future<void> _pump(
   WidgetTester tester,
@@ -24,6 +28,8 @@ Future<void> _pump(
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(context)
             .copyWith(textScaler: TextScaler.linear(textScale)),
@@ -191,13 +197,13 @@ void main() {
 
   testWidgets('unavailable facts add a quiet line with Retry', (tester) async {
     await _pump(tester, stepAt(stepFacts()), unavailable: true);
-    expect(find.text(nextStepUnavailableText), findsOneWidget);
+    expect(find.text(_l10n.workspaceNextStepUnavailable), findsOneWidget);
     expect(find.byKey(const ValueKey('next-step-retry')), findsOneWidget);
   });
 
   testWidgets('without unavailable facts there is no Retry', (tester) async {
     await _pump(tester, stepAt(stepFacts()));
-    expect(find.text(nextStepUnavailableText), findsNothing);
+    expect(find.text(_l10n.workspaceNextStepUnavailable), findsNothing);
     expect(find.byKey(const ValueKey('next-step-retry')), findsNothing);
   });
 

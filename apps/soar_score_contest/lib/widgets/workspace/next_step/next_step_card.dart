@@ -1,12 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/workspace/next_step/next_step.dart';
 import '../../../services/workspace/next_step/next_step_action.dart';
 import 'next_step_buttons.dart';
 import 'next_step_reason_line.dart';
-
-/// The text under the buttons when part of the facts could not be loaded.
-const String nextStepUnavailableText = 'Some information could not be loaded.';
 
 /// The workspace's "what to do next" card: eyebrow, title, body, the reason,
 /// the buttons and an optional note.
@@ -37,6 +35,7 @@ class NextStepCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final reason = step.reason;
@@ -121,7 +120,7 @@ class NextStepCard extends StatelessWidget {
                 spacing: 8,
                 children: [
                   Text(
-                    nextStepUnavailableText,
+                    l10n.workspaceNextStepUnavailable,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
@@ -130,7 +129,7 @@ class NextStepCard extends StatelessWidget {
                     TextButton(
                       key: const ValueKey('next-step-retry'),
                       onPressed: onRetryFacts,
-                      child: const Text('Retry'),
+                      child: Text(l10n.workspaceRetry),
                     ),
                 ],
               ),

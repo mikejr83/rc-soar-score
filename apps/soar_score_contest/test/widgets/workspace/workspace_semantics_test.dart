@@ -1,12 +1,17 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/widgets/workspace/workspace_control_slot.dart';
 import 'package:soar_score_contest/widgets/workspace/workspace_live_region.dart';
 import 'package:soar_score_contest/services/workspace/workspace_control.dart';
 import 'package:soar_score_contest/services/workspace/workspace_section.dart';
 import 'package:soar_score_contest/widgets/workspace/workspace_section_slot.dart';
 
-Widget _app(Widget child) => MaterialApp(home: Scaffold(body: child));
+Widget _app(Widget child) => MaterialApp(
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: Scaffold(body: child),
+);
 
 void main() {
   testWidgets('a section slot is a labelled region with a placeholder', (

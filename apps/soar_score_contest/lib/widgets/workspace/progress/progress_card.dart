@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/workspace/progress/progress_headline.dart';
 import '../../../services/workspace/progress/progress_summary.dart';
 import '../../../services/workspace/progress/progress_text.dart';
@@ -183,6 +184,7 @@ class ProgressCard extends StatelessWidget {
     String? body, {
     VoidCallback? retry,
   }) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return DecoratedBox(
@@ -214,7 +216,7 @@ class ProgressCard extends StatelessWidget {
                     TextButton(
                       key: const ValueKey('progress-retry'),
                       onPressed: retry,
-                      child: const Text('Retry'),
+                      child: Text(l10n.workspaceRetry),
                     ),
                 ],
               ),

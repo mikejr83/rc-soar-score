@@ -2617,6 +2617,387 @@
   "@matrixCopySeedTooltip": {
     "description": "Tooltip of the copy-seed button."
   },
+  "workspaceControlLifecycle": "Lifecycle",
+  "@workspaceControlLifecycle": {
+    "description": "Title of the lifecycle control card."
+  },
+  "workspaceControlScoring": "Participant scoring",
+  "@workspaceControlScoring": {
+    "description": "Title of the participant-scoring control card."
+  },
+  "workspaceControlResults": "Overall results",
+  "@workspaceControlResults": {
+    "description": "Title of the overall-results control card."
+  },
+  "workspaceControlAdministration": "Administration",
+  "@workspaceControlAdministration": {
+    "description": "Title of the administration control card."
+  },
+  "workspaceControlPublication": "Publication",
+  "@workspaceControlPublication": {
+    "description": "Title of the publication control card."
+  },
+  "workspaceControlArchive": "Archive",
+  "@workspaceControlArchive": {
+    "description": "Title of the archive control card."
+  },
+  "workspaceControlGoesHere": "{label} goes here",
+  "@workspaceControlGoesHere": {
+    "description": "Placeholder under a control card that has no widget yet.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceSectionNextStep": "Next step",
+  "@workspaceSectionNextStep": {
+    "description": "Label of the next-step section."
+  },
+  "workspaceSectionChecklist": "Setup checklist",
+  "@workspaceSectionChecklist": {
+    "description": "Label of the setup-checklist section."
+  },
+  "workspaceSectionInvitations": "Pilot invitations",
+  "@workspaceSectionInvitations": {
+    "description": "Label of the pilot-invitations section."
+  },
+  "workspaceSectionAttention": "Needs attention",
+  "@workspaceSectionAttention": {
+    "description": "Label of the needs-attention section."
+  },
+  "workspaceSectionProgress": "Round progress",
+  "@workspaceSectionProgress": {
+    "description": "Label of the round-progress section."
+  },
+  "workspaceSectionControls": "Contest controls",
+  "@workspaceSectionControls": {
+    "description": "Label of the contest-controls section."
+  },
+  "workspaceSectionFacts": "Contest facts",
+  "@workspaceSectionFacts": {
+    "description": "Label of the contest-facts section."
+  },
+  "workspaceSectionActivity": "Recent activity",
+  "@workspaceSectionActivity": {
+    "description": "Label of the recent-activity section."
+  },
+  "workspaceSectionGoesHere": "{label} goes here",
+  "@workspaceSectionGoesHere": {
+    "description": "Placeholder under a section that has no widget yet.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceBannerStaleChange": "Your change to {change} wasn't applied. This page is out of date.",
+  "@workspaceBannerStaleChange": {
+    "description": "Banner after a rejected change.",
+    "placeholders": {
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceBannerStaleRefresh": "Refresh",
+  "@workspaceBannerStaleRefresh": {
+    "description": "Action of the stale-change banner."
+  },
+  "workspaceBannerUnreachable": "Can't reach the Soar Score server. Showing this device's copy from {copyTime}. Scoring still works here and will sync; publishing, visibility and delisting are off until the server is back.",
+  "@workspaceBannerUnreachable": {
+    "description": "Banner when the server is unreachable but a local copy is shown.",
+    "placeholders": {
+      "copyTime": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceBannerTryAgain": "Try again",
+  "@workspaceBannerTryAgain": {
+    "description": "Action of the unreachable-server banner."
+  },
+  "workspaceBannerOfflineLocal": "Offline. Scoring and the other controls keep working on this device and sync when you're back. Publishing, visibility and delisting need a connection.",
+  "@workspaceBannerOfflineLocal": {
+    "description": "Offline banner on a native installation that keeps local data."
+  },
+  "workspaceBannerOfflineNoLocal": "Offline. Changes can't be saved until you're back online; what is on screen may be out of date.",
+  "@workspaceBannerOfflineNoLocal": {
+    "description": "Offline banner on the web build, which keeps no local data."
+  },
+  "workspaceFactsTitle": "Contest",
+  "@workspaceFactsTitle": {
+    "description": "Title of the contest-facts details."
+  },
+  "workspaceFactsDates": "Dates",
+  "@workspaceFactsDates": {
+    "description": "Label of the dates fact."
+  },
+  "workspaceFactsTimezone": "Timezone",
+  "@workspaceFactsTimezone": {
+    "description": "Label of the time-zone fact."
+  },
+  "workspaceFactsHost": "Host",
+  "@workspaceFactsHost": {
+    "description": "Label of the host fact."
+  },
+  "workspaceFactsLocation": "Location",
+  "@workspaceFactsLocation": {
+    "description": "Label of the location fact."
+  },
+  "workspaceAttentionLoading": "Checking what needs attention…",
+  "@workspaceAttentionLoading": {
+    "description": "Loading text of the needs-attention section."
+  },
+  "workspaceAttentionTitle": "Needs attention",
+  "@workspaceAttentionTitle": {
+    "description": "Title of the needs-attention card."
+  },
+  "workspaceAttentionIncomplete": "This list may be incomplete",
+  "@workspaceAttentionIncomplete": {
+    "description": "Note when a needs-attention source could not be read and there are items."
+  },
+  "workspaceAttentionUnknown": "Needs attention could not be worked out",
+  "@workspaceAttentionUnknown": {
+    "description": "Note when needs-attention could not be worked out at all."
+  },
+  "workspaceRetry": "Retry",
+  "@workspaceRetry": {
+    "description": "Retry button in a workspace section placeholder."
+  },
+  "workspaceChecklistTitle": "Setup checklist",
+  "@workspaceChecklistTitle": {
+    "description": "Title of the setup-checklist card."
+  },
+  "workspaceChecklistOptional": "Optional",
+  "@workspaceChecklistOptional": {
+    "description": "Heading of the optional checklist rows."
+  },
+  "workspaceChecklistOptionalNote": "Not needed to run the contest",
+  "@workspaceChecklistOptionalNote": {
+    "description": "Note beside the optional heading."
+  },
+  "workspaceChecklistLoading": "Loading the setup checklist…",
+  "@workspaceChecklistLoading": {
+    "description": "Loading text of the setup-checklist section."
+  },
+  "workspaceChecklistLoadFailed": "The setup checklist could not be loaded.",
+  "@workspaceChecklistLoadFailed": {
+    "description": "Failed text of the setup-checklist section."
+  },
+  "workspaceArchiveArchived": "Archived",
+  "@workspaceArchiveArchived": {
+    "description": "Current value when the contest is archived."
+  },
+  "workspaceArchiveNotArchived": "Not archived",
+  "@workspaceArchiveNotArchived": {
+    "description": "Current value when the contest is not archived."
+  },
+  "workspaceArchiveScope": "Archiving moves a contest out of the way on this installation.",
+  "@workspaceArchiveScope": {
+    "description": "What the archive control reaches."
+  },
+  "workspaceArchiveUnavailable": "Archiving is not available yet: the server has no archive action.",
+  "@workspaceArchiveUnavailable": {
+    "description": "Why the archive button is disabled."
+  },
+  "workspaceArchiveButton": "Archive contest",
+  "@workspaceArchiveButton": {
+    "description": "Label of the archive button."
+  },
+  "workspaceControlNow": "Now: ",
+  "@workspaceControlNow": {
+    "description": "Prefix of the current value in a control card."
+  },
+  "workspaceCompleteTitle": "Complete contest?",
+  "@workspaceCompleteTitle": {
+    "description": "Title of the complete-contest dialog."
+  },
+  "workspaceCompleteButton": "Complete contest",
+  "@workspaceCompleteButton": {
+    "description": "Confirm button of the complete-contest dialog."
+  },
+  "workspaceCompleteLifecycle": "Lifecycle: Running → Completed",
+  "@workspaceCompleteLifecycle": {
+    "description": "Lifecycle line in the complete-contest dialog."
+  },
+  "workspaceCompleteBody": "Completing closes participant scoring and ends results hiding. There is no way back to Running. Authorized score corrections stay possible.",
+  "@workspaceCompleteBody": {
+    "description": "Body of the complete-contest dialog."
+  },
+  "workspaceCompleteScoresUnknown": "The scores could not be loaded, so the missing scores and unflown rounds are not listed.",
+  "@workspaceCompleteScoresUnknown": {
+    "description": "Note in the complete dialog when the scores could not be read."
+  },
+  "workspaceCompleteAllClear": "Every flight has a score and every round has been flown.",
+  "@workspaceCompleteAllClear": {
+    "description": "Note in the complete dialog when nothing is open."
+  },
+  "workspaceCompleteStillOpen": "Still open:",
+  "@workspaceCompleteStillOpen": {
+    "description": "Heading above the open items in the complete dialog."
+  },
+  "workspaceCompleteMissingScores": "• {count} {word} no score",
+  "@workspaceCompleteMissingScores": {
+    "description": "Open item: flights without a score.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceCompleteUnflownRounds": "• {word} {rounds} not flown",
+  "@workspaceCompleteUnflownRounds": {
+    "description": "Open item: rounds nobody flew.",
+    "placeholders": {
+      "word": {
+        "type": "String"
+      },
+      "rounds": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceNoApiClient": "No API client is available.",
+  "@workspaceNoApiClient": {
+    "description": "Snackbar when a transition has no API client."
+  },
+  "workspaceLockTitle": "Lock administration?",
+  "@workspaceLockTitle": {
+    "description": "Title of the lock-administration dialog."
+  },
+  "workspaceLockLifecycle": "Administration: Unlocked → Locked",
+  "@workspaceLockLifecycle": {
+    "description": "Lifecycle line in the lock dialog."
+  },
+  "workspaceLockRejected": "While locked, these changes are rejected:",
+  "@workspaceLockRejected": {
+    "description": "Intro of the rejected-changes list in the lock dialog."
+  },
+  "workspaceLockConfigItem": "• Contest configuration",
+  "@workspaceLockConfigItem": {
+    "description": "Rejected-change item: configuration."
+  },
+  "workspaceLockParticipantsItem": "• Participants and their roles",
+  "@workspaceLockParticipantsItem": {
+    "description": "Rejected-change item: participants and roles."
+  },
+  "workspaceLockMatrixItem": "• The matrix and its assignments",
+  "@workspaceLockMatrixItem": {
+    "description": "Rejected-change item: the matrix."
+  },
+  "workspaceLockScoresItem": "• Scores",
+  "@workspaceLockScoresItem": {
+    "description": "Rejected-change item: scores."
+  },
+  "workspaceLockBody": "The contest can still be viewed and published. Locking does not complete it or close participant scoring.",
+  "@workspaceLockBody": {
+    "description": "Body of the lock-administration dialog."
+  },
+  "workspaceLockButton": "Lock administration",
+  "@workspaceLockButton": {
+    "description": "Confirm button of the lock dialog."
+  },
+  "workspaceStatusTitle": "Status",
+  "@workspaceStatusTitle": {
+    "description": "Title of the status summary card."
+  },
+  "workspaceScoringOpen": "Open",
+  "@workspaceScoringOpen": {
+    "description": "Current value when participant scoring is open."
+  },
+  "workspaceScoringCloseScope": "Closing stops pilots and helpers from entering their own scores.",
+  "@workspaceScoringCloseScope": {
+    "description": "What closing scoring reaches."
+  },
+  "workspaceScoringClosed": "Closed",
+  "@workspaceScoringClosed": {
+    "description": "Current value when participant scoring is closed."
+  },
+  "workspaceScoringOpenScope": "Opening lets pilots and helpers enter their own scores.",
+  "@workspaceScoringOpenScope": {
+    "description": "What opening scoring reaches."
+  },
+  "workspaceAdminLocked": "Locked",
+  "@workspaceAdminLocked": {
+    "description": "Current value when administration is locked."
+  },
+  "workspaceAdminUnlockScope": "Unlocking allows changes to configuration, participants, the matrix and scores again.",
+  "@workspaceAdminUnlockScope": {
+    "description": "What unlocking administration reaches."
+  },
+  "workspaceAdminUnlocked": "Unlocked",
+  "@workspaceAdminUnlocked": {
+    "description": "Current value when administration is unlocked."
+  },
+  "workspaceAdminLockScope": "Locking blocks changes to configuration, participants, the matrix and scores.",
+  "@workspaceAdminLockScope": {
+    "description": "What locking administration reaches."
+  },
+  "workspaceCompleteScope": "Completing ends the contest: scoring closes and the results are final.",
+  "@workspaceCompleteScope": {
+    "description": "What completing the contest reaches."
+  },
+  "workspaceActionUndo": "Undo",
+  "@workspaceActionUndo": {
+    "description": "Undo button of an in-place action."
+  },
+  "workspaceActionRefresh": "Refresh",
+  "@workspaceActionRefresh": {
+    "description": "Refresh button of a rejected in-place action."
+  },
+  "workspaceNextStepUnavailable": "Some information could not be loaded.",
+  "@workspaceNextStepUnavailable": {
+    "description": "Note in the next-step card when part of the facts failed."
+  },
+  "workspaceNextStepLoading": "Working out the next step…",
+  "@workspaceNextStepLoading": {
+    "description": "Loading text of the next-step section."
+  },
+  "workspaceNextStepFailed": "The next step could not be worked out.",
+  "@workspaceNextStepFailed": {
+    "description": "Failed text of the next-step section."
+  },
+  "workspaceSuggestionDismissed": "Suggestion dismissed. It returns if another 48 hours pass without scores.",
+  "@workspaceSuggestionDismissed": {
+    "description": "Snackbar after dismissing a completion suggestion."
+  },
+  "workspaceLoadingLabel": "Loading contest",
+  "@workspaceLoadingLabel": {
+    "description": "Semantics label of the loading skeleton."
+  },
+  "workspaceLoadFailedTitle": "Couldn't load this contest",
+  "@workspaceLoadFailedTitle": {
+    "description": "Title of the load-failed state."
+  },
+  "workspaceLoadFailedBody": "{message} Nothing has changed.",
+  "@workspaceLoadFailedBody": {
+    "description": "Body of the load-failed state.",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceLoadFailedRetry": "Try again",
+  "@workspaceLoadFailedRetry": {
+    "description": "Action of the load-failed state."
+  },
+  "workspaceNotFoundTitle": "Contest not found",
+  "@workspaceNotFoundTitle": {
+    "description": "Title of the not-found state."
+  },
+  "workspaceNotFoundBody": "This link doesn't match a contest on this device or the server. It may have been deleted, or the link is incomplete.",
+  "@workspaceNotFoundBody": {
+    "description": "Body of the not-found state."
+  },
+  "workspaceNotFoundBack": "Back to Contests",
+  "@workspaceNotFoundBack": {
+    "description": "Action of the not-found state."
+  },
   "aboutHeading": "About",
   "@aboutHeading": {
     "description": "Heading of the Settings card with the version, licences and legal links."

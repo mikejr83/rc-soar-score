@@ -3168,6 +3168,516 @@ abstract class AppLocalizations {
   /// **'Copy random seed'**
   String get matrixCopySeedTooltip;
 
+  /// Title of the lifecycle control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifecycle'**
+  String get workspaceControlLifecycle;
+
+  /// Title of the participant-scoring control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant scoring'**
+  String get workspaceControlScoring;
+
+  /// Title of the overall-results control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall results'**
+  String get workspaceControlResults;
+
+  /// Title of the administration control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration'**
+  String get workspaceControlAdministration;
+
+  /// Title of the publication control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication'**
+  String get workspaceControlPublication;
+
+  /// Title of the archive control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get workspaceControlArchive;
+
+  /// Placeholder under a control card that has no widget yet.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} goes here'**
+  String workspaceControlGoesHere(String label);
+
+  /// Label of the next-step section.
+  ///
+  /// In en, this message translates to:
+  /// **'Next step'**
+  String get workspaceSectionNextStep;
+
+  /// Label of the setup-checklist section.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup checklist'**
+  String get workspaceSectionChecklist;
+
+  /// Label of the pilot-invitations section.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot invitations'**
+  String get workspaceSectionInvitations;
+
+  /// Label of the needs-attention section.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get workspaceSectionAttention;
+
+  /// Label of the round-progress section.
+  ///
+  /// In en, this message translates to:
+  /// **'Round progress'**
+  String get workspaceSectionProgress;
+
+  /// Label of the contest-controls section.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest controls'**
+  String get workspaceSectionControls;
+
+  /// Label of the contest-facts section.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest facts'**
+  String get workspaceSectionFacts;
+
+  /// Label of the recent-activity section.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent activity'**
+  String get workspaceSectionActivity;
+
+  /// Placeholder under a section that has no widget yet.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} goes here'**
+  String workspaceSectionGoesHere(String label);
+
+  /// Banner after a rejected change.
+  ///
+  /// In en, this message translates to:
+  /// **'Your change to {change} wasn\'t applied. This page is out of date.'**
+  String workspaceBannerStaleChange(String change);
+
+  /// Action of the stale-change banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get workspaceBannerStaleRefresh;
+
+  /// Banner when the server is unreachable but a local copy is shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t reach the Soar Score server. Showing this device\'s copy from {copyTime}. Scoring still works here and will sync; publishing, visibility and delisting are off until the server is back.'**
+  String workspaceBannerUnreachable(String copyTime);
+
+  /// Action of the unreachable-server banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get workspaceBannerTryAgain;
+
+  /// Offline banner on a native installation that keeps local data.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline. Scoring and the other controls keep working on this device and sync when you\'re back. Publishing, visibility and delisting need a connection.'**
+  String get workspaceBannerOfflineLocal;
+
+  /// Offline banner on the web build, which keeps no local data.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline. Changes can\'t be saved until you\'re back online; what is on screen may be out of date.'**
+  String get workspaceBannerOfflineNoLocal;
+
+  /// Title of the contest-facts details.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest'**
+  String get workspaceFactsTitle;
+
+  /// Label of the dates fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates'**
+  String get workspaceFactsDates;
+
+  /// Label of the time-zone fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Timezone'**
+  String get workspaceFactsTimezone;
+
+  /// Label of the host fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Host'**
+  String get workspaceFactsHost;
+
+  /// Label of the location fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get workspaceFactsLocation;
+
+  /// Loading text of the needs-attention section.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking what needs attention…'**
+  String get workspaceAttentionLoading;
+
+  /// Title of the needs-attention card.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get workspaceAttentionTitle;
+
+  /// Note when a needs-attention source could not be read and there are items.
+  ///
+  /// In en, this message translates to:
+  /// **'This list may be incomplete'**
+  String get workspaceAttentionIncomplete;
+
+  /// Note when needs-attention could not be worked out at all.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention could not be worked out'**
+  String get workspaceAttentionUnknown;
+
+  /// Retry button in a workspace section placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get workspaceRetry;
+
+  /// Title of the setup-checklist card.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup checklist'**
+  String get workspaceChecklistTitle;
+
+  /// Heading of the optional checklist rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get workspaceChecklistOptional;
+
+  /// Note beside the optional heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Not needed to run the contest'**
+  String get workspaceChecklistOptionalNote;
+
+  /// Loading text of the setup-checklist section.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the setup checklist…'**
+  String get workspaceChecklistLoading;
+
+  /// Failed text of the setup-checklist section.
+  ///
+  /// In en, this message translates to:
+  /// **'The setup checklist could not be loaded.'**
+  String get workspaceChecklistLoadFailed;
+
+  /// Current value when the contest is archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get workspaceArchiveArchived;
+
+  /// Current value when the contest is not archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Not archived'**
+  String get workspaceArchiveNotArchived;
+
+  /// What the archive control reaches.
+  ///
+  /// In en, this message translates to:
+  /// **'Archiving moves a contest out of the way on this installation.'**
+  String get workspaceArchiveScope;
+
+  /// Why the archive button is disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Archiving is not available yet: the server has no archive action.'**
+  String get workspaceArchiveUnavailable;
+
+  /// Label of the archive button.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive contest'**
+  String get workspaceArchiveButton;
+
+  /// Prefix of the current value in a control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Now: '**
+  String get workspaceControlNow;
+
+  /// Title of the complete-contest dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete contest?'**
+  String get workspaceCompleteTitle;
+
+  /// Confirm button of the complete-contest dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete contest'**
+  String get workspaceCompleteButton;
+
+  /// Lifecycle line in the complete-contest dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifecycle: Running → Completed'**
+  String get workspaceCompleteLifecycle;
+
+  /// Body of the complete-contest dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Completing closes participant scoring and ends results hiding. There is no way back to Running. Authorized score corrections stay possible.'**
+  String get workspaceCompleteBody;
+
+  /// Note in the complete dialog when the scores could not be read.
+  ///
+  /// In en, this message translates to:
+  /// **'The scores could not be loaded, so the missing scores and unflown rounds are not listed.'**
+  String get workspaceCompleteScoresUnknown;
+
+  /// Note in the complete dialog when nothing is open.
+  ///
+  /// In en, this message translates to:
+  /// **'Every flight has a score and every round has been flown.'**
+  String get workspaceCompleteAllClear;
+
+  /// Heading above the open items in the complete dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Still open:'**
+  String get workspaceCompleteStillOpen;
+
+  /// Open item: flights without a score.
+  ///
+  /// In en, this message translates to:
+  /// **'• {count} {word} no score'**
+  String workspaceCompleteMissingScores(int count, String word);
+
+  /// Open item: rounds nobody flew.
+  ///
+  /// In en, this message translates to:
+  /// **'• {word} {rounds} not flown'**
+  String workspaceCompleteUnflownRounds(String word, String rounds);
+
+  /// Snackbar when a transition has no API client.
+  ///
+  /// In en, this message translates to:
+  /// **'No API client is available.'**
+  String get workspaceNoApiClient;
+
+  /// Title of the lock-administration dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock administration?'**
+  String get workspaceLockTitle;
+
+  /// Lifecycle line in the lock dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration: Unlocked → Locked'**
+  String get workspaceLockLifecycle;
+
+  /// Intro of the rejected-changes list in the lock dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'While locked, these changes are rejected:'**
+  String get workspaceLockRejected;
+
+  /// Rejected-change item: configuration.
+  ///
+  /// In en, this message translates to:
+  /// **'• Contest configuration'**
+  String get workspaceLockConfigItem;
+
+  /// Rejected-change item: participants and roles.
+  ///
+  /// In en, this message translates to:
+  /// **'• Participants and their roles'**
+  String get workspaceLockParticipantsItem;
+
+  /// Rejected-change item: the matrix.
+  ///
+  /// In en, this message translates to:
+  /// **'• The matrix and its assignments'**
+  String get workspaceLockMatrixItem;
+
+  /// Rejected-change item: scores.
+  ///
+  /// In en, this message translates to:
+  /// **'• Scores'**
+  String get workspaceLockScoresItem;
+
+  /// Body of the lock-administration dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest can still be viewed and published. Locking does not complete it or close participant scoring.'**
+  String get workspaceLockBody;
+
+  /// Confirm button of the lock dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock administration'**
+  String get workspaceLockButton;
+
+  /// Title of the status summary card.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get workspaceStatusTitle;
+
+  /// Current value when participant scoring is open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get workspaceScoringOpen;
+
+  /// What closing scoring reaches.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing stops pilots and helpers from entering their own scores.'**
+  String get workspaceScoringCloseScope;
+
+  /// Current value when participant scoring is closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get workspaceScoringClosed;
+
+  /// What opening scoring reaches.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening lets pilots and helpers enter their own scores.'**
+  String get workspaceScoringOpenScope;
+
+  /// Current value when administration is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get workspaceAdminLocked;
+
+  /// What unlocking administration reaches.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocking allows changes to configuration, participants, the matrix and scores again.'**
+  String get workspaceAdminUnlockScope;
+
+  /// Current value when administration is unlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked'**
+  String get workspaceAdminUnlocked;
+
+  /// What locking administration reaches.
+  ///
+  /// In en, this message translates to:
+  /// **'Locking blocks changes to configuration, participants, the matrix and scores.'**
+  String get workspaceAdminLockScope;
+
+  /// What completing the contest reaches.
+  ///
+  /// In en, this message translates to:
+  /// **'Completing ends the contest: scoring closes and the results are final.'**
+  String get workspaceCompleteScope;
+
+  /// Undo button of an in-place action.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get workspaceActionUndo;
+
+  /// Refresh button of a rejected in-place action.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get workspaceActionRefresh;
+
+  /// Note in the next-step card when part of the facts failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Some information could not be loaded.'**
+  String get workspaceNextStepUnavailable;
+
+  /// Loading text of the next-step section.
+  ///
+  /// In en, this message translates to:
+  /// **'Working out the next step…'**
+  String get workspaceNextStepLoading;
+
+  /// Failed text of the next-step section.
+  ///
+  /// In en, this message translates to:
+  /// **'The next step could not be worked out.'**
+  String get workspaceNextStepFailed;
+
+  /// Snackbar after dismissing a completion suggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestion dismissed. It returns if another 48 hours pass without scores.'**
+  String get workspaceSuggestionDismissed;
+
+  /// Semantics label of the loading skeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading contest'**
+  String get workspaceLoadingLabel;
+
+  /// Title of the load-failed state.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this contest'**
+  String get workspaceLoadFailedTitle;
+
+  /// Body of the load-failed state.
+  ///
+  /// In en, this message translates to:
+  /// **'{message} Nothing has changed.'**
+  String workspaceLoadFailedBody(String message);
+
+  /// Action of the load-failed state.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get workspaceLoadFailedRetry;
+
+  /// Title of the not-found state.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest not found'**
+  String get workspaceNotFoundTitle;
+
+  /// Body of the not-found state.
+  ///
+  /// In en, this message translates to:
+  /// **'This link doesn\'t match a contest on this device or the server. It may have been deleted, or the link is incomplete.'**
+  String get workspaceNotFoundBody;
+
+  /// Action of the not-found state.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Contests'**
+  String get workspaceNotFoundBack;
+
   /// Heading of the Settings card with the version, licences and legal links.
   ///
   /// In en, this message translates to:

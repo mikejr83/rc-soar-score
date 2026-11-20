@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/workspace/controls/completion_blockers.dart';
 import '../../../services/workspace/workspace_fact_source.dart';
 import '../../../services/workspace/workspace_facts.dart';
@@ -16,30 +17,34 @@ Future<bool> confirmComplete(
 }) async {
   final confirmed = await showDialog<bool>(
     context: context,
-    builder: (context) => AlertDialog(
-      key: const ValueKey('complete-dialog'),
-      title: const Text('Complete contest?'),
-      content: SingleChildScrollView(child: _Body(facts: facts)),
-      actions: [
-        TextButton(
-          key: const ValueKey('complete-dialog-cancel'),
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          key: const ValueKey('complete-dialog-confirm'),
-          onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Complete contest'),
-        ),
-      ],
-    ),
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+      return AlertDialog(
+        key: const ValueKey('complete-dialog'),
+        title: Text(l10n.workspaceCompleteTitle),
+        content: SingleChildScrollView(child: _Body(l10n: l10n, facts: facts)),
+        actions: [
+          TextButton(
+            key: const ValueKey('complete-dialog-cancel'),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancelButton),
+          ),
+          FilledButton(
+            key: const ValueKey('complete-dialog-confirm'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.workspaceCompleteButton),
+          ),
+        ],
+      );
+    },
   );
   return confirmed ?? false;
 }
 
 class _Body extends StatelessWidget {
-  const _Body({required this.facts});
+  const _Body({required this.l10n, required this.facts});
 
+  final AppLocalizations l10n;
   final WorkspaceFacts? facts;
 
   @override
@@ -53,40 +58,38 @@ class _Body extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Lifecycle: Running → Completed'),
+        Text(l10n.workspaceCompleteLifecycle),
         const SizedBox(height: 12),
-        const Text(
-          'Completing closes participant scoring and ends results hiding. '
-          'There is no way back to Running. Authorized score corrections '
-          'stay possible.',
-        ),
+        Text(l10n.workspaceCompleteBody),
         const SizedBox(height: 12),
         if (blockers == null)
-          const Text(
-            key: ValueKey('complete-dialog-unknown'),
-            'The scores could not be loaded, so the missing scores and '
-            'unflown rounds are not listed.',
+          Text(
+            key: const ValueKey('complete-dialog-unknown'),
+            l10n.workspaceCompleteScoresUnknown,
           )
         else if (blockers.isEmpty)
-          const Text(
-            key: ValueKey('complete-dialog-clear'),
-            'Every flight has a score and every round has been flown.',
+          Text(
+            key: const ValueKey('complete-dialog-clear'),
+            l10n.workspaceCompleteAllClear,
           )
         else ...[
-          const Text('Still open:'),
+          Text(l10n.workspaceCompleteStillOpen),
           const SizedBox(height: 4),
           if (blockers.missingScores > 0)
             Text(
               key: const ValueKey('complete-dialog-missing'),
-              '• ${blockers.missingScores} '
-              '${blockers.missingScores == 1 ? 'flight has' : 'flights have'}'
-              ' no score',
+              l10n.workspaceCompleteMissingScores(
+                blockers.missingScores,
+                blockers.missingScores == 1 ? 'flight has' : 'flights have',
+              ),
             ),
           if (blockers.unflownRounds.isNotEmpty)
             Text(
               key: const ValueKey('complete-dialog-unflown'),
-              '• ${blockers.unflownRounds.length == 1 ? 'Round' : 'Rounds'} '
-              '${blockers.unflownRounds.join(', ')} not flown',
+              l10n.workspaceCompleteUnflownRounds(
+                blockers.unflownRounds.length == 1 ? 'Round' : 'Rounds',
+                blockers.unflownRounds.join(', '),
+              ),
             ),
         ],
       ],

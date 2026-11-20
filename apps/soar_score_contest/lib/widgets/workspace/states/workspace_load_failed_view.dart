@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../page_states/page_state_view.dart';
 
 /// The workspace when the contest could not be loaded and there is no local
@@ -17,13 +18,16 @@ class WorkspaceLoadFailedView extends StatelessWidget {
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context) => PageStateView.unavailable(
-    title: "Couldn't load this contest",
-    body: '$message Nothing has changed.',
-    primary: PageStateAction(
-      key: const ValueKey('workspace-state-action'),
-      label: 'Try again',
-      onPressed: onRetry,
-    ),
-  );
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return PageStateView.unavailable(
+      title: l10n.workspaceLoadFailedTitle,
+      body: l10n.workspaceLoadFailedBody(message),
+      primary: PageStateAction(
+        key: const ValueKey('workspace-state-action'),
+        label: l10n.workspaceLoadFailedRetry,
+        onPressed: onRetry,
+      ),
+    );
+  }
 }

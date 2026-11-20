@@ -2,9 +2,8 @@ import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/workspace/controls/contest_transition.dart';
-import 'package:soar_score_contest/widgets/workspace/next_step/next_step_card.dart';
-import 'package:soar_score_contest/widgets/workspace/next_step/next_step_section.dart';
 import 'package:soar_score_contest/widgets/workspace/workspace_frame.dart';
 import 'package:soar_score_contest/widgets/workspace/workspace_live_region.dart';
 import 'package:soar_score_contest/widgets/workspace/workspace_scope.dart';
@@ -13,6 +12,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../../../support/matrix_test_support.dart';
 import '../../../support/next_step_widget_support.dart';
 import '../../../support/workspace_facts_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 /// [text] inside the next-step card; the control cards repeat some labels.
 Finder _inCard(String text) => find.descendant(
@@ -226,7 +227,7 @@ void main() {
 
       expect(find.text('SUGGESTED NEXT STEP'), findsNothing);
       expect(cardTitle(tester), 'Continue scoring');
-      expect(find.text(suggestionDismissedMessage), findsOneWidget);
+      expect(find.text(_l10n.workspaceSuggestionDismissed), findsOneWidget);
     });
 
     testWidgets('comes back when a newer score arrives', (tester) async {
@@ -266,13 +267,13 @@ void main() {
     ) async {
       final server = _ready()..scoresStatus = 500;
       await pumpWorkspace(tester, server);
-      expect(find.text(nextStepUnavailableText), findsOneWidget);
+      expect(find.text(_l10n.workspaceNextStepUnavailable), findsOneWidget);
       expect(find.byKey(_primary), findsOneWidget);
 
       server.scoresStatus = 200;
       await tester.tap(find.byKey(const ValueKey('next-step-retry')));
       await tester.pumpAndSettle();
-      expect(find.text(nextStepUnavailableText), findsNothing);
+      expect(find.text(_l10n.workspaceNextStepUnavailable), findsNothing);
     });
   });
 }

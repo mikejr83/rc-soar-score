@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/services/workspace/current_group_facts.dart';
 import 'package:soar_score_contest/services/workspace/progress/progress_headline.dart';
 import 'package:soar_score_contest/services/workspace/progress/progress_summary.dart';
@@ -35,6 +36,8 @@ Future<List<int>> _pump(
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         useMaterial3: true,
         brightness: brightness,

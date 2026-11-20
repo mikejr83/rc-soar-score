@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/services/workspace/publication_facts.dart';
 import 'package:soar_score_contest/widgets/workspace/next_step/next_step_card.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -22,6 +23,8 @@ void main() {
     await tester.pumpWidget(
       withPreferredZone(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: SingleChildScrollView(
               child: NextStepCard(
