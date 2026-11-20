@@ -53,6 +53,9 @@ class AppLog {
     // Lines are written through a buffered sink a moment after they are
     // logged; the appender has no public flush.
     await Future<void>.delayed(const Duration(milliseconds: 100));
+    // getAllLogFiles() walks the rotations from the newest and stops at the
+    // first gap, so an older file is only listed when every newer one is still
+    // present. The reversed list is oldest first.
     return _appender.getAllLogFiles().reversed.toList();
   }
 

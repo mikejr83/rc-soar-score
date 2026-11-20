@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "inputs": {
-    "pubspec.lock": "e966a014881a9ac2",
+    "pubspec.lock": "4bdf53273ba5a3e8",
     "apps/soar_score_web/package-lock.json": "0a4a6e047036ac6d",
     "scripts/licence-overrides.json": "ae8995a315f7f5ab"
   },
@@ -659,7 +659,7 @@
         },
         {
           "name": "package_config",
-          "version": "3.0.0",
+          "version": "2.2.0",
           "license": "BSD-3-Clause",
           "homepage": "https://github.com/dart-lang/tools/tree/main/pkgs/package_config",
           "source": "dart",

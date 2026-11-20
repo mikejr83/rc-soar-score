@@ -69,5 +69,16 @@ List<int> contestFileOf(List<int> bytes) {
       'The file is larger than a contest export can be.',
     );
   }
-  return entry.readBytes() ?? (throw notContest);
+  final content = entry.readBytes() ?? (throw notContest);
+  // The header's declared size is advisory, so the inflated length is checked
+  // too: a file that inflates past the cap, or whose header disagrees with its
+  // content, is refused.
+  if (content.length > exchangeMaxBytes) {
+    throw const ExchangeException(
+      'too_large',
+      'The file is larger than a contest export can be.',
+    );
+  }
+  if (entry.size > 0 && content.length != entry.size) throw notContest;
+  return content;
 }

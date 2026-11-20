@@ -63,7 +63,7 @@ class NativeContestExchange implements ContestExchange {
           'manifest_version': 1,
           'exported_at': _clock().toUtc().toIso8601String(),
           'contest': {'id': contestId.value, 'name': contest?.name},
-          'contains': {'contest': 'contest.json', 'log': 'app.log'},
+          'contains': {'contest': supportContestEntry, 'log': supportLogEntry},
           'redacted': false,
           'schema_version': database.schemaVersion,
           'platform': Platform.operatingSystem,

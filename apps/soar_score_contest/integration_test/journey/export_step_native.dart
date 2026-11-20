@@ -83,5 +83,6 @@ Future<void> exportContestForSupport(
     utf8.decode(archive.findFile('contest.json')!.readBytes()!),
     contains(data.contestName),
   );
-  expect(archive.findFile('app.log')!.size, greaterThan(0));
+  final log = utf8.decode(archive.findFile('app.log')!.readBytes()!);
+  expect(log, contains('NativeBootstrap'));
 }
