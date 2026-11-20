@@ -7,15 +7,30 @@ import 'package:soar_score_contest/platform/rolling_log_file.dart';
 void main() {
   late Directory dir;
 
+  final opened = <RollingLogFile>[];
+
   setUp(() => dir = Directory.systemTemp.createTempSync('rolling_log'));
-  tearDown(() => dir.deleteSync(recursive: true));
+  tearDown(() {
+    // An open file blocks deleting its folder on Windows.
+    for (final log in opened) {
+      log.close();
+    }
+    opened.clear();
+    dir.deleteSync(recursive: true);
+  });
+
+  RollingLogFile open({int maxBytes = RollingLogFile.defaultMaxBytes}) {
+    final log = RollingLogFile(dir, maxBytes: maxBytes);
+    opened.add(log);
+    return log;
+  }
 
   List<String> names(RollingLogFile log) => [
     for (final f in log.files()) f.uri.pathSegments.last,
   ];
 
   test('appends lines to the current file', () {
-    final log = RollingLogFile(dir)
+    final log = open()
       ..write('one')
       ..write('two');
 
@@ -24,7 +39,7 @@ void main() {
   });
 
   test('rolls past the size and keeps the current file and three more', () {
-    final log = RollingLogFile(dir, maxBytes: 20);
+    final log = open(maxBytes: 20);
     for (var i = 1; i <= 8; i++) {
       log.write('line-$i-xxxxxxxxxx'); // 18 characters, 19 with the newline
     }
@@ -41,9 +56,28 @@ void main() {
     expect(log.readAll(), isNot(contains('line-4-')));
   });
 
+  test('counts bytes, not characters, towards the size', () {
+    final log = open(maxBytes: 30);
+    log.write('éééééééééé'); // 10 characters, 20 bytes, 21 with the newline
+    log.write('éééééééééé');
+
+    expect(names(log), ['soar-score.1.log', 'soar-score.log']);
+  });
+
+  test('summaries name each file with its size, oldest first', () {
+    final log = open(maxBytes: 20)
+      ..write('line-1-xxxxxxxxxx')
+      ..write('line-2-xxxxxxxxxx');
+
+    expect(log.summaries(), [
+      (name: 'soar-score.1.log', bytes: 18),
+      (name: 'soar-score.log', bytes: 18),
+    ]);
+  });
+
   test('keeps writing after a restart and reads the size of the file', () {
-    RollingLogFile(dir, maxBytes: 30).write('first-line');
-    final again = RollingLogFile(dir, maxBytes: 30)
+    (open(maxBytes: 30)..write('first-line')).close();
+    final again = open(maxBytes: 30)
       ..write('second-line')
       ..write('third-line');
 
@@ -52,14 +86,14 @@ void main() {
   });
 
   test('writing into a missing folder does not throw', () {
-    final log = RollingLogFile(dir);
+    final log = open();
     dir.deleteSync(recursive: true);
     expect(() => log.write('lost'), returnsNormally);
     dir.createSync();
   });
 
   test('attach writes the records of the logger until stopped', () async {
-    final log = RollingLogFile(dir);
+    final log = open();
     Logger.root.level = Level.ALL;
     final stop = log.attach();
     Logger('Test').info('hello log');

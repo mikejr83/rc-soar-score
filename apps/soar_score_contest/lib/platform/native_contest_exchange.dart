@@ -71,8 +71,8 @@ class NativeContestExchange implements ContestExchange {
           'locale': Platform.localeName,
           'log_files': [
             if (log != null)
-              for (final f in log.files())
-                {'name': f.uri.pathSegments.last, 'bytes': f.lengthSync()},
+              for (final f in log.summaries())
+                {'name': f.name, 'bytes': f.bytes},
           ],
           ...?await _installation?.call(),
         },

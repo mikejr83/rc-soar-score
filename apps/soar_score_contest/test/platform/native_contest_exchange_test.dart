@@ -68,6 +68,7 @@ void main() {
         log: log,
         installation: () async => {'installation_id': 'abc'},
       );
+      addTearDown(log.close);
 
       final export = await exchange.export(
         contestId,

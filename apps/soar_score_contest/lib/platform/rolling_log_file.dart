@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
@@ -10,8 +10,10 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// The current file is `<name>.log`; rolling renames it to `<name>.1.log`,
 /// pushing older ones to `.2` and `.3` and deleting the oldest, so at most
 /// [retainedFiles] rolled files are kept besides the current one (like
-/// Serilog's or NLog's file targets). Writing never throws: a log that cannot
-/// be written must not break the app.
+/// Serilog's or NLog's file targets). The current file stays open between
+/// writes and is closed before a roll (a file cannot be renamed while open on
+/// Windows). Writing never throws: a log that cannot be written must not break
+/// the app.
 class RollingLogFile {
   RollingLogFile(
     this.directory, {
@@ -37,6 +39,7 @@ class RollingLogFile {
   final int retainedFiles;
 
   int _size = 0;
+  RandomAccessFile? _open;
 
   File _file(int index) => File(
     p.join(directory.path, index == 0 ? '$name.log' : '$name.$index.log'),
@@ -45,17 +48,19 @@ class RollingLogFile {
   /// Appends [line] and a newline, rolling first when it would not fit.
   void write(String line) {
     try {
-      final text = '$line\n';
-      final bytes = text.length;
-      if (_size > 0 && _size + bytes > maxBytes) _roll();
-      _file(0).writeAsStringSync(text, mode: FileMode.append);
-      _size += bytes;
+      final bytes = utf8.encode('$line\n');
+      if (_size > 0 && _size + bytes.length > maxBytes) _roll();
+      final open = _open ??= _file(0).openSync(mode: FileMode.append);
+      open.writeFromSync(bytes);
+      _size += bytes.length;
     } on FileSystemException {
-      // Dropped: see the class comment.
+      // Dropped: see the class comment. The next write opens the file again.
+      close();
     }
   }
 
   void _roll() {
+    close();
     try {
       final oldest = _file(retainedFiles);
       if (oldest.existsSync()) oldest.deleteSync();
@@ -64,9 +69,20 @@ class RollingLogFile {
         if (file.existsSync()) file.renameSync(_file(i + 1).path);
       }
     } on FileSystemException {
-      // A file that cannot be moved is overwritten by the next write.
+      // A file that cannot be moved stays where it is and the next write
+      // appends to it, so the file grows past the limit until a roll works.
     }
     _size = 0;
+  }
+
+  /// Closes the open file. Writing again reopens it.
+  void close() {
+    try {
+      _open?.closeSync();
+    } on FileSystemException {
+      // Nothing more to release.
+    }
+    _open = null;
   }
 
   /// The existing log files, oldest first.
@@ -74,6 +90,20 @@ class RollingLogFile {
     for (var i = retainedFiles; i >= 0; i--)
       if (_file(i).existsSync()) _file(i),
   ];
+
+  /// The name and size of each existing log file, oldest first. A file that
+  /// disappears or cannot be read meanwhile is left out.
+  List<({String name, int bytes})> summaries() => [
+    for (final file in files()) ?_summary(file),
+  ];
+
+  ({String name, int bytes})? _summary(File file) {
+    try {
+      return (name: p.basename(file.path), bytes: file.lengthSync());
+    } on FileSystemException {
+      return null;
+    }
+  }
 
   /// All kept text, oldest first.
   String readAll() {
@@ -89,11 +119,14 @@ class RollingLogFile {
   }
 
   /// Writes every record on [Logger.root] to this file until the returned
-  /// function is called.
+  /// function is called, which also closes the file.
   void Function() attach() {
     final subscription = Logger.root.onRecord.listen(
       (record) => write(formatTextRecord(record)),
     );
-    return () => unawaited(subscription.cancel());
+    return () {
+      subscription.cancel();
+      close();
+    };
   }
 }

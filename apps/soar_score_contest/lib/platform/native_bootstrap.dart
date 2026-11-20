@@ -62,6 +62,7 @@ class NativeBootstrap extends AppBootstrap {
     this.localUiStore,
     this._acting,
     this._preferences,
+    this._detachLog,
   ) : _client = ApiClient(
         baseUrl: _server.baseUrl,
         tokenProvider: () async => _server.secret,
@@ -88,6 +89,9 @@ class NativeBootstrap extends AppBootstrap {
 
   /// The account's preferences, read and kept here.
   final NativePreferences _preferences;
+
+  /// Stops writing the log file; called when this bootstrap closes.
+  final void Function() _detachLog;
 
   @override
   late final UiAccount uiAccount = ActingUiAccount(_acting);
@@ -157,6 +161,7 @@ class NativeBootstrap extends AppBootstrap {
     _epoch.close();
     await sync.close();
     await _server.close();
+    _detachLog();
     await localUiStore.close();
     (uiAccount as ActingUiAccount).dispose();
     _remoteClient.close();
@@ -220,7 +225,7 @@ class NativeBootstrap extends AppBootstrap {
     final appLog = RollingLogFile(
       Directory(p.join(p.dirname(database), 'logs')),
     );
-    appLog.attach();
+    final detachLog = appLog.attach();
     if (demoReset) {
       _logger.info('Resetting demo database');
       await deleteDatabaseFiles(database);
@@ -329,6 +334,7 @@ class NativeBootstrap extends AppBootstrap {
       uiStore,
       acting,
       preferences,
+      detachLog,
     );
   }
 
