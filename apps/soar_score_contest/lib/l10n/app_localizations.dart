@@ -5396,6 +5396,2285 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Discard'**
   String get scoreUnsavedDiscard;
+
+  /// Wizard step 1 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Details & copy source'**
+  String get wizardStepDetailsCopySource;
+
+  /// Wizard step 2 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline'**
+  String get wizardStepDiscipline;
+
+  /// Wizard step 3 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant options'**
+  String get wizardStepParticipantOptions;
+
+  /// Wizard step 4 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get wizardStepParticipants;
+
+  /// Wizard step 5 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring & publication'**
+  String get wizardStepScoringPublication;
+
+  /// Wizard step 6 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw options'**
+  String get wizardStepDrawOptions;
+
+  /// Wizard step 7 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary & create'**
+  String get wizardStepSummaryCreate;
+
+  /// Wizard step 1 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Name the contest and say where it’s held. You can also start from an earlier contest.'**
+  String get wizardIntroDetailsCopySource;
+
+  /// Wizard step 2 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one discipline. It sets the default task, landing bonus and scoring rules.'**
+  String get wizardIntroDiscipline;
+
+  /// Wizard step 3 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on only what this contest needs. Each option adds columns to the Participants step.'**
+  String get wizardIntroParticipantOptions;
+
+  /// Wizard step 4 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Add pilots and helpers. Every scoring pilot needs the columns marked with *.'**
+  String get wizardIntroParticipants;
+
+  /// Wizard step 5 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the defaults for this discipline and change anything this contest does differently.'**
+  String get wizardIntroScoringPublication;
+
+  /// Wizard step 6 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Set how pilots are grouped. You draw the matrix after the contest is created.'**
+  String get wizardIntroDrawOptions;
+
+  /// Wizard step 7 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Check each section, then create the contest.'**
+  String get wizardIntroSummaryCreate;
+
+  /// Message when the draft couldn't be deleted after creating.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest created, but its saved draft couldn’t be deleted. You may be offered it again; choose Start fresh.'**
+  String get wizardDraftNotDeleted;
+
+  /// Message shown after leaving the wizard.
+  ///
+  /// In en, this message translates to:
+  /// **'Left the wizard. Your draft is kept.'**
+  String get wizardLeftMessage;
+
+  /// Message when trying to leave while creating.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest is being created. Wait for it to finish.'**
+  String get wizardCreatingContest;
+
+  /// Title of the leave-confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave new contest?'**
+  String get wizardLeaveTitle;
+
+  /// Body of the leave-confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Your draft is kept on this device. You can finish it later from Contests.'**
+  String get wizardLeaveBody;
+
+  /// Warning in the leave dialog when save failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your latest changes couldn’t be saved and will be lost.'**
+  String get wizardLeaveSaveFailed;
+
+  /// Warning in the leave dialog when fields have errors.
+  ///
+  /// In en, this message translates to:
+  /// **'Fields with errors on this step need fixing before the contest can be created.'**
+  String get wizardLeaveErrors;
+
+  /// Cancel label in the leave dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get wizardKeepEditing;
+
+  /// Confirm label in the leave dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get wizardLeave;
+
+  /// Title of the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Change discipline to {discipline}?'**
+  String wizardChangeDisciplineTitle(String discipline);
+
+  /// Body of the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Some values set for {current} don’t apply to {target} and will be cleared:'**
+  String wizardChangeDisciplineBody(String current, String target);
+
+  /// Item in the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{discipline} landing-bonus table'**
+  String wizardChangeDisciplineLanding(String discipline);
+
+  /// Item in the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{discipline}-specific rules ({rules})'**
+  String wizardChangeDisciplineRules(String discipline, String rules);
+
+  /// Item in the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Group-score mode and precision, reset to the new defaults'**
+  String get wizardChangeDisciplineGroupScore;
+
+  /// Footnote in the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Details, participants and draw options stay as they are.'**
+  String get wizardChangeDisciplineFootnote;
+
+  /// Cancel label in the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep {discipline}'**
+  String wizardChangeDisciplineCancel(String discipline);
+
+  /// Confirm label in the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Change and clear'**
+  String get wizardChangeDisciplineConfirm;
+
+  /// Message after changing the discipline.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline changed to {discipline}. Incompatible values were cleared.'**
+  String wizardDisciplineChanged(String discipline);
+
+  /// Title of the turn-off-teams dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off teams?'**
+  String get wizardTurnOffTeams;
+
+  /// Item in the turn-off-teams dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Team assignments are removed from {count} participant{plural} ({teams} team{teamPlural}).'**
+  String wizardTurnOffTeamsAssignments(
+    int count,
+    String plural,
+    int teams,
+    String teamPlural,
+  );
+
+  /// Item in the turn-off-teams dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant who isn’t a pilot is removed from the contest.} other{{count} participants who aren’t pilots are removed from the contest.}}'**
+  String wizardTurnOffTeamsNonPilots(int count);
+
+  /// Item in the turn-off-teams dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the group size in Draw options. Team protection no longer sets a minimum.'**
+  String get wizardTurnOffTeamsGroupSize;
+
+  /// Cancel label in the turn-off-teams dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep teams'**
+  String get wizardKeepTeams;
+
+  /// Confirm label in the turn-off-teams dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off and remove'**
+  String get wizardTurnOffAndRemove;
+
+  /// Message after turning off teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams turned off. Team assignments and non-pilots were removed.'**
+  String get wizardTeamsTurnedOff;
+
+  /// Banner title when save failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft not saved'**
+  String get wizardDraftNotSaved;
+
+  /// Banner body when save failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your last changes weren’t saved. Everything you entered is still on screen.'**
+  String get wizardDraftNotSavedBody;
+
+  /// Action label in the save-failed banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry save'**
+  String get wizardRetrySave;
+
+  /// Message after a successful save retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved.'**
+  String get wizardDraftSaved;
+
+  /// Generic cancel button.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get wizardCancel;
+
+  /// Banner title on step 5.
+  ///
+  /// In en, this message translates to:
+  /// **'Created unpublished and private'**
+  String get wizardCreatedUnpublished;
+
+  /// Banner body on step 5.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody outside the contest team can see it. You publish it later from the contest configuration page.'**
+  String get wizardCreatedUnpublishedBody;
+
+  /// Banner title when create failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest wasn’t created'**
+  String get wizardNotCreated;
+
+  /// Banner body when create failed.
+  ///
+  /// In en, this message translates to:
+  /// **'{error} Everything you entered is kept in the draft.'**
+  String wizardNotCreatedBody(String error);
+
+  /// Action label in the create-failed banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get wizardRetry;
+
+  /// Banner title on step 6.
+  ///
+  /// In en, this message translates to:
+  /// **'The matrix isn’t drawn here'**
+  String get wizardMatrixNotDrawn;
+
+  /// Banner body on step 6.
+  ///
+  /// In en, this message translates to:
+  /// **'After creating the contest, draw the matrix from contest configuration. It will use these settings.'**
+  String get wizardMatrixNotDrawnBody;
+
+  /// Validation banner title.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 field needs attention before you continue} other{{count} fields need attention before you continue}}'**
+  String wizardFieldsNeedAttention(int count);
+
+  /// Label for the first drop field.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop after round'**
+  String get wizardDropAfterRound;
+
+  /// Label for the second drop field.
+  ///
+  /// In en, this message translates to:
+  /// **'Second drop after round'**
+  String get wizardSecondDropAfterRound;
+
+  /// Label for the groups field.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups per round'**
+  String get wizardGroupsPerRound;
+
+  /// Label for the rounds field.
+  ///
+  /// In en, this message translates to:
+  /// **'Preliminary rounds'**
+  String get wizardPreliminaryRounds;
+
+  /// Label for the seeded rounds field.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded rounds'**
+  String get wizardSeededRounds;
+
+  /// Field label for team pilot count.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots counted for team score *'**
+  String get wizardTeamPilotCountLabel;
+
+  /// Accessibility announcement when navigating steps.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total}, {title}.'**
+  String wizardStepOf(int step, int total, String title);
+
+  /// Step number header above the title.
+  ///
+  /// In en, this message translates to:
+  /// **'STEP {step} OF {total}'**
+  String wizardStepHeader(int step, int total);
+
+  /// Primary button label when not on the last step.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {title}'**
+  String wizardNext(String title);
+
+  /// Primary button label while creating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating contest…'**
+  String get wizardCreating;
+
+  /// Primary button label on the last step.
+  ///
+  /// In en, this message translates to:
+  /// **'Create contest'**
+  String get wizardCreateContest;
+
+  /// Accessibility announcement when creating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating contest.'**
+  String get wizardCreatingAnnouncement;
+
+  /// Accessibility announcement after creating.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest created.'**
+  String get wizardCreatedAnnouncement;
+
+  /// Blocked-reason text.
+  ///
+  /// In en, this message translates to:
+  /// **'Can’t create yet: {reason}'**
+  String wizardCannotCreate(String reason);
+
+  /// Reason when a step is invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} needs attention.'**
+  String wizardNeedsAttention(String title);
+
+  /// Reason when too few scoring pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'add at least 2 scoring pilots.'**
+  String get wizardAddScoringPilots;
+
+  /// Reason when participants need fixing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant needs fixing.} other{{count} participants need fixing.}}'**
+  String wizardParticipantsNeedFixing(int count);
+
+  /// Fix label in the blocked footer.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to {title}'**
+  String wizardGoToStep(String title);
+
+  /// Back button in the wizard footer.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get wizardBack;
+
+  /// DetailsField label for name.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest name'**
+  String get wizardDetailsFieldContestName;
+
+  /// DetailsField label for venue.
+  ///
+  /// In en, this message translates to:
+  /// **'Venue / host'**
+  String get wizardDetailsFieldVenue;
+
+  /// DetailsField label for start date.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get wizardDetailsFieldStartDate;
+
+  /// DetailsField label for end date.
+  ///
+  /// In en, this message translates to:
+  /// **'End date'**
+  String get wizardDetailsFieldEndDate;
+
+  /// Validation error for empty name.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a contest name.'**
+  String get wizardValidationEnterName;
+
+  /// Validation error for empty venue.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the venue or host club.'**
+  String get wizardValidationEnterVenue;
+
+  /// Validation error for empty start date.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a start date.'**
+  String get wizardValidationEnterStartDate;
+
+  /// Validation error for invalid start date.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a date like Nov 14, 2026.'**
+  String get wizardValidationStartDateFormat;
+
+  /// Validation error for empty end date.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an end date.'**
+  String get wizardValidationEnterEndDate;
+
+  /// Validation error for invalid end date.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a date like Nov 15, 2026.'**
+  String get wizardValidationEndDateFormat;
+
+  /// Validation error when end is before start.
+  ///
+  /// In en, this message translates to:
+  /// **'End date can’t be before the start date ({start}).'**
+  String wizardValidationEndDateBeforeStart(String start);
+
+  /// Validation error when no discipline chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a discipline.'**
+  String get wizardValidationChooseDiscipline;
+
+  /// Validation error for non-positive integer.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number above 0.'**
+  String get wizardValidationWholeNumber;
+
+  /// Validation error for second drop.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be after round {round}.'**
+  String wizardValidationMustBeAfterRound(int round);
+
+  /// Validation error for too many groups.
+  ///
+  /// In en, this message translates to:
+  /// **'Use {max} or fewer so every group has at least 2 scoring pilots.'**
+  String wizardValidationGroupsMax(int max);
+
+  /// Validation error for too few groups.
+  ///
+  /// In en, this message translates to:
+  /// **'Team protection needs at least {min} groups.'**
+  String wizardValidationGroupsMin(int min);
+
+  /// Validation error for seeded rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1 or more.'**
+  String get wizardValidationSeededRounds;
+
+  /// DropPolicy label for disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get wizardDropDisabled;
+
+  /// DropPolicy label for one dropped.
+  ///
+  /// In en, this message translates to:
+  /// **'One dropped'**
+  String get wizardDropOne;
+
+  /// DropPolicy label for two dropped.
+  ///
+  /// In en, this message translates to:
+  /// **'Two dropped'**
+  String get wizardDropTwo;
+
+  /// CopyMode label for none.
+  ///
+  /// In en, this message translates to:
+  /// **'Don’t copy'**
+  String get wizardCopyModeNone;
+
+  /// CopyMode description for none.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with a blank configuration and no pilots.'**
+  String get wizardCopyModeNoneDesc;
+
+  /// CopyMode label for configuration only.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration only'**
+  String get wizardCopyModeConfiguration;
+
+  /// CopyMode description for configuration only.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline, options, scoring and draw settings.'**
+  String get wizardCopyModeConfigurationDesc;
+
+  /// CopyMode label for all pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration + all pilots'**
+  String get wizardCopyModeAllPilots;
+
+  /// CopyMode description for all pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Every pilot in the source contest, with their class.'**
+  String get wizardCopyModeAllPilotsDesc;
+
+  /// CopyMode label for selected pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration + selected pilots'**
+  String get wizardCopyModeSelectedPilots;
+
+  /// CopyMode description for selected pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick some pilots, with their class, for example for a fly-off.'**
+  String get wizardCopyModeSelectedPilotsDesc;
+
+  /// ParticipantOption title for teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get wizardOptionTeamsTitle;
+
+  /// ParticipantOption description for teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Group pilots into teams for a team score.'**
+  String get wizardOptionTeamsDesc;
+
+  /// ParticipantOption effect for teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a Team column. Type a name to create a team. Pilots with no team are unassigned. Team protection becomes available in Draw options.'**
+  String get wizardOptionTeamsEffect;
+
+  /// ParticipantOption title for pilot numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest pilot numbers'**
+  String get wizardOptionPilotNumbersTitle;
+
+  /// ParticipantOption description for pilot numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Give each pilot a number for this contest.'**
+  String get wizardOptionPilotNumbersDesc;
+
+  /// ParticipantOption effect for pilot numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a Pilot no. column. Numbers are assigned at the first draw.'**
+  String get wizardOptionPilotNumbersEffect;
+
+  /// ParticipantOption note for pilot numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Any number shown before the first draw is labelled provisional.'**
+  String get wizardOptionPilotNumbersNote;
+
+  /// ParticipantOption title for classes.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get wizardOptionClassesTitle;
+
+  /// ParticipantOption description for classes.
+  ///
+  /// In en, this message translates to:
+  /// **'Score pilots in classes such as Open or Sportsman.'**
+  String get wizardOptionClassesDesc;
+
+  /// ParticipantOption effect for classes.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a required Class column for every scoring pilot.'**
+  String get wizardOptionClassesEffect;
+
+  /// ParticipantOption title for roles.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest roles'**
+  String get wizardOptionRolesTitle;
+
+  /// ParticipantOption description for roles.
+  ///
+  /// In en, this message translates to:
+  /// **'Include non-flying people such as timers and the CD.'**
+  String get wizardOptionRolesDesc;
+
+  /// ParticipantOption effect for roles.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a Role column. New people start as Pilot. Non-flying roles get no score rows.'**
+  String get wizardOptionRolesEffect;
+
+  /// ParticipantOption title for models.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot models'**
+  String get wizardOptionModelsTitle;
+
+  /// ParticipantOption description for models.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the models each pilot flies.'**
+  String get wizardOptionModelsDesc;
+
+  /// ParticipantOption effect for models.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a Models column for scoring pilots.'**
+  String get wizardOptionModelsEffect;
+
+  /// ParticipantOption note for models.
+  ///
+  /// In en, this message translates to:
+  /// **'Add models any time. A pilot without a model never holds up the contest.'**
+  String get wizardOptionModelsNote;
+
+  /// Label for unsupported disciplines.
+  ///
+  /// In en, this message translates to:
+  /// **'Not supported yet'**
+  String get wizardDisciplineUnsupported;
+
+  /// GroupScoreMode label for raw.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw'**
+  String get wizardGroupScoreRaw;
+
+  /// GroupScoreMode label for normalized.
+  ///
+  /// In en, this message translates to:
+  /// **'Normalized'**
+  String get wizardGroupScoreNormalized;
+
+  /// GroupScoreMode label for time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get wizardGroupScoreTime;
+
+  /// RoundingMode label for round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round'**
+  String get wizardRoundingRound;
+
+  /// RoundingMode label for truncate.
+  ///
+  /// In en, this message translates to:
+  /// **'Truncate'**
+  String get wizardRoundingTruncate;
+
+  /// PublicUpdateMode label for automatic.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get wizardPublicUpdateAutomatic;
+
+  /// PublicUpdateMode label for round completion.
+  ///
+  /// In en, this message translates to:
+  /// **'On round completion'**
+  String get wizardPublicUpdateRoundCompletion;
+
+  /// PublicUpdateMode label for manual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get wizardPublicUpdateManual;
+
+  /// PublicUpdateMode description for automatic.
+  ///
+  /// In en, this message translates to:
+  /// **'Public results update as scores are entered.'**
+  String get wizardPublicUpdateAutomaticDesc;
+
+  /// PublicUpdateMode description for round completion.
+  ///
+  /// In en, this message translates to:
+  /// **'Public results update when a round is complete.'**
+  String get wizardPublicUpdateRoundCompletionDesc;
+
+  /// PublicUpdateMode description for manual.
+  ///
+  /// In en, this message translates to:
+  /// **'Public results update only when you publish.'**
+  String get wizardPublicUpdateManualDesc;
+
+  /// Draw mode card title.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw mode'**
+  String get wizardDrawMode;
+
+  /// Draw mode name for man on man.
+  ///
+  /// In en, this message translates to:
+  /// **'Man on Man'**
+  String get wizardDrawModeManOnMan;
+
+  /// Draw mode description for man on man.
+  ///
+  /// In en, this message translates to:
+  /// **'Random groups each round, mixed so pilots meet as many others as possible.'**
+  String get wizardDrawModeManOnManDesc;
+
+  /// Draw mode name for seeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded Man on Man'**
+  String get wizardDrawModeSeeded;
+
+  /// Draw mode description for seeded.
+  ///
+  /// In en, this message translates to:
+  /// **'After the seeded rounds, pilots with similar scores fly together.'**
+  String get wizardDrawModeSeededDesc;
+
+  /// Why seeded and team protection are exclusive.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded draws place pilots by ranking, so they can’t also keep teammates in separate groups.'**
+  String get wizardDrawModeWhyExclusive;
+
+  /// Disabled reason for seeded mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable while team protection is on. {reason} Turn off team protection to choose it.'**
+  String wizardDrawModeUnavailable(String reason);
+
+  /// Card title for groups and rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups and rounds'**
+  String get wizardGroupsAndRounds;
+
+  /// Hint below groups field.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum {min}: team protection keeps the {team} pilots of your largest team in separate groups.'**
+  String wizardMinimumGroups(int min, int team);
+
+  /// Hint below groups field.
+  ///
+  /// In en, this message translates to:
+  /// **'Between {min} and {max} for {scoring} scoring pilots.'**
+  String wizardGroupsRange(int min, int max, int scoring);
+
+  /// Note below preliminary rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds can be appended after the contest starts.'**
+  String get wizardRoundsAppendNote;
+
+  /// Description for seeded rounds setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Man-on-man rounds flown before seeding starts. Minimum 1.'**
+  String get wizardSeededRoundsDesc;
+
+  /// Error title for seeded rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 1 seeded round'**
+  String get wizardSeededRoundsAtLeast1;
+
+  /// Setting label for lane mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Lane mode'**
+  String get wizardLaneMode;
+
+  /// Description for lane mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Whether pilots get a launch lane within their group.'**
+  String get wizardLaneModeDesc;
+
+  /// LaneMode label for none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get wizardLaneNone;
+
+  /// LaneMode label for random.
+  ///
+  /// In en, this message translates to:
+  /// **'Random'**
+  String get wizardLaneRandom;
+
+  /// Setting label for team protection.
+  ///
+  /// In en, this message translates to:
+  /// **'Team protection'**
+  String get wizardTeamProtection;
+
+  /// Description for team protection when teams on.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps teammates out of the same group. Needs at least as many groups as your largest team has pilots ({count}).'**
+  String wizardTeamProtectionDesc(int count);
+
+  /// Description for team protection when teams off.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps teammates out of the same group.'**
+  String get wizardTeamProtectionDescOff;
+
+  /// Note title when teams off.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams are off'**
+  String get wizardTeamsOffNote;
+
+  /// Note body when teams off.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on Teams in Participant options to use team protection.'**
+  String get wizardTeamsOffNoteBody;
+
+  /// Note title when seeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable with Seeded Man on Man'**
+  String get wizardSeededUnavailableNote;
+
+  /// Note body when seeded.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason} Choose Man on Man to use team protection.'**
+  String wizardSeededUnavailableNoteBody(String reason);
+
+  /// Note title when protection on.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded Man on Man is now unavailable'**
+  String get wizardSeededUnavailableNote2;
+
+  /// Note body when protection on.
+  ///
+  /// In en, this message translates to:
+  /// **'The two can’t be combined. Turn this off if you want a seeded draw.'**
+  String get wizardSeededUnavailableNote2Body;
+
+  /// Setting label for back-to-back.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow back-to-back flights'**
+  String get wizardBackToBack;
+
+  /// Description for back-to-back.
+  ///
+  /// In en, this message translates to:
+  /// **'A pilot may fly the last group of one round and the first group of the next.'**
+  String get wizardBackToBackDesc;
+
+  /// Warning title for back-to-back off.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw fairness decreases'**
+  String get wizardBackToBackFairness;
+
+  /// Warning body for back-to-back off.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping pilots out of consecutive flights limits how the draw can mix pilots, so some match-ups repeat more often.'**
+  String get wizardBackToBackFairnessBody;
+
+  /// Error title when too few groups.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest is too small for the constraint'**
+  String get wizardBackToBackTooSmall;
+
+  /// Error body when too few groups.
+  ///
+  /// In en, this message translates to:
+  /// **'With {groups} group{plural}, a pilot in the last group of one round would also fly in the first group of the next. Use at least 3 groups or allow back-to-back flights.'**
+  String wizardBackToBackTooSmallBody(int groups, String plural);
+
+  /// Card title for constraints.
+  ///
+  /// In en, this message translates to:
+  /// **'Constraints'**
+  String get wizardConstraints;
+
+  /// Title of the group calculation panel.
+  ///
+  /// In en, this message translates to:
+  /// **'PILOTS PER GROUP · UPDATES AS YOU EDIT'**
+  String get wizardPilotsPerGroupTitle;
+
+  /// OK message in group panel.
+  ///
+  /// In en, this message translates to:
+  /// **'every group has at least 2 scoring pilots.'**
+  String get wizardPilotsPerGroupOk;
+
+  /// Blocked message in group panel.
+  ///
+  /// In en, this message translates to:
+  /// **'with {groups} groups some would have fewer than 2 scoring pilots. Use {max} or fewer.'**
+  String wizardPilotsPerGroupBlocked(int groups, int max);
+
+  /// Blocked message when no groups.
+  ///
+  /// In en, this message translates to:
+  /// **'enter at least 1 group.'**
+  String get wizardPilotsPerGroupEnter1;
+
+  /// Protection message in group panel.
+  ///
+  /// In en, this message translates to:
+  /// **'team protection needs at least {min} groups. Your largest team has {team} scoring pilots.'**
+  String wizardPilotsPerGroupProtection(int min, int team);
+
+  /// Message when protection off.
+  ///
+  /// In en, this message translates to:
+  /// **'Team protection is off, so teammates can share a group.'**
+  String get wizardPilotsPerGroupProtectionOff;
+
+  /// Count line in group panel.
+  ///
+  /// In en, this message translates to:
+  /// **'{scoring} scoring pilots in {groups} group{plural} · smallest group {min}, largest {max}'**
+  String wizardPilotsPerGroupCount(
+    int scoring,
+    int groups,
+    String plural,
+    int min,
+    int max,
+  );
+
+  /// Count line when no groups.
+  ///
+  /// In en, this message translates to:
+  /// **'{scoring} scoring pilots'**
+  String wizardPilotsPerGroupCountNoGroups(int scoring);
+
+  /// Card title for scoring settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring'**
+  String get wizardScoringCard;
+
+  /// Setting label for group score.
+  ///
+  /// In en, this message translates to:
+  /// **'Group score'**
+  String get wizardGroupScoreLabel;
+
+  /// Description for raw group score.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw: flight points plus landing bonus, not normalized.'**
+  String get wizardGroupScoreRawDesc;
+
+  /// Description for normalized group score.
+  ///
+  /// In en, this message translates to:
+  /// **'Normalized: flight points plus landing bonus, normalized to 1000 in each group.'**
+  String get wizardGroupScoreNormalizedDesc;
+
+  /// Description for time group score.
+  ///
+  /// In en, this message translates to:
+  /// **'Time: flight time is normalized to 1000 in each group, then the landing bonus is added.'**
+  String get wizardGroupScoreTimeDesc;
+
+  /// Warning title for non-traditional scoring.
+  ///
+  /// In en, this message translates to:
+  /// **'No longer a traditional {discipline} contest'**
+  String wizardGroupScoreTraditional(String discipline);
+
+  /// Warning body for non-traditional scoring.
+  ///
+  /// In en, this message translates to:
+  /// **'{discipline} uses {mode} group scoring by default.'**
+  String wizardGroupScoreTraditionalBody(String discipline, String mode);
+
+  /// Setting label for rounding.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounding'**
+  String get wizardRoundingLabel;
+
+  /// Description for rounding.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens to digits beyond the chosen precision.'**
+  String get wizardRoundingDesc;
+
+  /// Setting label for precision.
+  ///
+  /// In en, this message translates to:
+  /// **'Total score decimal precision'**
+  String get wizardPrecisionLabel;
+
+  /// Description for precision.
+  ///
+  /// In en, this message translates to:
+  /// **'Digits shown and stored after the decimal point.'**
+  String get wizardPrecisionDesc;
+
+  /// Hint example for precision.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: 987.4567 → {result}'**
+  String wizardPrecisionExample(String result);
+
+  /// Setting label for dropped rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropped rounds'**
+  String get wizardDroppedRoundsLabel;
+
+  /// Description for dropped rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Worst rounds left out of each pilot’s total.'**
+  String get wizardDroppedRoundsDesc;
+
+  /// Label for first drop.
+  ///
+  /// In en, this message translates to:
+  /// **'First drop after round'**
+  String get wizardFirstDropLabel;
+
+  /// Description for drop after round.
+  ///
+  /// In en, this message translates to:
+  /// **'Once this many rounds are complete, each pilot’s worst round is left out.'**
+  String get wizardDropAfterRoundDesc;
+
+  /// Description for second drop.
+  ///
+  /// In en, this message translates to:
+  /// **'Once this many rounds are complete, the second worst round is also left out. Must be later than the first.'**
+  String get wizardSecondDropDesc;
+
+  /// Note when second drop is later.
+  ///
+  /// In en, this message translates to:
+  /// **'The second drop has to come later than the first.'**
+  String get wizardSecondDropLater;
+
+  /// Card title for participants and publication.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants and publication'**
+  String get wizardParticipantsPublication;
+
+  /// Setting label for review requests.
+  ///
+  /// In en, this message translates to:
+  /// **'Score-review requests'**
+  String get wizardReviewRequestsLabel;
+
+  /// Description for review requests.
+  ///
+  /// In en, this message translates to:
+  /// **'Let pilots ask the contest director to review a score.'**
+  String get wizardReviewRequestsDesc;
+
+  /// Setting label for public update.
+  ///
+  /// In en, this message translates to:
+  /// **'Public update policy'**
+  String get wizardPublicUpdateLabel;
+
+  /// Description for public update.
+  ///
+  /// In en, this message translates to:
+  /// **'When public results refresh once the contest is published.'**
+  String get wizardPublicUpdateDesc;
+
+  /// Default label when no discipline.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform default'**
+  String get wizardPlatformDefault;
+
+  /// Suffix for discipline default labels.
+  ///
+  /// In en, this message translates to:
+  /// **'default'**
+  String get wizardDisciplineDefault;
+
+  /// Changed-from label.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed from {value}'**
+  String wizardChangedFrom(String value);
+
+  /// Reset button in setting rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to default'**
+  String get wizardResetToDefault;
+
+  /// Tooltip for the minus stepper.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer'**
+  String get wizardFewer;
+
+  /// Tooltip for the plus stepper.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get wizardMore;
+
+  /// Title in the step list.
+  ///
+  /// In en, this message translates to:
+  /// **'New contest'**
+  String get wizardNewContest;
+
+  /// Progress text in the step list.
+  ///
+  /// In en, this message translates to:
+  /// **'{complete} of {total} steps complete'**
+  String wizardStepsComplete(int complete, int total);
+
+  /// Note at the bottom of the step list.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration in process is kept until the app is closed or the contest is created.'**
+  String get wizardDraftKeptNote;
+
+  /// Note below the discipline cards.
+  ///
+  /// In en, this message translates to:
+  /// **'These are starting defaults. You can override task times, landing bonuses and rules after the contest is created, on the contest configuration page.'**
+  String get wizardDisciplineNote;
+
+  /// Badge text for selected discipline.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get wizardSelected;
+
+  /// Table label in discipline card.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get wizardTimeLabel;
+
+  /// Table label in discipline card.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing'**
+  String get wizardLandingLabel;
+
+  /// Card title for contest details.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest details'**
+  String get wizardContestDetails;
+
+  /// Trailing text on the details card.
+  ///
+  /// In en, this message translates to:
+  /// **'* Required'**
+  String get wizardRequired;
+
+  /// Field label for contest name.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest name *'**
+  String get wizardContestNameLabel;
+
+  /// Field label for venue.
+  ///
+  /// In en, this message translates to:
+  /// **'Venue / host *'**
+  String get wizardVenueLabel;
+
+  /// Helper text for venue.
+  ///
+  /// In en, this message translates to:
+  /// **'Field name or host club as it should appear on results.'**
+  String get wizardVenueHelper;
+
+  /// Field label for start date.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date *'**
+  String get wizardStartDateLabel;
+
+  /// Field label for end date.
+  ///
+  /// In en, this message translates to:
+  /// **'End date *'**
+  String get wizardEndDateLabel;
+
+  /// Hint for date fields.
+  ///
+  /// In en, this message translates to:
+  /// **'MMM D, YYYY'**
+  String get wizardDateHint;
+
+  /// Tooltip for the start date picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the start date'**
+  String get wizardChooseStartDate;
+
+  /// Tooltip for the end date picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the end date'**
+  String get wizardChooseEndDate;
+
+  /// Field label for city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get wizardCityLabel;
+
+  /// Field label for region.
+  ///
+  /// In en, this message translates to:
+  /// **'State / province'**
+  String get wizardRegionLabel;
+
+  /// Field label for country.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get wizardCountryLabel;
+
+  /// Label for the time zone picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Time zone'**
+  String get wizardTimeZoneLabel;
+
+  /// Helper for time zone when unset.
+  ///
+  /// In en, this message translates to:
+  /// **'Defaults from the country, else this device’s time zone.'**
+  String get wizardTimeZoneDefault;
+
+  /// Card title for copy source.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy from an existing contest'**
+  String get wizardCopyFromContest;
+
+  /// Trailing text on the copy source card.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get wizardOptional;
+
+  /// Note about what copying never brings.
+  ///
+  /// In en, this message translates to:
+  /// **'Copying never brings scores, the flight matrix, publication history, invitations or audit history.'**
+  String get wizardCopyNeverBrings;
+
+  /// Section label for source contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Source contest'**
+  String get wizardSourceContest;
+
+  /// Button to remove the source.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove source'**
+  String get wizardRemoveSource;
+
+  /// Subtitle while loading a source.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading configuration and pilot list…'**
+  String get wizardLoadingSource;
+
+  /// Error title when source fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t load “{name}”'**
+  String wizardSourceFailed(String name);
+
+  /// Error body when source fails.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest didn’t load. Retry, or remove the source and continue without copying.'**
+  String get wizardSourceFailedBody;
+
+  /// Message after removing the source.
+  ///
+  /// In en, this message translates to:
+  /// **'Source removed. You can continue without copying.'**
+  String get wizardSourceRemoved;
+
+  /// Semantics label for the copy mode picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy mode'**
+  String get wizardCopyModeLabel;
+
+  /// Label for local contests (web).
+  ///
+  /// In en, this message translates to:
+  /// **'Your contests'**
+  String get wizardYourContests;
+
+  /// Label for local contests (native).
+  ///
+  /// In en, this message translates to:
+  /// **'On this device'**
+  String get wizardOnThisDevice;
+
+  /// Tab label when offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Public (needs connection)'**
+  String get wizardPublicNeedsConnection;
+
+  /// Tab label when online.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get wizardPublic;
+
+  /// Note when offline.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re offline. Public contests can be searched when you’re back online. {local} are still available.'**
+  String wizardOfflineNote(String local);
+
+  /// Note when public search unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching public contests isn’t available yet. Copy from {local} for now.'**
+  String wizardPublicUnavailable(String local);
+
+  /// Error when local contests fail to load.
+  ///
+  /// In en, this message translates to:
+  /// **'Contests could not be loaded.'**
+  String get wizardContestsLoadFailed;
+
+  /// Empty state for local contests.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no contests to copy yet.'**
+  String get wizardNoContests;
+
+  /// Action text on a contest tile.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get wizardUse;
+
+  /// Count in the pilot subset.
+  ///
+  /// In en, this message translates to:
+  /// **'{chosen} of {total} pilots selected'**
+  String wizardPilotsSelected(int chosen, int total);
+
+  /// Text when no pilots chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilots chosen yet'**
+  String get wizardNoPilotsChosen;
+
+  /// Suffix for extra pilots.
+  ///
+  /// In en, this message translates to:
+  /// **' and {count} more'**
+  String wizardAndMore(int count);
+
+  /// Button to choose pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose pilots'**
+  String get wizardChoosePilots;
+
+  /// Title of the copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'COPY SUMMARY'**
+  String get wizardCopySummaryTitle;
+
+  /// Semantics label for the copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy summary'**
+  String get wizardCopySummaryLabel;
+
+  /// Row label in copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get wizardCopySourceLabel;
+
+  /// Row label in copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Copies'**
+  String get wizardCopyCopiesLabel;
+
+  /// Row label in copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots'**
+  String get wizardCopyPilotsLabel;
+
+  /// Value when all pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count}'**
+  String wizardCopyAllPilots(int count);
+
+  /// Value when no pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get wizardCopyNone;
+
+  /// Row label in copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Per pilot'**
+  String get wizardCopyPerPilot;
+
+  /// Value for per-pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Participation and class'**
+  String get wizardCopyPerPilotValue;
+
+  /// Row label in copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Not copied'**
+  String get wizardCopyNotCopied;
+
+  /// Value for not copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams, models, non-flying participants, scores, matrix, publication history, invitations, audit history'**
+  String get wizardCopyNotCopiedValue;
+
+  /// Title of the choose-pilots dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose pilots to copy'**
+  String get wizardChoosePilotsTitle;
+
+  /// Body of the choose-pilots dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Each pilot is copied with their class. {selected} of {total} selected.'**
+  String wizardChoosePilotsBody(int selected, int total);
+
+  /// Checkbox label in the choose-pilots dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'All pilots'**
+  String get wizardAllPilots;
+
+  /// Confirm button in the choose-pilots dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Use these pilots'**
+  String get wizardUseThesePilots;
+
+  /// Title of the resume-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue your draft?'**
+  String get wizardContinueDraft;
+
+  /// Title of the discard-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard your draft?'**
+  String get wizardDiscardDraft;
+
+  /// Body of the resume-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'You started a contest that isn’t created yet{when}. Continue it, or start fresh and delete it.'**
+  String wizardContinueDraftBody(String when);
+
+  /// Body of the discard-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'A draft saved{when} can’t be opened by this version of the app. Discard it to start a new contest.'**
+  String wizardDiscardDraftBody(String when);
+
+  /// Button in the resume-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Start fresh'**
+  String get wizardStartFresh;
+
+  /// Button in the discard-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard draft'**
+  String get wizardDiscardDraftButton;
+
+  /// Button in the resume-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue draft'**
+  String get wizardContinueDraftButton;
+
+  /// Semantics label for the participant options step.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant options'**
+  String get wizardParticipantsStepLabel;
+
+  /// Helper for team pilot count.
+  ///
+  /// In en, this message translates to:
+  /// **'Best N pilots per team make the team score.'**
+  String get wizardTeamPilotCountHelper;
+
+  /// Note when teams turned on.
+  ///
+  /// In en, this message translates to:
+  /// **'Team protection is now available in Draw options. It keeps teammates out of the same group.'**
+  String get wizardTeamProtectionAvailable;
+
+  /// Label for the columns preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Columns in the Participants step'**
+  String get wizardColumnsPreview;
+
+  /// Badge text when option is from source.
+  ///
+  /// In en, this message translates to:
+  /// **'From source'**
+  String get wizardFromSource;
+
+  /// Prefix when option is on.
+  ///
+  /// In en, this message translates to:
+  /// **'In Participants: '**
+  String get wizardInParticipants;
+
+  /// Prefix when option is off.
+  ///
+  /// In en, this message translates to:
+  /// **'If on: '**
+  String get wizardIfOn;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get wizardColumnName;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get wizardColumnEmail;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get wizardColumnRole;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get wizardColumnClass;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get wizardColumnTeam;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot no.'**
+  String get wizardColumnPilotNo;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Models'**
+  String get wizardColumnModels;
+
+  /// Column requirement text.
+  ///
+  /// In en, this message translates to:
+  /// **'required'**
+  String get wizardColumnRequired;
+
+  /// Column requirement text.
+  ///
+  /// In en, this message translates to:
+  /// **'optional'**
+  String get wizardColumnOptional;
+
+  /// Column requirement text.
+  ///
+  /// In en, this message translates to:
+  /// **'provisional'**
+  String get wizardColumnProvisional;
+
+  /// Button to add a participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Add participant'**
+  String get wizardAddParticipant;
+
+  /// Title in the add-participant dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Add participant'**
+  String get wizardAddParticipantTitle;
+
+  /// Message when adding a duplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is already in the contest.'**
+  String wizardAlreadyInContest(String name);
+
+  /// Message after adding a pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is added as Pilot.'**
+  String wizardAddedAsPilot(String name);
+
+  /// Short message after adding a pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added as Pilot.'**
+  String wizardAddedAsPilotShort(String name);
+
+  /// Message after removing participants.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant removed from this contest.} other{{count} participants removed from this contest.}}'**
+  String wizardParticipantsRemoved(int count);
+
+  /// Banner title for participants needing fixes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant needs fixing before you continue} other{{count} participants need fixing before you continue}}'**
+  String wizardParticipantsNeedFixingBanner(int count);
+
+  /// Banner title for too few pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least 2 scoring pilots'**
+  String get wizardMinPilotsBanner;
+
+  /// Banner body for too few pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'A contest needs 2 or more scoring pilots. Non-flying roles don’t count.'**
+  String get wizardMinPilotsBannerBody;
+
+  /// Banner title for few pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {count} scoring pilots'**
+  String wizardFewPilotsBanner(int count);
+
+  /// Banner body for few pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'You can continue. With fewer than 3 pilots, use 1 group per round.'**
+  String get wizardFewPilotsBannerBody;
+
+  /// Chip text for people count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} people'**
+  String wizardPeopleCount(int count);
+
+  /// Chip text for scoring pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} scoring pilots'**
+  String wizardScoringPilotsCount(int count);
+
+  /// Chip text for non-flying.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} non-flying'**
+  String wizardNonFlyingCount(int count);
+
+  /// Chip text for pilots (no roles).
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilots'**
+  String wizardPilotsCount(int count);
+
+  /// Filter chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs fixing ({count})'**
+  String wizardNeedsFixingFilter(int count);
+
+  /// Message after setting team.
+  ///
+  /// In en, this message translates to:
+  /// **'Team set for {count} participants.'**
+  String wizardTeamSet(int count);
+
+  /// Message after setting class.
+  ///
+  /// In en, this message translates to:
+  /// **'Class set to {value} for {count} participants.'**
+  String wizardClassSet(String value, int count);
+
+  /// Message after setting role.
+  ///
+  /// In en, this message translates to:
+  /// **'Role set to {value} for {count} participants.'**
+  String wizardRoleSet(String value, int count);
+
+  /// Filter note text.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {shown} of {total} matching “{query}”'**
+  String wizardShowingMatching(int shown, int total, String query);
+
+  /// Empty filter text.
+  ///
+  /// In en, this message translates to:
+  /// **'No one in this contest matches “{query}”.'**
+  String wizardNoMatch(String query);
+
+  /// Semantics label for the participants list.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest participants'**
+  String get wizardContestParticipantsLabel;
+
+  /// Keyboard help text.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab moves between cells · Enter confirms and moves down · Space selects a row · Esc closes a menu'**
+  String get wizardKeyboardHelp;
+
+  /// Empty state title.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants yet'**
+  String get wizardNoParticipants;
+
+  /// Empty state body.
+  ///
+  /// In en, this message translates to:
+  /// **'Find people by name or email above, or add someone new. The contest needs at least 2 scoring pilots.'**
+  String get wizardNoParticipantsBody;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Visibility'**
+  String get wizardVisibility;
+
+  /// Summary issue text.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropped rounds need fixing'**
+  String get wizardDroppedRoundsNeedFixing;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Lanes'**
+  String get wizardLanes;
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'No lane assignment'**
+  String get wizardNoLaneAssignment;
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed'**
+  String get wizardAllowed;
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'Avoided'**
+  String get wizardAvoided;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds and groups'**
+  String get wizardRoundsGroups;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds'**
+  String get wizardRounds;
+
+  /// Summary issue text.
+  ///
+  /// In en, this message translates to:
+  /// **'Group settings are blocked'**
+  String get wizardGroupSettingsBlocked;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots per group'**
+  String get wizardPilotsPerGroup;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get wizardDetails;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get wizardName;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates'**
+  String get wizardDates;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Venue / host'**
+  String get wizardVenueHost;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get wizardLocation;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy source'**
+  String get wizardCopySourceSection;
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'Not copying'**
+  String get wizardNotCopying;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline'**
+  String get wizardDisciplineSection;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Task'**
+  String get wizardTask;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing'**
+  String get wizardLanding;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get wizardParticipantsSection;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get wizardPeople;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring pilots'**
+  String get wizardScoringPilots;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-flying'**
+  String get wizardNonFlying;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots'**
+  String get wizardPilots;
+
+  /// Summary issue text.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs at least 2 scoring pilots'**
+  String get wizardNeedsAtLeast2;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled options'**
+  String get wizardEnabledOptions;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get wizardOn;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get wizardOff;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams and classes'**
+  String get wizardTeamsClasses;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get wizardTeams;
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'None assigned yet'**
+  String get wizardNoneAssigned;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get wizardClasses;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Models'**
+  String get wizardModels;
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entered; pilots without one are fine'**
+  String wizardModelsEntered(int count);
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entered'**
+  String wizardModelsEnteredSimple(int count);
+
+  /// Section title after create.
+  ///
+  /// In en, this message translates to:
+  /// **'After you create'**
+  String get wizardAfterCreate;
+
+  /// After-create note.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest configuration page is opened.'**
+  String get wizardAfterCreateConfig;
+
+  /// After-create note.
+  ///
+  /// In en, this message translates to:
+  /// **'It stays unpublished and private until you publish it.'**
+  String get wizardAfterCreatePrivate;
+
+  /// After-create note.
+  ///
+  /// In en, this message translates to:
+  /// **'A flight matrix hasn’t been drawn. The draw can be created from the next screen.'**
+  String get wizardAfterCreateMatrix;
+
+  /// After-create note.
+  ///
+  /// In en, this message translates to:
+  /// **'Review {discipline} discipline overrides and the remaining settings there.'**
+  String wizardAfterCreateReview(String discipline);
+
+  /// Edit button in summary section.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get wizardEdit;
+
+  /// Summary issue for details.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 field needs attention} other{{count} fields need attention}}'**
+  String wizardFieldsNeedAttentionSummary(int count);
+
+  /// Filter chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs fixing ({count})'**
+  String wizardNeedsFixing(int count);
+
+  /// Filter note text.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {shown} of {total} matching “{query}”'**
+  String wizardShowing(int shown, int total, String query);
+
+  /// Semantics label for the participants list.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest participants'**
+  String get wizardParticipantsLabel;
+
+  /// Empty state body.
+  ///
+  /// In en, this message translates to:
+  /// **'Find people by name or email above, or add someone new. The contest needs at least 2 scoring pilots.'**
+  String get wizardNoParticipantsHelp;
+
+  /// Semantics label for the step list.
+  ///
+  /// In en, this message translates to:
+  /// **'Wizard steps'**
+  String get wizardStepListLabel;
+
+  /// Count of selected rows in the participants step.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 selected} other{{count} selected}}'**
+  String wizardRowsSelected(int count);
+
+  /// Semantics label for the bulk edit bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk edit selected participants'**
+  String get wizardBulkEditLabel;
+
+  /// Menu label for setting team.
+  ///
+  /// In en, this message translates to:
+  /// **'Set team'**
+  String get wizardBulkSetTeam;
+
+  /// Menu title for setting team.
+  ///
+  /// In en, this message translates to:
+  /// **'Set team for {count}'**
+  String wizardBulkSetTeamTitle(int count);
+
+  /// Menu label for setting class.
+  ///
+  /// In en, this message translates to:
+  /// **'Set class'**
+  String get wizardBulkSetClass;
+
+  /// Menu title for setting class.
+  ///
+  /// In en, this message translates to:
+  /// **'Set class for {count}'**
+  String wizardBulkSetClassTitle(int count);
+
+  /// Menu label for setting role.
+  ///
+  /// In en, this message translates to:
+  /// **'Set role'**
+  String get wizardBulkSetRole;
+
+  /// Menu title for setting role.
+  ///
+  /// In en, this message translates to:
+  /// **'Set role for {count}'**
+  String wizardBulkSetRoleTitle(int count);
+
+  /// Button to remove selected rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get wizardBulkRemove;
+
+  /// Tooltip for clearing the selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get wizardBulkClear;
+
+  /// Step status: complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get wizardStepComplete;
+
+  /// Step status: current.
+  ///
+  /// In en, this message translates to:
+  /// **'Current step'**
+  String get wizardStepCurrent;
+
+  /// Step status: current with errors.
+  ///
+  /// In en, this message translates to:
+  /// **'Current · needs attention'**
+  String get wizardStepCurrentNeedsAttention;
+
+  /// Step status: needs attention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get wizardStepNeedsAttention;
+
+  /// Step status: visited.
+  ///
+  /// In en, this message translates to:
+  /// **'Visited'**
+  String get wizardStepVisited;
+
+  /// Step status: not started.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started'**
+  String get wizardStepNotStarted;
+
+  /// Tooltip explaining the draft status.
+  ///
+  /// In en, this message translates to:
+  /// **'One draft at a time. It is kept on this device and isn’t listed with contests.'**
+  String get wizardDraftExplanation;
+
+  /// Short draft status with time.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved {time}'**
+  String wizardDraftSavedAt(String time);
+
+  /// Draft status with time.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved · {time}'**
+  String wizardDraftSavedDot(String time);
+
+  /// Help text for the start date picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get wizardStartDateHelp;
+
+  /// Help text for the end date picker.
+  ///
+  /// In en, this message translates to:
+  /// **'End date'**
+  String get wizardEndDateHelp;
+
+  /// Team count in the summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} count for team score'**
+  String wizardTeamCount(String count);
+
+  /// Pilot count in the copy source line.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 pilot} other{{count} pilots}}'**
+  String wizardPilotsCountShort(int count);
 }
 
 class _AppLocalizationsDelegate

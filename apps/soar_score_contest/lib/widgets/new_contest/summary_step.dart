@@ -43,7 +43,7 @@ class SummaryStep extends StatelessWidget {
 
   List<_Section> _sections(AppLocalizations l10n) {
     final d = draft;
-    final details = DraftValidation.details(d).length;
+    final details = DraftValidation.details(d, l10n).length;
     final source = d.source;
     final scoring = d.scoringSettings;
     final draw = d.drawSettings;
@@ -57,13 +57,12 @@ class SummaryStep extends StatelessWidget {
       for (final option in ParticipantOption.values)
         if (d.has(option))
           option == ParticipantOption.teams
-              ? '${option.title} (${d.teamPilotCount.trim()} count for team '
-                    'score)'
-              : option.title,
+              ? '${option.title(l10n)} (${l10n.wizardTeamCount(d.teamPilotCount.trim())})'
+              : option.title(l10n),
     ];
     final off = [
       for (final option in ParticipantOption.values)
-        if (!d.has(option)) option.title,
+        if (!d.has(option)) option.title(l10n),
     ];
     final classCounts = [
       for (final name in d.classes)
@@ -82,15 +81,15 @@ class SummaryStep extends StatelessWidget {
 
     return [
       _Section(
-        'Details',
+        l10n.wizardDetails,
         1,
         [
-          ('Name', d.name.trim().isEmpty ? '—' : d.name.trim()),
-          ('Dates', dates.isEmpty ? '—' : dates),
-          ('Venue / host', d.venue.trim().isEmpty ? '—' : d.venue.trim()),
-          ('Location', location.isEmpty ? '—' : location),
+          (l10n.wizardName, d.name.trim().isEmpty ? '—' : d.name.trim()),
+          (l10n.wizardDates, dates.isEmpty ? '—' : dates),
+          (l10n.wizardVenueHost, d.venue.trim().isEmpty ? '—' : d.venue.trim()),
+          (l10n.wizardLocation, location.isEmpty ? '—' : location),
           (
-            'Time zone',
+            l10n.wizardTimeZoneLabel,
             ContestTimeZones.label(
               TimeZones.effective(d.timeZone, d.country),
               at: DraftValidation.parseDate(d.startDate),
@@ -99,95 +98,94 @@ class SummaryStep extends StatelessWidget {
         ],
         details == 0
             ? null
-            : '$details field${details == 1 ? ' needs' : 's need'} attention',
+            : l10n.wizardFieldsNeedAttentionSummary(details),
       ),
       _Section(
-        'Copy source',
+        l10n.wizardCopySourceSection,
         1,
         source == null || !d.copyMode.usesSource
-            ? [('Source', 'Not copying')]
+            ? [(l10n.wizardCopySourceLabel, l10n.wizardNotCopying)]
             : [
-                ('Source', source.contest.name),
-                ('Copies', d.copyMode.label),
+                (l10n.wizardCopySourceLabel, source.contest.name),
+                (l10n.wizardCopyCopiesLabel, d.copyMode.label(l10n)),
                 (
-                  'Pilots',
+                  l10n.wizardCopyPilotsLabel,
                   switch (d.copyMode) {
                     CopyMode.selectedPilots =>
                       '${d.selectedPilots.length} of ${source.pilots.length} '
                           'selected',
-                    CopyMode.allPilots => 'All ${source.pilots.length}',
-                    _ => 'None',
+                    CopyMode.allPilots => l10n.wizardCopyAllPilots(source.pilots.length),
+                    _ => l10n.wizardCopyNone,
                   },
                 ),
               ],
       ),
       _Section(
-        'Discipline',
+        l10n.wizardDisciplineSection,
         2,
         d.discipline == null
-            ? [('Discipline', '—')]
+            ? [(l10n.wizardDisciplineSection, '—')]
             : [
-                ('Discipline', d.discipline!.name),
-                ('Task', d.discipline!.time ?? '—'),
-                ('Landing', d.discipline!.landing ?? '—'),
+                (l10n.wizardDisciplineSection, d.discipline!.name),
+                (l10n.wizardTask, d.discipline!.time ?? '—'),
+                (l10n.wizardLanding, d.discipline!.landing ?? '—'),
               ],
-        DraftValidation.discipline(d),
+        DraftValidation.discipline(d, l10n),
       ),
       _Section(
-        'Participants',
+        l10n.wizardParticipantsSection,
         4,
         d.has(ParticipantOption.roles)
             ? [
-                ('People', '${d.participants.length}'),
-                ('Scoring pilots', '$scoringPilots'),
-                ('Non-flying', '${d.participants.length - scoringPilots}'),
+                (l10n.wizardPeople, '${d.participants.length}'),
+                (l10n.wizardScoringPilots, '$scoringPilots'),
+                (l10n.wizardNonFlying, '${d.participants.length - scoringPilots}'),
               ]
-            : [('Pilots', '$scoringPilots')],
+            : [(l10n.wizardPilots, '$scoringPilots')],
         scoringPilots < DraftValidation.minScoringPilots
-            ? 'Needs at least 2 scoring pilots'
+            ? l10n.wizardNeedsAtLeast2
             : needing > 0
-            ? '$needing participant${needing == 1 ? ' needs' : 's need'} '
-                  'fixing'
+            ? l10n.wizardParticipantsNeedFixing(needing)
             : null,
       ),
-      _Section('Enabled options', 3, [
-        ('On', on.isEmpty ? 'None' : on.join(', ')),
-        ('Off', off.isEmpty ? 'None' : off.join(', ')),
-      ], DraftValidation.teamPilotCount(d)),
-      _Section('Teams and classes', 4, [
+      _Section(l10n.wizardEnabledOptions, 3, [
+        (l10n.wizardOn, on.isEmpty ? l10n.wizardCopyNone : on.join(', ')),
+        (l10n.wizardOff, off.isEmpty ? l10n.wizardCopyNone : off.join(', ')),
+      ], DraftValidation.teamPilotCount(d, l10n)),
+      _Section(l10n.wizardTeamsClasses, 4, [
         (
-          'Teams',
+          l10n.wizardTeams,
           !d.has(ParticipantOption.teams)
-              ? 'Off'
+              ? l10n.wizardOff
               : d.teams.isEmpty
-              ? 'None assigned yet'
+              ? l10n.wizardNoneAssigned
               : d.teams.map((t) => '${t.name} (${t.count})').join(', '),
         ),
         (
-          'Classes',
+          l10n.wizardClasses,
           !d.has(ParticipantOption.classes)
-              ? 'Off'
+              ? l10n.wizardOff
               : classCounts.isEmpty
               ? '—'
               : classCounts.join(', '),
         ),
         if (d.has(ParticipantOption.models))
           (
-            'Models',
+            l10n.wizardModels,
             d.participants.any((p) => d.isScoring(p) && p.models.isEmpty)
-                ? '$modelCount entered; pilots without one are fine'
-                : '$modelCount entered',
+                ? l10n.wizardModelsEntered(modelCount)
+                : l10n.wizardModelsEnteredSimple(modelCount),
           ),
       ]),
-      _Section('Scoring and publication', 5, [
-        ('Group score', ScoringLabels.groupScore(scoring.groupScoreMode)),
+      _Section(l10n.wizardParticipantsPublication, 5, [
+        (l10n.wizardGroupScoreLabel, ScoringLabels.groupScore(l10n, scoring.groupScoreMode)),
         (
-          'Precision',
-          '${ScoringLabels.rounding(scoring.roundingMode)} to '
+          l10n.wizardPrecisionLabel,
+          '${ScoringLabels.rounding(l10n, scoring.roundingMode)} to '
               '${scoring.decimalPlaces} dp',
         ),
-        ('Dropped rounds', ScoringLabels.drops(scoring)),
-        ('Review requests', scoring.reviewRequests ? 'On' : 'Off'),
+        (l10n.wizardDroppedRoundsLabel, ScoringLabels.drops(l10n, scoring)),
+        (l10n.wizardReviewRequestsLabel, scoring.reviewRequests ? 'On' : 'Off'),
         (
           l10n.scoresBecomeOfficialLabel,
           ScoringLabels.scoresBecomeOfficial(
@@ -196,50 +194,46 @@ class SummaryStep extends StatelessWidget {
           ),
         ),
         (
-          'Public updates',
-          ScoringLabels.publicUpdate(scoring.publicUpdateMode),
+          l10n.wizardPublicUpdateLabel,
+          ScoringLabels.publicUpdate(l10n, scoring.publicUpdateMode),
         ),
-        ('Visibility', 'Unpublished and private'),
-      ], DraftValidation.scoring(d) ? null : 'Dropped rounds need fixing'),
-      _Section('Draw options', 6, [
+        (l10n.wizardVisibility, 'Unpublished and private'),
+      ], DraftValidation.scoring(d, l10n) ? null : l10n.wizardDroppedRoundsNeedFixing),
+      _Section(l10n.wizardStepDrawOptions, 6, [
         (
-          'Mode',
+          l10n.wizardDrawMode,
           draw.seeded
-              ? 'Seeded Man on Man (${draw.seededRounds.trim()} seeded)'
-              : 'Man on Man',
+               ? '${l10n.wizardDrawModeSeeded} (${draw.seededRounds.trim()} seeded)'
+              : l10n.wizardDrawModeManOnMan,
         ),
-        ('Team protection', plan.teamProtection ? 'On' : 'Off'),
+        (l10n.wizardTeamProtection, plan.teamProtection ? l10n.wizardOn : l10n.wizardOff),
         (
-          'Lanes',
-          draw.laneMode.name == 'none' ? 'No lane assignment' : 'Random',
+          l10n.wizardLanes,
+          draw.laneMode.name == 'none' ? l10n.wizardNoLaneAssignment : l10n.wizardLaneRandom,
         ),
-        ('Back-to-back', draw.allowBackToBack ? 'Allowed' : 'Avoided'),
+        (l10n.wizardBackToBack, draw.allowBackToBack ? l10n.wizardAllowed : l10n.wizardAvoided),
       ]),
-      _Section('Rounds and groups', 6, [
-        ('Rounds', '${d.roundsText.trim()} (rounds can be appended)'),
-        ('Groups per round', '${plan.groups}'),
-        ('Pilots per group', plan.groupsValid ? plan.perGroupText : '—'),
-      ], DraftValidation.drawOptions(d) ? null : 'Group settings are blocked'),
+      _Section(l10n.wizardRoundsGroups, 6, [
+        (l10n.wizardRounds, '${d.roundsText.trim()} (${l10n.wizardRoundsAppendNote})'),
+        (l10n.wizardGroupsPerRound, '${plan.groups}'),
+        (l10n.wizardPilotsPerGroup, plan.groupsValid ? plan.perGroupText : '—'),
+      ], DraftValidation.drawOptions(d, l10n) ? null : l10n.wizardGroupSettingsBlocked),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final discipline = draft.discipline?.name ?? 'discipline';
     final after = [
-      (Icons.tune, 'The contest configuration page is opened.'),
-      (Icons.lock, 'It stays unpublished and private until you publish it.'),
-      (
-        Icons.grid_view,
-        'A flight matrix hasn’t been drawn. The draw can be created from the '
-            'next screen.',
-      ),
+      (Icons.tune, l10n.wizardAfterCreateConfig),
+      (Icons.lock, l10n.wizardAfterCreatePrivate),
+      (Icons.grid_view, l10n.wizardAfterCreateMatrix),
       (
         Icons.rule,
-        'Review $discipline discipline overrides and the remaining settings '
-            'there.',
+        l10n.wizardAfterCreateReview(discipline),
       ),
     ];
     return Column(
@@ -286,7 +280,7 @@ class SummaryStep extends StatelessWidget {
         const SizedBox(height: 20),
         Semantics(
           container: true,
-          label: 'After you create',
+          label: l10n.wizardAfterCreate,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/new_contest/scoring_settings.dart';
 import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
@@ -21,26 +22,27 @@ Future<void> _pick(WidgetTester tester, String name) async {
 void main() {
   testWidgets('step 1 blocks Next with a summary and inline errors, and the '
       'summary links focus the field', (tester) async {
+    final l10n = AppLocalizationsEn();
     await pumpWizard(tester, respond: emptyApi);
 
     expect(find.byType(WizardStepList), findsOneWidget);
-    expect(stepTitle(tester), 'Details & copy source');
-    expect(find.text('Next: Discipline'), findsOneWidget);
+    expect(stepTitle(tester), l10n.wizardStepDetailsCopySource);
+    expect(find.text(l10n.wizardNext(l10n.wizardStepDiscipline)), findsOneWidget);
     // No errors before trying to continue.
     expect(find.byKey(const ValueKey('banner-validation')), findsNothing);
 
     await next(tester);
-    expect(stepTitle(tester), 'Details & copy source');
+    expect(stepTitle(tester), l10n.wizardStepDetailsCopySource);
     expect(
-      find.text('4 fields need attention before you continue'),
+      find.text(l10n.wizardFieldsNeedAttention(4)),
       findsOneWidget,
     );
-    expect(find.text('Contest name: Enter a contest name.'), findsOneWidget);
+    expect(find.text('${l10n.wizardDetailsFieldContestName}: ${l10n.wizardValidationEnterName}'), findsOneWidget);
     // Inline, next to the field.
-    expect(find.text('Enter a contest name.'), findsOneWidget);
+    expect(find.text(l10n.wizardValidationEnterName), findsOneWidget);
     expect(find.text('Current · needs attention'), findsOneWidget);
 
-    await tester.tap(find.text('Contest name: Enter a contest name.'));
+    await tester.tap(find.text('${l10n.wizardDetailsFieldContestName}: ${l10n.wizardValidationEnterName}'));
     await tester.pump();
     final name = tester.widget<TextField>(
       find.byKey(const ValueKey('contest-name')),
@@ -78,10 +80,11 @@ void main() {
   testWidgets('every discipline card is as tall as the tallest', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     await pumpWizard(tester, respond: emptyApi);
     await fillDetails(tester);
     await next(tester);
-    expect(stepTitle(tester), 'Discipline');
+    expect(stepTitle(tester), l10n.wizardStepDiscipline);
 
     final heights = {
       for (final discipline in WizardDiscipline.values)
@@ -93,6 +96,7 @@ void main() {
   });
 
   testWidgets('an end date before the start date is an error', (tester) async {
+    final l10n = AppLocalizationsEn();
     await pumpWizard(tester, respond: emptyApi);
     await fillDetails(tester);
     await tester.enterText(
@@ -102,24 +106,25 @@ void main() {
     await next(tester);
 
     expect(
-      find.text('End date can’t be before the start date (Nov 14, 2026).'),
+      find.text(l10n.wizardValidationEndDateBeforeStart('Nov 14, 2026')),
       findsOneWidget,
     );
-    expect(find.text('1 field needs attention before you continue'), findsOne);
+    expect(find.text(l10n.wizardFieldsNeedAttention(1)), findsOne);
   });
 
   testWidgets('steps 1 to 3 advance when valid; visited steps can be jumped '
       'to without losing values', (tester) async {
+    final l10n = AppLocalizationsEn();
     final wizard = await pumpWizard(tester, respond: emptyApi);
     await fillDetails(tester);
     await next(tester);
 
-    expect(stepTitle(tester), 'Discipline');
-    expect(find.text('Complete'), findsOneWidget);
+    expect(stepTitle(tester), l10n.wizardStepDiscipline);
+    expect(find.text(l10n.wizardStepComplete), findsOneWidget);
 
     // A discipline is required.
     await next(tester);
-    expect(find.text('Choose a discipline.'), findsOneWidget);
+    expect(find.text(l10n.wizardValidationChooseDiscipline), findsOneWidget);
 
     // The first pick needs no confirmation; unsupported ones can't be picked.
     await _pick(tester, 'F3K');
@@ -129,12 +134,12 @@ void main() {
     expect(wizard.store.draft.discipline, WizardDiscipline.f5j);
 
     await next(tester);
-    expect(stepTitle(tester), 'Participant options');
+    expect(stepTitle(tester), l10n.wizardStepParticipantOptions);
 
     // Jump back to step 1: the values are still there.
     await tester.tap(find.byKey(const ValueKey('wizard-step-1')));
     await tester.pumpAndSettle();
-    expect(stepTitle(tester), 'Details & copy source');
+    expect(stepTitle(tester), l10n.wizardStepDetailsCopySource);
     expect(find.text('Gator Cup F5J'), findsOneWidget);
     expect(wizard.store.draft.visitedThrough, 3);
   });
@@ -142,23 +147,24 @@ void main() {
   testWidgets('changing the discipline asks first and can be kept', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final wizard = await pumpWizard(tester, respond: emptyApi);
     await fillDetails(tester);
     await next(tester);
     await _pick(tester, 'F5J');
 
     await _pick(tester, 'F3J');
-    expect(find.text('Change discipline to F3J?'), findsOneWidget);
-    await tester.tap(find.text('Keep F5J'));
+    expect(find.text(l10n.wizardChangeDisciplineTitle('F3J')), findsOneWidget);
+    await tester.tap(find.text(l10n.wizardChangeDisciplineCancel('F5J')));
     await tester.pumpAndSettle();
     expect(wizard.store.draft.discipline, WizardDiscipline.f5j);
 
     await _pick(tester, 'F3J');
-    await tester.tap(find.text('Change and clear'));
+    await tester.tap(find.text(l10n.wizardChangeDisciplineConfirm));
     await tester.pumpAndSettle();
     expect(wizard.store.draft.discipline, WizardDiscipline.f3j);
     expect(
-      find.text('Discipline changed to F3J. Incompatible values were cleared.'),
+      find.text(l10n.wizardDisciplineChanged('F3J')),
       findsOneWidget,
     );
   });
@@ -166,6 +172,7 @@ void main() {
   testWidgets('changing the discipline keeps the choices it does not own', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final wizard = await pumpWizard(tester, respond: emptyApi);
     await fillDetails(tester);
     await next(tester);
@@ -183,7 +190,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await _pick(tester, 'F3J');
-    await tester.tap(find.text('Change and clear'));
+    await tester.tap(find.text(l10n.wizardChangeDisciplineConfirm));
     await tester.pumpAndSettle();
 
     final scoring = wizard.store.draft.scoringSettings;
@@ -202,12 +209,13 @@ void main() {
   testWidgets('changing the discipline with untouched scoring uses defaults', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final wizard = await pumpWizard(tester, respond: emptyApi);
     await fillDetails(tester);
     await next(tester);
     await _pick(tester, 'F5J');
     await _pick(tester, 'F3J');
-    await tester.tap(find.text('Change and clear'));
+    await tester.tap(find.text(l10n.wizardChangeDisciplineConfirm));
     await tester.pumpAndSettle();
 
     expect(
@@ -219,6 +227,7 @@ void main() {
   testWidgets('step 3: Teams needs a positive team count and adds columns', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final wizard = await pumpWizard(tester, respond: emptyApi);
     await fillDetails(tester);
     await next(tester);
@@ -230,38 +239,39 @@ void main() {
     await tester.pumpAndSettle();
     expect(wizard.store.draft.options, {ParticipantOption.teams});
     expect(find.byKey(const ValueKey('team-pilot-count')), findsOneWidget);
-    expect(find.text('Team optional', findRichText: true), findsOneWidget);
+    expect(find.text('${l10n.wizardColumnTeam} ${l10n.wizardColumnOptional}', findRichText: true), findsOneWidget);
 
     await next(tester);
-    expect(stepTitle(tester), 'Participant options');
+    expect(stepTitle(tester), l10n.wizardStepParticipantOptions);
     expect(
-      find.text('Pilots counted for team score: enter a whole number above 0.'),
+      find.text('${l10n.wizardTeamPilotCountLabel}: ${l10n.wizardValidationWholeNumber}'),
       findsOneWidget,
     );
 
     await tester.enterText(find.byKey(const ValueKey('team-pilot-count')), '0');
     await tester.pump();
-    expect(find.text('Enter a whole number above 0.'), findsOneWidget);
+    expect(find.text(l10n.wizardValidationWholeNumber), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('team-pilot-count')), '3');
     await tester.pump();
     await next(tester);
 
     // Step 4 needs at least 2 scoring pilots.
-    expect(stepTitle(tester), 'Participants');
+    expect(stepTitle(tester), l10n.wizardStepParticipants);
     await next(tester);
-    expect(stepTitle(tester), 'Participants');
-    expect(find.text('Add at least 2 scoring pilots'), findsOneWidget);
+    expect(stepTitle(tester), l10n.wizardStepParticipants);
+    expect(find.text(l10n.wizardMinPilotsBanner), findsOneWidget);
   });
 
   testWidgets('narrow windows show the dot stepper and reflow the fields', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     await pumpWizard(tester, respond: emptyApi, size: const Size(800, 1180));
 
     expect(find.byType(WizardStepList), findsNothing);
     expect(find.byType(WizardDotStepper), findsOneWidget);
     expect(
-      find.byTooltip('Step 1, Details & copy source, Current step'),
+      find.byTooltip(l10n.wizardStepOf(1, 7, l10n.wizardStepDetailsCopySource)),
       findsOne,
     );
     final error = tester.takeException();

@@ -3822,4 +3822,1432 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scoreUnsavedDiscard => 'Discard';
+
+  @override
+  String get wizardStepDetailsCopySource => 'Details & copy source';
+
+  @override
+  String get wizardStepDiscipline => 'Discipline';
+
+  @override
+  String get wizardStepParticipantOptions => 'Participant options';
+
+  @override
+  String get wizardStepParticipants => 'Participants';
+
+  @override
+  String get wizardStepScoringPublication => 'Scoring & publication';
+
+  @override
+  String get wizardStepDrawOptions => 'Draw options';
+
+  @override
+  String get wizardStepSummaryCreate => 'Summary & create';
+
+  @override
+  String get wizardIntroDetailsCopySource =>
+      'Name the contest and say where it’s held. You can also start from an earlier contest.';
+
+  @override
+  String get wizardIntroDiscipline =>
+      'Choose one discipline. It sets the default task, landing bonus and scoring rules.';
+
+  @override
+  String get wizardIntroParticipantOptions =>
+      'Turn on only what this contest needs. Each option adds columns to the Participants step.';
+
+  @override
+  String get wizardIntroParticipants =>
+      'Add pilots and helpers. Every scoring pilot needs the columns marked with *.';
+
+  @override
+  String get wizardIntroScoringPublication =>
+      'Review the defaults for this discipline and change anything this contest does differently.';
+
+  @override
+  String get wizardIntroDrawOptions =>
+      'Set how pilots are grouped. You draw the matrix after the contest is created.';
+
+  @override
+  String get wizardIntroSummaryCreate =>
+      'Check each section, then create the contest.';
+
+  @override
+  String get wizardDraftNotDeleted =>
+      'Contest created, but its saved draft couldn’t be deleted. You may be offered it again; choose Start fresh.';
+
+  @override
+  String get wizardLeftMessage => 'Left the wizard. Your draft is kept.';
+
+  @override
+  String get wizardCreatingContest =>
+      'The contest is being created. Wait for it to finish.';
+
+  @override
+  String get wizardLeaveTitle => 'Leave new contest?';
+
+  @override
+  String get wizardLeaveBody =>
+      'Your draft is kept on this device. You can finish it later from Contests.';
+
+  @override
+  String get wizardLeaveSaveFailed =>
+      'Your latest changes couldn’t be saved and will be lost.';
+
+  @override
+  String get wizardLeaveErrors =>
+      'Fields with errors on this step need fixing before the contest can be created.';
+
+  @override
+  String get wizardKeepEditing => 'Keep editing';
+
+  @override
+  String get wizardLeave => 'Leave';
+
+  @override
+  String wizardChangeDisciplineTitle(String discipline) {
+    return 'Change discipline to $discipline?';
+  }
+
+  @override
+  String wizardChangeDisciplineBody(String current, String target) {
+    return 'Some values set for $current don’t apply to $target and will be cleared:';
+  }
+
+  @override
+  String wizardChangeDisciplineLanding(String discipline) {
+    return '$discipline landing-bonus table';
+  }
+
+  @override
+  String wizardChangeDisciplineRules(String discipline, String rules) {
+    return '$discipline-specific rules ($rules)';
+  }
+
+  @override
+  String get wizardChangeDisciplineGroupScore =>
+      'Group-score mode and precision, reset to the new defaults';
+
+  @override
+  String get wizardChangeDisciplineFootnote =>
+      'Details, participants and draw options stay as they are.';
+
+  @override
+  String wizardChangeDisciplineCancel(String discipline) {
+    return 'Keep $discipline';
+  }
+
+  @override
+  String get wizardChangeDisciplineConfirm => 'Change and clear';
+
+  @override
+  String wizardDisciplineChanged(String discipline) {
+    return 'Discipline changed to $discipline. Incompatible values were cleared.';
+  }
+
+  @override
+  String get wizardTurnOffTeams => 'Turn off teams?';
+
+  @override
+  String wizardTurnOffTeamsAssignments(
+    int count,
+    String plural,
+    int teams,
+    String teamPlural,
+  ) {
+    return 'Team assignments are removed from $count participant$plural ($teams team$teamPlural).';
+  }
+
+  @override
+  String wizardTurnOffTeamsNonPilots(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count participants who aren’t pilots are removed from the contest.',
+      one: '1 participant who isn’t a pilot is removed from the contest.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wizardTurnOffTeamsGroupSize =>
+      'Check the group size in Draw options. Team protection no longer sets a minimum.';
+
+  @override
+  String get wizardKeepTeams => 'Keep teams';
+
+  @override
+  String get wizardTurnOffAndRemove => 'Turn off and remove';
+
+  @override
+  String get wizardTeamsTurnedOff =>
+      'Teams turned off. Team assignments and non-pilots were removed.';
+
+  @override
+  String get wizardDraftNotSaved => 'Draft not saved';
+
+  @override
+  String get wizardDraftNotSavedBody =>
+      'Your last changes weren’t saved. Everything you entered is still on screen.';
+
+  @override
+  String get wizardRetrySave => 'Retry save';
+
+  @override
+  String get wizardDraftSaved => 'Draft saved.';
+
+  @override
+  String get wizardCancel => 'Cancel';
+
+  @override
+  String get wizardCreatedUnpublished => 'Created unpublished and private';
+
+  @override
+  String get wizardCreatedUnpublishedBody =>
+      'Nobody outside the contest team can see it. You publish it later from the contest configuration page.';
+
+  @override
+  String get wizardNotCreated => 'The contest wasn’t created';
+
+  @override
+  String wizardNotCreatedBody(String error) {
+    return '$error Everything you entered is kept in the draft.';
+  }
+
+  @override
+  String get wizardRetry => 'Retry';
+
+  @override
+  String get wizardMatrixNotDrawn => 'The matrix isn’t drawn here';
+
+  @override
+  String get wizardMatrixNotDrawnBody =>
+      'After creating the contest, draw the matrix from contest configuration. It will use these settings.';
+
+  @override
+  String wizardFieldsNeedAttention(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fields need attention before you continue',
+      one: '1 field needs attention before you continue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wizardDropAfterRound => 'Drop after round';
+
+  @override
+  String get wizardSecondDropAfterRound => 'Second drop after round';
+
+  @override
+  String get wizardGroupsPerRound => 'Groups per round';
+
+  @override
+  String get wizardPreliminaryRounds => 'Preliminary rounds';
+
+  @override
+  String get wizardSeededRounds => 'Seeded rounds';
+
+  @override
+  String get wizardTeamPilotCountLabel => 'Pilots counted for team score *';
+
+  @override
+  String wizardStepOf(int step, int total, String title) {
+    return 'Step $step of $total, $title.';
+  }
+
+  @override
+  String wizardStepHeader(int step, int total) {
+    return 'STEP $step OF $total';
+  }
+
+  @override
+  String wizardNext(String title) {
+    return 'Next: $title';
+  }
+
+  @override
+  String get wizardCreating => 'Creating contest…';
+
+  @override
+  String get wizardCreateContest => 'Create contest';
+
+  @override
+  String get wizardCreatingAnnouncement => 'Creating contest.';
+
+  @override
+  String get wizardCreatedAnnouncement => 'Contest created.';
+
+  @override
+  String wizardCannotCreate(String reason) {
+    return 'Can’t create yet: $reason';
+  }
+
+  @override
+  String wizardNeedsAttention(String title) {
+    return '$title needs attention.';
+  }
+
+  @override
+  String get wizardAddScoringPilots => 'add at least 2 scoring pilots.';
+
+  @override
+  String wizardParticipantsNeedFixing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants need fixing.',
+      one: '1 participant needs fixing.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wizardGoToStep(String title) {
+    return 'Go to $title';
+  }
+
+  @override
+  String get wizardBack => 'Back';
+
+  @override
+  String get wizardDetailsFieldContestName => 'Contest name';
+
+  @override
+  String get wizardDetailsFieldVenue => 'Venue / host';
+
+  @override
+  String get wizardDetailsFieldStartDate => 'Start date';
+
+  @override
+  String get wizardDetailsFieldEndDate => 'End date';
+
+  @override
+  String get wizardValidationEnterName => 'Enter a contest name.';
+
+  @override
+  String get wizardValidationEnterVenue => 'Enter the venue or host club.';
+
+  @override
+  String get wizardValidationEnterStartDate => 'Enter a start date.';
+
+  @override
+  String get wizardValidationStartDateFormat => 'Use a date like Nov 14, 2026.';
+
+  @override
+  String get wizardValidationEnterEndDate => 'Enter an end date.';
+
+  @override
+  String get wizardValidationEndDateFormat => 'Use a date like Nov 15, 2026.';
+
+  @override
+  String wizardValidationEndDateBeforeStart(String start) {
+    return 'End date can’t be before the start date ($start).';
+  }
+
+  @override
+  String get wizardValidationChooseDiscipline => 'Choose a discipline.';
+
+  @override
+  String get wizardValidationWholeNumber => 'Enter a whole number above 0.';
+
+  @override
+  String wizardValidationMustBeAfterRound(int round) {
+    return 'Must be after round $round.';
+  }
+
+  @override
+  String wizardValidationGroupsMax(int max) {
+    return 'Use $max or fewer so every group has at least 2 scoring pilots.';
+  }
+
+  @override
+  String wizardValidationGroupsMin(int min) {
+    return 'Team protection needs at least $min groups.';
+  }
+
+  @override
+  String get wizardValidationSeededRounds => 'Enter 1 or more.';
+
+  @override
+  String get wizardDropDisabled => 'Disabled';
+
+  @override
+  String get wizardDropOne => 'One dropped';
+
+  @override
+  String get wizardDropTwo => 'Two dropped';
+
+  @override
+  String get wizardCopyModeNone => 'Don’t copy';
+
+  @override
+  String get wizardCopyModeNoneDesc =>
+      'Start with a blank configuration and no pilots.';
+
+  @override
+  String get wizardCopyModeConfiguration => 'Configuration only';
+
+  @override
+  String get wizardCopyModeConfigurationDesc =>
+      'Discipline, options, scoring and draw settings.';
+
+  @override
+  String get wizardCopyModeAllPilots => 'Configuration + all pilots';
+
+  @override
+  String get wizardCopyModeAllPilotsDesc =>
+      'Every pilot in the source contest, with their class.';
+
+  @override
+  String get wizardCopyModeSelectedPilots => 'Configuration + selected pilots';
+
+  @override
+  String get wizardCopyModeSelectedPilotsDesc =>
+      'Pick some pilots, with their class, for example for a fly-off.';
+
+  @override
+  String get wizardOptionTeamsTitle => 'Teams';
+
+  @override
+  String get wizardOptionTeamsDesc =>
+      'Group pilots into teams for a team score.';
+
+  @override
+  String get wizardOptionTeamsEffect =>
+      'Adds a Team column. Type a name to create a team. Pilots with no team are unassigned. Team protection becomes available in Draw options.';
+
+  @override
+  String get wizardOptionPilotNumbersTitle => 'Contest pilot numbers';
+
+  @override
+  String get wizardOptionPilotNumbersDesc =>
+      'Give each pilot a number for this contest.';
+
+  @override
+  String get wizardOptionPilotNumbersEffect =>
+      'Adds a Pilot no. column. Numbers are assigned at the first draw.';
+
+  @override
+  String get wizardOptionPilotNumbersNote =>
+      'Any number shown before the first draw is labelled provisional.';
+
+  @override
+  String get wizardOptionClassesTitle => 'Classes';
+
+  @override
+  String get wizardOptionClassesDesc =>
+      'Score pilots in classes such as Open or Sportsman.';
+
+  @override
+  String get wizardOptionClassesEffect =>
+      'Adds a required Class column for every scoring pilot.';
+
+  @override
+  String get wizardOptionRolesTitle => 'Contest roles';
+
+  @override
+  String get wizardOptionRolesDesc =>
+      'Include non-flying people such as timers and the CD.';
+
+  @override
+  String get wizardOptionRolesEffect =>
+      'Adds a Role column. New people start as Pilot. Non-flying roles get no score rows.';
+
+  @override
+  String get wizardOptionModelsTitle => 'Pilot models';
+
+  @override
+  String get wizardOptionModelsDesc => 'Record the models each pilot flies.';
+
+  @override
+  String get wizardOptionModelsEffect =>
+      'Adds a Models column for scoring pilots.';
+
+  @override
+  String get wizardOptionModelsNote =>
+      'Add models any time. A pilot without a model never holds up the contest.';
+
+  @override
+  String get wizardDisciplineUnsupported => 'Not supported yet';
+
+  @override
+  String get wizardGroupScoreRaw => 'Raw';
+
+  @override
+  String get wizardGroupScoreNormalized => 'Normalized';
+
+  @override
+  String get wizardGroupScoreTime => 'Time';
+
+  @override
+  String get wizardRoundingRound => 'Round';
+
+  @override
+  String get wizardRoundingTruncate => 'Truncate';
+
+  @override
+  String get wizardPublicUpdateAutomatic => 'Automatic';
+
+  @override
+  String get wizardPublicUpdateRoundCompletion => 'On round completion';
+
+  @override
+  String get wizardPublicUpdateManual => 'Manual';
+
+  @override
+  String get wizardPublicUpdateAutomaticDesc =>
+      'Public results update as scores are entered.';
+
+  @override
+  String get wizardPublicUpdateRoundCompletionDesc =>
+      'Public results update when a round is complete.';
+
+  @override
+  String get wizardPublicUpdateManualDesc =>
+      'Public results update only when you publish.';
+
+  @override
+  String get wizardDrawMode => 'Draw mode';
+
+  @override
+  String get wizardDrawModeManOnMan => 'Man on Man';
+
+  @override
+  String get wizardDrawModeManOnManDesc =>
+      'Random groups each round, mixed so pilots meet as many others as possible.';
+
+  @override
+  String get wizardDrawModeSeeded => 'Seeded Man on Man';
+
+  @override
+  String get wizardDrawModeSeededDesc =>
+      'After the seeded rounds, pilots with similar scores fly together.';
+
+  @override
+  String get wizardDrawModeWhyExclusive =>
+      'Seeded draws place pilots by ranking, so they can’t also keep teammates in separate groups.';
+
+  @override
+  String wizardDrawModeUnavailable(String reason) {
+    return 'Unavailable while team protection is on. $reason Turn off team protection to choose it.';
+  }
+
+  @override
+  String get wizardGroupsAndRounds => 'Groups and rounds';
+
+  @override
+  String wizardMinimumGroups(int min, int team) {
+    return 'Minimum $min: team protection keeps the $team pilots of your largest team in separate groups.';
+  }
+
+  @override
+  String wizardGroupsRange(int min, int max, int scoring) {
+    return 'Between $min and $max for $scoring scoring pilots.';
+  }
+
+  @override
+  String get wizardRoundsAppendNote =>
+      'Rounds can be appended after the contest starts.';
+
+  @override
+  String get wizardSeededRoundsDesc =>
+      'Man-on-man rounds flown before seeding starts. Minimum 1.';
+
+  @override
+  String get wizardSeededRoundsAtLeast1 => 'At least 1 seeded round';
+
+  @override
+  String get wizardLaneMode => 'Lane mode';
+
+  @override
+  String get wizardLaneModeDesc =>
+      'Whether pilots get a launch lane within their group.';
+
+  @override
+  String get wizardLaneNone => 'None';
+
+  @override
+  String get wizardLaneRandom => 'Random';
+
+  @override
+  String get wizardTeamProtection => 'Team protection';
+
+  @override
+  String wizardTeamProtectionDesc(int count) {
+    return 'Keeps teammates out of the same group. Needs at least as many groups as your largest team has pilots ($count).';
+  }
+
+  @override
+  String get wizardTeamProtectionDescOff =>
+      'Keeps teammates out of the same group.';
+
+  @override
+  String get wizardTeamsOffNote => 'Teams are off';
+
+  @override
+  String get wizardTeamsOffNoteBody =>
+      'Turn on Teams in Participant options to use team protection.';
+
+  @override
+  String get wizardSeededUnavailableNote =>
+      'Unavailable with Seeded Man on Man';
+
+  @override
+  String wizardSeededUnavailableNoteBody(String reason) {
+    return '$reason Choose Man on Man to use team protection.';
+  }
+
+  @override
+  String get wizardSeededUnavailableNote2 =>
+      'Seeded Man on Man is now unavailable';
+
+  @override
+  String get wizardSeededUnavailableNote2Body =>
+      'The two can’t be combined. Turn this off if you want a seeded draw.';
+
+  @override
+  String get wizardBackToBack => 'Allow back-to-back flights';
+
+  @override
+  String get wizardBackToBackDesc =>
+      'A pilot may fly the last group of one round and the first group of the next.';
+
+  @override
+  String get wizardBackToBackFairness => 'Draw fairness decreases';
+
+  @override
+  String get wizardBackToBackFairnessBody =>
+      'Keeping pilots out of consecutive flights limits how the draw can mix pilots, so some match-ups repeat more often.';
+
+  @override
+  String get wizardBackToBackTooSmall =>
+      'This contest is too small for the constraint';
+
+  @override
+  String wizardBackToBackTooSmallBody(int groups, String plural) {
+    return 'With $groups group$plural, a pilot in the last group of one round would also fly in the first group of the next. Use at least 3 groups or allow back-to-back flights.';
+  }
+
+  @override
+  String get wizardConstraints => 'Constraints';
+
+  @override
+  String get wizardPilotsPerGroupTitle =>
+      'PILOTS PER GROUP · UPDATES AS YOU EDIT';
+
+  @override
+  String get wizardPilotsPerGroupOk =>
+      'every group has at least 2 scoring pilots.';
+
+  @override
+  String wizardPilotsPerGroupBlocked(int groups, int max) {
+    return 'with $groups groups some would have fewer than 2 scoring pilots. Use $max or fewer.';
+  }
+
+  @override
+  String get wizardPilotsPerGroupEnter1 => 'enter at least 1 group.';
+
+  @override
+  String wizardPilotsPerGroupProtection(int min, int team) {
+    return 'team protection needs at least $min groups. Your largest team has $team scoring pilots.';
+  }
+
+  @override
+  String get wizardPilotsPerGroupProtectionOff =>
+      'Team protection is off, so teammates can share a group.';
+
+  @override
+  String wizardPilotsPerGroupCount(
+    int scoring,
+    int groups,
+    String plural,
+    int min,
+    int max,
+  ) {
+    return '$scoring scoring pilots in $groups group$plural · smallest group $min, largest $max';
+  }
+
+  @override
+  String wizardPilotsPerGroupCountNoGroups(int scoring) {
+    return '$scoring scoring pilots';
+  }
+
+  @override
+  String get wizardScoringCard => 'Scoring';
+
+  @override
+  String get wizardGroupScoreLabel => 'Group score';
+
+  @override
+  String get wizardGroupScoreRawDesc =>
+      'Raw: flight points plus landing bonus, not normalized.';
+
+  @override
+  String get wizardGroupScoreNormalizedDesc =>
+      'Normalized: flight points plus landing bonus, normalized to 1000 in each group.';
+
+  @override
+  String get wizardGroupScoreTimeDesc =>
+      'Time: flight time is normalized to 1000 in each group, then the landing bonus is added.';
+
+  @override
+  String wizardGroupScoreTraditional(String discipline) {
+    return 'No longer a traditional $discipline contest';
+  }
+
+  @override
+  String wizardGroupScoreTraditionalBody(String discipline, String mode) {
+    return '$discipline uses $mode group scoring by default.';
+  }
+
+  @override
+  String get wizardRoundingLabel => 'Rounding';
+
+  @override
+  String get wizardRoundingDesc =>
+      'What happens to digits beyond the chosen precision.';
+
+  @override
+  String get wizardPrecisionLabel => 'Total score decimal precision';
+
+  @override
+  String get wizardPrecisionDesc =>
+      'Digits shown and stored after the decimal point.';
+
+  @override
+  String wizardPrecisionExample(String result) {
+    return 'Example: 987.4567 → $result';
+  }
+
+  @override
+  String get wizardDroppedRoundsLabel => 'Dropped rounds';
+
+  @override
+  String get wizardDroppedRoundsDesc =>
+      'Worst rounds left out of each pilot’s total.';
+
+  @override
+  String get wizardFirstDropLabel => 'First drop after round';
+
+  @override
+  String get wizardDropAfterRoundDesc =>
+      'Once this many rounds are complete, each pilot’s worst round is left out.';
+
+  @override
+  String get wizardSecondDropDesc =>
+      'Once this many rounds are complete, the second worst round is also left out. Must be later than the first.';
+
+  @override
+  String get wizardSecondDropLater =>
+      'The second drop has to come later than the first.';
+
+  @override
+  String get wizardParticipantsPublication => 'Participants and publication';
+
+  @override
+  String get wizardReviewRequestsLabel => 'Score-review requests';
+
+  @override
+  String get wizardReviewRequestsDesc =>
+      'Let pilots ask the contest director to review a score.';
+
+  @override
+  String get wizardPublicUpdateLabel => 'Public update policy';
+
+  @override
+  String get wizardPublicUpdateDesc =>
+      'When public results refresh once the contest is published.';
+
+  @override
+  String get wizardPlatformDefault => 'Platform default';
+
+  @override
+  String get wizardDisciplineDefault => 'default';
+
+  @override
+  String wizardChangedFrom(String value) {
+    return 'Changed from $value';
+  }
+
+  @override
+  String get wizardResetToDefault => 'Reset to default';
+
+  @override
+  String get wizardFewer => 'Fewer';
+
+  @override
+  String get wizardMore => 'More';
+
+  @override
+  String get wizardNewContest => 'New contest';
+
+  @override
+  String wizardStepsComplete(int complete, int total) {
+    return '$complete of $total steps complete';
+  }
+
+  @override
+  String get wizardDraftKeptNote =>
+      'Configuration in process is kept until the app is closed or the contest is created.';
+
+  @override
+  String get wizardDisciplineNote =>
+      'These are starting defaults. You can override task times, landing bonuses and rules after the contest is created, on the contest configuration page.';
+
+  @override
+  String get wizardSelected => 'Selected';
+
+  @override
+  String get wizardTimeLabel => 'Time';
+
+  @override
+  String get wizardLandingLabel => 'Landing';
+
+  @override
+  String get wizardContestDetails => 'Contest details';
+
+  @override
+  String get wizardRequired => '* Required';
+
+  @override
+  String get wizardContestNameLabel => 'Contest name *';
+
+  @override
+  String get wizardVenueLabel => 'Venue / host *';
+
+  @override
+  String get wizardVenueHelper =>
+      'Field name or host club as it should appear on results.';
+
+  @override
+  String get wizardStartDateLabel => 'Start date *';
+
+  @override
+  String get wizardEndDateLabel => 'End date *';
+
+  @override
+  String get wizardDateHint => 'MMM D, YYYY';
+
+  @override
+  String get wizardChooseStartDate => 'Choose the start date';
+
+  @override
+  String get wizardChooseEndDate => 'Choose the end date';
+
+  @override
+  String get wizardCityLabel => 'City';
+
+  @override
+  String get wizardRegionLabel => 'State / province';
+
+  @override
+  String get wizardCountryLabel => 'Country';
+
+  @override
+  String get wizardTimeZoneLabel => 'Time zone';
+
+  @override
+  String get wizardTimeZoneDefault =>
+      'Defaults from the country, else this device’s time zone.';
+
+  @override
+  String get wizardCopyFromContest => 'Copy from an existing contest';
+
+  @override
+  String get wizardOptional => 'Optional';
+
+  @override
+  String get wizardCopyNeverBrings =>
+      'Copying never brings scores, the flight matrix, publication history, invitations or audit history.';
+
+  @override
+  String get wizardSourceContest => 'Source contest';
+
+  @override
+  String get wizardRemoveSource => 'Remove source';
+
+  @override
+  String get wizardLoadingSource => 'Loading configuration and pilot list…';
+
+  @override
+  String wizardSourceFailed(String name) {
+    return 'Couldn’t load “$name”';
+  }
+
+  @override
+  String get wizardSourceFailedBody =>
+      'The contest didn’t load. Retry, or remove the source and continue without copying.';
+
+  @override
+  String get wizardSourceRemoved =>
+      'Source removed. You can continue without copying.';
+
+  @override
+  String get wizardCopyModeLabel => 'Copy mode';
+
+  @override
+  String get wizardYourContests => 'Your contests';
+
+  @override
+  String get wizardOnThisDevice => 'On this device';
+
+  @override
+  String get wizardPublicNeedsConnection => 'Public (needs connection)';
+
+  @override
+  String get wizardPublic => 'Public';
+
+  @override
+  String wizardOfflineNote(String local) {
+    return 'You’re offline. Public contests can be searched when you’re back online. $local are still available.';
+  }
+
+  @override
+  String wizardPublicUnavailable(String local) {
+    return 'Searching public contests isn’t available yet. Copy from $local for now.';
+  }
+
+  @override
+  String get wizardContestsLoadFailed => 'Contests could not be loaded.';
+
+  @override
+  String get wizardNoContests => 'There are no contests to copy yet.';
+
+  @override
+  String get wizardUse => 'Use';
+
+  @override
+  String wizardPilotsSelected(int chosen, int total) {
+    return '$chosen of $total pilots selected';
+  }
+
+  @override
+  String get wizardNoPilotsChosen => 'No pilots chosen yet';
+
+  @override
+  String wizardAndMore(int count) {
+    return ' and $count more';
+  }
+
+  @override
+  String get wizardChoosePilots => 'Choose pilots';
+
+  @override
+  String get wizardCopySummaryTitle => 'COPY SUMMARY';
+
+  @override
+  String get wizardCopySummaryLabel => 'Copy summary';
+
+  @override
+  String get wizardCopySourceLabel => 'Source';
+
+  @override
+  String get wizardCopyCopiesLabel => 'Copies';
+
+  @override
+  String get wizardCopyPilotsLabel => 'Pilots';
+
+  @override
+  String wizardCopyAllPilots(int count) {
+    return 'All $count';
+  }
+
+  @override
+  String get wizardCopyNone => 'None';
+
+  @override
+  String get wizardCopyPerPilot => 'Per pilot';
+
+  @override
+  String get wizardCopyPerPilotValue => 'Participation and class';
+
+  @override
+  String get wizardCopyNotCopied => 'Not copied';
+
+  @override
+  String get wizardCopyNotCopiedValue =>
+      'Teams, models, non-flying participants, scores, matrix, publication history, invitations, audit history';
+
+  @override
+  String get wizardChoosePilotsTitle => 'Choose pilots to copy';
+
+  @override
+  String wizardChoosePilotsBody(int selected, int total) {
+    return 'Each pilot is copied with their class. $selected of $total selected.';
+  }
+
+  @override
+  String get wizardAllPilots => 'All pilots';
+
+  @override
+  String get wizardUseThesePilots => 'Use these pilots';
+
+  @override
+  String get wizardContinueDraft => 'Continue your draft?';
+
+  @override
+  String get wizardDiscardDraft => 'Discard your draft?';
+
+  @override
+  String wizardContinueDraftBody(String when) {
+    return 'You started a contest that isn’t created yet$when. Continue it, or start fresh and delete it.';
+  }
+
+  @override
+  String wizardDiscardDraftBody(String when) {
+    return 'A draft saved$when can’t be opened by this version of the app. Discard it to start a new contest.';
+  }
+
+  @override
+  String get wizardStartFresh => 'Start fresh';
+
+  @override
+  String get wizardDiscardDraftButton => 'Discard draft';
+
+  @override
+  String get wizardContinueDraftButton => 'Continue draft';
+
+  @override
+  String get wizardParticipantsStepLabel => 'Participant options';
+
+  @override
+  String get wizardTeamPilotCountHelper =>
+      'Best N pilots per team make the team score.';
+
+  @override
+  String get wizardTeamProtectionAvailable =>
+      'Team protection is now available in Draw options. It keeps teammates out of the same group.';
+
+  @override
+  String get wizardColumnsPreview => 'Columns in the Participants step';
+
+  @override
+  String get wizardFromSource => 'From source';
+
+  @override
+  String get wizardInParticipants => 'In Participants: ';
+
+  @override
+  String get wizardIfOn => 'If on: ';
+
+  @override
+  String get wizardColumnName => 'Name';
+
+  @override
+  String get wizardColumnEmail => 'Email';
+
+  @override
+  String get wizardColumnRole => 'Role';
+
+  @override
+  String get wizardColumnClass => 'Class';
+
+  @override
+  String get wizardColumnTeam => 'Team';
+
+  @override
+  String get wizardColumnPilotNo => 'Pilot no.';
+
+  @override
+  String get wizardColumnModels => 'Models';
+
+  @override
+  String get wizardColumnRequired => 'required';
+
+  @override
+  String get wizardColumnOptional => 'optional';
+
+  @override
+  String get wizardColumnProvisional => 'provisional';
+
+  @override
+  String get wizardAddParticipant => 'Add participant';
+
+  @override
+  String get wizardAddParticipantTitle => 'Add participant';
+
+  @override
+  String wizardAlreadyInContest(String name) {
+    return '$name is already in the contest.';
+  }
+
+  @override
+  String wizardAddedAsPilot(String name) {
+    return '$name is added as Pilot.';
+  }
+
+  @override
+  String wizardAddedAsPilotShort(String name) {
+    return '$name added as Pilot.';
+  }
+
+  @override
+  String wizardParticipantsRemoved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants removed from this contest.',
+      one: '1 participant removed from this contest.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wizardParticipantsNeedFixingBanner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants need fixing before you continue',
+      one: '1 participant needs fixing before you continue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wizardMinPilotsBanner => 'Add at least 2 scoring pilots';
+
+  @override
+  String get wizardMinPilotsBannerBody =>
+      'A contest needs 2 or more scoring pilots. Non-flying roles don’t count.';
+
+  @override
+  String wizardFewPilotsBanner(int count) {
+    return 'Only $count scoring pilots';
+  }
+
+  @override
+  String get wizardFewPilotsBannerBody =>
+      'You can continue. With fewer than 3 pilots, use 1 group per round.';
+
+  @override
+  String wizardPeopleCount(int count) {
+    return '$count people';
+  }
+
+  @override
+  String wizardScoringPilotsCount(int count) {
+    return '$count scoring pilots';
+  }
+
+  @override
+  String wizardNonFlyingCount(int count) {
+    return '$count non-flying';
+  }
+
+  @override
+  String wizardPilotsCount(int count) {
+    return '$count pilots';
+  }
+
+  @override
+  String wizardNeedsFixingFilter(int count) {
+    return 'Needs fixing ($count)';
+  }
+
+  @override
+  String wizardTeamSet(int count) {
+    return 'Team set for $count participants.';
+  }
+
+  @override
+  String wizardClassSet(String value, int count) {
+    return 'Class set to $value for $count participants.';
+  }
+
+  @override
+  String wizardRoleSet(String value, int count) {
+    return 'Role set to $value for $count participants.';
+  }
+
+  @override
+  String wizardShowingMatching(int shown, int total, String query) {
+    return 'Showing $shown of $total matching “$query”';
+  }
+
+  @override
+  String wizardNoMatch(String query) {
+    return 'No one in this contest matches “$query”.';
+  }
+
+  @override
+  String get wizardContestParticipantsLabel => 'Contest participants';
+
+  @override
+  String get wizardKeyboardHelp =>
+      'Tab moves between cells · Enter confirms and moves down · Space selects a row · Esc closes a menu';
+
+  @override
+  String get wizardNoParticipants => 'No participants yet';
+
+  @override
+  String get wizardNoParticipantsBody =>
+      'Find people by name or email above, or add someone new. The contest needs at least 2 scoring pilots.';
+
+  @override
+  String get wizardVisibility => 'Visibility';
+
+  @override
+  String get wizardDroppedRoundsNeedFixing => 'Dropped rounds need fixing';
+
+  @override
+  String get wizardLanes => 'Lanes';
+
+  @override
+  String get wizardNoLaneAssignment => 'No lane assignment';
+
+  @override
+  String get wizardAllowed => 'Allowed';
+
+  @override
+  String get wizardAvoided => 'Avoided';
+
+  @override
+  String get wizardRoundsGroups => 'Rounds and groups';
+
+  @override
+  String get wizardRounds => 'Rounds';
+
+  @override
+  String get wizardGroupSettingsBlocked => 'Group settings are blocked';
+
+  @override
+  String get wizardPilotsPerGroup => 'Pilots per group';
+
+  @override
+  String get wizardDetails => 'Details';
+
+  @override
+  String get wizardName => 'Name';
+
+  @override
+  String get wizardDates => 'Dates';
+
+  @override
+  String get wizardVenueHost => 'Venue / host';
+
+  @override
+  String get wizardLocation => 'Location';
+
+  @override
+  String get wizardCopySourceSection => 'Copy source';
+
+  @override
+  String get wizardNotCopying => 'Not copying';
+
+  @override
+  String get wizardDisciplineSection => 'Discipline';
+
+  @override
+  String get wizardTask => 'Task';
+
+  @override
+  String get wizardLanding => 'Landing';
+
+  @override
+  String get wizardParticipantsSection => 'Participants';
+
+  @override
+  String get wizardPeople => 'People';
+
+  @override
+  String get wizardScoringPilots => 'Scoring pilots';
+
+  @override
+  String get wizardNonFlying => 'Non-flying';
+
+  @override
+  String get wizardPilots => 'Pilots';
+
+  @override
+  String get wizardNeedsAtLeast2 => 'Needs at least 2 scoring pilots';
+
+  @override
+  String get wizardEnabledOptions => 'Enabled options';
+
+  @override
+  String get wizardOn => 'On';
+
+  @override
+  String get wizardOff => 'Off';
+
+  @override
+  String get wizardTeamsClasses => 'Teams and classes';
+
+  @override
+  String get wizardTeams => 'Teams';
+
+  @override
+  String get wizardNoneAssigned => 'None assigned yet';
+
+  @override
+  String get wizardClasses => 'Classes';
+
+  @override
+  String get wizardModels => 'Models';
+
+  @override
+  String wizardModelsEntered(int count) {
+    return '$count entered; pilots without one are fine';
+  }
+
+  @override
+  String wizardModelsEnteredSimple(int count) {
+    return '$count entered';
+  }
+
+  @override
+  String get wizardAfterCreate => 'After you create';
+
+  @override
+  String get wizardAfterCreateConfig =>
+      'The contest configuration page is opened.';
+
+  @override
+  String get wizardAfterCreatePrivate =>
+      'It stays unpublished and private until you publish it.';
+
+  @override
+  String get wizardAfterCreateMatrix =>
+      'A flight matrix hasn’t been drawn. The draw can be created from the next screen.';
+
+  @override
+  String wizardAfterCreateReview(String discipline) {
+    return 'Review $discipline discipline overrides and the remaining settings there.';
+  }
+
+  @override
+  String get wizardEdit => 'Edit';
+
+  @override
+  String wizardFieldsNeedAttentionSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fields need attention',
+      one: '1 field needs attention',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wizardNeedsFixing(int count) {
+    return 'Needs fixing ($count)';
+  }
+
+  @override
+  String wizardShowing(int shown, int total, String query) {
+    return 'Showing $shown of $total matching “$query”';
+  }
+
+  @override
+  String get wizardParticipantsLabel => 'Contest participants';
+
+  @override
+  String get wizardNoParticipantsHelp =>
+      'Find people by name or email above, or add someone new. The contest needs at least 2 scoring pilots.';
+
+  @override
+  String get wizardStepListLabel => 'Wizard steps';
+
+  @override
+  String wizardRowsSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected',
+      one: '1 selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wizardBulkEditLabel => 'Bulk edit selected participants';
+
+  @override
+  String get wizardBulkSetTeam => 'Set team';
+
+  @override
+  String wizardBulkSetTeamTitle(int count) {
+    return 'Set team for $count';
+  }
+
+  @override
+  String get wizardBulkSetClass => 'Set class';
+
+  @override
+  String wizardBulkSetClassTitle(int count) {
+    return 'Set class for $count';
+  }
+
+  @override
+  String get wizardBulkSetRole => 'Set role';
+
+  @override
+  String wizardBulkSetRoleTitle(int count) {
+    return 'Set role for $count';
+  }
+
+  @override
+  String get wizardBulkRemove => 'Remove';
+
+  @override
+  String get wizardBulkClear => 'Clear selection';
+
+  @override
+  String get wizardStepComplete => 'Complete';
+
+  @override
+  String get wizardStepCurrent => 'Current step';
+
+  @override
+  String get wizardStepCurrentNeedsAttention => 'Current · needs attention';
+
+  @override
+  String get wizardStepNeedsAttention => 'Needs attention';
+
+  @override
+  String get wizardStepVisited => 'Visited';
+
+  @override
+  String get wizardStepNotStarted => 'Not started';
+
+  @override
+  String get wizardDraftExplanation =>
+      'One draft at a time. It is kept on this device and isn’t listed with contests.';
+
+  @override
+  String wizardDraftSavedAt(String time) {
+    return 'Draft saved $time';
+  }
+
+  @override
+  String wizardDraftSavedDot(String time) {
+    return 'Draft saved · $time';
+  }
+
+  @override
+  String get wizardStartDateHelp => 'Start date';
+
+  @override
+  String get wizardEndDateHelp => 'End date';
+
+  @override
+  String wizardTeamCount(String count) {
+    return '$count count for team score';
+  }
+
+  @override
+  String wizardPilotsCountShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pilots',
+      one: '1 pilot',
+    );
+    return '$_temp0';
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_store.dart';
 import 'package:soar_score_contest/services/new_contest/draft_participant.dart';
 import 'package:soar_score_contest/services/new_contest/draw_settings.dart';
@@ -47,11 +48,12 @@ void main() {
   testWidgets('pilots per group updates live, and too many groups blocks', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await _store();
     await pumpWizard(tester, respond: stepApi, store: store);
 
-    expect(stepTitle(tester), 'Draw options');
-    expect(find.text('The matrix isn’t drawn here'), findsOneWidget);
+    expect(stepTitle(tester), l10n.wizardStepDrawOptions);
+    expect(find.text(l10n.wizardMatrixNotDrawn), findsOneWidget);
     // Groups start at 2, so 10 pilots are 2 groups of 5.
     expect(find.text('5 pilots'), findsOneWidget);
 
@@ -64,18 +66,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Blocked:', findRichText: true), findsOneWidget);
     await next(tester);
-    expect(stepTitle(tester), 'Draw options');
+    expect(stepTitle(tester), l10n.wizardStepDrawOptions);
     expect(
       find.text(
-        'Groups per round: Use 5 or fewer so every group has at least 2 '
-        'scoring pilots.',
+        'Groups per round: ${l10n.wizardValidationGroupsMax(5)}',
       ),
       findsOneWidget,
     );
   });
 
   testWidgets('team protection raises the minimum groups and rules out a '
-      'seeded draw', (tester) async {
+       'seeded draw', (tester) async {
+    final l10n = AppLocalizationsEn();
     final store = await _store();
     await pumpWizard(tester, respond: stepApi, store: store);
 
@@ -83,7 +85,7 @@ void main() {
     expect(store.draft.drawSettings.teamProtection, isTrue);
     // The largest team has 3 pilots, so groups go up to 3.
     expect(store.draft.drawSettings.groups, '3');
-    expect(find.text('Seeded Man on Man is now unavailable'), findsOneWidget);
+    expect(find.text(l10n.wizardSeededUnavailableNote2), findsOneWidget);
     expect(
       find.textContaining('Unavailable while team protection is on.'),
       findsOneWidget,
@@ -92,7 +94,7 @@ void main() {
     await tester.enterText(_field('groups-per-round'), '2');
     await tester.pumpAndSettle();
     expect(
-      find.text('Team protection needs at least 3 groups.'),
+      find.text(l10n.wizardValidationGroupsMin(3)),
       findsOneWidget,
     );
 
@@ -101,13 +103,14 @@ void main() {
   });
 
   testWidgets('a seeded draw disables team protection and asks for seeded '
-      'rounds', (tester) async {
+       'rounds', (tester) async {
+    final l10n = AppLocalizationsEn();
     final store = await _store();
     await pumpWizard(tester, respond: stepApi, store: store);
 
     await _tap(tester, find.byKey(const ValueKey('draw-mode-seededManOnMan')));
     expect(store.draft.drawSettings.seeded, isTrue);
-    expect(find.text('Unavailable with Seeded Man on Man'), findsOneWidget);
+    expect(find.text(l10n.wizardSeededUnavailableNote), findsOneWidget);
     final protection = tester.widget<Switch>(
       find.byKey(const ValueKey('team-protection')),
     );
@@ -115,27 +118,28 @@ void main() {
 
     await tester.enterText(_field('seeded-rounds'), '0');
     await tester.pumpAndSettle();
-    expect(find.text('At least 1 seeded round'), findsOneWidget);
+    expect(find.text(l10n.wizardSeededRoundsAtLeast1), findsOneWidget);
   });
 
   testWidgets('avoiding back-to-back flights warns about fairness, and about '
-      'small contests', (tester) async {
+       'small contests', (tester) async {
+    final l10n = AppLocalizationsEn();
     final store = await _store(teamSize: 0, options: const {});
     await pumpWizard(tester, respond: stepApi, store: store);
-    expect(find.text('Teams are off'), findsOneWidget);
+    expect(find.text(l10n.wizardTeamsOffNote), findsOneWidget);
 
     await tester.enterText(_field('groups-per-round'), '2');
     await tester.pumpAndSettle();
     await _tap(tester, find.byKey(const ValueKey('back-to-back')));
-    expect(find.text('Draw fairness decreases'), findsOneWidget);
+    expect(find.text(l10n.wizardBackToBackFairness), findsOneWidget);
     expect(
-      find.text('This contest is too small for the constraint'),
+      find.text(l10n.wizardBackToBackTooSmall),
       findsOneWidget,
     );
 
     // The warning doesn't block continuing.
     await next(tester);
-    expect(stepTitle(tester), 'Summary & create');
+    expect(stepTitle(tester), l10n.wizardStepSummaryCreate);
   });
 
   testWidgets('narrow windows stack the calculation under the inputs', (

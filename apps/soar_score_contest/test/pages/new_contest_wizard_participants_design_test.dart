@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/widgets/participants/participants_table.dart';
 
@@ -27,19 +28,21 @@ void main() {
   testWidgets('the email cell says Has email or None, never the address', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(
       participants: [row(0, classification: 'Open')],
     );
     await pumpWizard(tester, respond: stepApi, store: store);
 
-    expect(_inTable(find.text('Has email')), findsOneWidget);
+    expect(_inTable(find.text(l10n.participantEmailHas)), findsOneWidget);
     expect(find.textContaining('@'), findsNothing);
   });
 
   testWidgets(
     'the Models column shows a notice for a pilot without models and never '
-    'blocks continuing',
+     'blocks continuing',
     (tester) async {
+      final l10n = AppLocalizationsEn();
       final store = await storeAtStep4(
         options: const {ParticipantOption.classes, ParticipantOption.models},
         participants: [
@@ -49,14 +52,15 @@ void main() {
       );
       await pumpWizard(tester, respond: stepApi, store: store);
 
-      expect(_inTable(find.text('Models')), findsOneWidget);
+      expect(_inTable(find.text(l10n.wizardColumnModels)), findsOneWidget);
       expect(find.text('Model *'), findsNothing);
-      expect(_inTable(find.text('No models entered')), findsNWidgets(2));
+      expect(_inTable(find.text(l10n.modelsCellNone)), findsNWidgets(2));
       expect(find.textContaining('fixing before you continue'), findsNothing);
     },
   );
 
   testWidgets('the search field also filters the list', (tester) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(
       participants: [
         row(0, classification: 'Open', team: 'Flying Gators'),
@@ -75,7 +79,7 @@ void main() {
       find.byKey(const ValueKey('participants-filter-note')),
       findsOneWidget,
     );
-    expect(find.text('Showing 1 of 2 matching “lake”'), findsOneWidget);
+    expect(find.text(l10n.wizardShowingMatching(1, 2, 'lake')), findsOneWidget);
     expect(_inTable(find.text('Gary Novak')), findsOneWidget);
     expect(_inTable(find.text('Mike Gardner')), findsNothing);
 

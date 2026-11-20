@@ -2,6 +2,7 @@ import 'dart:convert' as convert;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/widgets/participants/participant_card.dart';
 import 'package:soar_score_contest/widgets/participants/participants_table.dart';
@@ -30,19 +31,20 @@ void main() {
   testWidgets('search adds people as Pilots and marks those already added', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4();
     await pumpWizard(tester, respond: stepApi, store: store);
 
-    expect(stepTitle(tester), 'Participants');
+    expect(stepTitle(tester), l10n.wizardStepParticipants);
     expect(find.byKey(const ValueKey('participants-empty')), findsOneWidget);
 
     await searchAndPick(tester, 'gardner', 'Mike Gardner');
-    expect(find.text('Mike Gardner added as Pilot.'), findsOneWidget);
+    expect(find.text(l10n.wizardAddedAsPilotShort('Mike Gardner')), findsOneWidget);
     expect(store.draft.participants.single.name, 'Mike Gardner');
     expect(store.draft.participants.single.roleName, 'Pilot');
     expect(find.byType(ParticipantsTable), findsOneWidget);
     // One scoring pilot is not enough.
-    expect(find.text('Add at least 2 scoring pilots'), findsOneWidget);
+    expect(find.text(l10n.wizardMinPilotsBanner), findsOneWidget);
 
     await tester.enterText(
       find.descendant(
@@ -60,7 +62,8 @@ void main() {
   });
 
   testWidgets('a missing class blocks Next and the summary jumps to it; the '
-      'class is title-cased', (tester) async {
+       'class is title-cased', (tester) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(
       participants: [
         row(0, classification: 'Open'),
@@ -70,13 +73,13 @@ void main() {
     await pumpWizard(tester, respond: stepApi, store: store);
 
     expect(
-      find.text('1 participant needs fixing before you continue'),
+      find.text(l10n.wizardParticipantsNeedFixingBanner(1)),
       findsOneWidget,
     );
     expect(find.text('Needs class'), findsOneWidget);
-    expect(find.text('Needs fixing (1)'), findsOneWidget);
+    expect(find.text(l10n.wizardNeedsFixingFilter(1)), findsOneWidget);
     await next(tester);
-    expect(stepTitle(tester), 'Participants');
+    expect(stepTitle(tester), l10n.wizardStepParticipants);
 
     await tester.tap(find.text('Gary Novak: enter a class'));
     await tester.pump();
@@ -89,9 +92,9 @@ void main() {
     expect(_ready(), findsNWidgets(2));
 
     // Two scoring pilots: a warning, but Next works.
-    expect(find.text('Only 2 scoring pilots'), findsOneWidget);
+    expect(find.text(l10n.wizardFewPilotsBanner(2)), findsOneWidget);
     await next(tester);
-    expect(stepTitle(tester), 'Scoring & publication');
+    expect(stepTitle(tester), l10n.wizardStepScoringPublication);
   });
 
   testWidgets('a typed team matches an existing one ignoring case; a blank '
@@ -117,6 +120,7 @@ void main() {
   });
 
   testWidgets('bulk edit sets the class of the selected rows', (tester) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(
       participants: [
         row(0, classification: 'Open'),
@@ -129,7 +133,7 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Select Gary Novak'));
     await tester.tap(find.bySemanticsLabel('Select Sarah Albright'));
     await tester.pumpAndSettle();
-    expect(find.text('2 selected'), findsOneWidget);
+    expect(find.text(l10n.wizardRowsSelected(2)), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('bulk-class')));
     await tester.pumpAndSettle();
@@ -141,12 +145,13 @@ void main() {
       'Open',
       'Open',
     ]);
-    expect(find.text('Class set to Open for 2 participants.'), findsOneWidget);
+    expect(find.text(l10n.wizardClassSet('Open', 2)), findsOneWidget);
   });
 
   testWidgets('a non-flying role is not scored and needs no class', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(
       participants: [
         row(0, classification: 'Open'),
@@ -155,22 +160,23 @@ void main() {
       ],
     );
     await pumpWizard(tester, respond: stepApi, store: store);
-    expect(find.text('3 scoring pilots'), findsOneWidget);
+    expect(find.text(l10n.wizardScoringPilotsCount(3)), findsOneWidget);
 
     await tester.tap(find.byKey(ValueKey('role-${stepProfiles[2].id.value}')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Helper').last);
+    await tester.tap(find.text(l10n.scoreHistoryAuthorityHelper).last);
     await tester.pumpAndSettle();
 
     expect(store.draft.participants[2].isPilot, isFalse);
-    expect(find.text('2 scoring pilots'), findsOneWidget);
-    expect(find.text('Non-flying'), findsOneWidget);
+    expect(find.text(l10n.wizardScoringPilotsCount(2)), findsOneWidget);
+    expect(find.text(l10n.wizardNonFlying), findsOneWidget);
     expect(tester.widget<TextField>(_class(2)).enabled, isFalse);
   });
 
   testWidgets('Add participant opens the editor and selects the new person', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(options: const {ParticipantOption.teams});
     await pumpWizard(tester, respond: stepApi, store: store);
 
@@ -198,10 +204,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(store.draft.participants.single.name, 'Jordan Lee');
-    expect(find.text('1 selected'), findsNothing);
-    expect(find.text('Jordan Lee is added as Pilot.'), findsOneWidget);
+    expect(find.text(l10n.wizardRowsSelected(1)), findsNothing);
+    expect(find.text(l10n.wizardAddedAsPilot('Jordan Lee')), findsOneWidget);
     // Roles are off, so one pilot count replaces the three chips.
-    expect(find.text('1 pilots'), findsOneWidget);
+    expect(find.text(l10n.wizardPilotsCount(1)), findsOneWidget);
     expect(find.textContaining('non-flying'), findsNothing);
   });
 
@@ -266,6 +272,7 @@ void main() {
   testWidgets('cancelling after Save and add another keeps the saved ones', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(options: const {ParticipantOption.teams});
     await pumpWizard(tester, respond: stepApi, store: store);
 
@@ -280,7 +287,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('save-add-another')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Cancel'));
+    await tester.tap(find.byTooltip(l10n.wizardCancel));
     await tester.pumpAndSettle();
 
     expect(store.draft.participants.map((p) => p.name), ['Jordan Lee']);

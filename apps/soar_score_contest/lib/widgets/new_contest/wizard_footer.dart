@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// Why the primary action can't run yet, with a way to fix it.
 class WizardBlockedReason {
   const WizardBlockedReason({required this.text, this.fixLabel, this.onFix});
@@ -43,6 +45,7 @@ class WizardFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final blocked = this.blocked;
@@ -63,7 +66,7 @@ class WizardFooter extends StatelessWidget {
               key: const ValueKey('wizard-back'),
               onPressed: busy ? null : onBack,
               icon: const Icon(Icons.arrow_back, size: 18),
-              label: const Text('Back'),
+              label: Text(l10n.wizardBack),
             )
           else
             const SizedBox.shrink(),

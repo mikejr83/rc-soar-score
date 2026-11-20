@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/contest_draft.dart';
 import '../../services/new_contest/copy_mode.dart';
 
@@ -11,35 +12,32 @@ class CopySummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final source = draft.source!;
     final mode = draft.copyMode;
     final total = source.pilots.length;
     final rows = <(String, String)>[
-      ('Source', source.contest.name),
-      ('Copies', mode.label),
+      (l10n.wizardCopySourceLabel, source.contest.name),
+      (l10n.wizardCopyCopiesLabel, mode.label(l10n)),
       (
-        'Pilots',
+        l10n.wizardCopyPilotsLabel,
         switch (mode) {
           CopyMode.selectedPilots => '${draft.participants.length} selected',
-          CopyMode.allPilots => 'All $total',
-          _ => 'None',
+          CopyMode.allPilots => l10n.wizardCopyAllPilots(total),
+          _ => l10n.wizardCopyNone,
         },
       ),
-      if (mode.copiesPilots) ('Per pilot', 'Participation and class'),
-      (
-        'Not copied',
-        'Teams, models, non-flying participants, scores, matrix, publication '
-            'history, invitations, audit history',
-      ),
+      if (mode.copiesPilots) (l10n.wizardCopyPerPilot, l10n.wizardCopyPerPilotValue),
+      (l10n.wizardCopyNotCopied, l10n.wizardCopyNotCopiedValue),
     ];
     final labelStyle = theme.textTheme.bodyMedium?.copyWith(
       color: scheme.onSurfaceVariant,
     );
     return Semantics(
       container: true,
-      label: 'Copy summary',
+      label: l10n.wizardCopySummaryLabel,
       child: Container(
         key: const ValueKey('copy-summary'),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -51,7 +49,7 @@ class CopySummary extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'COPY SUMMARY',
+              l10n.wizardCopySummaryTitle,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: scheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,

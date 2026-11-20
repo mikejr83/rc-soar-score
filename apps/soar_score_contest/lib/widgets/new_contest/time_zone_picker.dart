@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// A searchable list of every IANA time zone, labelled for people
 /// (`Central European Time · Rome · UTC+02:00`). The value is the zone id.
 ///
@@ -31,7 +33,7 @@ class TimeZonePicker extends StatelessWidget {
         menuHeight: 320,
         requestFocusOnTap: true,
         enableFilter: true,
-        label: const Text('Time zone'),
+        label: Text(AppLocalizations.of(context).wizardTimeZoneLabel),
         helperText: helperText,
         inputDecorationTheme: const InputDecorationTheme(
           border: OutlineInputBorder(),

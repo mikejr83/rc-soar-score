@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../api_client_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/contest_draft.dart';
 import '../../services/new_contest/copy_mode.dart';
 import '../../services/new_contest/copy_source.dart';
@@ -43,7 +44,8 @@ class CopySourceSection extends StatefulWidget {
 
   /// Where this app's own contests live: the device on native builds, the
   /// account on the web (which stores no contest data locally).
-  static const String localLabel = kIsWeb ? 'Your contests' : 'On this device';
+  static String localLabel(AppLocalizations l10n) =>
+      kIsWeb ? l10n.wizardYourContests : l10n.wizardOnThisDevice;
 
   @override
   State<CopySourceSection> createState() => _CopySourceSectionState();
@@ -107,7 +109,8 @@ class _CopySourceSectionState extends State<CopySourceSection> {
     if (widget.draft.source != null) {
       widget.onChanged(widget.draft.withoutSource());
     }
-    widget.onMessage?.call('Source removed. You can continue without copying.');
+    final l10n = AppLocalizations.of(context);
+    widget.onMessage?.call(l10n.wizardSourceRemoved);
   }
 
   void _setMode(CopyMode mode) {
@@ -137,15 +140,19 @@ class _CopySourceSectionState extends State<CopySourceSection> {
     }
   }
 
-  String _contestLine(Contest contest, {int? pilots, String? discipline}) => [
-    dateRangeText(contest.startDateTime, contest.endDateTime),
-    ?discipline,
-    if (pilots != null) '$pilots pilot${pilots == 1 ? '' : 's'}',
-    CopySourceSection.localLabel,
-  ].join(' · ');
+  String _contestLine(Contest contest, {int? pilots, String? discipline}) {
+    final l10n = AppLocalizations.of(context);
+    return [
+      dateRangeText(contest.startDateTime, contest.endDateTime),
+      ?discipline,
+      if (pilots != null) l10n.wizardPilotsCountShort(pilots),
+      CopySourceSection.localLabel(l10n),
+    ].join(' · ');
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final draft = widget.draft;
@@ -153,8 +160,8 @@ class _CopySourceSectionState extends State<CopySourceSection> {
     final source = draft.source;
 
     return WizardSectionCard(
-      title: 'Copy from an existing contest',
-      trailing: 'Optional',
+      title: l10n.wizardCopyFromContest,
+      trailing: l10n.wizardOptional,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -173,8 +180,7 @@ class _CopySourceSectionState extends State<CopySourceSection> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Copying never brings scores, the flight matrix, '
-                    'publication history, invitations or audit history.',
+                    l10n.wizardCopyNeverBrings,
                     style: theme.textTheme.bodyMedium,
                   ),
                 ),
@@ -186,7 +192,7 @@ class _CopySourceSectionState extends State<CopySourceSection> {
             const Divider(height: 1),
             const SizedBox(height: 16),
             Text(
-              'Source contest',
+              l10n.wizardSourceContest,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
                 color: scheme.onSurfaceVariant,
@@ -215,38 +221,45 @@ class _CopySourceSectionState extends State<CopySourceSection> {
     );
   }
 
-  Widget _chosenSource(CopySource source) => SourceContestTile(
-    key: const ValueKey('copy-source-chosen'),
-    icon: Icons.event,
-    name: source.contest.name,
-    subtitle: _contestLine(
-      source.contest,
-      pilots: source.pilots.length,
-      discipline: source.discipline?.name,
-    ),
-    outlined: true,
-    trailing: OutlinedButton.icon(
-      key: const ValueKey('copy-source-remove'),
-      onPressed: _remove,
-      icon: const Icon(Icons.close, size: 18),
-      label: const Text('Remove source'),
-    ),
-  );
-
-  Widget _loadingSource(Contest contest) => Semantics(
-    liveRegion: true,
-    child: SourceContestTile(
-      key: const ValueKey('copy-source-loading'),
+  Widget _chosenSource(CopySource source) {
+    final l10n = AppLocalizations.of(context);
+    return SourceContestTile(
+      key: const ValueKey('copy-source-chosen'),
       icon: Icons.event,
-      name: contest.name,
-      subtitle: 'Loading configuration and pilot list…',
+      name: source.contest.name,
+      subtitle: _contestLine(
+        source.contest,
+        pilots: source.pilots.length,
+        discipline: source.discipline?.name,
+      ),
       outlined: true,
-      trailing: TextButton(onPressed: _remove, child: const Text('Cancel')),
-      footer: const LinearProgressIndicator(),
-    ),
-  );
+      trailing: OutlinedButton.icon(
+        key: const ValueKey('copy-source-remove'),
+        onPressed: _remove,
+        icon: const Icon(Icons.close, size: 18),
+        label: Text(l10n.wizardRemoveSource),
+      ),
+    );
+  }
+
+  Widget _loadingSource(Contest contest) {
+    final l10n = AppLocalizations.of(context);
+    return Semantics(
+      liveRegion: true,
+      child: SourceContestTile(
+        key: const ValueKey('copy-source-loading'),
+        icon: Icons.event,
+        name: contest.name,
+        subtitle: l10n.wizardLoadingSource,
+        outlined: true,
+        trailing: TextButton(onPressed: _remove, child: Text(l10n.wizardCancel)),
+        footer: const LinearProgressIndicator(),
+      ),
+    );
+  }
 
   Widget _failedSource(Contest contest) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final style = theme.textTheme.bodyMedium?.copyWith(
@@ -279,12 +292,11 @@ class _CopySourceSectionState extends State<CopySourceSection> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Couldn’t load “${contest.name}”',
+                          l10n.wizardSourceFailed(contest.name),
                           style: style?.copyWith(fontWeight: FontWeight.w500),
                         ),
                         Text(
-                          'The contest didn’t load. Retry, or remove the '
-                          'source and continue without copying.',
+                          l10n.wizardSourceFailedBody,
                           style: style,
                         ),
                       ],
@@ -303,7 +315,7 @@ class _CopySourceSectionState extends State<CopySourceSection> {
                     foregroundColor: scheme.onError,
                   ),
                   onPressed: () => _use(contest),
-                  child: const Text('Retry'),
+                  child: Text(l10n.wizardRetry),
                 ),
                 OutlinedButton(
                   key: const ValueKey('copy-source-remove'),
@@ -312,7 +324,7 @@ class _CopySourceSectionState extends State<CopySourceSection> {
                     side: BorderSide(color: scheme.onErrorContainer),
                   ),
                   onPressed: _remove,
-                  child: const Text('Remove source'),
+                  child: Text(l10n.wizardRemoveSource),
                 ),
               ],
             ),
@@ -323,6 +335,7 @@ class _CopySourceSectionState extends State<CopySourceSection> {
   }
 
   Widget _picker() {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final offline = widget.offline;
@@ -373,12 +386,12 @@ class _CopySourceSectionState extends State<CopySourceSection> {
             children: [
               tab(
                 _SourceTab.local,
-                CopySourceSection.localLabel,
+                CopySourceSection.localLabel(l10n),
                 kIsWeb ? Icons.event : Icons.devices,
               ),
               tab(
                 _SourceTab.public,
-                offline ? 'Public (needs connection)' : 'Public',
+                offline ? l10n.wizardPublicNeedsConnection : l10n.wizardPublic,
                 offline ? Icons.cloud_off : Icons.public,
               ),
             ],
@@ -390,15 +403,14 @@ class _CopySourceSectionState extends State<CopySourceSection> {
         else if (offline)
           _note(
             Icons.cloud_off,
-            'You’re offline. Public contests can be searched when you’re back '
-            'online. ${CopySourceSection.localLabel} are still available.',
+            l10n.wizardOfflineNote(CopySourceSection.localLabel(l10n)),
             key: const ValueKey('copy-source-public-offline'),
           )
         else
           _note(
             Icons.public,
-            'Searching public contests isn’t available yet. Copy from '
-            '${CopySourceSection.localLabel.toLowerCase()} for now.',
+            l10n.wizardPublicUnavailable(
+              CopySourceSection.localLabel(l10n).toLowerCase()),
             key: const ValueKey('copy-source-public-unavailable'),
           ),
       ],
@@ -429,64 +441,69 @@ class _CopySourceSectionState extends State<CopySourceSection> {
     );
   }
 
-  Widget _localContests() => FutureBuilder<List<Contest>>(
-    future: _contests,
-    builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        return Row(
-          children: [
-            Expanded(
-              child: _note(
-                Icons.error_outline,
-                'Contests could not be loaded.',
+  Widget _localContests() {
+    final l10n = AppLocalizations.of(context);
+    return FutureBuilder<List<Contest>>(
+      future: _contests,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Row(
+            children: [
+              Expanded(
+                child: _note(
+                  Icons.error_outline,
+                  l10n.wizardContestsLoadFailed,
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            TextButton(
-              onPressed: () => setState(() => _contests = _loadContests()),
-              child: const Text('Retry'),
-            ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: () => setState(() => _contests = _loadContests()),
+                child: Text(l10n.wizardRetry),
+              ),
+            ],
+          );
+        }
+        final contests = snapshot.data;
+        if (contests == null) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (contests.isEmpty) {
+          return _note(Icons.event_busy, l10n.wizardNoContests);
+        }
+        final primary = Theme.of(context).colorScheme.primary;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final contest in contests)
+              SourceContestTile(
+                key: ValueKey('copy-source-${contest.id.value}'),
+                icon: Icons.event,
+                name: contest.name,
+                subtitle: _contestLine(contest),
+                onTap: () => unawaited(_use(contest)),
+                trailing: Text(
+                  l10n.wizardUse,
+                  style: Theme.of(context).textTheme.labelLarge
+                      ?.copyWith(color: primary),
+                ),
+              ),
           ],
         );
-      }
-      final contests = snapshot.data;
-      if (contests == null) {
-        return const Padding(
-          padding: EdgeInsets.all(16),
-          child: Center(child: CircularProgressIndicator()),
-        );
-      }
-      if (contests.isEmpty) {
-        return _note(Icons.event_busy, 'There are no contests to copy yet.');
-      }
-      final primary = Theme.of(context).colorScheme.primary;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final contest in contests)
-            SourceContestTile(
-              key: ValueKey('copy-source-${contest.id.value}'),
-              icon: Icons.event,
-              name: contest.name,
-              subtitle: _contestLine(contest),
-              onTap: () => unawaited(_use(contest)),
-              trailing: Text(
-                'Use',
-                style: Theme.of(context).textTheme.labelLarge
-                    ?.copyWith(color: primary),
-              ),
-            ),
-        ],
-      );
-    },
-  );
+      },
+    );
+  }
 
   Widget _pilotSubset(CopySource source) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final chosen = widget.draft.participants;
     final names = chosen.take(3).map((pilot) => pilot.name).join(', ');
-    final more = chosen.length > 3 ? ' and ${chosen.length - 3} more' : '';
+    final more =
+        chosen.length > 3 ? l10n.wizardAndMore(chosen.length - 3) : '';
     return Container(
       key: const ValueKey('copy-source-subset'),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -511,12 +528,14 @@ class _CopySourceSectionState extends State<CopySourceSection> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${chosen.length} of ${source.pilots.length} pilots '
-                        'selected',
+                        l10n.wizardPilotsSelected(
+                          chosen.length, source.pilots.length),
                         style: theme.textTheme.bodyLarge,
                       ),
                       Text(
-                        chosen.isEmpty ? 'No pilots chosen yet' : '$names$more',
+                        chosen.isEmpty
+                            ? l10n.wizardNoPilotsChosen
+                            : '$names$more',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
@@ -532,7 +551,7 @@ class _CopySourceSectionState extends State<CopySourceSection> {
             onPressed: source.pilots.isEmpty
                 ? null
                 : () => unawaited(_choosePilots(source)),
-            child: const Text('Choose pilots'),
+            child: Text(l10n.wizardChoosePilots),
           ),
         ],
       ),
