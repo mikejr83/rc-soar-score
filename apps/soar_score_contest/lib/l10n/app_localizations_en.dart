@@ -4765,15 +4765,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get scoreAcceptedAutomatically => 'Official · automatic';
+  String get scoreAcceptedAutomatically => 'Official · auto';
 
   @override
-  String get scoreAutomaticNote =>
-      'Made official automatically when its round or group was fully scored. Confirm it to close it to review.';
+  String get scoreAutomaticNote => 'Confirm it to close it to review.';
 
   @override
-  String get scoreAutomaticLocked =>
-      'Official (automatic). This score is locked.';
+  String get scoreAutomaticLocked => 'Official (auto). This score is locked.';
 
   @override
   String get scoreStatusUnsaved => 'Unsaved';
