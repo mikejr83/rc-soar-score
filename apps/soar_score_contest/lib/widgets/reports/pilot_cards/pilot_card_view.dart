@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_localizations_en.dart';
 import '../../../services/reports/pilot_cards/card_columns.dart';
 import '../../../services/reports/pilot_cards/card_geometry.dart';
 import '../../../services/reports/pilot_cards/card_sizing.dart';
@@ -9,6 +11,12 @@ import '../../../services/reports/pilot_cards/pilot_cards_data.dart';
 import '../../../services/reports/report_pilot.dart';
 import '../viewer/paper_style.dart';
 import 'qr_code_view.dart';
+
+final AppLocalizations _fallbackL10n = AppLocalizationsEn();
+
+AppLocalizations _l10nOf(BuildContext context) =>
+    Localizations.of<AppLocalizations>(context, AppLocalizations) ??
+    _fallbackL10n;
 
 /// One pilot's scoring card at its printed size: the contest line, the pilot's
 /// name and details, an optional QR code, the table to write in and a footer
@@ -59,9 +67,10 @@ class PilotCardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = _l10nOf(context);
     final card = Semantics(
       container: true,
-      label: 'Scoring card, ${pilot.givenSurname}',
+      label: l10n.cardsCardSemantics(pilot.givenSurname),
       child: Container(
         width: mmToPx(geometry.cardWidth),
         height: mmToPx(geometry.cardHeight),
@@ -84,7 +93,7 @@ class PilotCardView extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [_top(), _table()],
+                children: [_top(context), _table()],
               ),
             ),
           ),
@@ -101,7 +110,8 @@ class PilotCardView extends StatelessWidget {
     );
   }
 
-  Widget _top() {
+  Widget _top(BuildContext context) {
+    final l10n = _l10nOf(context);
     final identity = fit.identity;
     final qr = qrLink != null;
     return SizedBox(
@@ -182,7 +192,7 @@ class PilotCardView extends StatelessWidget {
               child: Align(
                 alignment: Alignment.bottomRight,
                 child: Text(
-                  'Scan to enter scores',
+                  l10n.cardsScanToEnter,
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontSize: ptToPx(7),
@@ -204,7 +214,11 @@ class PilotCardView extends StatelessWidget {
                       : 0,
                 ),
               ),
-              child: QrCodeView(data: qrLink!, size: mmToPx(fit.qrSize)),
+              child: QrCodeView(
+                data: qrLink!,
+                size: mmToPx(fit.qrSize),
+                label: l10n.cardsQrLabel,
+              ),
             ),
             SizedBox(width: mmToPx(fit.quietZone)),
           ],

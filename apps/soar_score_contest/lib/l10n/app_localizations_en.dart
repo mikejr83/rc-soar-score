@@ -8131,4 +8131,193 @@ class AppLocalizationsEn extends AppLocalizations {
   String configLandingEntriesLabel(String name) {
     return '$name entries';
   }
+
+  @override
+  String get cardsPilotsHeading => 'Pilots';
+
+  @override
+  String cardsPilotCount(int count, int total) {
+    return '$count of $total selected';
+  }
+
+  @override
+  String get cardsSearchPilots => 'Search pilots';
+
+  @override
+  String cardsSelectShown(int count) {
+    return 'Select $count shown';
+  }
+
+  @override
+  String get cardsSelectAll => 'Select all';
+
+  @override
+  String get cardsClearShown => 'Clear shown';
+
+  @override
+  String get cardsSelectNone => 'Select none';
+
+  @override
+  String get cardsAddTeamHint => 'Add a team’s pilots to the selection';
+
+  @override
+  String get cardsAddTeam => 'Add a team';
+
+  @override
+  String get cardsPilotList => 'Pilot list';
+
+  @override
+  String get cardsNoPilotsYet => 'No pilots in this contest yet.';
+
+  @override
+  String cardsNoPilotMatches(String query) {
+    return 'No pilot matches “$query”.';
+  }
+
+  @override
+  String get cardsRetired => 'Retired';
+
+  @override
+  String get cardsOptions => 'Options';
+
+  @override
+  String get cardsGroup => 'Cards';
+
+  @override
+  String get cardsIncludeRetired => 'Include retired pilots';
+
+  @override
+  String get cardsIncludeRetiredHelp =>
+      'Retired pilots are marked “Retired” on their cards.';
+
+  @override
+  String cardsRetiredLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'pilots are',
+      one: 'pilot is',
+    );
+    return '$count retired $_temp0 left out.';
+  }
+
+  @override
+  String get cardsPrefill => 'Pre-fill';
+
+  @override
+  String get cardsPrefillUnavailable => 'No scores have been entered yet.';
+
+  @override
+  String get cardsPrefillHelp =>
+      'Prints the scores already entered, so pilots can check them.';
+
+  @override
+  String get cardsAutomatic => 'Automatic';
+
+  @override
+  String get cardsFourPerPage => 'Four per page';
+
+  @override
+  String get cardsTwoPerPage => 'Two per page';
+
+  @override
+  String cardsMarginLabel(String label) {
+    return '$label margin';
+  }
+
+  @override
+  String get cardsMarginStandard => 'Standard';
+
+  @override
+  String get cardsMarginStandardHelp => '6.35 mm (¼ in) from the paper’s edge.';
+
+  @override
+  String get cardsMarginWide => 'Wide';
+
+  @override
+  String get cardsMarginWideHelp =>
+      '10 mm from the paper’s edge, for a printer that cuts the cards off.';
+
+  @override
+  String get cardsNoCards => 'No cards';
+
+  @override
+  String cardsSummary(int cards, int pages) {
+    String _temp0 = intl.Intl.pluralLogic(
+      cards,
+      locale: localeName,
+      other: 'cards',
+      one: 'card',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      pages,
+      locale: localeName,
+      other: 'pages',
+      one: 'page',
+    );
+    return '$cards $_temp0 · $pages $_temp1';
+  }
+
+  @override
+  String get cardsTooManyRounds => 'Too many rounds';
+
+  @override
+  String get cardsUsingFourPerPage => 'Using four per page';
+
+  @override
+  String get cardsUsingTwoPerPage => 'Using two per page';
+
+  @override
+  String get cardsQuarterPage => 'Quarter-page cards';
+
+  @override
+  String get cardsRowsUnderEight => 'Rows would be under 8 mm';
+
+  @override
+  String get cardsHalfPage => 'Half-page cards';
+
+  @override
+  String get cardsNoRoundsInRange => 'No rounds in range.';
+
+  @override
+  String cardsTooManyRoundsMessage(int max) {
+    return 'This contest has too many rounds for a scoring card. A half-page card holds up to $max rounds at the minimum 8 mm row height.';
+  }
+
+  @override
+  String cardsRoundsHalfPage(int rounds, int max) {
+    return '$rounds rounds on half-page cards. Up to $max fit.';
+  }
+
+  @override
+  String cardsRoundsFitFour(int rounds, int max) {
+    return '$rounds rounds fit four to a page (up to $max at 8 mm rows).';
+  }
+
+  @override
+  String cardsRoundsNotFour(int rounds, int max) {
+    return '$rounds rounds don’t fit four to a page; using two. Four holds up to $max.';
+  }
+
+  @override
+  String cardsCardSemantics(String pilot) {
+    return 'Scoring card, $pilot';
+  }
+
+  @override
+  String get cardsScanToEnter => 'Scan to enter scores';
+
+  @override
+  String get cardsQrLabel => 'QR code, scan to enter scores';
+
+  @override
+  String cardsPageLabel(int page, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'cards',
+      one: 'card',
+    );
+    return 'Page $page, $count $_temp0';
+  }
 }
