@@ -106,5 +106,23 @@ Future<void> phase6Results(
       await pumpUntilFound(tester, find.text('Place'));
       expect(find.textContaining('Standings are held'), findsNothing);
     });
+    await journey.step(
+      'A recorded zero names its reason in the group',
+      () async {
+        // The mate's flight now scores zero for leaving the field. The reason
+        // reaches the page from the server's response, as words.
+        await contest.zeroAsDirector(
+          mate,
+          1,
+          flag: 'out_of_bounds',
+          baseRevision: 2,
+        );
+        await openPath(tester, group);
+        await pumpUntilFound(tester, find.text('(you)'));
+        expect(find.text('Zero: out of bounds'), findsOneWidget);
+        expect(find.textContaining('out_of_bounds'), findsNothing);
+        expect(find.text('Zero recorded'), findsNothing);
+      },
+    );
   });
 }

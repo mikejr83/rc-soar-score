@@ -126,6 +126,28 @@ class SeededContest {
     );
   }
 
+  /// The director records a zero for [name]'s flight in [round] with the
+  /// score component [flag] (`out_of_bounds`) set and no measurements.
+  Future<void> zeroAsDirector(
+    String name,
+    int round, {
+    required String flag,
+    required int baseRevision,
+    String mutation = 'director-zero',
+  }) async {
+    await api.call(
+      'POST',
+      '/contests/$id/assignments/${_slot(name, round)['id']}/scores',
+      status: 201,
+      body: {
+        'client_mutation_id': '$mutation-$name-$round',
+        'base_score_revision': baseRevision,
+        'components': {flag: true},
+        'reason': 'E2E director zero',
+      },
+    );
+  }
+
   /// The credential in [name]'s link (the last path segment).
   String credentialOf(String name) => Uri.parse(links[name]!).pathSegments.last;
 
