@@ -8,6 +8,7 @@ import 'package:test/test.dart';
 
 import '../../support/acceptor_harness.dart';
 import '../../support/backends.dart';
+import '../../support/overlap_support.dart';
 
 void main() {
   forPostgresOnly(_tests);
@@ -22,7 +23,7 @@ void main() {
     });
     final failing = Future<void>.error(StateError('exchange failed'))..ignore();
 
-    await settleStarted(release, [parked, failing, null]);
+    await settleStarted([release], [parked, failing, null]);
 
     expect(release.isCompleted, isTrue);
     expect(waited, isTrue);
@@ -147,7 +148,7 @@ void _tests(Backend backend) {
     } finally {
       // Whatever failed above, release the lock and let both operations end
       // before the databases close; the original failure is the one reported.
-      await settleStarted(commit, [manual, sync]);
+      await settleStarted([commit], [manual, sync]);
     }
   });
 }
@@ -170,22 +171,4 @@ Future<void> _waitUntilBlockedBy(
     await Future<void>.delayed(const Duration(milliseconds: 25));
   }
   fail('no session waited for the manual publish within 15 seconds');
-}
-
-/// Completes [release] if it is still pending, then waits for every started
-/// operation in [started] to end, ignoring how they end so that cleanup never
-/// hides the failure that led to it.
-Future<void> settleStarted(
-  Completer<void> release,
-  Iterable<Future<Object?>?> started,
-) async {
-  if (!release.isCompleted) release.complete();
-  for (final operation in started) {
-    if (operation == null) continue;
-    try {
-      await operation;
-    } on Object {
-      // reported by the test body, or by nobody when it was never awaited
-    }
-  }
 }

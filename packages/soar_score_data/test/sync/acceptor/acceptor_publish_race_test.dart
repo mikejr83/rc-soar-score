@@ -6,8 +6,39 @@ import 'package:test/test.dart';
 
 import '../../support/acceptor_harness.dart';
 import '../../support/backends.dart';
+import '../../support/overlap_support.dart';
 
-void main() => forEachBackend(_tests);
+void main() {
+  forEachBackend(_tests);
+
+  test('a gated operation that fails before it is ready surfaces its own '
+      'error, and both gates open', () async {
+    final gateA = Completer<void>();
+    final gateB = Completer<void>();
+    final neverReady = Completer<void>();
+    final failing = Future<void>.error(StateError('failed early'))..ignore();
+
+    await expectLater(
+      readyOrDone(neverReady.future, failing),
+      throwsA(
+        isA<StateError>().having((e) => e.message, 'message', 'failed early'),
+      ),
+    );
+    await settleStarted([gateA, gateB], [failing]);
+
+    expect(gateA.isCompleted, isTrue);
+    expect(gateB.isCompleted, isTrue);
+  });
+
+  test('an operation that ends without signalling ready is reported', () async {
+    final neverReady = Completer<void>();
+
+    await expectLater(
+      readyOrDone(neverReady.future, Future<void>.value()),
+      throwsA(isA<StateError>()),
+    );
+  });
+}
 
 /// Builds a projection, then waits to be released before handing it back, so a
 /// test decides when each publish stores.
@@ -75,52 +106,66 @@ void _tests(Backend backend) {
       sourceContestRevision: contest.revision,
     );
 
-    // The manual publish builds from the old configuration and waits.
     final manualBuilder = _GatedBuilder(harness.serverRepository);
-    final manual =
-        PublicationService(
-          harness.serverRepository,
-          builder: manualBuilder,
-        ).publish(
-          contestId,
-          actorId: harness.account,
-          authority: core.Authority.director,
-          clientMutationId: 'manual',
-          sourceContestRevision: contest.revision,
-        );
-    await manualBuilder.built.future;
+    Future<PublishResult>? manual;
+    Future<SyncExchangeOutput>? sync;
+    try {
+      // The manual publish builds from the old configuration and waits.
+      final startedManual = manual =
+          PublicationService(
+              harness.serverRepository,
+              builder: manualBuilder,
+            ).publish(
+              contestId,
+              actorId: harness.account,
+              authority: core.Authority.director,
+              clientMutationId: 'manual',
+              sourceContestRevision: contest.revision,
+            )
+            ..ignore();
+      await readyOrDone(manualBuilder.built.future, startedManual);
 
-    // The director's configuration edit syncs; its publish builds and waits.
-    await ContestConfigurationService(harness.clientRepository).save(
-      contestId,
-      ConfigurationInput(
-        baseRevisionNumber: 1,
-        disciplineProfileId: core.SystemDisciplineProfiles.f5jId,
-        config: core.ContestConfig(
-          core: const {
-            'drop_after_rounds': [1],
-          },
-          discipline: const {'working_time': 600},
+      // The director's configuration edit syncs; its publish builds and waits.
+      await ContestConfigurationService(harness.clientRepository).save(
+        contestId,
+        ConfigurationInput(
+          baseRevisionNumber: 1,
+          disciplineProfileId: core.SystemDisciplineProfiles.f5jId,
+          config: core.ContestConfig(
+            core: const {
+              'drop_after_rounds': [1],
+            },
+            discipline: const {'working_time': 600},
+          ),
         ),
-      ),
-      createdBy: harness.account,
-      metadata: core.MutationMetadata(
-        clientMutationId: 'drop-rounds',
-        authority: core.Authority.director,
-        clientTime: DateTime.utc(2026, 10, 15),
-        actorId: harness.account,
-      ),
-    );
-    final sent = await harness.outbox(scope);
-    final sync = harness.exchange(scope, mutations: sent);
-    await syncBuilder.built.future;
+        createdBy: harness.account,
+        metadata: core.MutationMetadata(
+          clientMutationId: 'drop-rounds',
+          authority: core.Authority.director,
+          clientTime: DateTime.utc(2026, 10, 15),
+          actorId: harness.account,
+        ),
+      );
+      final sent = await harness.outbox(scope);
+      final startedSync = sync = harness.exchange(scope, mutations: sent)
+        ..ignore();
+      await readyOrDone(syncBuilder.built.future, startedSync);
 
-    // The manual store wins, then the sync publish finds the revision moved.
-    manualBuilder.release.complete();
-    await manual;
-    syncBuilder.release.complete();
-    final out = await sync;
-    await harness.acknowledge(sent, out.results);
+      // The manual store wins, then the sync publish finds the revision
+      // moved.
+      manualBuilder.release.complete();
+      await startedManual;
+      syncBuilder.release.complete();
+      final out = await startedSync;
+      await harness.acknowledge(sent, out.results);
+    } finally {
+      // Whatever failed above, open both gates and let both operations end
+      // before the database closes; the original failure is the one reported.
+      await settleStarted(
+        [manualBuilder.release, syncBuilder.release],
+        [manual, sync],
+      );
+    }
 
     final identity = (await harness
         .serverRepository
