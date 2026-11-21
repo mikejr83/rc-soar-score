@@ -170,15 +170,15 @@ class SyncEngine {
       return null;
     }
     final watch = Stopwatch()..start();
+    // Before the service is prepared, so a failed version check or
+    // registration still follows a start line. The cursor is on the pull's
+    // exchange line, and the pending count on the push plan.
+    _logger.info('Sync started: scope=${syncScopeLabel(scope)}');
     _emit(_state.copyWith(syncing: true));
     try {
       final failure = await _guard(() async {
         await _prepare();
         final cursor = await _store.readCursor(scope);
-        _logger.info(
-          'Sync started: scope=${syncScopeLabel(scope)} cursor=$cursor '
-          'pending=${(await _store.status(scope)).pendingMutations}',
-        );
         // Pull first, so the push is based on what the service already has.
         final pulled = await _pull(
           scope,

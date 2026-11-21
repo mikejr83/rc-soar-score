@@ -73,4 +73,20 @@ void main() {
       expect(messages().any((l) => l.contains('secret-host-detail')), isFalse);
     },
   );
+
+  test('the start is logged before a failing preparation', () async {
+    final rig = Rig();
+    rig.gateway.infoError = ApiNetworkError(
+      'down',
+      requestUri: Uri.parse('https://api.example/x'),
+    );
+
+    await rig.engine.syncScope(scope);
+
+    final lines = messages();
+    final started = lines.indexWhere((l) => l.startsWith('Sync started'));
+    final failed = lines.indexWhere((l) => l.startsWith('Sync failed'));
+    expect(started, greaterThanOrEqualTo(0));
+    expect(failed, greaterThan(started));
+  });
 }
