@@ -55,11 +55,17 @@ class GroupResultTile extends StatelessWidget {
         icon: Icons.schedule,
         style: StatusChipStyle.quiet,
       ),
+      GroupRowKind.retired => const StatusChip(
+        label: 'Retired',
+        icon: Icons.person_off_outlined,
+        style: StatusChipStyle.quiet,
+      ),
     };
     final note = switch (row.kind) {
       GroupRowKind.scored => null,
       GroupRowKind.zero => 'Time, height and landing are zeroed.',
       GroupRowKind.noScore => 'Not in the standings for this round.',
+      GroupRowKind.retired => 'No flight expected after retirement.',
     };
     final numbers = BrandTypography.numbers.copyWith(
       fontWeight: row.isYou ? FontWeight.w700 : null,

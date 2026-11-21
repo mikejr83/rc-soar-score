@@ -8,6 +8,9 @@ enum GroupRowKind {
 
   /// No score has been entered yet.
   noScore,
+
+  /// The pilot retired before this round, so no flight is expected.
+  retired,
 }
 
 /// One pilot's flight in a group, as the group results page shows it. Each

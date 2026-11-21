@@ -126,6 +126,25 @@ class SeededContest {
     );
   }
 
+  /// The director retires [name] from [round] on (a pilot's first round
+  /// without a score).
+  Future<void> retire(String name, {required int round}) async {
+    final id = participations[name]!;
+    final listed = await api.call('GET', '/contests/${this.id}/participations');
+    final stored = (listed['participations']! as List)
+        .cast<Map<String, Object?>>()
+        .singleWhere((p) => p['id'] == id);
+    await api.call(
+      'PUT',
+      '/contests/${this.id}/participations/$id',
+      body: {
+        'base_revision': stored['revision'],
+        'classification': stored['classification'],
+        'retired_at_round': round,
+      },
+    );
+  }
+
   /// The credential in [name]'s link (the last path segment).
   String credentialOf(String name) => Uri.parse(links[name]!).pathSegments.last;
 

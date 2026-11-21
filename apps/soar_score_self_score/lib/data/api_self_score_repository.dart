@@ -362,6 +362,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       ParticipantScoreState.zero => GroupRowKind.zero,
       ParticipantScoreState.notEntered ||
       ParticipantScoreState.draft => GroupRowKind.noScore,
+      ParticipantScoreState.retired => GroupRowKind.retired,
       _ => GroupRowKind.scored,
     };
     final seconds = row.timeFlownSeconds;
