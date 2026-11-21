@@ -353,11 +353,13 @@ class SyncAcceptorService {
   ) async {
     final publicUpdates = this.publicUpdates;
     if (publicUpdates == null || scope is! ContestScopeKey) return;
-    final byId = {for (final m in mutations) m.clientMutationId: m};
+    // The results are in the order of the mutations sent, so pair them by
+    // position: two mutations may carry the same client mutation id.
     final accepted = [
-      for (final r in results)
-        if (r.outcome == MutationOutcome.accepted && !r.replayed)
-          ?byId[r.clientMutationId],
+      for (var i = 0; i < results.length && i < mutations.length; i++)
+        if (results[i].outcome == MutationOutcome.accepted &&
+            !results[i].replayed)
+          mutations[i],
     ];
     if (accepted.isEmpty) return;
     try {

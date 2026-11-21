@@ -124,6 +124,41 @@ void _tests(Backend backend) {
     expect(await projectionRevision(), before + 1);
   });
 
+  test('a reused mutation id after a configuration change does not hide '
+      'the change', () async {
+    await setUp0(publishes: true);
+    addTearDown(harness.close);
+    final before = await projectionRevision();
+    final configBefore = await publishedConfigRevision();
+    await _saveConfig(
+      harness,
+      contestId,
+      base: configBefore,
+      options: {
+        'drop_after_rounds': [1],
+      },
+    );
+    final sent = await harness.outbox(scope);
+    final config = sent.firstWhere(
+      (m) => m.entityType == 'ContestConfigurationRevision',
+    );
+    // A later mutation of a type the public site does not show, under the
+    // configuration change's own id: the service accepts it too, and the
+    // configuration change must still be classified by its own input.
+    final reused = harness.save('ReviewRequest', {
+      'id': core.Id.create().value,
+    }, clientMutationId: config.clientMutationId);
+
+    final out = await harness.exchange(scope, mutations: [...sent, reused]);
+
+    expect(
+      out.results.every((r) => r.outcome == core.MutationOutcome.accepted),
+      isTrue,
+    );
+    expect(await projectionRevision(), before + 1);
+    expect(await publishedConfigRevision(), configBefore + 1);
+  });
+
   test('a synced change does not republish in Manual mode', () async {
     await setUp0(publishes: true, mode: core.PublicUpdateMode.manual);
     addTearDown(harness.close);
