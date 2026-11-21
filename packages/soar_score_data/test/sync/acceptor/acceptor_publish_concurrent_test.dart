@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/services/services.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
@@ -48,6 +49,12 @@ void _tests(Backend backend) {
 
     // The manual publish stores (the identity row is now locked) and stays
     // uncommitted.
+    final observerDb = SoarScoreDatabase(
+      postgresConfig!.named(harness.server.databaseName!).toPgDatabase(),
+      profile: DatabaseProfile.server,
+    );
+    addTearDown(observerDb.close);
+    late final int manualPid;
     final stored = Completer<void>();
     final commit = Completer<void>();
     final manual = manualDb.transaction(() async {
@@ -58,6 +65,11 @@ void _tests(Backend backend) {
         clientMutationId: 'manual',
         sourceContestRevision: contest.revision,
       );
+      manualPid =
+          (await manualDb
+                  .customSelect('SELECT pg_backend_pid() AS pid')
+                  .getSingle())
+              .read<int>('pid');
       stored.complete();
       await commit.future;
     });
@@ -86,10 +98,14 @@ void _tests(Backend backend) {
     );
     final sent = await harness.outbox(scope);
     final sync = harness.exchange(scope, mutations: sent);
-    await Future<void>.delayed(const Duration(milliseconds: 500));
-
-    commit.complete();
-    await manual;
+    try {
+      // PostgreSQL itself says when the sync publish waits on the manual
+      // transaction's lock, so the two overlap whatever the runner's speed.
+      await _waitUntilBlockedBy(observerDb, manualPid);
+    } finally {
+      commit.complete();
+      await manual;
+    }
     final out = await sync;
     await harness.acknowledge(sent, out.results);
 
@@ -105,4 +121,24 @@ void _tests(Backend backend) {
     expect(current.clientMutationId, 'auto-sync-drop-rounds');
     expect(current.projectionRevision, 3);
   });
+}
+
+/// Polls until a session waits for a lock held by [blockerPid].
+Future<void> _waitUntilBlockedBy(
+  SoarScoreDatabase observer,
+  int blockerPid,
+) async {
+  final deadline = DateTime.now().add(const Duration(seconds: 15));
+  while (DateTime.now().isBefore(deadline)) {
+    final rows = await observer
+        .customSelect(
+          'SELECT count(*) AS waiting FROM pg_stat_activity '
+          r'WHERE $1 = ANY(pg_blocking_pids(pid))',
+          variables: [Variable<int>(blockerPid)],
+        )
+        .get();
+    if (rows.single.read<int>('waiting') > 0) return;
+    await Future<void>.delayed(const Duration(milliseconds: 25));
+  }
+  fail('no session waited for the manual publish within 15 seconds');
 }
