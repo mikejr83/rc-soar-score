@@ -65,7 +65,7 @@ class GroupResultTile extends StatelessWidget {
       GroupRowKind.scored => null,
       GroupRowKind.zero => 'Time, height and landing are zeroed.',
       GroupRowKind.noScore => 'Not in the standings for this round.',
-      GroupRowKind.retired => 'Retired from this round. No flight expected.',
+      GroupRowKind.retired => 'No flight expected after retirement.',
     };
     final numbers = BrandTypography.numbers.copyWith(
       fontWeight: row.isYou ? FontWeight.w700 : null,

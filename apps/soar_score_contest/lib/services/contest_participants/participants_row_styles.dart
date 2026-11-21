@@ -77,6 +77,12 @@ extension ParticipantsRowStyles on ParticipantsController {
         Icons.edit,
         tone: ParticipantStatusTone.primary,
       );
+    } else if (row.participation.retiredAtRound != null) {
+      status = ParticipantStatus(
+        'Retired from round ${row.participation.retiredAtRound}',
+        Icons.person_off,
+        tone: ParticipantStatusTone.warning,
+      );
     } else if (state.outcome == RowOutcome.added) {
       status = ParticipantStatus(
         state.late ? 'Added late' : 'Added',
@@ -88,12 +94,6 @@ extension ParticipantsRowStyles on ParticipantsController {
         'Saved',
         Icons.check_circle,
         tone: ParticipantStatusTone.success,
-      );
-    } else if (row.participation.retiredAtRound != null) {
-      status = ParticipantStatus(
-        'Retired from round ${row.participation.retiredAtRound}',
-        Icons.person_off,
-        tone: ParticipantStatusTone.warning,
       );
     } else if (!scoring) {
       status = const ParticipantStatus('Non-flying', Icons.badge);

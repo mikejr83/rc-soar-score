@@ -3,6 +3,7 @@ import 'dart:math' show min;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/services/reports/pilot_cards/pilot_invitations.dart';
 import 'package:soar_score_contest/services/scoring/scoring_row.dart';
 import 'package:soar_score_core/soar_score_core.dart'
     show ScorePlaceholderState;
@@ -12,6 +13,7 @@ import '../support/interact.dart';
 import '../support/launch_app.dart';
 import '../support/open_demo_contest.dart';
 import '../support/pilot_submission.dart';
+import '../support/stub_invitations.dart';
 import '../support/pump_until_gone.dart';
 import 'journey.dart';
 import 'scoring_steps.dart';
@@ -848,21 +850,52 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
     'their invitation',
     () => inContest(() async {
       const retired = 'Tess Valdez';
-      await tapRail(tester, 'Participants');
-      await pumpUntilFound(tester, _key('participants-table'));
-      await pumpUntilFound(tester, find.text(retired));
-      expect(find.text('Retired from round 3'), findsOneWidget);
-      // A retired pilot is still a pilot: the invitation actions are not
-      // refused for them, so selecting the row leaves the menu in place.
-      await tapVisible(
-        tester,
-        find.byWidgetPredicate(
-          (w) => w is Checkbox && w.semanticLabel == 'Select $retired',
-        ),
-      );
-      await tapVisible(tester, _key('invitations-menu'));
-      await pumpUntilFound(tester, _key('invitations-copy'));
-      expect(find.text('Only pilots get invitations.'), findsNothing);
+      // The hosted server issues invitations; the journey runs without it, so
+      // a stand-in with the same behavior takes its place for this step.
+      final original = PilotInvitationSources.current;
+      final stub = StubPilotInvitationSource();
+      PilotInvitationSources.current = stub;
+      try {
+        await tapRail(tester, 'Participants');
+        await pumpUntilFound(tester, _key('participants-table'));
+        await pumpUntilFound(tester, find.text(retired));
+        expect(find.text('Retired from round 3'), findsOneWidget);
+        // A retired pilot is still a pilot: Send issues their invitation, and
+        // Copy link then copies it.
+        await tapVisible(
+          tester,
+          find.byWidgetPredicate(
+            (w) => w is Checkbox && w.semanticLabel == 'Select $retired',
+          ),
+        );
+        await tapVisible(tester, _key('invitations-menu'));
+        await pumpUntilFound(tester, _key('invitations-send'));
+        expect(
+          tester.widget<MenuItemButton>(_key('invitations-send')).onPressed,
+          isNotNull,
+        );
+        await tapVisible(tester, _key('invitations-send'));
+        await pumpUntilFound(tester, _key('cards-send-dialog'));
+        await tapVisible(tester, _key('cards-send-confirm'));
+        await pumpUntilFound(tester, _key('invitations-snackbar'));
+        expect(stub.issuingSends, 1);
+        // The retirement stays on the row after the send.
+        expect(find.text('Retired from round 3'), findsOneWidget);
+
+        await tapVisible(tester, _key('invitations-menu'));
+        await pumpUntilFound(tester, _key('invitations-copy'));
+        expect(
+          tester.widget<MenuItemButton>(_key('invitations-copy')).onPressed,
+          isNotNull,
+        );
+        await tapVisible(tester, _key('invitations-copy'));
+        // A headless browser may refuse clipboard access; the app then says
+        // so instead of failing silently.
+        await pumpUntilFound(tester, find.textContaining('copied'));
+        expect(stub.issuingSends, 1);
+      } finally {
+        PilotInvitationSources.current = original;
+      }
     }),
   );
   await journey.step(

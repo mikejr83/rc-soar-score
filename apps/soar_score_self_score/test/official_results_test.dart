@@ -210,10 +210,7 @@ void main() {
     );
     expect(find.text('Retired'), findsOneWidget);
     expect(find.text('No score yet'), findsNothing);
-    expect(
-      find.text('Retired from this round. No flight expected.'),
-      findsOneWidget,
-    );
+    expect(find.text('No flight expected after retirement.'), findsOneWidget);
   });
 
   for (final (policy, phrase) in [
