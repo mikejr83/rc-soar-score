@@ -502,7 +502,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final String? shown;
     // A saved score (a zero entered without a height) has nothing missing,
     // but typed input is still checked.
-    final saved = widget.row.isEntered && !d.isDirty;
+    final saved = widget.row.isEntered && !d.editedSinceLoad;
     if (!editable || !touched || d.zeroing) {
       shown = null;
     } else if (d.heightText.trim().isEmpty) {

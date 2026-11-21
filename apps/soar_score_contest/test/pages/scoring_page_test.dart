@@ -361,6 +361,17 @@ void main() {
     await tester.pump();
     expect(find.text('Required'), findsNothing);
     expect(hint, findsNothing);
+
+    // An explicit zero time makes the empty height missing again.
+    await tester.tap(_height(1, 1));
+    await tester.pump();
+    await tester.enterText(_time(1, 1), '0');
+    await tester.pump();
+    expect(find.text('Required'), findsOneWidget);
+    expect(tester.widget<FilledButton>(_save(1, 1)).onPressed, isNull);
+    await tester.enterText(_time(1, 1), '');
+    await tester.pump();
+    expect(find.text('Required'), findsNothing);
   });
 
   testWidgets(
