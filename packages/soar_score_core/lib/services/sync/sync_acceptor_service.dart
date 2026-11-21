@@ -178,11 +178,12 @@ class SyncAcceptorService {
       );
       final results = <MutationResult>[];
       if (position == null) {
+        final detailsBefore = await _publicDetailsOf(scope);
         results.addAll(await _decideAll(ctx, input));
         final firstUpload = _isFirstUpload(scope, input);
         await _recalculateAfter(scope, results, firstUpload);
         if (!firstUpload) {
-          await _publishAfter(scope, results, input.mutations);
+          await _publishAfter(scope, results, input.mutations, detailsBefore);
         }
       }
       final after = position ?? input.lastAcknowledgedSequence;
@@ -344,6 +345,7 @@ class SyncAcceptorService {
     SyncScopeKey scope,
     List<MutationResult> results,
     List<SyncMutation> mutations,
+    Map<String, Object?>? detailsBefore,
   ) async {
     final publicUpdates = this.publicUpdates;
     if (publicUpdates == null || scope is! ContestScopeKey) return;
@@ -359,6 +361,10 @@ class SyncAcceptorService {
         scope.contestId,
         entityTypes: {for (final m in accepted) m.entityType},
         assignmentIds: await _assignmentsOf(accepted),
+        publicDetailsChanged: _differ(
+          detailsBefore,
+          await _publicDetailsOf(scope),
+        ),
         exchangeMutationId: accepted.last.clientMutationId,
       );
     } on Object catch (error, stackTrace) {
@@ -369,6 +375,26 @@ class SyncAcceptorService {
         stackTrace,
       );
     }
+  }
+
+  static bool _differ(
+    Map<String, Object?>? before,
+    Map<String, Object?>? after,
+  ) {
+    if (before == null || after == null) return false;
+    return before.entries.any((e) => after[e.key] != e.value);
+  }
+
+  /// What the public site shows of the contest in [scope], or null when
+  /// nothing is published from here (no update service, or no such contest).
+  Future<Map<String, Object?>?> _publicDetailsOf(SyncScopeKey scope) async {
+    if (publicUpdates == null || scope is! ContestScopeKey) return null;
+    final contest = await _repository.contestRepository.findById(
+      scope.contestId,
+    );
+    return contest == null
+        ? null
+        : PublicUpdateService.publicDetailsOf(contest);
   }
 
   /// The matrix assignments the score changes of [accepted] belong to: a

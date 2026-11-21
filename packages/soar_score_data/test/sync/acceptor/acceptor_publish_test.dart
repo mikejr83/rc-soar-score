@@ -227,6 +227,36 @@ void _tests(Backend backend) {
       );
     });
 
+    test('an unpublished hosted title edit does not ride on a later partial '
+        'round score', () async {
+      final before = await projectionRevision();
+      // A direct write on the server (the REST route does not republish).
+      final hosted = (await harness.serverRepository.contestRepository.findById(
+        contestId,
+      ))!;
+      await ContestsService(harness.serverRepository).updateContest(
+        contestId,
+        ContestDetails(
+          name: 'Hosted Rename',
+          host: hosted.host,
+          city: hosted.city,
+          startDateTime: hosted.startDateTime,
+          endDateTime: hosted.endDateTime,
+        ),
+        baseRevision: hosted.revision,
+        metadata: core.MutationMetadata(
+          clientMutationId: 'hosted-rename',
+          authority: core.Authority.director,
+          clientTime: DateTime.utc(2026, 10, 15),
+          actorId: harness.account,
+        ),
+      );
+
+      await syncScores(rounds[0].take(1));
+
+      expect(await projectionRevision(), before);
+    });
+
     test('the batch that completes the round publishes', () async {
       await syncScores(rounds[0].take(2));
       final before = await projectionRevision();

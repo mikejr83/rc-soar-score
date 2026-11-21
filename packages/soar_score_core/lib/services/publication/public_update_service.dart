@@ -9,7 +9,6 @@ import '../../errors/contest_state_error.dart';
 import '../../models/contest/core_options.dart';
 import '../../models/contest/contest.dart';
 import '../../models/id.dart';
-import '../../models/publication/publication_identity.dart';
 import '../../models/sync/audit_event.dart';
 import '../../repositories/recorded_score.dart';
 import '../../repositories/stale_revision_error.dart';
@@ -153,10 +152,12 @@ class PublicUpdateService {
   /// RoundCompletion for any change that is not only score changes, and for
   /// score changes once a round they touch is complete (the same rule as a
   /// score entry through the API); Manual never. [assignmentIds] are the
-  /// matrix assignments the accepted score changes belong to. A `Contest`
-  /// change that comes with score changes is their companion (a score write
-  /// saves the contest too) and counts as one, unless the contest is
-  /// Completed, which is the end of the last round and always publishes.
+  /// matrix assignments the accepted score changes belong to.
+  /// [publicDetailsChanged] says the exchange's accepted contest write changed
+  /// [publicDetailsOf] (the caller compares before and after). A `Contest`
+  /// change that comes with score changes and did not is their companion (a
+  /// score write saves the contest too) and counts as one, unless the contest
+  /// is Completed, which is the end of the last round and always publishes.
   ///
   /// It never creates a publication. [exchangeMutationId] (the last accepted
   /// mutation of the exchange) makes a retried exchange publish once.
@@ -168,6 +169,7 @@ class PublicUpdateService {
     Id contestId, {
     required Set<String> entityTypes,
     Set<Id> assignmentIds = const {},
+    bool publicDetailsChanged = false,
     required String exchangeMutationId,
   }) async {
     final changed = entityTypes.intersection(_publicTypes);
@@ -178,7 +180,12 @@ class PublicUpdateService {
     final mode = await _modeOf(contestId);
     if (mode == null || mode == PublicUpdateMode.manual) return null;
     if (mode == PublicUpdateMode.roundCompletion &&
-        !await _worthPublishing(contestId, identity, changed, assignmentIds)) {
+        !await _worthPublishing(
+          contestId,
+          changed,
+          assignmentIds,
+          publicDetailsChanged,
+        )) {
       return null;
     }
     try {
@@ -211,19 +218,19 @@ class PublicUpdateService {
   /// RoundCompletion's rule for a synced batch of [changed] types.
   Future<bool> _worthPublishing(
     Id contestId,
-    PublicationIdentity identity,
     Set<String> changed,
     Set<Id> assignmentIds,
+    bool publicDetailsChanged,
   ) async {
     final others = changed.difference({..._scoreTypes, 'Contest'});
     if (others.isNotEmpty) return true;
     final scoreChanged = changed.intersection(_scoreTypes).isNotEmpty;
     if (!scoreChanged) return true; // only the contest itself changed
+    // An edit of what the public site shows publishes whatever else the
+    // exchange holds; a score's lifecycle companion does not.
+    if (publicDetailsChanged) return true;
     final contest = await repository.contestRepository.findById(contestId);
     if (contest?.lifecycleState == LifecycleState.completed) return true;
-    if (contest != null && await _editsPublicDetails(contest, identity)) {
-      return true;
-    }
     final roundIds = <Id>{};
     for (final id in assignmentIds) {
       final assignment = await repository.matrixAssignmentRepository.findById(
@@ -238,28 +245,14 @@ class PublicUpdateService {
     );
   }
 
-  /// Whether [contest] differs from what the public projection shows in a
-  /// way a score cannot cause: its details (name, dates, venue) or how much
-  /// of the results are hidden. Scoring only moves the lifecycle state, which
-  /// is not compared, so a score write's companion `Contest` change is not an
-  /// edit.
-  Future<bool> _editsPublicDetails(
-    Contest contest,
-    PublicationIdentity identity,
-  ) async {
-    final currentId = identity.currentProjectionId;
-    if (currentId == null) return false;
-    final published = await repository.publicationProjectionRepository.findById(
-      currentId,
-    );
-    if (published == null) return false;
-    final now = PublicationProjectionBuilder.detailFields(contest);
-    for (final entry in now.entries) {
-      if (published.contestIdentity[entry.key] != entry.value) return true;
-    }
-    return identity.resultsHiddenThroughRound !=
-        contest.resultsHiddenThroughRound;
-  }
+  /// The contest fields the public site shows: its details (name, dates,
+  /// venue) and how much of the results are hidden. Scoring never changes
+  /// them, only the lifecycle state, which is not part of this.
+  static Map<String, Object?> publicDetailsOf(Contest contest) => {
+    ...PublicationProjectionBuilder.detailFields(contest),
+    'results_hidden_through_round': contest.resultsHiddenThroughRound,
+    'results_hidden_at': contest.resultsHiddenAt?.toUtc().toIso8601String(),
+  };
 
   Future<PublicUpdateMode?> _modeOf(Id contestId) async {
     final revision = await repository.contestConfigurationRevisionRepository

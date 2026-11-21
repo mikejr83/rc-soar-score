@@ -17,7 +17,7 @@ void _tests(Backend backend) {
   late core.ContestScopeKey scope;
   late core.ScorePlaceholder slot;
 
-  setUp(() async {
+  Future<void> open(core.PublicUpdateMode mode) async {
     harness = await AcceptorHarness.open(
       backend,
       recalculates: true,
@@ -53,10 +53,7 @@ void _tests(Backend backend) {
         baseRevisionNumber: latest.revisionNumber,
         disciplineProfileId: latest.disciplineProfileId,
         config: core.ContestConfig(
-          core: {
-            ...latest.config.core,
-            'public_update_mode': core.PublicUpdateMode.automatic.json,
-          },
+          core: {...latest.config.core, 'public_update_mode': mode.json},
           discipline: latest.config.discipline,
         ),
       ),
@@ -78,8 +75,15 @@ void _tests(Backend backend) {
               p.contestId == contestId &&
               p.state == core.ScorePlaceholderState.submitted,
         );
+  }
+
+  tearDown(() async {
+    try {
+      await harness.close();
+    } on Object {
+      // the test never opened a harness
+    }
   });
-  tearDown(() => harness.close());
 
   Future<List<core.PublicationProjection>> projections() async {
     final identity = (await harness
@@ -112,6 +116,7 @@ void _tests(Backend backend) {
   test(
     'a promotion-only exchange republishes once; its replay does not',
     () async {
+      await open(core.PublicUpdateMode.automatic);
       final before = (await projections()).length;
       final m = intent();
 
@@ -135,6 +140,7 @@ void _tests(Backend backend) {
   );
 
   test('a refused promotion publishes nothing', () async {
+    await open(core.PublicUpdateMode.automatic);
     final before = (await projections()).length;
     final stale = SyncMutation(
       id: core.Id.create(),
@@ -160,4 +166,38 @@ void _tests(Backend backend) {
     expect(out.results.single.outcome, isNot(core.MutationOutcome.accepted));
     expect(await projections(), hasLength(before));
   });
+
+  test(
+    'an unpublished hosted title edit does not ride on a later promotion',
+    () async {
+      await open(core.PublicUpdateMode.roundCompletion);
+      final before = (await projections()).length;
+      final hosted = (await harness.serverRepository.contestRepository.findById(
+        contestId,
+      ))!;
+      await ContestsService(harness.serverRepository).updateContest(
+        contestId,
+        ContestDetails(
+          name: 'Hosted Rename',
+          host: hosted.host,
+          city: hosted.city,
+          state: hosted.state,
+          country: hosted.country,
+          startDateTime: hosted.startDateTime,
+          endDateTime: hosted.endDateTime,
+        ),
+        baseRevision: hosted.revision,
+        metadata: core.MutationMetadata(
+          clientMutationId: 'hosted-rename',
+          authority: core.Authority.director,
+          clientTime: DateTime.utc(2026, 11, 16),
+          actorId: harness.account,
+        ),
+      );
+
+      await harness.exchange(scope, mutations: [intent()]);
+
+      expect(await projections(), hasLength(before));
+    },
+  );
 }
