@@ -78,7 +78,7 @@ void main() {
     expect(records.map((r) => r.message).join('\n'), isNot(contains('abc')));
   });
 
-  test('only a pilot who still flies can have an invitation', () {
+  test('pilots can have invitations even after retirement', () {
     ContestParticipation participation({
       RoleType role = RoleType.pilot,
       int? retiredAtRound,
