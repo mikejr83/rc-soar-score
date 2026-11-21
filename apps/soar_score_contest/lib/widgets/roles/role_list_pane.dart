@@ -61,7 +61,8 @@ class RoleListPane extends StatelessWidget {
                 leading: const Icon(Icons.badge_outlined),
                 title: Text(role.displayName),
                 subtitle: Text(
-                    role.isSystem ? l10n.rolesSystemRole : l10n.rolesYourRole),
+                  role.isSystem ? l10n.rolesSystemRole : l10n.rolesYourRole,
+                ),
                 trailing: role.isSystem
                     ? const Icon(Icons.lock_outline, size: 18)
                     : null,

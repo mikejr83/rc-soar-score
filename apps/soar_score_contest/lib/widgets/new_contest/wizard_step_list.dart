@@ -77,9 +77,10 @@ class WizardStepList extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 2),
                 child: _StepRow(
-                    step: step,
-                    total: steps.length,
-                    onSelect: onSelect),
+                  step: step,
+                  total: steps.length,
+                  onSelect: onSelect,
+                ),
               ),
             const SizedBox(height: 16),
             Padding(

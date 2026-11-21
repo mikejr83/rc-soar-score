@@ -13,7 +13,8 @@ enum WizardStepStatus {
   String label(AppLocalizations l10n) => switch (this) {
     WizardStepStatus.complete => l10n.wizardStepComplete,
     WizardStepStatus.current => l10n.wizardStepCurrent,
-    WizardStepStatus.currentNeedsAttention => l10n.wizardStepCurrentNeedsAttention,
+    WizardStepStatus.currentNeedsAttention =>
+      l10n.wizardStepCurrentNeedsAttention,
     WizardStepStatus.needsAttention => l10n.wizardStepNeedsAttention,
     WizardStepStatus.visited => l10n.wizardStepVisited,
     WizardStepStatus.notStarted => l10n.wizardStepNotStarted,

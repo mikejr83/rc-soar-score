@@ -45,10 +45,22 @@ class StandingsTableView extends StatelessWidget {
     final options = table.options;
     final first = page.isFirstSet;
     return [
-      _Column(l10n.standingsColRank, StandingsLayout.rankWidth, TextAlign.right),
-      _Column(l10n.standingsColPilot, StandingsLayout.nameWidth, TextAlign.left),
+      _Column(
+        l10n.standingsColRank,
+        StandingsLayout.rankWidth,
+        TextAlign.right,
+      ),
+      _Column(
+        l10n.standingsColPilot,
+        StandingsLayout.nameWidth,
+        TextAlign.left,
+      ),
       if (first)
-        _Column(l10n.standingsColTotal, StandingsLayout.totalWidth, TextAlign.right),
+        _Column(
+          l10n.standingsColTotal,
+          StandingsLayout.totalWidth,
+          TextAlign.right,
+        ),
       if (first && options.percentage)
         _Column(
           l10n.standingsColPct,
@@ -64,7 +76,11 @@ class StandingsTableView extends StatelessWidget {
           semantic: l10n.standingsColRawSemantic,
         ),
       if (first && options.team)
-        _Column(l10n.standingsColTeam, StandingsLayout.teamWidth, TextAlign.left),
+        _Column(
+          l10n.standingsColTeam,
+          StandingsLayout.teamWidth,
+          TextAlign.left,
+        ),
       if (first && options.number)
         _Column(
           l10n.standingsColNo,
@@ -73,7 +89,11 @@ class StandingsTableView extends StatelessWidget {
           semantic: l10n.standingsColNoSemantic,
         ),
       if (first && options.pilotClass)
-        _Column(l10n.standingsColClass, StandingsLayout.classWidth, TextAlign.left),
+        _Column(
+          l10n.standingsColClass,
+          StandingsLayout.classWidth,
+          TextAlign.left,
+        ),
       if (options.details)
         _Column(
           '',
@@ -412,33 +432,33 @@ class _ReviewChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = _l10nOf(context);
     return Semantics(
-    label: l10n.standingsReviewChipSemantic,
-    child: ExcludeSemantics(
-      child: Container(
-        margin: const EdgeInsets.only(left: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 3),
-        decoration: BoxDecoration(
-          border: Border.all(color: const Color(0xFF9E9E9E)),
-          borderRadius: BorderRadius.circular(3),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.desktop_windows,
-              size: 8,
-              color: Color(0xFF616161),
-            ),
-            const SizedBox(width: 2),
-            Text(
-              l10n.standingsReviewChip,
-              softWrap: false,
-              style: const TextStyle(fontSize: 8, color: Color(0xFF616161)),
-            ),
-          ],
+      label: l10n.standingsReviewChipSemantic,
+      child: ExcludeSemantics(
+        child: Container(
+          margin: const EdgeInsets.only(left: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 3),
+          decoration: BoxDecoration(
+            border: Border.all(color: const Color(0xFF9E9E9E)),
+            borderRadius: BorderRadius.circular(3),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.desktop_windows,
+                size: 8,
+                color: Color(0xFF616161),
+              ),
+              const SizedBox(width: 2),
+              Text(
+                l10n.standingsReviewChip,
+                softWrap: false,
+                style: const TextStyle(fontSize: 8, color: Color(0xFF616161)),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 }

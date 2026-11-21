@@ -236,15 +236,15 @@ class _MatrixPageState extends State<MatrixPage> {
       final suggestion = contestDraftStoreOf(context)
           ?.drawSuggestions[data.contest.id];
       final fromConfiguration = seeded ? options?.preliminaryRounds : null;
-       final l10n = AppLocalizations.of(context);
-       _form = DrawFormController(
-         configuredRounds:
-             fromConfiguration ?? int.tryParse(suggestion?.rounds?.trim() ?? ''),
-         roundsSource: fromConfiguration != null
-             ? l10n.matrixSourceConfiguration
-             : l10n.matrixSourceWizard,
-         configuredGroups: int.tryParse(suggestion?.groups?.trim() ?? ''),
-       )..addListener(_onForm);
+      final l10n = AppLocalizations.of(context);
+      _form = DrawFormController(
+        configuredRounds:
+            fromConfiguration ?? int.tryParse(suggestion?.rounds?.trim() ?? ''),
+        roundsSource: fromConfiguration != null
+            ? l10n.matrixSourceConfiguration
+            : l10n.matrixSourceWizard,
+        configuredGroups: int.tryParse(suggestion?.groups?.trim() ?? ''),
+      )..addListener(_onForm);
     }
   }
 
@@ -438,7 +438,7 @@ class _MatrixPageState extends State<MatrixPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(switch (intent) {
-             null => l10n.matrixDrawn,
+            null => l10n.matrixDrawn,
             MatrixIntent.addRounds => l10n.matrixRoundsAdded,
             MatrixIntent.redraw => l10n.matrixRoundsRedrawn,
           }),
@@ -732,9 +732,7 @@ class _Loading extends StatelessWidget {
       child: Column(
         children: [
           const LinearProgressIndicator(),
-          Expanded(
-            child: Center(child: Text(l10n.matrixLoading)),
-          ),
+          Expanded(child: Center(child: Text(l10n.matrixLoading))),
         ],
       ),
     );
@@ -780,10 +778,7 @@ class _Unavailable extends StatelessWidget {
                 l10n.matrixUnavailableTitle,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              Text(
-                l10n.matrixUnavailableBody,
-                textAlign: TextAlign.center,
-              ),
+              Text(l10n.matrixUnavailableBody, textAlign: TextAlign.center),
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh, size: 18),

@@ -46,7 +46,7 @@ class StatusSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             Text(l10n.workspaceStatusTitle, style: theme.textTheme.titleSmall),
+            Text(l10n.workspaceStatusTitle, style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             for (final value in values)
               Padding(

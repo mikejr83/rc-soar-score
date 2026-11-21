@@ -90,7 +90,9 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('delete-landing')));
     await tester.pumpAndSettle();
     expect(find.text(l10n.landingsDeleteConfirmTitle), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, l10n.landingsDeleteConfirm));
+    await tester.tap(
+      find.widgetWithText(FilledButton, l10n.landingsDeleteConfirm),
+    );
     await tester.pumpAndSettle();
 
     final delete = requests.singleWhere((r) => r.method == 'DELETE');
@@ -112,7 +114,9 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('delete-landing')));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, l10n.landingsDeleteConfirm));
+    await tester.tap(
+      find.widgetWithText(FilledButton, l10n.landingsDeleteConfirm),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('the landing table is used'), findsOneWidget);

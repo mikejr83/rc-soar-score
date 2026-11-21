@@ -23,7 +23,10 @@ class WorkspaceFactsDetails extends StatelessWidget {
     return DetailSectionCard(
       title: l10n.workspaceFactsTitle,
       items: [
-        DetailItem(l10n.workspaceFactsDates, ContestList.contestDates(l10n, contest)),
+        DetailItem(
+          l10n.workspaceFactsDates,
+          ContestList.contestDates(l10n, contest),
+        ),
         DetailItem(l10n.workspaceFactsTimezone, contest.timezone),
         DetailItem(l10n.workspaceFactsHost, contest.host),
         DetailItem(l10n.workspaceFactsLocation, location),

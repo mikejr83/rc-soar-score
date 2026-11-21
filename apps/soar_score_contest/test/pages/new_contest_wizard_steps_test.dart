@@ -27,22 +27,31 @@ void main() {
 
     expect(find.byType(WizardStepList), findsOneWidget);
     expect(stepTitle(tester), l10n.wizardStepDetailsCopySource);
-    expect(find.text(l10n.wizardNext(l10n.wizardStepDiscipline)), findsOneWidget);
+    expect(
+      find.text(l10n.wizardNext(l10n.wizardStepDiscipline)),
+      findsOneWidget,
+    );
     // No errors before trying to continue.
     expect(find.byKey(const ValueKey('banner-validation')), findsNothing);
 
     await next(tester);
     expect(stepTitle(tester), l10n.wizardStepDetailsCopySource);
+    expect(find.text(l10n.wizardFieldsNeedAttention(4)), findsOneWidget);
     expect(
-      find.text(l10n.wizardFieldsNeedAttention(4)),
+      find.text(
+        '${l10n.wizardDetailsFieldContestName}: ${l10n.wizardValidationEnterName}',
+      ),
       findsOneWidget,
     );
-    expect(find.text('${l10n.wizardDetailsFieldContestName}: ${l10n.wizardValidationEnterName}'), findsOneWidget);
     // Inline, next to the field.
     expect(find.text(l10n.wizardValidationEnterName), findsOneWidget);
     expect(find.text('Current · needs attention'), findsOneWidget);
 
-    await tester.tap(find.text('${l10n.wizardDetailsFieldContestName}: ${l10n.wizardValidationEnterName}'));
+    await tester.tap(
+      find.text(
+        '${l10n.wizardDetailsFieldContestName}: ${l10n.wizardValidationEnterName}',
+      ),
+    );
     await tester.pump();
     final name = tester.widget<TextField>(
       find.byKey(const ValueKey('contest-name')),
@@ -163,10 +172,7 @@ void main() {
     await tester.tap(find.text(l10n.wizardChangeDisciplineConfirm));
     await tester.pumpAndSettle();
     expect(wizard.store.draft.discipline, WizardDiscipline.f3j);
-    expect(
-      find.text(l10n.wizardDisciplineChanged('F3J')),
-      findsOneWidget,
-    );
+    expect(find.text(l10n.wizardDisciplineChanged('F3J')), findsOneWidget);
   });
 
   testWidgets('changing the discipline keeps the choices it does not own', (
@@ -239,12 +245,20 @@ void main() {
     await tester.pumpAndSettle();
     expect(wizard.store.draft.options, {ParticipantOption.teams});
     expect(find.byKey(const ValueKey('team-pilot-count')), findsOneWidget);
-    expect(find.text('${l10n.wizardColumnTeam} ${l10n.wizardColumnOptional}', findRichText: true), findsOneWidget);
+    expect(
+      find.text(
+        '${l10n.wizardColumnTeam} ${l10n.wizardColumnOptional}',
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
 
     await next(tester);
     expect(stepTitle(tester), l10n.wizardStepParticipantOptions);
     expect(
-      find.text('${l10n.wizardTeamPilotCountLabel}: ${l10n.wizardValidationWholeNumber}'),
+      find.text(
+        '${l10n.wizardTeamPilotCountLabel}: ${l10n.wizardValidationWholeNumber}',
+      ),
       findsOneWidget,
     );
 

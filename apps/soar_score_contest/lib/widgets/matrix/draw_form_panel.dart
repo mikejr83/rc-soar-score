@@ -131,8 +131,7 @@ class DrawFormPanel extends StatelessWidget {
         configured == null
         ? l10n.matrixNoteNoValue
         : l10n.matrixNoteFrom(source, text);
-    String edited(int? configured) =>
-        configured == null
+    String edited(int? configured) => configured == null
         ? l10n.matrixNoteNoValue
         : l10n.matrixNoteEdited(configured);
 
@@ -250,16 +249,16 @@ class DrawFormPanel extends StatelessWidget {
                   children: [
                     Text(
                       plan == null
-                           ? l10n.matrixNoMatrixTitle
-                           : adding
-                           ? l10n.matrixAddTitle
-                           : l10n.matrixRedrawTitle,
-                       style: theme.textTheme.titleMedium,
-                     ),
-                     Text(
-                       plan == null
-                           ? l10n.matrixNoMatrixIntro
-                           : adding
+                          ? l10n.matrixNoMatrixTitle
+                          : adding
+                          ? l10n.matrixAddTitle
+                          : l10n.matrixRedrawTitle,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    Text(
+                      plan == null
+                          ? l10n.matrixNoMatrixIntro
+                          : adding
                           ? l10n.matrixAddIntro(plan.lastRound)
                           : l10n.matrixRedrawIntro(
                               roundSpan(
@@ -330,8 +329,9 @@ class DrawFormPanel extends StatelessWidget {
                                   note: roundsNote,
                                   error: roundsError,
                                   edited: !rounding && controller.roundsEdited,
-                                  resetLabel:
-                                      l10n.matrixResetTo('$configuredRounds'),
+                                  resetLabel: l10n.matrixResetTo(
+                                    '$configuredRounds',
+                                  ),
                                   onReset: () => controller.rounds.text =
                                       '$configuredRounds',
                                   onOpenConfiguration: onOpenConfiguration,
@@ -392,7 +392,7 @@ class DrawFormPanel extends StatelessWidget {
                   intent: intent,
                   busy: busy,
                   blocker: blocker,
-                   reloadReason: conflict ? l10n.matrixActionReload : null,
+                  reloadReason: conflict ? l10n.matrixActionReload : null,
                   onDraw: onDraw,
                   onFix: onFix,
                   progress: progress,

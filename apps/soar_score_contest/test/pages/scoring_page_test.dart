@@ -109,8 +109,12 @@ void main() {
       final rawLabel = tester.getTopLeft(find.text(_l10n.scoreRawLabel).first);
       expect(rawLabel.dy, greaterThan(time.dy));
       // The three score cells fit side by side with their labels.
-      final group = tester.getTopLeft(find.text(_l10n.scoreGroupLabel).first).dx;
-      final penalties = tester.getTopLeft(find.text(_l10n.scorePenaltiesLabel).first).dx;
+      final group = tester
+          .getTopLeft(find.text(_l10n.scoreGroupLabel).first)
+          .dx;
+      final penalties = tester
+          .getTopLeft(find.text(_l10n.scorePenaltiesLabel).first)
+          .dx;
       expect(group, greaterThan(rawLabel.dx + 40));
       expect(penalties, greaterThan(group + 40));
     });
@@ -312,10 +316,7 @@ void main() {
     await tester.pump();
     expect(find.text(_l10n.scoreZeroWhy), findsOneWidget);
     expect(tester.widget<FilledButton>(_save(1, 1)).onPressed, isNull);
-    expect(
-      find.text(_l10n.scoreSaveNeedsZeroConfirm),
-      findsOneWidget,
-    );
+    expect(find.text(_l10n.scoreSaveNeedsZeroConfirm), findsOneWidget);
     await tester.tap(find.byKey(ValueKey('score-confirm-zero-$id')));
     await tester.pump();
     await tester.tap(_save(1, 1));
@@ -1080,7 +1081,10 @@ void main() {
       expect(find.byKey(const ValueKey('landing-follows-tag')), findsOneWidget);
       await tester.enterText(landing(1), '30');
       await tester.pump();
-      expect(find.text(_l10n.scoreLandingSelected('Within 5 m', 30)), findsOneWidget);
+      expect(
+        find.text(_l10n.scoreLandingSelected('Within 5 m', 30)),
+        findsOneWidget,
+      );
       final id = scoringAssignmentId(1, 1).value;
       final chip = tester.widget<ScoreLandingChip>(
         find.byKey(ValueKey('score-landing-$id-within_5m')),
@@ -1141,7 +1145,10 @@ void main() {
       await tester.tap(find.byKey(ValueKey('score-landing-$id-within_10m')));
       await tester.pump();
       expect(tester.widget<TextField>(landing(1)).controller!.text, '10');
-      expect(find.text(_l10n.scoreLandingBand('Within 10 m', 10)), findsOneWidget);
+      expect(
+        find.text(_l10n.scoreLandingBand('Within 10 m', 10)),
+        findsOneWidget,
+      );
     });
 
     testWidgets('the saved landing is the matching table entry', (

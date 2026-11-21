@@ -34,7 +34,10 @@ class ResultStatusHelp extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 12,
               children: [
-                Text(l10n.resultStatusHelpTitle, style: theme.textTheme.titleMedium),
+                Text(
+                  l10n.resultStatusHelpTitle,
+                  style: theme.textTheme.titleMedium,
+                ),
                 for (final (status, text) in definitions)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

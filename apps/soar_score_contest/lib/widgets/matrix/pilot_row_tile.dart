@@ -66,9 +66,7 @@ class PilotRowTile extends StatelessWidget {
                 ? ', ${marker == null ? l10n.matrixRowNoTeam : marker!.name}'
                 : '',
           )
-          ..write(
-            showLane && lane != null ? l10n.matrixRowLane(lane) : '',
-          )
+          ..write(showLane && lane != null ? l10n.matrixRowLane(lane) : '')
           ..write(l10n.matrixRowRoundGroup(round, group))
           ..write(slot.moved ? ', ${l10n.matrixMovedLabel}' : '')
           ..write(selected ? l10n.matrixRowHighlighted : '')

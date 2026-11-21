@@ -141,14 +141,13 @@ class StandingsTable {
   final bool isF3j;
 
   /// The Flight details labels, in line order.
-  List<String> detailLabels(AppLocalizations l10n) =>
-      isF3j
-          ? [l10n.standingsDetailTime, l10n.standingsDetailLanding]
-          : [
-              l10n.standingsDetailTime,
-              l10n.standingsDetailLanding,
-              l10n.standingsDetailHeight,
-            ];
+  List<String> detailLabels(AppLocalizations l10n) => isF3j
+      ? [l10n.standingsDetailTime, l10n.standingsDetailLanding]
+      : [
+          l10n.standingsDetailTime,
+          l10n.standingsDetailLanding,
+          l10n.standingsDetailHeight,
+        ];
 
   /// The lines under a round score: time, landing points, launch height. A
   /// part that was not recorded is `—`, which is not 0.

@@ -120,13 +120,13 @@ class ParticipantCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                 if (selectable) ...[
-                   SizedBox.square(
-                     dimension: 44,
-                     child: cells.checkbox(context),
-                   ),
-                   const SizedBox(width: 8),
-                 ],
+                if (selectable) ...[
+                  SizedBox.square(
+                    dimension: 44,
+                    child: cells.checkbox(context),
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 cells.avatar(context, size: 36),
                 const SizedBox(width: 8),
                 Expanded(

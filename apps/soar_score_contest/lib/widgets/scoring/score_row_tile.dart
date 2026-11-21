@@ -794,7 +794,10 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 4),
-                  Text(words.scoreFlightPenalty(flight), style: theme.textTheme.bodyMedium),
+                  Text(
+                    words.scoreFlightPenalty(flight),
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 ],
               ),
             )
@@ -831,10 +834,10 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 4),
-                      Text(
-                        words.scoreCumulativePenalty(cumulative),
-                        style: theme.textTheme.bodyMedium,
-                      ),
+                    Text(
+                      words.scoreCumulativePenalty(cumulative),
+                      style: theme.textTheme.bodyMedium,
+                    ),
                   ],
                 ),
               ),
@@ -911,11 +914,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       // mistake that blocks the save is added, and only on a row the director
       // has left: the open row lists its problems in the entry band.
       if (dirty && !widget.active && widget.draft.problems.isNotEmpty)
-        (
-          Icons.error,
-          words.scoreFixToSave,
-          scheme.error,
-        ),
+        (Icons.error, words.scoreFixToSave, scheme.error),
       if (widget.findings.isNotEmpty)
         (
           Icons.help_outline,
@@ -1124,9 +1123,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
                 key: const ValueKey('menu-reinstate'),
                 value: 'reinstate',
                 enabled: blocked == null,
-                child: Text(
-                  blocked ?? words.scoreReinstateMenu(round),
-                ),
+                child: Text(blocked ?? words.scoreReinstateMenu(round)),
               ),
             PopupMenuItem<String>(
               enabled: false,

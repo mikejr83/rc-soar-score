@@ -68,15 +68,13 @@ void main() {
     await next(tester);
     expect(stepTitle(tester), l10n.wizardStepDrawOptions);
     expect(
-      find.text(
-        'Groups per round: ${l10n.wizardValidationGroupsMax(5)}',
-      ),
+      find.text('Groups per round: ${l10n.wizardValidationGroupsMax(5)}'),
       findsOneWidget,
     );
   });
 
   testWidgets('team protection raises the minimum groups and rules out a '
-       'seeded draw', (tester) async {
+      'seeded draw', (tester) async {
     final l10n = AppLocalizationsEn();
     final store = await _store();
     await pumpWizard(tester, respond: stepApi, store: store);
@@ -93,17 +91,14 @@ void main() {
 
     await tester.enterText(_field('groups-per-round'), '2');
     await tester.pumpAndSettle();
-    expect(
-      find.text(l10n.wizardValidationGroupsMin(3)),
-      findsOneWidget,
-    );
+    expect(find.text(l10n.wizardValidationGroupsMin(3)), findsOneWidget);
 
     await _tap(tester, find.byKey(const ValueKey('draw-mode-seededManOnMan')));
     expect(store.draft.drawSettings.drawMode, DrawMode.standardManOnMan);
   });
 
   testWidgets('a seeded draw disables team protection and asks for seeded '
-       'rounds', (tester) async {
+      'rounds', (tester) async {
     final l10n = AppLocalizationsEn();
     final store = await _store();
     await pumpWizard(tester, respond: stepApi, store: store);
@@ -122,7 +117,7 @@ void main() {
   });
 
   testWidgets('avoiding back-to-back flights warns about fairness, and about '
-       'small contests', (tester) async {
+      'small contests', (tester) async {
     final l10n = AppLocalizationsEn();
     final store = await _store(teamSize: 0, options: const {});
     await pumpWizard(tester, respond: stepApi, store: store);
@@ -132,10 +127,7 @@ void main() {
     await tester.pumpAndSettle();
     await _tap(tester, find.byKey(const ValueKey('back-to-back')));
     expect(find.text(l10n.wizardBackToBackFairness), findsOneWidget);
-    expect(
-      find.text(l10n.wizardBackToBackTooSmall),
-      findsOneWidget,
-    );
+    expect(find.text(l10n.wizardBackToBackTooSmall), findsOneWidget);
 
     // The warning doesn't block continuing.
     await next(tester);

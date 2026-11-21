@@ -29,8 +29,8 @@ class LandingDetailPane extends StatelessWidget {
   String? lockedReason(AppLocalizations l10n) => view.table.isSystem
       ? l10n.landingsLockedSystem
       : view.inUse
-          ? l10n.landingsLockedInUse
-          : null;
+      ? l10n.landingsLockedInUse
+      : null;
 
   @override
   Widget build(BuildContext context) {
@@ -101,9 +101,7 @@ class LandingDetailPane extends StatelessWidget {
                 children: [
                   const Icon(Icons.lock_outline, size: 20),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(l10n.landingsLockedNote(locked)),
-                  ),
+                  Expanded(child: Text(l10n.landingsLockedNote(locked))),
                 ],
               ),
             ),

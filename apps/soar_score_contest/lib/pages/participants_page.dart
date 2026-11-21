@@ -161,35 +161,35 @@ class _ParticipantsPageState extends State<ParticipantsPage> {
             PageStateView.empty(title: l10n.participantsEmpty),
           );
         }
-          // The first participant is selected until one is chosen (or when the
-          // chosen one is gone).
-          final selected = all.firstWhere(
-            (profile) => profile.id == _selectedId,
-            orElse: () => all.first,
-          );
-          return _withImport(
-            MasterDetail(
-              showDetail: _showDetail,
-              list: (context, wide) => ParticipantListPane(
-                participants: all,
-                search: _search,
-                onSearch: (value) => setState(() => _search = value),
-                selectedId: selected.id,
-                highlight: wide,
-                onSelect: (profile) => setState(() {
-                  _selectedId = profile.id;
-                  _showDetail = true;
-                }),
-              ),
-              detail: (context, wide) => ParticipantDetailPane(
-                profile: selected,
-                onBack: wide ? null : () => setState(() => _showDetail = false),
-                onEdit: () => context.go(participantPath(selected.id.value)),
-                onDelete: () => _delete(selected),
-              ),
+        // The first participant is selected until one is chosen (or when the
+        // chosen one is gone).
+        final selected = all.firstWhere(
+          (profile) => profile.id == _selectedId,
+          orElse: () => all.first,
+        );
+        return _withImport(
+          MasterDetail(
+            showDetail: _showDetail,
+            list: (context, wide) => ParticipantListPane(
+              participants: all,
+              search: _search,
+              onSearch: (value) => setState(() => _search = value),
+              selectedId: selected.id,
+              highlight: wide,
+              onSelect: (profile) => setState(() {
+                _selectedId = profile.id;
+                _showDetail = true;
+              }),
             ),
-          );
-        },
-      );
+            detail: (context, wide) => ParticipantDetailPane(
+              profile: selected,
+              onBack: wide ? null : () => setState(() => _showDetail = false),
+              onEdit: () => context.go(participantPath(selected.id.value)),
+              onDelete: () => _delete(selected),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

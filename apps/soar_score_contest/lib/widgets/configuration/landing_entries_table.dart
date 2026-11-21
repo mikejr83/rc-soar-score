@@ -73,17 +73,17 @@ class LandingEntriesTable extends StatelessWidget {
                   child: Row(
                     children: [
                       Expanded(
-                          child: Text(
-                            keyHeader(l10n, view.table.inputUnit),
-                            style: header,
-                          ),
+                        child: Text(
+                          keyHeader(l10n, view.table.inputUnit),
+                          style: header,
+                        ),
                       ),
                       Expanded(
-                          child: Text(
-                            l10n.landingsPointsHeading,
-                            textAlign: TextAlign.end,
-                            style: header,
-                          ),
+                        child: Text(
+                          l10n.landingsPointsHeading,
+                          textAlign: TextAlign.end,
+                          style: header,
+                        ),
                       ),
                     ],
                   ),

@@ -153,7 +153,9 @@ class _PilotPickerState extends State<PilotPicker> {
             TextButton(
               key: const ValueKey('cards-select-none'),
               onPressed: shown.isEmpty ? null : _deselectShown,
-              child: Text(searching ? l10n.cardsClearShown : l10n.cardsSelectNone),
+              child: Text(
+                searching ? l10n.cardsClearShown : l10n.cardsSelectNone,
+              ),
             ),
             if (teams.isNotEmpty)
               PopupMenuButton<String>(
@@ -165,7 +167,10 @@ class _PilotPickerState extends State<PilotPicker> {
                     PopupMenuItem(value: team, child: Text(team)),
                 ],
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -192,9 +197,7 @@ class _PilotPickerState extends State<PilotPicker> {
                     child: Text(
                       total == 0
                           ? l10n.cardsNoPilotsYet
-                          : l10n.cardsNoPilotMatches(
-                              _search.text.trim(),
-                            ),
+                          : l10n.cardsNoPilotMatches(_search.text.trim()),
                       style: theme.textTheme.bodySmall,
                     ),
                   )

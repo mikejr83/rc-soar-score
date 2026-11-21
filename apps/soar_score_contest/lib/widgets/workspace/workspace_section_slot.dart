@@ -5,19 +5,17 @@ import '../../services/workspace/workspace_section.dart';
 
 /// The label a section announces to assistive technology and shows on its
 /// placeholder.
-String workspaceSectionLabel(
-  AppLocalizations l10n,
-  WorkspaceSection section,
-) => switch (section) {
-  WorkspaceSection.nextStep => l10n.workspaceSectionNextStep,
-  WorkspaceSection.checklist => l10n.workspaceSectionChecklist,
-  WorkspaceSection.invitations => l10n.workspaceSectionInvitations,
-  WorkspaceSection.attention => l10n.workspaceSectionAttention,
-  WorkspaceSection.progress => l10n.workspaceSectionProgress,
-  WorkspaceSection.controls => l10n.workspaceSectionControls,
-  WorkspaceSection.facts => l10n.workspaceSectionFacts,
-  WorkspaceSection.activity => l10n.workspaceSectionActivity,
-};
+String workspaceSectionLabel(AppLocalizations l10n, WorkspaceSection section) =>
+    switch (section) {
+      WorkspaceSection.nextStep => l10n.workspaceSectionNextStep,
+      WorkspaceSection.checklist => l10n.workspaceSectionChecklist,
+      WorkspaceSection.invitations => l10n.workspaceSectionInvitations,
+      WorkspaceSection.attention => l10n.workspaceSectionAttention,
+      WorkspaceSection.progress => l10n.workspaceSectionProgress,
+      WorkspaceSection.controls => l10n.workspaceSectionControls,
+      WorkspaceSection.facts => l10n.workspaceSectionFacts,
+      WorkspaceSection.activity => l10n.workspaceSectionActivity,
+    };
 
 /// A labelled region of the workspace page. The widget ticket that owns a
 /// section replaces [child]; the layout never changes.
@@ -48,7 +46,9 @@ class WorkspaceSectionSlot extends StatelessWidget {
         key: ValueKey('workspace-section-${section.id}'),
         child:
             child ??
-            WorkspacePlaceholderCard(text: l10n.workspaceSectionGoesHere(label)),
+            WorkspacePlaceholderCard(
+              text: l10n.workspaceSectionGoesHere(label),
+            ),
       ),
     );
   }

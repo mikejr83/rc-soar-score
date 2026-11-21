@@ -30,8 +30,9 @@ class SaveConfirmDialog extends StatelessWidget {
         ReadinessSummary.lowerList([for (final c in changes) c.def.label]);
 
     final revision = matrixRevision;
-    final revisionText =
-        revision == null ? '' : l10n.configSaveMatrixRevision(revision);
+    final revisionText = revision == null
+        ? ''
+        : l10n.configSaveMatrixRevision(revision);
 
     Widget item(IconData icon, String head, String text, Color bg, Color fg) =>
         Container(
@@ -79,10 +80,7 @@ class SaveConfirmDialog extends StatelessWidget {
             item(
               Icons.sync_problem,
               l10n.configSaveMatrixHead,
-              l10n.configSaveMatrixText(
-                names(matrix),
-                revisionText,
-              ),
+              l10n.configSaveMatrixText(names(matrix), revisionText),
               scheme.tertiaryContainer,
               scheme.onTertiaryContainer,
             ),

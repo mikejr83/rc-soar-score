@@ -92,12 +92,8 @@ List<Widget> participantBanners({
           '${failedAdd.firstName} ${failedAdd.lastName}',
         ),
         text: c.addNeedsRoom
-            ? l10n
-                .contestParticipantsAddFailedRoom(c.addFailure ?? '')
-                .trim()
-            : l10n
-                .contestParticipantsAddFailedRetry(c.addFailure ?? '')
-                .trim(),
+            ? l10n.contestParticipantsAddFailedRoom(c.addFailure ?? '').trim()
+            : l10n.contestParticipantsAddFailedRetry(c.addFailure ?? '').trim(),
         actionLabel: c.addNeedsRoom
             ? l10n.contestParticipantsOpenMatrix
             : l10n.contestParticipantsTryAgain,

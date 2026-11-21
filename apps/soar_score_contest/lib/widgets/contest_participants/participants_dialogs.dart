@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+
 import '../../l10n/app_localizations.dart';
 
 /// What the director chose when adding a person.
@@ -180,8 +181,8 @@ Future<bool> confirmNonFlying(
             plural ? 'get' : 'gets',
             clears
                 ? plural
-                    ? ' and their classes are cleared'
-                    : ' and their class ($classification) is cleared'
+                      ? ' and their classes are cleared'
+                      : ' and their class ($classification) is cleared'
                 : '',
           ),
           if (inDraw) l10n.contestParticipantsChangeRoleDrawNote,
@@ -227,9 +228,7 @@ Future<bool> confirmRemove(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              l10n.contestParticipantsRemoveBody(contestName),
-            ),
+            Text(l10n.contestParticipantsRemoveBody(contestName)),
             if (inDraw.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(

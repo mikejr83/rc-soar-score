@@ -491,22 +491,22 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
       builder: (dialogContext) {
         final l10n = AppLocalizations.of(dialogContext);
         return Dialog.fullscreen(
-            child: Scaffold(
-              appBar: AppBar(
-                leading: IconButton(
-                  tooltip: l10n.cancelButton,
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                ),
-                title: Text(l10n.contestParticipantsAddConfirm),
+          child: Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                tooltip: l10n.cancelButton,
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(dialogContext).pop(),
               ),
-              body: ParticipantEditorPage(
-                onDone: (profile) => Navigator.of(dialogContext).pop(profile),
-                onCancel: () => Navigator.of(dialogContext).pop(),
-                onSavedAnother: others.add,
-              ),
+              title: Text(l10n.contestParticipantsAddConfirm),
             ),
-          );
+            body: ParticipantEditorPage(
+              onDone: (profile) => Navigator.of(dialogContext).pop(profile),
+              onCancel: () => Navigator.of(dialogContext).pop(),
+              onSavedAnother: others.add,
+            ),
+          ),
+        );
       },
     );
     if (!mounted) return;
@@ -568,9 +568,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     final c = _controller;
     return Scaffold(
       body: c == null
-          ? PageStateView.unavailable(
-              title: l10n.participantNoApi,
-            )
+          ? PageStateView.unavailable(title: l10n.participantNoApi)
           : _body(context, c),
     );
   }
@@ -766,7 +764,10 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
             children: [
               Icon(Icons.group_add, size: 48, color: scheme.onSurfaceVariant),
               const SizedBox(height: 12),
-              Text(l10n.participantsEmptyTitle, style: theme.textTheme.titleLarge),
+              Text(
+                l10n.participantsEmptyTitle,
+                style: theme.textTheme.titleLarge,
+              ),
               const SizedBox(height: 12),
               Text(
                 l10n.participantsEmptyText,
@@ -792,9 +793,9 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
           onRemove: c.canEdit && !c.saving && !c.selectionHasFlights
               ? _removeSelected
               : null,
-           removeReason: c.selectionHasFlights
-               ? l10n.participantBulkSelectionHasFlights
-               : null,
+          removeReason: c.selectionHasFlights
+              ? l10n.participantBulkSelectionHasFlights
+              : null,
           teams: c.options.contains(ParticipantOption.teams) && c.canEdit
               ? c.rules.teams
               : null,

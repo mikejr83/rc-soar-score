@@ -20,14 +20,18 @@ Future<UnsavedChoice> askUnsavedEdits(
       content: Text(
         words.scoreUnsavedBody(
           rows,
-          closingApp ? words.scoreUnsavedActionClose : words.scoreUnsavedActionLeave,
+          closingApp
+              ? words.scoreUnsavedActionClose
+              : words.scoreUnsavedActionLeave,
         ),
       ),
       actions: [
         TextButton(
           key: const ValueKey('unsaved-stay'),
           onPressed: () => Navigator.of(context).pop(UnsavedChoice.stay),
-          child: Text(closingApp ? words.commonKeepOpen : words.scoreUnsavedStay),
+          child: Text(
+            closingApp ? words.commonKeepOpen : words.scoreUnsavedStay,
+          ),
         ),
         TextButton(
           key: const ValueKey('unsaved-discard'),

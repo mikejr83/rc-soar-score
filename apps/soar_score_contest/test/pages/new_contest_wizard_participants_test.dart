@@ -39,7 +39,10 @@ void main() {
     expect(find.byKey(const ValueKey('participants-empty')), findsOneWidget);
 
     await searchAndPick(tester, 'gardner', 'Mike Gardner');
-    expect(find.text(l10n.wizardAddedAsPilotShort('Mike Gardner')), findsOneWidget);
+    expect(
+      find.text(l10n.wizardAddedAsPilotShort('Mike Gardner')),
+      findsOneWidget,
+    );
     expect(store.draft.participants.single.name, 'Mike Gardner');
     expect(store.draft.participants.single.roleName, 'Pilot');
     expect(find.byType(ParticipantsTable), findsOneWidget);
@@ -62,7 +65,7 @@ void main() {
   });
 
   testWidgets('a missing class blocks Next and the summary jumps to it; the '
-       'class is title-cased', (tester) async {
+      'class is title-cased', (tester) async {
     final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(
       participants: [

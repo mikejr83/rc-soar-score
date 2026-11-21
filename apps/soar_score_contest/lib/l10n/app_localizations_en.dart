@@ -4827,6 +4827,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scoreHistoryDirector => 'Director';
 
   @override
+  String scoreHistorySubmittedBy(String who) {
+    return 'Submitted by $who';
+  }
+
+  @override
   String get scoreHistoryConfirmed => 'Confirmed by the director';
 
   @override

@@ -278,15 +278,15 @@ class ScoreEntryPanel extends StatelessWidget {
               ),
               if (settings.restartsAllowed)
                 toggle(
-                    'restart',
-                    words.scoreMotorRestart,
-                    draft.motorRestart,
-                    draft.motorRestartOffReason,
-                    settings.restartsNonDroppable
-                        ? words.scoreMotorRestartNonDroppable
-                        : words.scoreMotorRestartZero,
-                    draft.setMotorRestart,
-                  ),
+                  'restart',
+                  words.scoreMotorRestart,
+                  draft.motorRestart,
+                  draft.motorRestartOffReason,
+                  settings.restartsNonDroppable
+                      ? words.scoreMotorRestartNonDroppable
+                      : words.scoreMotorRestartZero,
+                  draft.setMotorRestart,
+                ),
               toggle(
                 'oob',
                 words.scoreOutOfBounds,
@@ -368,7 +368,9 @@ class ScoreEntryPanel extends StatelessWidget {
                                 ),
                               )
                             : const Icon(Icons.save, size: 20),
-                        label: Text(busy ? words.scoreSaving : words.scoreSaveRow),
+                        label: Text(
+                          busy ? words.scoreSaving : words.scoreSaveRow,
+                        ),
                         style: FilledButton.styleFrom(
                           minimumSize: const Size(0, 48),
                         ),
@@ -382,7 +384,7 @@ class ScoreEntryPanel extends StatelessWidget {
                         onPressed: enabled && (draft.canRevert || _hasSaveError)
                             ? actions.onRevert
                             : null,
-                          child: Text(words.scoreRevert),
+                        child: Text(words.scoreRevert),
                       ),
                     ),
                   ],
@@ -407,9 +409,7 @@ class ScoreEntryPanel extends StatelessWidget {
 
   Widget _zeroConfirm(BuildContext context, bool enabled) {
     final words = AppLocalizations.of(context);
-    final why = draft.isBlank
-        ? words.scoreZeroWhyBlank
-        : words.scoreZeroWhy;
+    final why = draft.isBlank ? words.scoreZeroWhyBlank : words.scoreZeroWhy;
     if (draft.zeroConfirmed) {
       return ScoreInlineNote(
         icon: Icons.check_circle_outline,

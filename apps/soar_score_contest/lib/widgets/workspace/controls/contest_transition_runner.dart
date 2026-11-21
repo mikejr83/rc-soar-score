@@ -37,9 +37,7 @@ Future<Contest?> runTransition(
   final messenger = ScaffoldMessenger.of(context);
   final l10n = AppLocalizations.of(context);
   if (client == null) {
-    messenger.showSnackBar(
-      SnackBar(content: Text(l10n.workspaceNoApiClient)),
-    );
+    messenger.showSnackBar(SnackBar(content: Text(l10n.workspaceNoApiClient)));
     return null;
   }
   final runner = ContestActionRunner(

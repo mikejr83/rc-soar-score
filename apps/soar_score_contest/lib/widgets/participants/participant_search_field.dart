@@ -132,14 +132,14 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
                 constraints: const BoxConstraints(minHeight: 56),
                 onSubmitted: (_) => onSubmit(),
               ),
-           optionsViewBuilder: (context, onSelected, options) => _ResultsMenu(
-             options: options.toList(),
-             selected: widget.selected,
-             header: _searchesRemote
-                 ? l10n.searchHeaderRemote
-                 : l10n.searchHeaderProfiles,
-             onSelected: onSelected,
-           ),
+          optionsViewBuilder: (context, onSelected, options) => _ResultsMenu(
+            options: options.toList(),
+            selected: widget.selected,
+            header: _searchesRemote
+                ? l10n.searchHeaderRemote
+                : l10n.searchHeaderProfiles,
+            onSelected: onSelected,
+          ),
         ),
         const SizedBox(height: 4),
         Padding(
@@ -152,16 +152,16 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
                 color: scheme.onSurfaceVariant,
               ),
               const SizedBox(width: 6),
-               Flexible(
-                 child: Text(
-                   widget.profiles == null
-                       ? l10n.searchLoading
-                       : _sourceText(l10n),
-                   style: theme.textTheme.bodySmall?.copyWith(
-                     color: scheme.onSurfaceVariant,
-                   ),
-                 ),
-               ),
+              Flexible(
+                child: Text(
+                  widget.profiles == null
+                      ? l10n.searchLoading
+                      : _sourceText(l10n),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

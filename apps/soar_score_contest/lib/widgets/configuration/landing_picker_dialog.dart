@@ -101,7 +101,8 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
                               padding: const EdgeInsets.only(top: 12),
                               child: Column(
                                 children: [
-                                  for (final view in widget.tables) _item(l10n, view),
+                                  for (final view in widget.tables)
+                                    _item(l10n, view),
                                 ],
                               ),
                             ),
@@ -199,7 +200,11 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
     );
   }
 
-  Widget _preview(AppLocalizations l10n, ThemeData theme, LandingTableView view) {
+  Widget _preview(
+    AppLocalizations l10n,
+    ThemeData theme,
+    LandingTableView view,
+  ) {
     final scheme = theme.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

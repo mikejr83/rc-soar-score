@@ -48,17 +48,33 @@ abstract final class StandingsKey {
   }
 
   /// "Pilots 1 to 11 · Rounds 1 to 5".
-  static String indicator(AppLocalizations l10n, {required StandingsPageSpec page}) =>
+  static String indicator(
+    AppLocalizations l10n, {
+    required StandingsPageSpec page,
+  }) =>
       l10n.standingsIndicator(
         page.pilotStart + 1,
         page.pilotEnd,
-        roundsText(l10n, page.rounds, penalty: page.penalty && page.rounds.isEmpty),
-      ) + (page.penalty && page.rounds.isNotEmpty ? l10n.standingsIndicatorPenalty : '');
+        roundsText(
+          l10n,
+          page.rounds,
+          penalty: page.penalty && page.rounds.isEmpty,
+        ),
+      ) +
+      (page.penalty && page.rounds.isNotEmpty
+          ? l10n.standingsIndicatorPenalty
+          : '');
 
   /// "Round 5", "Rounds 1 to 5" or "Penalty" for no round columns.
-  static String roundsText(AppLocalizations l10n, List<int> rounds, {bool penalty = false}) {
+  static String roundsText(
+    AppLocalizations l10n,
+    List<int> rounds, {
+    bool penalty = false,
+  }) {
     if (rounds.isEmpty) {
-      return penalty ? l10n.standingsKeyRoundsPenalty : l10n.standingsKeyRoundsNone;
+      return penalty
+          ? l10n.standingsKeyRoundsPenalty
+          : l10n.standingsKeyRoundsNone;
     }
     return rounds.length == 1
         ? l10n.standingsRoundSemantic(rounds.first)

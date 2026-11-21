@@ -228,9 +228,9 @@ class ConfigSaveBar extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                    Text(
-                      l10n.configBarSettingsNeedFixing(errors.length),
-                      style: theme.textTheme.bodyMedium?.copyWith(
+                  Text(
+                    l10n.configBarSettingsNeedFixing(errors.length),
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       color: scheme.onErrorContainer,
                       fontWeight: FontWeight.w500,
                     ),

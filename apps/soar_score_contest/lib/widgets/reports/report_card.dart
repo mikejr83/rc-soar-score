@@ -211,7 +211,9 @@ class _Facts extends StatelessWidget {
       children: [
         fact(
           Icons.scoreboard_outlined,
-          kind.needsScores ? l10n.reportCardNeedsScores : l10n.reportCardNoScoresNeeded,
+          kind.needsScores
+              ? l10n.reportCardNeedsScores
+              : l10n.reportCardNoScoresNeeded,
         ),
         fact(Icons.grid_view, l10n.reportCardNeedsMatrix),
       ],

@@ -22,20 +22,22 @@ Future<bool> showResumeDraftDialog(
   };
   final when = savedAt == null ? null : DirectorTime.of(context)(savedAt);
   final l10n = AppLocalizations.of(context);
-  final whenText = when == null ? '' : ' ($when)';
   final resume = await showDialog<bool>(
     context: context,
     barrierDismissible: false,
     builder: (context) => AlertDialog(
       key: const ValueKey('resume-draft-dialog'),
       icon: const Icon(Icons.edit_note),
-      title: Text(readable ? l10n.wizardContinueDraft : l10n.wizardDiscardDraft),
+      title: Text(
+        readable ? l10n.wizardContinueDraft : l10n.wizardDiscardDraft,
+      ),
       content: SizedBox(
         width: 392,
         child: Text(
           readable
               ? l10n.wizardContinueDraftBody(
-                  when == null ? '' : ' (last saved $when)')
+                  when == null ? '' : ' (last saved $when)',
+                )
               : l10n.wizardDiscardDraftBody(when == null ? '' : ' $when'),
         ),
       ),
@@ -43,7 +45,9 @@ Future<bool> showResumeDraftDialog(
         TextButton(
           key: const ValueKey('resume-draft-fresh'),
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text(readable ? l10n.wizardStartFresh : l10n.wizardDiscardDraftButton),
+          child: Text(
+            readable ? l10n.wizardStartFresh : l10n.wizardDiscardDraftButton,
+          ),
         ),
         if (readable)
           FilledButton(

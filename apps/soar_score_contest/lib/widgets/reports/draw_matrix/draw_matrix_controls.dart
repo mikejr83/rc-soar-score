@@ -112,9 +112,7 @@ List<ReportControlGroup> drawMatrixControls(
             onChanged: (v) => toggle('nat', v),
           ),
           if (!options.additionalAvailable)
-            ReportFieldMessage(
-              text: l10n.matrixAdditionalKept,
-            ),
+            ReportFieldMessage(text: l10n.matrixAdditionalKept),
         ],
       ],
     ),

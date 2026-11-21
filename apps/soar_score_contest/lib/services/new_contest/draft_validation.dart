@@ -61,8 +61,9 @@ abstract final class DraftValidation {
     } else if (end == null) {
       errors[DetailsField.endDate] = l10n.wizardValidationEndDateFormat;
     } else if (start != null && end.isBefore(start)) {
-      errors[DetailsField.endDate] = l10n
-          .wizardValidationEndDateBeforeStart(draft.startDate.trim());
+      errors[DetailsField.endDate] = l10n.wizardValidationEndDateBeforeStart(
+        draft.startDate.trim(),
+      );
     }
     return errors;
   }
@@ -72,10 +73,7 @@ abstract final class DraftValidation {
       draft.discipline == null ? l10n.wizardValidationChooseDiscipline : null;
 
   /// The step 3 error for the pilots counted for the team score, if any.
-  static String? teamPilotCount(
-    ContestDraft draft,
-    AppLocalizations l10n,
-  ) {
+  static String? teamPilotCount(ContestDraft draft, AppLocalizations l10n) {
     if (!draft.has(ParticipantOption.teams)) {
       return null;
     }
@@ -125,6 +123,7 @@ abstract final class DraftValidation {
       final value = int.tryParse(text.trim());
       return value == null || value < 1 ? message : null;
     }
+
     final wholeMsg = l10n.wizardValidationWholeNumber;
 
     final groups = settings.groups != null

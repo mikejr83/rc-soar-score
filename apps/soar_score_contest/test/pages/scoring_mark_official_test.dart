@@ -155,7 +155,9 @@ void main() {
 
     expect(server.promoteRequests, 1);
     expect(
-      find.textContaining('is queued and will be reviewed when this device syncs'),
+      find.textContaining(
+        'is queued and will be reviewed when this device syncs',
+      ),
       findsOneWidget,
     );
     // The row is not official; it says the adoption waits.

@@ -137,11 +137,19 @@ class _ParticipantOptionsStepState extends State<ParticipantOptionsStep> {
       if (draft.has(ParticipantOption.roles))
         (Icons.badge_outlined, l10n.wizardColumnRole, ''),
       if (draft.has(ParticipantOption.classes))
-        (Icons.workspace_premium_outlined, l10n.wizardColumnClass, l10n.wizardColumnRequired),
+        (
+          Icons.workspace_premium_outlined,
+          l10n.wizardColumnClass,
+          l10n.wizardColumnRequired,
+        ),
       if (draft.has(ParticipantOption.teams))
         (Icons.diversity_3, l10n.wizardColumnTeam, l10n.wizardColumnOptional),
       if (draft.has(ParticipantOption.pilotNumbers))
-        (Icons.pin_outlined, l10n.wizardColumnPilotNo, l10n.wizardColumnProvisional),
+        (
+          Icons.pin_outlined,
+          l10n.wizardColumnPilotNo,
+          l10n.wizardColumnProvisional,
+        ),
       if (draft.has(ParticipantOption.models))
         (Icons.flight, l10n.wizardColumnModels, l10n.wizardColumnOptional),
     ];

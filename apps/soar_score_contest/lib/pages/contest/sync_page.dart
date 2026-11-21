@@ -32,9 +32,7 @@ class ContestSyncPage extends StatelessWidget {
         scope: scope,
         builder: (context, sync, summary, syncing) {
           if (!sync.available) {
-            return Center(
-              child: Text(l10n.syncWindowsOnly),
-            );
+            return Center(child: Text(l10n.syncWindowsOnly));
           }
           return ListView(
             padding: const EdgeInsets.all(16),

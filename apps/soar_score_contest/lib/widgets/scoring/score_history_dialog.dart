@@ -125,9 +125,18 @@ class _EntryTile extends StatelessWidget {
       Authority.administrator => words.scoreHistoryAuthorityAdmin,
     };
     final (icon, word) = switch (entry.outcome) {
-      ScoreHistoryOutcome.current => (Icons.verified, words.scoreHistoryCurrent),
-      ScoreHistoryOutcome.superseded => (Icons.history, words.scoreHistoryReplaced),
-      ScoreHistoryOutcome.notAdopted => (Icons.block, words.scoreHistoryNotAdopted),
+      ScoreHistoryOutcome.current => (
+        Icons.verified,
+        words.scoreHistoryCurrent,
+      ),
+      ScoreHistoryOutcome.superseded => (
+        Icons.history,
+        words.scoreHistoryReplaced,
+      ),
+      ScoreHistoryOutcome.notAdopted => (
+        Icons.block,
+        words.scoreHistoryNotAdopted,
+      ),
       ScoreHistoryOutcome.pending => (Icons.inbox, words.scoreHistoryPending),
     };
     final revision = entry.scoreRevision;

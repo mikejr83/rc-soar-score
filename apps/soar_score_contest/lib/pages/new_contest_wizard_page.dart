@@ -231,11 +231,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     final titles = NewContestWizardPage.stepTitles(l10n);
     return [
       for (var n = 1; n <= titles.length; n++)
-        WizardStepEntry(
-          number: n,
-          title: titles[n - 1],
-          status: _status(n),
-        ),
+        WizardStepEntry(number: n, title: titles[n - 1], status: _status(n)),
     ];
   }
 
@@ -413,10 +409,7 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
             Icons.person_remove,
             l10n.wizardTurnOffTeamsNonPilots(nonPilots),
           ),
-          WizardConfirmItem(
-            Icons.grid_view,
-            l10n.wizardTurnOffTeamsGroupSize,
-          ),
+          WizardConfirmItem(Icons.grid_view, l10n.wizardTurnOffTeamsGroupSize),
         ],
         cancelLabel: l10n.wizardKeepTeams,
         confirmLabel: l10n.wizardTurnOffAndRemove,
@@ -672,7 +665,11 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
     final view = View.of(context);
     final direction = Directionality.of(context);
     unawaited(
-      SemanticsService.sendAnnouncement(view, l10n.wizardCreatingAnnouncement, direction),
+      SemanticsService.sendAnnouncement(
+        view,
+        l10n.wizardCreatingAnnouncement,
+        direction,
+      ),
     );
     try {
       if (client == null) {
@@ -696,7 +693,11 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
         _created = contest;
       });
       unawaited(
-        SemanticsService.sendAnnouncement(view, l10n.wizardCreatedAnnouncement, direction),
+        SemanticsService.sendAnnouncement(
+          view,
+          l10n.wizardCreatedAnnouncement,
+          direction,
+        ),
       );
       context.go(contestConfigurationPath(contest.id.value));
     } on Object catch (error) {
@@ -744,33 +745,33 @@ class _NewContestWizardPageState extends State<NewContestWizardPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                           Text(
-                             l10n.wizardStepHeader(_step, titles.length),
-                             style: theme.textTheme.labelSmall?.copyWith(
-                               color: scheme.primary,
-                               fontWeight: FontWeight.w500,
-                               letterSpacing: 0.5,
-                             ),
-                           ),
-                           const SizedBox(height: 4),
-                           Semantics(
-                             header: true,
-                             child: Text(
-                               titles[_step - 1],
-                               key: const ValueKey('wizard-step-title'),
-                               style: theme.textTheme.headlineMedium,
-                             ),
-                           ),
-                           const SizedBox(height: 4),
-                           ConstrainedBox(
-                             constraints: const BoxConstraints(maxWidth: 640),
-                             child: Text(
-                               NewContestWizardPage.stepIntros(l10n)[_step - 1],
-                               style: theme.textTheme.bodyMedium?.copyWith(
-                                 color: scheme.onSurfaceVariant,
-                               ),
-                             ),
-                           ),
+                          Text(
+                            l10n.wizardStepHeader(_step, titles.length),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: scheme.primary,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Semantics(
+                            header: true,
+                            child: Text(
+                              titles[_step - 1],
+                              key: const ValueKey('wizard-step-title'),
+                              style: theme.textTheme.headlineMedium,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 640),
+                            child: Text(
+                              NewContestWizardPage.stepIntros(l10n)[_step - 1],
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
                           for (final banner in _banners()) ...[
                             const SizedBox(height: 20),
                             banner,

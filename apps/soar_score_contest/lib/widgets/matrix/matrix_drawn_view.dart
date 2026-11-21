@@ -165,14 +165,11 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
     final live = selected != null
         ? l10n.matrixLiveSelected(selected.name, _model.rounds.length)
         : filtered != null
-        ? l10n.matrixLiveTeamFilter(
-            filtered.name,
-            teamSizes[_teamFilter] ?? 0,
-          )
+        ? l10n.matrixLiveTeamFilter(filtered.name, teamSizes[_teamFilter] ?? 0)
         : query.trim().isNotEmpty
         ? (matches > 0
-            ? l10n.matrixLiveMatches(matches)
-            : l10n.matrixLiveNoMatches)
+              ? l10n.matrixLiveMatches(matches)
+              : l10n.matrixLiveNoMatches)
         : '';
 
     return LayoutBuilder(

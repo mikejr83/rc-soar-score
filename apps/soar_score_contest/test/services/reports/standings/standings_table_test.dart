@@ -205,14 +205,24 @@ void main() {
 
   group('status', () {
     test('official when the stored standings are final', () {
-      final status = StandingsStatus.of(l10n, facts, options({}), _data(fixture));
+      final status = StandingsStatus.of(
+        l10n,
+        facts,
+        options({}),
+        _data(fixture),
+      );
       expect(status.status, ResultStatus.official);
       expect(status.reason, isNull);
     });
 
     test('preliminary when the stored standings say so', () {
       final prelim = StandingsFixture(preliminary: true);
-      final status = StandingsStatus.of(l10n, facts, options({}), _data(prelim));
+      final status = StandingsStatus.of(
+        l10n,
+        facts,
+        options({}),
+        _data(prelim),
+      );
       expect(status.status, ResultStatus.preliminary);
       expect(status.reason, isNotEmpty);
       expect(status.action?.label, 'Open Scoring');

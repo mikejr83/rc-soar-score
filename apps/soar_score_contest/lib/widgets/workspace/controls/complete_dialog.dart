@@ -22,7 +22,9 @@ Future<bool> confirmComplete(
       return AlertDialog(
         key: const ValueKey('complete-dialog'),
         title: Text(l10n.workspaceCompleteTitle),
-        content: SingleChildScrollView(child: _Body(l10n: l10n, facts: facts)),
+        content: SingleChildScrollView(
+          child: _Body(l10n: l10n, facts: facts),
+        ),
         actions: [
           TextButton(
             key: const ValueKey('complete-dialog-cancel'),

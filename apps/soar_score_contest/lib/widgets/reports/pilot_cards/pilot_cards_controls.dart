@@ -188,17 +188,14 @@ String _choiceHelp(
   AppLocalizations l10n,
   CardsPerPageChoice choice,
   CardSheetDecision decision,
-) =>
-    switch (choice) {
-      CardsPerPageChoice.automatic =>
-        decision.tooMany
-            ? l10n.cardsTooManyRounds
-            : decision.perPage?.count == 4
-            ? l10n.cardsUsingFourPerPage
-            : l10n.cardsUsingTwoPerPage,
-      CardsPerPageChoice.four =>
-        decision.fitsFour
-            ? l10n.cardsQuarterPage
-            : l10n.cardsRowsUnderEight,
-      CardsPerPageChoice.two => l10n.cardsHalfPage,
-    };
+) => switch (choice) {
+  CardsPerPageChoice.automatic =>
+    decision.tooMany
+        ? l10n.cardsTooManyRounds
+        : decision.perPage?.count == 4
+        ? l10n.cardsUsingFourPerPage
+        : l10n.cardsUsingTwoPerPage,
+  CardsPerPageChoice.four =>
+    decision.fitsFour ? l10n.cardsQuarterPage : l10n.cardsRowsUnderEight,
+  CardsPerPageChoice.two => l10n.cardsHalfPage,
+};

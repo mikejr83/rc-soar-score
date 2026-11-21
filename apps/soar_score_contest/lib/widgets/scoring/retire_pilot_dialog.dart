@@ -82,7 +82,10 @@ class _RetireDialogState extends State<_RetireDialog> {
             if (impact.keptScores > 0) ...[
               const SizedBox(height: 8),
               Text(
-                words.scoreRetireKeptScores(impact.keptScores, impact.fromRound),
+                words.scoreRetireKeptScores(
+                  impact.keptScores,
+                  impact.fromRound,
+                ),
               ),
             ],
             if (_error != null) ...[
@@ -106,9 +109,7 @@ class _RetireDialogState extends State<_RetireDialog> {
           key: const ValueKey('retire-confirm'),
           onPressed: _busy ? null : _confirm,
           child: Text(
-            reinstating
-                ? words.scoreReinstateButton
-                : words.scoreRetireButton,
+            reinstating ? words.scoreReinstateButton : words.scoreRetireButton,
           ),
         ),
       ],
