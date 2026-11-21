@@ -380,7 +380,8 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       score: kind == GroupRowKind.noScore || score == null
           ? null
           : ScoreFormat.score(score),
-      zeroReason: row.zeroReason?.toLowerCase(),
+      // A code like out_of_bounds reads as words.
+      zeroReason: row.zeroReason?.toLowerCase().replaceAll('_', ' '),
       isYou: row.isYou,
       reviewPending: row.reviewPending,
     );
