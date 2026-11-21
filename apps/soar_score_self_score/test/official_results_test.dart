@@ -181,6 +181,7 @@ void main() {
   ) async {
     Future<void> pump(GroupResultRow row) => tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: appLocalizationDelegates,
         home: Scaffold(body: GroupResultTile(row: row)),
       ),
     );
@@ -195,10 +196,26 @@ void main() {
       const GroupResultRow(
         name: 'Blake Castillo',
         kind: GroupRowKind.zero,
-        zeroReason: 'out of bounds',
+        zeroReason: 'out_of_bounds',
       ),
     );
     expect(find.text('Zero: out of bounds'), findsOneWidget);
+
+    for (final (code, words) in [
+      ('motor_restart', 'Zero: motor restart'),
+      ('no_altitude_recorded', 'Zero: no altitude recorded'),
+      ('overflight_gt_one_min', 'Zero: overflight over one minute'),
+      ('new_server_code', 'Zero: new server code'),
+    ]) {
+      await pump(
+        GroupResultRow(
+          name: 'Blake Castillo',
+          kind: GroupRowKind.zero,
+          zeroReason: code,
+        ),
+      );
+      expect(find.text(words), findsOneWidget);
+    }
 
     await pump(
       const GroupResultRow(name: 'Blake Castillo', kind: GroupRowKind.noScore),

@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../l10n/app_localizations.dart';
+import '../l10n/zero_reason_label.dart';
 import '../models/group_result_row.dart';
 import 'status_chip.dart';
 
@@ -34,6 +36,14 @@ class GroupResultTile extends StatelessWidget {
 
   final GroupResultRow row;
 
+  static String _zeroLabel(AppLocalizations l10n, String? code) {
+    final reason = zeroReasonLabel(l10n, code);
+    // A recorded zero can have no reason code (confirmed with no flag).
+    return reason == null
+        ? l10n.groupZeroRecorded
+        : l10n.groupZeroWithReason(reason);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -43,10 +53,7 @@ class GroupResultTile extends StatelessWidget {
     final chip = switch (row.kind) {
       GroupRowKind.scored => null,
       GroupRowKind.zero => StatusChip(
-        // A recorded zero can have no reason code (confirmed with no flag).
-        label: row.zeroReason == null
-            ? 'Zero recorded'
-            : 'Zero: ${row.zeroReason}',
+        label: _zeroLabel(AppLocalizations.of(context), row.zeroReason),
         icon: Icons.location_off_outlined,
         style: StatusChipStyle.tonal,
       ),

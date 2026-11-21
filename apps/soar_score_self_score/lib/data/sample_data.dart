@@ -144,7 +144,7 @@ abstract final class SampleData {
       name: 'Ana Lopez',
       pilotNumber: 3,
       kind: GroupRowKind.zero,
-      zeroReason: 'out of bounds',
+      zeroReason: 'out_of_bounds',
       time: '0:00.0',
       score: '0',
     ),

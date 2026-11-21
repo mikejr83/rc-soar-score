@@ -269,4 +269,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get preliminaryNoteReviewHold =>
       'A score under review is held: it stays as entered and is not made official until the review is decided.';
+
+  @override
+  String get groupZeroRecorded => 'Zero recorded';
+
+  @override
+  String groupZeroWithReason(String reason) {
+    return 'Zero: $reason';
+  }
+
+  @override
+  String get zeroReasonOutOfBounds => 'out of bounds';
+
+  @override
+  String get zeroReasonMotorRestart => 'motor restart';
+
+  @override
+  String get zeroReasonNoAltitudeRecorded => 'no altitude recorded';
+
+  @override
+  String get zeroReasonOverflight => 'overflight over one minute';
 }
