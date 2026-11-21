@@ -25,7 +25,7 @@ The public web site: product marketing and information, documentation and help, 
 
 - `src/app/open-source/page.tsx` renders `src/content/licences.json` through `components/open-source/open-source-view.tsx`; `lib/licences.ts` holds the types and helpers. The page has the anchors `#contest-app`, `#self-scoring`, `#server` and `#public-site`; the apps link to them, so keep the ids stable.
 - The JSON is generated, never edited by hand: `scripts/generate-licences.sh` (or `.ps1`) from the repo root, after `dart pub get` and `npm ci`. Overrides for packages with missing metadata are in `scripts/licence-overrides.json`; vendored standard texts in `scripts/licence-texts/`.
-- Staleness check: `src/lib/licences.test.ts` compares fingerprints of `pubspec.lock`, `package-lock.json` and the overrides with the ones stored in the JSON, so `npm test` (and CI) fails when a lockfile changed. Regenerate and commit the JSON in the same PR as the dependency change.
+- The committed JSON is only a snapshot so CI and local runs need no Dart. It may lag the lockfiles; there is no staleness test. `.github/workflows/deploy.yml` regenerates it from the release tag before `vercel build`. To refresh the snapshot, run the generator (optional).
 - Details, copyleft review and open actions: `docs/open-source-licences.md`.
 
 ## Rules
@@ -36,3 +36,13 @@ The public web site: product marketing and information, documentation and help, 
 - **Results behaviour** follows `plan/ui/public-site/*.md`. Rounds, ties (`2=`), dropped rounds, re-flights, the coming-Sunday rule, the 30-day summary and the not-visible re-check are the Flutter pages' rules; change them in `lib/results` with a test.
 - Keep files small and single-purpose; one route per file, shared bits in `components/`.
 - Page copy that is unreviewed carries the "Draft, pending review (#165)" note; keep it until Mike signs the content off.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

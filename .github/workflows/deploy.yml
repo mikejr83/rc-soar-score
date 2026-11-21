@@ -105,6 +105,28 @@ jobs:
         with:
           node-version: 24
 
+      # The /open-source data is regenerated here from the tag's lockfiles
+      # (the committed licences.json is only a snapshot for CI and local runs).
+      # The generator fails when it cannot identify a licence.
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.50.1
+          cache: true
+
+      - name: Install dependencies for the licence generator
+        run: |
+          flutter pub get
+          npm ci --prefix apps/soar_score_web
+
+      - name: Generate licence data
+        run: dart scripts/generate_licences.dart
+
+      - name: Check the generated licence data
+        working-directory: apps/soar_score_web
+        run: npx vitest run src/lib/licences.test.ts src/components/open-source
+
       - name: Install the Vercel CLI
         run: npm install --global vercel@latest
 
