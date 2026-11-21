@@ -8695,4 +8695,208 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchYourProfiles => 'Your profiles';
+
+  @override
+  String get participantEditorCancel => 'Cancel';
+
+  @override
+  String get participantEditorSaveAnother => 'Save and add another';
+
+  @override
+  String get participantEditorSaving => 'Saving…';
+
+  @override
+  String get participantEditorUnsaved => 'Unsaved changes';
+
+  @override
+  String get participantEditorChooseOption =>
+      'Choose an option above to continue.';
+
+  @override
+  String get participantEditorResolveConflict =>
+      'Resolve the conflict above to save.';
+
+  @override
+  String get participantEditorSaveChanges => 'Save changes';
+
+  @override
+  String get participantEditorAddToContest => 'Add to contest';
+
+  @override
+  String get participantEditorAddTitle => 'Add participant';
+
+  @override
+  String get participantEditorNoClub => 'No club';
+
+  @override
+  String get participantEditorReuseDetails =>
+      'Details are reused in every contest you add them to.';
+
+  @override
+  String get participantEditorKeepClubLocation =>
+      'Keep club and location for the next participant';
+
+  @override
+  String get participantEditorKeepClubLocationSub =>
+      'Used by Save and add another, so a row of pilots from one club needs them once.';
+
+  @override
+  String get participantEditorLoadFailedTitle =>
+      'Couldn’t load this participant';
+
+  @override
+  String get participantEditorBackToWizard => 'Back to contest setup';
+
+  @override
+  String get participantEditorSaveFailedTitle => 'Couldn’t save';
+
+  @override
+  String get participantEditorSaveFailedTry => 'Try again';
+
+  @override
+  String get participantEditorSaveFailedKept =>
+      'Nothing was saved and your entries are kept, so it’s safe to try again.';
+
+  @override
+  String participantEditorAddedSnack(String name) {
+    return '$name added';
+  }
+
+  @override
+  String get participantEditorDiscardTitle => 'Discard changes?';
+
+  @override
+  String get participantEditorDiscardClosing =>
+      'Closing the app will lose your unsaved changes to this participant.';
+
+  @override
+  String get participantEditorDiscardBody =>
+      'Your unsaved changes will be lost.';
+
+  @override
+  String get participantEditorKeepEditing => 'Keep editing';
+
+  @override
+  String get participantEditorDiscardAndClose => 'Close and discard';
+
+  @override
+  String get participantEditorDiscard => 'Discard';
+
+  @override
+  String get participantEditorStaleTitle =>
+      'This participant was changed elsewhere since you opened it.';
+
+  @override
+  String participantEditorStaleBody(String fields, String verb) {
+    return '$fields $verb changed elsewhere. Nothing was saved, and your edits are kept.';
+  }
+
+  @override
+  String get participantEditorWas => 'was';
+
+  @override
+  String get participantEditorWere => 'were';
+
+  @override
+  String get participantEditorReloadLatest => 'Reload their version';
+
+  @override
+  String get participantEditorReviewStart => 'Review differences';
+
+  @override
+  String participantEditorKeptTitle(String name) {
+    return 'Club and location kept from $name.';
+  }
+
+  @override
+  String get participantEditorClearKept => 'Clear them';
+
+  @override
+  String get participantEditorLoading => 'Loading participant';
+
+  @override
+  String get participantEditorLoadingText => 'Loading participant…';
+
+  @override
+  String get participantEditorCountry => 'Country';
+
+  @override
+  String get participantEditorDuplicateLead =>
+      'Decision needed. Nothing has been saved.';
+
+  @override
+  String get participantEditorDuplicateTitle =>
+      'Someone with this email already exists';
+
+  @override
+  String get participantEditorDuplicateCompare =>
+      'Compare the two and choose. Matching ignores upper and lower case.';
+
+  @override
+  String get participantEditorDuplicateExisting => 'Existing participant';
+
+  @override
+  String get participantEditorDuplicateEntered => 'What you entered';
+
+  @override
+  String get participantEditorUseExisting => 'Use existing participant';
+
+  @override
+  String participantEditorDuplicateAdds(String name) {
+    return 'Adds $name to this contest. Nothing new is created and what you typed here isn’t saved.';
+  }
+
+  @override
+  String participantEditorDuplicateOpens(String name) {
+    return 'Opens $name. Nothing new is created and what you typed here isn’t saved.';
+  }
+
+  @override
+  String get participantEditorChangeEmail => 'Change the email';
+
+  @override
+  String participantEditorDuplicateNote(String name) {
+    return 'Two participants cannot share an email. Go back and enter a different one for $name.';
+  }
+
+  @override
+  String get participantEditorThisPerson => 'this person';
+
+  @override
+  String participantEditorEmailPrefix(String letter) {
+    return 'Email hidden, starts with $letter';
+  }
+
+  @override
+  String get participantEditorNoName => 'No name';
+
+  @override
+  String get participantEditorNoLocation => 'No location';
+
+  @override
+  String get participantEditorReviewTitle => 'Review differences';
+
+  @override
+  String get participantEditorReviewBody =>
+      'Choose the value to keep for each field that differs. Fields you changed start on your version; fields only they changed start on theirs.';
+
+  @override
+  String get participantEditorReviewReload => 'Reload their version';
+
+  @override
+  String get participantEditorReviewApply => 'Save with these choices';
+
+  @override
+  String get participantEditorReviewYourVersion => 'Your version';
+
+  @override
+  String get participantEditorReviewTheirVersion => 'Their version';
+
+  @override
+  String get participantEditorReviewBlank => '(blank)';
+
+  @override
+  String participantEditorStorage(String storage) {
+    return 'Storage: $storage';
+  }
 }

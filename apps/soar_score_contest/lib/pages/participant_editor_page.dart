@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../l10n/app_localizations.dart';
 import '../widgets/contest_scope.dart';
 import '../api_client_provider.dart';
 import '../app_sync_provider.dart';
@@ -182,7 +183,11 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
       case SaveOutcome.savedAnother:
         final saved = _c.saved!;
         widget.onSavedAnother?.call(saved);
-        _snack('${saved.firstName} ${saved.lastName} added');
+        _snack(
+          AppLocalizations.of(
+            context,
+          ).participantEditorAddedSnack('${saved.firstName} ${saved.lastName}'),
+        );
         if (_scroll.hasClients) {
           _scroll.jumpTo(0);
         }
@@ -218,27 +223,33 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
       return true;
     }
     final closing = UnsavedChangesGuard.closingApp;
+    final words = AppLocalizations.of(context);
     final discard = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          closing ? UnsavedChangesGuard.closeTitle : 'Discard changes?',
+          closing
+              ? UnsavedChangesGuard.closeTitle
+              : words.participantEditorDiscardTitle,
         ),
         content: Text(
           closing
-              ? 'Closing the app will lose your unsaved changes to this '
-                    'participant.'
-              : 'Your unsaved changes will be lost.',
+              ? words.participantEditorDiscardClosing
+              : words.participantEditorDiscardBody,
         ),
         actions: [
           TextButton(
             autofocus: true,
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep editing'),
+            child: Text(words.participantEditorKeepEditing),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(closing ? 'Close and discard' : 'Discard'),
+            child: Text(
+              closing
+                  ? words.participantEditorDiscardAndClose
+                  : words.participantEditorDiscard,
+            ),
           ),
         ],
       ),
@@ -285,14 +296,15 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
         case EditorPhase.loading:
           return const EditorSkeleton();
         case EditorPhase.loadFailed:
+          final words = AppLocalizations.of(context);
           return loadFailedView(
             _c.loadError ?? StateError(_c.error ?? 'Unknown error'),
-            title: 'Couldn’t load this participant',
+            title: words.participantEditorLoadFailedTitle,
             onRetry: _c.load,
             secondary: PageStateAction(
               label: _fromWizard
-                  ? 'Back to contest setup'
-                  : 'Back to participants',
+                  ? words.participantEditorBackToWizard
+                  : words.participantsBackToParticipants,
               onPressed: _leave,
             ),
           );
@@ -348,6 +360,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
     final edit = !c.creating;
     final loaded = c.loaded;
     final attention = c.attention;
+    final words = AppLocalizations.of(context);
     return SingleChildScrollView(
       controller: _scroll,
       padding: phone
@@ -366,10 +379,10 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
                 builder: (context, snapshot) => EditorHeader(
                   title: edit && loaded != null
                       ? '${loaded.firstName} ${loaded.lastName}'
-                      : 'Add participant',
+                      : words.participantEditorAddTitle,
                   subtitle: edit
-                      ? (loaded?.club ?? 'No club')
-                      : 'Details are reused in every contest you add them to.',
+                      ? (loaded?.club ?? words.participantEditorNoClub)
+                      : words.participantEditorReuseDetails,
                   initials: edit && loaded != null
                       ? '${loaded.firstName[0]}${loaded.lastName[0]}'
                             .toUpperCase()
@@ -391,22 +404,19 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
                 EditorBanner(
                   key: const ValueKey('save-error'),
                   icon: Icons.error,
-                  title: 'Couldn’t save',
+                  title: words.participantEditorSaveFailedTitle,
                   body: c.error,
                   kind: PageBannerKind.alert,
                   actions: [
                     EditorBannerAction(
-                      'Try again',
+                      words.participantEditorSaveFailedTry,
                       () async => _react(await _c.retrySave()),
                       icon: Icons.refresh,
                     ),
                   ],
-                  child: const Padding(
-                    padding: EdgeInsets.only(top: 4),
-                    child: Text(
-                      'Nothing was saved and your entries are kept, so it’s '
-                      'safe to try again.',
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(words.participantEditorSaveFailedKept),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -462,13 +472,8 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
                     controlAffinity: ListTileControlAffinity.leading,
                     value: c.keepClubAndLocation,
                     onChanged: (keep) => c.toggleKeep(keep: keep ?? false),
-                    title: const Text(
-                      'Keep club and location for the next participant',
-                    ),
-                    subtitle: const Text(
-                      'Used by Save and add another, so a row of pilots from '
-                      'one club needs them once.',
-                    ),
+                    title: Text(words.participantEditorKeepClubLocation),
+                    subtitle: Text(words.participantEditorKeepClubLocationSub),
                   ),
                 ),
             ],
@@ -479,6 +484,7 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
   }
 
   Widget _staleBanner() {
+    final words = AppLocalizations.of(context);
     final names = _c.staleFields.map((f) => f.label).toList();
     final changed = switch (names.length) {
       0 => null,
@@ -488,21 +494,25 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
     return EditorBanner(
       key: const ValueKey('stale-revision'),
       icon: Icons.sync_problem,
-      title: 'This participant was changed elsewhere since you opened it.',
+      title: words.participantEditorStaleTitle,
       body: changed == null
           ? _c.error
-          : '$changed ${names.length == 1 ? 'was' : 'were'} changed '
-                'elsewhere. Nothing was saved, and your edits are kept.',
+          : words.participantEditorStaleBody(
+              changed,
+              names.length == 1
+                  ? words.participantEditorWas
+                  : words.participantEditorWere,
+            ),
       kind: PageBannerKind.status,
       actions: [
         EditorBannerAction(
-          'Reload their version',
+          words.participantEditorReloadLatest,
           _c.reloadLatest,
           key: const ValueKey('reload-latest'),
         ),
         if (_c.latest != null)
           EditorBannerAction(
-            'Review differences',
+            words.participantEditorReviewStart,
             _c.startReview,
             key: const ValueKey('review-start'),
           ),
@@ -510,36 +520,45 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
     );
   }
 
-  Widget _keptNotice() => EditorBanner(
-    key: const ValueKey('kept-values'),
-    icon: Icons.content_copy,
-    title: 'Club and location kept from ${_c.keptFrom}.',
-    kind: PageBannerKind.success,
-    actions: [EditorBannerAction('Clear them', _c.clearKept)],
-  );
+  Widget _keptNotice() {
+    final words = AppLocalizations.of(context);
+    return EditorBanner(
+      key: const ValueKey('kept-values'),
+      icon: Icons.content_copy,
+      title: words.participantEditorKeptTitle(_c.keptFrom!),
+      kind: PageBannerKind.success,
+      actions: [
+        EditorBannerAction(words.participantEditorClearKept, _c.clearKept),
+      ],
+    );
+  }
 
   Widget _bar(bool stacked) {
     final c = _c;
     final edit = !c.creating;
     final saving = c.phase == EditorPhase.saving;
+    final words = AppLocalizations.of(context);
     // An unchanged stored profile has nothing to save or cancel, so the bar
     // waits for the first change (or any state that needs an answer).
     if (edit && !c.dirty && c.phase == EditorPhase.idle) {
       return const SizedBox.shrink();
     }
     final EditorBarStatus? status = switch (c.phase) {
-      EditorPhase.saving => const EditorBarStatus(Icons.sync, 'Saving…'),
-      EditorPhase.duplicate => const EditorBarStatus(
+      EditorPhase.saving => EditorBarStatus(
+        Icons.sync,
+        words.participantEditorSaving,
+      ),
+      EditorPhase.duplicate => EditorBarStatus(
         Icons.person_search,
-        'Choose an option above to continue.',
+        words.participantEditorChooseOption,
       ),
-      EditorPhase.stale || EditorPhase.review => const EditorBarStatus(
+      EditorPhase.stale || EditorPhase.review => EditorBarStatus(
         Icons.sync_problem,
-        'Resolve the conflict above to save.',
+        words.participantEditorResolveConflict,
       ),
-      _ when edit && c.dirty => const EditorBarStatus(
+      _ when edit && c.dirty => EditorBarStatus(
         Icons.edit,
-        'Unsaved changes',
+        words.participantEditorUnsaved,
       ),
       _ => null,
     };
@@ -548,10 +567,10 @@ class _ParticipantEditorPageState extends State<ParticipantEditorPage> {
       status: status,
       saving: saving,
       saveLabel: edit
-          ? 'Save changes'
+          ? words.participantEditorSaveChanges
           : _fromWizard
-          ? 'Add to contest'
-          : 'Add participant',
+          ? words.participantEditorAddToContest
+          : words.participantEditorAddTitle,
       saveEnabled: !c.blocked && c.dirty,
       onSave: _save,
       onCancel: _cancel,

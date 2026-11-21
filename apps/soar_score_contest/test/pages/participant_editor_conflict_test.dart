@@ -3,10 +3,13 @@ import 'dart:convert';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/participant_test_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 /// A server whose copy of the profile changed elsewhere: the first save is
 /// refused as stale, later reads return [theirs] at a newer revision.
@@ -73,16 +76,13 @@ void main() {
     await enterField(tester, 'last-name', 'King');
     await saveEditor(tester);
 
-    expect(
-      find.text('This participant was changed elsewhere since you opened it.'),
-      findsOneWidget,
-    );
+    expect(find.text(_l10n.participantEditorStaleTitle), findsOneWidget);
     expect(
       find.textContaining('Club and City were changed elsewhere.'),
       findsOneWidget,
     );
     expect(find.text('King'), findsOneWidget);
-    expect(find.text('Resolve the conflict above to save.'), findsOneWidget);
+    expect(find.text(_l10n.participantEditorResolveConflict), findsOneWidget);
     expect(
       tester
           .widget<FilledButton>(find.byKey(const ValueKey('save-participant')))
@@ -115,7 +115,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('review-start')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Review differences'), findsWidgets);
+    expect(find.text(_l10n.participantEditorReviewTitle), findsWidgets);
     Finder picked(String field, String side) => find.descendant(
       of: find.byKey(ValueKey('review-$field-$side')),
       matching: find.byIcon(Icons.radio_button_checked),
