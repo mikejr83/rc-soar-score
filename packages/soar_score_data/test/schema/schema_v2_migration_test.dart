@@ -202,6 +202,30 @@ void main() => forEachBackend((backend) {
             final oldContest = contest(name: 'Preserved contest');
             await Repository(old).contestRepository
                 .save(oldContest, metadata: metadata());
+            // Two pending changes of one entity written before the fix, with
+            // the timestamps Dart wrote: the earlier one reads ...00.584Z and
+            // sorts after ...00.584005Z as text. Raw rows, so the current
+            // write mapper cannot hide the legacy form.
+            for (final (name, time, revision) in [
+              ('legacy-a', '2026-05-01T12:00:00.584Z', 1),
+              ('legacy-b', '2026-05-01T12:00:00.584005Z', 2),
+            ]) {
+              await old.customStatement(
+                'INSERT INTO mutation_records (id, contest_id, '
+                'owner_account_id, sequence, entity_type, entity_id, '
+                'base_revision, client_mutation_id, actor_id, authority, '
+                'source_installation_id, source_device, client_time, '
+                'server_acceptance_time, server_rejection_time, payload, '
+                'outcome, reason_code, error_message, '
+                'depends_on_mutation_id) '
+                "SELECT '${core.Id.create()}', contest_id, owner_account_id, "
+                "NULL, entity_type, entity_id, $revision, '$name', actor_id, "
+                "authority, source_installation_id, source_device, '$time', "
+                'NULL, NULL, payload, \'Pending\', NULL, NULL, NULL '
+                "FROM mutation_records WHERE contest_id = '${oldContest.id}' "
+                'LIMIT 1',
+              );
+            }
             final before =
                 (await old
                         .customSelect(
@@ -320,6 +344,17 @@ void main() => forEachBackend((backend) {
                       .getSingle())
                   .read<int>('n'),
               0,
+            );
+            // The legacy timestamps read in time order after the upgrade.
+            final queued = await DriftSyncStore(upgraded)
+                .pendingMutations(core.ContestScopeKey(oldContest.id));
+            expect(
+              [
+                for (final m in queued)
+                  if (m.clientMutationId.startsWith('legacy-'))
+                    m.clientMutationId,
+              ],
+              ['legacy-a', 'legacy-b'],
             );
             final scoresAfter = await upgraded
                 .customSelect('SELECT * FROM official_scores ORDER BY id')

@@ -330,5 +330,34 @@
   "preliminaryNoteReviewHold": "A score under review is held: it stays as entered and is not made official until the review is decided.",
   "@preliminaryNoteReviewHold": {
     "description": "Added to the preliminary note when a review is open, or may be opened."
+  },
+  "groupZeroRecorded": "Zero recorded",
+  "@groupZeroRecorded": {
+    "description": "Chip on a group results row whose flight scored zero with no reason code."
+  },
+  "groupZeroWithReason": "Zero: {reason}",
+  "@groupZeroWithReason": {
+    "description": "Chip on a group results row whose flight scored zero. The reason is a label such as out of bounds.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "zeroReasonOutOfBounds": "out of bounds",
+  "@zeroReasonOutOfBounds": {
+    "description": "Zero reason: the flight left the field boundary. Follows 'Zero: '."
+  },
+  "zeroReasonMotorRestart": "motor restart",
+  "@zeroReasonMotorRestart": {
+    "description": "Zero reason: the motor was restarted. Follows 'Zero: '."
+  },
+  "zeroReasonNoAltitudeRecorded": "no altitude recorded",
+  "@zeroReasonNoAltitudeRecorded": {
+    "description": "Zero reason: no launch altitude was recorded. Follows 'Zero: '."
+  },
+  "zeroReasonOverflight": "overflight over one minute",
+  "@zeroReasonOverflight": {
+    "description": "Zero reason: the flight overran the window by more than a minute. Follows 'Zero: '."
   }
 }

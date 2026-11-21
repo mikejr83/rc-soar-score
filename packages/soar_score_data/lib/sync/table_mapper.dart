@@ -235,8 +235,28 @@ class TableMapper {
           ),
           final num value when columns[name]!.type == DriftSqlType.double =>
             Variable<double>(value.toDouble()),
+          final String value when _sortsAsText(name) => Variable<String>(
+            sortableTimestamp(value),
+          ),
           final value => Variable<Object>(value),
         },
     ];
   }
+
+  /// Whether the database orders or compares [column] as text.
+  bool _sortsAsText(String column) =>
+      _name == 'mutation_records' && column == 'client_time';
+}
+
+/// [timestamp] (a UTC ISO 8601 string) with a six-digit fraction, so that
+/// text order is time order. Dart writes `...16.584Z` for a zero microsecond
+/// part and `...16.584005Z` otherwise, and as text the earlier instant sorts
+/// last. A mutation's changes of one entity are sent in this order, so a
+/// change swapped with its predecessor is rejected as `stale_base`.
+String sortableTimestamp(String timestamp) {
+  final match = RegExp(r'^(.*T\d\d:\d\d:\d\d)(?:\.(\d+))?Z$')
+      .firstMatch(timestamp);
+  if (match == null) return timestamp;
+  final fraction = (match.group(2) ?? '').padRight(6, '0');
+  return '${match.group(1)}.${fraction.substring(0, 6)}Z';
 }

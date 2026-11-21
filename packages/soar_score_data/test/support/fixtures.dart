@@ -139,11 +139,12 @@ class Installation {
 
 var _requests = 0;
 
-core.MutationMetadata metadata({String? requestId}) => core.MutationMetadata(
-  clientMutationId: requestId ?? 'request-${_requests++}',
-  authority: core.Authority.director,
-  clientTime: DateTime.utc(2026, 5, 1, 11),
-);
+core.MutationMetadata metadata({String? requestId, DateTime? clientTime}) =>
+    core.MutationMetadata(
+      clientMutationId: requestId ?? 'request-${_requests++}',
+      authority: core.Authority.director,
+      clientTime: clientTime ?? DateTime.utc(2026, 5, 1, 11),
+    );
 
 core.Contest contest({
   String name = 'Spring Meet',

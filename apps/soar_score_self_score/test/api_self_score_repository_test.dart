@@ -433,14 +433,14 @@ void main() {
     expect(group.rows[2].kind, GroupRowKind.retired);
   });
 
-  test('a snake_case zero reason reads as words', () async {
+  test('a zero reason keeps its code for the screen to label', () async {
     final body = jsonDecode(_fixture('group_results')) as Map<String, dynamic>;
     for (final row in (body['rows'] as List).cast<Map<String, dynamic>>()) {
       if (row['zero_reason'] != null) row['zero_reason'] = 'out_of_bounds';
     }
     final group = await _repository((_) => _json(jsonEncode(body)))
         .groupResults('c', 'p', 1);
-    expect(group.rows[1].zeroReason, 'out of bounds');
+    expect(group.rows[1].zeroReason, 'out_of_bounds');
   });
 
   test(

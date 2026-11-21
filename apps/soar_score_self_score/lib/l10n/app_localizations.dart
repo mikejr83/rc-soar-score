@@ -526,6 +526,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A score under review is held: it stays as entered and is not made official until the review is decided.'**
   String get preliminaryNoteReviewHold;
+
+  /// Chip on a group results row whose flight scored zero with no reason code.
+  ///
+  /// In en, this message translates to:
+  /// **'Zero recorded'**
+  String get groupZeroRecorded;
+
+  /// Chip on a group results row whose flight scored zero. The reason is a label such as out of bounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Zero: {reason}'**
+  String groupZeroWithReason(String reason);
+
+  /// Zero reason: the flight left the field boundary. Follows 'Zero: '.
+  ///
+  /// In en, this message translates to:
+  /// **'out of bounds'**
+  String get zeroReasonOutOfBounds;
+
+  /// Zero reason: the motor was restarted. Follows 'Zero: '.
+  ///
+  /// In en, this message translates to:
+  /// **'motor restart'**
+  String get zeroReasonMotorRestart;
+
+  /// Zero reason: no launch altitude was recorded. Follows 'Zero: '.
+  ///
+  /// In en, this message translates to:
+  /// **'no altitude recorded'**
+  String get zeroReasonNoAltitudeRecorded;
+
+  /// Zero reason: the flight overran the window by more than a minute. Follows 'Zero: '.
+  ///
+  /// In en, this message translates to:
+  /// **'overflight over one minute'**
+  String get zeroReasonOverflight;
 }
 
 class _AppLocalizationsDelegate

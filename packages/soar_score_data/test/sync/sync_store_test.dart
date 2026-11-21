@@ -41,6 +41,26 @@ void _tests(Backend backend) {
       },
     );
 
+    test('keeps the order of changes within one millisecond', () async {
+      // Dart writes ...00.584Z for a zero microsecond part and ...00.584005Z
+      // otherwise; as plain text the earlier instant would sort last.
+      final first = DateTime.utc(2026, 5, 1, 12, 0, 0, 584);
+      final second = DateTime.utc(2026, 5, 1, 12, 0, 0, 584, 5);
+      final saved = await inst.unitOfWork.run(
+        (c) => c.save(a, metadata: metadata(clientTime: first)),
+      );
+      await inst.unitOfWork.run(
+        (c) => c.save(saved, metadata: metadata(clientTime: second)),
+      );
+      final pending = await inst.syncStore.pendingMutations(
+        core.ContestScopeKey(a.id),
+      );
+      expect(pending.map((m) => m.clientTime).toList().reversed.take(2), [
+        second,
+        first,
+      ]);
+    });
+
     test('records an accepted outcome with its sequence', () async {
       final scope = core.ContestScopeKey(a.id);
       final mutation = (await inst.syncStore.pendingMutations(scope)).single;
