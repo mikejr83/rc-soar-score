@@ -18,6 +18,7 @@ class ScoringContextStrip extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final colors = MatrixColors.of(context);
+    final words = AppLocalizations.of(context);
     final data = controller.data!;
     final round = controller.currentRound;
     // A retired pilot's unscored flight is not missing, so it is not counted.
@@ -30,11 +31,11 @@ class ScoringContextStrip extends StatelessWidget {
         ? CompletenessState.empty
         : data.roundCompleteness(round).state;
     final roundText = switch (roundState) {
-      CompletenessState.empty => 'Round not flown',
-      CompletenessState.partial => 'Round in progress',
+      CompletenessState.empty => words.scoreRoundNotFlown,
+      CompletenessState.partial => words.scoreRoundInProgress,
       CompletenessState.entered ||
       CompletenessState.official ||
-      CompletenessState.locked => 'Round scored',
+      CompletenessState.locked => words.scoreRoundScored,
     };
     final roundIcon = switch (roundState) {
       CompletenessState.empty => Icons.radio_button_unchecked,
@@ -71,22 +72,24 @@ class ScoringContextStrip extends StatelessWidget {
             else
               StatusChip(
                 icon: Icons.lock_open,
-                label: 'Open for entry',
+                label: words.scoreOpenForEntry,
                 foreground: scheme.onSurface,
               ),
             if (dirty > 0)
               StatusChip(
                 icon: Icons.edit_note,
-                label: '$dirty unsaved ${dirty == 1 ? 'row' : 'rows'}',
+                label: words.scoreUnsavedRows(dirty),
                 background: scheme.tertiaryContainer,
                 foreground: scheme.onTertiaryContainer,
               ),
             Padding(
               padding: const EdgeInsets.only(left: 4),
               child: Text(
-                AppLocalizations.of(
-                  context,
-                ).scoringEnteredOfficialCount(entered, rows.length, official),
+                words.scoringEnteredOfficialCount(
+                  entered,
+                  rows.length,
+                  official,
+                ),
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                   fontFeatures: const [FontFeature.tabularFigures()],

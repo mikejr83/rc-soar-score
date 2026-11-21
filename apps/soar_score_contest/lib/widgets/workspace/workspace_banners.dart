@@ -44,6 +44,7 @@ class WorkspaceBanners extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final copyTime = localCopyTime;
     final change = staleChange;
     final imported = importNote;
@@ -56,9 +57,8 @@ class WorkspaceBanners extends StatelessWidget {
             key: const ValueKey('workspace-banner-stale'),
             kind: PageBannerKind.alert,
             icon: Icons.sync_problem,
-            text:
-                "Your change to $change wasn't applied. This page is out of date.",
-            actionLabel: 'Refresh',
+            text: l10n.workspaceBannerStaleChange(change),
+            actionLabel: l10n.workspaceBannerStaleRefresh,
             onAction: onRefresh,
           ),
         if (copyTime != null)
@@ -66,12 +66,8 @@ class WorkspaceBanners extends StatelessWidget {
             key: const ValueKey('workspace-banner-unavailable'),
             kind: PageBannerKind.alert,
             icon: Icons.cloud_off,
-            text:
-                "Can't reach the Soar Score server. Showing this device's copy "
-                'from $copyTime. Scoring still works here and will sync; '
-                'publishing, visibility and delisting are off until the '
-                'server is back.',
-            actionLabel: 'Try again',
+            text: l10n.workspaceBannerUnreachable(copyTime),
+            actionLabel: l10n.workspaceBannerTryAgain,
             onAction: onRetry,
           ),
         if (imported != null) _importedBanner(context, imported),
@@ -81,11 +77,8 @@ class WorkspaceBanners extends StatelessWidget {
             kind: PageBannerKind.status,
             icon: Icons.wifi_off,
             text: keepsLocalData
-                ? "Offline. Scoring and the other controls keep working on "
-                      "this device and sync when you're back. Publishing, "
-                      'visibility and delisting need a connection.'
-                : "Offline. Changes can't be saved until you're back online; "
-                      'what is on screen may be out of date.',
+                ? l10n.workspaceBannerOfflineLocal
+                : l10n.workspaceBannerOfflineNoLocal,
           ),
       ],
     );

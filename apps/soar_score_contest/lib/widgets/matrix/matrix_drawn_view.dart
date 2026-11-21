@@ -163,13 +163,13 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
               .firstOrNull;
     final filtered = _teamFilter == null ? null : data.markers.of(_teamFilter);
     final live = selected != null
-        ? '${selected.name} highlighted in ${_model.rounds.length} rounds. '
-              'Opponent panel open.'
+        ? l10n.matrixLiveSelected(selected.name, _model.rounds.length)
         : filtered != null
-        ? 'Showing ${filtered.name} only: ${teamSizes[_teamFilter] ?? 0} '
-              'pilots in each round.'
+        ? l10n.matrixLiveTeamFilter(filtered.name, teamSizes[_teamFilter] ?? 0)
         : query.trim().isNotEmpty
-        ? (matches > 0 ? '$matches pilots match.' : 'No pilot matches.')
+        ? (matches > 0
+              ? l10n.matrixLiveMatches(matches)
+              : l10n.matrixLiveNoMatches)
         : '';
 
     return LayoutBuilder(
@@ -224,7 +224,7 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
                             MatrixBanner(
                               kind: MatrixBannerKind.warning,
                               icon: Icons.info,
-                              title: 'Configuration changed since this draw',
+                              title: l10n.matrixConfigChangedBanner,
                               body: redrawBlock == null
                                   ? l10n.matrixDriftBanner(drift.join(' '))
                                   : l10n.matrixDriftBannerBlocked(
@@ -240,7 +240,7 @@ class _MatrixDrawnViewState extends State<MatrixDrawnView> {
                                     key: const ValueKey('banner-redraw'),
                                   ),
                                 PageBannerAction(
-                                  'Open Configuration',
+                                  l10n.matrixOpenConfiguration,
                                   widget.onOpenConfiguration,
                                   emphasis: PageBannerEmphasis.outlined,
                                 ),

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../api_error_text.dart';
 
 /// Asks for a role name and hands it to [onSubmit] (adding or renaming).
@@ -56,7 +57,7 @@ class _RoleNameDialogState extends State<_RoleNameDialog> {
   Future<void> _submit() async {
     final name = _controller.text.trim();
     if (name.isEmpty) {
-      setState(() => _error = 'Enter a name for the role.');
+      setState(() => _error = AppLocalizations.of(context).rolesNameError);
       return;
     }
     setState(() {
@@ -79,27 +80,33 @@ class _RoleNameDialogState extends State<_RoleNameDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-    title: Text(widget.title),
-    content: TextField(
-      key: const ValueKey('role-name-field'),
-      controller: _controller,
-      autofocus: true,
-      enabled: !_saving,
-      textInputAction: TextInputAction.done,
-      decoration: InputDecoration(labelText: 'Role name', errorText: _error),
-      onSubmitted: (_) => _submit(),
-    ),
-    actions: [
-      TextButton(
-        onPressed: _saving ? null : () => Navigator.of(context).pop(false),
-        child: const Text('Cancel'),
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(widget.title),
+      content: TextField(
+        key: const ValueKey('role-name-field'),
+        controller: _controller,
+        autofocus: true,
+        enabled: !_saving,
+        textInputAction: TextInputAction.done,
+        decoration: InputDecoration(
+          labelText: l10n.rolesNameLabel,
+          errorText: _error,
+        ),
+        onSubmitted: (_) => _submit(),
       ),
-      FilledButton(
-        key: const ValueKey('role-name-confirm'),
-        onPressed: _saving ? null : _submit,
-        child: Text(widget.confirmLabel),
-      ),
-    ],
-  );
+      actions: [
+        TextButton(
+          onPressed: _saving ? null : () => Navigator.of(context).pop(false),
+          child: Text(l10n.wizardCancel),
+        ),
+        FilledButton(
+          key: const ValueKey('role-name-confirm'),
+          onPressed: _saving ? null : _submit,
+          child: Text(widget.confirmLabel),
+        ),
+      ],
+    );
+  }
 }

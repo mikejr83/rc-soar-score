@@ -1,29 +1,28 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
 import 'paper_style.dart';
 
 /// The viewer's loading state: a grey page-shaped skeleton with a progress bar
 /// on the sheet backdrop.
 class ViewerLoading extends StatelessWidget {
-  const ViewerLoading({
-    super.key,
-    required this.pageAspect,
-    this.label = 'Loading contest data…',
-  });
+  const ViewerLoading({super.key, required this.pageAspect, this.label});
 
   /// Page width over height.
   final double pageAspect;
 
   /// What is being waited for.
-  final String label;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final text = label ?? l10n.viewerLoadingLabel;
     return ColoredBox(
       color: PaperStyle.backdrop(theme.brightness),
       child: Semantics(
-        label: label,
+        label: text,
         container: true,
         child: Column(
           key: const ValueKey('viewer-loading'),
@@ -48,7 +47,7 @@ class ViewerLoading extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Text(label),
+                    Text(text),
                   ],
                 ),
               ),

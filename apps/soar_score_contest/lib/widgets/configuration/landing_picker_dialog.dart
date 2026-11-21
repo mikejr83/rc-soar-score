@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'choice_card.dart';
@@ -48,6 +49,7 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final scheme = theme.colorScheme;
     final view = _pickedView;
     return Dialog(
@@ -64,13 +66,12 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Choose a landing table',
+                    l10n.landingPickerTitle,
                     style: theme.textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Any table works for any discipline. Check the unit matches '
-                    'how your scorers measure.',
+                    l10n.landingPickerNote,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
@@ -100,7 +101,8 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
                               padding: const EdgeInsets.only(top: 12),
                               child: Column(
                                 children: [
-                                  for (final view in widget.tables) _item(view),
+                                  for (final view in widget.tables)
+                                    _item(l10n, view),
                                 ],
                               ),
                             ),
@@ -114,7 +116,7 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
                           minWidth: 260,
                           maxWidth: 420,
                         ),
-                        child: _preview(theme, view),
+                        child: _preview(l10n, theme, view),
                       ),
                   ],
                 ),
@@ -132,21 +134,21 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
                   TextButton.icon(
                     onPressed: widget.onCreateTable,
                     icon: const Icon(Icons.add),
-                    label: const Text('Create a table in Landings'),
+                    label: Text(l10n.landingPickerCreateTable),
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
+                        child: Text(l10n.cancelButton),
                       ),
                       const SizedBox(width: 8),
                       FilledButton(
                         onPressed: _picked == null
                             ? null
                             : () => Navigator.of(context).pop(_picked),
-                        child: const Text('Use this table'),
+                        child: Text(l10n.landingPickerUse),
                       ),
                     ],
                   ),
@@ -159,7 +161,7 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
     );
   }
 
-  Widget _item(LandingTableView view) {
+  Widget _item(AppLocalizations l10n, LandingTableView view) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final selected = view.table.id == _picked;
@@ -180,21 +182,29 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
               if (view.table.id == widget.defaultTableId)
                 ConfigChip(
                   icon: Icons.star_outline,
-                  text: 'Profile default',
+                  text: l10n.landingPickerProfileDefault,
                   background: scheme.secondaryContainer,
                   foreground: scheme.onSecondaryContainer,
                 ),
               if (view.table.id == widget.current)
-                ConfigChip.neutral(context, icon: Icons.check, text: 'Current'),
+                ConfigChip.neutral(
+                  context,
+                  icon: Icons.check,
+                  text: l10n.landingPickerCurrent,
+                ),
             ],
           ),
-          subtitle: Text(LandingEntriesTable.summary(view)),
+          subtitle: Text(LandingEntriesTable.summary(l10n, view)),
         ),
       ),
     );
   }
 
-  Widget _preview(ThemeData theme, LandingTableView view) {
+  Widget _preview(
+    AppLocalizations l10n,
+    ThemeData theme,
+    LandingTableView view,
+  ) {
     final scheme = theme.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,7 +219,7 @@ class _LandingPickerDialogState extends State<LandingPickerDialog> {
         const SizedBox(height: 8),
         Text(view.table.name, style: theme.textTheme.titleMedium),
         Text(
-          LandingEntriesTable.summary(view),
+          LandingEntriesTable.summary(l10n, view),
           style: theme.textTheme.bodyMedium?.copyWith(
             color: scheme.onSurfaceVariant,
           ),

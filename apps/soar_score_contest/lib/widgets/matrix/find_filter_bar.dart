@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/matrix/team_marker.dart';
 import 'matrix_colors.dart';
 import 'team_badge.dart';
@@ -37,6 +38,7 @@ class FindFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final colors = MatrixColors.of(context);
@@ -60,14 +62,14 @@ class FindFilterBar extends StatelessWidget {
                   key: const ValueKey('find-pilot'),
                   controller: search,
                   hintText: showNumbers
-                      ? 'Find pilot by name or number'
-                      : 'Find pilot by name',
+                      ? l10n.matrixFindNameOrNumber
+                      : l10n.matrixFindName,
                   elevation: const WidgetStatePropertyAll(0),
                   leading: const Icon(Icons.search),
                   trailing: [
                     if (query.isNotEmpty)
                       IconButton(
-                        tooltip: 'Clear search',
+                        tooltip: l10n.matrixClearSearch,
                         icon: const Icon(Icons.close, size: 20),
                         onPressed: () {
                           search.clear();
@@ -98,9 +100,12 @@ class FindFilterBar extends StatelessWidget {
                       Text(
                         key: const ValueKey('search-result'),
                         matches > 0
-                            ? '$matches pilot${matches == 1 ? '' : 's'} match'
-                                  '${matches == 1 ? 'es' : ''}'
-                            : 'No pilot matches “$query”',
+                            ? l10n.matrixPilotsMatch(
+                                matches,
+                                matches == 1 ? '' : 's',
+                                matches == 1 ? 'es' : '',
+                              )
+                            : l10n.matrixNoPilotMatches(query),
                         style: TextStyle(
                           color: matches > 0 ? null : scheme.error,
                         ),
@@ -113,7 +118,7 @@ class FindFilterBar extends StatelessWidget {
                     key: const ValueKey('jump-to-first'),
                     onPressed: onJump,
                     icon: const Icon(Icons.my_location, size: 16),
-                    label: const Text('Jump to first'),
+                    label: Text(l10n.matrixJumpFirst),
                   ),
               ],
             ],
@@ -129,7 +134,7 @@ class FindFilterBar extends StatelessWidget {
                   Icons.check,
                   color: teamFilter == null ? null : Colors.transparent,
                 ),
-                child: const Text('All teams'),
+                child: Text(l10n.matrixAllTeams),
               ),
               for (final (id, marker) in markers.ordered)
                 MenuItemButton(
@@ -150,12 +155,9 @@ class FindFilterBar extends StatelessWidget {
                   ),
                 ),
               if (markers.ordered.length > TeamMarker.paletteSize)
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
-                  child: Text(
-                    'Teams 13 and up use outlined markers. Their letters stay '
-                    'unique.',
-                  ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                  child: Text(l10n.matrixTeamsOutlinedNote),
                 ),
             ],
             builder: (context, menu, _) => Row(
@@ -177,13 +179,15 @@ class FindFilterBar extends StatelessWidget {
                     filtered == null ? Icons.filter_list : Icons.check,
                   ),
                   label: Text(
-                    filtered == null ? 'All teams' : 'Team: ${filtered.name}',
+                    filtered == null
+                        ? l10n.matrixAllTeams
+                        : l10n.matrixTeamFilterLabel(filtered.name),
                   ),
                 ),
                 if (filtered != null)
                   IconButton(
                     key: const ValueKey('clear-team'),
-                    tooltip: 'Clear team filter',
+                    tooltip: l10n.matrixClearTeamFilter,
                     icon: const Icon(Icons.close, size: 18),
                     onPressed: () => onTeam(null),
                   ),

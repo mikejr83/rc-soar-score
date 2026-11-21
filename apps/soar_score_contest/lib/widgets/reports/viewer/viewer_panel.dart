@@ -2,6 +2,7 @@ import 'dart:ui' show PlatformDispatcher;
 
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/reports/viewer/page_setup.dart';
 import '../../../services/reports/viewer/print_page_range.dart';
 import 'report_definition.dart';
@@ -48,6 +49,7 @@ class ViewerPanelGroups extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final all = [
       for (var i = 0; i < groups.length; i++)
         _Group(
@@ -57,10 +59,10 @@ class ViewerPanelGroups extends StatelessWidget {
         ),
       _Group(
         number: groups.length + 1,
-        title: 'Page',
+        title: l10n.viewerPageGroup,
         children: [
           _Segments<PaperSize>(
-            label: 'Paper',
+            label: l10n.viewerPaper,
             values: PaperSize.values,
             selected: setup.paper,
             text: (paper) => paper.label,
@@ -72,12 +74,12 @@ class ViewerPanelGroups extends StatelessWidget {
           ),
           if (showOrientation)
             _Segments<PageOrientation>(
-              label: 'Orientation',
+              label: l10n.viewerOrientation,
               values: PageOrientation.values,
               selected: setup.orientation,
               text: (orientation) => orientation.label,
               onChanged: onOrientation,
-              help: 'This report’s default is ${defaultOrientation.label}.',
+              help: l10n.viewerOrientationDefault(defaultOrientation.label),
             ),
           if (pageCount > 0 && onPrintPages != null)
             _PrintPagesField(
@@ -90,10 +92,8 @@ class ViewerPanelGroups extends StatelessWidget {
             value: preview,
             onChanged: onPreview,
             contentPadding: EdgeInsets.zero,
-            title: const Text('Print preview'),
-            subtitle: const Text(
-              'Hide screen-only marks and page-break labels',
-            ),
+            title: Text(l10n.viewerPrintPreview),
+            subtitle: Text(l10n.viewerHideScreenMarks),
           ),
         ],
       ),
@@ -229,25 +229,31 @@ class _PrintPagesFieldState extends State<_PrintPagesField> {
 
   @override
   Widget build(BuildContext context) {
-    final range = PrintPageRange.parse(widget.text, widget.pageCount);
+    final l10n = AppLocalizations.of(context);
+    final total = widget.pageCount;
+    final range = PrintPageRange.parse(widget.text, total);
     final count = range.pages.length;
     return TextField(
       key: const ValueKey('viewer-print-pages'),
       controller: _controller,
       onChanged: widget.onChanged,
       decoration: InputDecoration(
-        labelText: 'Pages to print',
-        hintText: 'All ${widget.pageCount}',
+        labelText: l10n.viewerPagesToPrint,
+        hintText: l10n.viewerPagesToPrintHint(total),
         border: const OutlineInputBorder(),
         isDense: true,
         errorText: range.error,
         helperText: range.isValid
             ? widget.text.trim().isEmpty
-                  ? 'All ${widget.pageCount} '
-                        '${widget.pageCount == 1 ? 'page' : 'pages'}. Type 1 or '
-                        '2-4 to print only some.'
-                  : '$count of ${widget.pageCount} '
-                        '${widget.pageCount == 1 ? 'page' : 'pages'} will print.'
+                  ? l10n.viewerPagesToPrintAll(
+                      total,
+                      total == 1 ? 'page' : 'pages',
+                    )
+                  : l10n.viewerPagesToPrintSome(
+                      count,
+                      total,
+                      total == 1 ? 'page' : 'pages',
+                    )
             : null,
         helperMaxLines: 2,
       ),

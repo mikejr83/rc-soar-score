@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
@@ -198,6 +199,7 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return PopScope(
       canPop: !_dirty,
       onPopInvokedWithResult: (didPop, _) async {
@@ -248,21 +250,23 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
                   TextFormField(
                     key: const ValueKey('landing-name'),
                     controller: _name,
-                    decoration: const InputDecoration(labelText: 'Name'),
-                    validator: (v) => _required(v, 'Name'),
+                    decoration: InputDecoration(
+                      labelText: l10n.landingEditorName,
+                    ),
+                    validator: (v) => _required(v, l10n.landingEditorName),
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<LandingInputUnit>(
                     key: const ValueKey('landing-unit'),
                     initialValue: _unit,
-                    decoration: const InputDecoration(
-                      labelText: 'What the keys mean',
+                    decoration: InputDecoration(
+                      labelText: l10n.landingEditorUnitLabel,
                     ),
                     items: [
                       for (final unit in LandingInputUnit.values)
                         DropdownMenuItem(
                           value: unit,
-                          child: Text(landingUnitLabel(unit)),
+                          child: Text(landingUnitLabel(l10n, unit)),
                         ),
                     ],
                     onChanged: (unit) => setState(() {
@@ -271,7 +275,10 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
                     }),
                   ),
                   const SizedBox(height: 24),
-                  Text('Entries', style: theme.textTheme.titleSmall),
+                  Text(
+                    l10n.landingEditorEntries,
+                    style: theme.textTheme.titleSmall,
+                  ),
                   const SizedBox(height: 8),
                   for (var i = 0; i < _rows.length; i++) _row(i),
                   Align(
@@ -280,7 +287,7 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
                       key: const ValueKey('add-landing-entry'),
                       onPressed: _addRow,
                       icon: const Icon(Icons.add),
-                      label: const Text('Add entry'),
+                      label: Text(l10n.landingEditorAddEntry),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -289,13 +296,13 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
                       FilledButton(
                         key: const ValueKey('save-landing'),
                         onPressed: _saving ? null : _save,
-                        child: const Text('Save'),
+                        child: Text(l10n.landingEditorSave),
                       ),
                       const SizedBox(width: 12),
                       TextButton(
                         key: const ValueKey('cancel-landing'),
                         onPressed: _saving ? null : _cancel,
-                        child: const Text('Cancel'),
+                        child: Text(l10n.landingEditorCancel),
                       ),
                     ],
                   ),
@@ -310,6 +317,7 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
 
   Widget _row(int index) {
     final row = _rows[index];
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -320,7 +328,9 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
             child: TextFormField(
               key: ValueKey('entry-label-$index'),
               controller: row.label,
-              decoration: const InputDecoration(labelText: 'Label'),
+              decoration: InputDecoration(
+                labelText: l10n.landingEditorEntryLabel,
+              ),
               validator: (v) => _labelRule(index, v),
             ),
           ),
@@ -331,13 +341,15 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
               key: ValueKey('entry-points-$index'),
               controller: row.points,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Points'),
+              decoration: InputDecoration(
+                labelText: l10n.landingEditorEntryPoints,
+              ),
               validator: _pointsRule,
             ),
           ),
           IconButton(
             key: ValueKey('remove-entry-$index'),
-            tooltip: 'Remove entry ${index + 1}',
+            tooltip: l10n.landingEditorRemoveEntry(index + 1),
             icon: const Icon(Icons.remove_circle_outline),
             onPressed: _rows.length > 1 ? () => _removeRow(index) : null,
           ),

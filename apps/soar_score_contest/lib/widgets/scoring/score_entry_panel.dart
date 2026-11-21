@@ -74,6 +74,7 @@ class ScoreEntryPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final words = AppLocalizations.of(context);
     final busy = save.isBusy;
     final enabled = !readOnly && !busy;
     final settings = draft.settings;
@@ -148,18 +149,14 @@ class ScoreEntryPanel extends StatelessWidget {
             ScoreInlineNote(
               icon: Icons.help_outline,
               kind: PageBannerKind.status,
-              text:
-                  '${draft.height} m is a high launch. Is this correct? '
-                  'You can still save.',
+              text: words.scoreHighLaunch(draft.height!),
             ),
           if (draft.heightZero)
             ScoreInlineNote(
               icon: Icons.help_outline,
               kind: PageBannerKind.status,
-              text:
-                  '0 m is not a launch height. Saving it as No altitude '
-                  'recorded scores 0.',
-              actionLabel: 'Turn on No altitude recorded',
+              text: words.scoreZeroHeight,
+              actionLabel: words.scoreTurnOnNoAltitude,
               onAction: enabled ? () => draft.setNoAltitude(true) : null,
             ),
           for (final finding in findings)
@@ -194,9 +191,10 @@ class ScoreEntryPanel extends StatelessWidget {
             ScoreInlineNote(
               icon: Icons.person_off_outlined,
               kind: PageBannerKind.neutral,
-              text:
-                  '${row.pilot.name} retired from round '
-                  '${row.pilot.retiredAtRound}. Entry is closed for this flight.',
+              text: words.scoreRetiredFromRound(
+                row.pilot.name,
+                row.pilot.retiredAtRound!,
+              ),
             ),
           // Landing.
           const SizedBox(height: 6),
@@ -206,7 +204,7 @@ class ScoreEntryPanel extends StatelessWidget {
             runSpacing: 4,
             children: [
               Text(
-                'Landing',
+                words.scoreLandingHeading,
                 style: theme.textTheme.labelLarge?.copyWith(fontSize: 14),
               ),
               if (landingTableName != null)
@@ -226,8 +224,7 @@ class ScoreEntryPanel extends StatelessWidget {
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
-                          'Follows the Landing field · type table points, '
-                          '↑↓ to step',
+                          words.scoreLandingFollows,
                           style: theme.textTheme.labelMedium?.copyWith(
                             color: scheme.onPrimary,
                           ),
@@ -250,8 +247,7 @@ class ScoreEntryPanel extends StatelessWidget {
           const SizedBox(height: 8),
           if (landings.isEmpty)
             Text(
-              'The contest has no landing table. Choose one on the '
-              'Configuration page.',
+              words.scoreNoLandingTableBand,
               style: theme.textTheme.bodySmall,
             )
           else
@@ -274,37 +270,37 @@ class ScoreEntryPanel extends StatelessWidget {
             children: [
               toggle(
                 'late',
-                'Late landing',
+                words.scoreLateLanding,
                 draft.lateLanding,
                 draft.lateLandingOffReason,
-                'Landing bonus is not given.',
+                words.scoreLateLandingNote,
                 draft.setLateLanding,
               ),
               if (settings.restartsAllowed)
                 toggle(
                   'restart',
-                  'Motor restart',
+                  words.scoreMotorRestart,
                   draft.motorRestart,
                   draft.motorRestartOffReason,
                   settings.restartsNonDroppable
-                      ? 'Scores 0, and the zero cannot be dropped.'
-                      : 'Scores 0.',
+                      ? words.scoreMotorRestartNonDroppable
+                      : words.scoreMotorRestartZero,
                   draft.setMotorRestart,
                 ),
               toggle(
                 'oob',
-                'Out of bounds',
+                words.scoreOutOfBounds,
                 draft.outOfBounds,
                 draft.outOfBoundsOffReason,
-                'Landed more than 75 m from the marker. Scores 0.',
+                words.scoreOutOfBoundsNote,
                 draft.setOutOfBounds,
               ),
               toggle(
                 'noalt',
-                'No altitude recorded',
+                words.scoreNoAltitude,
                 draft.noAltitude,
                 draft.noAltitudeOffReason,
-                'Scores 0.',
+                words.scoreNoAltitudeNote,
                 draft.setNoAltitude,
               ),
             ],
@@ -338,7 +334,7 @@ class ScoreEntryPanel extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
-                AppLocalizations.of(context).scoreSaveNeedsZeroConfirm,
+                words.scoreSaveNeedsZeroConfirm,
                 key: ValueKey(keyOf('save-needs-confirm')),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.error,
@@ -372,7 +368,9 @@ class ScoreEntryPanel extends StatelessWidget {
                                 ),
                               )
                             : const Icon(Icons.save, size: 20),
-                        label: Text(busy ? 'Saving…' : 'Save row'),
+                        label: Text(
+                          busy ? words.scoreSaving : words.scoreSaveRow,
+                        ),
                         style: FilledButton.styleFrom(
                           minimumSize: const Size(0, 48),
                         ),
@@ -386,7 +384,7 @@ class ScoreEntryPanel extends StatelessWidget {
                         onPressed: enabled && (draft.canRevert || _hasSaveError)
                             ? actions.onRevert
                             : null,
-                        child: const Text('Revert'),
+                        child: Text(words.scoreRevert),
                       ),
                     ),
                   ],
@@ -394,8 +392,7 @@ class ScoreEntryPanel extends StatelessWidget {
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 360),
                   child: Text(
-                    'Enter moves on. Enter on the penalty saves and opens the '
-                    'next pilot.',
+                    words.scoreEnterHint,
                     textAlign: TextAlign.end,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
@@ -411,21 +408,20 @@ class ScoreEntryPanel extends StatelessWidget {
   }
 
   Widget _zeroConfirm(BuildContext context, bool enabled) {
-    final why = draft.isBlank
-        ? 'Nothing is entered. Saving records No flight, a zero.'
-        : 'Saving scores 0 for this pilot.';
+    final words = AppLocalizations.of(context);
+    final why = draft.isBlank ? words.scoreZeroWhyBlank : words.scoreZeroWhy;
     if (draft.zeroConfirmed) {
       return ScoreInlineNote(
         icon: Icons.check_circle_outline,
         kind: PageBannerKind.success,
-        text: 'Zero confirmed. Save the row to record it.',
+        text: words.scoreZeroConfirmed,
       );
     }
     return ScoreInlineNote(
       icon: Icons.help_outline,
       kind: PageBannerKind.status,
       text: why,
-      actionLabel: 'Confirm zero',
+      actionLabel: words.scoreConfirmZero,
       onAction: enabled ? draft.confirmZero : null,
       actionKey: ValueKey(keyOf('confirm-zero')),
     );

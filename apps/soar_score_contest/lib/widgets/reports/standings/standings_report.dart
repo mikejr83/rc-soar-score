@@ -132,7 +132,7 @@ class StandingsReport extends DataReportDefinition<StandingsReportData> {
       isF3j: table.isF3j,
     );
     final format = StandingsFormat(facts.decimalPlaces);
-    final status = StandingsStatus.of(facts, options, data);
+    final status = StandingsStatus.of(context.l10n, facts, options, data);
     final missing = facts.standing.missingByRound.entries
         .where((entry) => entry.key <= options.to)
         .fold<int>(0, (sum, entry) => sum + entry.value);

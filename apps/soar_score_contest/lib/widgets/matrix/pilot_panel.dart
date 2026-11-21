@@ -37,6 +37,7 @@ class PilotPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final opponents = model.opponentsOf(pilot.participationId);
@@ -50,11 +51,18 @@ class PilotPanel extends StatelessWidget {
     ];
     final marker = markers.of(pilot.teamId);
     final first = pilot.name.split(' ').first;
+    String place(int round, int group, GridSlot slot) {
+      final base = l10n.matrixPlace(round, DrawFormCheck.groupLetter(group));
+      final lane = slot.lane;
+      return model.hasLanes && lane != null
+          ? l10n.matrixPlaceLane(base, lane)
+          : base;
+    }
+
     final places = [
       for (final round in model.rounds)
         for (final (group, slot) in model.slotsOf(pilot.participationId, round))
-          'R${round.ordinal} · ${DrawFormCheck.groupLetter(group)}'
-              '${model.hasLanes && slot.lane != null ? ' · L${slot.lane}' : ''}',
+          place(round.ordinal, group, slot),
     ];
 
     Widget section(String title, String sub, List<(MatrixPilot, int)> rows) =>
@@ -79,7 +87,6 @@ class PilotPanel extends StatelessWidget {
           ],
         );
 
-    final l10n = AppLocalizations.of(context);
     final moves = [
       for (final round in model.rounds)
         for (final (_, slot) in model.slotsOf(pilot.participationId, round))
@@ -99,15 +106,13 @@ class PilotPanel extends StatelessWidget {
           ],
         ),
       section(
-        'Opponents (${met.length} of ${opponents.length})',
-        'Most meetings first. Repeats are marked.',
+        l10n.matrixOpponentsCount(met.length, opponents.length),
+        l10n.matrixOpponentsSub,
         met,
       ),
       section(
-        'Never meets (${never.length})',
-        never.isEmpty
-            ? 'Meets every other pilot at least once.'
-            : 'Pilots in no group with $first.',
+        l10n.matrixNeverMeets(never.length),
+        never.isEmpty ? l10n.matrixMeetsAll : l10n.matrixNoGroupWith(first),
         never,
       ),
     ];
@@ -126,8 +131,10 @@ class PilotPanel extends StatelessWidget {
                 Text(pilot.name, style: theme.textTheme.titleMedium),
                 Text(
                   [
-                    if (pilot.number != null) 'No. ${pilot.numberText}',
-                    if (markers.ordered.isNotEmpty) marker?.name ?? 'No team',
+                    if (pilot.number != null)
+                      l10n.matrixPilotNo(pilot.numberText),
+                    if (markers.ordered.isNotEmpty)
+                      marker?.name ?? l10n.matrixNoTeam,
                   ].join(' · '),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
@@ -138,7 +145,7 @@ class PilotPanel extends StatelessWidget {
           ),
           IconButton(
             key: const ValueKey('clear-highlight'),
-            tooltip: 'Clear highlight (Esc)',
+            tooltip: l10n.matrixClearHighlight,
             onPressed: onClose,
             icon: const Icon(Icons.close),
           ),
@@ -187,7 +194,7 @@ class PilotPanel extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: 'Opponents of ${pilot.name}',
+      label: l10n.matrixOpponentsOf(pilot.name),
       child: Material(
         key: const ValueKey('pilot-panel'),
         color: scheme.secondaryContainer,
@@ -219,7 +226,7 @@ class PilotPanel extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                   child: Text(
-                    'Select the pilot again or press Esc to clear.',
+                    l10n.matrixSelectAgain,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
@@ -248,13 +255,14 @@ class _OpponentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colors = MatrixColors.of(context);
     final text = count == 0
         ? ''
         : count == 1
-        ? 'once'
-        : '$count times';
+        ? l10n.matrixOpponentOnce
+        : l10n.matrixOpponentTimes(count);
     return Container(
       constraints: const BoxConstraints(minHeight: 32),
       decoration: BoxDecoration(

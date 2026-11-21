@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/local_ui_store_provider.dart';
 import 'package:soar_score_contest/pages/contest/report_viewer_page.dart';
 import 'package:soar_score_contest/router.dart';
@@ -65,6 +66,8 @@ Future<List<ReportViewParams>> _pump(
       httpClient: MockClient(server.handle),
     ),
     child: MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       locale: appLocale,
       home: ReportViewerPage(
         contestId: contestId,
@@ -306,6 +309,8 @@ void main() {
             httpClient: MockClient(server.handle),
           ),
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             theme: ThemeData.dark(),
             home: ReportViewerPage(
               printer: const NotWiredReportPrinter(),
@@ -733,6 +738,8 @@ void main() {
               httpClient: MockClient(server.handle),
             ),
             child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
               locale: const Locale('en', 'US'),
               home: ReportViewerPage(
                 contestId: matrixContestId,

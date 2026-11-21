@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/matrix/matrix_page_data.dart';
-import '../../services/matrix/config_drift.dart';
 
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -19,6 +19,7 @@ class DrawConfigRows extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final options = data.options;
@@ -27,60 +28,62 @@ class DrawConfigRows extends StatelessWidget {
     final backToBack = options?.allowBackToBack ?? true;
     final pilots = data.scoringPilots;
     final excluded = data.nonFlyingParticipants;
+    final laneMode = options?.laneMode ?? LaneMode.none;
     final rows = <(IconData, String, String, String, bool)>[
       if (options?.teamsEnabled ?? false)
         (
           Icons.shield_outlined,
-          'Team protection',
-          protection ? 'On' : 'Off',
+          l10n.wizardTeamProtection,
+          protection ? l10n.matrixValueOn : l10n.matrixValueOff,
           protection
-              ? 'Teammates never fly in the same group.'
+              ? l10n.matrixTeamProtectionNote
               : seeded
-              ? 'Off because Seeded order is on.'
+              ? l10n.matrixTeamProtectionSeededOffNote
               : '',
           true,
         ),
       (
         Icons.shuffle,
-        'Draw mode',
-        seeded ? 'Seeded Man on Man' : 'Man on Man',
+        l10n.wizardDrawMode,
+        seeded ? l10n.wizardDrawModeSeeded : l10n.wizardDrawModeManOnMan,
         seeded
-            ? 'Only the ${options?.preliminaryRounds ?? 1} preliminary rounds '
-                  'are drawn now.'
+            ? l10n.matrixSeededPrelimNote(options?.preliminaryRounds ?? 1)
             : '',
         true,
       ),
       (
         Icons.swap_vert,
-        'Back-to-back flights',
-        backToBack ? 'Allowed' : 'Avoided',
-        backToBack
-            ? ''
-            : 'No pilot flies the last group of one round and the first '
-                  'group of the next.',
+        l10n.matrixBackToBackLabel,
+        backToBack ? l10n.wizardAllowed : l10n.wizardAvoided,
+        backToBack ? '' : l10n.matrixBackToBackOffNote,
         true,
       ),
       (
         Icons.view_column_outlined,
-        'Lane mode',
-        ConfigDrift.laneModeText(options?.laneMode ?? LaneMode.none),
-        options?.laneMode == LaneMode.random
-            ? 'Each pilot gets a lane in every group.'
-            : 'Pilots are not given lanes.',
+        l10n.matrixLaneModeLabel,
+        laneMode == LaneMode.random
+            ? l10n.matrixLaneRandom
+            : l10n.matrixLaneNone,
+        laneMode == LaneMode.random
+            ? l10n.matrixLaneRandomNote
+            : l10n.matrixLaneNoneNote,
         true,
       ),
       (
         Icons.groups_outlined,
-        'Pilots in the draw',
-        '$pilots scoring pilot${pilots == 1 ? '' : 's'}',
+        l10n.matrixPilotsInDrawLabel,
+        l10n.matrixPilotsInDrawValue(pilots, pilots == 1 ? '' : 's'),
         excluded > 0
-            ? '$excluded non-flying participant${excluded == 1 ? ' is' : 's are'} excluded.'
+            ? l10n.matrixNonFlyingExcluded(
+                excluded,
+                excluded == 1 ? ' is' : 's are',
+              )
             : '',
         true,
       ),
       (
         Icons.history,
-        'Configuration revision',
+        l10n.matrixConfigRevisionLabel,
         '${data.configuration?.revisionNumber ?? '–'}',
         '',
         false,
@@ -100,11 +103,11 @@ class DrawConfigRows extends StatelessWidget {
               spacing: 12,
               children: [
                 Text(
-                  'From contest configuration',
+                  l10n.matrixConfigFromTitle,
                   style: theme.textTheme.titleSmall,
                 ),
                 Text(
-                  'Read-only here. Change these in Configuration.',
+                  l10n.matrixConfigReadOnlyNote,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
@@ -148,14 +151,14 @@ class DrawConfigRows extends StatelessWidget {
                   ),
                   if (link)
                     Semantics(
-                      label: 'Change ${label.toLowerCase()} in Configuration',
+                      label: l10n.matrixChangeInConfig(label.toLowerCase()),
                       excludeSemantics: true,
                       button: true,
                       child: TextButton.icon(
                         onPressed: onOpenConfiguration,
                         iconAlignment: IconAlignment.end,
                         icon: const Icon(Icons.open_in_new, size: 16),
-                        label: const Text('Change'),
+                        label: Text(l10n.matrixChange),
                       ),
                     ),
                 ],

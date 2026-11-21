@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 /// The card while the facts load, and when they could not be loaded at all.
 class NextStepPlaceholderCard extends StatelessWidget {
   const NextStepPlaceholderCard({super.key, this.onRetry});
@@ -10,6 +12,7 @@ class NextStepPlaceholderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Card.filled(
       key: const ValueKey('next-step-placeholder'),
@@ -28,7 +31,7 @@ class NextStepPlaceholderCard extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Working out the next step…',
+                      l10n.workspaceNextStepLoading,
                       style: theme.textTheme.bodyMedium,
                     ),
                   ),
@@ -39,13 +42,13 @@ class NextStepPlaceholderCard extends StatelessWidget {
                 spacing: 12,
                 children: [
                   Text(
-                    'The next step could not be worked out.',
+                    l10n.workspaceNextStepFailed,
                     style: theme.textTheme.bodyMedium,
                   ),
                   TextButton(
                     key: const ValueKey('next-step-retry'),
                     onPressed: onRetry,
-                    child: const Text('Retry'),
+                    child: Text(l10n.workspaceRetry),
                   ),
                 ],
               ),

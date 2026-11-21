@@ -319,19 +319,21 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   Future<bool> _confirmLeave() async {
     final c = _controller;
     if (c == null || !mounted || !c.hasUnsaved) return true;
+    final l10n = AppLocalizations.of(context);
     final count = c.changedIds.length;
     final closing = UnsavedChangesGuard.closingApp;
     final discard = await confirmDiscard(
       context,
       title: closing
           ? UnsavedChangesGuard.closeTitle
-          : 'Leave with unsaved changes?',
-      body:
-          'You have unsaved changes to $count participant'
-          '${count == 1 ? '' : 's'}. '
-          '${closing ? 'Closing the app' : 'Leaving'} discards them.',
-      keepLabel: 'Stay',
-      discardLabel: 'Discard and leave',
+          : l10n.participantLeaveTitle,
+      body: l10n.participantLeaveBody(
+        count,
+        count == 1 ? '' : 's',
+        closing ? l10n.participantLeaveClosing : l10n.participantLeaveLeaving,
+      ),
+      keepLabel: l10n.participantStay,
+      discardLabel: l10n.participantDiscardAndLeave,
     );
     if (discard) c.discardAll();
     return discard;
@@ -486,23 +488,26 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     final others = <ParticipantProfile>[];
     final profile = await showDialog<ParticipantProfile>(
       context: context,
-      builder: (context) => Dialog.fullscreen(
-        child: Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              tooltip: 'Cancel',
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(),
+      builder: (dialogContext) {
+        final l10n = AppLocalizations.of(dialogContext);
+        return Dialog.fullscreen(
+          child: Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                tooltip: l10n.cancelButton,
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(dialogContext).pop(),
+              ),
+              title: Text(l10n.contestParticipantsAddConfirm),
             ),
-            title: const Text('Add participant'),
+            body: ParticipantEditorPage(
+              onDone: (profile) => Navigator.of(dialogContext).pop(profile),
+              onCancel: () => Navigator.of(dialogContext).pop(),
+              onSavedAnother: others.add,
+            ),
           ),
-          body: ParticipantEditorPage(
-            onDone: (profile) => Navigator.of(context).pop(profile),
-            onCancel: () => Navigator.of(context).pop(),
-            onSavedAnother: others.add,
-          ),
-        ),
-      ),
+        );
+      },
     );
     if (!mounted) return;
     final added = [...others, ?profile];
@@ -529,10 +534,11 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
         if (rowIds.contains(row.rowId)) row.name,
     ];
     if (names.isEmpty) return;
+    final l10n = AppLocalizations.of(context);
     final ok = await confirmRemove(
       context,
       names: names,
-      contestName: c.contest?.name ?? 'this contest',
+      contestName: c.contest?.name ?? l10n.participantThisContest,
       inDraw: [
         for (final row in c.rows)
           if (rowIds.contains(row.rowId) && c.inDraw(row)) row.name,
@@ -558,28 +564,28 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   );
 
   Widget _scaffold(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final c = _controller;
     return Scaffold(
       body: c == null
-          ? const PageStateView.unavailable(
-              title: 'No API client is available.',
-            )
-          : _body(c),
+          ? PageStateView.unavailable(title: l10n.participantNoApi)
+          : _body(context, c),
     );
   }
 
-  Widget _body(ParticipantsController c) {
+  Widget _body(BuildContext context, ParticipantsController c) {
+    final l10n = AppLocalizations.of(context);
     if (c.data == null) {
       if (c.loadError != null) {
         return loadFailedView(
           c.loadError!,
-          title: 'The participants could not be loaded.',
+          title: l10n.participantLoadFailed,
           onRetry: c.load,
         );
       }
-      return const PageStateView.loading(
-        key: ValueKey('participants-loading'),
-        label: 'Loading the participants',
+      return PageStateView.loading(
+        key: const ValueKey('participants-loading'),
+        label: l10n.participantLoading,
       );
     }
     final ids = {for (final row in c.rows) row.rowId};
@@ -624,6 +630,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         for (final banner in participantBanners(
+                          context: context,
                           controller: c,
                           onAdd: _addNew,
                           onRetryAdd: () {
@@ -741,6 +748,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     List<StoredParticipant> visible,
     bool narrow,
   ) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     if (c.rows.isEmpty) {
@@ -756,10 +764,13 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
             children: [
               Icon(Icons.group_add, size: 48, color: scheme.onSurfaceVariant),
               const SizedBox(height: 12),
-              Text('No participants yet', style: theme.textTheme.titleLarge),
+              Text(
+                l10n.participantsEmptyTitle,
+                style: theme.textTheme.titleLarge,
+              ),
               const SizedBox(height: 12),
               Text(
-                'Add people you’ve saved before, or create a new one.',
+                l10n.participantsEmptyText,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: scheme.onSurfaceVariant,
@@ -783,7 +794,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
               ? _removeSelected
               : null,
           removeReason: c.selectionHasFlights
-              ? 'The selection contains a pilot with flights.'
+              ? l10n.participantBulkSelectionHasFlights
               : null,
           teams: c.options.contains(ParticipantOption.teams) && c.canEdit
               ? c.rules.teams
@@ -804,7 +815,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Text(
-            'No one in this contest matches “${c.query.trim()}”.',
+            l10n.wizardNoMatch(c.query.trim()),
             key: const ValueKey('participants-filter-empty'),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -816,7 +827,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
         Semantics(
           key: const ValueKey('participants-cards'),
           container: true,
-          label: 'Contest participants',
+          label: l10n.participantsTableLabel,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

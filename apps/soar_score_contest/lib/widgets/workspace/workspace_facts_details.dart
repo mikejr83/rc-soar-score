@@ -14,21 +14,22 @@ class WorkspaceFactsDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final location = [
       contest.city,
       contest.state,
       contest.country,
     ].whereType<String>().where((part) => part.isNotEmpty).join(', ');
     return DetailSectionCard(
-      title: 'Contest',
+      title: l10n.workspaceFactsTitle,
       items: [
         DetailItem(
-          'Dates',
-          ContestList.contestDates(AppLocalizations.of(context), contest),
+          l10n.workspaceFactsDates,
+          ContestList.contestDates(l10n, contest),
         ),
-        DetailItem('Timezone', contest.timezone),
-        DetailItem('Host', contest.host),
-        DetailItem('Location', location),
+        DetailItem(l10n.workspaceFactsTimezone, contest.timezone),
+        DetailItem(l10n.workspaceFactsHost, contest.host),
+        DetailItem(l10n.workspaceFactsLocation, location),
       ],
     );
   }

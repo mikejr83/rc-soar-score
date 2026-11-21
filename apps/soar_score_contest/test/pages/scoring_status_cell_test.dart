@@ -2,10 +2,13 @@ import 'dart:ui' show PointerDeviceKind;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/matrix_test_support.dart';
 import '../support/scoring_test_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 const _flight = {'time_flown': 540, 'launch_height': 120};
 
@@ -50,10 +53,10 @@ void main() {
     await tester.enterText(_key('score-height-${first.value}'), '99');
     await tester.pumpAndSettle();
 
-    expect(find.text('Unsaved'), findsOneWidget);
+    expect(find.text(_l10n.scoreStatusUnsaved), findsOneWidget);
     expect(find.text('Not saved yet'), findsNothing);
     expect(find.text('Not saved'), findsNothing);
-    expect(find.text('Fix to save'), findsNothing);
+    expect(find.text(_l10n.scoreFixToSave), findsNothing);
   });
 
   testWidgets('a row left with a mistake says Fix to save', (tester) async {
@@ -67,12 +70,12 @@ void main() {
     await tester.enterText(_key('score-time-${first.value}'), '99:99');
     await tester.pumpAndSettle();
     // The open row lists its problems in its own band instead.
-    expect(find.text('Fix to save'), findsNothing);
+    expect(find.text(_l10n.scoreFixToSave), findsNothing);
 
     await tester.tap(_key('score-row-${second.value}'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Fix to save'), findsOneWidget);
+    expect(find.text(_l10n.scoreFixToSave), findsOneWidget);
   });
 
   testWidgets('an unedited row has neither Unsaved nor Fix to save', (
@@ -82,7 +85,7 @@ void main() {
     final server = ScoringServer()..seedScore(first, _flight);
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
-    expect(find.text('Unsaved'), findsNothing);
-    expect(find.text('Fix to save'), findsNothing);
+    expect(find.text(_l10n.scoreStatusUnsaved), findsNothing);
+    expect(find.text(_l10n.scoreFixToSave), findsNothing);
   });
 }

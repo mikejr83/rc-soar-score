@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:logging/logging.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/workspace/controls/contest_transition.dart';
 import '../../../services/workspace/next_step/completion_dismissals.dart';
 import '../../../services/workspace/next_step/next_step.dart';
@@ -16,12 +17,6 @@ import 'next_step_navigator.dart';
 import 'next_step_placeholder_card.dart';
 
 final _logger = Logger('NextStepSection');
-
-/// What the snackbar says after dismissing a suggestion. The messages after
-/// a transition are in `contest_transition.dart`.
-const String suggestionDismissedMessage =
-    'Suggestion dismissed. It returns if another 48 hours pass without '
-    'scores.';
 
 /// The next-step section of the workspace: resolves the step from the
 /// workspace facts and connects its buttons.
@@ -127,10 +122,11 @@ class _NextStepSectionState extends State<NextStepSection> {
           now: widget.clock(),
         );
         setState(() {});
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
-            const SnackBar(content: Text(suggestionDismissedMessage)),
+            SnackBar(content: Text(l10n.workspaceSuggestionDismissed)),
           );
       case NextStepTarget.openScoring:
         _run(scope, ContestTransition.openScoring);

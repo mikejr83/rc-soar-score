@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/matrix/matrix_grid_model.dart';
 import '../../services/matrix/round_progress_view.dart';
 import 'matrix_colors.dart';
@@ -27,6 +28,7 @@ class RoundHeaderCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final colors = MatrixColors.of(context);
@@ -61,8 +63,8 @@ class RoundHeaderCell extends StatelessWidget {
     final once =
         round.distinctPilots == pilotCount && round.pilotCount == pilotCount;
     final count = once
-        ? '$pilotCount pilots, each once'
-        : '${round.distinctPilots} of $pilotCount';
+        ? l10n.matrixPilotsOnce(pilotCount)
+        : l10n.matrixDistinctOf(round.distinctPilots, pilotCount);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 6, 4, 8),
       child: Column(
@@ -79,7 +81,7 @@ class RoundHeaderCell extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        'Round ${round.ordinal}',
+                        l10n.matrixRoundTitle(round.ordinal),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -92,24 +94,21 @@ class RoundHeaderCell extends StatelessWidget {
                     ),
                     if (round.isLocked)
                       Tooltip(
-                        message: 'Round locked',
+                        message: l10n.matrixRoundLocked,
                         child: Icon(
                           Icons.lock_outline,
                           size: 16,
-                          semanticLabel: 'Round locked',
+                          semanticLabel: l10n.matrixRoundLocked,
                           color: scheme.onSurfaceVariant,
                         ),
                       ),
                     if (dropNumber > 0)
                       Tooltip(
-                        message:
-                            'Drop $dropNumber: the lowest round score is '
-                            'dropped once this round is complete',
+                        message: l10n.matrixDropTooltip(dropNumber),
                         child: Icon(
                           Icons.arrow_circle_down_outlined,
                           size: 16,
-                          semanticLabel:
-                              'Drop $dropNumber starts after this round',
+                          semanticLabel: l10n.matrixDropSemantics(dropNumber),
                           color: scheme.onSurfaceVariant,
                         ),
                       ),
@@ -151,9 +150,7 @@ class RoundHeaderCell extends StatelessWidget {
                 ),
               ),
               Tooltip(
-                message:
-                    'Every scoring pilot appears exactly once in this '
-                    'round',
+                message: l10n.matrixExactlyOnce,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   spacing: 4,

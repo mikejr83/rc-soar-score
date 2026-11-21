@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/draft_persistence.dart';
 import '../../services/preferences/director_time.dart';
 
@@ -20,36 +21,39 @@ Future<bool> showResumeDraftDialog(
     NoStoredDraft() => null,
   };
   final when = savedAt == null ? null : DirectorTime.of(context)(savedAt);
+  final l10n = AppLocalizations.of(context);
   final resume = await showDialog<bool>(
     context: context,
     barrierDismissible: false,
     builder: (context) => AlertDialog(
       key: const ValueKey('resume-draft-dialog'),
       icon: const Icon(Icons.edit_note),
-      title: Text(readable ? 'Continue your draft?' : 'Discard your draft?'),
+      title: Text(
+        readable ? l10n.wizardContinueDraft : l10n.wizardDiscardDraft,
+      ),
       content: SizedBox(
         width: 392,
         child: Text(
           readable
-              ? 'You started a contest that isn’t created yet'
-                    '${when == null ? '' : ' (last saved $when)'}. Continue '
-                    'it, or start fresh and delete it.'
-              : 'A draft saved${when == null ? '' : ' $when'} can’t be '
-                    'opened by this version of the app. Discard it to '
-                    'start a new contest.',
+              ? l10n.wizardContinueDraftBody(
+                  when == null ? '' : ' (last saved $when)',
+                )
+              : l10n.wizardDiscardDraftBody(when == null ? '' : ' $when'),
         ),
       ),
       actions: [
         TextButton(
           key: const ValueKey('resume-draft-fresh'),
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text(readable ? 'Start fresh' : 'Discard draft'),
+          child: Text(
+            readable ? l10n.wizardStartFresh : l10n.wizardDiscardDraftButton,
+          ),
         ),
         if (readable)
           FilledButton(
             key: const ValueKey('resume-draft-continue'),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Continue draft'),
+            child: Text(l10n.wizardContinueDraftButton),
           ),
       ],
     ),

@@ -1,7 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 
 import '../support/scoring_test_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 Finder _menu(int round, int pilot) =>
     find.byKey(ValueKey('row-menu-${scoringAssignmentId(round, pilot).value}'));
@@ -48,8 +51,8 @@ void main() {
     expect((update['body'] as Map)['retired_at_round'], 1);
     expect((update['body'] as Map)['base_revision'], 0);
     // The retired flight is shown as retired and is not missing.
-    expect(find.text('Retired'), findsOneWidget);
-    expect(find.text('Retired from round 1'), findsOneWidget);
+    expect(find.text(_l10n.scoreStatusRetired), findsOneWidget);
+    expect(find.text(_l10n.scoreRetiredNote(1)), findsOneWidget);
     expect(find.text('0 of 1 entered · 0 official'), findsOneWidget);
     expect(find.text('Bo Ray retired from round 1.'), findsOneWidget);
   });
@@ -85,13 +88,13 @@ void main() {
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
     // Bo has a score from before the retirement: it stays official.
-    expect(find.text('Official'), findsOneWidget);
-    expect(find.text('Retired from round 1'), findsOneWidget);
+    expect(find.text(_l10n.scoreStatusOfficial), findsOneWidget);
+    expect(find.text(_l10n.scoreRetiredNote(1)), findsOneWidget);
     expect(find.text('1 of 2 entered · 1 official'), findsOneWidget);
     // Ann flies round 1; she retired at round 2, so round 2 shows her retired.
     await tester.tap(find.byKey(const ValueKey('round-next')));
     await tester.pumpAndSettle();
-    expect(find.text('Retired'), findsOneWidget);
+    expect(find.text(_l10n.scoreStatusRetired), findsOneWidget);
     final time = find.byKey(
       ValueKey('score-time-${scoringAssignmentId(2, 1).value}'),
     );
@@ -184,7 +187,7 @@ void main() {
     // The pilot's values fill the form, so the status reads Unsaved and the
     // Pilot entry indicator marks where they came from.
     expect(find.text('Pilot entry'), findsOneWidget);
-    expect(find.text('Retired'), findsNothing);
+    expect(find.text(_l10n.scoreStatusRetired), findsNothing);
   });
 
   testWidgets('a failed recalculation shows the stale-results notice', (
@@ -199,7 +202,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('retire-confirm')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Retired'), findsOneWidget);
+    expect(find.text(_l10n.scoreStatusRetired), findsOneWidget);
     expect(
       find.byKey(const ValueKey('scoring-recalculation-warning')),
       findsOneWidget,
@@ -216,14 +219,14 @@ void main() {
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
     await _openMenuItem(tester, 1, 2, 'menu-reinstate');
-    expect(find.text('Reinstate Bo Ray?'), findsOneWidget);
+    expect(find.text(_l10n.scoreReinstateTitle('Bo Ray')), findsOneWidget);
     expect(find.text('Round 1 counts 4 flights instead of 3.'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('retire-confirm')));
     await tester.pumpAndSettle();
 
     final update = server.matrixServer.participationUpdates.single;
     expect((update['body'] as Map)['retired_at_round'], isNull);
-    expect(find.text('Retired'), findsNothing);
+    expect(find.text(_l10n.scoreStatusRetired), findsNothing);
     expect(find.text('0 of 2 entered · 0 official'), findsOneWidget);
   });
 
@@ -236,7 +239,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(server.matrixServer.participationUpdates, isEmpty);
-    expect(find.text('Retired'), findsNothing);
+    expect(find.text(_l10n.scoreStatusRetired), findsNothing);
   });
 
   testWidgets('a refused change stays in the dialog with the reason', (
@@ -252,6 +255,6 @@ void main() {
 
     expect(find.text('The change was rejected.'), findsOneWidget);
     expect(find.byKey(const ValueKey('retire-dialog')), findsOneWidget);
-    expect(find.text('Retired'), findsNothing);
+    expect(find.text(_l10n.scoreStatusRetired), findsNothing);
   });
 }

@@ -25,15 +25,14 @@ class ContestSyncPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scope = ContestScopeKey(Id.parse(contestId));
     return Scaffold(
       body: SyncSummaryBuilder(
         scope: scope,
         builder: (context, sync, summary, syncing) {
           if (!sync.available) {
-            return const Center(
-              child: Text('Syncing is only used in the Windows app.'),
-            );
+            return Center(child: Text(l10n.syncWindowsOnly));
           }
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -254,14 +253,13 @@ class _ConflictsState extends State<_Conflicts> {
     if (answer != null && answer.resolved) {
       _decided.add(conflict.id);
       final problem = answer.refreshProblem;
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             problem == null
-                ? 'Decision saved.'
-                : 'Decision sent. The sync that follows failed '
-                      '(${problem.label.toLowerCase()}), so this screen '
-                      'updates after the next successful sync.',
+                ? l10n.syncDecisionSaved
+                : l10n.syncDecisionFailed(problem.label.toLowerCase()),
           ),
         ),
       );

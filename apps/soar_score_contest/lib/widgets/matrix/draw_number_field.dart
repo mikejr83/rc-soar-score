@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/app_localizations.dart';
 import 'matrix_colors.dart';
 
 /// A whole-number field of the draw form with its source note, an "Edited"
@@ -38,6 +39,7 @@ class DrawNumberField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final colors = MatrixColors.of(context);
     final message = error ?? warning ?? note;
@@ -77,11 +79,11 @@ class DrawNumberField extends StatelessWidget {
               2,
             ),
             suffixIcon: edited
-                ? const Padding(
-                    padding: EdgeInsets.only(right: 12),
+                ? Padding(
+                    padding: const EdgeInsets.only(right: 12),
                     child: Chip(
-                      avatar: Icon(Icons.edit, size: 14),
-                      label: Text('Edited'),
+                      avatar: const Icon(Icons.edit, size: 14),
+                      label: Text(l10n.matrixEdited),
                       visualDensity: VisualDensity.compact,
                     ),
                   )
@@ -114,14 +116,14 @@ class DrawNumberField extends StatelessWidget {
             TextButton.icon(
               onPressed: onOpenConfiguration,
               icon: const Icon(Icons.tune, size: 16),
-              label: const Text('Open Configuration'),
+              label: Text(l10n.matrixOpenConfiguration),
             ),
             if (edited && onReset != null)
               TextButton.icon(
                 key: ValueKey('${(fieldKey as ValueKey).value}-reset'),
                 onPressed: onReset,
                 icon: const Icon(Icons.restart_alt, size: 16),
-                label: Text(resetLabel ?? 'Reset'),
+                label: Text(resetLabel ?? l10n.matrixReset),
               ),
           ],
         ),

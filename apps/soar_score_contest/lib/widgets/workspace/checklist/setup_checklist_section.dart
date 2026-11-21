@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/preferences/director_time.dart';
 import '../../../services/workspace/checklist/setup_checklist.dart';
 import '../workspace_scope.dart';
@@ -42,6 +43,7 @@ class _Placeholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Card(
       key: const ValueKey('setup-checklist-placeholder'),
@@ -60,7 +62,7 @@ class _Placeholder extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Loading the setup checklist…',
+                      l10n.workspaceChecklistLoading,
                       style: theme.textTheme.bodyMedium,
                     ),
                   ),
@@ -71,13 +73,13 @@ class _Placeholder extends StatelessWidget {
                 spacing: 12,
                 children: [
                   Text(
-                    'The setup checklist could not be loaded.',
+                    l10n.workspaceChecklistLoadFailed,
                     style: theme.textTheme.bodyMedium,
                   ),
                   TextButton(
                     key: const ValueKey('setup-checklist-retry'),
                     onPressed: onRetry,
-                    child: const Text('Retry'),
+                    child: Text(l10n.workspaceRetry),
                   ),
                 ],
               ),

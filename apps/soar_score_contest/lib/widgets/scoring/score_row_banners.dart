@@ -110,32 +110,34 @@ class ScoreSaveBanner extends StatelessWidget {
   final VoidCallback onKeepMine;
   final VoidCallback onTakeTheirs;
 
-  static String _summary(Map<String, Object?>? c) {
-    if (c == null || c.isEmpty) return 'nothing entered';
+  static String _summary(AppLocalizations words, Map<String, Object?>? c) {
+    if (c == null || c.isEmpty) return words.scoreSaveNothingEntered;
     return c.entries.map((e) => '${e.key}: ${e.value}').join(', ');
   }
 
   @override
   Widget build(BuildContext context) {
     if (save.promotion) return _promotion(context);
+    final words = AppLocalizations.of(context);
     switch (save.kind) {
       case RowSaveKind.stale:
         return _RowBanner(
           bannerKey: const ValueKey('score-stale'),
           kind: PageBannerKind.status,
           icon: Icons.sync_problem,
-          text:
-              'This row changed since you opened it. Yours: '
-              '${_summary(mine)}. Newer: ${_summary(theirs)}.',
+          text: words.scoreSaveStaleText(
+            _summary(words, mine),
+            _summary(words, theirs),
+          ),
           actions: [
             PageBannerAction(
-              'Keep mine',
+              words.scoreSaveKeepMine,
               onKeepMine,
               emphasis: PageBannerEmphasis.filled,
               key: const ValueKey('score-keep-mine'),
             ),
             PageBannerAction(
-              'Take the newer',
+              words.scoreSaveTakeNewer,
               onTakeTheirs,
               emphasis: PageBannerEmphasis.outlined,
               key: const ValueKey('score-take-theirs'),
@@ -147,18 +149,18 @@ class ScoreSaveBanner extends StatelessWidget {
           bannerKey: const ValueKey('score-save-failed'),
           kind: PageBannerKind.alert,
           icon: Icons.error_outline,
-          text: 'Not saved. ${save.message ?? ''} Your values are kept.',
+          text: words.scoreSaveNotSaved(save.message ?? ''),
           actions: [
             if (save.networkProblem)
               PageBannerAction(
-                'Retry',
+                words.scoreSaveRetry,
                 onRetry,
                 emphasis: PageBannerEmphasis.filled,
                 key: const ValueKey('score-retry'),
               )
             else
               PageBannerAction(
-                'Refresh',
+                words.scoreSaveRefresh,
                 onRefresh,
                 emphasis: PageBannerEmphasis.outlined,
                 key: const ValueKey('score-refresh'),
@@ -169,10 +171,10 @@ class ScoreSaveBanner extends StatelessWidget {
         return ScoreInlineNote(
           icon: Icons.error_outline,
           kind: PageBannerKind.alert,
-          text:
-              'Refused: ${save.message ?? 'the entry was not accepted'}. '
-              'Your values are kept.',
-          actionLabel: 'Refresh',
+          text: words.scoreSaveRefused(
+            save.message ?? words.scoreSaveRefusedNoReason,
+          ),
+          actionLabel: words.scoreSaveRefresh,
           onAction: onRefresh,
         );
       case RowSaveKind.idle:

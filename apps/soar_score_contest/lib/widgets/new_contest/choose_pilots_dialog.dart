@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/copy_source.dart';
 
 /// Picks which of the source contest's pilots to copy (for example for a
@@ -28,10 +29,11 @@ class _ChoosePilotsDialogState extends State<_ChoosePilotsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final all = _selected.length == widget.pilots.length;
     return AlertDialog(
       icon: const Icon(Icons.groups),
-      title: const Text('Choose pilots to copy'),
+      title: Text(l10n.wizardChoosePilotsTitle),
       content: SizedBox(
         width: 420,
         child: Column(
@@ -39,13 +41,15 @@ class _ChoosePilotsDialogState extends State<_ChoosePilotsDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Each pilot is copied with their class. '
-              '${_selected.length} of ${widget.pilots.length} selected.',
+              l10n.wizardChoosePilotsBody(
+                _selected.length,
+                widget.pilots.length,
+              ),
             ),
             const SizedBox(height: 8),
             CheckboxListTile(
               value: all,
-              title: const Text('All pilots'),
+              title: Text(l10n.wizardAllPilots),
               controlAffinity: ListTileControlAffinity.leading,
               onChanged: (value) => setState(() {
                 _selected.clear();
@@ -86,11 +90,11 @@ class _ChoosePilotsDialogState extends State<_ChoosePilotsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.wizardCancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(_selected),
-          child: const Text('Use these pilots'),
+          child: Text(l10n.wizardUseThesePilots),
         ),
       ],
     );

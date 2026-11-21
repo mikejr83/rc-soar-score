@@ -16,11 +16,19 @@ class ContestActionRunner {
     required this.client,
     required this.messenger,
     required this.refresh,
+    required this.undoLabel,
+    required this.refreshLabel,
     this.onStale,
   });
 
   final ApiClient client;
   final ScaffoldMessengerState messenger;
+
+  /// Label of the snackbar's Undo button.
+  final String undoLabel;
+
+  /// Label of the snackbar's Refresh button.
+  final String refreshLabel;
 
   /// Loads the contest and the facts again after a change.
   final Future<void> Function() refresh;
@@ -62,7 +70,7 @@ class ContestActionRunner {
           action: undo == null
               ? null
               : SnackBarAction(
-                  label: 'Undo',
+                  label: undoLabel,
                   onPressed: () => _undo(updated, undo, what),
                 ),
         ),
@@ -99,7 +107,7 @@ class ContestActionRunner {
           // otherwise; a failure notice is not worth a click to clear.
           persist: false,
           duration: const Duration(seconds: 8),
-          action: SnackBarAction(label: 'Refresh', onPressed: refresh),
+          action: SnackBarAction(label: refreshLabel, onPressed: refresh),
         ),
       );
   }

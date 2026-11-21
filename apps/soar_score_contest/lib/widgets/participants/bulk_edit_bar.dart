@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/participants/participant_row.dart';
 import 'team_avatar.dart';
 
@@ -54,6 +55,7 @@ class BulkEditBar extends StatelessWidget {
     final scheme = theme.colorScheme;
     final foreground = scheme.onSecondaryContainer;
     final buttonStyle = TextButton.styleFrom(foregroundColor: foreground);
+    final l10n = AppLocalizations.of(context);
 
     Widget menu<T>({
       required Key key,
@@ -76,7 +78,7 @@ class BulkEditBar extends StatelessWidget {
           ),
         ),
         if (items.isEmpty)
-          const MenuItemButton(child: Text('Nothing entered yet')),
+          MenuItemButton(child: Text(l10n.participantBulkNothing)),
         for (final item in items)
           MenuItemButton(
             leadingIcon: leading(item),
@@ -96,7 +98,7 @@ class BulkEditBar extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: 'Bulk edit selected participants',
+      label: l10n.wizardBulkEditLabel,
       child: Container(
         key: const ValueKey('bulk-edit-bar'),
         padding: const EdgeInsets.fromLTRB(16, 6, 6, 6),
@@ -113,7 +115,7 @@ class BulkEditBar extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: Text(
-                '$count selected',
+                l10n.wizardRowsSelected(count),
                 style: theme.textTheme.labelLarge?.copyWith(color: foreground),
               ),
             ),
@@ -124,9 +126,9 @@ class BulkEditBar extends StatelessWidget {
                 if (teams != null && onTeam != null)
                   menu<TeamSummary>(
                     key: const ValueKey('bulk-team'),
-                    label: 'Set team',
+                    label: l10n.wizardBulkSetTeam,
                     icon: Icons.diversity_3,
-                    title: 'Set team for $count',
+                    title: l10n.wizardBulkSetTeamTitle(count),
                     items: teams!,
                     leading: (team) => TeamAvatar(team: team.name),
                     text: (team) => team.name,
@@ -135,9 +137,9 @@ class BulkEditBar extends StatelessWidget {
                 if (classes != null && onClass != null)
                   menu<String>(
                     key: const ValueKey('bulk-class'),
-                    label: 'Set class',
+                    label: l10n.wizardBulkSetClass,
                     icon: Icons.workspace_premium_outlined,
-                    title: 'Set class for $count',
+                    title: l10n.wizardBulkSetClassTitle(count),
                     items: classes!,
                     leading: (value) => CircleAvatar(
                       radius: 14,
@@ -149,9 +151,9 @@ class BulkEditBar extends StatelessWidget {
                 if (roles != null && onRole != null)
                   menu<Role>(
                     key: const ValueKey('bulk-role'),
-                    label: 'Set role',
+                    label: l10n.wizardBulkSetRole,
                     icon: Icons.badge_outlined,
-                    title: 'Set role for $count',
+                    title: l10n.wizardBulkSetRoleTitle(count),
                     items: roles!,
                     leading: (role) => const Icon(Icons.badge_outlined),
                     text: (role) => role.displayName,
@@ -166,11 +168,11 @@ class BulkEditBar extends StatelessWidget {
                       style: buttonStyle,
                       onPressed: onRemove,
                       icon: const Icon(Icons.person_remove_outlined, size: 18),
-                      label: const Text('Remove'),
+                      label: Text(l10n.wizardBulkRemove),
                     ),
                   ),
                 IconButton(
-                  tooltip: 'Clear selection',
+                  tooltip: l10n.wizardBulkClear,
                   color: foreground,
                   onPressed: onClear,
                   icon: const Icon(Icons.close),

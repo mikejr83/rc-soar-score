@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/new_contest/copy_mode.dart';
 import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
@@ -52,6 +53,7 @@ Future<void> _choose(WidgetTester tester, CopyMode mode) async {
 void main() {
   testWidgets('copying all pilots loads the configuration and pilots only, '
       'and summarizes the copy', (tester) async {
+    final l10n = AppLocalizationsEn();
     final wizard = await pumpWizard(tester, respond: _api());
 
     await _choose(tester, CopyMode.allPilots);
@@ -62,7 +64,7 @@ void main() {
 
     expect(find.byKey(const ValueKey('copy-source-chosen')), findsOneWidget);
     expect(find.byKey(const ValueKey('copy-summary')), findsOneWidget);
-    expect(find.text('All 2'), findsOneWidget);
+    expect(find.text(l10n.wizardCopyAllPilots(2)), findsOneWidget);
     final draft = wizard.store.draft;
     expect(draft.discipline, WizardDiscipline.f5j);
     expect(draft.options, {ParticipantOption.teams, ParticipantOption.classes});
@@ -78,13 +80,14 @@ void main() {
   testWidgets('selected pilots can be narrowed with Choose pilots', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final wizard = await pumpWizard(tester, respond: _api());
     await _choose(tester, CopyMode.selectedPilots);
     final tile = find.byKey(ValueKey('copy-source-${_source.id.value}'));
     await tester.ensureVisible(tile);
     await tester.tap(tile);
     await tester.pumpAndSettle();
-    expect(find.text('2 of 2 pilots selected'), findsOneWidget);
+    expect(find.text(l10n.wizardPilotsSelected(2, 2)), findsOneWidget);
 
     await tester.ensureVisible(
       find.byKey(const ValueKey('copy-source-choose-pilots')),
@@ -92,10 +95,10 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('copy-source-choose-pilots')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Sarah Albright'));
-    await tester.tap(find.text('Use these pilots'));
+    await tester.tap(find.text(l10n.wizardUseThesePilots));
     await tester.pumpAndSettle();
 
-    expect(find.text('1 of 2 pilots selected'), findsOneWidget);
+    expect(find.text(l10n.wizardPilotsSelected(1, 2)), findsOneWidget);
     expect(wizard.store.draft.participants.map((p) => p.name), [
       'Mike Gardner',
     ]);
@@ -104,6 +107,7 @@ void main() {
   testWidgets('a source that fails to load can be retried or removed', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final wizard = await pumpWizard(tester, respond: _api(failSource: true));
     await _choose(tester, CopyMode.configuration);
     final tile = find.byKey(ValueKey('copy-source-${_source.id.value}'));
@@ -112,16 +116,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('copy-source-failed')), findsOneWidget);
-    expect(find.text('Couldn’t load “Labor Day F5J Open”'), findsOneWidget);
+    expect(
+      find.text(l10n.wizardSourceFailed('Labor Day F5J Open')),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const ValueKey('copy-source-remove')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('copy-source-failed')), findsNothing);
     expect(wizard.store.draft.source, isNull);
-    expect(
-      find.text('Source removed. You can continue without copying.'),
-      findsOneWidget,
-    );
+    expect(find.text(l10n.wizardSourceRemoved), findsOneWidget);
     // The picker is back, so the user can choose again or continue.
     expect(tile, findsOneWidget);
   });

@@ -1,10 +1,18 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_localizations_en.dart';
 import '../../../services/reports/pilot_cards/card_columns.dart';
 import '../../../services/reports/pilot_cards/pilot_cards_data.dart';
 import '../../../services/reports/scoring_sheet/scoring_sheet_columns.dart';
 import '../../../services/reports/scoring_sheet/scoring_sheet_layout.dart';
 import '../viewer/paper_style.dart';
+
+final AppLocalizations _fallbackL10n = AppLocalizationsEn();
+
+AppLocalizations _l10nOf(BuildContext context) =>
+    Localizations.of<AppLocalizations>(context, AppLocalizations) ??
+    _fallbackL10n;
 
 /// One table of the Scoring Sheet: the column headings, then the round, group
 /// and pilot rows of a page. Black and white, ruled on every cell edge, with
@@ -49,20 +57,25 @@ class ScoringSheetTableView extends StatelessWidget {
       );
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    container: true,
-    label: prefilled
-        ? '$label. Scores already entered are printed in the score cells; '
-              'the other score cells are blank for officials to write in.'
-        : '$label. Score cells are blank for officials to write in.',
-    child: SizedBox(
-      width: page.strip.width,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [_headings(), for (final item in page.items) _row(item)],
+  Widget build(BuildContext context) {
+    final l10n = _l10nOf(context);
+    return Semantics(
+      container: true,
+      label: prefilled
+          ? l10n.sheetTablePrefilled(label)
+          : l10n.sheetTableBlank(label),
+      child: SizedBox(
+        width: page.strip.width,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _headings(),
+            for (final item in page.items) _row(l10n, item),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   Widget _headings() {
     final strip = page.strip;
@@ -160,13 +173,13 @@ class ScoringSheetTableView extends StatelessWidget {
     child: child,
   );
 
-  Widget _row(ScoringSheetItem item) => switch (item) {
-    ScoringSheetRoundRow() => _round(item),
-    ScoringSheetGroupRow() => _group(item),
+  Widget _row(AppLocalizations l10n, ScoringSheetItem item) => switch (item) {
+    ScoringSheetRoundRow() => _round(l10n, item),
+    ScoringSheetGroupRow() => _group(l10n, item),
     ScoringSheetPilotRow() => _pilot(item),
   };
 
-  Widget _round(ScoringSheetRoundRow row) => Semantics(
+  Widget _round(AppLocalizations l10n, ScoringSheetRoundRow row) => Semantics(
     header: true,
     child: Padding(
       padding: EdgeInsets.only(
@@ -181,12 +194,12 @@ class ScoringSheetTableView extends StatelessWidget {
         ),
         child: Text.rich(
           TextSpan(
-            text: 'Round ${row.ordinal}',
+            text: l10n.matrixRoundRow(row.ordinal),
             children: [
               TextSpan(
                 text:
-                    '${row.continued ? ' (Continued)' : ''} · Working Time '
-                    '$workingTime',
+                    '${row.continued ? l10n.sheetContinued : ''} · '
+                    '${l10n.sheetWorkingTime(workingTime)}',
                 style: const TextStyle(fontWeight: FontWeight.w400),
               ),
             ],
@@ -197,7 +210,7 @@ class ScoringSheetTableView extends StatelessWidget {
     ),
   );
 
-  Widget _group(ScoringSheetGroupRow row) => Semantics(
+  Widget _group(AppLocalizations l10n, ScoringSheetGroupRow row) => Semantics(
     header: true,
     child: Container(
       height: ScoringSheetStyle.groupHeight,
@@ -211,12 +224,12 @@ class ScoringSheetTableView extends StatelessWidget {
       ),
       child: Text.rich(
         TextSpan(
-          text: 'Group ${row.label}',
+          text: l10n.matrixGroupRow(row.label),
           children: [
             TextSpan(
               text:
-                  '${row.continued ? ' (Continued)' : ''} · ${row.size} '
-                  '${row.size == 1 ? 'Pilot' : 'Pilots'}',
+                  '${row.continued ? l10n.sheetContinued : ''} · '
+                  '${l10n.matrixGroupSize(row.size, row.size == 1 ? 'Pilot' : 'Pilots')}',
               style: const TextStyle(fontWeight: FontWeight.w400),
             ),
           ],

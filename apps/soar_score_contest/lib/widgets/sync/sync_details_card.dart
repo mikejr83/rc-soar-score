@@ -24,18 +24,10 @@ class SyncDetailsCard extends StatelessWidget {
   /// Null when a sync cannot be started now.
   final VoidCallback? onSyncNow;
 
-  /// The reminder that is always shown.
-  static const String unrecoverableWarning =
-      'Changes made after the last successful sync cannot be recovered if '
-      'this installation is lost.';
-
-  static const String localOnlyText =
-      'This contest is local only. It has no remote backup and does not '
-      'sync until it is tied to an account.';
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final dark = theme.brightness == Brightness.dark;
     final summary = this.summary;
     final problem = summary?.problem;
@@ -51,40 +43,43 @@ class SyncDetailsCard extends StatelessWidget {
           children: [
             Semantics(
               header: true,
-              child: Text('Sync', style: theme.textTheme.titleLarge),
+              child: Text(l10n.syncTitle, style: theme.textTheme.titleLarge),
             ),
             const SizedBox(height: 12),
             if (summary == null)
-              const Text('Checking…')
+              Text(l10n.syncChecking)
             else if (summary.localOnly) ...[
-              const Text(localOnlyText, key: ValueKey('sync-local-only')),
+              Text(
+                l10n.syncLocalOnlyText,
+                key: const ValueKey('sync-local-only'),
+              ),
               if (problem != null) ..._problemRow(theme, dark, problem),
             ] else ...[
               _row(
                 theme,
-                'Last synced',
+                l10n.syncLastSynced,
                 summary.lastSyncedAt == null
-                    ? 'Not synced yet'
+                    ? l10n.syncNotSyncedYet
                     : DirectorTime.of(context)(summary.lastSyncedAt!),
               ),
-              _row(theme, 'Waiting to be sent', '${summary.pendingChanges}'),
+              _row(theme, l10n.syncWaitingToSend, '${summary.pendingChanges}'),
               _row(
                 theme,
-                'Refused by the service',
+                l10n.syncRefusedByService,
                 '${summary.rejectedChanges}',
               ),
-              _row(theme, 'Conflicts to decide', '${summary.conflicts}'),
+              _row(theme, l10n.syncConflictsToDecide, '${summary.conflicts}'),
               if (summary.waitingForNewerService > 0)
                 _row(
                   theme,
-                  AppLocalizations.of(context).syncWaitingForNewerService,
+                  l10n.syncWaitingForNewerService,
                   '${summary.waitingForNewerService}',
                 ),
               if (problem != null) ..._problemRow(theme, dark, problem),
             ],
             const SizedBox(height: 12),
             Text(
-              unrecoverableWarning,
+              l10n.syncUnrecoverableWarning,
               key: const ValueKey('sync-unrecoverable-warning'),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
@@ -100,7 +95,7 @@ class SyncDetailsCard extends StatelessWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.sync),
-              label: Text(syncing ? 'Syncing…' : 'Sync now'),
+              label: Text(syncing ? l10n.syncSyncing : l10n.syncNow),
             ),
           ],
         ),

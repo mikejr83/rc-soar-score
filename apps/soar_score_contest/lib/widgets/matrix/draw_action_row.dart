@@ -76,7 +76,7 @@ class DrawActionRow extends StatelessWidget {
               busy ? l10n.matrixAddActionBusy : l10n.matrixAddAction,
             MatrixIntent.redraw =>
               busy ? l10n.matrixRedrawActionBusy : l10n.matrixRedrawAction,
-            null => busy ? 'Drawing matrix…' : 'Draw matrix',
+            null => busy ? l10n.matrixDrawActionBusy : l10n.matrixDrawAction,
           }),
         ),
         if (reasonText != null)
@@ -113,7 +113,7 @@ class DrawActionRow extends StatelessWidget {
                           onPressed: () => onFix(blocker!.fix!),
                           iconAlignment: IconAlignment.end,
                           icon: const Icon(Icons.open_in_new, size: 16),
-                          label: Text(blocker!.linkLabel ?? 'Open'),
+                          label: Text(blocker!.linkLabel ?? l10n.matrixOpen),
                         ),
                     ],
                   ),

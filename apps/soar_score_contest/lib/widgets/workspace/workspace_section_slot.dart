@@ -1,19 +1,21 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/workspace/workspace_section.dart';
 
 /// The label a section announces to assistive technology and shows on its
 /// placeholder.
-String workspaceSectionLabel(WorkspaceSection section) => switch (section) {
-  WorkspaceSection.nextStep => 'Next step',
-  WorkspaceSection.checklist => 'Setup checklist',
-  WorkspaceSection.invitations => 'Pilot invitations',
-  WorkspaceSection.attention => 'Needs attention',
-  WorkspaceSection.progress => 'Round progress',
-  WorkspaceSection.controls => 'Contest controls',
-  WorkspaceSection.facts => 'Contest facts',
-  WorkspaceSection.activity => 'Recent activity',
-};
+String workspaceSectionLabel(AppLocalizations l10n, WorkspaceSection section) =>
+    switch (section) {
+      WorkspaceSection.nextStep => l10n.workspaceSectionNextStep,
+      WorkspaceSection.checklist => l10n.workspaceSectionChecklist,
+      WorkspaceSection.invitations => l10n.workspaceSectionInvitations,
+      WorkspaceSection.attention => l10n.workspaceSectionAttention,
+      WorkspaceSection.progress => l10n.workspaceSectionProgress,
+      WorkspaceSection.controls => l10n.workspaceSectionControls,
+      WorkspaceSection.facts => l10n.workspaceSectionFacts,
+      WorkspaceSection.activity => l10n.workspaceSectionActivity,
+    };
 
 /// A labelled region of the workspace page. The widget ticket that owns a
 /// section replaces [child]; the layout never changes.
@@ -35,13 +37,18 @@ class WorkspaceSectionSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = workspaceSectionLabel(section);
+    final l10n = AppLocalizations.of(context);
+    final label = workspaceSectionLabel(l10n, section);
     return Semantics(
       container: true,
       label: label,
       child: KeyedSubtree(
         key: ValueKey('workspace-section-${section.id}'),
-        child: child ?? WorkspacePlaceholderCard(text: '$label goes here'),
+        child:
+            child ??
+            WorkspacePlaceholderCard(
+              text: l10n.workspaceSectionGoesHere(label),
+            ),
       ),
     );
   }

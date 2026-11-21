@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/app_localizations.dart';
 import 'focus_step.dart';
 
 /// The two penalties as two bordered cards, so the difference reads without
@@ -41,6 +42,7 @@ class ScorePenaltyCards extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final words = AppLocalizations.of(context);
     Widget card({required Widget child}) => Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -89,7 +91,7 @@ class ScorePenaltyCards extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              title(Icons.remove, 'Flight penalty'),
+              title(Icons.remove, words.scoreFlightPenaltyTitle),
               const SizedBox(height: 6),
               SizedBox(
                 width: 160,
@@ -124,11 +126,17 @@ class ScorePenaltyCards extends StatelessWidget {
               Text.rich(
                 TextSpan(
                   children: [
-                    const TextSpan(text: 'Deducted from '),
-                    TextSpan(text: 'this flight', style: helpBold),
-                    const TextSpan(text: ' (never below 0). '),
-                    TextSpan(text: 'Dropped', style: helpBold),
-                    const TextSpan(text: ' if this round is dropped.'),
+                    TextSpan(text: words.scorePenaltyFlightHelp1),
+                    TextSpan(
+                      text: words.scorePenaltyFlightThisFlight,
+                      style: helpBold,
+                    ),
+                    TextSpan(text: words.scorePenaltyFlightHelp2),
+                    TextSpan(
+                      text: words.scorePenaltyFlightDropped,
+                      style: helpBold,
+                    ),
+                    TextSpan(text: words.scorePenaltyFlightHelp3),
                   ],
                 ),
                 style: helpStyle,
@@ -144,24 +152,24 @@ class ScorePenaltyCards extends StatelessWidget {
         IconData cumStateIcon;
         var cumStateColor = scheme.onSurface;
         if (cumText.isEmpty) {
-          cumState = 'No cumulative penalty.';
+          cumState = words.scorePenaltyCumulativeNone;
           cumStateIcon = Icons.do_not_disturb_on;
         } else if (cum == null || cum < 0) {
-          cumState = 'A whole number of points, 0 or more.';
+          cumState = words.scorePenaltyCumulativeInvalid;
           cumStateIcon = Icons.error_outline;
           cumStateColor = scheme.error;
         } else if (cum == 0) {
-          cumState = 'Removed. Removing is recorded as an official correction.';
+          cumState = words.scorePenaltyCumulativeRemoved;
           cumStateIcon = Icons.remove_circle_outline;
         } else {
-          cumState = 'Applied: −$cum points from the contest total.';
+          cumState = words.scorePenaltyCumulativeApplied('−$cum');
           cumStateIcon = Icons.push_pin;
         }
         final cumulative = card(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              title(Icons.push_pin, 'Cumulative penalty'),
+              title(Icons.push_pin, words.scoreCumulativePenaltyTitle),
               const SizedBox(height: 6),
               SizedBox(
                 width: 160,
@@ -178,7 +186,7 @@ class ScorePenaltyCards extends StatelessWidget {
                     onChanged: cumulativeOnChanged,
                     style: const TextStyle(fontSize: 18),
                     decoration: InputDecoration(
-                      hintText: 'None',
+                      hintText: words.scorePenaltyNone,
                       suffixIcon: ptsSuffix,
                       suffixIconConstraints: const BoxConstraints(),
                       errorText: cumulativeErrorText,
@@ -207,13 +215,17 @@ class ScorePenaltyCards extends StatelessWidget {
               Text.rich(
                 TextSpan(
                   children: [
-                    const TextSpan(text: 'Deducted from the '),
-                    TextSpan(text: 'contest total', style: helpBold),
-                    const TextSpan(text: '. '),
-                    TextSpan(text: 'Never dropped', style: helpBold),
-                    const TextSpan(
-                      text: ', and still counts if this flight is re-flown.',
+                    TextSpan(text: words.scorePenaltyCumulativeHelp1),
+                    TextSpan(
+                      text: words.scorePenaltyCumulativeContestTotal,
+                      style: helpBold,
                     ),
+                    TextSpan(text: words.scorePenaltyCumulativeHelp2),
+                    TextSpan(
+                      text: words.scorePenaltyCumulativeNeverDropped,
+                      style: helpBold,
+                    ),
+                    TextSpan(text: words.scorePenaltyCumulativeHelp3),
                   ],
                 ),
                 style: helpStyle,

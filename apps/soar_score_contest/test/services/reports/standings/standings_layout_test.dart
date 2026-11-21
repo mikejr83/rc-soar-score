@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/reports/standings/standings_key.dart';
 import 'package:soar_score_contest/services/reports/standings/standings_layout.dart';
 import 'package:soar_score_contest/services/reports/standings/standings_options.dart';
@@ -8,6 +9,8 @@ import 'package:soar_score_contest/services/reports/viewer/page_setup.dart';
 import 'package:soar_score_contest/widgets/reports/viewer/report_sheet_page.dart';
 
 import '../../../support/standings_fixtures.dart';
+
+final l10n = AppLocalizationsEn();
 
 void main() {
   final facts = factsOf(StandingsFixture());
@@ -157,34 +160,34 @@ void main() {
 
     test('a page points to the next set for the same pilots', () {
       expect(
-        StandingsKey.continuation(page: layout.pages[0], layout: layout),
+        StandingsKey.continuation(l10n, page: layout.pages[0], layout: layout),
         'Rounds 13 to 14 continue on page 3',
       );
       expect(
-        StandingsKey.continuation(page: layout.pages[1], layout: layout),
+        StandingsKey.continuation(l10n, page: layout.pages[1], layout: layout),
         'Rounds 13 to 14 continue on page 4',
       );
       expect(
-        StandingsKey.continuation(page: layout.pages[2], layout: layout),
+        StandingsKey.continuation(l10n, page: layout.pages[2], layout: layout),
         isNull,
       );
     });
 
     test('a page says which pilots and rounds it holds', () {
       expect(
-        StandingsKey.indicator(page: layout.pages[1]),
+        StandingsKey.indicator(l10n, page: layout.pages[1]),
         'Pilots 27 to 30 · Rounds 1 to 12',
       );
       expect(
-        StandingsKey.indicator(page: layout.pages[2]),
+        StandingsKey.indicator(l10n, page: layout.pages[2]),
         'Pilots 1 to 26 · Rounds 13 to 14',
       );
     });
 
     test('rounds are written for one, several and none', () {
-      expect(StandingsKey.roundsText([5]), 'Round 5');
-      expect(StandingsKey.roundsText([5, 6, 7]), 'Rounds 5 to 7');
-      expect(StandingsKey.roundsText([], penalty: true), 'Penalty');
+      expect(StandingsKey.roundsText(l10n, [5]), 'Round 5');
+      expect(StandingsKey.roundsText(l10n, [5, 6, 7]), 'Rounds 5 to 7');
+      expect(StandingsKey.roundsText(l10n, [], penalty: true), 'Penalty');
     });
   });
 }

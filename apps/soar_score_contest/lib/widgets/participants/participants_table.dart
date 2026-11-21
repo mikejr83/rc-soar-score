@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/participants/participant_option.dart';
 import '../../services/participants/participant_row.dart';
 import 'participant_cells.dart';
@@ -46,7 +47,7 @@ class ParticipantsTable extends StatelessWidget {
   static const double _gap = 8;
   static const double _padding = 12;
 
-  List<_Column> _columns() => [
+  List<_Column> _columns(AppLocalizations l10n) => [
     // The number is the first thing a director reads about a pilot, so it
     // leads the row, right after the checkbox.
     if (editing.rules.has(ParticipantOption.pilotNumbers))
@@ -57,7 +58,7 @@ class ParticipantsTable extends StatelessWidget {
         (context, cells) => cells.number(context),
       ),
     _Column(
-      'Name',
+      l10n.participantColumnName,
       130,
       1.4,
       (context, cells) => Row(
@@ -68,42 +69,63 @@ class ParticipantsTable extends StatelessWidget {
         ],
       ),
     ),
-    _Column('Email', 170, 1.3, (context, cells) => cells.emailCell(context)),
+    _Column(
+      l10n.participantColumnEmail,
+      170,
+      1.3,
+      (context, cells) => cells.emailCell(context),
+    ),
     for (final option in ParticipantCells.columnsFor(editing))
       ...switch (option) {
         ParticipantOption.roles => [
-          _Column('Role', 128, 0, (context, cells) => cells.role(context)),
+          _Column(
+            l10n.participantColumnRole,
+            128,
+            0,
+            (context, cells) => cells.role(context),
+          ),
         ],
         ParticipantOption.classes => [
           _Column(
-            'Class *',
+            l10n.participantColumnClass,
             112,
             0,
             (context, cells) => cells.classification(context),
           ),
         ],
         ParticipantOption.teams => [
-          _Column('Team', 150, 1.2, (context, cells) => cells.team(context)),
+          _Column(
+            l10n.participantColumnTeam,
+            150,
+            1.2,
+            (context, cells) => cells.team(context),
+          ),
         ],
         // The number column already leads the row.
         ParticipantOption.pilotNumbers => const [],
         ParticipantOption.models => [
           _Column(
-            'Models',
+            l10n.participantColumnModels,
             150,
             0,
             (context, cells) => cells.modelsCell(context),
           ),
         ],
       },
-    _Column('Status', 110, 0, (context, cells) => cells.status(context)),
+    _Column(
+      l10n.participantColumnStatus,
+      110,
+      0,
+      (context, cells) => cells.status(context),
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final columns = _columns();
+    final columns = _columns(l10n);
     final checkboxWidth = selectable ? 40.0 : 0.0;
     final minWidth =
         (actionsOf == null ? 0 : 48) +
@@ -119,7 +141,7 @@ class ParticipantsTable extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: 'Contest participants',
+      label: l10n.participantsTableLabel,
       child: Container(
         decoration: BoxDecoration(
           color: scheme.secondaryContainer,
@@ -194,7 +216,7 @@ class ParticipantsTable extends StatelessWidget {
                     lead: Checkbox(
                       value: all ? true : (some ? null : false),
                       tristate: true,
-                      semanticLabel: 'Select all',
+                      semanticLabel: l10n.participantSelectAll,
                       onChanged: (_) => onToggleAll(),
                     ),
                     cells: [
@@ -232,7 +254,7 @@ class ParticipantsTable extends StatelessWidget {
                                 ),
                               ),
                         divider: index < rows.length - 1,
-                        lead: cells.checkbox(),
+                        lead: cells.checkbox(context),
                         actions: actionsOf?.call(participant),
                         cells: [
                           for (final column in columns)

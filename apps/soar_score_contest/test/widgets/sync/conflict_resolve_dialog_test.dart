@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/services/sync/conflict_answer.dart';
 import 'package:soar_score_contest/services/sync/open_conflict.dart';
 import 'package:soar_score_contest/services/sync/sync_problem.dart';
@@ -30,6 +31,8 @@ Future<void> _open(
 ) async {
   await tester.pumpWidget(
     MaterialApp(
+      localizationsDelegates: appLocalizationDelegates,
+      supportedLocales: const [Locale('en')],
       home: Builder(
         builder: (context) => TextButton(
           onPressed: () => showDialog<ConflictAnswer>(

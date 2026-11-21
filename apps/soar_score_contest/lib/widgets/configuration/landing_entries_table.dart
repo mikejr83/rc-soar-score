@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../landings/landing_unit_text.dart';
@@ -11,30 +12,33 @@ class LandingEntriesTable extends StatelessWidget {
   final LandingTableView view;
 
   /// The header over the keys: `Distance (m)`, `Distance (ft)`, `Landing key`.
-  static String keyHeader(LandingInputUnit unit) => switch (unit) {
-    LandingInputUnit.meters => 'Distance (m)',
-    LandingInputUnit.feet => 'Distance (ft)',
-    LandingInputUnit.points => 'Landing key',
-  };
+  static String keyHeader(AppLocalizations l10n, LandingInputUnit unit) =>
+      switch (unit) {
+        LandingInputUnit.meters => l10n.configLandingKeyHeaderMeters,
+        LandingInputUnit.feet => l10n.configLandingKeyHeaderFeet,
+        LandingInputUnit.points => l10n.configLandingKeyHeaderPoints,
+      };
 
   /// `1 to 50 points`, or `No entries`.
-  static String pointsRange(LandingTableView view) {
+  static String pointsRange(AppLocalizations l10n, LandingTableView view) {
     if (view.results.isEmpty) {
-      return 'No entries';
+      return l10n.configLandingNoEntries;
     }
     final points = view.results.map((r) => r.pointValue);
     final low = points.reduce((a, b) => a < b ? a : b);
     final high = points.reduce((a, b) => a > b ? a : b);
-    return '$low–$high points';
+    return l10n.configLandingPointsRangeValue(low, high);
   }
 
   /// `Meters · 10 entries · 5–50 points`.
-  static String summary(LandingTableView view) =>
-      '${landingUnitLabel(view.table.inputUnit)} · '
-      '${view.results.length} entries · ${pointsRange(view)}';
+  static String summary(AppLocalizations l10n, LandingTableView view) =>
+      '${landingUnitLabel(l10n, view.table.inputUnit)} · '
+      '${l10n.configLandingEntriesCount(view.results.length)} · '
+      '${pointsRange(l10n, view)}';
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final entries = [...view.results]
@@ -47,7 +51,7 @@ class LandingEntriesTable extends StatelessWidget {
       fontFeatures: const [FontFeature.tabularFigures()],
     );
     return Semantics(
-      label: '${view.table.name} entries',
+      label: l10n.configLandingEntriesLabel(view.table.name),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 420),
         child: DecoratedBox(
@@ -70,13 +74,13 @@ class LandingEntriesTable extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          keyHeader(view.table.inputUnit),
+                          keyHeader(l10n, view.table.inputUnit),
                           style: header,
                         ),
                       ),
                       Expanded(
                         child: Text(
-                          'Points',
+                          l10n.landingsPointsHeading,
                           textAlign: TextAlign.end,
                           style: header,
                         ),

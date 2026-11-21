@@ -450,6 +450,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final d = widget.draft;
     final off = d.measurementsOffReason;
     final t = d.time;
+    final words = AppLocalizations.of(context);
     // A disabled field (retired, locked, queued) shows no entry hints.
     final missing = !editable
         ? null
@@ -461,7 +462,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _label(context, 'Time flown (m:ss)', labels),
+        _label(context, words.scoreTimeLabel, labels),
         _field(
           context,
           key: ValueKey(_k('time')),
@@ -492,6 +493,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
   Widget _heightCell(BuildContext context, bool labels, bool editable) {
     final d = widget.draft;
     final off = d.measurementsOffReason;
+    final words = AppLocalizations.of(context);
     final problem = d.problems
         .where((p) => p.field == 'launch_height')
         .map((p) => p.message)
@@ -514,13 +516,13 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     }
     final penalty = widget.heightPenalty;
     final note = shown == null && penalty != null && problem == null
-        ? '${_points(penalty)} pts'
+        ? words.scorePointsNote(_points(penalty))
         : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _label(context, 'Launch height (m)', labels),
+        _label(context, words.scoreHeightLabel, labels),
         _field(
           context,
           key: ValueKey(_k('height')),
@@ -591,6 +593,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
   Widget _landingCell(BuildContext context, bool labels, bool editable) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final words = AppLocalizations.of(context);
     final d = widget.draft;
     final off = d.landingOffReason;
     final focused = _landingFocused && off == null;
@@ -610,33 +613,33 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       text = '0';
       icon = Icons.block;
     } else if (d.lateLanding) {
-      text = '0 · late';
+      text = words.scoreLandingLate;
       icon = Icons.timer_off;
     } else if (widget.landings.isEmpty) {
-      text = 'No landing table';
+      text = words.scoreNoLandingTable;
       icon = Icons.block;
     } else if (d.landingBad) {
-      text = '${d.landingText.trim()} isn’t in the landing table. Use $hint';
+      text = words.scoreLandingBad(d.landingText.trim(), hint);
       icon = Icons.error;
       error = true;
     } else if (focused && chosen == null) {
-      text = 'Type table points: $hint';
+      text = words.scoreLandingTypeHint(hint);
       icon = Icons.keyboard;
       color = scheme.primary;
     } else if (focused && chosen != null) {
-      text = '${chosen.displayValue} · ${chosen.pointValue} pts';
+      text = words.scoreLandingSelected(chosen.displayValue, chosen.pointValue);
       icon = Icons.arrow_right_alt;
       color = scheme.primary;
     } else if (chosen != null) {
-      text = '${chosen.displayValue} · ${chosen.pointValue}';
+      text = words.scoreLandingBand(chosen.displayValue, chosen.pointValue);
     } else {
       text = '—';
     }
     final flags = <(IconData, String)>[
-      if (d.lateLanding) (Icons.timer_off, 'Late landing'),
-      if (d.motorRestart) (Icons.settings, 'Motor restart'),
-      if (d.outOfBounds) (Icons.wrong_location, 'Out of bounds'),
-      if (d.noAltitude) (Icons.height, 'No altitude'),
+      if (d.lateLanding) (Icons.timer_off, words.scoreFlagLateLanding),
+      if (d.motorRestart) (Icons.settings, words.scoreFlagMotorRestart),
+      if (d.outOfBounds) (Icons.wrong_location, words.scoreFlagOutOfBounds),
+      if (d.noAltitude) (Icons.height, words.scoreFlagNoAltitude),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -646,7 +649,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
           Padding(
             padding: const EdgeInsets.only(bottom: 3),
             child: Text(
-              'Landing (pts)',
+              words.scoreLandingLabel,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: focused ? scheme.primary : scheme.onSurfaceVariant,
               ),
@@ -755,6 +758,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
 
   Widget _penaltyCell(BuildContext context, bool labels) {
     final theme = Theme.of(context);
+    final words = AppLocalizations.of(context);
     final muted = theme.textTheme.bodyMedium?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
     );
@@ -770,7 +774,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         children: [
           _label(
             context,
-            'Penalties',
+            words.scorePenaltiesLabel,
             labels,
             labels ? TextAlign.start : TextAlign.center,
           ),
@@ -790,20 +794,23 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 4),
-                  Text('$flight flight', style: theme.textTheme.bodyMedium),
+                  Text(
+                    words.scoreFlightPenalty(flight),
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 ],
               ),
             )
           else if (cumulative == null)
             Text(
-              'None',
+              words.scorePenaltyNone,
               textAlign: labels ? TextAlign.start : TextAlign.center,
               style: muted,
             ),
           // A removal keeps its row: the value was applied earlier.
           if (cumulative == 0)
             Text(
-              'Removed',
+              words.scorePenaltyRemoved,
               textAlign: labels ? TextAlign.start : TextAlign.center,
               style: muted,
             ),
@@ -828,7 +835,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '$cumulative total',
+                      words.scoreCumulativePenalty(cumulative),
                       style: theme.textTheme.bodyMedium,
                     ),
                   ],
@@ -878,7 +885,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _label(context, 'Indicators', labels),
+          _label(context, words.scoreIndicatorsLabel, labels),
           if (chips.isEmpty)
             Text(
               '–',
@@ -901,30 +908,31 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final colors = MatrixColors.of(context);
+    final words = AppLocalizations.of(context);
     final subs = <(IconData, String, Color?)>[
       // The Unsaved chip already says the values are not saved. Only a
       // mistake that blocks the save is added, and only on a row the director
       // has left: the open row lists its problems in the entry band.
       if (dirty && !widget.active && widget.draft.problems.isNotEmpty)
-        (
-          Icons.error,
-          AppLocalizations.of(context).scoreFixToSave,
-          scheme.error,
-        ),
+        (Icons.error, words.scoreFixToSave, scheme.error),
       if (widget.findings.isNotEmpty)
-        (Icons.help_outline, 'Check: ${widget.findings.length}', colors.warn),
+        (
+          Icons.help_outline,
+          words.scoreCheckCount(widget.findings.length),
+          colors.warn,
+        ),
       if (widget.row.isAdoptionPending)
         (
           Icons.cloud_upload_outlined,
           widget.row.isAutomaticUnconfirmed
-              ? AppLocalizations.of(context).scoreConfirmWaiting
-              : AppLocalizations.of(context).scoreAdoptionWaiting,
+              ? words.scoreConfirmWaiting
+              : words.scoreAdoptionWaiting,
           null,
         ),
       if (widget.row.retired)
         (
           Icons.person_off_outlined,
-          'Retired from round ${widget.row.pilot.retiredAtRound}',
+          words.scoreRetiredNote(widget.row.pilot.retiredAtRound!),
           null,
         ),
     ];
@@ -1079,6 +1087,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
 
   Widget _menuCell(BuildContext context) {
     final row = widget.row;
+    final words = AppLocalizations.of(context);
     final retired = row.retired;
     final blocked = widget.retireBlocked;
     final round = row.pilot.retiredAtRound;
@@ -1088,7 +1097,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         padding: EdgeInsets.only(top: _menuTop),
         child: PopupMenuButton<String>(
           key: ValueKey('row-menu-${row.id.value}'),
-          tooltip: 'More for ${row.pilot.name}',
+          tooltip: words.scoreMoreTooltip(row.pilot.name),
           icon: const Icon(Icons.more_vert),
           onSelected: (value) => switch (value) {
             'history' => widget.actions.onHistory(),
@@ -1097,30 +1106,28 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
             _ => null,
           },
           itemBuilder: (context) => [
-            const PopupMenuItem<String>(
-              key: ValueKey('menu-history'),
+            PopupMenuItem<String>(
+              key: const ValueKey('menu-history'),
               value: 'history',
-              child: Text('Score history'),
+              child: Text(words.scoreHistoryMenu),
             ),
             if (round == null || !retired)
               PopupMenuItem<String>(
                 key: const ValueKey('menu-retire'),
                 value: 'retire',
                 enabled: blocked == null,
-                child: Text(blocked ?? 'Retire pilot from this round on'),
+                child: Text(blocked ?? words.scoreRetireMenu),
               )
             else
               PopupMenuItem<String>(
                 key: const ValueKey('menu-reinstate'),
                 value: 'reinstate',
                 enabled: blocked == null,
-                child: Text(
-                  blocked ?? 'Reinstate pilot (retired from round $round)',
-                ),
+                child: Text(blocked ?? words.scoreReinstateMenu(round)),
               ),
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               enabled: false,
-              child: Text('Correct a locked score · Later release'),
+              child: Text(words.scoreLockedLater),
             ),
           ],
         ),
@@ -1164,11 +1171,12 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
 
   Widget _pilotCell(BuildContext context) {
     final theme = Theme.of(context);
+    final words = AppLocalizations.of(context);
     final row = widget.row;
     final sub = [
       if (widget.grid.showTeams && row.team != null) row.team!.name,
       if (row.pilot.number != null && widget.grid.idLabel != 'No.')
-        'No. ${row.pilot.number}',
+        words.scorePilotNo(row.pilot.number!),
     ].join(' · ');
     return Padding(
       padding: EdgeInsets.only(top: _cellTop),
@@ -1177,7 +1185,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
         children: [
           if (widget.grid.showTeams) ...[
             Tooltip(
-              message: row.team?.name ?? 'No team',
+              message: row.team?.name ?? words.scoreNoTeam,
               child: TeamBadge(marker: row.team),
             ),
             const SizedBox(width: 8),
@@ -1226,6 +1234,7 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final groupValue = dirty ? null : saved?.groupScore;
     String number(double? v) => v == null ? '–' : v.toStringAsFixed(1);
 
+    final words = AppLocalizations.of(context);
     final lane = _laneCell(context);
     final pilot = _pilotCell(context);
     final time = _timeCell(context, fieldLabels, editable);
@@ -1233,18 +1242,18 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final land = _landingCell(context, fieldLabels, editable);
     final raw = _numberCell(
       context,
-      'Raw score',
+      words.scoreRawLabel,
       labels,
       number(rawValue),
       dirty,
       // A partly typed row has no raw score yet.
       caption: dirty && rawValue == null && !d.isBlank && !_readOnly
-          ? AppLocalizations.of(context).scoreIncomplete
+          ? words.scoreIncomplete
           : null,
     );
     final grp = _numberCell(
       context,
-      'Group score',
+      words.scoreGroupLabel,
       labels,
       number(groupValue),
       dirty,
@@ -1459,16 +1468,17 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
   }
 
   String _statusWord(bool dirty) {
-    if (dirty) return 'unsaved changes';
+    final words = AppLocalizations.of(context);
+    if (dirty) return words.scoreSemUnsaved;
     return switch (widget.row.status) {
-      RowStatus.notEntered => 'not entered',
-      RowStatus.submitted => 'submitted by a participant',
+      RowStatus.notEntered => words.scoreSemNotEntered,
+      RowStatus.submitted => words.scoreSemSubmitted,
       RowStatus.official =>
         widget.row.isAutomaticUnconfirmed
-            ? 'accepted automatically'
-            : 'official',
-      RowStatus.locked => 'locked',
-      RowStatus.retired => 'retired',
+            ? words.scoreSemAcceptedAuto
+            : words.scoreSemOfficial,
+      RowStatus.locked => words.scoreSemLocked,
+      RowStatus.retired => words.scoreSemRetired,
     };
   }
 }

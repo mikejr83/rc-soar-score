@@ -3,11 +3,14 @@ import 'dart:convert';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/pages/participant_editor_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/participant_test_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 Future<List<http.Request>> _open(WidgetTester tester) async {
   useTallWindow(tester);
@@ -47,14 +50,17 @@ void main() {
     await _saveAndAddAnother(tester);
 
     expect(requests.where((r) => r.method == 'POST'), hasLength(1));
-    expect(find.text('Sam Okafor added'), findsOneWidget);
+    expect(
+      find.text(_l10n.participantEditorAddedSnack('Sam Okafor')),
+      findsOneWidget,
+    );
     expect(_text(tester, 'first-name'), isEmpty);
     expect(_text(tester, 'email'), isEmpty);
     expect(_text(tester, 'fai-number'), isEmpty);
     expect(_text(tester, 'club'), 'Tampa Bay Soaring Society');
     expect(_text(tester, 'city'), 'Tampa');
     expect(
-      find.text('Club and location kept from Sam Okafor.'),
+      find.text(_l10n.participantEditorKeptTitle('Sam Okafor')),
       findsOneWidget,
     );
   });
@@ -63,7 +69,7 @@ void main() {
     await _open(tester);
     await _fillSam(tester);
     await _saveAndAddAnother(tester);
-    await tester.tap(find.text('Clear them'));
+    await tester.tap(find.text(_l10n.participantEditorClearKept));
     await tester.pump();
 
     expect(_text(tester, 'club'), isEmpty);

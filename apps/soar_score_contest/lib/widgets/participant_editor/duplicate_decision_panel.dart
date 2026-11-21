@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/participants/participant_field.dart';
 import '../../services/participants/participant_field_rules.dart';
 import '../../services/participants/participant_form_values.dart';
@@ -33,6 +34,7 @@ class DuplicateDecisionPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final words = AppLocalizations.of(context);
     final existingName = '${existing.firstName} ${existing.lastName}';
     final enteredName = entered.fullName;
     return Focus(
@@ -66,16 +68,15 @@ class DuplicateDecisionPanel extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Decision needed. Nothing has been saved.',
+                              words.participantEditorDuplicateLead,
                               style: theme.textTheme.labelMedium,
                             ),
                             Text(
-                              'Someone with this email already exists',
+                              words.participantEditorDuplicateTitle,
                               style: theme.textTheme.titleLarge,
                             ),
                             Text(
-                              'Compare the two and choose. Matching ignores '
-                              'upper and lower case.',
+                              words.participantEditorDuplicateCompare,
                               style: theme.textTheme.bodyMedium,
                             ),
                           ],
@@ -90,7 +91,7 @@ class DuplicateDecisionPanel extends StatelessWidget {
                     children: [
                       _tile(
                         context,
-                        'Existing participant',
+                        words.participantEditorDuplicateExisting,
                         existingName,
                         existing.club,
                         _place(existing.city, existing.state),
@@ -99,7 +100,7 @@ class DuplicateDecisionPanel extends StatelessWidget {
                       ),
                       _tile(
                         context,
-                        'What you entered',
+                        words.participantEditorDuplicateEntered,
                         enteredName,
                         entered.optional(ParticipantField.club),
                         _place(
@@ -115,31 +116,30 @@ class DuplicateDecisionPanel extends StatelessWidget {
                   FilledButton(
                     key: const ValueKey('use-existing'),
                     onPressed: onUseExisting,
-                    child: const Text('Use existing participant'),
+                    child: Text(words.participantEditorUseExisting),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 4, bottom: 12),
                     child: Text(
                       addsToContest
-                          ? 'Adds $existingName to this contest. Nothing new '
-                                'is created and what you typed here isn’t '
-                                'saved.'
-                          : 'Opens $existingName. Nothing new is created and '
-                                'what you typed here isn’t saved.',
+                          ? words.participantEditorDuplicateAdds(existingName)
+                          : words.participantEditorDuplicateOpens(existingName),
                       style: theme.textTheme.bodySmall,
                     ),
                   ),
                   OutlinedButton(
                     key: const ValueKey('change-email'),
                     onPressed: onBackToEdit,
-                    child: const Text('Change the email'),
+                    child: Text(words.participantEditorChangeEmail),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      'Two participants cannot share an email. Go back and '
-                      'enter a different one for '
-                      '${enteredName.isEmpty ? 'this person' : enteredName}.',
+                      words.participantEditorDuplicateNote(
+                        enteredName.isEmpty
+                            ? words.participantEditorThisPerson
+                            : enteredName,
+                      ),
                       style: theme.textTheme.bodySmall,
                     ),
                   ),
@@ -167,6 +167,7 @@ class DuplicateDecisionPanel extends StatelessWidget {
     required bool filled,
   }) {
     final theme = Theme.of(context);
+    final words = AppLocalizations.of(context);
     final scheme = theme.colorScheme;
     final initials = name.isEmpty
         ? '?'
@@ -206,17 +207,17 @@ class DuplicateDecisionPanel extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            name.isEmpty ? 'No name' : name,
+                            name.isEmpty ? words.participantEditorNoName : name,
                             style: theme.textTheme.titleMedium,
                           ),
                           Text(
-                            club ?? 'No club',
+                            club ?? words.participantEditorNoClub,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: scheme.onSurfaceVariant,
                             ),
                           ),
                           Text(
-                            place ?? 'No location',
+                            place ?? words.participantEditorNoLocation,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: scheme.onSurfaceVariant,
                             ),
@@ -236,7 +237,7 @@ class DuplicateDecisionPanel extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Semantics(
-                      label: 'Email hidden, starts with ${maskedEmail[0]}',
+                      label: words.participantEditorEmailPrefix(maskedEmail[0]),
                       excludeSemantics: true,
                       child: Text(
                         maskedEmail,

@@ -1,6 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/pages/landing_page.dart';
+
+final _l10n = AppLocalizationsEn();
 
 const _sizes = [
   Size(1280, 800),
@@ -23,7 +27,10 @@ void main() {
             addTearDown(tester.view.reset);
 
             await tester.pumpWidget(
-              MaterialApp(home: LandingPage(isWeb: isWeb)),
+              MaterialApp(
+                localizationsDelegates: appLocalizationDelegates,
+                home: LandingPage(isWeb: isWeb),
+              ),
             );
             await tester.pumpAndSettle();
 
@@ -40,6 +47,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: appLocalizationDelegates,
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(context)
                 .copyWith(textScaler: const TextScaler.linear(2)),
@@ -60,15 +68,20 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(const MaterialApp(home: LandingPage()));
+      await tester.pumpWidget(
+        const MaterialApp(
+          localizationsDelegates: appLocalizationDelegates,
+          home: LandingPage(),
+        ),
+      );
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
-        find.text('Public contest site'),
+        find.text(_l10n.landingPublicSite),
         100,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.text('Public contest site'), findsOneWidget);
+      expect(find.text(_l10n.landingPublicSite), findsOneWidget);
     });
   });
 }

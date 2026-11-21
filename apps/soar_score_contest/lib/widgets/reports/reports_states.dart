@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// The loading state: a progress bar over the shapes of the page.
 class ReportsLoading extends StatelessWidget {
   const ReportsLoading({super.key, required this.twoColumns});
@@ -8,6 +10,7 @@ class ReportsLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     Widget block(double height, [double opacity = 1]) => Opacity(
       opacity: opacity,
@@ -23,7 +26,7 @@ class ReportsLoading extends StatelessWidget {
       for (final opacity in [1.0, .8, .6, .45]) block(176, opacity),
     ];
     return Semantics(
-      label: 'Loading reports',
+      label: l10n.reportsLoadingLabel,
       container: true,
       child: Column(
         key: const ValueKey('reports-loading'),
@@ -43,7 +46,7 @@ class ReportsLoading extends StatelessWidget {
               )
           else
             ...cards,
-          const Text('Loading reports…'),
+          Text(l10n.reportsLoadingText),
         ],
       ),
     );
@@ -58,6 +61,7 @@ class ReportsUnavailable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Center(
@@ -83,14 +87,12 @@ class ReportsUnavailable extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Can’t read this contest’s data',
+                  l10n.reportsUnavailableTitle,
                   style: theme.textTheme.titleLarge,
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  'The reports list needs the contest’s matrix and scores, '
-                  'and they couldn’t be loaded from this device or the '
-                  'server. Nothing has changed.',
+                  l10n.reportsUnavailableBody,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
@@ -100,7 +102,7 @@ class ReportsUnavailable extends StatelessWidget {
                   key: const ValueKey('reports-retry'),
                   onPressed: onRetry,
                   icon: const Icon(Icons.refresh, size: 20),
-                  label: const Text('Try again'),
+                  label: Text(l10n.reportsUnavailableRetry),
                 ),
               ],
             ),

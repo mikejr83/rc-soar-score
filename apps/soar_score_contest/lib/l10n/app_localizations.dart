@@ -2223,6 +2223,2571 @@ abstract class AppLocalizations {
   /// **'Checking scores…'**
   String get matrixMoveChecking;
 
+  /// Text while the matrix loads.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading matrix…'**
+  String get matrixLoading;
+
+  /// Semantics label while the matrix loads.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading matrix'**
+  String get matrixLoadingLabel;
+
+  /// Title of the load-failure state.
+  ///
+  /// In en, this message translates to:
+  /// **'The matrix could not be loaded.'**
+  String get matrixLoadFailed;
+
+  /// Title of the offline state.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix unavailable'**
+  String get matrixUnavailableTitle;
+
+  /// Body of the offline state.
+  ///
+  /// In en, this message translates to:
+  /// **'Soar Score can’t reach the server, so the matrix can’t be shown. Nothing on this contest has changed.'**
+  String get matrixUnavailableBody;
+
+  /// Snackbar after the first draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix drawn.'**
+  String get matrixDrawn;
+
+  /// Where the configured rounds came from.
+  ///
+  /// In en, this message translates to:
+  /// **'contest configuration'**
+  String get matrixSourceConfiguration;
+
+  /// Where the configured groups came from.
+  ///
+  /// In en, this message translates to:
+  /// **'the New Contest wizard'**
+  String get matrixSourceWizard;
+
+  /// Label of the rounds field for a seeded draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Preliminary seeded rounds'**
+  String get matrixSeededRoundsLabel;
+
+  /// Label of the rounds field.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of rounds'**
+  String get matrixRoundsLabel;
+
+  /// Label of the groups field.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups per round'**
+  String get matrixGroupsLabel;
+
+  /// One problem in the draw error list.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups per round: {error}'**
+  String matrixGroupsErrorLabel(String error);
+
+  /// Note when the configuration holds no value for a field.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest configuration has no value. Enter one here, or set it in Configuration.'**
+  String get matrixNoteNoValue;
+
+  /// Note naming where a field value came from.
+  ///
+  /// In en, this message translates to:
+  /// **'From {source}: {text}'**
+  String matrixNoteFrom(String source, String text);
+
+  /// Note when a field differs from the suggested value.
+  ///
+  /// In en, this message translates to:
+  /// **'Differs from the suggested value ({configured}). Changing it here doesn’t change the contest configuration.'**
+  String matrixNoteEdited(int configured);
+
+  /// Rounds value text for a seeded draw.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} preliminary seeded rounds'**
+  String matrixSeededRoundsText(int count);
+
+  /// Rounds value text.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} rounds'**
+  String matrixRoundsText(int count);
+
+  /// Groups value text.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} groups per round'**
+  String matrixGroupsText(int count);
+
+  /// Reset action label of a draw number field.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to {value}'**
+  String matrixResetTo(String value);
+
+  /// Chip on a field that differs from its configured value.
+  ///
+  /// In en, this message translates to:
+  /// **'Edited'**
+  String get matrixEdited;
+
+  /// Action to open the configuration page from a draw field.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Configuration'**
+  String get matrixOpenConfiguration;
+
+  /// Fallback reset label of a draw number field.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get matrixReset;
+
+  /// Title of the first-draw card.
+  ///
+  /// In en, this message translates to:
+  /// **'No matrix drawn yet'**
+  String get matrixNoMatrixTitle;
+
+  /// Intro of the first-draw card.
+  ///
+  /// In en, this message translates to:
+  /// **'No flight matrix has been drawn for this contest. Draw the first matrix here; afterwards you can add rounds and redraw the rounds without scores.'**
+  String get matrixNoMatrixIntro;
+
+  /// Heading of the first-draw form.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw the first matrix'**
+  String get matrixDrawFirstTitle;
+
+  /// Title of the draw-error list after a server rejection.
+  ///
+  /// In en, this message translates to:
+  /// **'The server rejected the draw'**
+  String get matrixServerRejected;
+
+  /// Title of the draw-error list when fields must be fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix {count} field{plural} before drawing'**
+  String matrixFixFields(int count, String plural);
+
+  /// Body of the draw-error list.
+  ///
+  /// In en, this message translates to:
+  /// **'Your values are kept. Nothing was drawn.'**
+  String get matrixErrorsKept;
+
+  /// Title of the network-failure banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t reach the server'**
+  String get matrixNetworkTitle;
+
+  /// Body of the network-failure banner for the first draw.
+  ///
+  /// In en, this message translates to:
+  /// **'The matrix wasn’t drawn and the page hasn’t changed. Your values are kept.'**
+  String get matrixNetworkFirstBody;
+
+  /// Action of the network-failure banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get matrixTryAgain;
+
+  /// Title of the conflict banner.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest changed on the server'**
+  String get matrixConflictTitle;
+
+  /// Body of the conflict banner for the first draw.
+  ///
+  /// In en, this message translates to:
+  /// **'A matrix has already been drawn for this contest, or the contest can no longer be drawn. Reload to see the current state. Your values stay until you reload.'**
+  String get matrixConflictFirstBody;
+
+  /// Action of the conflict banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get matrixReload;
+
+  /// Reason the draw button is off while there is a conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload the contest before drawing.'**
+  String get matrixActionReload;
+
+  /// Semantics label of a link to Configuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Change {label} in Configuration'**
+  String matrixChangeInConfig(String label);
+
+  /// Visible label of a link to Configuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get matrixChange;
+
+  /// Title of the advanced section.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get matrixAdvancedTitle;
+
+  /// Subtitle of the advanced section.
+  ///
+  /// In en, this message translates to:
+  /// **'Random seed, attempts per round, seed count'**
+  String get matrixAdvancedSubtitle;
+
+  /// Semantics label of the fairness panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw details'**
+  String get matrixDrawDetails;
+
+  /// Semantics label of an attention list.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get matrixNeedsAttention;
+
+  /// Snackbar after copying the random seed.
+  ///
+  /// In en, this message translates to:
+  /// **'Random seed copied.'**
+  String get matrixSeedCopied;
+
+  /// Action to jump to the first pilot match.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to first'**
+  String get matrixJumpFirst;
+
+  /// Filter option for every team.
+  ///
+  /// In en, this message translates to:
+  /// **'All teams'**
+  String get matrixAllTeams;
+
+  /// Search hint when pilot numbers are shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Find pilot by name or number'**
+  String get matrixFindNameOrNumber;
+
+  /// Search hint when pilot numbers are hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Find pilot by name'**
+  String get matrixFindName;
+
+  /// Tooltip of the clear-search button.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get matrixClearSearch;
+
+  /// Result of the search when there are matches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilot{plural} match{es}'**
+  String matrixPilotsMatch(int count, String plural, String es);
+
+  /// Result of the search when there are no matches.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilot matches “{query}”'**
+  String matrixNoPilotMatches(String query);
+
+  /// Label of the team filter when a team is chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Team: {name}'**
+  String matrixTeamFilterLabel(String name);
+
+  /// Tooltip of the clear-team-filter button.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear team filter'**
+  String get matrixClearTeamFilter;
+
+  /// Note about outlined team markers.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams 13 and up use outlined markers. Their letters stay unique.'**
+  String get matrixTeamsOutlinedNote;
+
+  /// Title of the banner when configuration changed after a draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration changed since this draw'**
+  String get matrixConfigChangedBanner;
+
+  /// Live region when a pilot is selected.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} highlighted in {rounds} rounds. Opponent panel open.'**
+  String matrixLiveSelected(String name, int rounds);
+
+  /// Live region when a team filter is active.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {name} only: {count} pilots in each round.'**
+  String matrixLiveTeamFilter(String name, int count);
+
+  /// Live region when a query has matches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilots match.'**
+  String matrixLiveMatches(int count);
+
+  /// Live region when a query has no matches.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilot matches.'**
+  String get matrixLiveNoMatches;
+
+  /// Column heading of the matrix grid.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get matrixGridGroups;
+
+  /// Semantics label of the matrix grid.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix grid, scrolls in both directions'**
+  String get matrixGridLabel;
+
+  /// Group size when groups vary.
+  ///
+  /// In en, this message translates to:
+  /// **'up to {count} pilots'**
+  String matrixGridUpToPilots(int count);
+
+  /// Group size when all groups are the same size.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilots'**
+  String matrixGridPilots(int count);
+
+  /// Semantics label of a grid cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}, group {group}, {count} pilots'**
+  String matrixGridCellSemantics(int round, String group, int count);
+
+  /// Semantics label of a pilot's opponents.
+  ///
+  /// In en, this message translates to:
+  /// **'Opponents of {name}'**
+  String matrixOpponentsOf(String name);
+
+  /// Title of the opponents section.
+  ///
+  /// In en, this message translates to:
+  /// **'Opponents ({met} of {total})'**
+  String matrixOpponentsCount(int met, int total);
+
+  /// Sub of the opponents section.
+  ///
+  /// In en, this message translates to:
+  /// **'Most meetings first. Repeats are marked.'**
+  String get matrixOpponentsSub;
+
+  /// Title of the never-meets section.
+  ///
+  /// In en, this message translates to:
+  /// **'Never meets ({count})'**
+  String matrixNeverMeets(int count);
+
+  /// Sub when the pilot meets everyone.
+  ///
+  /// In en, this message translates to:
+  /// **'Meets every other pilot at least once.'**
+  String get matrixMeetsAll;
+
+  /// Sub when the pilot never meets some pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots in no group with {name}.'**
+  String matrixNoGroupWith(String name);
+
+  /// Pilot number in the panel header.
+  ///
+  /// In en, this message translates to:
+  /// **'No. {number}'**
+  String matrixPilotNo(String number);
+
+  /// Team shown when the pilot has none.
+  ///
+  /// In en, this message translates to:
+  /// **'No team'**
+  String get matrixNoTeam;
+
+  /// Tooltip of the clear-highlight button.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear highlight (Esc)'**
+  String get matrixClearHighlight;
+
+  /// Note under the panel on a tablet.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the pilot again or press Esc to clear.'**
+  String get matrixSelectAgain;
+
+  /// Meeting count of one.
+  ///
+  /// In en, this message translates to:
+  /// **'once'**
+  String get matrixOpponentOnce;
+
+  /// Meeting count of more than one.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} times'**
+  String matrixOpponentTimes(int count);
+
+  /// A pilot's place in a round and group.
+  ///
+  /// In en, this message translates to:
+  /// **'R{round} · {group}'**
+  String matrixPlace(int round, String group);
+
+  /// A pilot's place with a lane.
+  ///
+  /// In en, this message translates to:
+  /// **'{place} · L{lane}'**
+  String matrixPlaceLane(String place, int lane);
+
+  /// Semantics: a pilot with a number.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot {number}, {name}'**
+  String matrixRowPilot(String number, String name);
+
+  /// Semantics: a pilot with no team.
+  ///
+  /// In en, this message translates to:
+  /// **'no team'**
+  String get matrixRowNoTeam;
+
+  /// Semantics: a pilot's lane.
+  ///
+  /// In en, this message translates to:
+  /// **', lane {lane}'**
+  String matrixRowLane(int lane);
+
+  /// Semantics: a pilot's round and group.
+  ///
+  /// In en, this message translates to:
+  /// **', round {round}, group {group}'**
+  String matrixRowRoundGroup(int round, String group);
+
+  /// Semantics: a highlighted pilot.
+  ///
+  /// In en, this message translates to:
+  /// **', highlighted'**
+  String get matrixRowHighlighted;
+
+  /// Semantics: a pilot matching the search.
+  ///
+  /// In en, this message translates to:
+  /// **', search match'**
+  String get matrixRowMatched;
+
+  /// Short lane label on a row.
+  ///
+  /// In en, this message translates to:
+  /// **'L{lane}'**
+  String matrixRowLaneShort(int lane);
+
+  /// Title of a round column.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String matrixRoundTitle(int round);
+
+  /// Tooltip and semantics label of a locked round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round locked'**
+  String get matrixRoundLocked;
+
+  /// Tooltip for a round that starts a drop.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop {dropNumber}: the lowest round score is dropped once this round is complete'**
+  String matrixDropTooltip(int dropNumber);
+
+  /// Semantics for a round that starts a drop.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop {dropNumber} starts after this round'**
+  String matrixDropSemantics(int dropNumber);
+
+  /// Count when every scoring pilot flies exactly once.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilots, each once'**
+  String matrixPilotsOnce(int count);
+
+  /// Count when pilots fly more than once.
+  ///
+  /// In en, this message translates to:
+  /// **'{distinct} of {total}'**
+  String matrixDistinctOf(int distinct, int total);
+
+  /// Tooltip explaining the exactly-once check.
+  ///
+  /// In en, this message translates to:
+  /// **'Every scoring pilot appears exactly once in this round'**
+  String get matrixExactlyOnce;
+
+  /// Prefix of a server rejection message.
+  ///
+  /// In en, this message translates to:
+  /// **'Server: '**
+  String get matrixServerPrefix;
+
+  /// Snackbar when the advanced section choice cannot be saved.
+  ///
+  /// In en, this message translates to:
+  /// **'The section choice could not be saved. It applies until you close the app.'**
+  String get matrixAdvancedSaveFailed;
+
+  /// Label of the random seed field.
+  ///
+  /// In en, this message translates to:
+  /// **'Random seed'**
+  String get matrixSeedLabel;
+
+  /// Hint of the random seed field.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one for me'**
+  String get matrixSeedHint;
+
+  /// Help of the random seed field.
+  ///
+  /// In en, this message translates to:
+  /// **'Same seed and settings give the same matrix. Leave blank and the server picks one.'**
+  String get matrixSeedHelp;
+
+  /// Label of the attempts-per-round field.
+  ///
+  /// In en, this message translates to:
+  /// **'Attempts per round'**
+  String get matrixAttemptsLabel;
+
+  /// Help of the attempts-per-round field.
+  ///
+  /// In en, this message translates to:
+  /// **'Groupings the server tries for each round. More attempts can improve fairness.'**
+  String get matrixAttemptsHelp;
+
+  /// Label of the seed-count field.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed count'**
+  String get matrixSeedCountLabel;
+
+  /// Help of the seed-count field.
+  ///
+  /// In en, this message translates to:
+  /// **'Independent starts the server runs. The fairest result is kept.'**
+  String get matrixSeedCountHelp;
+
+  /// Heading of the read-only configuration rows.
+  ///
+  /// In en, this message translates to:
+  /// **'From contest configuration'**
+  String get matrixConfigFromTitle;
+
+  /// Note under the read-only configuration rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only here. Change these in Configuration.'**
+  String get matrixConfigReadOnlyNote;
+
+  /// Value for a setting that is on.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get matrixValueOn;
+
+  /// Value for a setting that is off.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get matrixValueOff;
+
+  /// Label of the back-to-back row.
+  ///
+  /// In en, this message translates to:
+  /// **'Back-to-back flights'**
+  String get matrixBackToBackLabel;
+
+  /// Note when back-to-back flights are avoided.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilot flies the last group of one round and the first group of the next.'**
+  String get matrixBackToBackOffNote;
+
+  /// Label of the lane mode row.
+  ///
+  /// In en, this message translates to:
+  /// **'Lane mode'**
+  String get matrixLaneModeLabel;
+
+  /// Lane mode value: random.
+  ///
+  /// In en, this message translates to:
+  /// **'Random'**
+  String get matrixLaneRandom;
+
+  /// Lane mode value: none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get matrixLaneNone;
+
+  /// Note for the random lane mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Each pilot gets a lane in every group.'**
+  String get matrixLaneRandomNote;
+
+  /// Note for the none lane mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots are not given lanes.'**
+  String get matrixLaneNoneNote;
+
+  /// Label of the pilots-in-the-draw row.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots in the draw'**
+  String get matrixPilotsInDrawLabel;
+
+  /// Value of the pilots-in-the-draw row.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} scoring pilot{plural}'**
+  String matrixPilotsInDrawValue(int count, String plural);
+
+  /// Note for non-flying participants excluded from the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} non-flying participant{plural} excluded.'**
+  String matrixNonFlyingExcluded(int count, String plural);
+
+  /// Label of the configuration revision row.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration revision'**
+  String get matrixConfigRevisionLabel;
+
+  /// Note when team protection is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Teammates never fly in the same group.'**
+  String get matrixTeamProtectionNote;
+
+  /// Note when team protection is off because the draw is seeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Off because Seeded order is on.'**
+  String get matrixTeamProtectionSeededOffNote;
+
+  /// Note for the seeded draw mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the {count} preliminary rounds are drawn now.'**
+  String matrixSeededPrelimNote(int count);
+
+  /// Title of the first-draw confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw the matrix?'**
+  String get matrixDrawConfirmTitle;
+
+  /// Rounds line of the first-draw confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {rounds}'**
+  String matrixDrawConfirmRounds(int count, String rounds);
+
+  /// Rounds word for a seeded first draw.
+  ///
+  /// In en, this message translates to:
+  /// **'preliminary seeded rounds'**
+  String get matrixDrawConfirmSeededRounds;
+
+  /// Rounds word for a first draw.
+  ///
+  /// In en, this message translates to:
+  /// **'rounds'**
+  String get matrixDrawConfirmRoundsWord;
+
+  /// Groups line of the first-draw confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'{groups} groups per round ({sizes} pilots)'**
+  String matrixDrawConfirmGroups(int groups, String sizes);
+
+  /// Note when the draw assigns pilot numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest pilot numbers are assigned by this draw.'**
+  String get matrixDrawConfirmNumbers;
+
+  /// Warning of the first-draw confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'The matrix can’t be undone. Unscored rounds can be redrawn afterwards.'**
+  String get matrixDrawConfirmWarning;
+
+  /// Confirm button of the first-draw confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw matrix'**
+  String get matrixDrawConfirmAction;
+
+  /// First-draw button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw matrix'**
+  String get matrixDrawAction;
+
+  /// First-draw button label while drawing.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawing matrix…'**
+  String get matrixDrawActionBusy;
+
+  /// Fallback link label to open a page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get matrixOpen;
+
+  /// Title of the group-size preview.
+  ///
+  /// In en, this message translates to:
+  /// **'{groups} group{groupsPlural}: {sizes} pilot{pilotsPlural}'**
+  String matrixGroupSizesTitle(
+    int groups,
+    String groupsPlural,
+    String sizes,
+    String pilotsPlural,
+  );
+
+  /// Title when there are more groups than pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'More groups than scoring pilots'**
+  String get matrixGroupSizesMore;
+
+  /// Title when no groups are entered yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter groups per round to see the group sizes.'**
+  String get matrixGroupSizesEnter;
+
+  /// Heading of one group in the preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {letter}'**
+  String matrixGroupLabel(String letter);
+
+  /// Pilot count of one group in the preview.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilot{plural}'**
+  String matrixGroupPilots(int count, String plural);
+
+  /// Note of the team-protection minimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum {min} groups. Team protection keeps teammates apart, and the largest team{team} has {min} scoring pilots.'**
+  String matrixGroupMinimum(int min, String team);
+
+  /// Note of the seeded preliminary rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded Man on Man: only the {rounds} preliminary rounds are drawn now. Seeded rounds are drawn later from the preliminary results.'**
+  String matrixGroupSeeded(int rounds);
+
+  /// Snackbar when the summary choice cannot be saved.
+  ///
+  /// In en, this message translates to:
+  /// **'The summary choice could not be saved. It applies until you close the app.'**
+  String get matrixSummarySaveFailed;
+
+  /// Button to show the fairness summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Show summary'**
+  String get matrixShowSummary;
+
+  /// Button to hide the fairness summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide summary'**
+  String get matrixHideSummary;
+
+  /// Heading of the fairness score.
+  ///
+  /// In en, this message translates to:
+  /// **'FAIRNESS SCORE'**
+  String get matrixFairnessScore;
+
+  /// Note under the fairness score.
+  ///
+  /// In en, this message translates to:
+  /// **'0% is the average of random draws, 100% is the best possible.'**
+  String get matrixFairnessScale;
+
+  /// Label of the unmet opponents figure.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmet opponents'**
+  String get matrixUnmetLabel;
+
+  /// Sub of the unmet opponents figure.
+  ///
+  /// In en, this message translates to:
+  /// **'pairs who never meet'**
+  String get matrixUnmetSub;
+
+  /// Label of the max repeats figure.
+  ///
+  /// In en, this message translates to:
+  /// **'Max repeats'**
+  String get matrixMaxRepeatsLabel;
+
+  /// Sub of the max repeats figure.
+  ///
+  /// In en, this message translates to:
+  /// **'most meetings of one pair'**
+  String get matrixMaxRepeatsSub;
+
+  /// Label of the lane uniformity figure.
+  ///
+  /// In en, this message translates to:
+  /// **'Lane uniformity'**
+  String get matrixLaneUniformityLabel;
+
+  /// Sub of the lane uniformity figure.
+  ///
+  /// In en, this message translates to:
+  /// **'spread of lane use, lower is more even; lanes are random within each group'**
+  String get matrixLaneUniformitySub;
+
+  /// Title of the pairs histogram.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot pairs by number of meetings'**
+  String get matrixFairnessPairsTitle;
+
+  /// Mean absolute deviation line of the histogram.
+  ///
+  /// In en, this message translates to:
+  /// **'Mean absolute deviation {value}'**
+  String matrixMeanAbsDeviation(String value);
+
+  /// Compact fairness score line.
+  ///
+  /// In en, this message translates to:
+  /// **'Fairness {score}'**
+  String matrixFairnessCompact(String score);
+
+  /// Compact fairness statistics line.
+  ///
+  /// In en, this message translates to:
+  /// **'{unmet} unmet pairs · max {maxRepeats}× · MAD {mad}'**
+  String matrixFairnessCompactStats(
+    String unmet,
+    String maxRepeats,
+    String mad,
+  );
+
+  /// Label in the draw details.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix revision'**
+  String get matrixDetailMatrixRevision;
+
+  /// Label in the draw details.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration revision'**
+  String get matrixDetailConfigurationRevision;
+
+  /// Label in the draw details.
+  ///
+  /// In en, this message translates to:
+  /// **'Algorithm'**
+  String get matrixDetailAlgorithm;
+
+  /// Label in the draw details.
+  ///
+  /// In en, this message translates to:
+  /// **'Random seed'**
+  String get matrixDetailRandomSeed;
+
+  /// Label in the draw details.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawn'**
+  String get matrixDetailDrawn;
+
+  /// Tooltip of the copy-seed button.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy random seed'**
+  String get matrixCopySeedTooltip;
+
+  /// Title of the lifecycle control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifecycle'**
+  String get workspaceControlLifecycle;
+
+  /// Title of the participant-scoring control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant scoring'**
+  String get workspaceControlScoring;
+
+  /// Title of the overall-results control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall results'**
+  String get workspaceControlResults;
+
+  /// Title of the administration control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration'**
+  String get workspaceControlAdministration;
+
+  /// Title of the publication control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication'**
+  String get workspaceControlPublication;
+
+  /// Title of the archive control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get workspaceControlArchive;
+
+  /// Placeholder under a control card that has no widget yet.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} goes here'**
+  String workspaceControlGoesHere(String label);
+
+  /// Label of the next-step section.
+  ///
+  /// In en, this message translates to:
+  /// **'Next step'**
+  String get workspaceSectionNextStep;
+
+  /// Label of the setup-checklist section.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup checklist'**
+  String get workspaceSectionChecklist;
+
+  /// Label of the pilot-invitations section.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot invitations'**
+  String get workspaceSectionInvitations;
+
+  /// Label of the needs-attention section.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get workspaceSectionAttention;
+
+  /// Label of the round-progress section.
+  ///
+  /// In en, this message translates to:
+  /// **'Round progress'**
+  String get workspaceSectionProgress;
+
+  /// Label of the contest-controls section.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest controls'**
+  String get workspaceSectionControls;
+
+  /// Label of the contest-facts section.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest facts'**
+  String get workspaceSectionFacts;
+
+  /// Label of the recent-activity section.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent activity'**
+  String get workspaceSectionActivity;
+
+  /// Placeholder under a section that has no widget yet.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} goes here'**
+  String workspaceSectionGoesHere(String label);
+
+  /// Banner after a rejected change.
+  ///
+  /// In en, this message translates to:
+  /// **'Your change to {change} wasn\'t applied. This page is out of date.'**
+  String workspaceBannerStaleChange(String change);
+
+  /// Action of the stale-change banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get workspaceBannerStaleRefresh;
+
+  /// Banner when the server is unreachable but a local copy is shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t reach the Soar Score server. Showing this device\'s copy from {copyTime}. Scoring still works here and will sync; publishing, visibility and delisting are off until the server is back.'**
+  String workspaceBannerUnreachable(String copyTime);
+
+  /// Action of the unreachable-server banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get workspaceBannerTryAgain;
+
+  /// Offline banner on a native installation that keeps local data.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline. Scoring and the other controls keep working on this device and sync when you\'re back. Publishing, visibility and delisting need a connection.'**
+  String get workspaceBannerOfflineLocal;
+
+  /// Offline banner on the web build, which keeps no local data.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline. Changes can\'t be saved until you\'re back online; what is on screen may be out of date.'**
+  String get workspaceBannerOfflineNoLocal;
+
+  /// Title of the contest-facts details.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest'**
+  String get workspaceFactsTitle;
+
+  /// Label of the dates fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates'**
+  String get workspaceFactsDates;
+
+  /// Label of the time-zone fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Timezone'**
+  String get workspaceFactsTimezone;
+
+  /// Label of the host fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Host'**
+  String get workspaceFactsHost;
+
+  /// Label of the location fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get workspaceFactsLocation;
+
+  /// Loading text of the needs-attention section.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking what needs attention…'**
+  String get workspaceAttentionLoading;
+
+  /// Title of the needs-attention card.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get workspaceAttentionTitle;
+
+  /// Note when a needs-attention source could not be read and there are items.
+  ///
+  /// In en, this message translates to:
+  /// **'This list may be incomplete'**
+  String get workspaceAttentionIncomplete;
+
+  /// Note when needs-attention could not be worked out at all.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention could not be worked out'**
+  String get workspaceAttentionUnknown;
+
+  /// Retry button in a workspace section placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get workspaceRetry;
+
+  /// Title of the setup-checklist card.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup checklist'**
+  String get workspaceChecklistTitle;
+
+  /// Heading of the optional checklist rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get workspaceChecklistOptional;
+
+  /// Note beside the optional heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Not needed to run the contest'**
+  String get workspaceChecklistOptionalNote;
+
+  /// Loading text of the setup-checklist section.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the setup checklist…'**
+  String get workspaceChecklistLoading;
+
+  /// Failed text of the setup-checklist section.
+  ///
+  /// In en, this message translates to:
+  /// **'The setup checklist could not be loaded.'**
+  String get workspaceChecklistLoadFailed;
+
+  /// Current value when the contest is archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get workspaceArchiveArchived;
+
+  /// Current value when the contest is not archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Not archived'**
+  String get workspaceArchiveNotArchived;
+
+  /// What the archive control reaches.
+  ///
+  /// In en, this message translates to:
+  /// **'Archiving moves a contest out of the way on this installation.'**
+  String get workspaceArchiveScope;
+
+  /// Why the archive button is disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Archiving is not available yet: the server has no archive action.'**
+  String get workspaceArchiveUnavailable;
+
+  /// Label of the archive button.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive contest'**
+  String get workspaceArchiveButton;
+
+  /// Prefix of the current value in a control card.
+  ///
+  /// In en, this message translates to:
+  /// **'Now: '**
+  String get workspaceControlNow;
+
+  /// Title of the complete-contest dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete contest?'**
+  String get workspaceCompleteTitle;
+
+  /// Confirm button of the complete-contest dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete contest'**
+  String get workspaceCompleteButton;
+
+  /// Lifecycle line in the complete-contest dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifecycle: Running → Completed'**
+  String get workspaceCompleteLifecycle;
+
+  /// Body of the complete-contest dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Completing closes participant scoring and ends results hiding. There is no way back to Running. Authorized score corrections stay possible.'**
+  String get workspaceCompleteBody;
+
+  /// Note in the complete dialog when the scores could not be read.
+  ///
+  /// In en, this message translates to:
+  /// **'The scores could not be loaded, so the missing scores and unflown rounds are not listed.'**
+  String get workspaceCompleteScoresUnknown;
+
+  /// Note in the complete dialog when nothing is open.
+  ///
+  /// In en, this message translates to:
+  /// **'Every flight has a score and every round has been flown.'**
+  String get workspaceCompleteAllClear;
+
+  /// Heading above the open items in the complete dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Still open:'**
+  String get workspaceCompleteStillOpen;
+
+  /// Open item: flights without a score.
+  ///
+  /// In en, this message translates to:
+  /// **'• {count} {word} no score'**
+  String workspaceCompleteMissingScores(int count, String word);
+
+  /// Open item: rounds nobody flew.
+  ///
+  /// In en, this message translates to:
+  /// **'• {word} {rounds} not flown'**
+  String workspaceCompleteUnflownRounds(String word, String rounds);
+
+  /// Snackbar when a transition has no API client.
+  ///
+  /// In en, this message translates to:
+  /// **'No API client is available.'**
+  String get workspaceNoApiClient;
+
+  /// Title of the lock-administration dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock administration?'**
+  String get workspaceLockTitle;
+
+  /// Lifecycle line in the lock dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration: Unlocked → Locked'**
+  String get workspaceLockLifecycle;
+
+  /// Intro of the rejected-changes list in the lock dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'While locked, these changes are rejected:'**
+  String get workspaceLockRejected;
+
+  /// Rejected-change item: configuration.
+  ///
+  /// In en, this message translates to:
+  /// **'• Contest configuration'**
+  String get workspaceLockConfigItem;
+
+  /// Rejected-change item: participants and roles.
+  ///
+  /// In en, this message translates to:
+  /// **'• Participants and their roles'**
+  String get workspaceLockParticipantsItem;
+
+  /// Rejected-change item: the matrix.
+  ///
+  /// In en, this message translates to:
+  /// **'• The matrix and its assignments'**
+  String get workspaceLockMatrixItem;
+
+  /// Rejected-change item: scores.
+  ///
+  /// In en, this message translates to:
+  /// **'• Scores'**
+  String get workspaceLockScoresItem;
+
+  /// Body of the lock-administration dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest can still be viewed and published. Locking does not complete it or close participant scoring.'**
+  String get workspaceLockBody;
+
+  /// Confirm button of the lock dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock administration'**
+  String get workspaceLockButton;
+
+  /// Title of the status summary card.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get workspaceStatusTitle;
+
+  /// Current value when participant scoring is open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get workspaceScoringOpen;
+
+  /// What closing scoring reaches.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing stops pilots and helpers from entering their own scores.'**
+  String get workspaceScoringCloseScope;
+
+  /// Current value when participant scoring is closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get workspaceScoringClosed;
+
+  /// What opening scoring reaches.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening lets pilots and helpers enter their own scores.'**
+  String get workspaceScoringOpenScope;
+
+  /// Current value when administration is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get workspaceAdminLocked;
+
+  /// What unlocking administration reaches.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocking allows changes to configuration, participants, the matrix and scores again.'**
+  String get workspaceAdminUnlockScope;
+
+  /// Current value when administration is unlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked'**
+  String get workspaceAdminUnlocked;
+
+  /// What locking administration reaches.
+  ///
+  /// In en, this message translates to:
+  /// **'Locking blocks changes to configuration, participants, the matrix and scores.'**
+  String get workspaceAdminLockScope;
+
+  /// What completing the contest reaches.
+  ///
+  /// In en, this message translates to:
+  /// **'Completing ends the contest: scoring closes and the results are final.'**
+  String get workspaceCompleteScope;
+
+  /// Undo button of an in-place action.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get workspaceActionUndo;
+
+  /// Refresh button of a rejected in-place action.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get workspaceActionRefresh;
+
+  /// Note in the next-step card when part of the facts failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Some information could not be loaded.'**
+  String get workspaceNextStepUnavailable;
+
+  /// Loading text of the next-step section.
+  ///
+  /// In en, this message translates to:
+  /// **'Working out the next step…'**
+  String get workspaceNextStepLoading;
+
+  /// Failed text of the next-step section.
+  ///
+  /// In en, this message translates to:
+  /// **'The next step could not be worked out.'**
+  String get workspaceNextStepFailed;
+
+  /// Snackbar after dismissing a completion suggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestion dismissed. It returns if another 48 hours pass without scores.'**
+  String get workspaceSuggestionDismissed;
+
+  /// Semantics label of the loading skeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading contest'**
+  String get workspaceLoadingLabel;
+
+  /// Title of the load-failed state.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this contest'**
+  String get workspaceLoadFailedTitle;
+
+  /// Body of the load-failed state.
+  ///
+  /// In en, this message translates to:
+  /// **'{message} Nothing has changed.'**
+  String workspaceLoadFailedBody(String message);
+
+  /// Action of the load-failed state.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get workspaceLoadFailedRetry;
+
+  /// Title of the not-found state.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest not found'**
+  String get workspaceNotFoundTitle;
+
+  /// Body of the not-found state.
+  ///
+  /// In en, this message translates to:
+  /// **'This link doesn\'t match a contest on this device or the server. It may have been deleted, or the link is incomplete.'**
+  String get workspaceNotFoundBody;
+
+  /// Action of the not-found state.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Contests'**
+  String get workspaceNotFoundBack;
+
+  /// Title and semantics of the reports context strip.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports are built from'**
+  String get reportsBuiltFrom;
+
+  /// Label of the lifecycle fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifecycle'**
+  String get reportsFactLifecycle;
+
+  /// Lifecycle value of a completed contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed · Results are final'**
+  String get reportsFactCompleted;
+
+  /// Label of the matrix fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix'**
+  String get reportsFactMatrix;
+
+  /// Matrix value when none is drawn.
+  ///
+  /// In en, this message translates to:
+  /// **'No matrix drawn'**
+  String get reportsFactNoMatrix;
+
+  /// Label of the configuration fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration'**
+  String get reportsFactConfiguration;
+
+  /// Configuration value when none is saved.
+  ///
+  /// In en, this message translates to:
+  /// **'None saved'**
+  String get reportsFactNoneSaved;
+
+  /// Label of the scoring-progress fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring progress'**
+  String get reportsFactScoringProgress;
+
+  /// Lead of the result-status fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Standings produced now would be'**
+  String get reportsResultStatusLead;
+
+  /// Semantics label of the result-status chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Result status: {status}'**
+  String reportsResultStatusLabel(String status);
+
+  /// Offline note with no pending changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on local data.'**
+  String get reportsOfflineLocalOnly;
+
+  /// Offline note with pending changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on local data, {count} {change} not yet synced.'**
+  String reportsOfflinePending(int count, String change);
+
+  /// Suffix of the offline note.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports show what this device has.'**
+  String get reportsOfflineSuffix;
+
+  /// Link to the sync page in the offline note.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Sync'**
+  String get reportsOpenSync;
+
+  /// Semantics label of the reports loading state.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading reports'**
+  String get reportsLoadingLabel;
+
+  /// Text of the reports loading state.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading reports…'**
+  String get reportsLoadingText;
+
+  /// Title of the reports unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'Can’t read this contest’s data'**
+  String get reportsUnavailableTitle;
+
+  /// Body of the reports unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'The reports list needs the contest’s matrix and scores, and they couldn’t be loaded from this device or the server. Nothing has changed.'**
+  String get reportsUnavailableBody;
+
+  /// Retry button of the reports unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get reportsUnavailableRetry;
+
+  /// Open button of a report card.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get reportCardOpen;
+
+  /// Note after a report opened in a new tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened in a new tab'**
+  String get reportCardOpened;
+
+  /// Notice when the browser blocked the new tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Your browser blocked the new tab. Allow pop-ups for Soar Score, or open the report here and use Back to return.'**
+  String get reportCardBlocked;
+
+  /// Action to open the report in this window.
+  ///
+  /// In en, this message translates to:
+  /// **'Open here'**
+  String get reportCardOpenHere;
+
+  /// Fact: the report needs scores.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs scores'**
+  String get reportCardNeedsScores;
+
+  /// Fact: the report needs no scores.
+  ///
+  /// In en, this message translates to:
+  /// **'No scores needed'**
+  String get reportCardNoScoresNeeded;
+
+  /// Fact: the report needs a matrix.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a matrix'**
+  String get reportCardNeedsMatrix;
+
+  /// Button that opens the result-status definitions.
+  ///
+  /// In en, this message translates to:
+  /// **'What do these mean?'**
+  String get resultStatusHelpButton;
+
+  /// Title of the result-status popover.
+  ///
+  /// In en, this message translates to:
+  /// **'Result status'**
+  String get resultStatusHelpTitle;
+
+  /// Definition of the official status.
+  ///
+  /// In en, this message translates to:
+  /// **'Every round up to the last round shown is complete: each pilot has an official score and no reviews are open. Printed pages carry no stamp.'**
+  String get resultStatusOfficial;
+
+  /// Definition of the preliminary status.
+  ///
+  /// In en, this message translates to:
+  /// **'A round up to the last round shown has a missing score, a score not yet marked official, or an open review. Every page is stamped PRELIMINARY.'**
+  String get resultStatusPreliminary;
+
+  /// Footer of the result-status popover.
+  ///
+  /// In en, this message translates to:
+  /// **'Each printed page repeats the status in its footer.'**
+  String get resultStatusHelpFooter;
+
+  /// Viewer app bar button that downloads the sheet as a PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as PDF'**
+  String get viewerSaveAsPdf;
+
+  /// Viewer app bar back button when the report was opened in place.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Reports'**
+  String get viewerBackToReports;
+
+  /// Viewer app bar primary button that prints the sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get viewerPrint;
+
+  /// Viewer app bar menu entry and panel switch that hide screen-only marks.
+  ///
+  /// In en, this message translates to:
+  /// **'Print preview'**
+  String get viewerPrintPreview;
+
+  /// Viewer app bar menu entry that opens the page setup.
+  ///
+  /// In en, this message translates to:
+  /// **'Page setup…'**
+  String get viewerPageSetup;
+
+  /// Viewer app bar menu entry that clears filters and options.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters and options'**
+  String get viewerResetFilters;
+
+  /// Keyboard shortcut shown beside the print menu entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl+P'**
+  String get viewerShortcutPrint;
+
+  /// Tooltip of the viewer app bar overflow button.
+  ///
+  /// In en, this message translates to:
+  /// **'Page setup and more'**
+  String get viewerOverflowTooltip;
+
+  /// Lead of the offline banner above the sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline.'**
+  String get viewerOffline;
+
+  /// Offline banner text when no changes are pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Produced from data on this device.'**
+  String get viewerOfflineLocalOnly;
+
+  /// Offline banner text when changes are still pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Produced from data on this device. {count} {change} not yet synced.'**
+  String viewerOfflinePending(int count, String change);
+
+  /// Offline banner action that opens the sync page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Sync'**
+  String get viewerOpenSync;
+
+  /// Heading of the viewer's Page control group.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get viewerPageGroup;
+
+  /// Label of the paper size segments.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper'**
+  String get viewerPaper;
+
+  /// Label of the page orientation segments.
+  ///
+  /// In en, this message translates to:
+  /// **'Orientation'**
+  String get viewerOrientation;
+
+  /// Help line under the orientation segments.
+  ///
+  /// In en, this message translates to:
+  /// **'This report’s default is {orientation}.'**
+  String viewerOrientationDefault(String orientation);
+
+  /// Subtitle of the print preview switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide screen-only marks and page-break labels'**
+  String get viewerHideScreenMarks;
+
+  /// Label of the pages-to-print field.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages to print'**
+  String get viewerPagesToPrint;
+
+  /// Hint of the pages-to-print field when it is blank.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count}'**
+  String viewerPagesToPrintHint(int count);
+
+  /// Helper shown when every page will print.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} {word}. Type 1 or 2-4 to print only some.'**
+  String viewerPagesToPrintAll(int count, String word);
+
+  /// Helper shown when a subset of pages will print.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total} {word} will print.'**
+  String viewerPagesToPrintSome(int count, int total, String word);
+
+  /// Compact viewer toolbar button that opens the filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get viewerFiltersButton;
+
+  /// Accessibility label of the viewer zoom controls.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom'**
+  String get viewerZoom;
+
+  /// Tooltip of the zoom out button.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom out'**
+  String get viewerZoomOut;
+
+  /// Tooltip of the zoom in button.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in'**
+  String get viewerZoomIn;
+
+  /// Accessibility label of the zoom toggle while fitting the width.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom: fit width. Switch to 100 percent.'**
+  String get viewerZoomFitSwitchTo;
+
+  /// Accessibility label of the zoom toggle at a fixed zoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom {percent}. Switch to fit width.'**
+  String viewerZoomFixedSwitchTo(String percent);
+
+  /// Zoom toggle label while fitting the width.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit · {percent}'**
+  String viewerZoomFitPrefix(String percent);
+
+  /// Default label of the viewer loading state.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading contest data…'**
+  String get viewerLoadingLabel;
+
+  /// Viewer label while a report builds its pages.
+  ///
+  /// In en, this message translates to:
+  /// **'Building pages…'**
+  String get viewerBuildingPages;
+
+  /// Title of the viewer not-found state.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest can’t be found'**
+  String get viewerNotFoundTitle;
+
+  /// Body of the viewer not-found state.
+  ///
+  /// In en, this message translates to:
+  /// **'It may have been deleted, or the link points to a contest you no longer have access to. There is nothing to print.'**
+  String get viewerNotFoundBody;
+
+  /// Not-found action when the report was opened in a new tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Contests'**
+  String get viewerBackToContests;
+
+  /// Title of the viewer unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'Can’t read the contest data'**
+  String get viewerUnavailableTitle;
+
+  /// Body of the viewer unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'The scores for this report couldn’t be loaded from this device or the server. Your filters are kept.'**
+  String get viewerUnavailableBody;
+
+  /// Action label on the viewer error states.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get viewerTryAgain;
+
+  /// Title of the viewer data-unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'Can’t read the scores for this report'**
+  String get viewerDataUnavailableTitle;
+
+  /// Body of the viewer data-unavailable state.
+  ///
+  /// In en, this message translates to:
+  /// **'They couldn’t be loaded from this device or the server. Your filters are kept.'**
+  String get viewerDataUnavailableBody;
+
+  /// Accessibility label of the report sheet area.
+  ///
+  /// In en, this message translates to:
+  /// **'Report pages'**
+  String get viewerReportPages;
+
+  /// Label of the on-screen page break separator.
+  ///
+  /// In en, this message translates to:
+  /// **'Page break · Page {page}'**
+  String viewerPageBreak(int page);
+
+  /// Window title of the viewer for a named contest.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} — {name}'**
+  String viewerPageWindow(String title, String name);
+
+  /// App bar title of the viewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get viewerReportWord;
+
+  /// Accessibility label of a printed sheet page.
+  ///
+  /// In en, this message translates to:
+  /// **'{reportName}, page {page} of {count}'**
+  String viewerSheetPageLabel(String reportName, int page, int count);
+
+  /// Page number in the sheet footer.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} of {count}'**
+  String viewerPageOf(int page, int count);
+
+  /// Official stamp word in the sheet footer.
+  ///
+  /// In en, this message translates to:
+  /// **'OFFICIAL'**
+  String get viewerStatusOfficial;
+
+  /// Preliminary stamp word on the page and in the footer.
+  ///
+  /// In en, this message translates to:
+  /// **'PRELIMINARY'**
+  String get viewerStatusPreliminary;
+
+  /// Accessibility label of the result stamp.
+  ///
+  /// In en, this message translates to:
+  /// **'{text} result'**
+  String viewerResultStampSemantics(String text);
+
+  /// Second line of the preliminary result stamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Not final · scores incomplete'**
+  String get viewerStampNotFinal;
+
+  /// Subtitle of a data report that has nothing to show yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to show'**
+  String get viewerNothingToShow;
+
+  /// Footer line of a printed page naming when it was produced.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated {time}'**
+  String viewerGenerated(String time);
+
+  /// Print job title for a named contest.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} – {name}'**
+  String viewerPrintTitle(String title, String name);
+
+  /// Heading of the filters and options panel and bottom sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter and options'**
+  String get viewerFilterOptions;
+
+  /// Button that closes the filter bottom sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get viewerDone;
+
+  /// Lead of the official status banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Official.'**
+  String get viewerOfficialLead;
+
+  /// Text of the official status banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Every score is official, no reviews are open, and the standings are current. Printed pages carry no stamp.'**
+  String get viewerOfficialDefault;
+
+  /// Lead of the preliminary status banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Preliminary:'**
+  String get viewerPreliminaryLead;
+
+  /// Text of the preliminary status banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Some scores are not final.'**
+  String get viewerPreliminaryDefault;
+
+  /// Lead of the crowded-sheet notice banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Crowded.'**
+  String get viewerCrowdedLead;
+
+  /// Lead of the out-of-date sheet banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of date.'**
+  String get viewerOutdatedLead;
+
+  /// Text of the out-of-date sheet banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores, the matrix or the configuration changed after this report was produced. The sheet hasn’t changed.'**
+  String get viewerOutdatedText;
+
+  /// Action on the out-of-date sheet banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get viewerRefresh;
+
+  /// Lead of the data-failure banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t load the scores for these rounds.'**
+  String get viewerDataLoadFailedLead;
+
+  /// Text of the data-failure banner.
+  ///
+  /// In en, this message translates to:
+  /// **'The sheet still shows the last rounds that loaded.'**
+  String get viewerDataLoadFailedText;
+
+  /// Lead of the print-failure banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t print.'**
+  String get viewerPrintFailedLead;
+
+  /// Text of the print-failure banner.
+  ///
+  /// In en, this message translates to:
+  /// **'The system reported a printer error. Your filters and options are unchanged.'**
+  String get viewerPrintFailedText;
+
+  /// Lead when printing is unavailable but saving a PDF is.
+  ///
+  /// In en, this message translates to:
+  /// **'Printing isn’t available here.'**
+  String get viewerPrintingUnavailableLead;
+
+  /// Lead when neither printing nor saving a PDF is available.
+  ///
+  /// In en, this message translates to:
+  /// **'This browser can’t print or save PDFs.'**
+  String get viewerPdfUnavailableLead;
+
+  /// Text when printing is unavailable but saving a PDF is.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as PDF, then print or email the file from another device.'**
+  String get viewerPrintingUnavailableText;
+
+  /// Text when neither printing nor saving a PDF is available.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the link and open it on a browser that can print.'**
+  String get viewerPdfUnavailableText;
+
+  /// Action that copies the link to this report.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get viewerCopyLink;
+
+  /// Action on the empty-filters state that clears the filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters'**
+  String get viewerClearFilters;
+
+  /// Legend when print preview is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Print preview: the white pages are exactly what prints.'**
+  String get viewerPrintPreviewLegend;
+
+  /// Legend of a compact window.
+  ///
+  /// In en, this message translates to:
+  /// **'White pages print as shown'**
+  String get viewerPrintAsShownCompact;
+
+  /// Legend of a wide window.
+  ///
+  /// In en, this message translates to:
+  /// **'The white pages print exactly as shown. Everything around them is screen only.'**
+  String get viewerPrintAsShown;
+
+  /// Page indicator when there are no pages.
+  ///
+  /// In en, this message translates to:
+  /// **'No pages'**
+  String get viewerNoPages;
+
+  /// Page indicator of the toolbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} of {count}'**
+  String viewerPageIndicator(int page, int count);
+
+  /// Legend and setup text when there is nothing to print.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to print'**
+  String get viewerNothingToPrint;
+
+  /// Compact toolbar button label with the active filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters · {summary}'**
+  String viewerFiltersSummary(String summary);
+
+  /// Title when the route's report is unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'This report doesn’t exist'**
+  String get viewerUnknownReportTitle;
+
+  /// Body when the route's report is unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The link doesn’t match one of the contest’s reports. There is nothing to print.'**
+  String get viewerUnknownReportBody;
+
+  /// Setup text when printing is unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Printing unavailable'**
+  String get viewerSetupPrintingUnavailable;
+
+  /// Setup text showing paper, orientation and page count.
+  ///
+  /// In en, this message translates to:
+  /// **'{setup} · {count} {word}'**
+  String viewerSetupSummary(String setup, int count, String word);
+
+  /// Subtitle under the panel heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes update the sheet straight away.'**
+  String get viewerPanelSubtitle;
+
+  /// Separator between items in the collapsed panel summary.
+  ///
+  /// In en, this message translates to:
+  /// **' · '**
+  String get viewerPanelSummarySeparator;
+
+  /// Heading of the standings round-range group.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get standingsFilter;
+
+  /// Label of the from-round dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'From round'**
+  String get standingsFromRound;
+
+  /// Label of the to-round dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'To round'**
+  String get standingsToRound;
+
+  /// Message when no rounds can be shown.
+  ///
+  /// In en, this message translates to:
+  /// **'No rounds can be shown yet.'**
+  String get standingsNoRounds;
+
+  /// Message explaining what the standings show.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank and total are the standings as of round {to}. Only rounds with scores are listed.'**
+  String standingsRangeText(int to);
+
+  /// Heading of the standings column group.
+  ///
+  /// In en, this message translates to:
+  /// **'Options'**
+  String get standingsOptions;
+
+  /// Label of the percentage column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage of total'**
+  String get standingsPercentage;
+
+  /// Help for the percentage column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Each total as a percentage of the winner’s'**
+  String get standingsPercentageHelp;
+
+  /// Label of the raw score column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw score'**
+  String get standingsRaw;
+
+  /// Help for the raw score column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Total plus the dropped rounds. Not the score of each round.'**
+  String get standingsRawHelp;
+
+  /// Label of the team column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get standingsTeam;
+
+  /// Label of the pilot number column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot number'**
+  String get standingsPilotNumber;
+
+  /// Label of the pilot class column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot class'**
+  String get standingsPilotClass;
+
+  /// Heading of the standings detail group.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail'**
+  String get standingsDetail;
+
+  /// Label of the flight details option.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight details'**
+  String get standingsFlightDetails;
+
+  /// Help for flight details in an F5J contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds flight time, landing points and launch height under each round score.'**
+  String get standingsFlightDetailsF5J;
+
+  /// Help for flight details in an F3J contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds flight time and landing points under each round score.'**
+  String get standingsFlightDetailsF3J;
+
+  /// Label of the provisional option.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional'**
+  String get standingsProvisional;
+
+  /// Dropdown label of a fully scored round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String standingsRoundLabel(int round);
+
+  /// Dropdown label of a partly scored round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} (partly scored)'**
+  String standingsRoundLabelPartial(int round);
+
+  /// Provisional help when no round is partly scored.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows rounds up to the last with any score.'**
+  String get standingsProvHelpNone;
+
+  /// Provisional help when a round is partly scored.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {partial} is partly scored. Shows rounds up to the last with any score.'**
+  String standingsProvHelpPartial(int partial);
+
+  /// Provisional help when no round is fully scored.
+  ///
+  /// In en, this message translates to:
+  /// **'No round is fully scored yet.'**
+  String get standingsProvHelpNoFull;
+
+  /// Provisional help when some rounds are fully scored.
+  ///
+  /// In en, this message translates to:
+  /// **'Only fully scored rounds (1 to {full}) are official.'**
+  String standingsProvHelpFull(int full);
+
+  /// Heading of the key line under the standings table.
+  ///
+  /// In en, this message translates to:
+  /// **'Key'**
+  String get standingsKeyHeading;
+
+  /// Rank column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank'**
+  String get standingsColRank;
+
+  /// Pilot column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot'**
+  String get standingsColPilot;
+
+  /// Total column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get standingsColTotal;
+
+  /// Percentage column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Pct'**
+  String get standingsColPct;
+
+  /// Accessibility label of the percentage column.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage of winner'**
+  String get standingsColPctSemantic;
+
+  /// Raw score column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw'**
+  String get standingsColRaw;
+
+  /// Accessibility label of the raw score column.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw score'**
+  String get standingsColRawSemantic;
+
+  /// Team column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get standingsColTeam;
+
+  /// Pilot number column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'No.'**
+  String get standingsColNo;
+
+  /// Accessibility label of the pilot number column.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot number'**
+  String get standingsColNoSemantic;
+
+  /// Pilot class column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get standingsColClass;
+
+  /// Accessibility label of the flight detail column.
+  ///
+  /// In en, this message translates to:
+  /// **'Line'**
+  String get standingsColLineSemantic;
+
+  /// Round column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'R{round}'**
+  String standingsRoundColumn(int round);
+
+  /// Round column heading for a partly scored round.
+  ///
+  /// In en, this message translates to:
+  /// **'R{round} partial'**
+  String standingsRoundColumnPartial(int round);
+
+  /// Accessibility label of a round column.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String standingsRoundSemantic(int round);
+
+  /// Penalty column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty'**
+  String get standingsColPenalty;
+
+  /// Sub-line of the penalty column heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Deducted from total; not dropped'**
+  String get standingsPenaltySub;
+
+  /// Accessibility label of a standings table page.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall Results, page {page}'**
+  String standingsTableSemantics(int page);
+
+  /// Cell label of the flight detail column.
+  ///
+  /// In en, this message translates to:
+  /// **'Score'**
+  String get standingsScoreCell;
+
+  /// Accessibility label of a pilot's rank cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank {place}'**
+  String standingsRankCell(int place);
+
+  /// Accessibility label of an unscored round cell.
+  ///
+  /// In en, this message translates to:
+  /// **'no score'**
+  String get standingsNoScore;
+
+  /// Accessibility label of a dropped round cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropped round, {score}'**
+  String standingsDroppedLabel(String score);
+
+  /// Screen-only chip beside a pilot with an open review.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get standingsReviewChip;
+
+  /// Accessibility label of the review chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen only. Review open.'**
+  String get standingsReviewChipSemantic;
+
+  /// Dropdown label of a drawn round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String matrixRoundLabel(int round);
+
+  /// Dropdown label of a round the contest has not drawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} · not drawn'**
+  String matrixRoundLabelNotDrawn(int round);
+
+  /// Button that shows every drawn round.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all drawn rounds'**
+  String get matrixShowAllDrawn;
+
+  /// Button that shows every round.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all rounds'**
+  String get matrixShowAllRounds;
+
+  /// Heading of the draw matrix column group.
+  ///
+  /// In en, this message translates to:
+  /// **'Columns'**
+  String get matrixColumns;
+
+  /// Label of the compact mode option.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact mode'**
+  String get matrixCompactMode;
+
+  /// Help for the compact mode option.
+  ///
+  /// In en, this message translates to:
+  /// **'Two columns per page, 9 pt text'**
+  String get matrixCompactHelp;
+
+  /// Label of the additional pilot info option.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional pilot info'**
+  String get matrixAdditionalInfo;
+
+  /// Help when additional pilot info is unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available in compact mode'**
+  String get matrixAdditionalUnavailable;
+
+  /// Help when additional pilot info is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a column for each item you tick'**
+  String get matrixAdditionalChosenHelp;
+
+  /// Help when additional pilot info is off.
+  ///
+  /// In en, this message translates to:
+  /// **'Club, FAI ID and National ID columns'**
+  String get matrixAdditionalDefaultHelp;
+
+  /// Label of the club column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Club'**
+  String get matrixClub;
+
+  /// Label of the FAI ID column option.
+  ///
+  /// In en, this message translates to:
+  /// **'FAI ID'**
+  String get matrixFaiId;
+
+  /// Label of the National ID column option.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID'**
+  String get matrixNationalId;
+
+  /// Note when the additional columns are kept during compact mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept as set. They apply again when Compact mode is off.'**
+  String get matrixAdditionalKept;
+
+  /// Screen-reader name of a draw matrix table on one page.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}'**
+  String matrixTableLabel(int page);
+
+  /// Screen-reader name of a table in compact mode (two per page).
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}, column {column}'**
+  String matrixTableLabelColumn(int page, int column);
+
+  /// Heading of a round row in the draw matrix.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {ordinal}'**
+  String matrixRoundRow(int ordinal);
+
+  /// Suffix of a round or group row that continues on this page.
+  ///
+  /// In en, this message translates to:
+  /// **' (continued)'**
+  String get matrixContinued;
+
+  /// Heading of a group row in the draw matrix.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {label}'**
+  String matrixGroupRow(String label);
+
+  /// Group size in the draw matrix row heading.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} {word}'**
+  String matrixGroupSize(int size, String word);
+
   /// Heading of the Settings card with the version, licences and legal links.
   ///
   /// In en, this message translates to:
@@ -4461,6 +7026,228 @@ abstract class AppLocalizations {
   /// **'Official (automatic). This score is locked.'**
   String get scoreAutomaticLocked;
 
+  /// Status chip of a scoring row with typed values that are not saved yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved'**
+  String get scoreStatusUnsaved;
+
+  /// Status chip of a scoring row with no score yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not entered'**
+  String get scoreStatusNotEntered;
+
+  /// Status chip of a scoring row with a preliminary pilot entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get scoreStatusSubmitted;
+
+  /// Status chip of a scoring row with an official score.
+  ///
+  /// In en, this message translates to:
+  /// **'Official'**
+  String get scoreStatusOfficial;
+
+  /// Status chip of a scoring row that is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get scoreStatusLocked;
+
+  /// Status chip of a scoring row whose pilot is retired from the round.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired'**
+  String get scoreStatusRetired;
+
+  /// Context strip chip: the round has no scores yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Round not flown'**
+  String get scoreRoundNotFlown;
+
+  /// Context strip chip: some, not all, scores of the round are in.
+  ///
+  /// In en, this message translates to:
+  /// **'Round in progress'**
+  String get scoreRoundInProgress;
+
+  /// Context strip chip: every score of the round is in.
+  ///
+  /// In en, this message translates to:
+  /// **'Round scored'**
+  String get scoreRoundScored;
+
+  /// Context strip chip when the group is not locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Open for entry'**
+  String get scoreOpenForEntry;
+
+  /// Context strip chip counting rows with unsaved scores.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 unsaved row} other{{count} unsaved rows}}'**
+  String scoreUnsavedRows(int count);
+
+  /// Tooltip of the round or group picker button.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to…'**
+  String get scorePickerGoTo;
+
+  /// Title of the flight penalty card.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight penalty'**
+  String get scoreFlightPenaltyTitle;
+
+  /// Title of the cumulative penalty card.
+  ///
+  /// In en, this message translates to:
+  /// **'Cumulative penalty'**
+  String get scoreCumulativePenaltyTitle;
+
+  /// Lead of the flight penalty help line; the bold word and the rest follow in their own keys.
+  ///
+  /// In en, this message translates to:
+  /// **'Deducted from '**
+  String get scorePenaltyFlightHelp1;
+
+  /// Bold word in the flight penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **'this flight'**
+  String get scorePenaltyFlightThisFlight;
+
+  /// Middle of the flight penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **' (never below 0). '**
+  String get scorePenaltyFlightHelp2;
+
+  /// Bold word in the flight penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropped'**
+  String get scorePenaltyFlightDropped;
+
+  /// Tail of the flight penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **' if this round is dropped.'**
+  String get scorePenaltyFlightHelp3;
+
+  /// Lead of the cumulative penalty help line; the bold word and the rest follow in their own keys.
+  ///
+  /// In en, this message translates to:
+  /// **'Deducted from the '**
+  String get scorePenaltyCumulativeHelp1;
+
+  /// Bold word in the cumulative penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **'contest total'**
+  String get scorePenaltyCumulativeContestTotal;
+
+  /// Middle of the cumulative penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **'. '**
+  String get scorePenaltyCumulativeHelp2;
+
+  /// Bold word in the cumulative penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **'Never dropped'**
+  String get scorePenaltyCumulativeNeverDropped;
+
+  /// Tail of the cumulative penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **', and still counts if this flight is re-flown.'**
+  String get scorePenaltyCumulativeHelp3;
+
+  /// State of the cumulative penalty field while it is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No cumulative penalty.'**
+  String get scorePenaltyCumulativeNone;
+
+  /// State of the cumulative penalty field when its value is not a whole number of 0 or more.
+  ///
+  /// In en, this message translates to:
+  /// **'A whole number of points, 0 or more.'**
+  String get scorePenaltyCumulativeInvalid;
+
+  /// State of the cumulative penalty field when it was set to 0.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed. Removing is recorded as an official correction.'**
+  String get scorePenaltyCumulativeRemoved;
+
+  /// State of the cumulative penalty field when a positive value is set.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied: {count} points from the contest total.'**
+  String scorePenaltyCumulativeApplied(String count);
+
+  /// Banner under a score row whose save failed; message is the reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Not saved. {message} Your values are kept.'**
+  String scoreSaveNotSaved(String message);
+
+  /// Banner under a score row whose save was refused; reason is the server's text or a fallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: {reason}. Your values are kept.'**
+  String scoreSaveRefused(String reason);
+
+  /// Fallback reason when the server refuses a save without a message.
+  ///
+  /// In en, this message translates to:
+  /// **'the entry was not accepted'**
+  String get scoreSaveRefusedNoReason;
+
+  /// Stale-row banner action that keeps the director's typed values.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep mine'**
+  String get scoreSaveKeepMine;
+
+  /// Stale-row banner action that takes the newer stored values.
+  ///
+  /// In en, this message translates to:
+  /// **'Take the newer'**
+  String get scoreSaveTakeNewer;
+
+  /// Stale-row banner text naming the director's and the newer stored values.
+  ///
+  /// In en, this message translates to:
+  /// **'This row changed since you opened it. Yours: {mine}. Newer: {newer}.'**
+  String scoreSaveStaleText(String mine, String newer);
+
+  /// Value summary when a row or its other side has no values.
+  ///
+  /// In en, this message translates to:
+  /// **'nothing entered'**
+  String get scoreSaveNothingEntered;
+
+  /// Save-failed banner action that retries the save.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get scoreSaveRetry;
+
+  /// Save-failed or refused banner action that re-reads the row.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get scoreSaveRefresh;
+
   /// Note on a row whose Confirm is queued for the service.
   ///
   /// In en, this message translates to:
@@ -4539,6 +7326,12 @@ abstract class AppLocalizations {
   /// **'Director'**
   String get scoreHistoryDirector;
 
+  /// Line on a score history entry adopted by a director, naming who sent it.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted by {who}'**
+  String scoreHistorySubmittedBy(String who);
+
   /// Note on the current version in the score history when the director confirmed an automatically accepted score.
   ///
   /// In en, this message translates to:
@@ -4562,6 +7355,6333 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark official'**
   String get syncRefusedScorePromotion;
+
+  /// Button that closes the Score check result panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get scoreCheckClose;
+
+  /// Header of the Score check panel when the check found nothing.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} pilots entered, nothing out of range.'**
+  String scoreCheckClean(int count);
+
+  /// Header of the Score check panel when the check found problems.
+  ///
+  /// In en, this message translates to:
+  /// **'{findings} to look at for {pilots} of {checked} pilots.'**
+  String scoreCheckFindings(int findings, int pilots, int checked);
+
+  /// Button that closes a dialog or panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get commonClose;
+
+  /// Button that saves the current values.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get commonSave;
+
+  /// Dialog button that keeps the app open instead of closing it.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep open'**
+  String get commonKeepOpen;
+
+  /// Snackbar after saving rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {count} {count, plural, =1{row} other{rows}}.'**
+  String scoreSavedRows(int count);
+
+  /// Title of a pilot's score history dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Score history · {pilot}'**
+  String scoreHistoryTitle(String pilot);
+
+  /// Title of the group score history dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Group history'**
+  String get scoreHistoryGroupTitle;
+
+  /// Snackbar after a pilot was retired.
+  ///
+  /// In en, this message translates to:
+  /// **'{pilot} retired from round {round}.'**
+  String scoreRetiredFromRound(String pilot, int round);
+
+  /// Snackbar after a pilot was reinstated.
+  ///
+  /// In en, this message translates to:
+  /// **'{pilot} reinstated.'**
+  String scoreReinstated(String pilot);
+
+  /// Page state when there is no API client.
+  ///
+  /// In en, this message translates to:
+  /// **'No API client is available.'**
+  String get scoreNoApiClient;
+
+  /// Title of the load-failed view on the scoring page.
+  ///
+  /// In en, this message translates to:
+  /// **'The scores could not be loaded.'**
+  String get scoreLoadFailed;
+
+  /// Loading label while the scoring page reads its data.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the scores'**
+  String get scoreLoading;
+
+  /// Empty-state title on the scoring page before the matrix is drawn.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest has no matrix yet.'**
+  String get scoreNoMatrixTitle;
+
+  /// Empty-state body on the scoring page before the matrix is drawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw the matrix first. Then scores can be entered here.'**
+  String get scoreNoMatrixBody;
+
+  /// Action on the empty scoring state that opens the Matrix page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the matrix'**
+  String get scoreOpenMatrix;
+
+  /// Button on the recalculation-warning banner that re-reads the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get scoreRefresh;
+
+  /// Empty-state title when the group has no pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilots in this group.'**
+  String get scoreNoPilotsTitle;
+
+  /// Empty-state body when the group has no pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Every pilot assigned here is absent or retired.'**
+  String get scoreNoPilotsBody;
+
+  /// Label of the time field.
+  ///
+  /// In en, this message translates to:
+  /// **'Time flown (m:ss)'**
+  String get scoreTimeLabel;
+
+  /// Label of the launch height field.
+  ///
+  /// In en, this message translates to:
+  /// **'Launch height (m)'**
+  String get scoreHeightLabel;
+
+  /// Label of the landing field.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing (pts)'**
+  String get scoreLandingLabel;
+
+  /// Note under a valid launch height: its height penalty in points.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} pts'**
+  String scorePointsNote(String points);
+
+  /// Caption of the landing field on a late landing.
+  ///
+  /// In en, this message translates to:
+  /// **'0 · late'**
+  String get scoreLandingLate;
+
+  /// Caption of the landing field when the contest has no landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'No landing table'**
+  String get scoreNoLandingTable;
+
+  /// Error caption when the typed landing points are not in the table.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} isn’t in the landing table. Use {hint}'**
+  String scoreLandingBad(String value, String hint);
+
+  /// Caption of an empty landing field that has focus.
+  ///
+  /// In en, this message translates to:
+  /// **'Type table points: {hint}'**
+  String scoreLandingTypeHint(String hint);
+
+  /// Caption of a focused landing field whose band is chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'{display} · {points} pts'**
+  String scoreLandingSelected(String display, int points);
+
+  /// Caption of a landing field whose band is chosen, not focused.
+  ///
+  /// In en, this message translates to:
+  /// **'{display} · {points}'**
+  String scoreLandingBand(String display, int points);
+
+  /// Status chip of a late landing.
+  ///
+  /// In en, this message translates to:
+  /// **'Late landing'**
+  String get scoreFlagLateLanding;
+
+  /// Status chip of a motor restart.
+  ///
+  /// In en, this message translates to:
+  /// **'Motor restart'**
+  String get scoreFlagMotorRestart;
+
+  /// Status chip of an out-of-bounds flight.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of bounds'**
+  String get scoreFlagOutOfBounds;
+
+  /// Status chip of a flight with no recorded altitude.
+  ///
+  /// In en, this message translates to:
+  /// **'No altitude'**
+  String get scoreFlagNoAltitude;
+
+  /// Label of the penalties column.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalties'**
+  String get scorePenaltiesLabel;
+
+  /// Penalty cell value for a flight penalty.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} flight'**
+  String scoreFlightPenalty(int count);
+
+  /// Penalty cell when there is no penalty.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get scorePenaltyNone;
+
+  /// Penalty cell when an applied cumulative penalty was removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get scorePenaltyRemoved;
+
+  /// Penalty cell value for a cumulative penalty.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} total'**
+  String scoreCumulativePenalty(int count);
+
+  /// Label of the indicators column.
+  ///
+  /// In en, this message translates to:
+  /// **'Indicators'**
+  String get scoreIndicatorsLabel;
+
+  /// Status line naming how many Score check findings a row has.
+  ///
+  /// In en, this message translates to:
+  /// **'Check: {count}'**
+  String scoreCheckCount(int count);
+
+  /// Status line of a retired row, naming the first round the pilot does not fly.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired from round {round}'**
+  String scoreRetiredNote(int round);
+
+  /// Tooltip of the row three-dot menu.
+  ///
+  /// In en, this message translates to:
+  /// **'More for {pilot}'**
+  String scoreMoreTooltip(String pilot);
+
+  /// Row menu action that opens the score history.
+  ///
+  /// In en, this message translates to:
+  /// **'Score history'**
+  String get scoreHistoryMenu;
+
+  /// Row menu action that retires the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire pilot from this round on'**
+  String get scoreRetireMenu;
+
+  /// Row menu action that takes a retirement back.
+  ///
+  /// In en, this message translates to:
+  /// **'Reinstate pilot (retired from round {round})'**
+  String scoreReinstateMenu(int round);
+
+  /// Disabled row menu action for correcting a locked score.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct a locked score · Later release'**
+  String get scoreLockedLater;
+
+  /// Tooltip of the team badge when the pilot has no team.
+  ///
+  /// In en, this message translates to:
+  /// **'No team'**
+  String get scoreNoTeam;
+
+  /// Line under a pilot's name: their pilot number.
+  ///
+  /// In en, this message translates to:
+  /// **'No. {number}'**
+  String scorePilotNo(int number);
+
+  /// Label of the raw score cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw score'**
+  String get scoreRawLabel;
+
+  /// Label of the group score cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Group score'**
+  String get scoreGroupLabel;
+
+  /// Accessibility status word for a row with unsaved changes.
+  ///
+  /// In en, this message translates to:
+  /// **'unsaved changes'**
+  String get scoreSemUnsaved;
+
+  /// Accessibility status word for a row with no score.
+  ///
+  /// In en, this message translates to:
+  /// **'not entered'**
+  String get scoreSemNotEntered;
+
+  /// Accessibility status word for a row with a waiting submission.
+  ///
+  /// In en, this message translates to:
+  /// **'submitted by a participant'**
+  String get scoreSemSubmitted;
+
+  /// Accessibility status word for a row whose score was accepted automatically.
+  ///
+  /// In en, this message translates to:
+  /// **'accepted automatically'**
+  String get scoreSemAcceptedAuto;
+
+  /// Accessibility status word for an official score.
+  ///
+  /// In en, this message translates to:
+  /// **'official'**
+  String get scoreSemOfficial;
+
+  /// Accessibility status word for a locked row.
+  ///
+  /// In en, this message translates to:
+  /// **'locked'**
+  String get scoreSemLocked;
+
+  /// Accessibility status word for a retired row.
+  ///
+  /// In en, this message translates to:
+  /// **'retired'**
+  String get scoreSemRetired;
+
+  /// Note when the typed launch height is unusually high.
+  ///
+  /// In en, this message translates to:
+  /// **'{height} m is a high launch. Is this correct? You can still save.'**
+  String scoreHighLaunch(int height);
+
+  /// Note when the launch height is 0.
+  ///
+  /// In en, this message translates to:
+  /// **'0 m is not a launch height. Saving it as No altitude recorded scores 0.'**
+  String get scoreZeroHeight;
+
+  /// Action of the zero-height note.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on No altitude recorded'**
+  String get scoreTurnOnNoAltitude;
+
+  /// Heading of the landing section in the entry band.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing'**
+  String get scoreLandingHeading;
+
+  /// Tag on the landing choice while the Landing field has focus.
+  ///
+  /// In en, this message translates to:
+  /// **'Follows the Landing field · type table points, ↑↓ to step'**
+  String get scoreLandingFollows;
+
+  /// Note in the entry band when the contest has no landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest has no landing table. Choose one on the Configuration page.'**
+  String get scoreNoLandingTableBand;
+
+  /// Toggle label for a late landing.
+  ///
+  /// In en, this message translates to:
+  /// **'Late landing'**
+  String get scoreLateLanding;
+
+  /// Note under the Late landing toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing bonus is not given.'**
+  String get scoreLateLandingNote;
+
+  /// Toggle label for a motor restart.
+  ///
+  /// In en, this message translates to:
+  /// **'Motor restart'**
+  String get scoreMotorRestart;
+
+  /// Note under the Motor restart toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores 0.'**
+  String get scoreMotorRestartZero;
+
+  /// Note under the Motor restart toggle when the zero cannot be dropped.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores 0, and the zero cannot be dropped.'**
+  String get scoreMotorRestartNonDroppable;
+
+  /// Toggle label for an out-of-bounds flight.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of bounds'**
+  String get scoreOutOfBounds;
+
+  /// Note under the Out of bounds toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Landed more than 75 m from the marker. Scores 0.'**
+  String get scoreOutOfBoundsNote;
+
+  /// Toggle label for a flight with no recorded altitude.
+  ///
+  /// In en, this message translates to:
+  /// **'No altitude recorded'**
+  String get scoreNoAltitude;
+
+  /// Note under the No altitude recorded toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores 0.'**
+  String get scoreNoAltitudeNote;
+
+  /// Label of the Save row button while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get scoreSaving;
+
+  /// Button that saves the active row.
+  ///
+  /// In en, this message translates to:
+  /// **'Save row'**
+  String get scoreSaveRow;
+
+  /// Button that reverts the active row's edits.
+  ///
+  /// In en, this message translates to:
+  /// **'Revert'**
+  String get scoreRevert;
+
+  /// Hint of the entry band about the Enter key.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter moves on. Enter on the penalty saves and opens the next pilot.'**
+  String get scoreEnterHint;
+
+  /// Zero-confirmation note when the row is blank.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is entered. Saving records No flight, a zero.'**
+  String get scoreZeroWhyBlank;
+
+  /// Zero-confirmation note when the row scores 0.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving scores 0 for this pilot.'**
+  String get scoreZeroWhy;
+
+  /// Note after the zero was confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Zero confirmed. Save the row to record it.'**
+  String get scoreZeroConfirmed;
+
+  /// Action of the zero-confirmation note.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm zero'**
+  String get scoreConfirmZero;
+
+  /// Empty state of the score history.
+  ///
+  /// In en, this message translates to:
+  /// **'No scores have been entered yet.'**
+  String get scoreHistoryEmpty;
+
+  /// Footer of the score history naming the zone.
+  ///
+  /// In en, this message translates to:
+  /// **'Times are in the contest time zone ({zone}).'**
+  String scoreHistoryTimesZone(String zone);
+
+  /// Author of a score history entry: the director.
+  ///
+  /// In en, this message translates to:
+  /// **'Director'**
+  String get scoreHistoryAuthorityDirector;
+
+  /// Author of a score history entry: the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant'**
+  String get scoreHistoryAuthorityParticipant;
+
+  /// Author of a score history entry: a helper.
+  ///
+  /// In en, this message translates to:
+  /// **'Helper'**
+  String get scoreHistoryAuthorityHelper;
+
+  /// Author of a score history entry: the system.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get scoreHistoryAuthoritySystem;
+
+  /// Author of a score history entry: an administrator.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrator'**
+  String get scoreHistoryAuthorityAdmin;
+
+  /// Outcome chip of the current score history entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get scoreHistoryCurrent;
+
+  /// Outcome chip of a superseded entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced'**
+  String get scoreHistoryReplaced;
+
+  /// Outcome chip of an entry the contest did not adopt.
+  ///
+  /// In en, this message translates to:
+  /// **'Not adopted'**
+  String get scoreHistoryNotAdopted;
+
+  /// Outcome chip of an entry awaiting a review decision.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting decision'**
+  String get scoreHistoryPending;
+
+  /// Heading of a score history entry with no revision.
+  ///
+  /// In en, this message translates to:
+  /// **'Submission'**
+  String get scoreHistorySubmission;
+
+  /// Heading of a score history entry naming its revision.
+  ///
+  /// In en, this message translates to:
+  /// **'Revision {revision}'**
+  String scoreHistoryRevision(int revision);
+
+  /// Line of a score history entry naming the correction reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String scoreHistoryReason(String reason);
+
+  /// Title of the round picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {current} of {total}'**
+  String scoreToolbarRoundTitle(int current, int total);
+
+  /// Choice in the round picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {ordinal}'**
+  String scoreToolbarRoundChoice(int ordinal);
+
+  /// Sub-line of a round picker choice: its number of groups.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} groups'**
+  String scoreToolbarGroups(int count);
+
+  /// Title of the group picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {letter} of {count}'**
+  String scoreToolbarGroupTitle(String letter, int count);
+
+  /// Sub-line of a round or group picker choice: its number of pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilots'**
+  String scoreToolbarPilots(int count);
+
+  /// Choice in the group picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Group {letter}'**
+  String scoreToolbarGroupChoice(String letter);
+
+  /// Primary action when entry is closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get scoreToolbarSave;
+
+  /// Primary action naming how many rows save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {count} {count, plural, =1{row} other{rows}}'**
+  String scoreToolbarSaveRows(int count);
+
+  /// Primary action when nothing is dirty (locking not built).
+  ///
+  /// In en, this message translates to:
+  /// **'Lock…'**
+  String get scoreToolbarLock;
+
+  /// Tooltip of the group three-dot menu.
+  ///
+  /// In en, this message translates to:
+  /// **'More group actions'**
+  String get scoreToolbarMoreTooltip;
+
+  /// Group menu item that toggles the keyboard path numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Show keyboard order'**
+  String get scoreToolbarShowFocusOrder;
+
+  /// Group menu item that opens the group history.
+  ///
+  /// In en, this message translates to:
+  /// **'Group history'**
+  String get scoreToolbarGroupHistory;
+
+  /// Disabled group menu action for a group re-flight.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-flight group · Later release'**
+  String get scoreToolbarReflightGroup;
+
+  /// Disabled group menu action for a round re-flight.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-flight round · Later release'**
+  String get scoreToolbarReflightRound;
+
+  /// Tooltip of the first-round navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'First round'**
+  String get scoreToolbarFirstRound;
+
+  /// Tooltip of the previous-round navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous round'**
+  String get scoreToolbarPrevRound;
+
+  /// Tooltip of the next-round navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Next round'**
+  String get scoreToolbarNextRound;
+
+  /// Tooltip of the last-round navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Last round'**
+  String get scoreToolbarLastRound;
+
+  /// Tooltip of the first-group navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'First group'**
+  String get scoreToolbarFirstGroup;
+
+  /// Tooltip of the previous-group navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous group'**
+  String get scoreToolbarPrevGroup;
+
+  /// Tooltip of the next-group navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Next group'**
+  String get scoreToolbarNextGroup;
+
+  /// Tooltip of the last-group navigation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Last group'**
+  String get scoreToolbarLastGroup;
+
+  /// Button that runs the Score check.
+  ///
+  /// In en, this message translates to:
+  /// **'Score check'**
+  String get scoreToolbarScoreCheck;
+
+  /// Tooltip of the disabled lock action.
+  ///
+  /// In en, this message translates to:
+  /// **'Locking is not available in this build yet.'**
+  String get scoreToolbarLockHint;
+
+  /// Title of the penalty removal dialog for one pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {pilot}\'s penalty?'**
+  String scorePenaltyRemoveTitleOne(String pilot);
+
+  /// Title of the penalty removal dialog for several pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {count} penalties?'**
+  String scorePenaltyRemoveTitleMany(int count);
+
+  /// Body of the penalty removal dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Removal is an official score correction. Enter the reason to record it.'**
+  String get scorePenaltyRemoveBody;
+
+  /// Label of the correction reason field.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction reason'**
+  String get scorePenaltyRemoveReason;
+
+  /// Button that removes the penalties.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove penalty'**
+  String get scorePenaltyRemoveButton;
+
+  /// Title of the retire dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire {pilot}?'**
+  String scoreRetireTitle(String pilot);
+
+  /// Title of the reinstate dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Reinstate {pilot}?'**
+  String scoreReinstateTitle(String pilot);
+
+  /// Body of the retire dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{pilot} retires from round {round} on. Their unscored flights from then on are not missing, and score entry is closed for them.'**
+  String scoreRetireBody(String pilot, int round);
+
+  /// Body of the reinstate dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{pilot} will fly again from round {round} on. Their unscored flights count as missing again.'**
+  String scoreReinstateBody(String pilot, int round);
+
+  /// Line of the retire dialog when no round count changes.
+  ///
+  /// In en, this message translates to:
+  /// **'No round count changes.'**
+  String get scoreRetireNoChanges;
+
+  /// Line of the retire dialog naming scores that stay.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 score already entered from round {round} on stays and still counts.} other{{count} scores already entered from round {round} on stay and still count.}}'**
+  String scoreRetireKeptScores(int count, int round);
+
+  /// Button that retires the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire pilot'**
+  String get scoreRetireButton;
+
+  /// Button that reinstates the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Reinstate pilot'**
+  String get scoreReinstateButton;
+
+  /// Title of the unsaved-edits dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved scores'**
+  String get scoreUnsavedTitle;
+
+  /// Title of the unsaved-edits dialog when closing the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Close RC Soar Score?'**
+  String get scoreUnsavedCloseTitle;
+
+  /// Body of the unsaved-edits dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 row has scores that are not saved. Save them before you {action}?} other{{count} rows have scores that are not saved. Save them before you {action}?}}'**
+  String scoreUnsavedBody(int count, String action);
+
+  /// Action word in the unsaved-edits dialog when closing the app.
+  ///
+  /// In en, this message translates to:
+  /// **'close the app'**
+  String get scoreUnsavedActionClose;
+
+  /// Action word in the unsaved-edits dialog when leaving the group.
+  ///
+  /// In en, this message translates to:
+  /// **'leave this group'**
+  String get scoreUnsavedActionLeave;
+
+  /// Dialog button that stays on the group.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get scoreUnsavedStay;
+
+  /// Dialog button that discards the unsaved rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get scoreUnsavedDiscard;
+
+  /// Wizard step 1 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Details & copy source'**
+  String get wizardStepDetailsCopySource;
+
+  /// Wizard step 2 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline'**
+  String get wizardStepDiscipline;
+
+  /// Wizard step 3 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant options'**
+  String get wizardStepParticipantOptions;
+
+  /// Wizard step 4 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get wizardStepParticipants;
+
+  /// Wizard step 5 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring & publication'**
+  String get wizardStepScoringPublication;
+
+  /// Wizard step 6 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw options'**
+  String get wizardStepDrawOptions;
+
+  /// Wizard step 7 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary & create'**
+  String get wizardStepSummaryCreate;
+
+  /// Wizard step 1 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Name the contest and say where it’s held. You can also start from an earlier contest.'**
+  String get wizardIntroDetailsCopySource;
+
+  /// Wizard step 2 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one discipline. It sets the default task, landing bonus and scoring rules.'**
+  String get wizardIntroDiscipline;
+
+  /// Wizard step 3 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on only what this contest needs. Each option adds columns to the Participants step.'**
+  String get wizardIntroParticipantOptions;
+
+  /// Wizard step 4 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Add pilots and helpers. Every scoring pilot needs the columns marked with *.'**
+  String get wizardIntroParticipants;
+
+  /// Wizard step 5 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the defaults for this discipline and change anything this contest does differently.'**
+  String get wizardIntroScoringPublication;
+
+  /// Wizard step 6 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Set how pilots are grouped. You draw the matrix after the contest is created.'**
+  String get wizardIntroDrawOptions;
+
+  /// Wizard step 7 intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Check each section, then create the contest.'**
+  String get wizardIntroSummaryCreate;
+
+  /// Message when the draft couldn't be deleted after creating.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest created, but its saved draft couldn’t be deleted. You may be offered it again; choose Start fresh.'**
+  String get wizardDraftNotDeleted;
+
+  /// Message shown after leaving the wizard.
+  ///
+  /// In en, this message translates to:
+  /// **'Left the wizard. Your draft is kept.'**
+  String get wizardLeftMessage;
+
+  /// Message when trying to leave while creating.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest is being created. Wait for it to finish.'**
+  String get wizardCreatingContest;
+
+  /// Title of the leave-confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave new contest?'**
+  String get wizardLeaveTitle;
+
+  /// Body of the leave-confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Your draft is kept on this device. You can finish it later from Contests.'**
+  String get wizardLeaveBody;
+
+  /// Warning in the leave dialog when save failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your latest changes couldn’t be saved and will be lost.'**
+  String get wizardLeaveSaveFailed;
+
+  /// Warning in the leave dialog when fields have errors.
+  ///
+  /// In en, this message translates to:
+  /// **'Fields with errors on this step need fixing before the contest can be created.'**
+  String get wizardLeaveErrors;
+
+  /// Cancel label in the leave dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get wizardKeepEditing;
+
+  /// Confirm label in the leave dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get wizardLeave;
+
+  /// Title of the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Change discipline to {discipline}?'**
+  String wizardChangeDisciplineTitle(String discipline);
+
+  /// Body of the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Some values set for {current} don’t apply to {target} and will be cleared:'**
+  String wizardChangeDisciplineBody(String current, String target);
+
+  /// Item in the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{discipline} landing-bonus table'**
+  String wizardChangeDisciplineLanding(String discipline);
+
+  /// Item in the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{discipline}-specific rules ({rules})'**
+  String wizardChangeDisciplineRules(String discipline, String rules);
+
+  /// Item in the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Group-score mode and precision, reset to the new defaults'**
+  String get wizardChangeDisciplineGroupScore;
+
+  /// Footnote in the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Details, participants and draw options stay as they are.'**
+  String get wizardChangeDisciplineFootnote;
+
+  /// Cancel label in the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep {discipline}'**
+  String wizardChangeDisciplineCancel(String discipline);
+
+  /// Confirm label in the discipline-change dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Change and clear'**
+  String get wizardChangeDisciplineConfirm;
+
+  /// Message after changing the discipline.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline changed to {discipline}. Incompatible values were cleared.'**
+  String wizardDisciplineChanged(String discipline);
+
+  /// Title of the turn-off-teams dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off teams?'**
+  String get wizardTurnOffTeams;
+
+  /// Item in the turn-off-teams dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Team assignments are removed from {count} participant{plural} ({teams} team{teamPlural}).'**
+  String wizardTurnOffTeamsAssignments(
+    int count,
+    String plural,
+    int teams,
+    String teamPlural,
+  );
+
+  /// Item in the turn-off-teams dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant who isn’t a pilot is removed from the contest.} other{{count} participants who aren’t pilots are removed from the contest.}}'**
+  String wizardTurnOffTeamsNonPilots(int count);
+
+  /// Item in the turn-off-teams dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the group size in Draw options. Team protection no longer sets a minimum.'**
+  String get wizardTurnOffTeamsGroupSize;
+
+  /// Cancel label in the turn-off-teams dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep teams'**
+  String get wizardKeepTeams;
+
+  /// Confirm label in the turn-off-teams dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off and remove'**
+  String get wizardTurnOffAndRemove;
+
+  /// Message after turning off teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams turned off. Team assignments and non-pilots were removed.'**
+  String get wizardTeamsTurnedOff;
+
+  /// Banner title when save failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft not saved'**
+  String get wizardDraftNotSaved;
+
+  /// Banner body when save failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your last changes weren’t saved. Everything you entered is still on screen.'**
+  String get wizardDraftNotSavedBody;
+
+  /// Action label in the save-failed banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry save'**
+  String get wizardRetrySave;
+
+  /// Message after a successful save retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved.'**
+  String get wizardDraftSaved;
+
+  /// Generic cancel button.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get wizardCancel;
+
+  /// Banner title on step 5.
+  ///
+  /// In en, this message translates to:
+  /// **'Created unpublished and private'**
+  String get wizardCreatedUnpublished;
+
+  /// Banner body on step 5.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody outside the contest team can see it. You publish it later from the contest configuration page.'**
+  String get wizardCreatedUnpublishedBody;
+
+  /// Banner title when create failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest wasn’t created'**
+  String get wizardNotCreated;
+
+  /// Banner body when create failed.
+  ///
+  /// In en, this message translates to:
+  /// **'{error} Everything you entered is kept in the draft.'**
+  String wizardNotCreatedBody(String error);
+
+  /// Action label in the create-failed banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get wizardRetry;
+
+  /// Banner title on step 6.
+  ///
+  /// In en, this message translates to:
+  /// **'The matrix isn’t drawn here'**
+  String get wizardMatrixNotDrawn;
+
+  /// Banner body on step 6.
+  ///
+  /// In en, this message translates to:
+  /// **'After creating the contest, draw the matrix from contest configuration. It will use these settings.'**
+  String get wizardMatrixNotDrawnBody;
+
+  /// Validation banner title.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 field needs attention before you continue} other{{count} fields need attention before you continue}}'**
+  String wizardFieldsNeedAttention(int count);
+
+  /// Label for the first drop field.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop after round'**
+  String get wizardDropAfterRound;
+
+  /// Label for the second drop field.
+  ///
+  /// In en, this message translates to:
+  /// **'Second drop after round'**
+  String get wizardSecondDropAfterRound;
+
+  /// Label for the groups field.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups per round'**
+  String get wizardGroupsPerRound;
+
+  /// Label for the rounds field.
+  ///
+  /// In en, this message translates to:
+  /// **'Preliminary rounds'**
+  String get wizardPreliminaryRounds;
+
+  /// Label for the seeded rounds field.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded rounds'**
+  String get wizardSeededRounds;
+
+  /// Field label for team pilot count.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots counted for team score *'**
+  String get wizardTeamPilotCountLabel;
+
+  /// Accessibility announcement when navigating steps.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total}, {title}.'**
+  String wizardStepOf(int step, int total, String title);
+
+  /// Step number header above the title.
+  ///
+  /// In en, this message translates to:
+  /// **'STEP {step} OF {total}'**
+  String wizardStepHeader(int step, int total);
+
+  /// Primary button label when not on the last step.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {title}'**
+  String wizardNext(String title);
+
+  /// Primary button label while creating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating contest…'**
+  String get wizardCreating;
+
+  /// Primary button label on the last step.
+  ///
+  /// In en, this message translates to:
+  /// **'Create contest'**
+  String get wizardCreateContest;
+
+  /// Accessibility announcement when creating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating contest.'**
+  String get wizardCreatingAnnouncement;
+
+  /// Accessibility announcement after creating.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest created.'**
+  String get wizardCreatedAnnouncement;
+
+  /// Blocked-reason text.
+  ///
+  /// In en, this message translates to:
+  /// **'Can’t create yet: {reason}'**
+  String wizardCannotCreate(String reason);
+
+  /// Reason when a step is invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} needs attention.'**
+  String wizardNeedsAttention(String title);
+
+  /// Reason when too few scoring pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'add at least 2 scoring pilots.'**
+  String get wizardAddScoringPilots;
+
+  /// Reason when participants need fixing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant needs fixing.} other{{count} participants need fixing.}}'**
+  String wizardParticipantsNeedFixing(int count);
+
+  /// Fix label in the blocked footer.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to {title}'**
+  String wizardGoToStep(String title);
+
+  /// Back button in the wizard footer.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get wizardBack;
+
+  /// DetailsField label for name.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest name'**
+  String get wizardDetailsFieldContestName;
+
+  /// DetailsField label for venue.
+  ///
+  /// In en, this message translates to:
+  /// **'Venue / host'**
+  String get wizardDetailsFieldVenue;
+
+  /// DetailsField label for start date.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get wizardDetailsFieldStartDate;
+
+  /// DetailsField label for end date.
+  ///
+  /// In en, this message translates to:
+  /// **'End date'**
+  String get wizardDetailsFieldEndDate;
+
+  /// Validation error for empty name.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a contest name.'**
+  String get wizardValidationEnterName;
+
+  /// Validation error for empty venue.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the venue or host club.'**
+  String get wizardValidationEnterVenue;
+
+  /// Validation error for empty start date.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a start date.'**
+  String get wizardValidationEnterStartDate;
+
+  /// Validation error for invalid start date.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a date like Nov 14, 2026.'**
+  String get wizardValidationStartDateFormat;
+
+  /// Validation error for empty end date.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an end date.'**
+  String get wizardValidationEnterEndDate;
+
+  /// Validation error for invalid end date.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a date like Nov 15, 2026.'**
+  String get wizardValidationEndDateFormat;
+
+  /// Validation error when end is before start.
+  ///
+  /// In en, this message translates to:
+  /// **'End date can’t be before the start date ({start}).'**
+  String wizardValidationEndDateBeforeStart(String start);
+
+  /// Validation error when no discipline chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a discipline.'**
+  String get wizardValidationChooseDiscipline;
+
+  /// Validation error for non-positive integer.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number above 0.'**
+  String get wizardValidationWholeNumber;
+
+  /// Validation error for second drop.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be after round {round}.'**
+  String wizardValidationMustBeAfterRound(int round);
+
+  /// Validation error for too many groups.
+  ///
+  /// In en, this message translates to:
+  /// **'Use {max} or fewer so every group has at least 2 scoring pilots.'**
+  String wizardValidationGroupsMax(int max);
+
+  /// Validation error for too few groups.
+  ///
+  /// In en, this message translates to:
+  /// **'Team protection needs at least {min} groups.'**
+  String wizardValidationGroupsMin(int min);
+
+  /// Validation error for seeded rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1 or more.'**
+  String get wizardValidationSeededRounds;
+
+  /// DropPolicy label for disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get wizardDropDisabled;
+
+  /// DropPolicy label for one dropped.
+  ///
+  /// In en, this message translates to:
+  /// **'One dropped'**
+  String get wizardDropOne;
+
+  /// DropPolicy label for two dropped.
+  ///
+  /// In en, this message translates to:
+  /// **'Two dropped'**
+  String get wizardDropTwo;
+
+  /// CopyMode label for none.
+  ///
+  /// In en, this message translates to:
+  /// **'Don’t copy'**
+  String get wizardCopyModeNone;
+
+  /// CopyMode description for none.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with a blank configuration and no pilots.'**
+  String get wizardCopyModeNoneDesc;
+
+  /// CopyMode label for configuration only.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration only'**
+  String get wizardCopyModeConfiguration;
+
+  /// CopyMode description for configuration only.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline, options, scoring and draw settings.'**
+  String get wizardCopyModeConfigurationDesc;
+
+  /// CopyMode label for all pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration + all pilots'**
+  String get wizardCopyModeAllPilots;
+
+  /// CopyMode description for all pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Every pilot in the source contest, with their class.'**
+  String get wizardCopyModeAllPilotsDesc;
+
+  /// CopyMode label for selected pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration + selected pilots'**
+  String get wizardCopyModeSelectedPilots;
+
+  /// CopyMode description for selected pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick some pilots, with their class, for example for a fly-off.'**
+  String get wizardCopyModeSelectedPilotsDesc;
+
+  /// ParticipantOption title for teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get wizardOptionTeamsTitle;
+
+  /// ParticipantOption description for teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Group pilots into teams for a team score.'**
+  String get wizardOptionTeamsDesc;
+
+  /// ParticipantOption effect for teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a Team column. Type a name to create a team. Pilots with no team are unassigned. Team protection becomes available in Draw options.'**
+  String get wizardOptionTeamsEffect;
+
+  /// ParticipantOption title for pilot numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest pilot numbers'**
+  String get wizardOptionPilotNumbersTitle;
+
+  /// ParticipantOption description for pilot numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Give each pilot a number for this contest.'**
+  String get wizardOptionPilotNumbersDesc;
+
+  /// ParticipantOption effect for pilot numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a Pilot no. column. Numbers are assigned at the first draw.'**
+  String get wizardOptionPilotNumbersEffect;
+
+  /// ParticipantOption note for pilot numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Any number shown before the first draw is labelled provisional.'**
+  String get wizardOptionPilotNumbersNote;
+
+  /// ParticipantOption title for classes.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get wizardOptionClassesTitle;
+
+  /// ParticipantOption description for classes.
+  ///
+  /// In en, this message translates to:
+  /// **'Score pilots in classes such as Open or Sportsman.'**
+  String get wizardOptionClassesDesc;
+
+  /// ParticipantOption effect for classes.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a required Class column for every scoring pilot.'**
+  String get wizardOptionClassesEffect;
+
+  /// ParticipantOption title for roles.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest roles'**
+  String get wizardOptionRolesTitle;
+
+  /// ParticipantOption description for roles.
+  ///
+  /// In en, this message translates to:
+  /// **'Include non-flying people such as timers and the CD.'**
+  String get wizardOptionRolesDesc;
+
+  /// ParticipantOption effect for roles.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a Role column. New people start as Pilot. Non-flying roles get no score rows.'**
+  String get wizardOptionRolesEffect;
+
+  /// ParticipantOption title for models.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot models'**
+  String get wizardOptionModelsTitle;
+
+  /// ParticipantOption description for models.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the models each pilot flies.'**
+  String get wizardOptionModelsDesc;
+
+  /// ParticipantOption effect for models.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds a Models column for scoring pilots.'**
+  String get wizardOptionModelsEffect;
+
+  /// ParticipantOption note for models.
+  ///
+  /// In en, this message translates to:
+  /// **'Add models any time. A pilot without a model never holds up the contest.'**
+  String get wizardOptionModelsNote;
+
+  /// Label for unsupported disciplines.
+  ///
+  /// In en, this message translates to:
+  /// **'Not supported yet'**
+  String get wizardDisciplineUnsupported;
+
+  /// GroupScoreMode label for raw.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw'**
+  String get wizardGroupScoreRaw;
+
+  /// GroupScoreMode label for normalized.
+  ///
+  /// In en, this message translates to:
+  /// **'Normalized'**
+  String get wizardGroupScoreNormalized;
+
+  /// GroupScoreMode label for time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get wizardGroupScoreTime;
+
+  /// RoundingMode label for round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round'**
+  String get wizardRoundingRound;
+
+  /// RoundingMode label for truncate.
+  ///
+  /// In en, this message translates to:
+  /// **'Truncate'**
+  String get wizardRoundingTruncate;
+
+  /// PublicUpdateMode label for automatic.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get wizardPublicUpdateAutomatic;
+
+  /// PublicUpdateMode label for round completion.
+  ///
+  /// In en, this message translates to:
+  /// **'On round completion'**
+  String get wizardPublicUpdateRoundCompletion;
+
+  /// PublicUpdateMode label for manual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get wizardPublicUpdateManual;
+
+  /// PublicUpdateMode description for automatic.
+  ///
+  /// In en, this message translates to:
+  /// **'Public results update as scores are entered.'**
+  String get wizardPublicUpdateAutomaticDesc;
+
+  /// PublicUpdateMode description for round completion.
+  ///
+  /// In en, this message translates to:
+  /// **'Public results update when a round is complete.'**
+  String get wizardPublicUpdateRoundCompletionDesc;
+
+  /// PublicUpdateMode description for manual.
+  ///
+  /// In en, this message translates to:
+  /// **'Public results update only when you publish.'**
+  String get wizardPublicUpdateManualDesc;
+
+  /// Draw mode card title.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw mode'**
+  String get wizardDrawMode;
+
+  /// Draw mode name for man on man.
+  ///
+  /// In en, this message translates to:
+  /// **'Man on Man'**
+  String get wizardDrawModeManOnMan;
+
+  /// Draw mode description for man on man.
+  ///
+  /// In en, this message translates to:
+  /// **'Random groups each round, mixed so pilots meet as many others as possible.'**
+  String get wizardDrawModeManOnManDesc;
+
+  /// Draw mode name for seeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded Man on Man'**
+  String get wizardDrawModeSeeded;
+
+  /// Draw mode description for seeded.
+  ///
+  /// In en, this message translates to:
+  /// **'After the seeded rounds, pilots with similar scores fly together.'**
+  String get wizardDrawModeSeededDesc;
+
+  /// Why seeded and team protection are exclusive.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded draws place pilots by ranking, so they can’t also keep teammates in separate groups.'**
+  String get wizardDrawModeWhyExclusive;
+
+  /// Disabled reason for seeded mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable while team protection is on. {reason} Turn off team protection to choose it.'**
+  String wizardDrawModeUnavailable(String reason);
+
+  /// Card title for groups and rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups and rounds'**
+  String get wizardGroupsAndRounds;
+
+  /// Hint below groups field.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum {min}: team protection keeps the {team} pilots of your largest team in separate groups.'**
+  String wizardMinimumGroups(int min, int team);
+
+  /// Hint below groups field.
+  ///
+  /// In en, this message translates to:
+  /// **'Between {min} and {max} for {scoring} scoring pilots.'**
+  String wizardGroupsRange(int min, int max, int scoring);
+
+  /// Note below preliminary rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds can be appended after the contest starts.'**
+  String get wizardRoundsAppendNote;
+
+  /// Description for seeded rounds setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Man-on-man rounds flown before seeding starts. Minimum 1.'**
+  String get wizardSeededRoundsDesc;
+
+  /// Error title for seeded rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 1 seeded round'**
+  String get wizardSeededRoundsAtLeast1;
+
+  /// Setting label for lane mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Lane mode'**
+  String get wizardLaneMode;
+
+  /// Description for lane mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Whether pilots get a launch lane within their group.'**
+  String get wizardLaneModeDesc;
+
+  /// LaneMode label for none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get wizardLaneNone;
+
+  /// LaneMode label for random.
+  ///
+  /// In en, this message translates to:
+  /// **'Random'**
+  String get wizardLaneRandom;
+
+  /// Setting label for team protection.
+  ///
+  /// In en, this message translates to:
+  /// **'Team protection'**
+  String get wizardTeamProtection;
+
+  /// Description for team protection when teams on.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps teammates out of the same group. Needs at least as many groups as your largest team has pilots ({count}).'**
+  String wizardTeamProtectionDesc(int count);
+
+  /// Description for team protection when teams off.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps teammates out of the same group.'**
+  String get wizardTeamProtectionDescOff;
+
+  /// Note title when teams off.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams are off'**
+  String get wizardTeamsOffNote;
+
+  /// Note body when teams off.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on Teams in Participant options to use team protection.'**
+  String get wizardTeamsOffNoteBody;
+
+  /// Note title when seeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable with Seeded Man on Man'**
+  String get wizardSeededUnavailableNote;
+
+  /// Note body when seeded.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason} Choose Man on Man to use team protection.'**
+  String wizardSeededUnavailableNoteBody(String reason);
+
+  /// Note title when protection on.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeded Man on Man is now unavailable'**
+  String get wizardSeededUnavailableNote2;
+
+  /// Note body when protection on.
+  ///
+  /// In en, this message translates to:
+  /// **'The two can’t be combined. Turn this off if you want a seeded draw.'**
+  String get wizardSeededUnavailableNote2Body;
+
+  /// Setting label for back-to-back.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow back-to-back flights'**
+  String get wizardBackToBack;
+
+  /// Description for back-to-back.
+  ///
+  /// In en, this message translates to:
+  /// **'A pilot may fly the last group of one round and the first group of the next.'**
+  String get wizardBackToBackDesc;
+
+  /// Warning title for back-to-back off.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw fairness decreases'**
+  String get wizardBackToBackFairness;
+
+  /// Warning body for back-to-back off.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping pilots out of consecutive flights limits how the draw can mix pilots, so some match-ups repeat more often.'**
+  String get wizardBackToBackFairnessBody;
+
+  /// Error title when too few groups.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest is too small for the constraint'**
+  String get wizardBackToBackTooSmall;
+
+  /// Error body when too few groups.
+  ///
+  /// In en, this message translates to:
+  /// **'With {groups} group{plural}, a pilot in the last group of one round would also fly in the first group of the next. Use at least 3 groups or allow back-to-back flights.'**
+  String wizardBackToBackTooSmallBody(int groups, String plural);
+
+  /// Card title for constraints.
+  ///
+  /// In en, this message translates to:
+  /// **'Constraints'**
+  String get wizardConstraints;
+
+  /// Title of the group calculation panel.
+  ///
+  /// In en, this message translates to:
+  /// **'PILOTS PER GROUP · UPDATES AS YOU EDIT'**
+  String get wizardPilotsPerGroupTitle;
+
+  /// OK message in group panel.
+  ///
+  /// In en, this message translates to:
+  /// **'every group has at least 2 scoring pilots.'**
+  String get wizardPilotsPerGroupOk;
+
+  /// Blocked message in group panel.
+  ///
+  /// In en, this message translates to:
+  /// **'with {groups} groups some would have fewer than 2 scoring pilots. Use {max} or fewer.'**
+  String wizardPilotsPerGroupBlocked(int groups, int max);
+
+  /// Blocked message when no groups.
+  ///
+  /// In en, this message translates to:
+  /// **'enter at least 1 group.'**
+  String get wizardPilotsPerGroupEnter1;
+
+  /// Protection message in group panel.
+  ///
+  /// In en, this message translates to:
+  /// **'team protection needs at least {min} groups. Your largest team has {team} scoring pilots.'**
+  String wizardPilotsPerGroupProtection(int min, int team);
+
+  /// Message when protection off.
+  ///
+  /// In en, this message translates to:
+  /// **'Team protection is off, so teammates can share a group.'**
+  String get wizardPilotsPerGroupProtectionOff;
+
+  /// Count line in group panel.
+  ///
+  /// In en, this message translates to:
+  /// **'{scoring} scoring pilots in {groups} group{plural} · smallest group {min}, largest {max}'**
+  String wizardPilotsPerGroupCount(
+    int scoring,
+    int groups,
+    String plural,
+    int min,
+    int max,
+  );
+
+  /// Count line when no groups.
+  ///
+  /// In en, this message translates to:
+  /// **'{scoring} scoring pilots'**
+  String wizardPilotsPerGroupCountNoGroups(int scoring);
+
+  /// Card title for scoring settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring'**
+  String get wizardScoringCard;
+
+  /// Setting label for group score.
+  ///
+  /// In en, this message translates to:
+  /// **'Group score'**
+  String get wizardGroupScoreLabel;
+
+  /// Description for raw group score.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw: flight points plus landing bonus, not normalized.'**
+  String get wizardGroupScoreRawDesc;
+
+  /// Description for normalized group score.
+  ///
+  /// In en, this message translates to:
+  /// **'Normalized: flight points plus landing bonus, normalized to 1000 in each group.'**
+  String get wizardGroupScoreNormalizedDesc;
+
+  /// Description for time group score.
+  ///
+  /// In en, this message translates to:
+  /// **'Time: flight time is normalized to 1000 in each group, then the landing bonus is added.'**
+  String get wizardGroupScoreTimeDesc;
+
+  /// Warning title for non-traditional scoring.
+  ///
+  /// In en, this message translates to:
+  /// **'No longer a traditional {discipline} contest'**
+  String wizardGroupScoreTraditional(String discipline);
+
+  /// Warning body for non-traditional scoring.
+  ///
+  /// In en, this message translates to:
+  /// **'{discipline} uses {mode} group scoring by default.'**
+  String wizardGroupScoreTraditionalBody(String discipline, String mode);
+
+  /// Setting label for rounding.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounding'**
+  String get wizardRoundingLabel;
+
+  /// Description for rounding.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens to digits beyond the chosen precision.'**
+  String get wizardRoundingDesc;
+
+  /// Setting label for precision.
+  ///
+  /// In en, this message translates to:
+  /// **'Total score decimal precision'**
+  String get wizardPrecisionLabel;
+
+  /// Description for precision.
+  ///
+  /// In en, this message translates to:
+  /// **'Digits shown and stored after the decimal point.'**
+  String get wizardPrecisionDesc;
+
+  /// Hint example for precision.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: 987.4567 → {result}'**
+  String wizardPrecisionExample(String result);
+
+  /// Setting label for dropped rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropped rounds'**
+  String get wizardDroppedRoundsLabel;
+
+  /// Description for dropped rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Worst rounds left out of each pilot’s total.'**
+  String get wizardDroppedRoundsDesc;
+
+  /// Label for first drop.
+  ///
+  /// In en, this message translates to:
+  /// **'First drop after round'**
+  String get wizardFirstDropLabel;
+
+  /// Description for drop after round.
+  ///
+  /// In en, this message translates to:
+  /// **'Once this many rounds are complete, each pilot’s worst round is left out.'**
+  String get wizardDropAfterRoundDesc;
+
+  /// Description for second drop.
+  ///
+  /// In en, this message translates to:
+  /// **'Once this many rounds are complete, the second worst round is also left out. Must be later than the first.'**
+  String get wizardSecondDropDesc;
+
+  /// Note when second drop is later.
+  ///
+  /// In en, this message translates to:
+  /// **'The second drop has to come later than the first.'**
+  String get wizardSecondDropLater;
+
+  /// Card title for participants and publication.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants and publication'**
+  String get wizardParticipantsPublication;
+
+  /// Setting label for review requests.
+  ///
+  /// In en, this message translates to:
+  /// **'Score-review requests'**
+  String get wizardReviewRequestsLabel;
+
+  /// Description for review requests.
+  ///
+  /// In en, this message translates to:
+  /// **'Let pilots ask the contest director to review a score.'**
+  String get wizardReviewRequestsDesc;
+
+  /// Setting label for public update.
+  ///
+  /// In en, this message translates to:
+  /// **'Public update policy'**
+  String get wizardPublicUpdateLabel;
+
+  /// Description for public update.
+  ///
+  /// In en, this message translates to:
+  /// **'When public results refresh once the contest is published.'**
+  String get wizardPublicUpdateDesc;
+
+  /// Default label when no discipline.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform default'**
+  String get wizardPlatformDefault;
+
+  /// Suffix for discipline default labels.
+  ///
+  /// In en, this message translates to:
+  /// **'default'**
+  String get wizardDisciplineDefault;
+
+  /// Changed-from label.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed from {value}'**
+  String wizardChangedFrom(String value);
+
+  /// Reset button in setting rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to default'**
+  String get wizardResetToDefault;
+
+  /// Tooltip for the minus stepper.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer'**
+  String get wizardFewer;
+
+  /// Tooltip for the plus stepper.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get wizardMore;
+
+  /// Title in the step list.
+  ///
+  /// In en, this message translates to:
+  /// **'New contest'**
+  String get wizardNewContest;
+
+  /// Progress text in the step list.
+  ///
+  /// In en, this message translates to:
+  /// **'{complete} of {total} steps complete'**
+  String wizardStepsComplete(int complete, int total);
+
+  /// Note at the bottom of the step list.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration in process is kept until the app is closed or the contest is created.'**
+  String get wizardDraftKeptNote;
+
+  /// Note below the discipline cards.
+  ///
+  /// In en, this message translates to:
+  /// **'These are starting defaults. You can override task times, landing bonuses and rules after the contest is created, on the contest configuration page.'**
+  String get wizardDisciplineNote;
+
+  /// Badge text for selected discipline.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get wizardSelected;
+
+  /// Table label in discipline card.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get wizardTimeLabel;
+
+  /// Table label in discipline card.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing'**
+  String get wizardLandingLabel;
+
+  /// Card title for contest details.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest details'**
+  String get wizardContestDetails;
+
+  /// Trailing text on the details card.
+  ///
+  /// In en, this message translates to:
+  /// **'* Required'**
+  String get wizardRequired;
+
+  /// Field label for contest name.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest name *'**
+  String get wizardContestNameLabel;
+
+  /// Field label for venue.
+  ///
+  /// In en, this message translates to:
+  /// **'Venue / host *'**
+  String get wizardVenueLabel;
+
+  /// Helper text for venue.
+  ///
+  /// In en, this message translates to:
+  /// **'Field name or host club as it should appear on results.'**
+  String get wizardVenueHelper;
+
+  /// Field label for start date.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date *'**
+  String get wizardStartDateLabel;
+
+  /// Field label for end date.
+  ///
+  /// In en, this message translates to:
+  /// **'End date *'**
+  String get wizardEndDateLabel;
+
+  /// Hint for date fields.
+  ///
+  /// In en, this message translates to:
+  /// **'MMM D, YYYY'**
+  String get wizardDateHint;
+
+  /// Tooltip for the start date picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the start date'**
+  String get wizardChooseStartDate;
+
+  /// Tooltip for the end date picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the end date'**
+  String get wizardChooseEndDate;
+
+  /// Field label for city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get wizardCityLabel;
+
+  /// Field label for region.
+  ///
+  /// In en, this message translates to:
+  /// **'State / province'**
+  String get wizardRegionLabel;
+
+  /// Field label for country.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get wizardCountryLabel;
+
+  /// Label for the time zone picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Time zone'**
+  String get wizardTimeZoneLabel;
+
+  /// Helper for time zone when unset.
+  ///
+  /// In en, this message translates to:
+  /// **'Defaults from the country, else this device’s time zone.'**
+  String get wizardTimeZoneDefault;
+
+  /// Card title for copy source.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy from an existing contest'**
+  String get wizardCopyFromContest;
+
+  /// Trailing text on the copy source card.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get wizardOptional;
+
+  /// Note about what copying never brings.
+  ///
+  /// In en, this message translates to:
+  /// **'Copying never brings scores, the flight matrix, publication history, invitations or audit history.'**
+  String get wizardCopyNeverBrings;
+
+  /// Section label for source contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Source contest'**
+  String get wizardSourceContest;
+
+  /// Button to remove the source.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove source'**
+  String get wizardRemoveSource;
+
+  /// Subtitle while loading a source.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading configuration and pilot list…'**
+  String get wizardLoadingSource;
+
+  /// Error title when source fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t load “{name}”'**
+  String wizardSourceFailed(String name);
+
+  /// Error body when source fails.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest didn’t load. Retry, or remove the source and continue without copying.'**
+  String get wizardSourceFailedBody;
+
+  /// Message after removing the source.
+  ///
+  /// In en, this message translates to:
+  /// **'Source removed. You can continue without copying.'**
+  String get wizardSourceRemoved;
+
+  /// Semantics label for the copy mode picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy mode'**
+  String get wizardCopyModeLabel;
+
+  /// Label for local contests (web).
+  ///
+  /// In en, this message translates to:
+  /// **'Your contests'**
+  String get wizardYourContests;
+
+  /// Label for local contests (native).
+  ///
+  /// In en, this message translates to:
+  /// **'On this device'**
+  String get wizardOnThisDevice;
+
+  /// Tab label when offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Public (needs connection)'**
+  String get wizardPublicNeedsConnection;
+
+  /// Tab label when online.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get wizardPublic;
+
+  /// Note when offline.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re offline. Public contests can be searched when you’re back online. {local} are still available.'**
+  String wizardOfflineNote(String local);
+
+  /// Note when public search unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching public contests isn’t available yet. Copy from {local} for now.'**
+  String wizardPublicUnavailable(String local);
+
+  /// Error when local contests fail to load.
+  ///
+  /// In en, this message translates to:
+  /// **'Contests could not be loaded.'**
+  String get wizardContestsLoadFailed;
+
+  /// Empty state for local contests.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no contests to copy yet.'**
+  String get wizardNoContests;
+
+  /// Action text on a contest tile.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get wizardUse;
+
+  /// Count in the pilot subset.
+  ///
+  /// In en, this message translates to:
+  /// **'{chosen} of {total} pilots selected'**
+  String wizardPilotsSelected(int chosen, int total);
+
+  /// Text when no pilots chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilots chosen yet'**
+  String get wizardNoPilotsChosen;
+
+  /// Suffix for extra pilots.
+  ///
+  /// In en, this message translates to:
+  /// **' and {count} more'**
+  String wizardAndMore(int count);
+
+  /// Button to choose pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose pilots'**
+  String get wizardChoosePilots;
+
+  /// Title of the copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'COPY SUMMARY'**
+  String get wizardCopySummaryTitle;
+
+  /// Semantics label for the copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy summary'**
+  String get wizardCopySummaryLabel;
+
+  /// Row label in copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get wizardCopySourceLabel;
+
+  /// Row label in copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Copies'**
+  String get wizardCopyCopiesLabel;
+
+  /// Row label in copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots'**
+  String get wizardCopyPilotsLabel;
+
+  /// Value when all pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count}'**
+  String wizardCopyAllPilots(int count);
+
+  /// Value when no pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get wizardCopyNone;
+
+  /// Row label in copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Per pilot'**
+  String get wizardCopyPerPilot;
+
+  /// Value for per-pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Participation and class'**
+  String get wizardCopyPerPilotValue;
+
+  /// Row label in copy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Not copied'**
+  String get wizardCopyNotCopied;
+
+  /// Value for not copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams, models, non-flying participants, scores, matrix, publication history, invitations, audit history'**
+  String get wizardCopyNotCopiedValue;
+
+  /// Title of the choose-pilots dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose pilots to copy'**
+  String get wizardChoosePilotsTitle;
+
+  /// Body of the choose-pilots dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Each pilot is copied with their class. {selected} of {total} selected.'**
+  String wizardChoosePilotsBody(int selected, int total);
+
+  /// Checkbox label in the choose-pilots dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'All pilots'**
+  String get wizardAllPilots;
+
+  /// Confirm button in the choose-pilots dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Use these pilots'**
+  String get wizardUseThesePilots;
+
+  /// Title of the resume-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue your draft?'**
+  String get wizardContinueDraft;
+
+  /// Title of the discard-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard your draft?'**
+  String get wizardDiscardDraft;
+
+  /// Body of the resume-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'You started a contest that isn’t created yet{when}. Continue it, or start fresh and delete it.'**
+  String wizardContinueDraftBody(String when);
+
+  /// Body of the discard-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'A draft saved{when} can’t be opened by this version of the app. Discard it to start a new contest.'**
+  String wizardDiscardDraftBody(String when);
+
+  /// Button in the resume-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Start fresh'**
+  String get wizardStartFresh;
+
+  /// Button in the discard-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard draft'**
+  String get wizardDiscardDraftButton;
+
+  /// Button in the resume-draft dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue draft'**
+  String get wizardContinueDraftButton;
+
+  /// Semantics label for the participant options step.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant options'**
+  String get wizardParticipantsStepLabel;
+
+  /// Helper for team pilot count.
+  ///
+  /// In en, this message translates to:
+  /// **'Best N pilots per team make the team score.'**
+  String get wizardTeamPilotCountHelper;
+
+  /// Note when teams turned on.
+  ///
+  /// In en, this message translates to:
+  /// **'Team protection is now available in Draw options. It keeps teammates out of the same group.'**
+  String get wizardTeamProtectionAvailable;
+
+  /// Label for the columns preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Columns in the Participants step'**
+  String get wizardColumnsPreview;
+
+  /// Badge text when option is from source.
+  ///
+  /// In en, this message translates to:
+  /// **'From source'**
+  String get wizardFromSource;
+
+  /// Prefix when option is on.
+  ///
+  /// In en, this message translates to:
+  /// **'In Participants: '**
+  String get wizardInParticipants;
+
+  /// Prefix when option is off.
+  ///
+  /// In en, this message translates to:
+  /// **'If on: '**
+  String get wizardIfOn;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get wizardColumnName;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get wizardColumnEmail;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get wizardColumnRole;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get wizardColumnClass;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get wizardColumnTeam;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot no.'**
+  String get wizardColumnPilotNo;
+
+  /// Column preview label.
+  ///
+  /// In en, this message translates to:
+  /// **'Models'**
+  String get wizardColumnModels;
+
+  /// Column requirement text.
+  ///
+  /// In en, this message translates to:
+  /// **'required'**
+  String get wizardColumnRequired;
+
+  /// Column requirement text.
+  ///
+  /// In en, this message translates to:
+  /// **'optional'**
+  String get wizardColumnOptional;
+
+  /// Column requirement text.
+  ///
+  /// In en, this message translates to:
+  /// **'provisional'**
+  String get wizardColumnProvisional;
+
+  /// Button to add a participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Add participant'**
+  String get wizardAddParticipant;
+
+  /// Title in the add-participant dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Add participant'**
+  String get wizardAddParticipantTitle;
+
+  /// Message when adding a duplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is already in the contest.'**
+  String wizardAlreadyInContest(String name);
+
+  /// Message after adding a pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is added as Pilot.'**
+  String wizardAddedAsPilot(String name);
+
+  /// Short message after adding a pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added as Pilot.'**
+  String wizardAddedAsPilotShort(String name);
+
+  /// Message after removing participants.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant removed from this contest.} other{{count} participants removed from this contest.}}'**
+  String wizardParticipantsRemoved(int count);
+
+  /// Banner title for participants needing fixes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant needs fixing before you continue} other{{count} participants need fixing before you continue}}'**
+  String wizardParticipantsNeedFixingBanner(int count);
+
+  /// Banner title for too few pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least 2 scoring pilots'**
+  String get wizardMinPilotsBanner;
+
+  /// Banner body for too few pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'A contest needs 2 or more scoring pilots. Non-flying roles don’t count.'**
+  String get wizardMinPilotsBannerBody;
+
+  /// Banner title for few pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {count} scoring pilots'**
+  String wizardFewPilotsBanner(int count);
+
+  /// Banner body for few pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'You can continue. With fewer than 3 pilots, use 1 group per round.'**
+  String get wizardFewPilotsBannerBody;
+
+  /// Chip text for people count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} people'**
+  String wizardPeopleCount(int count);
+
+  /// Chip text for scoring pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} scoring pilots'**
+  String wizardScoringPilotsCount(int count);
+
+  /// Chip text for non-flying.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} non-flying'**
+  String wizardNonFlyingCount(int count);
+
+  /// Chip text for pilots (no roles).
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pilots'**
+  String wizardPilotsCount(int count);
+
+  /// Filter chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs fixing ({count})'**
+  String wizardNeedsFixingFilter(int count);
+
+  /// Message after setting team.
+  ///
+  /// In en, this message translates to:
+  /// **'Team set for {count} participants.'**
+  String wizardTeamSet(int count);
+
+  /// Message after setting class.
+  ///
+  /// In en, this message translates to:
+  /// **'Class set to {value} for {count} participants.'**
+  String wizardClassSet(String value, int count);
+
+  /// Message after setting role.
+  ///
+  /// In en, this message translates to:
+  /// **'Role set to {value} for {count} participants.'**
+  String wizardRoleSet(String value, int count);
+
+  /// Filter note text.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {shown} of {total} matching “{query}”'**
+  String wizardShowingMatching(int shown, int total, String query);
+
+  /// Empty filter text.
+  ///
+  /// In en, this message translates to:
+  /// **'No one in this contest matches “{query}”.'**
+  String wizardNoMatch(String query);
+
+  /// Semantics label for the participants list.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest participants'**
+  String get wizardContestParticipantsLabel;
+
+  /// Keyboard help text.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab moves between cells · Enter confirms and moves down · Space selects a row · Esc closes a menu'**
+  String get wizardKeyboardHelp;
+
+  /// Empty state title.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants yet'**
+  String get wizardNoParticipants;
+
+  /// Empty state body.
+  ///
+  /// In en, this message translates to:
+  /// **'Find people by name or email above, or add someone new. The contest needs at least 2 scoring pilots.'**
+  String get wizardNoParticipantsBody;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Visibility'**
+  String get wizardVisibility;
+
+  /// Summary issue text.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropped rounds need fixing'**
+  String get wizardDroppedRoundsNeedFixing;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Lanes'**
+  String get wizardLanes;
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'No lane assignment'**
+  String get wizardNoLaneAssignment;
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed'**
+  String get wizardAllowed;
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'Avoided'**
+  String get wizardAvoided;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds and groups'**
+  String get wizardRoundsGroups;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds'**
+  String get wizardRounds;
+
+  /// Summary issue text.
+  ///
+  /// In en, this message translates to:
+  /// **'Group settings are blocked'**
+  String get wizardGroupSettingsBlocked;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots per group'**
+  String get wizardPilotsPerGroup;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get wizardDetails;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get wizardName;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates'**
+  String get wizardDates;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Venue / host'**
+  String get wizardVenueHost;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get wizardLocation;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy source'**
+  String get wizardCopySourceSection;
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'Not copying'**
+  String get wizardNotCopying;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline'**
+  String get wizardDisciplineSection;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Task'**
+  String get wizardTask;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing'**
+  String get wizardLanding;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get wizardParticipantsSection;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get wizardPeople;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring pilots'**
+  String get wizardScoringPilots;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-flying'**
+  String get wizardNonFlying;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots'**
+  String get wizardPilots;
+
+  /// Summary issue text.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs at least 2 scoring pilots'**
+  String get wizardNeedsAtLeast2;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled options'**
+  String get wizardEnabledOptions;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get wizardOn;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get wizardOff;
+
+  /// Summary section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams and classes'**
+  String get wizardTeamsClasses;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get wizardTeams;
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'None assigned yet'**
+  String get wizardNoneAssigned;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get wizardClasses;
+
+  /// Summary row label.
+  ///
+  /// In en, this message translates to:
+  /// **'Models'**
+  String get wizardModels;
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entered; pilots without one are fine'**
+  String wizardModelsEntered(int count);
+
+  /// Summary value.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entered'**
+  String wizardModelsEnteredSimple(int count);
+
+  /// Section title after create.
+  ///
+  /// In en, this message translates to:
+  /// **'After you create'**
+  String get wizardAfterCreate;
+
+  /// After-create note.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest configuration page is opened.'**
+  String get wizardAfterCreateConfig;
+
+  /// After-create note.
+  ///
+  /// In en, this message translates to:
+  /// **'It stays unpublished and private until you publish it.'**
+  String get wizardAfterCreatePrivate;
+
+  /// After-create note.
+  ///
+  /// In en, this message translates to:
+  /// **'A flight matrix hasn’t been drawn. The draw can be created from the next screen.'**
+  String get wizardAfterCreateMatrix;
+
+  /// After-create note.
+  ///
+  /// In en, this message translates to:
+  /// **'Review {discipline} discipline overrides and the remaining settings there.'**
+  String wizardAfterCreateReview(String discipline);
+
+  /// Edit button in summary section.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get wizardEdit;
+
+  /// Summary issue for details.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 field needs attention} other{{count} fields need attention}}'**
+  String wizardFieldsNeedAttentionSummary(int count);
+
+  /// Filter chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs fixing ({count})'**
+  String wizardNeedsFixing(int count);
+
+  /// Filter note text.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {shown} of {total} matching “{query}”'**
+  String wizardShowing(int shown, int total, String query);
+
+  /// Semantics label for the participants list.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest participants'**
+  String get wizardParticipantsLabel;
+
+  /// Empty state body.
+  ///
+  /// In en, this message translates to:
+  /// **'Find people by name or email above, or add someone new. The contest needs at least 2 scoring pilots.'**
+  String get wizardNoParticipantsHelp;
+
+  /// Semantics label for the step list.
+  ///
+  /// In en, this message translates to:
+  /// **'Wizard steps'**
+  String get wizardStepListLabel;
+
+  /// Count of selected rows in the participants step.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 selected} other{{count} selected}}'**
+  String wizardRowsSelected(int count);
+
+  /// Semantics label for the bulk edit bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk edit selected participants'**
+  String get wizardBulkEditLabel;
+
+  /// Menu label for setting team.
+  ///
+  /// In en, this message translates to:
+  /// **'Set team'**
+  String get wizardBulkSetTeam;
+
+  /// Menu title for setting team.
+  ///
+  /// In en, this message translates to:
+  /// **'Set team for {count}'**
+  String wizardBulkSetTeamTitle(int count);
+
+  /// Menu label for setting class.
+  ///
+  /// In en, this message translates to:
+  /// **'Set class'**
+  String get wizardBulkSetClass;
+
+  /// Menu title for setting class.
+  ///
+  /// In en, this message translates to:
+  /// **'Set class for {count}'**
+  String wizardBulkSetClassTitle(int count);
+
+  /// Menu label for setting role.
+  ///
+  /// In en, this message translates to:
+  /// **'Set role'**
+  String get wizardBulkSetRole;
+
+  /// Menu title for setting role.
+  ///
+  /// In en, this message translates to:
+  /// **'Set role for {count}'**
+  String wizardBulkSetRoleTitle(int count);
+
+  /// Button to remove selected rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get wizardBulkRemove;
+
+  /// Tooltip for clearing the selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get wizardBulkClear;
+
+  /// Step status: complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get wizardStepComplete;
+
+  /// Step status: current.
+  ///
+  /// In en, this message translates to:
+  /// **'Current step'**
+  String get wizardStepCurrent;
+
+  /// Step status: current with errors.
+  ///
+  /// In en, this message translates to:
+  /// **'Current · needs attention'**
+  String get wizardStepCurrentNeedsAttention;
+
+  /// Step status: needs attention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get wizardStepNeedsAttention;
+
+  /// Step status: visited.
+  ///
+  /// In en, this message translates to:
+  /// **'Visited'**
+  String get wizardStepVisited;
+
+  /// Step status: not started.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started'**
+  String get wizardStepNotStarted;
+
+  /// Tooltip explaining the draft status.
+  ///
+  /// In en, this message translates to:
+  /// **'One draft at a time. It is kept on this device and isn’t listed with contests.'**
+  String get wizardDraftExplanation;
+
+  /// Short draft status with time.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved {time}'**
+  String wizardDraftSavedAt(String time);
+
+  /// Draft status with time.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved · {time}'**
+  String wizardDraftSavedDot(String time);
+
+  /// Help text for the start date picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get wizardStartDateHelp;
+
+  /// Help text for the end date picker.
+  ///
+  /// In en, this message translates to:
+  /// **'End date'**
+  String get wizardEndDateHelp;
+
+  /// Team count in the summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} count for team score'**
+  String wizardTeamCount(String count);
+
+  /// Pilot count in the copy source line.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 pilot} other{{count} pilots}}'**
+  String wizardPilotsCountShort(int count);
+
+  /// Page title.
+  ///
+  /// In en, this message translates to:
+  /// **'Roles'**
+  String get rolesTitle;
+
+  /// Count of roles.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 role} other{{count} roles}}'**
+  String rolesCount(int count);
+
+  /// Subtitle for a system role.
+  ///
+  /// In en, this message translates to:
+  /// **'System role'**
+  String get rolesSystemRole;
+
+  /// Subtitle for a director's role.
+  ///
+  /// In en, this message translates to:
+  /// **'Your role'**
+  String get rolesYourRole;
+
+  /// Dialog title for creating a role.
+  ///
+  /// In en, this message translates to:
+  /// **'New role'**
+  String get rolesNew;
+
+  /// Confirm button in the create dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get rolesCreate;
+
+  /// Dialog title for renaming a role.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename role'**
+  String get rolesRename;
+
+  /// Button to rename a role.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get rolesRenameButton;
+
+  /// Dialog title for deleting a role.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete role?'**
+  String get rolesDeleteTitle;
+
+  /// Dialog body for deleting a role.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be removed from your roles. Contests are not affected.'**
+  String rolesDeleteBody(String name);
+
+  /// Confirm button in the delete dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get rolesDelete;
+
+  /// Title when the role list fails to load.
+  ///
+  /// In en, this message translates to:
+  /// **'Roles could not be loaded.'**
+  String get rolesLoadFailed;
+
+  /// Loading label.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading roles'**
+  String get rolesLoading;
+
+  /// Field label in the name dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Role name'**
+  String get rolesNameLabel;
+
+  /// Validation error for a blank name.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name for the role.'**
+  String get rolesNameError;
+
+  /// Tooltip for the back button.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to roles'**
+  String get rolesBackToRoles;
+
+  /// Tooltip for the delete button.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}'**
+  String rolesDeleteTooltip(String name);
+
+  /// Tooltip when delete is off.
+  ///
+  /// In en, this message translates to:
+  /// **'In use, cannot delete'**
+  String get rolesInUseTooltip;
+
+  /// Detail label for role type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get rolesType;
+
+  /// Role type: pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot'**
+  String get rolesPilot;
+
+  /// Role type: non-flier.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-flier'**
+  String get rolesNonFlier;
+
+  /// Detail label for role owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get rolesOwner;
+
+  /// Owner: system.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get rolesOwnerSystem;
+
+  /// Owner: the director.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get rolesOwnerYou;
+
+  /// Detail label for scoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Scores'**
+  String get rolesScores;
+
+  /// Pilot receives scores.
+  ///
+  /// In en, this message translates to:
+  /// **'Receives scores'**
+  String get rolesReceivesScores;
+
+  /// Non-flier has no scores.
+  ///
+  /// In en, this message translates to:
+  /// **'No scores'**
+  String get rolesNoScores;
+
+  /// Why the Pilot role cannot be changed.
+  ///
+  /// In en, this message translates to:
+  /// **'The Pilot role is fixed. Every participant starts as a pilot, and only pilots fly and receive scores, so it cannot be renamed or deleted.'**
+  String get rolesPilotExplanation;
+
+  /// Why a system role cannot be changed.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a system role shared by every director, so it cannot be renamed or deleted.'**
+  String get rolesSystemExplanation;
+
+  /// Why an in-use role cannot be deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'A role that participants have cannot be deleted. Change those participants to another role first.'**
+  String get rolesInUseExplanation;
+
+  /// Title of the usage card.
+  ///
+  /// In en, this message translates to:
+  /// **'Where it is used'**
+  String get rolesUsageTitle;
+
+  /// Error text when usage fails to load.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage could not be loaded. {error}'**
+  String rolesUsageLoadFailed(String error);
+
+  /// Empty state in the usage card.
+  ///
+  /// In en, this message translates to:
+  /// **'No contest uses this role yet.'**
+  String get rolesUsageEmpty;
+
+  /// One usage line.
+  ///
+  /// In en, this message translates to:
+  /// **'{contest}: {count, plural, =1{1 participant} other{{count} participants}}'**
+  String rolesUsageItem(String contest, int count);
+
+  /// Title of the Landings page list pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Landings'**
+  String get landingsTitle;
+
+  /// Number of landing tables.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 table} other{{count} tables}}'**
+  String landingsCount(int count);
+
+  /// Label for a system landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get landingsSystem;
+
+  /// Label for a director-owned landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'Yours'**
+  String get landingsYours;
+
+  /// Number of entries in a landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 entry} other{{count} entries}}'**
+  String landingsEntries(int count);
+
+  /// Landing input unit: meters.
+  ///
+  /// In en, this message translates to:
+  /// **'Meters'**
+  String get landingsUnitMeters;
+
+  /// Landing input unit: feet.
+  ///
+  /// In en, this message translates to:
+  /// **'Feet'**
+  String get landingsUnitFeet;
+
+  /// Landing input unit: points.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get landingsUnitPoints;
+
+  /// Reason a system table cannot be deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'System tables are read-only and cannot be removed.'**
+  String get landingsLockedSystem;
+
+  /// Reason a table in use cannot be deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked: a contest uses this table, so it cannot be removed.'**
+  String get landingsLockedInUse;
+
+  /// Notice under a locked table.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason} A table never changes; create a copy to make a different one.'**
+  String landingsLockedNote(String reason);
+
+  /// Tooltip for the back arrow in the detail pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to landings'**
+  String get landingsBackToLandings;
+
+  /// Button label for creating a copy of a landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'Create copy'**
+  String get landingsCreateCopy;
+
+  /// Tooltip for the delete button.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}'**
+  String landingsDeleteTooltip(String name);
+
+  /// Column heading for entry labels.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get landingsLabelHeading;
+
+  /// Column heading for entry points.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get landingsPointsHeading;
+
+  /// Title of the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete landing table?'**
+  String get landingsDeleteConfirmTitle;
+
+  /// Content of the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be removed.'**
+  String landingsDeleteConfirmContent(String name);
+
+  /// Cancel button in the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get landingsDeleteCancel;
+
+  /// Confirm button in the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get landingsDeleteConfirm;
+
+  /// Error title when landing tables fail to load.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing tables could not be loaded.'**
+  String get landingsLoadFailed;
+
+  /// Loading indicator label.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading landing tables'**
+  String get landingsLoading;
+
+  /// Empty state when no tables exist.
+  ///
+  /// In en, this message translates to:
+  /// **'No landing tables yet.'**
+  String get landingsEmpty;
+
+  /// Label for the name field in the landing editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get landingEditorName;
+
+  /// Label for the unit dropdown in the landing editor.
+  ///
+  /// In en, this message translates to:
+  /// **'What the keys mean'**
+  String get landingEditorUnitLabel;
+
+  /// Section header for the entries list.
+  ///
+  /// In en, this message translates to:
+  /// **'Entries'**
+  String get landingEditorEntries;
+
+  /// Button to add another entry row.
+  ///
+  /// In en, this message translates to:
+  /// **'Add entry'**
+  String get landingEditorAddEntry;
+
+  /// Save button in the landing editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get landingEditorSave;
+
+  /// Cancel button in the landing editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get landingEditorCancel;
+
+  /// Label for the entry label field.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get landingEditorEntryLabel;
+
+  /// Label for the entry points field.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get landingEditorEntryPoints;
+
+  /// Tooltip for the remove-entry button.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove entry {n}'**
+  String landingEditorRemoveEntry(int n);
+
+  /// Title of the external site confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening external site'**
+  String get landingOpenExternalTitle;
+
+  /// Cancel button in the external site dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get landingOpenExternalCancel;
+
+  /// Open button in the external site dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get landingOpenExternalOpen;
+
+  /// Snack bar when opening a link fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open \"{label}\".'**
+  String landingOpenExternalFailed(String label);
+
+  /// Sign in button on the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get landingSignIn;
+
+  /// Create account button on the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get landingCreateAccount;
+
+  /// Loading text while checking sign-in.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking sign-in…'**
+  String get landingCheckingSignIn;
+
+  /// Retry button after a failed sign-in check.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get landingRetry;
+
+  /// Continue button on the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get landingContinue;
+
+  /// Sign out button on the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get landingSignOut;
+
+  /// Continue offline button on the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue offline'**
+  String get landingContinueOffline;
+
+  /// Help button on the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get landingHelp;
+
+  /// Link to the public contest site.
+  ///
+  /// In en, this message translates to:
+  /// **'Public contest site'**
+  String get landingPublicSite;
+
+  /// Content of the external site dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'You are about to leave Soar Score and open \"{label}\" in a new browser tab. Any unsaved local work is not affected.'**
+  String landingOpenExternalContent(String label);
+
+  /// Title when the identity provider is unreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in unavailable'**
+  String get landingSignInUnavailable;
+
+  /// Detail text when the identity provider is unreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'The identity provider is currently unreachable: {error}.'**
+  String landingSignInUnavailableDetail(String error);
+
+  /// Label showing the signed-in user.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {name}'**
+  String landingSignedInAs(String name);
+
+  /// Tagline under the brand logo.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage and score RC sailplane soaring contests.'**
+  String get landingTagline;
+
+  /// Note about offline contests (native only).
+  ///
+  /// In en, this message translates to:
+  /// **'Offline contests stay on this device unless you publish them or sign in to enable synchronization.'**
+  String get landingOfflineNote;
+
+  /// Title of the Participants page list pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get participantsTitle;
+
+  /// Number of participants.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant} other{{count} participants}}'**
+  String participantsCount(int count);
+
+  /// Filtered count of participants.
+  ///
+  /// In en, this message translates to:
+  /// **'{shown} of {total}'**
+  String participantsCountOf(int shown, int total);
+
+  /// Search field hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, email, FAI number or national ID'**
+  String get participantsSearchHint;
+
+  /// Empty state when search has no results.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants match.'**
+  String get participantsNoMatch;
+
+  /// Error title when participants fail to load.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants could not be loaded.'**
+  String get participantsLoadFailed;
+
+  /// Loading indicator label.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading participants'**
+  String get participantsLoading;
+
+  /// Empty state when no participants exist.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants yet.'**
+  String get participantsEmpty;
+
+  /// Title of the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete participant?'**
+  String get participantsDeleteTitle;
+
+  /// Content of the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be removed from your participant list.'**
+  String participantsDeleteContent(String name);
+
+  /// Cancel button in the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get participantsDeleteCancel;
+
+  /// Confirm button in the delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get participantsDeleteConfirm;
+
+  /// Tooltip for the back arrow in the detail pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to participants'**
+  String get participantsBackToParticipants;
+
+  /// Edit button in the detail pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get participantsEdit;
+
+  /// Tooltip for the delete button.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}'**
+  String participantsDeleteTooltip(String name);
+
+  /// Section title: identification.
+  ///
+  /// In en, this message translates to:
+  /// **'Identification'**
+  String get participantsSectionIdentification;
+
+  /// Label for the FAI number field.
+  ///
+  /// In en, this message translates to:
+  /// **'FAI number'**
+  String get participantsFaiNumber;
+
+  /// Label for the national organization ID field.
+  ///
+  /// In en, this message translates to:
+  /// **'National organization ID'**
+  String get participantsNationalOrgId;
+
+  /// Label for the club field.
+  ///
+  /// In en, this message translates to:
+  /// **'Club'**
+  String get participantsClub;
+
+  /// Section title: location.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get participantsSectionLocation;
+
+  /// Label for the city field.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get participantsCity;
+
+  /// Label for the state/province field.
+  ///
+  /// In en, this message translates to:
+  /// **'State/province'**
+  String get participantsState;
+
+  /// Label for the country field.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get participantsCountry;
+
+  /// Section title: contact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get participantsSectionContact;
+
+  /// Label for the email field in the detail pane.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (private, used for matching only)'**
+  String get participantsEmailPrivate;
+
+  /// Notice on the sync page when sync is unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing is only used in the Windows app.'**
+  String get syncWindowsOnly;
+
+  /// Title of the sync details card.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get syncTitle;
+
+  /// Loading text in the sync details card.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get syncChecking;
+
+  /// Notice for a local-only contest.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest is local only. It has no remote backup and does not sync until it is tied to an account.'**
+  String get syncLocalOnlyText;
+
+  /// Always-shown warning in the sync details card.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes made after the last successful sync cannot be recovered if this installation is lost.'**
+  String get syncUnrecoverableWarning;
+
+  /// Row label: last synced time.
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced'**
+  String get syncLastSynced;
+
+  /// Row value when never synced.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced yet'**
+  String get syncNotSyncedYet;
+
+  /// Row label: pending changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be sent'**
+  String get syncWaitingToSend;
+
+  /// Row label: rejected changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused by the service'**
+  String get syncRefusedByService;
+
+  /// Row label / card title for conflicts.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflicts to decide'**
+  String get syncConflictsToDecide;
+
+  /// Button label to trigger a sync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get syncNow;
+
+  /// Button label while syncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncSyncing;
+
+  /// Loading text in the conflicts card.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get syncConflictsLoading;
+
+  /// Empty state in the conflicts card.
+  ///
+  /// In en, this message translates to:
+  /// **'None. Nothing is waiting for your decision.'**
+  String get syncConflictsNone;
+
+  /// Button to review a conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get syncReview;
+
+  /// Title of the refused changes card.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes the service refused'**
+  String get syncRefusedTitle;
+
+  /// Loading text in the refused changes card.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get syncRefusedLoading;
+
+  /// Empty state in the refused changes card.
+  ///
+  /// In en, this message translates to:
+  /// **'None. The service accepted every change it has answered.'**
+  String get syncRefusedNone;
+
+  /// Snack bar after a successful conflict decision.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision saved.'**
+  String get syncDecisionSaved;
+
+  /// Snack bar when the post-decision sync failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision sent. The sync that follows failed ({problem}), so this screen updates after the next successful sync.'**
+  String syncDecisionFailed(String problem);
+
+  /// Button to close the conflict dialog without deciding.
+  ///
+  /// In en, this message translates to:
+  /// **'Decide later'**
+  String get syncDecideLater;
+
+  /// Button to cancel editing in the conflict dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get syncBack;
+
+  /// Button to save an edited conflict payload.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep edited value'**
+  String get syncKeepEdited;
+
+  /// Button to edit a conflict payload.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get syncEdit;
+
+  /// Button to keep the competing version.
+  ///
+  /// In en, this message translates to:
+  /// **'Use competing change'**
+  String get syncUseCompeting;
+
+  /// Button to keep the accepted version.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep accepted value'**
+  String get syncKeepAccepted;
+
+  /// Title of the conflict resolve dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve {entityType} conflict'**
+  String syncResolveTitle(String entityType);
+
+  /// Title of the add-participant dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {name}?'**
+  String contestParticipantsAddTitle(String name);
+
+  /// Title of the add-participant dialog after the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Add after the draw?'**
+  String get contestParticipantsAddAfterDrawTitle;
+
+  /// Add-participant dialog body after the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'The draw has already been made. {name} will be added to the contest. Place them in a group from the Matrix page. A redraw is also possible.'**
+  String contestParticipantsAddBodyLate(String name);
+
+  /// Add-participant dialog body.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be added to the contest{asRole}.'**
+  String contestParticipantsAddBody(String name, String asRole);
+
+  /// Label of the role dropdown in the add-participant dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get contestParticipantsAddRoleLabel;
+
+  /// Confirm button in the add-participant dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Add participant'**
+  String get contestParticipantsAddConfirm;
+
+  /// Title of the redraw-offer dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Redraw the matrix with {name}?'**
+  String contestParticipantsRedrawTitle(String name);
+
+  /// Body of the redraw-offer dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'No scores have been entered, so the matrix can be drawn again to include {name} fairly. Or keep the matrix as it is: {name} is then added to the last group of every round, within the contest’s group sizes and team protection.'**
+  String contestParticipantsRedrawBody(String name);
+
+  /// Button to keep the matrix in the redraw-offer dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the matrix'**
+  String get contestParticipantsRedrawKeep;
+
+  /// Button to redraw the matrix in the redraw-offer dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Redraw'**
+  String get contestParticipantsRedrawDo;
+
+  /// Title of the role-change confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Change {name} to {roleName}?'**
+  String contestParticipantsChangeRoleTitle(String name, String roleName);
+
+  /// First sentence of the role-change confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{roleName} is a non-flying role, so {name} {verb} no score rows{classCleared}.'**
+  String contestParticipantsChangeRoleBody(
+    String roleName,
+    String name,
+    String verb,
+    String classCleared,
+  );
+
+  /// Note when the pilot has places in the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Their places in the draw are removed when you save, and the draw will need redoing.'**
+  String get contestParticipantsChangeRoleDrawNote;
+
+  /// Final sentence of the role-change confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still undo this before you save.'**
+  String get contestParticipantsChangeRoleUndoNote;
+
+  /// Confirm button in the role-change confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Change role'**
+  String get contestParticipantsChangeRoleConfirm;
+
+  /// Title of the remove confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {count, plural, =1{1 person} other{{count} people}} from this contest?'**
+  String contestParticipantsRemoveTitle(int count);
+
+  /// Body of the remove confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes them from {contestName} only. Their saved profiles stay, and you can add them again later.'**
+  String contestParticipantsRemoveBody(String contestName);
+
+  /// Note about draw places in the remove confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} {verb} in the draw. Their places in it are removed too, and the draw will need redoing.'**
+  String contestParticipantsRemoveInDraw(String names, String verb);
+
+  /// Confirm button in the remove confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {count}'**
+  String contestParticipantsRemoveButton(int count);
+
+  /// Button to discard unsaved rows in the save bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes'**
+  String get contestParticipantsSaveDiscard;
+
+  /// Note that role changes are made in the Configuration page.
+  ///
+  /// In en, this message translates to:
+  /// **'Change in Configuration.'**
+  String get contestParticipantsChangeInConfiguration;
+
+  /// Banner line for a pilot without a class.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: enter a class'**
+  String contestParticipantsMissingClass(String name);
+
+  /// Save bar title while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving {count, plural, =1{1 participant} other{{count} participants}}…'**
+  String contestParticipantsSavingRows(int count);
+
+  /// Save bar note while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows are locked until it finishes.'**
+  String get contestParticipantsRowsLocked;
+
+  /// Save bar title when a row is stale.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone changed this participant. Refresh to continue.'**
+  String get contestParticipantsStaleTitle;
+
+  /// Link in the save bar to refresh a stale row.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get contestParticipantsRefresh;
+
+  /// Save bar title when rows are invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix {count, plural, =1{1 row} other{{count} rows}} before saving.'**
+  String contestParticipantsFixRows(int count);
+
+  /// Link in the save bar to an invalid row.
+  ///
+  /// In en, this message translates to:
+  /// **'Show row'**
+  String get contestParticipantsShowRow;
+
+  /// Save bar title with unsaved changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes to {count, plural, =1{1 participant} other{{count} participants}}'**
+  String contestParticipantsUnsavedChanges(int count);
+
+  /// Save bar note under unsaved changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Each participant saves on its own.'**
+  String get contestParticipantsEachSaves;
+
+  /// Save bar title when nothing is changed.
+  ///
+  /// In en, this message translates to:
+  /// **'No changes to save.'**
+  String get contestParticipantsNoChanges;
+
+  /// Save button in the save bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get contestParticipantsSaveChanges;
+
+  /// Count line when the contest has no participants.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants'**
+  String get contestParticipantsCountNone;
+
+  /// Count line of pilots and non-flying participants.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 pilot} other{{count} pilots}}{nonFlying}'**
+  String contestParticipantsCountPilots(int count, String nonFlying);
+
+  /// Suffix of the count line for non-flying participants.
+  ///
+  /// In en, this message translates to:
+  /// **', {count} non-flying'**
+  String contestParticipantsCountNonFlying(int count);
+
+  /// Options line when no participant option is on.
+  ///
+  /// In en, this message translates to:
+  /// **'No participant options are on.'**
+  String get contestParticipantsOptionsNone;
+
+  /// Options line naming the participant options that are on.
+  ///
+  /// In en, this message translates to:
+  /// **'{options} {verb} on.'**
+  String contestParticipantsOptionsOn(String options, String verb);
+
+  /// Name of the teams participant option.
+  ///
+  /// In en, this message translates to:
+  /// **'teams'**
+  String get contestParticipantsOptionTeams;
+
+  /// Name of the classes participant option.
+  ///
+  /// In en, this message translates to:
+  /// **'classes'**
+  String get contestParticipantsOptionClasses;
+
+  /// Name of the roles participant option.
+  ///
+  /// In en, this message translates to:
+  /// **'roles'**
+  String get contestParticipantsOptionRoles;
+
+  /// Name of the pilot numbers participant option.
+  ///
+  /// In en, this message translates to:
+  /// **'pilot numbers'**
+  String get contestParticipantsOptionPilotNumbers;
+
+  /// Name of the pilot models participant option.
+  ///
+  /// In en, this message translates to:
+  /// **'pilot models'**
+  String get contestParticipantsOptionPilotModels;
+
+  /// Banner when the contest is read-only.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest is completed. Participants can’t be changed.'**
+  String get contestParticipantsReadOnlyText;
+
+  /// Banner title when administration is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration is locked. Unlock to change.'**
+  String get contestParticipantsLockedTitle;
+
+  /// Banner text when administration is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Role, class and team feed the matrix, so they’re off while locked. Adding and removing people are off too.'**
+  String get contestParticipantsLockedText;
+
+  /// Button to unlock administration.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get contestParticipantsUnlock;
+
+  /// Banner when fewer than 2 scoring pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least 2 scoring pilots before the draw.'**
+  String get contestParticipantsMinPilots;
+
+  /// Banner when exactly 2 scoring pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'With fewer than 3 pilots, use 1 group per round.'**
+  String get contestParticipantsFewPilots;
+
+  /// Banner title after a failed add.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t add {name}'**
+  String contestParticipantsAddFailedTitle(String name);
+
+  /// Banner text when the add needs room in the groups.
+  ///
+  /// In en, this message translates to:
+  /// **'{failure} Nothing was added. Add them again once the groups are changed.'**
+  String contestParticipantsAddFailedRoom(String failure);
+
+  /// Banner text after a failed add.
+  ///
+  /// In en, this message translates to:
+  /// **'{failure} Nothing was added. Trying again won’t add them twice.'**
+  String contestParticipantsAddFailedRetry(String failure);
+
+  /// Button to open the Matrix page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Matrix'**
+  String get contestParticipantsOpenMatrix;
+
+  /// Button to retry a failed add.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get contestParticipantsTryAgain;
+
+  /// Banner title when a removal was partial.
+  ///
+  /// In en, this message translates to:
+  /// **'{removed} of {total} removed'**
+  String contestParticipantsPartialRemoved(int removed, int total);
+
+  /// Banner title when a removal was refused.
+  ///
+  /// In en, this message translates to:
+  /// **'Not removed'**
+  String get contestParticipantsNotRemoved;
+
+  /// Line naming the participants removed.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} {verb} removed from this contest.'**
+  String contestParticipantsRemovedFrom(String names, String verb);
+
+  /// Line for a participant that was not removed.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wasn’t: {reason}'**
+  String contestParticipantsRefused(String name, String reason);
+
+  /// Note about retiring a pilot with scores.
+  ///
+  /// In en, this message translates to:
+  /// **'To take a pilot with scores out of the results, retire them in Scoring.'**
+  String get contestParticipantsRetireNote;
+
+  /// Button to open the Scoring page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Scoring'**
+  String get contestParticipantsOpenScoring;
+
+  /// Button to dismiss a banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get contestParticipantsDismiss;
+
+  /// Banner title when people left the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'The draw needs redoing'**
+  String get contestParticipantsRedoDrawTitle;
+
+  /// Banner text when people left the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} {wasWere} in the draw and {hasHave} no scores, so their places were removed from it. The groups are not balanced for the pilots who are left until the matrix is drawn again.'**
+  String contestParticipantsRedoDrawText(
+    String names,
+    String wasWere,
+    String hasHave,
+  );
+
+  /// Button to redo the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo the draw'**
+  String get contestParticipantsRedoDraw;
+
+  /// Banner title after a change in a running contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Results are recalculated'**
+  String get contestParticipantsRecalculatedTitle;
+
+  /// Banner text after a change in a running contest.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} changed. All results will be recalculated.'**
+  String contestParticipantsRecalculatedText(String names);
+
+  /// Banner title when a pilot is placed in every round.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is in every round'**
+  String contestParticipantsPlacedEverywhere(String name);
+
+  /// Banner title when a pilot is not in every round.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is not in every round'**
+  String contestParticipantsNotPlacedEverywhere(String name);
+
+  /// Line naming the rounds a pilot was placed in.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} was added to the last group that could take them in {count} {roundWord}.'**
+  String contestParticipantsPlacedInRounds(
+    String name,
+    int count,
+    String roundWord,
+  );
+
+  /// Line about rounds that were already scored.
+  ///
+  /// In en, this message translates to:
+  /// **'{rounds} {wasWere} already scored, so they got a zero {where}. Correct the scores in Scoring if needed.'**
+  String contestParticipantsZeroedRounds(
+    String rounds,
+    String wasWere,
+    String where,
+  );
+
+  /// Line for a skipped round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}: {reason}.'**
+  String contestParticipantsRoundReason(int round, String reason);
+
+  /// Note when a pilot is not in every round.
+  ///
+  /// In en, this message translates to:
+  /// **'Place them in those rounds from the Matrix page.'**
+  String get contestParticipantsPlaceFromMatrix;
+
+  /// Banner title for unplaced pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} {isnt} placed yet'**
+  String contestParticipantsUnplacedTitle(String names, String isnt);
+
+  /// Banner text for unplaced pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'Put them in the last group of every round, or place them from the Matrix page. A redraw is also possible.'**
+  String get contestParticipantsUnplacedText;
+
+  /// Button to place unplaced pilots in all rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Place in all rounds'**
+  String get contestParticipantsPlaceAllRounds;
+
+  /// Banner title for pilots without a class.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant has} other{{count} participants have}} no class'**
+  String contestParticipantsMissingClassTitle(int count);
+
+  /// Banner text for pilots without a class.
+  ///
+  /// In en, this message translates to:
+  /// **'Results are grouped by class. This does not stop you saving, drawing or scoring.'**
+  String get contestParticipantsMissingClassText;
+
+  /// Title of the empty participants state.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants yet'**
+  String get participantsEmptyTitle;
+
+  /// Text under the empty participants state.
+  ///
+  /// In en, this message translates to:
+  /// **'Add people you’ve saved before, or create a new one.'**
+  String get participantsEmptyText;
+
+  /// Title of the save-configuration confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Save configuration?'**
+  String get configSaveTitle;
+
+  /// Heading for matrix-affecting changes in the save dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'The drawn matrix becomes out of date'**
+  String get configSaveMatrixHead;
+
+  /// Text for matrix-affecting changes in the save dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} changed. The drawn matrix{revision} no longer matches; redraw unscored rounds on the Matrix page.'**
+  String configSaveMatrixText(String names, String revision);
+
+  /// Matrix revision in the save dialog text.
+  ///
+  /// In en, this message translates to:
+  /// **' (revision {revision})'**
+  String configSaveMatrixRevision(int revision);
+
+  /// Text for changes with no effect in the save dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Also saving, with no effect on the matrix or results: {names}.'**
+  String configSaveOtherText(String names);
+
+  /// Confirm button in the save dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Save configuration'**
+  String get configSaveConfirm;
+
+  /// Save bar title while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving configuration…'**
+  String get configBarSaving;
+
+  /// Save bar note while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'The page is locked until the save finishes.'**
+  String get configBarSavingLocked;
+
+  /// Save bar title after a failed save.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t save the configuration'**
+  String get configBarSaveFailed;
+
+  /// Save bar note after a failed save.
+  ///
+  /// In en, this message translates to:
+  /// **'{error} Every value you entered is kept.'**
+  String configBarSaveFailedSub(String error);
+
+  /// Save bar title with unsaved changes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 unsaved change} other{{count} unsaved changes}}'**
+  String configBarUnsaved(int count);
+
+  /// Chip when the change makes the drawn matrix out of date.
+  ///
+  /// In en, this message translates to:
+  /// **'Makes the drawn matrix out of date'**
+  String get configBarMatrixChip;
+
+  /// Chip when the change recalculates results.
+  ///
+  /// In en, this message translates to:
+  /// **'Recalculates all results'**
+  String get configBarRecalcChip;
+
+  /// Chip when the change has no effect.
+  ///
+  /// In en, this message translates to:
+  /// **'No effect on the matrix or results'**
+  String get configBarNoEffectChip;
+
+  /// Save bar note when errors stop a save.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix {count, plural, =1{1 error} other{{count} errors}} to save'**
+  String configBarFixErrors(int count);
+
+  /// Semantics label of the configuration save bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get configBarUnsavedLabel;
+
+  /// Semantics label of the progress bar while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving configuration'**
+  String get configBarSavingProgress;
+
+  /// Save button label while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get configBarSaveShort;
+
+  /// Save button label after a failed save.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get configBarRetry;
+
+  /// Error summary title.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 setting needs} other{{count} settings need}} fixing before you can save'**
+  String configBarSettingsNeedFixing(int count);
+
+  /// One error in the error summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {value}'**
+  String configBarErrorItem(String label, String value);
+
+  /// Title of the landing table picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a landing table'**
+  String get landingPickerTitle;
+
+  /// Note under the picker title.
+  ///
+  /// In en, this message translates to:
+  /// **'Any table works for any discipline. Check the unit matches how your scorers measure.'**
+  String get landingPickerNote;
+
+  /// Button that opens the Landings page to create a table.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a table in Landings'**
+  String get landingPickerCreateTable;
+
+  /// Button that picks the highlighted table.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this table'**
+  String get landingPickerUse;
+
+  /// Chip for the profile's default table.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile default'**
+  String get landingPickerProfileDefault;
+
+  /// Chip for the table the draft uses now.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get landingPickerCurrent;
+
+  /// Heading above the table preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get landingPickerPreview;
+
+  /// Chip: the setting differs from the saved one.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved'**
+  String get configChipUnsaved;
+
+  /// Chip: the value differs from the official profile.
+  ///
+  /// In en, this message translates to:
+  /// **'House rule'**
+  String get configChipHouseRule;
+
+  /// Chip: the value cannot be saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get configChipError;
+
+  /// Chip on the participants section: the list is a summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary only'**
+  String get configSummaryOnly;
+
+  /// Tooltip when every discipline option matches the profile default.
+  ///
+  /// In en, this message translates to:
+  /// **'Every option matches the {label}'**
+  String configDefaultMatches(String label);
+
+  /// Chip naming the number of house rules.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 house rule} other{{count} house rules}}'**
+  String configHouseRules(int count);
+
+  /// Detail under Open scoring access.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants can submit scores.'**
+  String get configStateScoringOpenDetail;
+
+  /// Detail under Closed scoring access.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants can’t submit scores.'**
+  String get configStateScoringClosedDetail;
+
+  /// Detail under a locked administration.
+  ///
+  /// In en, this message translates to:
+  /// **'The configuration, participants and matrix are read-only.'**
+  String get configStateAdminLockedDetail;
+
+  /// Detail under an unlocked administration.
+  ///
+  /// In en, this message translates to:
+  /// **'The contest can be administered.'**
+  String get configStateAdminUnlockedDetail;
+
+  /// Button to change a contest state in the Workspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Change in Workspace'**
+  String get configChangeInWorkspace;
+
+  /// Label of the scoring pilots count.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring pilots'**
+  String get configParticipantsScoringPilots;
+
+  /// Label of the other participants count.
+  ///
+  /// In en, this message translates to:
+  /// **'Other participants'**
+  String get configParticipantsOther;
+
+  /// Label of the teams count.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get configParticipantsTeams;
+
+  /// Note when fewer than 2 scoring pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'A matrix needs at least 2 scoring pilots. This contest has {count}.'**
+  String configParticipantsMinPilotsNote(int count);
+
+  /// Button to open the Participants page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Participants'**
+  String get configOpenParticipants;
+
+  /// Note under the Open Participants button.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants are edited there.'**
+  String get configParticipantsEditedThere;
+
+  /// Heading and semantics label of the matrix readiness panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix readiness'**
+  String get configMatrixReadiness;
+
+  /// Button to open the Matrix page from the readiness panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to matrix'**
+  String get configGoToMatrix;
+
+  /// Error when no landing table is chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'No landing table chosen. Scorers can’t record landing bonuses until one is set.'**
+  String get configLandingNoTable;
+
+  /// Button to choose a landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose table'**
+  String get configLandingChoose;
+
+  /// Button to change the landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'Change table'**
+  String get configLandingChange;
+
+  /// Button to hide the entries table.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide entries'**
+  String get configLandingHideEntries;
+
+  /// Button to show the entries table.
+  ///
+  /// In en, this message translates to:
+  /// **'Show entries'**
+  String get configLandingShowEntries;
+
+  /// Button to open the Landings page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Landings'**
+  String get configOpenLandings;
+
+  /// Note when the table is not the profile default.
+  ///
+  /// In en, this message translates to:
+  /// **'Not the {defaultLabel} ({name}). That’s fine; any table works for any discipline. The unit is {unit}.'**
+  String configLandingNotDefault(String defaultLabel, String name, String unit);
+
+  /// Note of the saved table after a change.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved: {name}'**
+  String configLandingSaved(String name);
+
+  /// The saved table when there is none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get configLandingNone;
+
+  /// Warning when the change makes the drawn matrix out of date.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving makes the drawn matrix out of date.'**
+  String get configLandingOutdatesMatrix;
+
+  /// Label of the unit fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get configLandingUnit;
+
+  /// Label of the entries fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Entries'**
+  String get configLandingEntries;
+
+  /// Label of the points range fact.
+  ///
+  /// In en, this message translates to:
+  /// **'Points range'**
+  String get configLandingPointsRange;
+
+  /// Button to undo a change.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get commonUndo;
+
+  /// Note when team protection is off with seeded draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available with Seeded Man on Man. Seeded groups are formed by score, so teammates may have to fly together.'**
+  String get configNoteTeamProtectionSeeded;
+
+  /// Action to switch the draw mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Man on Man instead'**
+  String get configNoteUseManOnMan;
+
+  /// House rule note naming the official value.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {official}{seconds}.'**
+  String configNoteHouseRule(String label, String official, String seconds);
+
+  /// Action to reset to the official value.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to {label}'**
+  String configNoteResetTo(String label);
+
+  /// Note for a duration entered as minutes:seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered as minutes:seconds. {display} = {seconds} s.'**
+  String configNoteDuration(String display, int seconds);
+
+  /// Note about group sizes with team protection.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups per round, set on the Matrix page, must be at least the size of the largest team.'**
+  String get configNoteTeamProtectionSize;
+
+  /// Note when the draw already assigns numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Numbers assigned at the draw don’t change.'**
+  String get configNoteNumbersFixed;
+
+  /// Note about drop rounds before the draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked against the rounds drawn on the Matrix page.'**
+  String get configNoteDropsChecked;
+
+  /// Note for a setting hidden and cleared by this one.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} ({saved}) is hidden and will be cleared when you save.'**
+  String configNoteCleared(String label, String saved);
+
+  /// Note of the saved value after a change.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved: {value}'**
+  String configNoteSaved(String value);
+
+  /// Note when the change recalculates results.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving recalculates all results.'**
+  String get configNoteRecalculates;
+
+  /// Example note for decimal places.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: 987.654 → {result} {mode}'**
+  String configNoteExample(String result, String mode);
+
+  /// Example mode: truncated.
+  ///
+  /// In en, this message translates to:
+  /// **'(truncated)'**
+  String get configNoteTruncated;
+
+  /// Example mode: rounded.
+  ///
+  /// In en, this message translates to:
+  /// **'(rounded)'**
+  String get configNoteRounded;
+
+  /// Drop note when no rounds are dropped.
+  ///
+  /// In en, this message translates to:
+  /// **'No rounds are dropped.'**
+  String get configNoteNoDrops;
+
+  /// Drop note for one dropped round.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop the worst round after round {round1}.'**
+  String configNoteDropOne(String round1);
+
+  /// Drop note for two dropped rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop the worst round after round {round1}, and a second after round {round2}.'**
+  String configNoteDropTwo(String round1, String round2);
+
+  /// Note about a non-droppable motor restart round.
+  ///
+  /// In en, this message translates to:
+  /// **'A round with a motor restart can’t be dropped (Motor restart mode: Allowed, not dropped).'**
+  String get configNoteMotorRestart;
+
+  /// Reason the seeded draw mode is blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available while team protection is on. Seeded groups are formed by score, so teammates may have to fly together.'**
+  String get configBlockedTeamProtection;
+
+  /// Fix action to turn off team protection.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off team protection'**
+  String get configFixTurnOffTeamProtection;
+
+  /// One round named in a list.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {number}'**
+  String contestParticipantsRound(String number);
+
+  /// Several rounds named in a list.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds {numbers}'**
+  String contestParticipantsRounds(String numbers);
+
+  /// Save button label while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get contestParticipantsSavingShort;
+
+  /// Semantics label of the progress bar while saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving participants'**
+  String get contestParticipantsSavingProgress;
+
+  /// Summary of a save that left rows unsaved.
+  ///
+  /// In en, this message translates to:
+  /// **'{saved} saved. {failed} not saved. Their typed values are kept.'**
+  String contestParticipantsSavedSummary(int saved, int failed);
+
+  /// Generic confirm button label.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get commonOk;
+
+  /// Cancel button of the unsaved-changes dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get configKeepEditing;
+
+  /// Confirm button of the unsaved-changes dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard and leave'**
+  String get configDiscardAndLeave;
+
+  /// Confirm button of the unsaved-changes dialog on app close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close and discard'**
+  String get configCloseAndDiscard;
+
+  /// Title of the unsaved-changes dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave without saving?'**
+  String get configLeaveTitle;
+
+  /// Body of the unsaved-changes dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {count} unsaved {changes} in {sections}. {action} discards them.'**
+  String configLeaveBody(
+    int count,
+    String changes,
+    String sections,
+    String action,
+  );
+
+  /// Message after discarding configuration changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes discarded.'**
+  String get configChangesDiscarded;
+
+  /// Action that discards changes on app close.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing the app'**
+  String get configActionClosing;
+
+  /// Action that discards changes when leaving the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaving'**
+  String get configActionLeaving;
+
+  /// Message after saving configuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration saved as revision {revision}.{warning}'**
+  String configSavedRevision(int revision, String warning);
+
+  /// Message after saving only the contest details.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest details saved.'**
+  String get configDetailsSaved;
+
+  /// Title of the other-device-updated dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration updated'**
+  String get configUpdatedTitle;
+
+  /// Body when the contest has no saved configuration.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest was changed from another device. This page now shows the latest version. Your unsaved changes are kept.'**
+  String get configUpdatedText;
+
+  /// Body when another device saved a revision.
+  ///
+  /// In en, this message translates to:
+  /// **'Revision {revision} was saved from another device. This page now shows the latest version. Your unsaved changes are kept; check them before saving again.'**
+  String configUpdatedRevision(int revision);
+
+  /// Title of the load-failure state.
+  ///
+  /// In en, this message translates to:
+  /// **'The configuration could not be loaded.'**
+  String get configLoadFailed;
+
+  /// Label of the loading state.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the configuration'**
+  String get configLoading;
+
+  /// Title of the administration-locked banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration is locked'**
+  String get configAdminLockedTitle;
+
+  /// Body of the administration-locked banner.
+  ///
+  /// In en, this message translates to:
+  /// **'The configuration is read-only while administration is locked. Unlock it from the Workspace.'**
+  String get configAdminLockedBody;
+
+  /// Action of the administration-locked banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Workspace'**
+  String get configGoToWorkspace;
+
+  /// Title of the completed-contest banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest completed'**
+  String get configCompletedTitle;
+
+  /// Body of the completed-contest banner.
+  ///
+  /// In en, this message translates to:
+  /// **'The configuration is read-only. Only score corrections remain, and those are made on the Scoring page.'**
+  String get configCompletedBody;
+
+  /// Title of the not-saved banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration not saved yet'**
+  String get configNotSavedTitle;
+
+  /// Body of the not-saved banner.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest has no saved configuration, and its discipline can’t be chosen on this page. Create the contest again with the New contest wizard to set one.'**
+  String get configNotSavedBody;
+
+  /// Title of the scoring-started banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring has started'**
+  String get configScoringStartedTitle;
+
+  /// Body of the scoring-started banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Structural settings, discipline options and the landing table are fixed. Scoring settings can still change; saving them recalculates all results.'**
+  String get configScoringStartedBody;
+
+  /// Label of a setting the contest state has locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get configFixedChip;
+
+  /// Accessible name of a locked setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed: {reason}'**
+  String configFixedChipSemantics(String reason);
+
+  /// Key column header for a meters table.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance (m)'**
+  String get configLandingKeyHeaderMeters;
+
+  /// Key column header for a feet table.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance (ft)'**
+  String get configLandingKeyHeaderFeet;
+
+  /// Key column header for a points table.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing key'**
+  String get configLandingKeyHeaderPoints;
+
+  /// Points range when a table has no entries.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries'**
+  String get configLandingNoEntries;
+
+  /// Points range of a landing table.
+  ///
+  /// In en, this message translates to:
+  /// **'{low}–{high} points'**
+  String configLandingPointsRangeValue(int low, int high);
+
+  /// Entry count in a landing table summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries'**
+  String configLandingEntriesCount(int count);
+
+  /// Accessible name of a landing entries table.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} entries'**
+  String configLandingEntriesLabel(String name);
+
+  /// Heading of the pilot picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots'**
+  String get cardsPilotsHeading;
+
+  /// Live count of the pilot picker.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total} selected'**
+  String cardsPilotCount(int count, int total);
+
+  /// Hint of the pilot picker search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search pilots'**
+  String get cardsSearchPilots;
+
+  /// Select button while a search is active.
+  ///
+  /// In en, this message translates to:
+  /// **'Select {count} shown'**
+  String cardsSelectShown(int count);
+
+  /// Button that selects every listed pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get cardsSelectAll;
+
+  /// Deselect button while a search is active.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear shown'**
+  String get cardsClearShown;
+
+  /// Button that deselects every listed pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Select none'**
+  String get cardsSelectNone;
+
+  /// Tooltip of the add-a-team button.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a team’s pilots to the selection'**
+  String get cardsAddTeamHint;
+
+  /// Label of the add-a-team button.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a team'**
+  String get cardsAddTeam;
+
+  /// Accessible label of the pilot list.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot list'**
+  String get cardsPilotList;
+
+  /// Picker list when the contest has no pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilots in this contest yet.'**
+  String get cardsNoPilotsYet;
+
+  /// Picker list when no pilot matches the search.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilot matches “{query}”.'**
+  String cardsNoPilotMatches(String query);
+
+  /// Mark on a retired pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired'**
+  String get cardsRetired;
+
+  /// Heading of the pilot cards options group.
+  ///
+  /// In en, this message translates to:
+  /// **'Options'**
+  String get cardsOptions;
+
+  /// Heading of the pilot cards group.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
+  String get cardsGroup;
+
+  /// Label of the include-retired-pilots option.
+  ///
+  /// In en, this message translates to:
+  /// **'Include retired pilots'**
+  String get cardsIncludeRetired;
+
+  /// Help when include retired pilots is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired pilots are marked “Retired” on their cards.'**
+  String get cardsIncludeRetiredHelp;
+
+  /// Help when include retired pilots is off.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} retired {count, plural, =1{pilot is}other{pilots are}} left out.'**
+  String cardsRetiredLeftOut(int count);
+
+  /// Label of the pre-fill option.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-fill'**
+  String get cardsPrefill;
+
+  /// Help when pre-fill is unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No scores have been entered yet.'**
+  String get cardsPrefillUnavailable;
+
+  /// Help when pre-fill is available.
+  ///
+  /// In en, this message translates to:
+  /// **'Prints the scores already entered, so pilots can check them.'**
+  String get cardsPrefillHelp;
+
+  /// Label of the automatic cards-per-page choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get cardsAutomatic;
+
+  /// Label of the four-cards-per-page choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Four per page'**
+  String get cardsFourPerPage;
+
+  /// Label of the two-cards-per-page choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Two per page'**
+  String get cardsTwoPerPage;
+
+  /// Label of a print margin choice.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} margin'**
+  String cardsMarginLabel(String label);
+
+  /// Label of the standard print margin.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get cardsMarginStandard;
+
+  /// Help of the standard print margin.
+  ///
+  /// In en, this message translates to:
+  /// **'6.35 mm (¼ in) from the paper’s edge.'**
+  String get cardsMarginStandardHelp;
+
+  /// Label of the wide print margin.
+  ///
+  /// In en, this message translates to:
+  /// **'Wide'**
+  String get cardsMarginWide;
+
+  /// Help of the wide print margin.
+  ///
+  /// In en, this message translates to:
+  /// **'10 mm from the paper’s edge, for a printer that cuts the cards off.'**
+  String get cardsMarginWideHelp;
+
+  /// Summary when no card is produced.
+  ///
+  /// In en, this message translates to:
+  /// **'No cards'**
+  String get cardsNoCards;
+
+  /// Summary of the cards and pages produced.
+  ///
+  /// In en, this message translates to:
+  /// **'{cards} {cards, plural, =1{card}other{cards}} · {pages} {pages, plural, =1{page}other{pages}}'**
+  String cardsSummary(int cards, int pages);
+
+  /// Choice help when the rounds do not fit.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many rounds'**
+  String get cardsTooManyRounds;
+
+  /// Choice help when automatic picks four per page.
+  ///
+  /// In en, this message translates to:
+  /// **'Using four per page'**
+  String get cardsUsingFourPerPage;
+
+  /// Choice help when automatic picks two per page.
+  ///
+  /// In en, this message translates to:
+  /// **'Using two per page'**
+  String get cardsUsingTwoPerPage;
+
+  /// Choice help for the four-per-page choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarter-page cards'**
+  String get cardsQuarterPage;
+
+  /// Choice help when four per page does not fit.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows would be under 8 mm'**
+  String get cardsRowsUnderEight;
+
+  /// Choice help for the two-per-page choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Half-page cards'**
+  String get cardsHalfPage;
+
+  /// Cards message when the range holds no rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'No rounds in range.'**
+  String get cardsNoRoundsInRange;
+
+  /// Cards message when the rounds do not fit even a half page.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest has too many rounds for a scoring card. A half-page card holds up to {max} rounds at the minimum 8 mm row height.'**
+  String cardsTooManyRoundsMessage(int max);
+
+  /// Cards message when two per page is in force.
+  ///
+  /// In en, this message translates to:
+  /// **'{rounds} rounds on half-page cards. Up to {max} fit.'**
+  String cardsRoundsHalfPage(int rounds, int max);
+
+  /// Cards message when four per page fits.
+  ///
+  /// In en, this message translates to:
+  /// **'{rounds} rounds fit four to a page (up to {max} at 8 mm rows).'**
+  String cardsRoundsFitFour(int rounds, int max);
+
+  /// Cards message when four per page does not fit.
+  ///
+  /// In en, this message translates to:
+  /// **'{rounds} rounds don’t fit four to a page; using two. Four holds up to {max}.'**
+  String cardsRoundsNotFour(int rounds, int max);
+
+  /// Accessible label of a pilot's scoring card.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring card, {pilot}'**
+  String cardsCardSemantics(String pilot);
+
+  /// Caption beside the card's QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to enter scores'**
+  String get cardsScanToEnter;
+
+  /// Accessible label of the card's QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code, scan to enter scores'**
+  String get cardsQrLabel;
+
+  /// Accessible label of a printed page of cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}, {count} {count, plural, =1{card}other{cards}}'**
+  String cardsPageLabel(int page, int count);
+
+  /// Help when include retired pilots is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired pilots stay in every round, marked (R).'**
+  String get sheetIncludeRetiredHelp;
+
+  /// Help when include retired pilots is off.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} retired {count, plural, =1{pilot is}other{pilots are}} left out of the rounds after they retired.'**
+  String sheetRetiredLeftOut(int count);
+
+  /// Help when pre-fill is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Prints the scores already entered. * marks values not yet official.'**
+  String get sheetPrefillOn;
+
+  /// Help when pre-fill is off.
+  ///
+  /// In en, this message translates to:
+  /// **'Prints the scores already entered, so the sheet can be checked against them.'**
+  String get sheetPrefillOff;
+
+  /// Help of the club column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Off by default. Hidden: its width goes to the writing cells.'**
+  String get sheetClubHelp;
+
+  /// Label of the validated column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Validated'**
+  String get sheetValidated;
+
+  /// Help of the validated column option.
+  ///
+  /// In en, this message translates to:
+  /// **'A blank spot for officials’ initials or notes.'**
+  String get sheetValidatedHelp;
+
+  /// Column readout when the columns fit one strip.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing cells {writing} mm of {across} mm across the page'**
+  String sheetWritingCells(int writing, int across);
+
+  /// Column readout when the columns continue onto more strips.
+  ///
+  /// In en, this message translates to:
+  /// **'The columns need more than the {across} mm across this page: they continue on {more} more {more, plural, =1{page}other{pages}} for the same rows.'**
+  String sheetColumnsContinue(int across, int more);
+
+  /// Mark on a carried-on round or group.
+  ///
+  /// In en, this message translates to:
+  /// **' (Continued)'**
+  String get sheetContinued;
+
+  /// Working time on a round row.
+  ///
+  /// In en, this message translates to:
+  /// **'Working Time {time}'**
+  String sheetWorkingTime(String time);
+
+  /// Accessible label of a blank sheet table.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}. Score cells are blank for officials to write in.'**
+  String sheetTableBlank(String label);
+
+  /// Accessible label of a sheet table with pre-filled scores.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}. Scores already entered are printed in the score cells; the other score cells are blank for officials to write in.'**
+  String sheetTablePrefilled(String label);
+
+  /// Key line for a dropped round.
+  ///
+  /// In en, this message translates to:
+  /// **'* = dropped round (shaded)'**
+  String get standingsKeyDropped;
+
+  /// Key line for a no-score cell.
+  ///
+  /// In en, this message translates to:
+  /// **'— = no score'**
+  String get standingsKeyNoScore;
+
+  /// Key line for a partly scored round.
+  ///
+  /// In en, this message translates to:
+  /// **'R{round} partial: {partial}'**
+  String standingsKeyPartial(int round, String partial);
+
+  /// Key line for flight details without height.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight details: time m:ss, landing points; — = not recorded'**
+  String get standingsKeyFlightDetails;
+
+  /// Key line for flight details with height.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight details: time m:ss, landing points, launch height; — = not recorded'**
+  String get standingsKeyFlightDetailsHeight;
+
+  /// Key line for the percentage column.
+  ///
+  /// In en, this message translates to:
+  /// **'Pct = total as % of the winner'**
+  String get standingsKeyPct;
+
+  /// Key line for the raw column.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw = total plus dropped rounds'**
+  String get standingsKeyRaw;
+
+  /// Key line for the penalty column.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty: deducted from the total, not dropped'**
+  String get standingsKeyPenalty;
+
+  /// Key line when pilots are tied.
+  ///
+  /// In en, this message translates to:
+  /// **'Tied pilots share a rank'**
+  String get standingsKeyTied;
+
+  /// Note that several rounds continue on a later page.
+  ///
+  /// In en, this message translates to:
+  /// **'{text} continue on page {page}'**
+  String standingsContinuePage(String text, int page);
+
+  /// Note that one round continues on a later page.
+  ///
+  /// In en, this message translates to:
+  /// **'{text} continues on page {page}'**
+  String standingsContinuesPage(String text, int page);
+
+  /// Indicator of the pilots and rounds a page holds.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots {start} to {end} · {rounds}'**
+  String standingsIndicator(int start, int end, String rounds);
+
+  /// Suffix when the page also holds the penalty set.
+  ///
+  /// In en, this message translates to:
+  /// **' + Penalty'**
+  String get standingsIndicatorPenalty;
+
+  /// Rounds text when the page holds only the penalty set.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty'**
+  String get standingsKeyRoundsPenalty;
+
+  /// Rounds text when the page holds no round set.
+  ///
+  /// In en, this message translates to:
+  /// **'No rounds'**
+  String get standingsKeyRoundsNone;
+
+  /// Rounds text for a range of rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds {from} to {to}'**
+  String standingsKeyRoundsRange(int from, int to);
+
+  /// Reason naming a round with missing scores.
+  ///
+  /// In en, this message translates to:
+  /// **'round {round} has {count} missing {count, plural, =1{score}other{scores}}'**
+  String standingsStatusRoundMissing(int round, int count);
+
+  /// Reason naming further rounds with missing scores.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more rounds are missing scores'**
+  String standingsStatusMoreRounds(int count);
+
+  /// Reason naming pilots with a score in review.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{pilot has}other{pilots have}} a score in review'**
+  String standingsStatusReview(int count);
+
+  /// Reason for stale results.
+  ///
+  /// In en, this message translates to:
+  /// **'these results were calculated before the latest change to the scores, the configuration or the matrix.'**
+  String get standingsStatusStale;
+
+  /// Reason for scores not yet final.
+  ///
+  /// In en, this message translates to:
+  /// **'some scores are not final yet.'**
+  String get standingsStatusNotFinal;
+
+  /// Hint to turn Provisional off.
+  ///
+  /// In en, this message translates to:
+  /// **' Turn off Provisional to print rounds 1 to {round} as Official.'**
+  String standingsStatusProvisionalHint(int round);
+
+  /// Action that opens the Scoring page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Scoring'**
+  String get standingsStatusOpenScoring;
+
+  /// Flight-detail label for time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get standingsDetailTime;
+
+  /// Flight-detail label for landing points.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing'**
+  String get standingsDetailLanding;
+
+  /// Flight-detail label for launch height.
+  ///
+  /// In en, this message translates to:
+  /// **'Height'**
+  String get standingsDetailHeight;
+
+  /// Accessibility label for the contest participants list.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest participants'**
+  String get participantsTableLabel;
+
+  /// Accessibility label for the select-all checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get participantSelectAll;
+
+  /// Accessibility label for a row's checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Select {name}'**
+  String participantSelect(String name);
+
+  /// Marker under a pilot's name when they have scores.
+  ///
+  /// In en, this message translates to:
+  /// **'Has flights'**
+  String get participantNameFlights;
+
+  /// Accessibility label for a row's role cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Role for {name}'**
+  String participantRoleSemantics(String name);
+
+  /// A non-flying role a pilot with flights cannot take.
+  ///
+  /// In en, this message translates to:
+  /// **'{role} (not available: has flights)'**
+  String participantRoleNotAvailable(String role);
+
+  /// Accessibility label for a row's class cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Class for {name}'**
+  String participantClassSemantics(String name);
+
+  /// A read-only row with no class.
+  ///
+  /// In en, this message translates to:
+  /// **'No class'**
+  String get participantClassNone;
+
+  /// A non-flying row's class, and the hint for a non-scoring row.
+  ///
+  /// In en, this message translates to:
+  /// **'Not scored'**
+  String get participantClassNotScored;
+
+  /// Hint in a scoring pilot's class cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get participantClassRequired;
+
+  /// Accessibility label for a row's team cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Team for {name}'**
+  String participantTeamSemantics(String name);
+
+  /// A read-only row with no team, and the picker's clear choice.
+  ///
+  /// In en, this message translates to:
+  /// **'No team'**
+  String get participantTeamNone;
+
+  /// Row status for a non-flying participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-flying'**
+  String get participantStatusNonFlying;
+
+  /// Row status naming what a row still needs.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs {issues}'**
+  String participantNeeds(String issues);
+
+  /// Row status for a ready participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get participantReady;
+
+  /// Header and card label for the pilot number column.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot no.'**
+  String get participantColumnPilotNo;
+
+  /// Header and card label for the role column.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get participantColumnRole;
+
+  /// Header and card label for the class column.
+  ///
+  /// In en, this message translates to:
+  /// **'Class *'**
+  String get participantColumnClass;
+
+  /// Header and card label for the team column.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get participantColumnTeam;
+
+  /// Header and card label for the models column.
+  ///
+  /// In en, this message translates to:
+  /// **'Models'**
+  String get participantColumnModels;
+
+  /// Header for the status column.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get participantColumnStatus;
+
+  /// Header for the email column.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get participantColumnEmail;
+
+  /// Header for the name column.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get participantColumnName;
+
+  /// A bulk menu with no choices yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing entered yet'**
+  String get participantBulkNothing;
+
+  /// Why Remove is off for the selection.
+  ///
+  /// In en, this message translates to:
+  /// **'The selection contains a pilot with flights.'**
+  String get participantBulkSelectionHasFlights;
+
+  /// Asking before leaving the participants page with unsaved changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave with unsaved changes?'**
+  String get participantLeaveTitle;
+
+  /// Body of the leave-with-unsaved-changes question.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes to {count} participant{plural}. {action} discards them.'**
+  String participantLeaveBody(int count, String plural, String action);
+
+  /// The leaving action when the app is closing.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing the app'**
+  String get participantLeaveClosing;
+
+  /// The leaving action when leaving the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaving'**
+  String get participantLeaveLeaving;
+
+  /// Keep editing in the leave-with-unsaved-changes dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get participantStay;
+
+  /// Discard and leave in the leave-with-unsaved-changes dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard and leave'**
+  String get participantDiscardAndLeave;
+
+  /// Fallback contest name when it is not known.
+  ///
+  /// In en, this message translates to:
+  /// **'this contest'**
+  String get participantThisContest;
+
+  /// Page state when there is no API client.
+  ///
+  /// In en, this message translates to:
+  /// **'No API client is available.'**
+  String get participantNoApi;
+
+  /// Title of the failed-load view.
+  ///
+  /// In en, this message translates to:
+  /// **'The participants could not be loaded.'**
+  String get participantLoadFailed;
+
+  /// Loading label for the participants page.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the participants'**
+  String get participantLoading;
+
+  /// How many people are on a team, in the team picker.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant} other{{count} participants}}'**
+  String teamCount(int count);
+
+  /// Note when a typed team matches an existing one only by case.
+  ///
+  /// In en, this message translates to:
+  /// **' · existing team, case ignored'**
+  String get teamCaseIgnored;
+
+  /// Picker choice for a new team.
+  ///
+  /// In en, this message translates to:
+  /// **'Create team “{name}”'**
+  String teamCreate(String name);
+
+  /// Subtitle under the create-team choice.
+  ///
+  /// In en, this message translates to:
+  /// **'New team'**
+  String get teamNew;
+
+  /// Subtitle under the no-team choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the name. The pilot stays unassigned.'**
+  String get teamClearSubtitle;
+
+  /// Hint in an empty team cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned'**
+  String get teamUnassigned;
+
+  /// Hint in the participant search field.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name or email to search or filter'**
+  String get searchHint;
+
+  /// Tooltip for the clear-search button.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get searchClear;
+
+  /// Search source line when online with a remote directory.
+  ///
+  /// In en, this message translates to:
+  /// **'Online: searching remote first, then your profiles'**
+  String get searchOnline;
+
+  /// Search source line when offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: searching your profiles only'**
+  String get searchOffline;
+
+  /// Search source line when there is no remote directory.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching your participant profiles'**
+  String get searchProfiles;
+
+  /// Header of the search results when remote is available.
+  ///
+  /// In en, this message translates to:
+  /// **'Add from remote and your profiles'**
+  String get searchHeaderRemote;
+
+  /// Header of the search results from saved profiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Add from saved profiles'**
+  String get searchHeaderProfiles;
+
+  /// Shown while the director's profiles load.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading people…'**
+  String get searchLoading;
+
+  /// A search result with no club.
+  ///
+  /// In en, this message translates to:
+  /// **'No club'**
+  String get searchNoClub;
+
+  /// A result's email status, in the subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Email: {status}'**
+  String searchEmailPrefix(String status);
+
+  /// A search result that is already in the contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in this contest'**
+  String get searchAlready;
+
+  /// A result found in the remote directory.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote'**
+  String get searchRemote;
+
+  /// A result from the director's own profiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profiles'**
+  String get searchYourProfiles;
+
+  /// Cancel button in the participant editor action bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get participantEditorCancel;
+
+  /// Button that saves the profile and keeps the editor open for the next one.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and add another'**
+  String get participantEditorSaveAnother;
+
+  /// Status text in the editor action bar while a save runs.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get participantEditorSaving;
+
+  /// Status text in the editor action bar for a dirty edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get participantEditorUnsaved;
+
+  /// Status text in the editor action bar while a duplicate decision is open.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an option above to continue.'**
+  String get participantEditorChooseOption;
+
+  /// Status text in the editor action bar while a stale-revision conflict is open.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve the conflict above to save.'**
+  String get participantEditorResolveConflict;
+
+  /// Save button in the participant editor when editing a stored profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get participantEditorSaveChanges;
+
+  /// Save button in the participant editor opened from the New Contest wizard.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to contest'**
+  String get participantEditorAddToContest;
+
+  /// Header title and save label when creating a new participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Add participant'**
+  String get participantEditorAddTitle;
+
+  /// Header subtitle of an edit whose profile has no club.
+  ///
+  /// In en, this message translates to:
+  /// **'No club'**
+  String get participantEditorNoClub;
+
+  /// Header subtitle when creating a new participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Details are reused in every contest you add them to.'**
+  String get participantEditorReuseDetails;
+
+  /// Checkbox that keeps club and location for the next profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep club and location for the next participant'**
+  String get participantEditorKeepClubLocation;
+
+  /// Explanation under the keep-club-and-location checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Used by Save and add another, so a row of pilots from one club needs them once.'**
+  String get participantEditorKeepClubLocationSub;
+
+  /// Title of the failed-load view in the participant editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t load this participant'**
+  String get participantEditorLoadFailedTitle;
+
+  /// Failed-load action when the editor was opened from the New Contest wizard.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to contest setup'**
+  String get participantEditorBackToWizard;
+
+  /// Title of the save-failed banner in the participant editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t save'**
+  String get participantEditorSaveFailedTitle;
+
+  /// Action on the save-failed banner that retries the save.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get participantEditorSaveFailedTry;
+
+  /// Note under the save-failed banner explaining the entries are safe.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was saved and your entries are kept, so it’s safe to try again.'**
+  String get participantEditorSaveFailedKept;
+
+  /// Snack bar after Save and add another.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added'**
+  String participantEditorAddedSnack(String name);
+
+  /// Title of the discard dialog when leaving the editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get participantEditorDiscardTitle;
+
+  /// Discard-dialog text when the app is closing.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing the app will lose your unsaved changes to this participant.'**
+  String get participantEditorDiscardClosing;
+
+  /// Discard-dialog text when leaving the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Your unsaved changes will be lost.'**
+  String get participantEditorDiscardBody;
+
+  /// Cancel action in the discard dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get participantEditorKeepEditing;
+
+  /// Discard action in the dialog when the app is closing.
+  ///
+  /// In en, this message translates to:
+  /// **'Close and discard'**
+  String get participantEditorDiscardAndClose;
+
+  /// Discard action in the discard dialog when leaving the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get participantEditorDiscard;
+
+  /// Title of the stale-revision banner.
+  ///
+  /// In en, this message translates to:
+  /// **'This participant was changed elsewhere since you opened it.'**
+  String get participantEditorStaleTitle;
+
+  /// Body of the stale-revision banner naming the changed fields.
+  ///
+  /// In en, this message translates to:
+  /// **'{fields} {verb} changed elsewhere. Nothing was saved, and your edits are kept.'**
+  String participantEditorStaleBody(String fields, String verb);
+
+  /// Verb for one changed field in the stale banner.
+  ///
+  /// In en, this message translates to:
+  /// **'was'**
+  String get participantEditorWas;
+
+  /// Verb for several changed fields in the stale banner.
+  ///
+  /// In en, this message translates to:
+  /// **'were'**
+  String get participantEditorWere;
+
+  /// Stale banner action that reloads the stored version.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload their version'**
+  String get participantEditorReloadLatest;
+
+  /// Stale banner action that opens the field-by-field review.
+  ///
+  /// In en, this message translates to:
+  /// **'Review differences'**
+  String get participantEditorReviewStart;
+
+  /// Banner after values were kept from a previous profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Club and location kept from {name}.'**
+  String participantEditorKeptTitle(String name);
+
+  /// Action on the kept-values banner that clears them.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear them'**
+  String get participantEditorClearKept;
+
+  /// Semantics label of the editor loading skeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading participant'**
+  String get participantEditorLoading;
+
+  /// Text in the editor loading skeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading participant…'**
+  String get participantEditorLoadingText;
+
+  /// Label of the country field.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get participantEditorCountry;
+
+  /// Lead line of the duplicate-email decision panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision needed. Nothing has been saved.'**
+  String get participantEditorDuplicateLead;
+
+  /// Title of the duplicate-email decision panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone with this email already exists'**
+  String get participantEditorDuplicateTitle;
+
+  /// Instruction under the duplicate-email title.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare the two and choose. Matching ignores upper and lower case.'**
+  String get participantEditorDuplicateCompare;
+
+  /// Heading of the existing-profile tile.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing participant'**
+  String get participantEditorDuplicateExisting;
+
+  /// Heading of the typed-values tile.
+  ///
+  /// In en, this message translates to:
+  /// **'What you entered'**
+  String get participantEditorDuplicateEntered;
+
+  /// Button that uses the existing profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Use existing participant'**
+  String get participantEditorUseExisting;
+
+  /// Note under Use existing when opened from the wizard.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds {name} to this contest. Nothing new is created and what you typed here isn’t saved.'**
+  String participantEditorDuplicateAdds(String name);
+
+  /// Note under Use existing when opened from the list.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens {name}. Nothing new is created and what you typed here isn’t saved.'**
+  String participantEditorDuplicateOpens(String name);
+
+  /// Button that returns to the form to change the email.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the email'**
+  String get participantEditorChangeEmail;
+
+  /// Note under Change the email.
+  ///
+  /// In en, this message translates to:
+  /// **'Two participants cannot share an email. Go back and enter a different one for {name}.'**
+  String participantEditorDuplicateNote(String name);
+
+  /// Fallback name when the typed name is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'this person'**
+  String get participantEditorThisPerson;
+
+  /// Semantics label for a masked email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email hidden, starts with {letter}'**
+  String participantEditorEmailPrefix(String letter);
+
+  /// Tile name when it is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No name'**
+  String get participantEditorNoName;
+
+  /// Tile place when it is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No location'**
+  String get participantEditorNoLocation;
+
+  /// Title of the field-by-field review panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Review differences'**
+  String get participantEditorReviewTitle;
+
+  /// Instruction under the review panel title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the value to keep for each field that differs. Fields you changed start on your version; fields only they changed start on theirs.'**
+  String get participantEditorReviewBody;
+
+  /// Review action that reloads the stored version.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload their version'**
+  String get participantEditorReviewReload;
+
+  /// Review action that saves the chosen values.
+  ///
+  /// In en, this message translates to:
+  /// **'Save with these choices'**
+  String get participantEditorReviewApply;
+
+  /// Heading of the own-value choice in the review.
+  ///
+  /// In en, this message translates to:
+  /// **'Your version'**
+  String get participantEditorReviewYourVersion;
+
+  /// Heading of the stored-value choice in the review.
+  ///
+  /// In en, this message translates to:
+  /// **'Their version'**
+  String get participantEditorReviewTheirVersion;
+
+  /// Shown for an empty value in the review.
+  ///
+  /// In en, this message translates to:
+  /// **'(blank)'**
+  String get participantEditorReviewBlank;
+
+  /// Semantics label of the storage chip naming where a participant lives.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage: {storage}'**
+  String participantEditorStorage(String storage);
 }
 
 class _AppLocalizationsDelegate

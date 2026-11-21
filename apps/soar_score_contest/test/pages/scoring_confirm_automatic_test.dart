@@ -31,7 +31,7 @@ void main() {
     // Only the automatic row has the chip and the button; a director's score
     // stays plain Official.
     expect(find.text(_words.scoreAcceptedAutomatically), findsOneWidget);
-    expect(find.text('Official'), findsOneWidget);
+    expect(find.text(_words.scoreStatusOfficial), findsOneWidget);
     expect(find.text(_words.scoreConfirm), findsOneWidget);
     expect(_key('score-confirm-automatic-${first.value}'), findsOneWidget);
     expect(_key('score-automatic-note-${first.value}'), findsOneWidget);
@@ -80,7 +80,7 @@ void main() {
     expect(server.confirmedAssignments, [first]);
     expect(server.promotedBodies.single['expected_score_revision'], 1);
     expect(find.text(_words.scoreAcceptedAutomatically), findsNothing);
-    expect(find.text('Official'), findsOneWidget);
+    expect(find.text(_words.scoreStatusOfficial), findsOneWidget);
     expect(find.text(_words.scoreConfirm), findsNothing);
   });
 
@@ -197,7 +197,7 @@ void main() {
     server.matrixServer.retirements[2] = 1;
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
-    expect(find.text('Retired from round 1'), findsOneWidget);
+    expect(find.text(_words.scoreRetiredNote(1)), findsOneWidget);
     expect(find.text('1 of 2 entered · 1 official'), findsOneWidget);
     expect(find.text('9:00'), findsWidgets);
     expect(find.text(_words.scoreConfirm), findsNothing);

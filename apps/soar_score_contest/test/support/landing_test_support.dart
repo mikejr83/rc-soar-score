@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/pages/landing_editor_page.dart';
 import 'package:soar_score_contest/pages/landings_page.dart';
 import 'package:soar_score_contest/router.dart';
@@ -72,6 +73,10 @@ Widget landingsApp(ApiClient client, {String initial = landingsPath}) {
   );
   return ApiClientInherited(
     client: client,
-    child: MaterialApp.router(routerConfig: router),
+    child: MaterialApp.router(
+      routerConfig: router,
+      localizationsDelegates: appLocalizationDelegates,
+      supportedLocales: const [Locale('en')],
+    ),
   );
 }

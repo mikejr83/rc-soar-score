@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/contest_draft_store.dart';
 import '../../services/preferences/director_time.dart';
 
@@ -10,14 +11,11 @@ class DraftStatusLabel extends StatelessWidget {
 
   final ContestDraftStore store;
 
-  static const String explanation =
-      'One draft at a time. It is kept on this device and isn’t listed with '
-      'contests.';
-
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: store,
     builder: (context, _) {
+      final l10n = AppLocalizations.of(context);
       final theme = Theme.of(context);
       final scheme = theme.colorScheme;
       final savedAt = store.savedAt;
@@ -29,12 +27,12 @@ class DraftStatusLabel extends StatelessWidget {
       final time = failed ? '' : DirectorTime.clockOf(context)(savedAt!);
       final narrow = MediaQuery.sizeOf(context).width < 1100;
       final text = failed
-          ? 'Draft not saved'
+          ? l10n.wizardDraftNotSaved
           : narrow
-          ? 'Draft saved $time'
-          : 'Draft saved · $time';
+          ? l10n.wizardDraftSavedAt(time)
+          : l10n.wizardDraftSavedDot(time);
       return Tooltip(
-        message: explanation,
+        message: l10n.wizardDraftExplanation,
         child: Semantics(
           liveRegion: true,
           child: Row(

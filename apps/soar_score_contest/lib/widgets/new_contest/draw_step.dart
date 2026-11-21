@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/contest_draft.dart';
 import '../../services/new_contest/draft_validation.dart';
 import '../../services/new_contest/draw_settings.dart';
@@ -20,19 +21,20 @@ class DrawStep extends StatelessWidget {
   final ContestDraft draft;
   final ValueChanged<ContestDraft> onChanged;
 
-  static const String whyExclusive =
-      'Seeded draws place pilots by ranking, so they can’t also keep '
-      'teammates in separate groups.';
+  static String whyExclusive(AppLocalizations l10n) =>
+      l10n.wizardDrawModeWhyExclusive;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final settings = draft.drawSettings;
     final plan = GroupPlan.of(draft);
-    final errors = DraftValidation.draw(draft);
+    final errors = DraftValidation.draw(draft, l10n);
     final teamsOn = draft.has(ParticipantOption.teams);
     final protection = settings.teamProtection;
+    final exclusive = whyExclusive(l10n);
 
     void set(DrawSettings value) => onChanged(draft.copyWith(draw: value));
 
@@ -55,11 +57,11 @@ class DrawStep extends StatelessWidget {
     final muted = scheme.onSurfaceVariant;
 
     final modes = card(
-      'Draw mode',
+      l10n.wizardDrawMode,
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Draw mode', style: title),
+          Text(l10n.wizardDrawMode, style: title),
           const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -73,15 +75,13 @@ class DrawStep extends StatelessWidget {
                   for (final (mode, name, description) in [
                     (
                       DrawMode.standardManOnMan,
-                      'Man on Man',
-                      'Random groups each round, mixed so pilots meet as many '
-                          'others as possible.',
+                      l10n.wizardDrawModeManOnMan,
+                      l10n.wizardDrawModeManOnManDesc,
                     ),
                     (
                       DrawMode.seededManOnMan,
-                      'Seeded Man on Man',
-                      'After the seeded rounds, pilots with similar scores '
-                          'fly together.',
+                      l10n.wizardDrawModeSeeded,
+                      l10n.wizardDrawModeSeededDesc,
                     ),
                   ])
                     SizedBox(
@@ -93,9 +93,7 @@ class DrawStep extends StatelessWidget {
                         selected: settings.drawMode == mode,
                         disabledReason:
                             mode == DrawMode.seededManOnMan && protection
-                            ? 'Unavailable while team protection is on. '
-                                  '$whyExclusive Turn off team protection to '
-                                  'choose it.'
+                            ? l10n.wizardDrawModeUnavailable(exclusive)
                             : null,
                         onTap: () => set(settings.copyWith(drawMode: mode)),
                       ),
@@ -111,7 +109,7 @@ class DrawStep extends StatelessWidget {
     final inputs = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Groups per round', style: theme.textTheme.bodyLarge),
+        Text(l10n.wizardGroupsPerRound, style: theme.textTheme.bodyLarge),
         const SizedBox(height: 8),
         WizardNumberField(
           key: const ValueKey('groups-per-round'),
@@ -121,30 +119,31 @@ class DrawStep extends StatelessWidget {
               ? plan.minGroups
               : plan.maxGroups,
           error: errors.groups != null,
-          semanticLabel: 'Groups per round',
+          semanticLabel: l10n.wizardGroupsPerRound,
           onChanged: (value) => set(settings.copyWith(groups: value)),
         ),
         const SizedBox(height: 8),
         Text(
           errors.groups ??
               (plan.teamProtection && plan.groups == plan.minGroups
-                  ? 'Minimum ${plan.minGroups}: team protection keeps the '
-                        '${plan.largestTeam} pilots of your largest team in '
-                        'separate groups.'
-                  : 'Between ${plan.minGroups} and ${plan.maxGroups} for '
-                        '${plan.scoring} scoring pilots.'),
+                  ? l10n.wizardMinimumGroups(plan.minGroups, plan.largestTeam)
+                  : l10n.wizardGroupsRange(
+                      plan.minGroups,
+                      plan.maxGroups,
+                      plan.scoring,
+                    )),
           style: theme.textTheme.bodySmall?.copyWith(
             color: errors.groups != null ? scheme.error : muted,
           ),
         ),
         const SizedBox(height: 20),
-        Text('Preliminary rounds', style: theme.textTheme.bodyLarge),
+        Text(l10n.wizardPreliminaryRounds, style: theme.textTheme.bodyLarge),
         const SizedBox(height: 8),
         WizardNumberField(
           key: const ValueKey('preliminary-rounds'),
           value: draft.roundsText,
           error: errors.rounds != null,
-          semanticLabel: 'Preliminary rounds',
+          semanticLabel: l10n.wizardPreliminaryRounds,
           onChanged: (value) => set(settings.copyWith(rounds: value)),
         ),
         const SizedBox(height: 8),
@@ -155,8 +154,7 @@ class DrawStep extends StatelessWidget {
             const SizedBox(width: 6),
             Flexible(
               child: Text(
-                errors.rounds ??
-                    'Rounds can be appended after the contest starts.',
+                errors.rounds ?? l10n.wizardRoundsAppendNote,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: errors.rounds != null ? scheme.error : muted,
                 ),
@@ -168,7 +166,7 @@ class DrawStep extends StatelessWidget {
     );
 
     final groupsCard = card(
-      'Groups and rounds',
+      l10n.wizardGroupsAndRounds,
       LayoutBuilder(
         builder: (context, constraints) {
           final panel = GroupCalculationPanel(plan: plan, teamsOn: teamsOn);
@@ -193,33 +191,38 @@ class DrawStep extends StatelessWidget {
     final constraintRows = <Widget>[
       if (settings.seeded)
         SettingRow(
-          label: 'Seeded rounds',
-          description:
-              'Man-on-man rounds flown before seeding starts. Minimum 1.',
+          label: l10n.wizardSeededRounds,
+          description: l10n.wizardSeededRoundsDesc,
           control: WizardNumberField(
             key: const ValueKey('seeded-rounds'),
             value: settings.seededRounds,
             error: errors.seededRounds != null,
-            semanticLabel: 'Seeded rounds',
+            semanticLabel: l10n.wizardSeededRounds,
             onChanged: (value) => set(settings.copyWith(seededRounds: value)),
           ),
           notes: [
             if (errors.seededRounds != null)
-              const SettingNote.error(
+              SettingNote.error(
                 Icons.error,
-                'At least 1 seeded round',
-                'Enter 1 or more.',
+                l10n.wizardSeededRoundsAtLeast1,
+                l10n.wizardValidationSeededRounds,
               ),
           ],
         ),
       SettingRow(
-        label: 'Lane mode',
-        description: 'Whether pilots get a launch lane within their group.',
+        label: l10n.wizardLaneMode,
+        description: l10n.wizardLaneModeDesc,
         control: SegmentedButton<LaneMode>(
           key: const ValueKey('lane-mode'),
-          segments: const [
-            ButtonSegment(value: LaneMode.none, label: Text('None')),
-            ButtonSegment(value: LaneMode.random, label: Text('Random')),
+          segments: [
+            ButtonSegment(
+              value: LaneMode.none,
+              label: Text(l10n.wizardLaneNone),
+            ),
+            ButtonSegment(
+              value: LaneMode.random,
+              label: Text(l10n.wizardLaneRandom),
+            ),
           ],
           selected: {settings.laneMode},
           onSelectionChanged: (picked) =>
@@ -227,15 +230,13 @@ class DrawStep extends StatelessWidget {
         ),
       ),
       SettingRow(
-        label: 'Team protection',
+        label: l10n.wizardTeamProtection,
         enabled: teamsOn && !settings.seeded,
         description: teamsOn && !settings.seeded
-            ? 'Keeps teammates out of the same group. Needs at least as many '
-                  'groups as your largest team has pilots '
-                  '(${draft.largestTeamPilots}).'
-            : 'Keeps teammates out of the same group.',
+            ? l10n.wizardTeamProtectionDesc(draft.largestTeamPilots)
+            : l10n.wizardTeamProtectionDescOff,
         control: Semantics(
-          label: 'Team protection',
+          label: l10n.wizardTeamProtection,
           child: Switch(
             key: const ValueKey('team-protection'),
             value: protection,
@@ -254,33 +255,30 @@ class DrawStep extends StatelessWidget {
         ),
         notes: [
           if (!teamsOn)
-            const SettingNote.info(
+            SettingNote.info(
               Icons.info,
-              'Teams are off',
-              'Turn on Teams in Participant options to use team protection.',
+              l10n.wizardTeamsOffNote,
+              l10n.wizardTeamsOffNoteBody,
             )
           else if (settings.seeded)
-            const SettingNote.info(
+            SettingNote.info(
               Icons.block,
-              'Unavailable with Seeded Man on Man',
-              '$whyExclusive Choose Man on Man to use team protection.',
+              l10n.wizardSeededUnavailableNote,
+              l10n.wizardSeededUnavailableNoteBody(exclusive),
             )
           else if (protection)
-            const SettingNote.info(
+            SettingNote.info(
               Icons.info,
-              'Seeded Man on Man is now unavailable',
-              'The two can’t be combined. Turn this off if you want a seeded '
-                  'draw.',
+              l10n.wizardSeededUnavailableNote2,
+              l10n.wizardSeededUnavailableNote2Body,
             ),
         ],
       ),
       SettingRow(
-        label: 'Allow back-to-back flights',
-        description:
-            'A pilot may fly the last group of one round and the first group '
-            'of the next.',
+        label: l10n.wizardBackToBack,
+        description: l10n.wizardBackToBackDesc,
         control: Semantics(
-          label: 'Allow back-to-back flights',
+          label: l10n.wizardBackToBack,
           child: Switch(
             key: const ValueKey('back-to-back'),
             value: settings.allowBackToBack,
@@ -289,20 +287,19 @@ class DrawStep extends StatelessWidget {
         ),
         notes: [
           if (!settings.allowBackToBack) ...[
-            const SettingNote.warning(
+            SettingNote.warning(
               Icons.balance,
-              'Draw fairness decreases',
-              'Keeping pilots out of consecutive flights limits how the draw '
-                  'can mix pilots, so some match-ups repeat more often.',
+              l10n.wizardBackToBackFairness,
+              l10n.wizardBackToBackFairnessBody,
             ),
             if (plan.tooSmallForBackToBack)
               SettingNote.error(
                 Icons.warning,
-                'This contest is too small for the constraint',
-                'With ${plan.groups} group${plan.groups == 1 ? '' : 's'}, a '
-                    'pilot in the last group of one round would also fly in '
-                    'the first group of the next. Use at least 3 groups or '
-                    'allow back-to-back flights.',
+                l10n.wizardBackToBackTooSmall,
+                l10n.wizardBackToBackTooSmallBody(
+                  plan.groups,
+                  plan.groups == 1 ? '' : 's',
+                ),
               ),
           ],
         ],
@@ -310,13 +307,13 @@ class DrawStep extends StatelessWidget {
     ];
 
     final constraintsCard = card(
-      'Constraints',
+      l10n.wizardConstraints,
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-            child: Text('Constraints', style: title),
+            child: Text(l10n.wizardConstraints, style: title),
           ),
           for (final (index, row) in constraintRows.indexed) ...[
             if (index > 0) Divider(height: 1, color: scheme.outlineVariant),

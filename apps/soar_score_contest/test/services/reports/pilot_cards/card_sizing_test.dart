@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/reports/pilot_cards/card_columns.dart';
 import 'package:soar_score_contest/services/reports/pilot_cards/card_geometry.dart';
 import 'package:soar_score_contest/services/reports/pilot_cards/card_sheet_decision.dart';
@@ -7,6 +8,8 @@ import 'package:soar_score_contest/services/reports/pilot_cards/pilot_cards_opti
 import 'package:soar_score_contest/services/reports/report_pilot.dart';
 import 'package:soar_score_contest/services/reports/viewer/page_setup.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+
+final _l10n = AppLocalizationsEn();
 
 final _id = Id.parse('019a3c4a-8f2a-7b1c-9d4e-6f5a3b2c2b01');
 
@@ -287,25 +290,28 @@ void main() {
       expect(decide(9, CardsPerPageChoice.automatic).perPage, CardsPerPage.two);
       final fourteen = decide(14, CardsPerPageChoice.automatic);
       expect(fourteen.perPage, CardsPerPage.two);
-      expect(fourteen.message, contains('14 rounds don’t fit four to a page'));
+      expect(
+        fourteen.message(_l10n),
+        contains('14 rounds don’t fit four to a page'),
+      );
     });
 
     test('two per page can be chosen when four would fit', () {
       final d = decide(8, CardsPerPageChoice.two);
       expect(d.perPage, CardsPerPage.two);
-      expect(d.message, startsWith('8 rounds on half-page cards.'));
+      expect(d.message(_l10n), startsWith('8 rounds on half-page cards.'));
     });
 
     test('too many rounds for a half page has no layout and says why', () {
       final d = decide(60, CardsPerPageChoice.automatic);
       expect(d.tooMany, isTrue);
       expect(d.perPage, isNull);
-      expect(d.message, contains('too many rounds for a scoring card'));
+      expect(d.message(_l10n), contains('too many rounds for a scoring card'));
     });
 
     test('no rounds in range', () {
       expect(
-        decide(0, CardsPerPageChoice.automatic).message,
+        decide(0, CardsPerPageChoice.automatic).message(_l10n),
         'No rounds in range.',
       );
     });

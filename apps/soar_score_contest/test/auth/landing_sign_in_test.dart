@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/auth/auth_session.dart';
 import 'package:soar_score_contest/auth/auth_session_inherited.dart';
 import 'package:soar_score_contest/auth/identity_provider_check.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/pages/landing_page.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
 
@@ -10,13 +12,18 @@ import '../support/fake_app_connectivity.dart';
 import '../support/fake_auth_session.dart';
 import '../support/fake_identity_provider_check.dart';
 
+final _l10n = AppLocalizationsEn();
+
 Widget _app(AuthSession session, IdentityProviderCheck check) {
   final connectivity = FakeAppConnectivity();
   return AppConnectivityInherited(
     monitor: connectivity,
     child: AuthSessionInherited(
       session: session,
-      child: MaterialApp(home: LandingPage(isWeb: true, identityCheck: check)),
+      child: MaterialApp(
+        localizationsDelegates: appLocalizationDelegates,
+        home: LandingPage(isWeb: true, identityCheck: check),
+      ),
     ),
   );
 }
@@ -37,7 +44,7 @@ void main() {
     final check = _availableCheck();
     await tester.pumpWidget(_app(session, check));
 
-    await tester.tap(find.text('Sign in'));
+    await tester.tap(find.text(_l10n.landingSignIn));
     await tester.pump();
 
     expect(session.signInCalls, [false]);
@@ -50,7 +57,7 @@ void main() {
     final check = _availableCheck();
     await tester.pumpWidget(_app(session, check));
 
-    await tester.tap(find.text('Create account'));
+    await tester.tap(find.text(_l10n.landingCreateAccount));
     await tester.pump();
 
     expect(session.signInCalls, [true]);
@@ -62,7 +69,7 @@ void main() {
     final check = _availableCheck();
     await tester.pumpWidget(_app(session, check));
 
-    await tester.tap(find.text('Sign in'));
+    await tester.tap(find.text(_l10n.landingSignIn));
     await tester.pump();
 
     expect(find.text('Sign-in was cancelled.'), findsOneWidget);
@@ -82,14 +89,14 @@ void main() {
     final check = _availableCheck();
     await tester.pumpWidget(_app(session, check));
 
-    expect(find.text('Signed in as Pat Pilot'), findsOneWidget);
-    expect(find.text('Continue'), findsOneWidget);
-    expect(find.text('Sign in'), findsNothing);
+    expect(find.text(_l10n.landingSignedInAs('Pat Pilot')), findsOneWidget);
+    expect(find.text(_l10n.landingContinue), findsOneWidget);
+    expect(find.text(_l10n.landingSignIn), findsNothing);
 
-    await tester.tap(find.text('Sign out'));
+    await tester.tap(find.text(_l10n.landingSignOut));
     await tester.pump();
 
     expect(session.signOutCalls, 1);
-    expect(find.text('Sign in'), findsOneWidget);
+    expect(find.text(_l10n.landingSignIn), findsOneWidget);
   });
 }

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/workspace/workspace_control.dart';
 import '../workspace_control_slot.dart';
 
@@ -31,18 +32,22 @@ class ControlCardBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final reason = disabledReason;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(workspaceControlLabel(control), style: theme.textTheme.titleSmall),
+        Text(
+          workspaceControlLabel(l10n, control),
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Text.rich(
           key: ValueKey('control-${control.id}-current'),
           TextSpan(
             children: [
-              const TextSpan(text: 'Now: '),
+              TextSpan(text: l10n.workspaceControlNow),
               TextSpan(
                 text: current,
                 style: const TextStyle(fontWeight: FontWeight.w600),

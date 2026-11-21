@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../sync/sync_summary_builder.dart';
 import '../../page_states/page_banner.dart';
 import 'viewer_banner.dart';
@@ -21,20 +22,22 @@ class ViewerOfflineBanner extends StatelessWidget {
   Widget build(BuildContext context) => SyncSummaryBuilder(
     scope: ContestScopeKey(contestId),
     builder: (context, sync, summary, syncing) {
+      final l10n = AppLocalizations.of(context);
       final pending = summary?.pendingChanges ?? 0;
       return ViewerBanner(
         kind: ViewerBannerKind.neutral,
         icon: Icons.cloud_off,
-        lead: 'Offline.',
+        lead: l10n.viewerOffline,
         text: pending == 0
-            ? 'Produced from data on this device.'
-            : 'Produced from data on this device. $pending '
-                  '${pending == 1 ? 'change is' : 'changes are'} not yet '
-                  'synced.',
+            ? l10n.viewerOfflineLocalOnly
+            : l10n.viewerOfflinePending(
+                pending,
+                pending == 1 ? 'change is' : 'changes are',
+              ),
         actions: [
           if (sync.available)
             PageBannerAction(
-              'Open Sync',
+              l10n.viewerOpenSync,
               onOpenSync,
               emphasis: PageBannerEmphasis.outlined,
             ),

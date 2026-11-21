@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/new_contest/scoring_settings.dart';
 import 'package:soar_score_contest/services/new_contest/draw_settings.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
@@ -12,6 +13,7 @@ void main() {
       'review and publication settings show no discipline default', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(
       participants: [row(0), row(1)],
       discipline: WizardDiscipline.f5j,
@@ -20,14 +22,14 @@ void main() {
     );
     await pumpWizard(tester, respond: stepApi, store: store);
 
-    expect(stepTitle(tester), 'Scoring & publication');
-    expect(find.text('Total score decimal precision'), findsOneWidget);
+    expect(stepTitle(tester), l10n.wizardStepScoringPublication);
+    expect(find.text(l10n.wizardPrecisionLabel), findsOneWidget);
     // Group score, rounding, precision, drop policy and the first drop.
     expect(find.text('F5J default'), findsNWidgets(5));
 
     final two = find.descendant(
       of: find.byKey(const ValueKey('drop-policy')),
-      matching: find.text('Two dropped'),
+      matching: find.text(l10n.wizardDropTwo),
     );
     await tester.ensureVisible(two);
     await tester.tap(two);
@@ -38,6 +40,7 @@ void main() {
   });
 
   testWidgets('preliminary rounds follow the dropped rounds', (tester) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(
       participants: [row(0), row(1)],
       discipline: WizardDiscipline.f5j,
@@ -56,12 +59,9 @@ void main() {
         .controller!
         .text;
 
-    expect(stepTitle(tester), 'Draw options');
+    expect(stepTitle(tester), l10n.wizardStepDrawOptions);
     expect(rounds(), '6');
-    expect(
-      find.text('Rounds can be appended after the contest starts.'),
-      findsOneWidget,
-    );
+    expect(find.text(l10n.wizardRoundsAppendNote), findsOneWidget);
     expect(store.draft.roundsText, '6');
 
     await store.update(

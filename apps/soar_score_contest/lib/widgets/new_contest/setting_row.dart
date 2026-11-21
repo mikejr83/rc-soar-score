@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// A note under a setting: a warning, an error or an explanation.
 class SettingNote {
   const SettingNote.info(this.icon, this.title, [this.text])
@@ -117,7 +119,10 @@ class SettingRow extends StatelessWidget {
                                   textStyle: theme.textTheme.labelMedium,
                                 ),
                                 onPressed: onReset,
-                                child: const Text('Reset to default'),
+                                child: Text(
+                                  AppLocalizations.of(context)
+                                      .wizardResetToDefault,
+                                ),
                               ),
                           ],
                         ),

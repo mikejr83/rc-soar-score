@@ -1,8 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 
 import '../support/matrix_test_support.dart';
 import '../support/scoring_test_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 const _flight = {'time_flown': 540, 'launch_height': 120};
 
@@ -14,17 +17,17 @@ void main() {
     final server = ScoringServer()..seedPendingSubmission(first, _flight);
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
-    expect(find.text('Pilot entry'), findsOneWidget);
+    expect(find.text(_l10n.scorePilotEntryChip), findsOneWidget);
     // Only the row with a waiting entry offers it.
-    expect(find.text('Mark official'), findsOneWidget);
+    expect(find.text(_l10n.scoreMarkOfficial), findsOneWidget);
     await tester.tap(_key('score-mark-official-${first.value}'));
     await tester.pumpAndSettle();
 
     expect(server.promoteRequests, 1);
     expect(server.entries, isEmpty);
     // Where the score came from is still true once it is official.
-    expect(find.text('Pilot entry'), findsOneWidget);
-    expect(find.text('Mark official'), findsNothing);
+    expect(find.text(_l10n.scorePilotEntryChip), findsOneWidget);
+    expect(find.text(_l10n.scoreMarkOfficial), findsNothing);
   });
 
   testWidgets('a row with typed edits says to save or revert first', (
@@ -43,8 +46,8 @@ void main() {
       _key('score-mark-official-${first.value}'),
     );
     expect(button.onPressed, isNull);
-    expect(find.byTooltip('Save or revert your edits first.'), findsOneWidget);
-    expect(find.text('Save or revert your edits first.'), findsNothing);
+    expect(find.byTooltip(_l10n.scoreMarkOfficialEdited), findsOneWidget);
+    expect(find.text(_l10n.scoreMarkOfficialEdited), findsNothing);
   });
 
   testWidgets('a busy server shows Retry, which asks again', (tester) async {
@@ -64,7 +67,7 @@ void main() {
 
     expect(server.entries, isEmpty);
     expect(_key('score-mark-official-failed'), findsNothing);
-    expect(find.text('Mark official'), findsNothing);
+    expect(find.text(_l10n.scoreMarkOfficial), findsNothing);
   });
 
   testWidgets('Mark all marks the valid rows at once and says what it left', (
@@ -80,8 +83,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(server.promoteRequests, 1);
-    expect(find.text('Marked 2 rows official.'), findsOneWidget);
-    expect(find.text('Pilot entry'), findsNWidgets(2));
+    expect(find.text(_l10n.scoreMarkAllDone(2)), findsOneWidget);
+    expect(find.text(_l10n.scorePilotEntryChip), findsNWidgets(2));
     // Nothing waits any more, so the group action is gone.
     expect(_key('score-mark-all-official'), findsNothing);
   });
@@ -106,7 +109,7 @@ void main() {
     final server = ScoringServer();
     await pumpScoringPage(tester, server, round: 1, group: 1);
     expect(_key('score-mark-all-official'), findsNothing);
-    expect(find.text('Mark official'), findsNothing);
+    expect(find.text(_l10n.scoreMarkOfficial), findsNothing);
   });
 
   testWidgets('a changed entry says to check the new values and mark again', (
@@ -134,8 +137,8 @@ void main() {
       _key('score-mark-official-${first.value}'),
     );
     expect(button.onPressed, isNull);
-    expect(find.byTooltip('Entry is closed for this row.'), findsOneWidget);
-    expect(find.text('Entry is closed for this row.'), findsNothing);
+    expect(find.byTooltip(_l10n.scoreMarkOfficialClosed), findsOneWidget);
+    expect(find.text(_l10n.scoreMarkOfficialClosed), findsNothing);
   });
 
   testWidgets('a queued Mark official shows as waiting and blocks a repeat', (
@@ -158,7 +161,7 @@ void main() {
       findsOneWidget,
     );
     // The row is not official; it says the adoption waits.
-    expect(find.text('Mark official is queued'), findsOneWidget);
+    expect(find.text(_l10n.scoreAdoptionWaiting), findsOneWidget);
     final button = tester.widget<TextButton>(
       _key('score-mark-official-${first.value}'),
     );
@@ -171,7 +174,7 @@ void main() {
       find.text('Queued; the service decides it when this device syncs.'),
       findsNothing,
     );
-    expect(find.text('Pilot entry'), findsOneWidget);
+    expect(find.text(_l10n.scorePilotEntryChip), findsOneWidget);
   });
 
   testWidgets('Mark all counts queued rows and leaves queued ones out', (
@@ -188,7 +191,7 @@ void main() {
     await tester.tap(_key('score-mark-all-official'));
     await tester.pumpAndSettle();
     expect(find.textContaining('2 rows are waiting to sync.'), findsOneWidget);
-    expect(find.text('Nothing was marked official.'), findsNothing);
+    expect(find.text(_l10n.scoreMarkAllNothing), findsNothing);
 
     // Both are queued now, so nothing is left to send.
     final button = tester.widget<OutlinedButton>(
@@ -210,7 +213,7 @@ void main() {
     await tester.tap(_key('score-mark-official-${first.value}'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Mark official is queued'), findsOneWidget);
+    expect(find.text(_l10n.scoreAdoptionWaiting), findsOneWidget);
     expect(
       find.textContaining('is queued and will be reviewed'),
       findsOneWidget,
@@ -236,7 +239,7 @@ void main() {
     await tester.tap(_key('score-mark-all-official'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Mark official is queued'), findsNWidgets(2));
+    expect(find.text(_l10n.scoreAdoptionWaiting), findsNWidgets(2));
     expect(find.textContaining('2 rows are waiting to sync.'), findsOneWidget);
     final button = tester.widget<OutlinedButton>(
       _key('score-mark-all-official'),

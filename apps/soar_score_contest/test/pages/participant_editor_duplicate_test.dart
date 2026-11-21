@@ -2,11 +2,14 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/pages/participant_editor_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../support/participant_test_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 ApiClient _directory(
   List<ParticipantProfile> profiles, {
@@ -84,11 +87,11 @@ void main() {
     await saveEditor(tester);
 
     expect(find.byKey(const ValueKey('duplicate-notice')), findsOneWidget);
-    expect(find.text('Someone with this email already exists'), findsOneWidget);
+    expect(find.text(_l10n.participantEditorDuplicateTitle), findsOneWidget);
     expect(find.text('a***@example.com'), findsOneWidget);
     expect(find.text('A***@example.com'), findsOneWidget);
     expect(find.text('ada@example.com'), findsNothing);
-    expect(find.text('Choose an option above to continue.'), findsOneWidget);
+    expect(find.text(_l10n.participantEditorChooseOption), findsOneWidget);
     expect(requests.where((r) => r.method == 'POST'), isEmpty);
     // Save is off while a decision is open.
     expect(
@@ -115,7 +118,7 @@ void main() {
 
     expect(find.byKey(const ValueKey('create-separate')), findsNothing);
     expect(find.text('Create a separate participant'), findsNothing);
-    expect(find.text('Change the email'), findsOneWidget);
+    expect(find.text(_l10n.participantEditorChangeEmail), findsOneWidget);
     expect(requests.where((r) => r.method == 'POST'), isEmpty);
   });
 
@@ -151,7 +154,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Add to contest'), findsOneWidget);
+    expect(find.text(_l10n.participantEditorAddToContest), findsOneWidget);
 
     await _fillDuplicate(tester);
     await saveEditor(tester);

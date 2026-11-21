@@ -54,20 +54,23 @@ class PilotRowTile extends StatelessWidget {
     final colors = MatrixColors.of(context);
     final l10n = AppLocalizations.of(context);
     final pilot = slot.pilot;
+    final lane = slot.lane;
     final label =
         StringBuffer(
             pilot.number == null
                 ? pilot.name
-                : 'Pilot ${pilot.numberText}, ${pilot.name}',
+                : l10n.matrixRowPilot(pilot.numberText, pilot.name),
           )
           ..write(
-            showTeam ? ', ${marker == null ? 'no team' : marker!.name}' : '',
+            showTeam
+                ? ', ${marker == null ? l10n.matrixRowNoTeam : marker!.name}'
+                : '',
           )
-          ..write(showLane && slot.lane != null ? ', lane ${slot.lane}' : '')
-          ..write(', round $round, group $group')
+          ..write(showLane && lane != null ? l10n.matrixRowLane(lane) : '')
+          ..write(l10n.matrixRowRoundGroup(round, group))
           ..write(slot.moved ? ', ${l10n.matrixMovedLabel}' : '')
-          ..write(selected ? ', highlighted' : '')
-          ..write(matched ? ', search match' : '');
+          ..write(selected ? l10n.matrixRowHighlighted : '')
+          ..write(matched ? l10n.matrixRowMatched : '');
     final ring = selected
         ? Border.all(color: scheme.primary, width: 2)
         : matched
@@ -151,7 +154,7 @@ class PilotRowTile extends StatelessWidget {
                   ),
                 ),
                 if (slot.moved) MovedLabel(label: l10n.matrixMovedLabel),
-                if (showLane && slot.lane != null)
+                if (showLane && lane != null)
                   Container(
                     constraints: const BoxConstraints(minHeight: 22),
                     padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -161,7 +164,7 @@ class PilotRowTile extends StatelessWidget {
                       border: Border.all(color: scheme.outline),
                     ),
                     child: Text(
-                      'L${slot.lane}',
+                      l10n.matrixRowLaneShort(lane),
                       style: TextStyle(fontSize: 12),
                     ),
                   ),

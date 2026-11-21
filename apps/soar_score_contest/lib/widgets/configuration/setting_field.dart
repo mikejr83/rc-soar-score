@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/configuration/configuration_draft.dart';
 import '../../services/configuration/house_rules.dart';
 import '../../services/configuration/setting_def.dart';
@@ -44,6 +45,7 @@ class SettingField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final key = def.key;
     final effect = draft.effectOf(def);
     final locked = effect.fixed;
@@ -76,8 +78,9 @@ class SettingField extends StatelessWidget {
               dashed: true,
             ),
         ],
-        control: _control(context, enabled, error != null),
+        control: _control(context, enabled, error != null, l10n),
         notes: SettingNotes.of(
+          l10n: l10n,
           draft: draft,
           def: def,
           editable: editable,
@@ -87,7 +90,12 @@ class SettingField extends StatelessWidget {
     );
   }
 
-  Widget _control(BuildContext context, bool enabled, bool hasError) {
+  Widget _control(
+    BuildContext context,
+    bool enabled,
+    bool hasError,
+    AppLocalizations l10n,
+  ) {
     final key = def.key;
     final value = draft[key];
     final focus = registry.focusNode(key);
@@ -150,7 +158,7 @@ class SettingField extends StatelessWidget {
           options: def.options,
           selected: value,
           onChanged: enabled ? _set : null,
-          blocked: _blockedOptions(),
+          blocked: _blockedOptions(l10n),
         );
       case SettingType.select || SettingType.readOnly:
         return _ReadOnlyValue(
@@ -160,7 +168,7 @@ class SettingField extends StatelessWidget {
     }
   }
 
-  List<BlockedOption> _blockedOptions() {
+  List<BlockedOption> _blockedOptions(AppLocalizations l10n) {
     if (def.key != SettingKeys.drawMode) {
       return const [];
     }
@@ -173,10 +181,8 @@ class SettingField extends StatelessWidget {
     return [
       BlockedOption(
         value: SettingKeys.seeded,
-        reason:
-            'Not available while team protection is on. Seeded groups are '
-            'formed by score, so teammates may have to fly together.',
-        fixLabel: 'Turn off team protection',
+        reason: l10n.configBlockedTeamProtection,
+        fixLabel: l10n.configFixTurnOffTeamProtection,
         onFix: () {
           draft.setAll({
             SettingKeys.teamProtection: false,

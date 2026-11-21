@@ -33,6 +33,7 @@ class ScoringToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final words = AppLocalizations.of(context);
     final data = controller.data!;
     final rounds = data.rounds;
     final round = controller.currentRound;
@@ -62,20 +63,23 @@ class ScoringToolbar extends StatelessWidget {
       children: [
         step(
           Icons.first_page,
-          'First round',
+          words.scoreToolbarFirstRound,
           roundIndex > 0 ? () => toRound(0) : null,
           'round-first',
         ),
         step(
           Icons.chevron_left,
-          'Previous round',
+          words.scoreToolbarPrevRound,
           roundIndex > 0 ? () => toRound(roundIndex - 1) : null,
           'round-previous',
         ),
         KeyedSubtree(
           key: const ValueKey('round-picker'),
           child: CompletenessMenu(
-            title: 'Round ${controller.round} of ${rounds.length}',
+            title: words.scoreToolbarRoundTitle(
+              controller.round,
+              rounds.length,
+            ),
             completeness: round == null
                 ? data.roundCompleteness(rounds.first)
                 : data.roundCompleteness(round),
@@ -84,8 +88,8 @@ class ScoringToolbar extends StatelessWidget {
               for (final r in rounds)
                 PickerChoice(
                   value: r.ordinal,
-                  label: 'Round ${r.ordinal}',
-                  sub: '${r.groupCount} groups',
+                  label: words.scoreToolbarRoundChoice(r.ordinal),
+                  sub: words.scoreToolbarGroups(r.groupCount),
                   completeness: data.roundCompleteness(r),
                 ),
             ],
@@ -94,7 +98,7 @@ class ScoringToolbar extends StatelessWidget {
         ),
         step(
           Icons.chevron_right,
-          'Next round',
+          words.scoreToolbarNextRound,
           roundIndex >= 0 && roundIndex < rounds.length - 1
               ? () => toRound(roundIndex + 1)
               : null,
@@ -102,7 +106,7 @@ class ScoringToolbar extends StatelessWidget {
         ),
         step(
           Icons.last_page,
-          'Last round',
+          words.scoreToolbarLastRound,
           roundIndex >= 0 && roundIndex < rounds.length - 1
               ? () => toRound(rounds.length - 1)
               : null,
@@ -116,23 +120,24 @@ class ScoringToolbar extends StatelessWidget {
       children: [
         step(
           Icons.first_page,
-          'First group',
+          words.scoreToolbarFirstGroup,
           groupIndex > 0 ? () => toGroup(0) : null,
           'group-first',
         ),
         step(
           Icons.chevron_left,
-          'Previous group',
+          words.scoreToolbarPrevGroup,
           groupIndex > 0 ? () => toGroup(groupIndex - 1) : null,
           'group-previous',
         ),
         KeyedSubtree(
           key: const ValueKey('group-picker'),
           child: CompletenessMenu(
-            title:
-                'Group ${NextStepText.group(controller.group)} of '
-                '${groups.length}',
-            trailing: '${rows.length} pilots',
+            title: words.scoreToolbarGroupTitle(
+              NextStepText.group(controller.group),
+              groups.length,
+            ),
+            trailing: words.scoreToolbarPilots(rows.length),
             completeness: round == null
                 ? data.roundCompleteness(rounds.first)
                 : data.groupCompleteness(round, controller.group),
@@ -142,8 +147,8 @@ class ScoringToolbar extends StatelessWidget {
                 for (final g in groups)
                   PickerChoice(
                     value: g,
-                    label: 'Group ${NextStepText.group(g)}',
-                    sub: '${data.rowsOf(round, g).length} pilots',
+                    label: words.scoreToolbarGroupChoice(NextStepText.group(g)),
+                    sub: words.scoreToolbarPilots(data.rowsOf(round, g).length),
                     completeness: data.groupCompleteness(round, g),
                   ),
             ],
@@ -152,7 +157,7 @@ class ScoringToolbar extends StatelessWidget {
         ),
         step(
           Icons.chevron_right,
-          'Next group',
+          words.scoreToolbarNextGroup,
           groupIndex >= 0 && groupIndex < groups.length - 1
               ? () => toGroup(groupIndex + 1)
               : null,
@@ -160,7 +165,7 @@ class ScoringToolbar extends StatelessWidget {
         ),
         step(
           Icons.last_page,
-          'Last group',
+          words.scoreToolbarLastGroup,
           groupIndex >= 0 && groupIndex < groups.length - 1
               ? () => toGroup(groups.length - 1)
               : null,
@@ -177,19 +182,19 @@ class ScoringToolbar extends StatelessWidget {
     final savingCount = controller.savingCount;
     final saving = savingCount > 0;
     if (saving) {
-      primaryLabel = AppLocalizations.of(context).scoreSavingRows(savingCount);
+      primaryLabel = words.scoreSavingRows(savingCount);
       primaryIcon = Icons.save;
       primaryTap = null;
     } else if (block != null) {
-      primaryLabel = 'Save';
+      primaryLabel = words.scoreToolbarSave;
       primaryIcon = Icons.save;
       primaryTap = null;
     } else if (dirty > 0) {
-      primaryLabel = 'Save $dirty ${dirty == 1 ? 'row' : 'rows'}';
+      primaryLabel = words.scoreToolbarSaveRows(dirty);
       primaryIcon = Icons.save;
       primaryTap = onSaveAll;
     } else {
-      primaryLabel = 'Lock…';
+      primaryLabel = words.scoreToolbarLock;
       primaryIcon = Icons.lock_outline;
       primaryTap = null;
     }
@@ -239,7 +244,7 @@ class ScoringToolbar extends StatelessWidget {
       children: [
         PopupMenuButton<String>(
           key: const ValueKey('group-more'),
-          tooltip: 'More group actions',
+          tooltip: words.scoreToolbarMoreTooltip,
           icon: const Icon(Icons.more_vert),
           onSelected: (value) {
             if (value == 'focus-order') controller.toggleFocusOrder();
@@ -250,33 +255,33 @@ class ScoringToolbar extends StatelessWidget {
               key: const ValueKey('show-focus-order'),
               value: 'focus-order',
               checked: controller.showFocusOrder,
-              child: const Text('Show keyboard order'),
+              child: Text(words.scoreToolbarShowFocusOrder),
             ),
-            const PopupMenuItem<String>(
-              key: ValueKey('menu-group-history'),
+            PopupMenuItem<String>(
+              key: const ValueKey('menu-group-history'),
               value: 'group-history',
-              child: Text('Group history'),
+              child: Text(words.scoreToolbarGroupHistory),
             ),
             const PopupMenuDivider(),
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               enabled: false,
-              child: Text('Re-flight group · Later release'),
+              child: Text(words.scoreToolbarReflightGroup),
             ),
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               enabled: false,
-              child: Text('Re-flight round · Later release'),
+              child: Text(words.scoreToolbarReflightRound),
             ),
           ],
         ),
         if (controller.waitingCount > 0)
           Tooltip(
             message: controller.markAllRows.isEmpty
-                ? AppLocalizations.of(context).scoreMarkAllNoneValid
+                ? words.scoreMarkAllNoneValid
                 : '',
             child: pill(
               key: const ValueKey('score-mark-all-official'),
               icon: Icons.verified_outlined,
-              label: AppLocalizations.of(context).scoreMarkAllOfficial,
+              label: words.scoreMarkAllOfficial,
               onTap: block == null && controller.markAllRows.isNotEmpty
                   ? onMarkAll
                   : null,
@@ -286,13 +291,11 @@ class ScoringToolbar extends StatelessWidget {
         pill(
           key: const ValueKey('score-check'),
           icon: Icons.fact_check_outlined,
-          label: 'Score check',
+          label: words.scoreToolbarScoreCheck,
           onTap: rows.isEmpty ? null : controller.runCheck,
         ),
         Tooltip(
-          message: lockHint
-              ? 'Locking is not available in this build yet.'
-              : '',
+          message: lockHint ? words.scoreToolbarLockHint : '',
           child: pill(
             key: const ValueKey('score-save-all'),
             icon: primaryIcon,
@@ -344,8 +347,7 @@ class ScoringToolbar extends StatelessWidget {
               padding: const EdgeInsets.only(top: 8),
               child: LinearProgressIndicator(
                 key: const ValueKey('score-saving-progress'),
-                semanticsLabel: AppLocalizations.of(context)
-                    .scoreSavingRows(savingCount),
+                semanticsLabel: words.scoreSavingRows(savingCount),
               ),
             ),
           if (block != null)

@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// The master pane of the roles page: title and count, and every role. The
 /// system roles carry a lock; the row for [selectedId] is highlighted when
 /// [highlight] is set.
@@ -21,6 +23,7 @@ class RoleListPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -31,10 +34,10 @@ class RoleListPane extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text('Roles', style: theme.textTheme.titleLarge),
+              Text(l10n.rolesTitle, style: theme.textTheme.titleLarge),
               const SizedBox(width: 12),
               Text(
-                '${roles.length} roles',
+                l10n.rolesCount(roles.length),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -57,7 +60,9 @@ class RoleListPane extends StatelessWidget {
                 selectedTileColor: theme.colorScheme.secondaryContainer,
                 leading: const Icon(Icons.badge_outlined),
                 title: Text(role.displayName),
-                subtitle: Text(role.isSystem ? 'System role' : 'Your role'),
+                subtitle: Text(
+                  role.isSystem ? l10n.rolesSystemRole : l10n.rolesYourRole,
+                ),
                 trailing: role.isSystem
                     ? const Icon(Icons.lock_outline, size: 18)
                     : null,

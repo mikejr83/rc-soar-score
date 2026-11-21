@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 
+import '../../l10n/app_localizations.dart';
 import 'contest_draft.dart';
 import 'draw_settings.dart';
 import '../participants/participant_option.dart';
@@ -8,14 +9,18 @@ import 'scoring_settings.dart';
 
 /// A required or checked field in step 1.
 enum DetailsField {
-  name('Contest name'),
-  venue('Venue / host'),
-  startDate('Start date'),
-  endDate('End date');
+  name,
+  venue,
+  startDate,
+  endDate;
 
-  const DetailsField(this.label);
-
-  final String label;
+  /// The user-visible label for this field.
+  String label(AppLocalizations l10n) => switch (this) {
+    name => l10n.wizardDetailsFieldContestName,
+    venue => l10n.wizardDetailsFieldVenue,
+    startDate => l10n.wizardDetailsFieldStartDate,
+    endDate => l10n.wizardDetailsFieldEndDate,
+  };
 }
 
 /// Validation of the wizard steps built so far.
@@ -33,53 +38,60 @@ abstract final class DraftValidation {
   }
 
   /// The step 1 errors, in field order.
-  static Map<DetailsField, String> details(ContestDraft draft) {
+  static Map<DetailsField, String> details(
+    ContestDraft draft,
+    AppLocalizations l10n,
+  ) {
     final errors = <DetailsField, String>{};
     if (draft.name.trim().isEmpty) {
-      errors[DetailsField.name] = 'Enter a contest name.';
+      errors[DetailsField.name] = l10n.wizardValidationEnterName;
     }
     if (draft.venue.trim().isEmpty) {
-      errors[DetailsField.venue] = 'Enter the venue or host club.';
+      errors[DetailsField.venue] = l10n.wizardValidationEnterVenue;
     }
     final start = parseDate(draft.startDate);
     if (draft.startDate.trim().isEmpty) {
-      errors[DetailsField.startDate] = 'Enter a start date.';
+      errors[DetailsField.startDate] = l10n.wizardValidationEnterStartDate;
     } else if (start == null) {
-      errors[DetailsField.startDate] = 'Use a date like Nov 14, 2026.';
+      errors[DetailsField.startDate] = l10n.wizardValidationStartDateFormat;
     }
     final end = parseDate(draft.endDate);
     if (draft.endDate.trim().isEmpty) {
-      errors[DetailsField.endDate] = 'Enter an end date.';
+      errors[DetailsField.endDate] = l10n.wizardValidationEnterEndDate;
     } else if (end == null) {
-      errors[DetailsField.endDate] = 'Use a date like Nov 15, 2026.';
+      errors[DetailsField.endDate] = l10n.wizardValidationEndDateFormat;
     } else if (start != null && end.isBefore(start)) {
-      errors[DetailsField.endDate] =
-          'End date can’t be before the start date (${draft.startDate.trim()}).';
+      errors[DetailsField.endDate] = l10n.wizardValidationEndDateBeforeStart(
+        draft.startDate.trim(),
+      );
     }
     return errors;
   }
 
   /// The step 2 error, if any.
-  static String? discipline(ContestDraft draft) =>
-      draft.discipline == null ? 'Choose a discipline.' : null;
+  static String? discipline(ContestDraft draft, AppLocalizations l10n) =>
+      draft.discipline == null ? l10n.wizardValidationChooseDiscipline : null;
 
   /// The step 3 error for the pilots counted for the team score, if any.
-  static String? teamPilotCount(ContestDraft draft) {
+  static String? teamPilotCount(ContestDraft draft, AppLocalizations l10n) {
     if (!draft.has(ParticipantOption.teams)) {
       return null;
     }
     final value = int.tryParse(draft.teamPilotCount.trim());
-    return value == null || value < 1 ? 'Enter a whole number above 0.' : null;
+    return value == null || value < 1 ? l10n.wizardValidationWholeNumber : null;
   }
 
   /// The dropped-round errors of step 5: the first and second "after round"
   /// inputs, when invalid.
-  static ({String? first, String? second}) drops(ContestDraft draft) {
+  static ({String? first, String? second}) drops(
+    ContestDraft draft,
+    AppLocalizations l10n,
+  ) {
     final settings = draft.scoringSettings;
     if (settings.dropPolicy == DropPolicy.disabled) {
       return (first: null, second: null);
     }
-    const whole = 'Enter a whole number above 0.';
+    final whole = l10n.wizardValidationWholeNumber;
     final first = int.tryParse(settings.firstDrop.trim());
     final firstError = first == null || first < 1 ? whole : null;
     if (settings.dropPolicy == DropPolicy.one) {
@@ -89,20 +101,21 @@ abstract final class DraftValidation {
     final secondError = second == null || second < 1
         ? whole
         : firstError == null && second <= first!
-        ? 'Must be after round $first.'
+        ? l10n.wizardValidationMustBeAfterRound(first)
         : null;
     return (first: firstError, second: secondError);
   }
 
   /// Whether step 5 can be left.
-  static bool scoring(ContestDraft draft) {
-    final errors = drops(draft);
+  static bool scoring(ContestDraft draft, AppLocalizations l10n) {
+    final errors = drops(draft, l10n);
     return errors.first == null && errors.second == null;
   }
 
   /// The step 6 errors, by field, when invalid.
   static ({String? groups, String? rounds, String? seededRounds}) draw(
     ContestDraft draft,
+    AppLocalizations l10n,
   ) {
     final settings = draft.drawSettings;
     final plan = GroupPlan.of(draft);
@@ -111,28 +124,29 @@ abstract final class DraftValidation {
       return value == null || value < 1 ? message : null;
     }
 
+    final wholeMsg = l10n.wizardValidationWholeNumber;
+
     final groups = settings.groups != null
-        ? whole(settings.groups!, 'Enter a whole number above 0.')
+        ? whole(settings.groups!, wholeMsg)
         : null;
     return (
       groups:
           groups ??
           (!plan.bigEnough
-              ? 'Use ${plan.maxGroups} or fewer so every group has at least 2 '
-                    'scoring pilots.'
+              ? l10n.wizardValidationGroupsMax(plan.maxGroups)
               : !plan.protectionMet
-              ? 'Team protection needs at least ${plan.minGroups} groups.'
+              ? l10n.wizardValidationGroupsMin(plan.minGroups)
               : null),
-      rounds: whole(draft.roundsText, 'Enter a whole number above 0.'),
+      rounds: whole(draft.roundsText, wholeMsg),
       seededRounds: settings.seeded
-          ? whole(settings.seededRounds, 'Enter 1 or more.')
+          ? whole(settings.seededRounds, l10n.wizardValidationSeededRounds)
           : null,
     );
   }
 
   /// Whether step 6 can be left.
-  static bool drawOptions(ContestDraft draft) {
-    final errors = draw(draft);
+  static bool drawOptions(ContestDraft draft, AppLocalizations l10n) {
+    final errors = draw(draft, l10n);
     return errors.groups == null &&
         errors.rounds == null &&
         errors.seededRounds == null;

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_contest/services/workspace/attention/attention_item.dart';
 import 'package:soar_score_contest/services/workspace/attention/needs_attention.dart';
 import 'package:soar_score_contest/widgets/workspace/attention/needs_attention_card.dart';
@@ -27,6 +28,8 @@ Future<List<AttentionItem>> _pump(
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
     MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         useMaterial3: true,
         brightness: brightness,

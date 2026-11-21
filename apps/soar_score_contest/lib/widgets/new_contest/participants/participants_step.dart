@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../api_client_provider.dart';
 import '../../../pages/participant_editor_page.dart';
 import '../../../services/new_contest/contest_draft.dart';
@@ -158,12 +159,11 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
   /// Adds [participants] in one change. The draft is only refreshed when the
   /// step rebuilds, so each one is checked against the list built so far.
   void _addAll(List<DraftParticipant> participants) {
+    final l10n = AppLocalizations.of(context);
     final next = [..._draft.participants];
     for (final participant in participants) {
       if (next.any((p) => p.profileId == participant.profileId)) {
-        widget.onMessage?.call(
-          '${participant.name} is already in the contest.',
-        );
+        widget.onMessage?.call(l10n.wizardAlreadyInContest(participant.name));
         continue;
       }
       next.add(participant);
@@ -182,11 +182,11 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
           child: Scaffold(
             appBar: AppBar(
               leading: IconButton(
-                tooltip: 'Cancel',
+                tooltip: AppLocalizations.of(context).wizardCancel,
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.of(context).pop(),
               ),
-              title: const Text('Add participant'),
+              title: Text(AppLocalizations.of(context).wizardAddParticipant),
             ),
             body: ParticipantEditorPage(
               onDone: (profile) => Navigator.of(context).pop(profile),
@@ -205,21 +205,21 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
     ];
     _addAll(participants);
     setState(() => _profiles = [...?_profiles, ...saved]);
+    final l10n = AppLocalizations.of(context);
     for (final participant in participants) {
-      widget.onMessage?.call('${participant.name} is added as Pilot.');
+      widget.onMessage?.call(l10n.wizardAddedAsPilot(participant.name));
     }
   }
 
   void _removeSelected() {
+    final l10n = AppLocalizations.of(context);
     final count = _selected.length;
     _setParticipants([
       for (final p in _draft.participants)
         if (!_selected.contains(p.profileId.value)) p,
     ]);
     setState(_selected.clear);
-    widget.onMessage?.call(
-      '$count participant${count == 1 ? '' : 's'} removed from this contest.',
-    );
+    widget.onMessage?.call(l10n.wizardParticipantsRemoved(count));
   }
 
   void _toggle(DraftParticipant participant) => setState(() {
@@ -261,6 +261,7 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
   }
 
   List<Widget> _banners() {
+    final l10n = AppLocalizations.of(context);
     final draft = _draft;
     final banners = <Widget>[];
     final needing = draft.participantsNeedingFixes;
@@ -271,9 +272,7 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
           key: const ValueKey('banner-participants'),
           tone: WizardBannerTone.error,
           icon: Icons.error,
-          title:
-              '$n participant${n == 1 ? ' needs' : 's need'} fixing before '
-              'you continue',
+          title: l10n.wizardParticipantsNeedFixingBanner(n),
           links: [
             for (final participant in needing.take(5))
               () {
@@ -291,14 +290,12 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
     if (scoring < DraftValidation.minScoringPilots &&
         (widget.showErrors || draft.participants.isNotEmpty)) {
       banners.add(
-        const WizardBanner(
-          key: ValueKey('banner-min-pilots'),
+        WizardBanner(
+          key: const ValueKey('banner-min-pilots'),
           tone: WizardBannerTone.error,
           icon: Icons.error,
-          title: 'Add at least 2 scoring pilots',
-          body:
-              'A contest needs 2 or more scoring pilots. Non-flying roles '
-              'don’t count.',
+          title: l10n.wizardMinPilotsBanner,
+          body: l10n.wizardMinPilotsBannerBody,
         ),
       );
     } else if (scoring == DraftValidation.minScoringPilots) {
@@ -307,10 +304,8 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
           key: const ValueKey('banner-few-pilots'),
           tone: WizardBannerTone.warning,
           icon: Icons.lightbulb,
-          title: 'Only $scoring scoring pilots',
-          body:
-              'You can continue. With fewer than 3 pilots, use 1 group per '
-              'round.',
+          title: l10n.wizardFewPilotsBanner(scoring),
+          body: l10n.wizardFewPilotsBannerBody,
         ),
       );
     }
@@ -376,7 +371,10 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
               onQueryChanged: (value) => setState(() => _query = value),
               onAdd: (candidate) {
                 _add(candidate.toParticipant());
-                widget.onMessage?.call('${candidate.name} added as Pilot.');
+                widget.onMessage?.call(
+                  AppLocalizations.of(context)
+                      .wizardAddedAsPilotShort(candidate.name),
+                );
               },
             );
             final add = SizedBox(
@@ -388,7 +386,7 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
                 ),
                 onPressed: () => unawaited(_addNew()),
                 icon: const Icon(Icons.person_add_outlined),
-                label: const Text('Add participant'),
+                label: Text(AppLocalizations.of(context).wizardAddParticipant),
               ),
             );
             if (constraints.maxWidth < 560) {
@@ -417,20 +415,35 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               if (_draft.has(ParticipantOption.roles)) ...[
-                chip(Icons.groups, '${participants.length} people'),
-                chip(Icons.flight_takeoff, '$scoring scoring pilots'),
+                chip(
+                  Icons.groups,
+                  AppLocalizations.of(context)
+                      .wizardPeopleCount(participants.length),
+                ),
+                chip(
+                  Icons.flight_takeoff,
+                  AppLocalizations.of(context)
+                      .wizardScoringPilotsCount(scoring),
+                ),
                 chip(
                   Icons.badge_outlined,
-                  '${participants.length - scoring} non-flying',
+                  AppLocalizations.of(context)
+                      .wizardNonFlyingCount(participants.length - scoring),
                 ),
               ] else
-                chip(Icons.flight_takeoff, '$scoring pilots'),
+                chip(
+                  Icons.flight_takeoff,
+                  AppLocalizations.of(context).wizardPilotsCount(scoring),
+                ),
               if (needing.isNotEmpty)
                 FilterChip(
                   key: const ValueKey('needs-fixing-filter'),
                   selected: onlyFix,
                   avatar: onlyFix ? null : const Icon(Icons.filter_list),
-                  label: Text('Needs fixing (${needing.length})'),
+                  label: Text(
+                    AppLocalizations.of(context)
+                        .wizardNeedsFixingFilter(needing.length),
+                  ),
                   onSelected: (value) => setState(() => _onlyFix = value),
                 ),
             ],
@@ -449,7 +462,7 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
               onTeam: (team) {
                 _updateSelected((p) => p.copyWith(team: team));
                 widget.onMessage?.call(
-                  'Team set for ${_selected.length} participants.',
+                  AppLocalizations.of(context).wizardTeamSet(_selected.length),
                 );
               },
               onClass: (value) {
@@ -459,15 +472,15 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
                       : p,
                 );
                 widget.onMessage?.call(
-                  'Class set to $value for ${_selected.length} '
-                  'participants.',
+                  AppLocalizations.of(context)
+                      .wizardClassSet(value, _selected.length),
                 );
               },
               onRole: (role) {
                 _updateSelected((p) => p.copyWith(role: role));
                 widget.onMessage?.call(
-                  'Role set to ${role.displayName} for ${_selected.length} '
-                  'participants.',
+                  AppLocalizations.of(context)
+                      .wizardRoleSet(role.displayName, _selected.length),
                 );
               },
             ),
@@ -475,8 +488,11 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
           if (_query.trim().isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(
-              'Showing ${rows.length} of ${fixRows.length} matching '
-              '“${_query.trim()}”',
+              AppLocalizations.of(context).wizardShowingMatching(
+                rows.length,
+                fixRows.length,
+                _query.trim(),
+              ),
               key: const ValueKey('participants-filter-note'),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
@@ -488,7 +504,7 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Text(
-                'No one in this contest matches “${_query.trim()}”.',
+                AppLocalizations.of(context).wizardNoMatch(_query.trim()),
                 key: const ValueKey('participants-filter-empty'),
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -499,7 +515,7 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
           else if (widget.narrow)
             Semantics(
               container: true,
-              label: 'Contest participants',
+              label: AppLocalizations.of(context).wizardParticipantsLabel,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -523,8 +539,7 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Tab moves between cells · Enter confirms and moves down · '
-                  'Space selects a row · Esc closes a menu',
+                  AppLocalizations.of(context).wizardKeyboardHelp,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
@@ -543,6 +558,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -555,13 +571,12 @@ class _EmptyState extends StatelessWidget {
         children: [
           Icon(Icons.group_add, size: 48, color: scheme.onSurfaceVariant),
           const SizedBox(height: 12),
-          Text('No participants yet', style: theme.textTheme.titleLarge),
+          Text(l10n.wizardNoParticipants, style: theme.textTheme.titleLarge),
           const SizedBox(height: 12),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 440),
             child: Text(
-              'Find people by name or email above, or add someone new. The '
-              'contest needs at least 2 scoring pilots.',
+              l10n.wizardNoParticipantsBody,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,

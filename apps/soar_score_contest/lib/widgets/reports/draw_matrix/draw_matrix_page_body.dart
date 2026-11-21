@@ -1,9 +1,17 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_localizations_en.dart';
 import '../../../services/reports/draw_matrix/draw_matrix_layout.dart';
 import '../../../services/reports/draw_matrix/draw_matrix_style.dart';
 import '../viewer/paper_style.dart';
 import 'draw_matrix_table_view.dart';
+
+final AppLocalizations _fallbackL10n = AppLocalizationsEn();
+
+AppLocalizations _l10nOf(BuildContext context) =>
+    Localizations.of<AppLocalizations>(context, AppLocalizations) ??
+    _fallbackL10n;
 
 /// The body of one printed page of the Draw Matrix: one table, or in compact
 /// mode two side by side with a black rule between them, each with its own
@@ -28,6 +36,7 @@ class DrawMatrixPageBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = _l10nOf(context);
     final two = layout.style == DrawMatrixStyle.compact;
     return SizedBox(
       width: size.width,
@@ -56,7 +65,9 @@ class DrawMatrixPageBody extends StatelessWidget {
                   items: page.tables[i],
                   columns: layout.columns,
                   style: layout.style,
-                  label: 'Page $number${two ? ', column ${i + 1}' : ''}',
+                  label: two
+                      ? l10n.matrixTableLabelColumn(number, i + 1)
+                      : l10n.matrixTableLabel(number),
                 ),
               ],
             ],

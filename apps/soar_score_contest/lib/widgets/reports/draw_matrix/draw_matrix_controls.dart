@@ -12,11 +12,14 @@ List<ReportControlGroup> drawMatrixControls(
   ReportControlsContext context,
   DrawMatrixOptions options,
 ) {
+  final l10n = context.l10n;
   final check = context.check;
   final problem = check is ReportInvalid || check is ReportEmpty;
   final rounds = {
     for (var r = 1; r <= options.planned; r++)
-      '$r': r > options.drawn ? 'Round $r · not drawn' : 'Round $r',
+      '$r': r > options.drawn
+          ? l10n.matrixRoundLabelNotDrawn(r)
+          : l10n.matrixRoundLabel(r),
   };
   final undrawn = {
     for (var r = options.drawn + 1; r <= options.planned; r++) '$r',
@@ -26,10 +29,10 @@ List<ReportControlGroup> drawMatrixControls(
 
   return [
     ReportControlGroup(
-      title: 'Filter',
+      title: l10n.standingsFilter,
       children: [
         ReportDropdown(
-          label: 'From round',
+          label: l10n.standingsFromRound,
           value: '${options.from}',
           items: rounds,
           disabled: undrawn,
@@ -37,7 +40,7 @@ List<ReportControlGroup> drawMatrixControls(
           errorText: problem ? '' : null,
         ),
         ReportDropdown(
-          label: 'To round',
+          label: l10n.standingsToRound,
           value: '${options.requestedTo}',
           items: rounds,
           disabled: undrawn,
@@ -62,56 +65,54 @@ List<ReportControlGroup> drawMatrixControls(
                   context.setFilters({'from': '1', 'to': '${options.drawn}'}),
               child: Text(
                 options.hasUndrawn
-                    ? 'Show all drawn rounds'
-                    : 'Show all rounds',
+                    ? l10n.matrixShowAllDrawn
+                    : l10n.matrixShowAllRounds,
               ),
             ),
           ),
       ],
     ),
     ReportControlGroup(
-      title: 'Options',
+      title: l10n.standingsOptions,
       children: [
         ReportSwitchOption(
-          label: 'Compact mode',
-          help: 'Two columns per page, 9 pt text',
+          label: l10n.matrixCompactMode,
+          help: l10n.matrixCompactHelp,
           value: options.compact,
           onChanged: (v) => toggle('cmp', v),
         ),
         ReportSwitchOption(
-          label: 'Additional pilot info',
+          label: l10n.matrixAdditionalInfo,
           help: !options.additionalAvailable
-              ? 'Not available in compact mode'
+              ? l10n.matrixAdditionalUnavailable
               : options.additionalChosen
-              ? 'Adds a column for each item you tick'
-              : 'Club, FAI ID and National ID columns',
+              ? l10n.matrixAdditionalChosenHelp
+              : l10n.matrixAdditionalDefaultHelp,
           value: options.additionalChosen,
           enabled: options.additionalAvailable,
           onChanged: (v) => toggle('inf', v),
         ),
         if (options.additionalChosen) ...[
           ReportCheckOption(
-            label: 'Club',
+            label: l10n.matrixClub,
             value: options.club,
             enabled: options.additionalAvailable,
             onChanged: (v) => toggle('club', v),
           ),
           ReportCheckOption(
-            label: 'FAI ID',
+            label: l10n.matrixFaiId,
             value: options.fai,
             enabled: options.additionalAvailable,
             onChanged: (v) => toggle('fai', v),
           ),
           ReportCheckOption(
-            label: 'National ID',
+            label: l10n.matrixNationalId,
             value: options.national,
             enabled: options.additionalAvailable,
             onChanged: (v) => toggle('nat', v),
           ),
           if (!options.additionalAvailable)
-            const ReportFieldMessage(
-              text: 'Kept as set. They apply again when Compact mode is off.',
-            ),
+            ReportFieldMessage(text: l10n.matrixAdditionalKept),
         ],
       ],
     ),
@@ -119,23 +120,23 @@ List<ReportControlGroup> drawMatrixControls(
         context.facts.numbersEnabled ||
         context.facts.classesEnabled)
       ReportControlGroup(
-        title: 'Columns',
+        title: l10n.matrixColumns,
         children: [
           if (context.facts.teamsEnabled)
             ReportCheckOption(
-              label: 'Team',
+              label: l10n.standingsTeam,
               value: options.teamChosen,
               onChanged: (v) => toggle('team', v),
             ),
           if (context.facts.numbersEnabled)
             ReportCheckOption(
-              label: 'Pilot number',
+              label: l10n.standingsPilotNumber,
               value: options.numberChosen,
               onChanged: (v) => toggle('num', v),
             ),
           if (context.facts.classesEnabled)
             ReportCheckOption(
-              label: 'Pilot class',
+              label: l10n.standingsPilotClass,
               value: options.classChosen,
               onChanged: (v) => toggle('cls', v),
             ),

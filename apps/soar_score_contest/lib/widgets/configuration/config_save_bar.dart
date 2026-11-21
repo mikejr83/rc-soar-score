@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/configuration/configuration_draft.dart';
 import 'config_chip.dart';
 
@@ -32,6 +33,7 @@ class ConfigSaveBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final errors = draft.errors;
@@ -42,20 +44,20 @@ class ConfigSaveBar extends StatelessWidget {
     final (icon, title, sub, color) = saving
         ? (
             Icons.sync,
-            'Saving configuration…',
-            'The page is locked until the save finishes.',
+            l10n.configBarSaving,
+            l10n.configBarSavingLocked,
             scheme.onSurface,
           )
         : failed
         ? (
             Icons.error,
-            'Couldn’t save the configuration',
-            '$saveError Every value you entered is kept.',
+            l10n.configBarSaveFailed,
+            l10n.configBarSaveFailedSub('$saveError '),
             scheme.error,
           )
         : (
             Icons.edit_note,
-            '$changes unsaved change${changes == 1 ? '' : 's'}',
+            l10n.configBarUnsaved(changes),
             null,
             scheme.onSurface,
           );
@@ -68,7 +70,7 @@ class ConfigSaveBar extends StatelessWidget {
       elevation: 3,
       child: Semantics(
         container: true,
-        label: 'Unsaved changes',
+        label: l10n.configBarUnsavedLabel,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -76,7 +78,7 @@ class ConfigSaveBar extends StatelessWidget {
             if (saving)
               LinearProgressIndicator(
                 minHeight: 4,
-                semanticsLabel: 'Saving configuration',
+                semanticsLabel: l10n.configBarSavingProgress,
                 backgroundColor: scheme.primaryContainer,
               ),
             if (errors.isNotEmpty && !saving) _errorSummary(context),
@@ -123,7 +125,7 @@ class ConfigSaveBar extends StatelessWidget {
                             if (matrix)
                               ConfigChip(
                                 icon: Icons.sync_problem,
-                                text: 'Makes the drawn matrix out of date',
+                                text: l10n.configBarMatrixChip,
                                 background: scheme.tertiaryContainer,
                                 foreground: scheme.onTertiaryContainer,
                                 dense: false,
@@ -131,7 +133,7 @@ class ConfigSaveBar extends StatelessWidget {
                             if (recalc)
                               ConfigChip(
                                 icon: Icons.calculate_outlined,
-                                text: 'Recalculates all results',
+                                text: l10n.configBarRecalcChip,
                                 background: scheme.primaryContainer,
                                 foreground: scheme.onPrimaryContainer,
                                 dense: false,
@@ -139,7 +141,7 @@ class ConfigSaveBar extends StatelessWidget {
                             if (!matrix && !recalc)
                               ConfigChip(
                                 icon: Icons.check,
-                                text: 'No effect on the matrix or results',
+                                text: l10n.configBarNoEffectChip,
                                 foreground: scheme.onSurface,
                                 outline: scheme.outline,
                                 dense: false,
@@ -162,15 +164,14 @@ class ConfigSaveBar extends StatelessWidget {
                             Icon(Icons.block, size: 18, color: scheme.error),
                             const SizedBox(width: 6),
                             Text(
-                              'Fix ${errors.length} error'
-                              '${errors.length == 1 ? '' : 's'} to save',
+                              l10n.configBarFixErrors(errors.length),
                               style: theme.textTheme.bodyMedium,
                             ),
                           ],
                         ),
                       OutlinedButton(
                         onPressed: saving ? null : onDiscard,
-                        child: const Text('Discard changes'),
+                        child: Text(l10n.contestParticipantsSaveDiscard),
                       ),
                       FilledButton.icon(
                         onPressed: blocked ? null : onSave,
@@ -187,10 +188,10 @@ class ConfigSaveBar extends StatelessWidget {
                               ),
                         label: Text(
                           saving
-                              ? 'Saving…'
+                              ? l10n.configBarSaveShort
                               : failed
-                              ? 'Retry'
-                              : 'Save configuration',
+                              ? l10n.configBarRetry
+                              : l10n.configSaveConfirm,
                         ),
                       ),
                     ],
@@ -205,6 +206,7 @@ class ConfigSaveBar extends StatelessWidget {
   }
 
   Widget _errorSummary(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final errors = draft.errors;
@@ -227,9 +229,7 @@ class ConfigSaveBar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${errors.length} setting'
-                    '${errors.length == 1 ? ' needs' : 's need'} fixing before '
-                    'you can save',
+                    l10n.configBarSettingsNeedFixing(errors.length),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: scheme.onErrorContainer,
                       fontWeight: FontWeight.w500,
@@ -255,8 +255,10 @@ class ConfigSaveBar extends StatelessWidget {
                                 const SizedBox(width: 4),
                                 Flexible(
                                   child: Text(
-                                    '${draft.catalog.byKey[entry.key]!.label}: '
-                                    '${entry.value}',
+                                    l10n.configBarErrorItem(
+                                      draft.catalog.byKey[entry.key]!.label,
+                                      entry.value,
+                                    ),
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       color: scheme.onErrorContainer,
                                       decoration: TextDecoration.underline,

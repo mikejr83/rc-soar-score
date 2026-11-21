@@ -37,11 +37,14 @@ class ParticipantCells {
 
   void _update(ParticipantRow updated) => editing.onUpdate(updated);
 
-  Widget checkbox() => Checkbox(
-    value: selected,
-    semanticLabel: 'Select ${participant.name}',
-    onChanged: (_) => editing.onToggleSelected(participant),
-  );
+  Widget checkbox(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Checkbox(
+      value: selected,
+      semanticLabel: l10n.participantSelect(participant.name),
+      onChanged: (_) => editing.onToggleSelected(participant),
+    );
+  }
 
   Widget avatar(BuildContext context, {double size = 32}) {
     final scheme = Theme.of(context).colorScheme;
@@ -68,6 +71,7 @@ class ParticipantCells {
     };
     final theme = Theme.of(context);
     final color = theme.colorScheme.onSurfaceVariant;
+    final label = status.label(l10n);
     return Tooltip(
       message: status.explanation(l10n),
       child: Row(
@@ -76,7 +80,7 @@ class ParticipantCells {
           SizedBox(width: prefix ? 4 : 6),
           Flexible(
             child: Text(
-              prefix ? 'Email: ${status.label(l10n)}' : status.label(l10n),
+              prefix ? l10n.searchEmailPrefix(label) : label,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(color: color),
             ),
@@ -102,13 +106,14 @@ class ParticipantCells {
   }
 
   Widget role(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final roles = editing.roles;
     final rowStyle = style;
     if (rowStyle.readOnly) {
       return _plain(
         context,
         participant.roleName,
-        semantics: 'Role for ${participant.name}',
+        semantics: l10n.participantRoleSemantics(participant.name),
       );
     }
     final scheme = Theme.of(context).colorScheme;
@@ -122,7 +127,7 @@ class ParticipantCells {
     bool blocked(Role role) =>
         rowStyle.hasFlights && role.type != RoleType.pilot;
     return Semantics(
-      label: 'Role for ${participant.name}',
+      label: l10n.participantRoleSemantics(participant.name),
       child: DropdownButtonFormField<Id>(
         key: ValueKey('role-$_id'),
         initialValue: known ? participant.roleId : null,
@@ -151,7 +156,7 @@ class ParticipantCells {
               enabled: !blocked(role),
               child: Text(
                 blocked(role)
-                    ? '${role.displayName} (not available: has flights)'
+                    ? l10n.participantRoleNotAvailable(role.displayName)
                     : role.displayName,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -168,25 +173,28 @@ class ParticipantCells {
   }
 
   Widget classification(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final rowStyle = style;
     if (rowStyle.readOnly) {
       return _plain(
         context,
         scoring
             ? (participant.classification.isEmpty
-                  ? 'No class'
+                  ? l10n.participantClassNone
                   : participant.classification)
-            : 'Not scored',
-        semantics: 'Class for ${participant.name}',
+            : l10n.participantClassNotScored,
+        semantics: l10n.participantClassSemantics(participant.name),
       );
     }
     return ParticipantTextCell(
       key: ValueKey('class-$_id'),
       value: participant.classification,
       focusNode: _node(ParticipantColumn.classification),
-      semanticLabel: 'Class for ${participant.name}',
+      semanticLabel: l10n.participantClassSemantics(participant.name),
       enabled: scoring && !rowStyle.locked,
-      hint: scoring ? 'Required' : 'Not scored',
+      hint: scoring
+          ? l10n.participantClassRequired
+          : l10n.participantClassNotScored,
       error: issues.contains(ParticipantIssue.classification),
       changed: rowStyle.changed.contains(ParticipantCell.classification),
       suggestions: editing.rules.classes,
@@ -205,12 +213,13 @@ class ParticipantCells {
   }
 
   Widget team(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final rowStyle = style;
     if (rowStyle.readOnly) {
       return _plain(
         context,
-        participant.team.isEmpty ? 'No team' : participant.team,
-        semantics: 'Team for ${participant.name}',
+        participant.team.isEmpty ? l10n.participantTeamNone : participant.team,
+        semantics: l10n.participantTeamSemantics(participant.name),
       );
     }
     return TeamCell(
@@ -219,7 +228,7 @@ class ParticipantCells {
       teams: editing.rules.teams,
       normalize: editing.rules.normalizeTeam,
       focusNode: _node(ParticipantColumn.team),
-      semanticLabel: 'Team for ${participant.name}',
+      semanticLabel: l10n.participantTeamSemantics(participant.name),
       height: height,
       enabled: !rowStyle.locked,
       changed: rowStyle.changed.contains(ParticipantCell.team),
@@ -287,6 +296,7 @@ class ParticipantCells {
   /// The row's status: what the page says about it, or in the wizard Ready,
   /// Non-flying, or what the row needs (icon and text, not color alone).
   Widget status(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final custom = style.status;
     if (custom != null && custom.text.isEmpty) {
@@ -305,14 +315,20 @@ class ParticipantCells {
             },
           )
         : !scoring
-        ? (Icons.badge, 'Non-flying', scheme.onSurfaceVariant)
+        ? (
+            Icons.badge,
+            l10n.participantStatusNonFlying,
+            scheme.onSurfaceVariant,
+          )
         : issues.isNotEmpty
         ? (
             Icons.error,
-            'Needs ${issues.map((issue) => issue.label).join(', ')}',
+            l10n.participantNeeds(
+              issues.map((issue) => issue.label).join(', '),
+            ),
             scheme.error,
           )
-        : (Icons.check_circle, 'Ready', scheme.secondary);
+        : (Icons.check_circle, l10n.participantReady, scheme.secondary);
     return Row(
       key: ValueKey('status-$_id'),
       mainAxisSize: MainAxisSize.min,
@@ -338,6 +354,7 @@ class ParticipantCells {
 
   /// The name, with a `Has flights` marker for a pilot who has scores.
   Widget nameBlock(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Column(
@@ -358,7 +375,7 @@ class ParticipantCells {
               const SizedBox(width: 4),
               Flexible(
                 child: Text(
-                  'Has flights',
+                  l10n.participantNameFlights,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),

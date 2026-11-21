@@ -1,8 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 
 import '../support/scoring_test_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 const _flight = {'time_flown': 540, 'launch_height': 120};
 
@@ -29,7 +32,7 @@ void main() {
       ..seedScore(second, _flight);
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
-    expect(find.text('Official'), findsNWidgets(2));
+    expect(find.text(_l10n.scoreStatusOfficial), findsNWidgets(2));
     expect(_key('score-indicator-pilot-entry-${first.value}'), findsOneWidget);
     // A score the director typed has no source to point at.
     expect(_key('score-indicator-pilot-entry-${second.value}'), findsNothing);
@@ -64,7 +67,7 @@ void main() {
     final server = ScoringServer()..seedPendingSubmission(first, _flight);
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
-    final text = tester.widget<Text>(find.text('Pilot entry'));
+    final text = tester.widget<Text>(find.text(_l10n.scorePilotEntryChip));
     expect(text.overflow, isNot(TextOverflow.ellipsis));
     expect(tester.takeException(), isNull);
   });

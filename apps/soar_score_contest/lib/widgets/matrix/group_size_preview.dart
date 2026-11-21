@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/matrix/draw_form_check.dart';
 import 'matrix_colors.dart';
 
@@ -27,17 +28,23 @@ class GroupSizePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final colors = MatrixColors.of(context);
     final sizes = check.sizes;
     final groups = check.groups;
+    final seeded = seededRounds;
     final title = sizes.isNotEmpty
-        ? '${sizes.length} group${sizes.length == 1 ? '' : 's'}: '
-              '${sizes.join(', ')} pilot${sizes.length == 1 && sizes.first == 1 ? '' : 's'}'
+        ? l10n.matrixGroupSizesTitle(
+            sizes.length,
+            sizes.length == 1 ? '' : 's',
+            sizes.join(', '),
+            sizes.length == 1 && sizes.first == 1 ? '' : 's',
+          )
         : groups != null && groups > pilots
-        ? 'More groups than scoring pilots'
-        : 'Enter groups per round to see the group sizes.';
+        ? l10n.matrixGroupSizesMore
+        : l10n.matrixGroupSizesEnter;
     Widget note(IconData icon, Color color, String text) => Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -93,7 +100,9 @@ class GroupSizePreview extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Group ${DrawFormCheck.groupLetter(i)}',
+                                l10n.matrixGroupLabel(
+                                  DrawFormCheck.groupLetter(i),
+                                ),
                                 style: theme.textTheme.labelMedium,
                               ),
                               if (sizes[i] < 2) ...[
@@ -107,7 +116,10 @@ class GroupSizePreview extends StatelessWidget {
                             ],
                           ),
                           Text(
-                            '${sizes[i]} pilot${sizes[i] == 1 ? '' : 's'}',
+                            l10n.matrixGroupPilots(
+                              sizes[i],
+                              sizes[i] == 1 ? '' : 's',
+                            ),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: scheme.onSurfaceVariant,
                             ),
@@ -123,18 +135,16 @@ class GroupSizePreview extends StatelessWidget {
                   groups != null && groups < minimumGroups
                       ? scheme.error
                       : scheme.onSurfaceVariant,
-                  'Minimum $minimumGroups groups. Team protection keeps '
-                  'teammates apart, and the largest team'
-                  '${largestTeam == null ? '' : ' ($largestTeam)'} has '
-                  '$minimumGroups scoring pilots.',
+                  l10n.matrixGroupMinimum(
+                    minimumGroups,
+                    largestTeam == null ? '' : ' ($largestTeam)',
+                  ),
                 ),
-              if (seededRounds != null)
+              if (seeded != null)
                 note(
                   Icons.info_outline,
                   scheme.onSurfaceVariant,
-                  'Seeded Man on Man: only the $seededRounds preliminary '
-                  'rounds are drawn now. Seeded rounds are drawn later from '
-                  'the preliminary results.',
+                  l10n.matrixGroupSeeded(seeded),
                 ),
             ],
           ),

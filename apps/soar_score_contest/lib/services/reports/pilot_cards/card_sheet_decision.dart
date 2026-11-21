@@ -1,3 +1,4 @@
+import '../../../l10n/app_localizations.dart';
 import '../report_pilot.dart';
 import '../viewer/page_setup.dart';
 import 'card_geometry.dart';
@@ -78,23 +79,19 @@ class CardSheetDecision {
   bool get tooMany => !fitsTwo;
 
   /// The line under the Cards per page choice.
-  String get message {
+  String message(AppLocalizations l10n) {
     if (rounds == 0) {
-      return 'No rounds in range.';
+      return l10n.cardsNoRoundsInRange;
     }
     if (tooMany) {
-      return 'This contest has too many rounds for a scoring card. A '
-          'half-page card holds up to $maxTwo rounds at the minimum 8 mm row '
-          'height.';
+      return l10n.cardsTooManyRoundsMessage(maxTwo);
     }
     if (perPage == CardsPerPage.two && choice == CardsPerPageChoice.two) {
-      return '$rounds rounds on half-page cards. Up to $maxTwo fit.';
+      return l10n.cardsRoundsHalfPage(rounds, maxTwo);
     }
     if (perPage == CardsPerPage.four) {
-      return '$rounds rounds fit four to a page (up to $maxFour at 8 mm '
-          'rows).';
+      return l10n.cardsRoundsFitFour(rounds, maxFour);
     }
-    return '$rounds rounds don’t fit four to a page; using two. Four holds '
-        'up to $maxFour.';
+    return l10n.cardsRoundsNotFour(rounds, maxFour);
   }
 }

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/participants/participant_row.dart';
 import 'team_avatar.dart';
 
@@ -111,7 +112,7 @@ class _TeamCellState extends State<TeamCell> {
     }
   }
 
-  Iterable<_TeamChoice> _choices(String typed) {
+  Iterable<_TeamChoice> _choices(String typed, AppLocalizations l10n) {
     final query = typed.trim().toLowerCase();
     final current = widget.value.trim().toLowerCase();
     final choices = <_TeamChoice>[
@@ -121,8 +122,12 @@ class _TeamCellState extends State<TeamCell> {
             value: team.name,
             label: team.name,
             subtitle:
-                '${team.count} participant${team.count == 1 ? '' : 's'}'
-                '${query.isNotEmpty && team.name.toLowerCase() == query && team.name != typed.trim() ? ' · existing team, case ignored' : ''}',
+                l10n.teamCount(team.count) +
+                (query.isNotEmpty &&
+                        team.name.toLowerCase() == query &&
+                        team.name != typed.trim()
+                    ? l10n.teamCaseIgnored
+                    : ''),
           ),
     ];
     final exact = widget.teams.any((team) => team.name.toLowerCase() == query);
@@ -130,18 +135,18 @@ class _TeamCellState extends State<TeamCell> {
       choices.add(
         _TeamChoice(
           value: titleCase(typed),
-          label: 'Create team “${titleCase(typed)}”',
-          subtitle: 'New team',
+          label: l10n.teamCreate(titleCase(typed)),
+          subtitle: l10n.teamNew,
           icon: Icons.add,
         ),
       );
     }
     if (query.isNotEmpty || current.isNotEmpty) {
       choices.add(
-        const _TeamChoice(
+        _TeamChoice(
           value: '',
-          label: 'No team',
-          subtitle: 'Clear the name. The pilot stays unassigned.',
+          label: l10n.participantTeamNone,
+          subtitle: l10n.teamClearSubtitle,
           icon: Icons.person_off_outlined,
         ),
       );
@@ -151,6 +156,7 @@ class _TeamCellState extends State<TeamCell> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final focused = widget.focusNode.hasFocus;
@@ -168,7 +174,7 @@ class _TeamCellState extends State<TeamCell> {
         textEditingController: _controller,
         focusNode: widget.focusNode,
         displayStringForOption: (choice) => choice.value,
-        optionsBuilder: (value) => _choices(value.text),
+        optionsBuilder: (value) => _choices(value.text, l10n),
         onSelected: (choice) {
           _controller.text = choice.value;
           if (choice.value != widget.value) {
@@ -187,7 +193,7 @@ class _TeamCellState extends State<TeamCell> {
               },
               decoration: InputDecoration(
                 isDense: true,
-                hintText: 'Unassigned',
+                hintText: l10n.teamUnassigned,
                 constraints: BoxConstraints.tightFor(height: widget.height),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 8,

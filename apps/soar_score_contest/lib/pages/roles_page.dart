@@ -4,6 +4,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../api_client_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../router.dart';
 import '../widgets/api_error_text.dart';
 import '../widgets/master_detail.dart';
@@ -103,11 +104,12 @@ class _RolesPageState extends State<RolesPage> {
 
   Future<void> _create() async {
     final client = apiClientOf(context)!;
+    final l10n = AppLocalizations.of(context);
     final id = Id.create();
     final created = await showRoleNameDialog(
       context,
-      title: 'New role',
-      confirmLabel: 'Create',
+      title: l10n.rolesNew,
+      confirmLabel: l10n.rolesCreate,
       onSubmit: (name) async {
         await client.createRole(CreateRoleRequest(id: id, displayName: name));
       },
@@ -129,10 +131,11 @@ class _RolesPageState extends State<RolesPage> {
 
   Future<void> _rename(Role role) async {
     final client = apiClientOf(context)!;
+    final l10n = AppLocalizations.of(context);
     final renamed = await showRoleNameDialog(
       context,
-      title: 'Rename role',
-      confirmLabel: 'Rename',
+      title: l10n.rolesRename,
+      confirmLabel: l10n.rolesRenameButton,
       initialName: role.displayName,
       onSubmit: (name) async {
         await client.renameRole(
@@ -147,22 +150,20 @@ class _RolesPageState extends State<RolesPage> {
   }
 
   Future<void> _delete(Role role) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete role?'),
-        content: Text(
-          '${role.displayName} will be removed from your roles. Contests '
-          'are not affected.',
-        ),
+        title: Text(l10n.rolesDeleteTitle),
+        content: Text(l10n.rolesDeleteBody(role.displayName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).wizardCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: Text(l10n.rolesDelete),
           ),
         ],
       ),
@@ -193,46 +194,49 @@ class _RolesPageState extends State<RolesPage> {
   Widget build(BuildContext context) =>
       ReloadOnSync.account(onSynced: _reload, child: _content(context));
 
-  Widget _content(BuildContext context) => FutureBuilder<List<Role>>(
-    future: _roles,
-    builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        return loadFailedView(
-          snapshot.error!,
-          title: 'Roles could not be loaded.',
-          onRetry: _reload,
+  Widget _content(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return FutureBuilder<List<Role>>(
+      future: _roles,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return loadFailedView(
+            snapshot.error!,
+            title: l10n.rolesLoadFailed,
+            onRetry: _reload,
+          );
+        }
+        final all = snapshot.data;
+        if (all == null) {
+          return PageStateView.loading(label: l10n.rolesLoading);
+        }
+        // The first role is selected until one is chosen (or when the chosen
+        // one is gone).
+        final selected = all.firstWhere(
+          (role) => role.id == _selectedId,
+          orElse: () => all.first,
         );
-      }
-      final all = snapshot.data;
-      if (all == null) {
-        return const PageStateView.loading(label: 'Loading roles');
-      }
-      // The first role is selected until one is chosen (or when the chosen
-      // one is gone).
-      final selected = all.firstWhere(
-        (role) => role.id == _selectedId,
-        orElse: () => all.first,
-      );
-      return MasterDetail(
-        showDetail: _showDetail,
-        list: (context, wide) => RoleListPane(
-          roles: all,
-          selectedId: selected.id,
-          highlight: wide,
-          onSelect: (role) => setState(() {
-            _selectedId = role.id;
-            _showDetail = true;
-          }),
-        ),
-        detail: (context, wide) => RoleDetailPane(
-          role: selected,
-          usage: _usageOf(selected),
-          onRetryUsage: _reloadUsage,
-          onBack: wide ? null : () => setState(() => _showDetail = false),
-          onRename: () => _rename(selected),
-          onDelete: () => _delete(selected),
-        ),
-      );
-    },
-  );
+        return MasterDetail(
+          showDetail: _showDetail,
+          list: (context, wide) => RoleListPane(
+            roles: all,
+            selectedId: selected.id,
+            highlight: wide,
+            onSelect: (role) => setState(() {
+              _selectedId = role.id;
+              _showDetail = true;
+            }),
+          ),
+          detail: (context, wide) => RoleDetailPane(
+            role: selected,
+            usage: _usageOf(selected),
+            onRetryUsage: _reloadUsage,
+            onBack: wide ? null : () => setState(() => _showDetail = false),
+            onRename: () => _rename(selected),
+            onDelete: () => _delete(selected),
+          ),
+        );
+      },
+    );
+  }
 }

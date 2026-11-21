@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:soar_score_contest/l10n/app_localizations.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'detail_section_card.dart';
@@ -25,6 +26,7 @@ class ParticipantDetailPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final name = '${profile.firstName} ${profile.lastName}';
     final club = profile.club;
     return ListView(
@@ -35,7 +37,7 @@ class ParticipantDetailPane extends StatelessWidget {
             if (onBack != null)
               IconButton(
                 key: const ValueKey('participant-detail-back'),
-                tooltip: 'Back to participants',
+                tooltip: l10n.participantsBackToParticipants,
                 icon: const Icon(Icons.arrow_back),
                 onPressed: onBack,
               ),
@@ -60,10 +62,10 @@ class ParticipantDetailPane extends StatelessWidget {
               key: const ValueKey('edit-participant'),
               onPressed: onEdit,
               icon: const Icon(Icons.edit, size: 18),
-              label: const Text('Edit'),
+              label: Text(l10n.participantsEdit),
             ),
             IconButton(
-              tooltip: 'Delete $name',
+              tooltip: l10n.participantsDeleteTooltip(name),
               icon: const Icon(Icons.delete_outline),
               onPressed: onDelete,
             ),
@@ -71,31 +73,26 @@ class ParticipantDetailPane extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         DetailSectionCard(
-          title: 'Identification',
+          title: l10n.participantsSectionIdentification,
           items: [
-            DetailItem('FAI number', profile.faiNumber),
-            DetailItem('National organization ID', profile.nationalOrgId),
-            DetailItem('Club', profile.club),
+            DetailItem(l10n.participantsFaiNumber, profile.faiNumber),
+            DetailItem(l10n.participantsNationalOrgId, profile.nationalOrgId),
+            DetailItem(l10n.participantsClub, profile.club),
           ],
         ),
         const SizedBox(height: 24),
         DetailSectionCard(
-          title: 'Location',
+          title: l10n.participantsSectionLocation,
           items: [
-            DetailItem('City', profile.city),
-            DetailItem('State/province', profile.state),
-            DetailItem('Country', profile.country),
+            DetailItem(l10n.participantsCity, profile.city),
+            DetailItem(l10n.participantsState, profile.state),
+            DetailItem(l10n.participantsCountry, profile.country),
           ],
         ),
         const SizedBox(height: 24),
         DetailSectionCard(
-          title: 'Contact',
-          items: [
-            DetailItem(
-              'Email (private, used for matching only)',
-              profile.email,
-            ),
-          ],
+          title: l10n.participantsSectionContact,
+          items: [DetailItem(l10n.participantsEmailPrivate, profile.email)],
         ),
       ],
     );

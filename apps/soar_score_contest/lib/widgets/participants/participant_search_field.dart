@@ -37,8 +37,6 @@ class ParticipantSearchField extends StatefulWidget {
   /// Called as the text changes, so the page can filter its list with it.
   final ValueChanged<String>? onQueryChanged;
 
-  static const String localLabel = 'Your profiles';
-
   @override
   State<ParticipantSearchField> createState() => _ParticipantSearchFieldState();
 }
@@ -56,14 +54,14 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
 
   bool get _searchesRemote => widget.remote != null && !widget.offline;
 
-  String get _sourceText {
+  String _sourceText(AppLocalizations l10n) {
     if (_searchesRemote) {
-      return 'Online: searching remote first, then your profiles';
+      return l10n.searchOnline;
     }
     if (widget.remote != null) {
-      return 'Offline: searching your profiles only';
+      return l10n.searchOffline;
     }
-    return 'Searching your participant profiles';
+    return l10n.searchProfiles;
   }
 
   Future<Iterable<ParticipantCandidate>> _search(String query) async {
@@ -85,6 +83,7 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Column(
@@ -108,7 +107,7 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
                 key: const ValueKey('participant-search'),
                 controller: controller,
                 focusNode: focusNode,
-                hintText: 'Enter a name or email to search or filter',
+                hintText: l10n.searchHint,
                 leading: const Icon(Icons.person_search),
                 trailing: [
                   ValueListenableBuilder(
@@ -116,7 +115,7 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
                     builder: (context, value, _) => value.text.isEmpty
                         ? const SizedBox.shrink()
                         : IconButton(
-                            tooltip: 'Clear search',
+                            tooltip: l10n.searchClear,
                             icon: const Icon(Icons.close),
                             onPressed: () {
                               controller.clear();
@@ -137,8 +136,8 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
             options: options.toList(),
             selected: widget.selected,
             header: _searchesRemote
-                ? 'Add from remote and your profiles'
-                : 'Add from saved profiles',
+                ? l10n.searchHeaderRemote
+                : l10n.searchHeaderProfiles,
             onSelected: onSelected,
           ),
         ),
@@ -155,7 +154,9 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
-                  widget.profiles == null ? 'Loading people…' : _sourceText,
+                  widget.profiles == null
+                      ? l10n.searchLoading
+                      : _sourceText(l10n),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
@@ -222,18 +223,19 @@ class _ResultsMenu extends StatelessWidget {
     ParticipantCandidate candidate,
     TextStyle? muted,
   ) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final already = selected.contains(candidate.profileId.value);
     final remote = candidate.source == ParticipantSource.remote;
     final subtitle = [
-      candidate.club ?? 'No club',
-      'Email: ${candidate.emailStatus.label(AppLocalizations.of(context))}',
+      candidate.club ?? l10n.searchNoClub,
+      l10n.searchEmailPrefix(candidate.emailStatus.label(l10n)),
     ].join(' · ');
     final (icon, label) = already
-        ? (Icons.check, 'Already in this contest')
+        ? (Icons.check, l10n.searchAlready)
         : remote
-        ? (Icons.cloud_outlined, 'Remote')
-        : (Icons.person_outline, ParticipantSearchField.localLabel);
+        ? (Icons.cloud_outlined, l10n.searchRemote)
+        : (Icons.person_outline, l10n.searchYourProfiles);
     return Opacity(
       opacity: already ? 0.6 : 1,
       child: ListTile(

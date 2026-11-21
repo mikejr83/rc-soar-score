@@ -1,10 +1,18 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_localizations_en.dart';
 import '../../../services/reports/standings/standings_key.dart';
 import '../../../services/reports/standings/standings_layout.dart';
 import '../../../services/reports/standings/standings_table.dart';
 import '../viewer/paper_style.dart';
 import 'standings_table_view.dart';
+
+final AppLocalizations _fallbackL10n = AppLocalizationsEn();
+
+AppLocalizations _l10nOf(BuildContext context) =>
+    Localizations.of<AppLocalizations>(context, AppLocalizations) ??
+    _fallbackL10n;
 
 /// The body of one printed page of the standings: which pilots and rounds the
 /// page holds, the table, and under it where the rounds continue and the key.
@@ -32,8 +40,10 @@ class StandingsPageBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final note = StandingsKey.continuation(page: page, layout: layout);
+    final l10n = _l10nOf(context);
+    final note = StandingsKey.continuation(l10n, page: page, layout: layout);
     final key = StandingsKey.items(
+      l10n,
       table: table,
       page: page,
       partialRounds: partialRounds,
@@ -48,7 +58,7 @@ class StandingsPageBody extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
             child: Text(
-              StandingsKey.indicator(page: page),
+              StandingsKey.indicator(l10n, page: page),
               style: PaperStyle.body.copyWith(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -86,7 +96,7 @@ class StandingsPageBody extends StatelessWidget {
                 runSpacing: 2,
                 children: [
                   Text(
-                    'Key',
+                    l10n.standingsKeyHeading,
                     style: small.copyWith(fontWeight: FontWeight.w700),
                   ),
                   for (final item in key) Text(item, style: small),

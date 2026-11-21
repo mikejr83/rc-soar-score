@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/workspace/controls/contest_transition.dart';
 import '../../../services/workspace/controls/transition_availability.dart';
 import '../../../services/workspace/workspace_control.dart';
@@ -22,7 +23,12 @@ class TransitionControlCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (transition, current, scope, icon) = forControl(contest, control);
+    final l10n = AppLocalizations.of(context);
+    final (transition, current, scope, icon) = forControl(
+      l10n,
+      contest,
+      control,
+    );
     final availability = TransitionAvailability.of(contest, transition);
     return ControlCardBody(
       control: control,
@@ -40,6 +46,7 @@ class TransitionControlCard extends StatelessWidget {
   /// The transition [control] offers for [contest] now, the current value,
   /// the scope sentence and the button's icon.
   static (ContestTransition, String, String, IconData) forControl(
+    AppLocalizations l10n,
     Contest contest,
     WorkspaceControl control,
   ) => switch (control) {
@@ -47,37 +54,34 @@ class TransitionControlCard extends StatelessWidget {
       contest.scoringAccess == ScoringAccess.open
           ? (
               ContestTransition.closeScoring,
-              'Open',
-              'Closing stops pilots and helpers from entering their own '
-                  'scores.',
+              l10n.workspaceScoringOpen,
+              l10n.workspaceScoringCloseScope,
               Icons.lock_clock,
             )
           : (
               ContestTransition.openScoring,
-              'Closed',
-              'Opening lets pilots and helpers enter their own scores.',
+              l10n.workspaceScoringClosed,
+              l10n.workspaceScoringOpenScope,
               Icons.edit_note,
             ),
     WorkspaceControl.administration =>
       contest.adminLock == AdminLock.locked
           ? (
               ContestTransition.unlock,
-              'Locked',
-              'Unlocking allows changes to configuration, participants, the '
-                  'matrix and scores again.',
+              l10n.workspaceAdminLocked,
+              l10n.workspaceAdminUnlockScope,
               Icons.lock_open,
             )
           : (
               ContestTransition.lock,
-              'Unlocked',
-              'Locking blocks changes to configuration, participants, the '
-                  'matrix and scores.',
+              l10n.workspaceAdminUnlocked,
+              l10n.workspaceAdminLockScope,
               Icons.lock,
             ),
     WorkspaceControl.lifecycle => (
       ContestTransition.complete,
       _title(contest.lifecycleState.name),
-      'Completing ends the contest: scoring closes and the results are final.',
+      l10n.workspaceCompleteScope,
       Icons.flag,
     ),
     _ => throw ArgumentError.value(

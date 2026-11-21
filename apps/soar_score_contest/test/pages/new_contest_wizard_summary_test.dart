@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_store.dart';
 import 'package:soar_score_core/soar_score_core.dart';
@@ -98,75 +99,70 @@ void main() {
   testWidgets('the summary lists each section and Edit returns to its step', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await _ready();
     await pumpWizard(tester, respond: _FakeApi().call, store: store);
 
-    expect(stepTitle(tester), 'Summary & create');
+    expect(stepTitle(tester), l10n.wizardStepSummaryCreate);
     for (final title in [
-      'Details',
-      'Copy source',
-      'Discipline',
-      'Participants',
-      'Enabled options',
-      'Teams and classes',
-      'Scoring and publication',
-      'Draw options',
-      'Rounds and groups',
+      l10n.wizardDetails,
+      l10n.wizardCopySourceSection,
+      l10n.wizardDisciplineSection,
+      l10n.wizardParticipantsSection,
+      l10n.wizardEnabledOptions,
+      l10n.wizardTeamsClasses,
+      l10n.wizardParticipantsPublication,
+      l10n.wizardRoundsGroups,
     ]) {
       expect(find.byKey(ValueKey('summary-$title')), findsOneWidget);
     }
     expect(find.text('Gator Cup'), findsOneWidget);
     expect(find.text('Unpublished and private'), findsOneWidget);
 
-    await tester.ensureVisible(find.byKey(const ValueKey('edit-Discipline')));
-    await tester.tap(find.byKey(const ValueKey('edit-Discipline')));
+    await tester.ensureVisible(
+      find.byKey(ValueKey('edit-${l10n.wizardDisciplineSection}')),
+    );
+    await tester.tap(
+      find.byKey(ValueKey('edit-${l10n.wizardDisciplineSection}')),
+    );
     await tester.pumpAndSettle();
-    expect(stepTitle(tester), 'Discipline');
+    expect(stepTitle(tester), l10n.wizardStepDiscipline);
   });
 
   testWidgets('the cards in a row of the summary share one height', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await _ready();
     await pumpWizard(tester, respond: _FakeApi().call, store: store);
 
     Rect rect(String title) =>
         tester.getRect(find.byKey(ValueKey('summary-$title')));
-    final details = rect('Details');
-    final copy = rect('Copy source');
+    final details = rect(l10n.wizardDetails);
+    final copy = rect(l10n.wizardCopySourceSection);
     expect(details.top, copy.top);
     expect(details.height, copy.height);
   });
 
   testWidgets('the summary words roles-off participants, lanes and what '
       'happens after creating', (tester) async {
+    final l10n = AppLocalizationsEn();
     final store = await _ready();
     await pumpWizard(tester, respond: _FakeApi().call, store: store);
 
     // Roles are off: one pilot count instead of people / non-flying.
-    expect(find.text('Pilots'), findsOneWidget);
-    expect(find.text('Non-flying'), findsNothing);
-    expect(find.text('No lane assignment'), findsOneWidget);
-    expect(find.text('The contest configuration page is opened.'), findsOne);
-    expect(
-      find.text(
-        'A flight matrix hasn’t been drawn. The draw can be created from '
-        'the next screen.',
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.text(
-        'Configuration in process is kept until the app is closed or the '
-        'contest is created.',
-      ),
-      findsOneWidget,
-    );
+    expect(find.text(l10n.wizardPilots), findsOneWidget);
+    expect(find.text(l10n.wizardNonFlying), findsNothing);
+    expect(find.text(l10n.wizardNoLaneAssignment), findsOneWidget);
+    expect(find.text(l10n.wizardAfterCreateConfig), findsOne);
+    expect(find.text(l10n.wizardAfterCreateMatrix), findsOneWidget);
+    expect(find.text(l10n.wizardDraftKeptNote), findsOneWidget);
   });
 
   testWidgets('Create is disabled with its reason while a step is invalid', (
     tester,
   ) async {
+    final l10n = AppLocalizationsEn();
     final store = await storeAtStep4(
       options: const {},
       participants: [row(0)],
@@ -176,27 +172,30 @@ void main() {
     await pumpWizard(tester, respond: api.call, store: store);
 
     expect(
-      find.text('Can’t create yet: add at least 2 scoring pilots.'),
+      find.text(l10n.wizardCannotCreate(l10n.wizardAddScoringPilots)),
       findsOneWidget,
     );
-    expect(find.text('Needs at least 2 scoring pilots'), findsOneWidget);
+    expect(find.text(l10n.wizardNeedsAtLeast2), findsOneWidget);
     await next(tester);
     expect(api.contestPosts, 0);
 
-    await tester.tap(find.text('Go to Participants'));
+    await tester.tap(
+      find.text(l10n.wizardGoToStep(l10n.wizardStepParticipants)),
+    );
     await tester.pumpAndSettle();
-    expect(stepTitle(tester), 'Participants');
+    expect(stepTitle(tester), l10n.wizardStepParticipants);
   });
 
   testWidgets('a failed creation keeps the values and Retry creates the '
       'contest once', (tester) async {
+    final l10n = AppLocalizationsEn();
     final store = await _ready();
     final api = _FakeApi(failCreates: 1);
     final wizard = await pumpWizard(tester, respond: api.call, store: store);
 
     await next(tester);
     expect(find.byKey(const ValueKey('banner-create-failed')), findsOneWidget);
-    expect(find.text('The contest wasn’t created'), findsOneWidget);
+    expect(find.text(l10n.wizardNotCreated), findsOneWidget);
     expect(store.draft.name, 'Gator Cup');
 
     await tester.tap(find.byKey(const ValueKey('create-retry')));
@@ -218,6 +217,7 @@ void main() {
   });
 
   testWidgets('pressing Create twice submits once', (tester) async {
+    final l10n = AppLocalizationsEn();
     final store = await _ready();
     final api = _FakeApi(delay: const Duration(seconds: 1));
     final wizard = await pumpWizard(tester, respond: api.call, store: store);
@@ -225,7 +225,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('wizard-primary')));
     await tester.tap(find.byKey(const ValueKey('wizard-primary')));
     await tester.pump();
-    expect(find.text('Creating contest…'), findsOneWidget);
+    expect(find.text(l10n.wizardCreating), findsOneWidget);
     await tester.pumpAndSettle();
 
     expect(api.contestPosts, 1);

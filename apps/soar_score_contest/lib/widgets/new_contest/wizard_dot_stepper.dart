@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import 'wizard_step_indicator.dart';
 import 'wizard_step_status.dart';
 
@@ -18,10 +19,11 @@ class WizardDotStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     return Semantics(
       container: true,
-      label: 'Wizard steps',
+      label: l10n.wizardStepListLabel,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: BoxDecoration(
@@ -30,7 +32,7 @@ class WizardDotStepper extends StatelessWidget {
         child: Row(
           children: [
             for (final step in steps) ...[
-              _Dot(step: step, onSelect: onSelect),
+              _Dot(step: step, total: steps.length, onSelect: onSelect),
               if (step.number < steps.length)
                 Expanded(
                   child: Container(
@@ -50,24 +52,27 @@ class WizardDotStepper extends StatelessWidget {
 }
 
 class _Dot extends StatelessWidget {
-  const _Dot({required this.step, required this.onSelect});
+  const _Dot({required this.step, required this.total, required this.onSelect});
 
   final WizardStepEntry step;
+  final int total;
   final ValueChanged<int> onSelect;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final status = step.status;
     final enabled = !status.locked && !status.isCurrent;
+    final label = step.semanticLabel(l10n, total);
     return Semantics(
       button: true,
       enabled: !status.locked,
       selected: status.isCurrent,
-      label: step.semanticLabel,
+      label: label,
       excludeSemantics: true,
       child: Tooltip(
-        message: step.semanticLabel,
+        message: label,
         child: Material(
           color: status.isCurrent
               ? scheme.secondaryContainer

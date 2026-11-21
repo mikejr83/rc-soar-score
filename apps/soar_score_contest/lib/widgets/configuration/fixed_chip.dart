@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// The `Fixed` tag of a setting the contest's state has locked. The reason
 /// is its tooltip and its accessible name (`Fixed: <reason>`), and the chip
 /// can be focused and tapped, so the reason is reachable without a mouse.
@@ -18,12 +20,13 @@ class _FixedChipState extends State<FixedChip> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final color = theme.colorScheme.onSurfaceVariant;
     return Semantics(
       container: true,
       focusable: true,
-      label: 'Fixed: ${widget.reason}',
+      label: l10n.configFixedChipSemantics(widget.reason),
       excludeSemantics: true,
       child: Tooltip(
         key: _tooltip,
@@ -45,7 +48,7 @@ class _FixedChipState extends State<FixedChip> {
                 Icon(Icons.lock_outline, size: 14, color: color),
                 const SizedBox(width: 4),
                 Text(
-                  'Fixed',
+                  l10n.configFixedChip,
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: color,
                     fontWeight: FontWeight.w500,

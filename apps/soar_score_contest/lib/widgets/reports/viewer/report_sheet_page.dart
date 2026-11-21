@@ -1,9 +1,21 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_localizations_en.dart';
 import '../../../services/reports/result_status.dart';
 import '../../../services/reports/viewer/page_setup.dart';
 import 'paper_style.dart';
+
+/// The sheet's face is painted off screen (in the PDF builder's render tree,
+/// which never waits on the app's async localizations) as well as on screen,
+/// so a page resolves its strings from the context and, when there is none,
+/// falls back to English — the only locale the sheet is built in.
+final AppLocalizations _fallbackL10n = AppLocalizationsEn();
+
+AppLocalizations _l10nOf(BuildContext context) =>
+    Localizations.of<AppLocalizations>(context, AppLocalizations) ??
+    _fallbackL10n;
 
 /// The room on a paper page: margins, and the running header and footer every
 /// page repeats.
@@ -49,23 +61,26 @@ class ReportBarePage extends StatelessWidget {
   final EdgeInsets margins;
 
   @override
-  Widget build(BuildContext context) => Theme(
-    data: PaperStyle.theme(),
-    child: DefaultTextStyle(
-      style: PaperStyle.body,
-      child: Semantics(
-        container: true,
-        label: '$reportName, page $pageNumber of $pageCount',
-        child: Container(
-          width: setup.width,
-          height: setup.height,
-          color: PaperStyle.paper,
-          padding: margins,
-          child: ClipRect(child: body),
+  Widget build(BuildContext context) {
+    final l10n = _l10nOf(context);
+    return Theme(
+      data: PaperStyle.theme(),
+      child: DefaultTextStyle(
+        style: PaperStyle.body,
+        child: Semantics(
+          container: true,
+          label: l10n.viewerSheetPageLabel(reportName, pageNumber, pageCount),
+          child: Container(
+            width: setup.width,
+            height: setup.height,
+            color: PaperStyle.paper,
+            padding: margins,
+            child: ClipRect(child: body),
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 /// One printed page: the running header with contest identity and, when the
@@ -110,8 +125,9 @@ class ReportSheetPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = _l10nOf(context);
     final stamp = switch (status) {
-      ResultStatus.preliminary => 'PRELIMINARY',
+      ResultStatus.preliminary => l10n.viewerStatusPreliminary,
       _ => null,
     };
     return Theme(
@@ -120,7 +136,7 @@ class ReportSheetPage extends StatelessWidget {
         style: PaperStyle.body,
         child: Semantics(
           container: true,
-          label: '$reportName, page $pageNumber of $pageCount',
+          label: l10n.viewerSheetPageLabel(reportName, pageNumber, pageCount),
           child: Container(
             width: setup.width,
             height: setup.height,
@@ -191,8 +207,8 @@ class ReportSheetPage extends StatelessWidget {
                   pageCount: pageCount,
                   generated: generated,
                   statusWord: switch (status) {
-                    ResultStatus.official => 'OFFICIAL',
-                    ResultStatus.preliminary => 'PRELIMINARY',
+                    ResultStatus.official => l10n.viewerStatusOfficial,
+                    ResultStatus.preliminary => l10n.viewerStatusPreliminary,
                     _ => null,
                   },
                 ),
@@ -222,6 +238,7 @@ class _Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = _l10nOf(context);
     final small = PaperStyle.body.copyWith(fontSize: 10);
     return SizedBox(
       height: SheetLayout.footerHeight,
@@ -246,7 +263,11 @@ class _Footer extends StatelessWidget {
                           text: reportName,
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
-                        TextSpan(text: ' · Page $pageNumber of $pageCount'),
+                        TextSpan(
+                          text:
+                              ' · '
+                              '${l10n.viewerPageOf(pageNumber, pageCount)}',
+                        ),
                       ],
                     ),
                     style: small,
@@ -281,46 +302,49 @@ class ResultStamp extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    label: '$text result',
-    child: ExcludeSemantics(
-      child: CustomPaint(
-        painter: _HatchPainter(),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            border: Border.all(color: PaperStyle.ink, width: 2),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                color: PaperStyle.paper,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  text,
-                  style: PaperStyle.body.copyWith(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.5,
+  Widget build(BuildContext context) {
+    final l10n = _l10nOf(context);
+    return Semantics(
+      label: l10n.viewerResultStampSemantics(text),
+      child: ExcludeSemantics(
+        child: CustomPaint(
+          painter: _HatchPainter(),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              border: Border.all(color: PaperStyle.ink, width: 2),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  color: PaperStyle.paper,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    text,
+                    style: PaperStyle.body.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.5,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Container(
-                color: PaperStyle.paper,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  'Not final · scores incomplete',
-                  style: PaperStyle.body.copyWith(fontSize: 9),
+                const SizedBox(height: 2),
+                Container(
+                  color: PaperStyle.paper,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    l10n.viewerStampNotFinal,
+                    style: PaperStyle.body.copyWith(fontSize: 9),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _HatchPainter extends CustomPainter {

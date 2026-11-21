@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/new_contest/copy_mode.dart';
 
 /// The four copy modes as a radio group of labelled tiles.
@@ -19,7 +20,7 @@ class CopyModePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     container: true,
-    label: 'Copy mode',
+    label: AppLocalizations.of(context).wizardCopyModeLabel,
     child: LayoutBuilder(
       builder: (context, constraints) {
         final columns = ((constraints.maxWidth + _gap) / (_minTileWidth + _gap))
@@ -59,12 +60,13 @@ class _CopyModeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: selected,
-      label: '${mode.label}. ${mode.description}',
+      label: '${mode.label(l10n)}. ${mode.description(l10n)}',
       excludeSemantics: true,
       child: Material(
         color: selected
@@ -91,10 +93,10 @@ class _CopyModeTile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(mode.label, style: theme.textTheme.bodyLarge),
+                      Text(mode.label(l10n), style: theme.textTheme.bodyLarge),
                       const SizedBox(height: 2),
                       Text(
-                        mode.description,
+                        mode.description(l10n),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),

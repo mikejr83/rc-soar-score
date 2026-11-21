@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/workspace/workspace_layout_plan.dart';
 import '../workspace_frame.dart';
 
@@ -34,11 +35,12 @@ class _WorkspaceLoadingSkeletonState extends State<WorkspaceLoadingSkeleton> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     return Semantics(
       container: true,
       liveRegion: true,
-      label: 'Loading contest',
+      label: l10n.workspaceLoadingLabel,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

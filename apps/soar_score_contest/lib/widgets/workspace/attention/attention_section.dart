@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../router.dart';
 import '../../../services/workspace/attention/needs_attention.dart';
 import '../../../services/workspace/attention/sync_source.dart';
@@ -54,6 +55,7 @@ class _Placeholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Card(
       key: const ValueKey('attention-placeholder'),
@@ -72,7 +74,7 @@ class _Placeholder extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Checking what needs attention…',
+                      l10n.workspaceAttentionLoading,
                       style: theme.textTheme.bodyMedium,
                     ),
                   ),
@@ -89,7 +91,7 @@ class _Placeholder extends StatelessWidget {
                   TextButton(
                     key: const ValueKey('attention-retry'),
                     onPressed: onRetry,
-                    child: const Text('Retry'),
+                    child: Text(l10n.workspaceRetry),
                   ),
                 ],
               ),

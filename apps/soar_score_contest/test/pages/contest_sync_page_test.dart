@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app_sync_provider.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/pages/contest/sync_page.dart';
 import 'package:soar_score_contest/services/sync/app_sync_state.dart';
 import 'package:soar_score_contest/services/sync/conflict_answer.dart';
@@ -15,13 +17,18 @@ import '../support/preferences_scope.dart';
 
 const _contestId = '019c0000-0000-7000-8000-000000000020';
 final _scope = ContestScopeKey(Id.parse(_contestId));
+final l10n = AppLocalizationsEn();
 
 Future<void> _pump(WidgetTester tester, FakeAppSync sync) async {
   await tester.pumpWidget(
     withPreferredZone(
       AppSyncInherited(
         sync: sync,
-        child: const MaterialApp(home: ContestSyncPage(contestId: _contestId)),
+        child: MaterialApp(
+          localizationsDelegates: appLocalizationDelegates,
+          supportedLocales: const [Locale('en')],
+          home: const ContestSyncPage(contestId: _contestId),
+        ),
       ),
     ),
   );
@@ -94,7 +101,11 @@ void main() {
     await tester.pumpWidget(
       AppSyncInherited(
         sync: sync,
-        child: const MaterialApp(home: ContestSyncPage(contestId: _contestId)),
+        child: MaterialApp(
+          localizationsDelegates: appLocalizationDelegates,
+          supportedLocales: const [Locale('en')],
+          home: const ContestSyncPage(contestId: _contestId),
+        ),
       ),
     );
     await tester.pump();
@@ -241,9 +252,6 @@ void conflictTests() {
   testWidgets('says so when nothing waits for a decision', (tester) async {
     await _pump(tester, FakeAppSync(state: _state(const SyncScopeSummary())));
 
-    expect(
-      find.text('None. Nothing is waiting for your decision.'),
-      findsOneWidget,
-    );
+    expect(find.text(l10n.syncConflictsNone), findsOneWidget);
   });
 }

@@ -11,35 +11,36 @@ import 'wizard_number_field.dart';
 
 /// Labels for the step 5 values, shared with the summary.
 abstract final class ScoringLabels {
-  static String groupScore(GroupScoreMode mode) => switch (mode) {
-    GroupScoreMode.raw => 'Raw',
-    GroupScoreMode.normalized => 'Normalized',
-    GroupScoreMode.time => 'Time',
-  };
-
-  static String rounding(RoundingMode mode) => switch (mode) {
-    RoundingMode.round => 'Round',
-    RoundingMode.truncate => 'Truncate',
-  };
-
-  static String publicUpdate(PublicUpdateMode mode) => switch (mode) {
-    PublicUpdateMode.automatic => 'Automatic',
-    PublicUpdateMode.roundCompletion => 'On round completion',
-    PublicUpdateMode.manual => 'Manual',
-  };
-
-  static String publicUpdateDescription(PublicUpdateMode mode) =>
+  static String groupScore(AppLocalizations l10n, GroupScoreMode mode) =>
       switch (mode) {
-        PublicUpdateMode.automatic =>
-          'Public results update as scores are '
-              'entered.',
-        PublicUpdateMode.roundCompletion =>
-          'Public results update when a '
-              'round is complete.',
-        PublicUpdateMode.manual =>
-          'Public results update only when you '
-              'publish.',
+        GroupScoreMode.raw => l10n.wizardGroupScoreRaw,
+        GroupScoreMode.normalized => l10n.wizardGroupScoreNormalized,
+        GroupScoreMode.time => l10n.wizardGroupScoreTime,
       };
+
+  static String rounding(AppLocalizations l10n, RoundingMode mode) =>
+      switch (mode) {
+        RoundingMode.round => l10n.wizardRoundingRound,
+        RoundingMode.truncate => l10n.wizardRoundingTruncate,
+      };
+
+  static String publicUpdate(AppLocalizations l10n, PublicUpdateMode mode) =>
+      switch (mode) {
+        PublicUpdateMode.automatic => l10n.wizardPublicUpdateAutomatic,
+        PublicUpdateMode.roundCompletion =>
+          l10n.wizardPublicUpdateRoundCompletion,
+        PublicUpdateMode.manual => l10n.wizardPublicUpdateManual,
+      };
+
+  static String publicUpdateDescription(
+    AppLocalizations l10n,
+    PublicUpdateMode mode,
+  ) => switch (mode) {
+    PublicUpdateMode.automatic => l10n.wizardPublicUpdateAutomaticDesc,
+    PublicUpdateMode.roundCompletion =>
+      l10n.wizardPublicUpdateRoundCompletionDesc,
+    PublicUpdateMode.manual => l10n.wizardPublicUpdateManualDesc,
+  };
 
   static String scoresBecomeOfficial(
     AppLocalizations l10n,
@@ -59,12 +60,13 @@ abstract final class ScoringLabels {
     OfficializationMode.manual => l10n.scoresBecomeOfficialManualHelp,
   };
 
-  static String drops(ScoringSettings settings) =>
+  static String drops(AppLocalizations l10n, ScoringSettings settings) =>
       switch (settings.dropPolicy) {
-        DropPolicy.disabled => 'Disabled',
-        DropPolicy.one => 'One dropped after round ${settings.firstDrop}',
+        DropPolicy.disabled => l10n.wizardDropDisabled,
+        DropPolicy.one =>
+          '${l10n.wizardDropOne} after round ${settings.firstDrop}',
         DropPolicy.two =>
-          'Two dropped, after rounds ${settings.firstDrop} and '
+          '${l10n.wizardDropTwo}, after rounds ${settings.firstDrop} and '
               '${settings.secondDrop}',
       };
 
@@ -97,8 +99,10 @@ class ScoringStep extends StatelessWidget {
     final settings = draft.scoringSettings;
     final defaults = draft.scoringDefaults;
     final discipline = draft.discipline;
-    final defaultLabel = '${discipline?.name ?? 'Platform'} default';
-    final drops = DraftValidation.drops(draft);
+    final defaultLabel = discipline != null
+        ? '${discipline.name} ${l10n.wizardDisciplineDefault}'
+        : l10n.wizardPlatformDefault;
+    final drops = DraftValidation.drops(draft, l10n);
 
     void set(ScoringSettings value) =>
         onChanged(draft.copyWith(scoring: value));
@@ -111,7 +115,7 @@ class ScoringStep extends StatelessWidget {
         ? (defaultLabel: defaultLabel, changedFrom: null, onReset: null)
         : (
             defaultLabel: null,
-            changedFrom: 'Changed from $from',
+            changedFrom: l10n.wizardChangedFrom(from),
             onReset: () => set(reset()),
           );
 
@@ -159,7 +163,7 @@ class ScoringStep extends StatelessWidget {
 
     final mode = tag(
       settings.groupScoreMode == defaults.groupScoreMode,
-      ScoringLabels.groupScore(defaults.groupScoreMode),
+      ScoringLabels.groupScore(l10n, defaults.groupScoreMode),
       () => settings.copyWith(groupScoreMode: defaults.groupScoreMode),
     );
     final traditional =
@@ -167,7 +171,7 @@ class ScoringStep extends StatelessWidget {
         discipline == WizardDiscipline.thermalDuration;
     final rounding = tag(
       settings.roundingMode == defaults.roundingMode,
-      ScoringLabels.rounding(defaults.roundingMode),
+      ScoringLabels.rounding(l10n, defaults.roundingMode),
       () => settings.copyWith(roundingMode: defaults.roundingMode),
     );
     final places = tag(
@@ -177,16 +181,14 @@ class ScoringStep extends StatelessWidget {
     );
     final dropPolicy = tag(
       settings.dropPolicy == defaults.dropPolicy,
-      defaults.dropPolicy.label.toLowerCase(),
+      defaults.dropPolicy.label(l10n).toLowerCase(),
       () => settings.copyWith(dropPolicy: defaults.dropPolicy),
     );
-    // A drop round is only a discipline default when the discipline drops
-    // that many rounds; otherwise the row is a change from its standard.
     final standard = '${discipline?.name ?? 'platform'} standard';
     final first = defaults.dropPolicy == DropPolicy.disabled
         ? tag(
             false,
-            '$standard (${defaults.dropPolicy.label.toLowerCase()})',
+            '$standard (${defaults.dropPolicy.label(l10n).toLowerCase()})',
             () => settings.copyWith(dropPolicy: defaults.dropPolicy),
           )
         : tag(
@@ -202,25 +204,20 @@ class ScoringStep extends StatelessWidget {
           )
         : tag(
             false,
-            '$standard (${defaults.dropPolicy.label.toLowerCase()})',
+            '$standard (${defaults.dropPolicy.label(l10n).toLowerCase()})',
             () => settings.copyWith(dropPolicy: defaults.dropPolicy),
           );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        card('Scoring', [
+        card(l10n.wizardScoringCard, [
           SettingRow(
-            label: 'Group score',
+            label: l10n.wizardGroupScoreLabel,
             description: switch (settings.groupScoreMode) {
-              GroupScoreMode.raw =>
-                'Raw: flight points plus landing bonus, not normalized.',
-              GroupScoreMode.normalized =>
-                'Normalized: flight points plus landing bonus, normalized to '
-                    '1000 in each group.',
-              GroupScoreMode.time =>
-                'Time: flight time is normalized to 1000 in each group, then '
-                    'the landing bonus is added.',
+              GroupScoreMode.raw => l10n.wizardGroupScoreRawDesc,
+              GroupScoreMode.normalized => l10n.wizardGroupScoreNormalizedDesc,
+              GroupScoreMode.time => l10n.wizardGroupScoreTimeDesc,
             },
             defaultLabel: mode.defaultLabel,
             changedFrom: mode.changedFrom,
@@ -229,7 +226,7 @@ class ScoringStep extends StatelessWidget {
               const ValueKey('group-score'),
               [
                 for (final value in GroupScoreMode.values)
-                  (value, ScoringLabels.groupScore(value)),
+                  (value, ScoringLabels.groupScore(l10n, value)),
               ],
               settings.groupScoreMode,
               (value) => set(settings.copyWith(groupScoreMode: value)),
@@ -239,16 +236,17 @@ class ScoringStep extends StatelessWidget {
                   settings.groupScoreMode != defaults.groupScoreMode)
                 SettingNote.warning(
                   Icons.warning,
-                  'No longer a traditional ${discipline!.name} contest',
-                  '${discipline.name} uses '
-                      '${ScoringLabels.groupScore(defaults.groupScoreMode)} '
-                      'group scoring by default.',
+                  l10n.wizardGroupScoreTraditional(discipline!.name),
+                  l10n.wizardGroupScoreTraditionalBody(
+                    discipline.name,
+                    ScoringLabels.groupScore(l10n, defaults.groupScoreMode),
+                  ),
                 ),
             ],
           ),
           SettingRow(
-            label: 'Rounding',
-            description: 'What happens to digits beyond the chosen precision.',
+            label: l10n.wizardRoundingLabel,
+            description: l10n.wizardRoundingDesc,
             defaultLabel: rounding.defaultLabel,
             changedFrom: rounding.changedFrom,
             onReset: rounding.onReset,
@@ -256,21 +254,25 @@ class ScoringStep extends StatelessWidget {
               const ValueKey('rounding'),
               [
                 for (final value in RoundingMode.values)
-                  (value, ScoringLabels.rounding(value)),
+                  (value, ScoringLabels.rounding(l10n, value)),
               ],
               settings.roundingMode,
               (value) => set(settings.copyWith(roundingMode: value)),
             ),
           ),
           SettingRow(
-            label: 'Total score decimal precision',
-            description: 'Digits shown and stored after the decimal point.',
+            label: l10n.wizardPrecisionLabel,
+            description: l10n.wizardPrecisionDesc,
             defaultLabel: places.defaultLabel,
             changedFrom: places.changedFrom,
             onReset: places.onReset,
-            hint:
-                'Example: 987.4567 → '
-                '${ScoringLabels.example(987.4567, settings.decimalPlaces, settings.roundingMode)}',
+            hint: l10n.wizardPrecisionExample(
+              ScoringLabels.example(
+                987.4567,
+                settings.decimalPlaces,
+                settings.roundingMode,
+              ),
+            ),
             control: segmented(
               const ValueKey('decimal-places'),
               [for (var n = 0; n <= 3; n++) (n, '$n')],
@@ -279,14 +281,17 @@ class ScoringStep extends StatelessWidget {
             ),
           ),
           SettingRow(
-            label: 'Dropped rounds',
-            description: 'Worst rounds left out of each pilot’s total.',
+            label: l10n.wizardDroppedRoundsLabel,
+            description: l10n.wizardDroppedRoundsDesc,
             defaultLabel: dropPolicy.defaultLabel,
             changedFrom: dropPolicy.changedFrom,
             onReset: dropPolicy.onReset,
             control: segmented(
               const ValueKey('drop-policy'),
-              [for (final value in DropPolicy.values) (value, value.label)],
+              [
+                for (final value in DropPolicy.values)
+                  (value, value.label(l10n)),
+              ],
               settings.dropPolicy,
               (value) => set(settings.copyWith(dropPolicy: value)),
             ),
@@ -294,11 +299,9 @@ class ScoringStep extends StatelessWidget {
           if (settings.dropPolicy != DropPolicy.disabled)
             SettingRow(
               label: settings.dropPolicy == DropPolicy.two
-                  ? 'First drop after round'
-                  : 'Drop after round',
-              description:
-                  'Once this many rounds are complete, each pilot’s worst '
-                  'round is left out.',
+                  ? l10n.wizardFirstDropLabel
+                  : l10n.wizardDropAfterRound,
+              description: l10n.wizardDropAfterRoundDesc,
               defaultLabel: first.defaultLabel,
               changedFrom: first.changedFrom,
               onReset: first.onReset,
@@ -306,7 +309,7 @@ class ScoringStep extends StatelessWidget {
                 key: const ValueKey('first-drop'),
                 value: settings.firstDrop,
                 error: drops.first != null,
-                semanticLabel: 'Drop after round',
+                semanticLabel: l10n.wizardDropAfterRound,
                 onChanged: (value) => set(settings.copyWith(firstDrop: value)),
               ),
               notes: [
@@ -316,10 +319,8 @@ class ScoringStep extends StatelessWidget {
             ),
           if (settings.dropPolicy == DropPolicy.two)
             SettingRow(
-              label: 'Second drop after round',
-              description:
-                  'Once this many rounds are complete, the second worst round '
-                  'is also left out. Must be later than the first.',
+              label: l10n.wizardSecondDropAfterRound,
+              description: l10n.wizardSecondDropDesc,
               defaultLabel: second.defaultLabel,
               changedFrom: second.changedFrom,
               onReset: second.onReset,
@@ -327,7 +328,7 @@ class ScoringStep extends StatelessWidget {
                 key: const ValueKey('second-drop'),
                 value: settings.secondDrop,
                 error: drops.second != null,
-                semanticLabel: 'Second drop after round',
+                semanticLabel: l10n.wizardSecondDropAfterRound,
                 onChanged: (value) => set(settings.copyWith(secondDrop: value)),
               ),
               notes: [
@@ -336,21 +337,19 @@ class ScoringStep extends StatelessWidget {
                     Icons.error,
                     drops.second!,
                     drops.second!.startsWith('Must')
-                        ? 'The second drop has to come later than the first.'
+                        ? l10n.wizardSecondDropLater
                         : null,
                   ),
               ],
             ),
         ]),
         const SizedBox(height: 20),
-        card('Participants and publication', [
+        card(l10n.wizardParticipantsPublication, [
           SettingRow(
-            label: 'Score-review requests',
-            description:
-                'Let pilots ask the contest director to review a '
-                'score.',
+            label: l10n.wizardReviewRequestsLabel,
+            description: l10n.wizardReviewRequestsDesc,
             control: Semantics(
-              label: 'Score-review requests',
+              label: l10n.wizardReviewRequestsLabel,
               child: Switch(
                 key: const ValueKey('review-requests'),
                 value: settings.reviewRequests,
@@ -392,9 +391,8 @@ class ScoringStep extends StatelessWidget {
             ),
           ),
           SettingRow(
-            label: 'Public update policy',
-            description:
-                'When public results refresh once the contest is published.',
+            label: l10n.wizardPublicUpdateLabel,
+            description: l10n.wizardPublicUpdateDesc,
             control: const SizedBox.shrink(),
             below: RadioGroup<PublicUpdateMode>(
               groupValue: settings.publicUpdateMode,
@@ -410,9 +408,9 @@ class ScoringStep extends StatelessWidget {
                       key: ValueKey('public-update-${value.name}'),
                       value: value,
                       contentPadding: EdgeInsets.zero,
-                      title: Text(ScoringLabels.publicUpdate(value)),
+                      title: Text(ScoringLabels.publicUpdate(l10n, value)),
                       subtitle: Text(
-                        ScoringLabels.publicUpdateDescription(value),
+                        ScoringLabels.publicUpdateDescription(l10n, value),
                       ),
                     ),
                 ],

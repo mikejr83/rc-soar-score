@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// What the director chose when adding a person.
 class AddChoice {
   const AddChoice(this.role);
@@ -53,11 +55,16 @@ class _AddDialogState extends State<_AddDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final roles = widget.roles;
     final late = widget.drawn && _flies;
     return AlertDialog(
       icon: const Icon(Icons.person_add),
-      title: Text(late ? 'Add after the draw?' : 'Add ${widget.name}?'),
+      title: Text(
+        late
+            ? l10n.contestParticipantsAddAfterDrawTitle
+            : l10n.contestParticipantsAddTitle(widget.name),
+      ),
       content: SizedBox(
         width: 440,
         child: Column(
@@ -66,11 +73,11 @@ class _AddDialogState extends State<_AddDialog> {
           children: [
             Text(
               late
-                  ? 'The draw has already been made. ${widget.name} will be '
-                        'added to the contest. Place them in a group from the '
-                        'Matrix page. A redraw is also possible.'
-                  : '${widget.name} will be added to the contest'
-                        '${_role == null ? '' : ' as ${_role!.displayName}'}.',
+                  ? l10n.contestParticipantsAddBodyLate(widget.name)
+                  : l10n.contestParticipantsAddBody(
+                      widget.name,
+                      _role == null ? '' : ' as ${_role!.displayName}',
+                    ),
               key: const ValueKey('add-participant-body'),
             ),
             if (roles != null) ...[
@@ -78,8 +85,8 @@ class _AddDialogState extends State<_AddDialog> {
               DropdownButtonFormField<Id>(
                 key: const ValueKey('add-participant-role'),
                 initialValue: _role?.id,
-                decoration: const InputDecoration(
-                  labelText: 'Role',
+                decoration: InputDecoration(
+                  labelText: l10n.contestParticipantsAddRoleLabel,
                   border: OutlineInputBorder(),
                 ),
                 items: [
@@ -100,12 +107,12 @@ class _AddDialogState extends State<_AddDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancelButton),
         ),
         FilledButton(
           key: const ValueKey('add-participant-confirm'),
           onPressed: () => Navigator.of(context).pop(AddChoice(_role)),
-          child: const Text('Add participant'),
+          child: Text(l10n.contestParticipantsAddConfirm),
         ),
       ],
     );
@@ -117,18 +124,16 @@ class _AddDialogState extends State<_AddDialog> {
 /// Matrix page's redraw), `false` or dismissing keeps the matrix and puts
 /// them in the last group of every round.
 Future<bool> askRedrawWith(BuildContext context, {required String name}) async {
+  final l10n = AppLocalizations.of(context);
   final redraw = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
       icon: const Icon(Icons.grid_view),
-      title: Text('Redraw the matrix with $name?'),
+      title: Text(l10n.contestParticipantsRedrawTitle(name)),
       content: SizedBox(
         width: 460,
         child: Text(
-          'No scores have been entered, so the matrix can be drawn again to '
-          'include $name fairly. Or keep the matrix as it is: $name is then '
-          'added to the last group of every round, within the contest’s '
-          'group sizes and team protection.',
+          l10n.contestParticipantsRedrawBody(name),
           key: const ValueKey('redraw-offer-body'),
         ),
       ),
@@ -136,12 +141,12 @@ Future<bool> askRedrawWith(BuildContext context, {required String name}) async {
         TextButton(
           key: const ValueKey('redraw-keep'),
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Keep the matrix'),
+          child: Text(l10n.contestParticipantsRedrawKeep),
         ),
         FilledButton(
           key: const ValueKey('redraw-with'),
           onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Redraw'),
+          child: Text(l10n.contestParticipantsRedrawDo),
         ),
       ],
     ),
@@ -161,35 +166,39 @@ Future<bool> confirmNonFlying(
   bool plural = false,
   bool? clearsClass,
 }) async {
+  final l10n = AppLocalizations.of(context);
+  final clears = clearsClass ?? classification.trim().isNotEmpty;
   final ok = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
       icon: const Icon(Icons.badge),
-      title: Text('Change $name to $roleName?'),
+      title: Text(l10n.contestParticipantsChangeRoleTitle(name, roleName)),
       content: Text(
         [
-          '$roleName is a non-flying role, so $name ${plural ? 'get' : 'gets'} no score rows'
-              '${!(clearsClass ?? classification.trim().isNotEmpty)
-                  ? ''
-                  : plural
-                  ? ' and their classes are cleared'
-                  : ' and their class ($classification) is cleared'}.',
-          if (inDraw)
-            'Their places in the draw are removed when you save, and the '
-                'draw will need redoing.',
-          'You can still undo this before you save.',
+          l10n.contestParticipantsChangeRoleBody(
+            roleName,
+            name,
+            plural ? 'get' : 'gets',
+            clears
+                ? plural
+                      ? ' and their classes are cleared'
+                      : ' and their class ($classification) is cleared'
+                : '',
+          ),
+          if (inDraw) l10n.contestParticipantsChangeRoleDrawNote,
+          l10n.contestParticipantsChangeRoleUndoNote,
         ].join(' '),
         key: const ValueKey('confirm-role-change-body'),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancelButton),
         ),
         FilledButton(
           key: const ValueKey('confirm-role-change'),
           onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Change role'),
+          child: Text(l10n.contestParticipantsChangeRoleConfirm),
         ),
       ],
     ),
@@ -207,30 +216,26 @@ Future<bool> confirmRemove(
   required String contestName,
   List<String> inDraw = const [],
 }) async {
+  final l10n = AppLocalizations.of(context);
   final ok = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
       icon: const Icon(Icons.person_remove),
-      title: Text(
-        'Remove ${names.length} ${names.length == 1 ? 'person' : 'people'} '
-        'from this contest?',
-      ),
+      title: Text(l10n.contestParticipantsRemoveTitle(names.length)),
       content: SizedBox(
         width: 460,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'This removes them from $contestName only. Their saved '
-              'profiles stay, and you can add them again later.',
-            ),
+            Text(l10n.contestParticipantsRemoveBody(contestName)),
             if (inDraw.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                '${_names(inDraw)} ${inDraw.length == 1 ? 'is' : 'are'} in '
-                'the draw. Their places in it are removed too, and the draw '
-                'will need redoing.',
+                l10n.contestParticipantsRemoveInDraw(
+                  _names(inDraw),
+                  inDraw.length == 1 ? 'is' : 'are',
+                ),
                 key: const ValueKey('confirm-remove-draw'),
               ),
             ],
@@ -252,12 +257,12 @@ Future<bool> confirmRemove(
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancelButton),
         ),
         FilledButton(
           key: const ValueKey('confirm-remove'),
           onPressed: () => Navigator.of(context).pop(true),
-          child: Text('Remove ${names.length}'),
+          child: Text(l10n.contestParticipantsRemoveButton(names.length)),
         ),
       ],
     ),

@@ -14,6 +14,7 @@ class RefusedChangesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final changes = this.changes;
     return Card(
       key: const ValueKey('refused-changes-card'),
@@ -28,17 +29,15 @@ class RefusedChangesCard extends StatelessWidget {
             Semantics(
               header: true,
               child: Text(
-                'Changes the service refused',
+                l10n.syncRefusedTitle,
                 style: theme.textTheme.titleLarge,
               ),
             ),
             const SizedBox(height: 8),
             if (changes == null)
-              const Text('Loading…')
+              Text(l10n.syncRefusedLoading)
             else if (changes.isEmpty)
-              const Text(
-                'None. The service accepted every change it has answered.',
-              )
+              Text(l10n.syncRefusedNone)
             else
               for (final change in changes)
                 Padding(

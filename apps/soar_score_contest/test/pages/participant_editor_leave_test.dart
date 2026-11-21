@@ -1,11 +1,14 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
 import 'package:soar_score_contest/router.dart';
 
 import '../support/participant_test_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 /// Pumps the real app router (shell, rail and header included) at [initial].
 Future<void> _pump(WidgetTester tester, String initial) async {
@@ -47,9 +50,9 @@ void main() {
 
     await tester.tap(find.text('Contests').first);
     await tester.pumpAndSettle();
-    expect(find.text('Discard changes?'), findsOneWidget);
+    expect(find.text(_l10n.participantEditorDiscardTitle), findsOneWidget);
 
-    await tester.tap(find.text('Keep editing'));
+    await tester.tap(find.text(_l10n.participantEditorKeepEditing));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('first-name')), findsOneWidget);
     expect(find.text('Ada'), findsOneWidget);
@@ -62,9 +65,9 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('breadcrumb-participants')));
     await tester.pumpAndSettle();
-    expect(find.text('Discard changes?'), findsOneWidget);
+    expect(find.text(_l10n.participantEditorDiscardTitle), findsOneWidget);
 
-    await tester.tap(find.text('Discard'));
+    await tester.tap(find.text(_l10n.participantEditorDiscard));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('first-name')), findsNothing);
     expect(find.text('No participants yet.'), findsOneWidget);
@@ -76,7 +79,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('breadcrumb-participants')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Discard changes?'), findsNothing);
+    expect(find.text(_l10n.participantEditorDiscardTitle), findsNothing);
     expect(find.text('No participants yet.'), findsOneWidget);
   });
 }

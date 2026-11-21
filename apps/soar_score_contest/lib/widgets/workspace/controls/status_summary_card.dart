@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/workspace/publication_facts.dart';
 import '../../../services/workspace/controls/status_summary.dart';
 import '../workspace_scope.dart';
@@ -31,6 +32,7 @@ class StatusSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final publication =
         WorkspaceScope.of(context).facts?.publication ??
@@ -44,7 +46,7 @@ class StatusSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Status', style: theme.textTheme.titleSmall),
+            Text(l10n.workspaceStatusTitle, style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             for (final value in values)
               Padding(

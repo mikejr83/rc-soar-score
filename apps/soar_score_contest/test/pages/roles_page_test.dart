@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app_sync_provider.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/sync/app_sync_state.dart';
 import 'package:soar_score_contest/services/sync/sync_scope_summary.dart';
 import 'package:soar_score_contest/widgets/roles/role_detail_pane.dart';
@@ -15,6 +16,8 @@ Finder _row(String name) => find.widgetWithText(ListTile, name);
 
 IconButton _deleteButton(WidgetTester tester) =>
     tester.widget<IconButton>(find.byKey(const ValueKey('delete-role')));
+
+final _l10n = AppLocalizationsEn();
 
 void main() {
   testWidgets('lists the system roles first, then the director\'s own', (
@@ -31,8 +34,8 @@ void main() {
         .map((tile) => (tile.title! as Text).data)
         .toList();
     expect(names, ['Helper', 'Pilot', 'Team Manager', 'Boss', 'Timer']);
-    expect(find.text('System role'), findsNWidgets(3));
-    expect(find.text('Your role'), findsNWidgets(2));
+    expect(find.text(_l10n.rolesSystemRole), findsNWidgets(3));
+    expect(find.text(_l10n.rolesYourRole), findsNWidgets(2));
   });
 
   testWidgets('a sync of the account lists the roles it pulled', (
@@ -67,8 +70,11 @@ void main() {
 
       expect(find.byKey(const ValueKey('rename-role')), findsNothing);
       expect(find.byKey(const ValueKey('delete-role')), findsNothing);
-      expect(find.text(RoleDetailPane.pilotExplanation), findsOneWidget);
-      expect(find.text('Pilot'), findsNWidgets(3)); // row, heading, type
+      expect(find.text(RoleDetailPane.pilotExplanation(_l10n)), findsOneWidget);
+      expect(
+        find.text(_l10n.rolesPilot),
+        findsNWidgets(3),
+      ); // row, heading, type
     });
 
     testWidgets('another system role is protected with its own reason', (
@@ -83,8 +89,11 @@ void main() {
 
       expect(find.byKey(const ValueKey('rename-role')), findsNothing);
       expect(find.byKey(const ValueKey('delete-role')), findsNothing);
-      expect(find.text(RoleDetailPane.systemExplanation), findsOneWidget);
-      expect(find.text(RoleDetailPane.pilotExplanation), findsNothing);
+      expect(
+        find.text(RoleDetailPane.systemExplanation(_l10n)),
+        findsOneWidget,
+      );
+      expect(find.text(RoleDetailPane.pilotExplanation(_l10n)), findsNothing);
     });
   });
 
@@ -96,7 +105,7 @@ void main() {
       await tester.pumpWidget(rolesApp(api.client, initial: newRolePath));
       await tester.pumpAndSettle();
 
-      expect(find.text('New role'), findsOneWidget);
+      expect(find.text(_l10n.rolesNew), findsOneWidget);
       await tester.enterText(
         find.byKey(const ValueKey('role-name-field')),
         '  Scorer ',
@@ -120,7 +129,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('role-name-confirm')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Enter a name for the role.'), findsOneWidget);
+      expect(find.text(_l10n.rolesNameError), findsOneWidget);
       expect(api.requests.where((r) => r.method == 'POST'), isEmpty);
     });
 
@@ -152,7 +161,7 @@ void main() {
       await tester.pumpWidget(rolesApp(api.client, initial: newRolePath));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.text(_l10n.wizardCancel));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('role-name-field')), findsNothing);
@@ -216,11 +225,11 @@ void main() {
 
       await tester.tap(_row('Timer'));
       await tester.pumpAndSettle();
-      expect(find.text('No contest uses this role yet.'), findsOneWidget);
+      expect(find.text(_l10n.rolesUsageEmpty), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('delete-role')));
       await tester.pumpAndSettle();
-      expect(find.text('Delete role?'), findsOneWidget);
-      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+      expect(find.text(_l10n.rolesDeleteTitle), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilledButton, _l10n.rolesDelete));
       await tester.pumpAndSettle();
 
       expect(api.requests.where((r) => r.method == 'DELETE'), hasLength(1));
@@ -236,7 +245,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('delete-role')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.text(_l10n.wizardCancel));
       await tester.pumpAndSettle();
 
       expect(api.requests.where((r) => r.method == 'DELETE'), isEmpty);
@@ -259,9 +268,12 @@ void main() {
       await tester.tap(_row('Timer'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Fall Classic: 1 participant'), findsOneWidget);
-      expect(find.text('Spring Open: 4 participants'), findsOneWidget);
-      expect(find.text(RoleDetailPane.inUseExplanation), findsOneWidget);
+      expect(
+        find.text(_l10n.rolesUsageItem('Fall Classic', 1)),
+        findsOneWidget,
+      );
+      expect(find.text(_l10n.rolesUsageItem('Spring Open', 4)), findsOneWidget);
+      expect(find.text(RoleDetailPane.inUseExplanation(_l10n)), findsOneWidget);
       expect(_deleteButton(tester).onPressed, isNull);
     });
 
@@ -280,7 +292,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('delete-role')));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+      await tester.tap(find.widgetWithText(FilledButton, _l10n.rolesDelete));
       await tester.pumpAndSettle();
 
       expect(find.text('the role is used in 1 contest(s)'), findsOneWidget);
@@ -300,7 +312,7 @@ void main() {
     await tester.pumpWidget(rolesApp(api.client));
     await tester.pumpAndSettle();
 
-    expect(find.text('Roles could not be loaded.'), findsOneWidget);
+    expect(find.text(_l10n.rolesLoadFailed), findsOneWidget);
     expect(find.text('database offline'), findsOneWidget);
 
     api.failures.clear();
@@ -322,7 +334,7 @@ void main() {
     expect(find.byKey(const ValueKey('role-detail-back')), findsNothing);
     await tester.tap(_row('Pilot'));
     await tester.pumpAndSettle();
-    expect(find.text(RoleDetailPane.pilotExplanation), findsOneWidget);
+    expect(find.text(RoleDetailPane.pilotExplanation(_l10n)), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('role-detail-back')));
     await tester.pumpAndSettle();

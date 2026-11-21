@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// Placeholder shapes shown while an existing participant loads.
 class EditorSkeleton extends StatelessWidget {
   const EditorSkeleton({super.key});
@@ -7,6 +9,7 @@ class EditorSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final words = AppLocalizations.of(context);
     Widget block(double height, Color color, {double? width, double r = 12}) =>
         Container(
           width: width,
@@ -18,7 +21,7 @@ class EditorSkeleton extends StatelessWidget {
         );
     final high = scheme.surfaceContainerHigh;
     return Semantics(
-      label: 'Loading participant',
+      label: words.participantEditorLoading,
       liveRegion: true,
       // The shapes are taller than a short window; clip instead of overflow.
       child: SingleChildScrollView(
@@ -51,7 +54,7 @@ class EditorSkeleton extends StatelessWidget {
             block(180, scheme.surfaceContainer),
             const SizedBox(height: 12),
             Text(
-              'Loading participant…',
+              words.participantEditorLoadingText,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],

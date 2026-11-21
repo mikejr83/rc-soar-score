@@ -6,6 +6,7 @@ import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/pages/contest/configuration_page.dart';
 import 'package:soar_score_contest/services/new_contest/wizard_discipline.dart';
 import 'package:soar_score_contest/widgets/configuration/fixed_chip.dart';
@@ -42,6 +43,7 @@ Future<void> _pump(
 
 final _saveButton = find.widgetWithText(FilledButton, 'Save configuration');
 final _confirmSave = find.byKey(const ValueKey('confirm-save'));
+final _l10n = AppLocalizationsEn();
 
 Future<void> _scrollTo(WidgetTester tester, Finder finder) async {
   await tester.ensureVisible(finder);
@@ -262,7 +264,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('Configuration saved as revision 2.'),
+      find.textContaining(_l10n.configSavedRevision(2, '')),
       findsOneWidget,
     );
     expect(find.textContaining('the results are stale.'), findsOneWidget);
@@ -367,11 +369,7 @@ void main() {
       expect(find.text(title, skipOffstage: false), findsWidgets);
     }
     expect(
-      find.text(
-        'A round with a motor restart can’t be dropped (Motor restart mode: '
-        'Allowed, not dropped).',
-        skipOffstage: false,
-      ),
+      find.text(_l10n.configNoteMotorRestart, skipOffstage: false),
       findsOneWidget,
     );
     expect(find.text('Not revisioned', skipOffstage: false), findsNothing);
@@ -395,12 +393,12 @@ void main() {
       ),
     );
 
-    final fix = find.text('Turn off team protection');
+    final fix = find.text(_l10n.configFixTurnOffTeamProtection);
     await _scrollTo(tester, fix);
     await tester.tap(fix);
     await tester.pumpAndSettle();
 
-    expect(find.text('Turn off team protection'), findsNothing);
+    expect(find.text(_l10n.configFixTurnOffTeamProtection), findsNothing);
     expect(find.text('2 unsaved', skipOffstage: false), findsWidgets);
   });
 
@@ -457,13 +455,13 @@ void main() {
     );
     await _pump(tester, server);
 
-    expect(find.text('Scoring has started'), findsOneWidget);
+    expect(find.text(_l10n.configScoringStartedTitle), findsOneWidget);
     // The reason is the Fixed chip's tooltip, not a block under the setting.
     expect(
       find.text('Fixed once scoring has started.', skipOffstage: false),
       findsNothing,
     );
-    expect(find.text('Fixed', skipOffstage: false), findsWidgets);
+    expect(find.text(_l10n.configFixedChip, skipOffstage: false), findsWidgets);
     final lanes = find.descendant(
       of: find.byKey(const ValueKey('field-lane_mode')),
       matching: find.byType(FixedChip),
@@ -473,7 +471,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Fixed once scoring has started.'), findsOneWidget);
     expect(
-      find.bySemanticsLabel('Fixed: Fixed once scoring has started.'),
+      find.bySemanticsLabel(
+        _l10n.configFixedChipSemantics('Fixed once scoring has started.'),
+      ),
       findsWidgets,
     );
 
@@ -491,7 +491,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Administration is locked'), findsOneWidget);
+    expect(find.text(_l10n.configAdminLockedTitle), findsOneWidget);
     final classes = find.descendant(
       of: find.byKey(const ValueKey('field-classes_enabled')),
       matching: find.byType(Switch),
@@ -510,7 +510,7 @@ void main() {
       ),
     );
     // The page banner and the readiness panel both say it now.
-    expect(find.text('Contest completed'), findsWidgets);
+    expect(find.text(_l10n.configCompletedTitle), findsWidgets);
   });
 
   testWidgets(
@@ -525,7 +525,10 @@ void main() {
           matrix: configDrawnMatrix(),
         ),
       );
-      expect(find.text('Contest completed', skipOffstage: false), findsWidgets);
+      expect(
+        find.text(_l10n.configCompletedTitle, skipOffstage: false),
+        findsWidgets,
+      );
       expect(find.text('Drawn and in sync'), findsNothing);
       expect(
         find.descendant(
@@ -571,8 +574,8 @@ void main() {
     await tester.tap(_saveButton);
     await tester.pumpAndSettle();
 
-    expect(find.text('Configuration updated'), findsOneWidget);
-    await tester.tap(find.text('OK'));
+    expect(find.text(_l10n.configUpdatedTitle), findsOneWidget);
+    await tester.tap(find.text(_l10n.commonOk));
     await tester.pumpAndSettle();
     expect(find.text('1 unsaved change'), findsOneWidget);
   });
@@ -646,7 +649,7 @@ void main() {
         headers: {'content-type': 'application/json'},
       ),
     );
-    expect(find.text('The configuration could not be loaded.'), findsOneWidget);
+    expect(find.text(_l10n.configLoadFailed), findsOneWidget);
     expect(find.text('Retry'), findsNothing);
   });
 
@@ -659,7 +662,7 @@ void main() {
       handler: (request) async =>
           fail ? http.Response('boom', 500) : server.handle(request),
     );
-    expect(find.text('The configuration could not be loaded.'), findsOneWidget);
+    expect(find.text(_l10n.configLoadFailed), findsOneWidget);
 
     fail = false;
     await tester.tap(find.text('Retry'));

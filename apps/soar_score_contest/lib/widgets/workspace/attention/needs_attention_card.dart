@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/workspace/attention/attention_item.dart';
 import '../../../services/workspace/attention/needs_attention.dart';
 import 'attention_row.dart';
@@ -26,6 +27,7 @@ class NeedsAttentionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final dark = theme.brightness == Brightness.dark;
@@ -48,7 +50,7 @@ class NeedsAttentionCard extends StatelessWidget {
                   Semantics(
                     header: true,
                     child: Text(
-                      'Needs attention',
+                      l10n.workspaceAttentionTitle,
                       style: theme.textTheme.titleLarge,
                     ),
                   ),
@@ -66,6 +68,7 @@ class NeedsAttentionCard extends StatelessWidget {
               AttentionRow(item: item, onOpen: () => onOpen(item)),
             if (attention.isAllClear)
               _note(
+                l10n,
                 context,
                 icon: Icons.check_circle,
                 color: AppStatusColors.getSuccess(dark),
@@ -74,12 +77,13 @@ class NeedsAttentionCard extends StatelessWidget {
               )
             else if (!attention.complete)
               _note(
+                l10n,
                 context,
                 icon: Icons.info_outline,
                 color: scheme.onSurfaceVariant,
                 title: attention.hasItems
-                    ? 'This list may be incomplete'
-                    : 'Needs attention could not be worked out',
+                    ? l10n.workspaceAttentionIncomplete
+                    : l10n.workspaceAttentionUnknown,
                 body: NeedsAttention.incompleteText,
                 retry: onRetry,
               ),
@@ -90,6 +94,7 @@ class NeedsAttentionCard extends StatelessWidget {
   }
 
   Widget _note(
+    AppLocalizations l10n,
     BuildContext context, {
     required IconData icon,
     required Color color,
@@ -121,7 +126,7 @@ class NeedsAttentionCard extends StatelessWidget {
                   TextButton(
                     key: const ValueKey('attention-retry'),
                     onPressed: retry,
-                    child: const Text('Retry'),
+                    child: Text(l10n.workspaceRetry),
                   ),
               ],
             ),

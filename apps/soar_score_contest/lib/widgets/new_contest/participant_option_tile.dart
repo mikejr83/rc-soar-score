@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/participants/participant_option.dart';
 
 /// One participant option: what it is, how it changes the Participants
@@ -25,6 +26,7 @@ class ParticipantOptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final small = theme.textTheme.bodySmall;
@@ -51,7 +53,7 @@ class ParticipantOptionTile extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          option.title,
+                          option.title(l10n),
                           style: theme.textTheme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.w500,
                           ),
@@ -77,7 +79,7 @@ class ParticipantOptionTile extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'From source',
+                                  l10n.wizardFromSource,
                                   style: small?.copyWith(
                                     color: scheme.onSurfaceVariant,
                                   ),
@@ -89,7 +91,7 @@ class ParticipantOptionTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      option.description,
+                      option.description(l10n),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -108,8 +110,8 @@ class ParticipantOptionTile extends StatelessWidget {
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            '${value ? 'In Participants: ' : 'If on: '}'
-                            '${option.effect}',
+                            '${value ? l10n.wizardInParticipants : l10n.wizardIfOn}'
+                            '${option.effect(l10n)}',
                             style: small?.copyWith(
                               color: value
                                   ? scheme.onSurface
@@ -126,7 +128,7 @@ class ParticipantOptionTile extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Semantics(
-                  label: option.title,
+                  label: option.title(l10n),
                   child: Switch(
                     key: ValueKey('option-${option.name}'),
                     value: value,

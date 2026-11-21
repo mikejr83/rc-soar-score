@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/services/role_usage.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../api_error_text.dart';
 
 /// Where a role is used: the contests that have participants in it. While
@@ -14,6 +15,7 @@ class RoleUsageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Card(
       margin: EdgeInsets.zero,
@@ -23,7 +25,7 @@ class RoleUsageCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Where it is used',
+              l10n.rolesUsageTitle,
               style: theme.textTheme.titleSmall?.copyWith(
                 color: theme.colorScheme.primary,
               ),
@@ -37,13 +39,14 @@ class RoleUsageCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          'Usage could not be loaded. '
-                          '${apiErrorText(snapshot.error!)}',
+                          l10n.rolesUsageLoadFailed(
+                            apiErrorText(snapshot.error!),
+                          ),
                         ),
                       ),
                       TextButton(
                         onPressed: onRetry,
-                        child: const Text('Retry'),
+                        child: Text(l10n.wizardRetry),
                       ),
                     ],
                   );
@@ -53,7 +56,7 @@ class RoleUsageCard extends StatelessWidget {
                   return const LinearProgressIndicator();
                 }
                 if (items.isEmpty) {
-                  return const Text('No contest uses this role yet.');
+                  return Text(l10n.rolesUsageEmpty);
                 }
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,8 +65,10 @@ class RoleUsageCard extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Text(
-                          '${item.contestName}: ${item.participantCount} '
-                          '${item.participantCount == 1 ? 'participant' : 'participants'}',
+                          l10n.rolesUsageItem(
+                            item.contestName,
+                            item.participantCount,
+                          ),
                         ),
                       ),
                   ],

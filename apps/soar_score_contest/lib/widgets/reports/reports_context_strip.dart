@@ -28,12 +28,13 @@ class ReportsContextStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final completed = facts.isCompleted;
     return Semantics(
       container: true,
-      label: 'Reports are built from',
+      label: l10n.reportsBuiltFrom,
       child: DecoratedBox(
         key: const ValueKey('reports-context-strip'),
         decoration: BoxDecoration(
@@ -48,7 +49,7 @@ class ReportsContextStrip extends StatelessWidget {
             spacing: 12,
             children: [
               Text(
-                'Reports are built from',
+                l10n.reportsBuiltFrom,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
@@ -59,34 +60,31 @@ class ReportsContextStrip extends StatelessWidget {
                     _Fact(
                       key: const ValueKey('reports-fact-lifecycle'),
                       icon: completed ? Icons.task_alt : Icons.flag_outlined,
-                      label: 'Lifecycle',
+                      label: l10n.reportsFactLifecycle,
                       value:
                           completed &&
                               facts.resultStatus == ResultStatus.official
-                          ? 'Completed · Results are final'
-                          : ContestStatusChip.label(
-                              AppLocalizations.of(context),
-                              facts.lifecycle,
-                            ),
+                          ? l10n.reportsFactCompleted
+                          : ContestStatusChip.label(l10n, facts.lifecycle),
                     ),
                     if (facts.matrixRevision == null)
                       _Fact(
                         key: const ValueKey('reports-fact-matrix'),
                         icon: Icons.grid_view,
-                        label: 'Matrix',
-                        value: 'No matrix drawn',
+                        label: l10n.reportsFactMatrix,
+                        value: l10n.reportsFactNoMatrix,
                       ),
                     if (facts.configurationRevision == null)
                       _Fact(
                         key: const ValueKey('reports-fact-configuration'),
                         icon: Icons.tune,
-                        label: 'Configuration',
-                        value: 'None saved',
+                        label: l10n.reportsFactConfiguration,
+                        value: l10n.reportsFactNoneSaved,
                       ),
                     _Fact(
                       key: const ValueKey('reports-fact-progress'),
                       icon: _progressIcon(facts),
-                      label: 'Scoring progress',
+                      label: l10n.reportsFactScoringProgress,
                       value: facts.progressText,
                     ),
                     _ResultStatusFact(facts: facts),
@@ -183,6 +181,7 @@ class _ResultStatusFact extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Column(
       key: const ValueKey('reports-fact-result-status'),
@@ -190,7 +189,7 @@ class _ResultStatusFact extends StatelessWidget {
       spacing: 2,
       children: [
         Text(
-          'Standings produced now would be',
+          l10n.reportsResultStatusLead,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -200,7 +199,7 @@ class _ResultStatusFact extends StatelessWidget {
           spacing: 4,
           children: [
             Semantics(
-              label: 'Result status: ${facts.resultStatus.label}',
+              label: l10n.reportsResultStatusLabel(facts.resultStatus.label),
               excludeSemantics: true,
               child: ResultStatusChip(status: facts.resultStatus),
             ),

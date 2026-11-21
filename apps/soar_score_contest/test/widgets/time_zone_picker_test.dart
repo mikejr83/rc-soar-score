@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/widgets/new_contest/time_zone_picker.dart';
 
 void main() {
@@ -9,6 +10,7 @@ void main() {
     String? picked;
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: appLocalizationDelegates,
         home: Scaffold(
           body: Padding(
             padding: const EdgeInsets.all(16),

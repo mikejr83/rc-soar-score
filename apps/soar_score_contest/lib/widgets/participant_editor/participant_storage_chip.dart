@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/participants/participant_storage.dart';
 
 /// Where a stored participant lives: synced, or only on this device.
@@ -13,7 +14,8 @@ class ParticipantStorageChip extends StatelessWidget {
     final theme = Theme.of(context);
     final color = theme.colorScheme.onSurfaceVariant;
     return Semantics(
-      label: 'Storage: ${storage.label}',
+      label: AppLocalizations.of(context)
+          .participantEditorStorage(storage.label),
       excludeSemantics: true,
       child: Container(
         padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),

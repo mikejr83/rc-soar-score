@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// A small label with an icon: a row tag (`Unsaved`, `House rule`, `Fixed`),
 /// a section kind chip or an impact chip on the save bar. The meaning is in
 /// the text and icon, never the colour alone.
@@ -20,9 +22,10 @@ class ConfigChip extends StatelessWidget {
   /// `Unsaved`: the setting differs from the saved one.
   factory ConfigChip.unsaved(BuildContext context, {bool dense = true}) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return ConfigChip(
       icon: Icons.edit_outlined,
-      text: 'Unsaved',
+      text: l10n.configChipUnsaved,
       background: scheme.primaryContainer,
       foreground: scheme.onPrimaryContainer,
       dense: dense,
@@ -32,13 +35,14 @@ class ConfigChip extends StatelessWidget {
   /// `House rule`: the value differs from the official profile.
   factory ConfigChip.houseRule(
     BuildContext context, {
-    String text = 'House rule',
+    String? text,
     bool dense = true,
   }) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return ConfigChip(
       icon: Icons.home_outlined,
-      text: text,
+      text: text ?? l10n.configChipHouseRule,
       background: AppStatusColors.getSuccessContainer(
         scheme.brightness == Brightness.dark,
       ),
@@ -52,9 +56,10 @@ class ConfigChip extends StatelessWidget {
   /// `Error`: the value cannot be saved.
   factory ConfigChip.error(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return ConfigChip(
       icon: Icons.error_outline,
-      text: 'Error',
+      text: l10n.configChipError,
       background: scheme.errorContainer,
       foreground: scheme.onErrorContainer,
     );

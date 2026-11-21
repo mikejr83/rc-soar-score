@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/pages/new_contest_wizard_page.dart';
 import 'package:soar_score_contest/router.dart';
 import 'package:soar_score_contest/services/new_contest/contest_draft_store.dart';
@@ -29,7 +30,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
     expect(find.byType(NewContestWizardPage), findsNothing);
-    expect(find.text(NewContestWizardPage.leftMessage), findsOneWidget);
+    expect(
+      find.text(NewContestWizardPage.leftMessage(AppLocalizationsEn())),
+      findsOneWidget,
+    );
 
     wizard.router.go(newContestPath);
     await tester.pumpAndSettle();
