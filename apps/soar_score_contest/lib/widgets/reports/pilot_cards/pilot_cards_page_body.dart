@@ -1,7 +1,15 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_localizations_en.dart';
 import '../../../services/reports/pilot_cards/card_geometry.dart';
 import '../viewer/paper_style.dart';
+
+final AppLocalizations _fallbackL10n = AppLocalizationsEn();
+
+AppLocalizations _l10nOf(BuildContext context) =>
+    Localizations.of<AppLocalizations>(context, AppLocalizations) ??
+    _fallbackL10n;
 
 /// The body of one printed page of cards: two columns, one row in two-up and
 /// two in four-up, with dashed cut lines between the cards that are there.
@@ -35,9 +43,7 @@ class PilotCardsPageBody extends StatelessWidget {
       height: size.height,
       child: Semantics(
         container: true,
-        label:
-            'Page $number, ${cards.length} '
-            '${cards.length == 1 ? 'card' : 'cards'}',
+        label: _l10nOf(context).cardsPageLabel(number, cards.length),
         child: Stack(
           clipBehavior: Clip.hardEdge,
           children: [

@@ -12272,6 +12272,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name} entries'**
   String configLandingEntriesLabel(String name);
+
+  /// Heading of the pilot picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots'**
+  String get cardsPilotsHeading;
+
+  /// Live count of the pilot picker.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total} selected'**
+  String cardsPilotCount(int count, int total);
+
+  /// Hint of the pilot picker search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search pilots'**
+  String get cardsSearchPilots;
+
+  /// Select button while a search is active.
+  ///
+  /// In en, this message translates to:
+  /// **'Select {count} shown'**
+  String cardsSelectShown(int count);
+
+  /// Button that selects every listed pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get cardsSelectAll;
+
+  /// Deselect button while a search is active.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear shown'**
+  String get cardsClearShown;
+
+  /// Button that deselects every listed pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Select none'**
+  String get cardsSelectNone;
+
+  /// Tooltip of the add-a-team button.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a team’s pilots to the selection'**
+  String get cardsAddTeamHint;
+
+  /// Label of the add-a-team button.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a team'**
+  String get cardsAddTeam;
+
+  /// Accessible label of the pilot list.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot list'**
+  String get cardsPilotList;
+
+  /// Picker list when the contest has no pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilots in this contest yet.'**
+  String get cardsNoPilotsYet;
+
+  /// Picker list when no pilot matches the search.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilot matches “{query}”.'**
+  String cardsNoPilotMatches(String query);
+
+  /// Mark on a retired pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired'**
+  String get cardsRetired;
+
+  /// Heading of the pilot cards options group.
+  ///
+  /// In en, this message translates to:
+  /// **'Options'**
+  String get cardsOptions;
+
+  /// Heading of the pilot cards group.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
+  String get cardsGroup;
+
+  /// Label of the include-retired-pilots option.
+  ///
+  /// In en, this message translates to:
+  /// **'Include retired pilots'**
+  String get cardsIncludeRetired;
+
+  /// Help when include retired pilots is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired pilots are marked “Retired” on their cards.'**
+  String get cardsIncludeRetiredHelp;
+
+  /// Help when include retired pilots is off.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} retired {count, plural, =1{pilot is}other{pilots are}} left out.'**
+  String cardsRetiredLeftOut(int count);
+
+  /// Label of the pre-fill option.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-fill'**
+  String get cardsPrefill;
+
+  /// Help when pre-fill is unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No scores have been entered yet.'**
+  String get cardsPrefillUnavailable;
+
+  /// Help when pre-fill is available.
+  ///
+  /// In en, this message translates to:
+  /// **'Prints the scores already entered, so pilots can check them.'**
+  String get cardsPrefillHelp;
+
+  /// Label of the automatic cards-per-page choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get cardsAutomatic;
+
+  /// Label of the four-cards-per-page choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Four per page'**
+  String get cardsFourPerPage;
+
+  /// Label of the two-cards-per-page choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Two per page'**
+  String get cardsTwoPerPage;
+
+  /// Label of a print margin choice.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} margin'**
+  String cardsMarginLabel(String label);
+
+  /// Label of the standard print margin.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get cardsMarginStandard;
+
+  /// Help of the standard print margin.
+  ///
+  /// In en, this message translates to:
+  /// **'6.35 mm (¼ in) from the paper’s edge.'**
+  String get cardsMarginStandardHelp;
+
+  /// Label of the wide print margin.
+  ///
+  /// In en, this message translates to:
+  /// **'Wide'**
+  String get cardsMarginWide;
+
+  /// Help of the wide print margin.
+  ///
+  /// In en, this message translates to:
+  /// **'10 mm from the paper’s edge, for a printer that cuts the cards off.'**
+  String get cardsMarginWideHelp;
+
+  /// Summary when no card is produced.
+  ///
+  /// In en, this message translates to:
+  /// **'No cards'**
+  String get cardsNoCards;
+
+  /// Summary of the cards and pages produced.
+  ///
+  /// In en, this message translates to:
+  /// **'{cards} {cards, plural, =1{card}other{cards}} · {pages} {pages, plural, =1{page}other{pages}}'**
+  String cardsSummary(int cards, int pages);
+
+  /// Choice help when the rounds do not fit.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many rounds'**
+  String get cardsTooManyRounds;
+
+  /// Choice help when automatic picks four per page.
+  ///
+  /// In en, this message translates to:
+  /// **'Using four per page'**
+  String get cardsUsingFourPerPage;
+
+  /// Choice help when automatic picks two per page.
+  ///
+  /// In en, this message translates to:
+  /// **'Using two per page'**
+  String get cardsUsingTwoPerPage;
+
+  /// Choice help for the four-per-page choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarter-page cards'**
+  String get cardsQuarterPage;
+
+  /// Choice help when four per page does not fit.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows would be under 8 mm'**
+  String get cardsRowsUnderEight;
+
+  /// Choice help for the two-per-page choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Half-page cards'**
+  String get cardsHalfPage;
+
+  /// Cards message when the range holds no rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'No rounds in range.'**
+  String get cardsNoRoundsInRange;
+
+  /// Cards message when the rounds do not fit even a half page.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest has too many rounds for a scoring card. A half-page card holds up to {max} rounds at the minimum 8 mm row height.'**
+  String cardsTooManyRoundsMessage(int max);
+
+  /// Cards message when two per page is in force.
+  ///
+  /// In en, this message translates to:
+  /// **'{rounds} rounds on half-page cards. Up to {max} fit.'**
+  String cardsRoundsHalfPage(int rounds, int max);
+
+  /// Cards message when four per page fits.
+  ///
+  /// In en, this message translates to:
+  /// **'{rounds} rounds fit four to a page (up to {max} at 8 mm rows).'**
+  String cardsRoundsFitFour(int rounds, int max);
+
+  /// Cards message when four per page does not fit.
+  ///
+  /// In en, this message translates to:
+  /// **'{rounds} rounds don’t fit four to a page; using two. Four holds up to {max}.'**
+  String cardsRoundsNotFour(int rounds, int max);
+
+  /// Accessible label of a pilot's scoring card.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring card, {pilot}'**
+  String cardsCardSemantics(String pilot);
+
+  /// Caption beside the card's QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to enter scores'**
+  String get cardsScanToEnter;
+
+  /// Accessible label of the card's QR code.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code, scan to enter scores'**
+  String get cardsQrLabel;
+
+  /// Accessible label of a printed page of cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}, {count} {count, plural, =1{card}other{cards}}'**
+  String cardsPageLabel(int page, int count);
 }
 
 class _AppLocalizationsDelegate

@@ -1,3 +1,4 @@
+import '../../../l10n/app_localizations.dart';
 import '../draw_matrix/draw_matrix_options.dart';
 import '../report_pilot.dart';
 import '../reports_facts.dart';
@@ -6,14 +7,19 @@ import 'card_geometry.dart';
 
 /// The cards-per-page setting.
 enum CardsPerPageChoice {
-  automatic('auto', 'Automatic'),
-  four('four', 'Four per page'),
-  two('two', 'Two per page');
+  automatic('auto'),
+  four('four'),
+  two('two');
 
-  const CardsPerPageChoice(this.key, this.label);
+  const CardsPerPageChoice(this.key);
 
   final String key;
-  final String label;
+
+  String label(AppLocalizations l10n) => switch (this) {
+    automatic => l10n.cardsAutomatic,
+    four => l10n.cardsFourPerPage,
+    two => l10n.cardsTwoPerPage,
+  };
 
   static const Set<String> keys = {'auto', 'four', 'two'};
 
@@ -26,20 +32,23 @@ enum CardsPerPageChoice {
 /// common inkjets reach; [wide] is 10 mm, for a printer that still cuts the
 /// edges off.
 enum PrintMargin {
-  standard('std', 'Standard', '6.35 mm (¼ in) from the paper’s edge.', 6.35),
-  wide(
-    'wide',
-    'Wide',
-    '10 mm from the paper’s edge, for a printer that cuts the cards off.',
-    10,
-  );
+  standard('std', 6.35),
+  wide('wide', 10);
 
-  const PrintMargin(this.key, this.label, this.help, this.mm);
+  const PrintMargin(this.key, this.mm);
 
   final String key;
-  final String label;
-  final String help;
   final double mm;
+
+  String label(AppLocalizations l10n) => switch (this) {
+    standard => l10n.cardsMarginStandard,
+    wide => l10n.cardsMarginWide,
+  };
+
+  String help(AppLocalizations l10n) => switch (this) {
+    standard => l10n.cardsMarginStandardHelp,
+    wide => l10n.cardsMarginWideHelp,
+  };
 
   static const Set<String> keys = {'std', 'wide'};
 

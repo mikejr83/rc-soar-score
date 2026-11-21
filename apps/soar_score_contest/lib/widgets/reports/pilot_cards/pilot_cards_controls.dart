@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/reports/pilot_cards/card_sheet_decision.dart';
 import '../../../services/reports/pilot_cards/pilot_cards_options.dart';
 import '../../../services/reports/viewer/report_spec.dart';
@@ -19,6 +20,7 @@ List<ReportControlGroup> pilotCardsControls(
   PilotCardsOptions options,
   CardSheetDecision decision,
 ) {
+  final l10n = context.l10n;
   final range = options.range;
   final check = context.check;
   final rangeProblem =
@@ -26,7 +28,9 @@ List<ReportControlGroup> pilotCardsControls(
       (check is ReportEmpty && options.rounds.isEmpty);
   final rounds = {
     for (var r = 1; r <= range.planned; r++)
-      '$r': r > range.drawn ? 'Round $r · not drawn' : 'Round $r',
+      '$r': r > range.drawn
+          ? l10n.matrixRoundLabelNotDrawn(r)
+          : l10n.matrixRoundLabel(r),
   };
   final undrawn = {for (var r = range.drawn + 1; r <= range.planned; r++) '$r'};
   final retired = context.facts.pilots.where((p) => p.isRetired).length;
@@ -37,10 +41,10 @@ List<ReportControlGroup> pilotCardsControls(
 
   return [
     ReportControlGroup(
-      title: 'Filter',
+      title: l10n.standingsFilter,
       children: [
         ReportDropdown(
-          label: 'From round',
+          label: l10n.standingsFromRound,
           value: '${range.from}',
           items: rounds,
           disabled: undrawn,
@@ -48,7 +52,7 @@ List<ReportControlGroup> pilotCardsControls(
           errorText: rangeProblem ? '' : null,
         ),
         ReportDropdown(
-          label: 'To round',
+          label: l10n.standingsToRound,
           value: '${range.requestedTo}',
           items: rounds,
           disabled: undrawn,
@@ -72,18 +76,19 @@ List<ReportControlGroup> pilotCardsControls(
               onPressed: () =>
                   context.setFilters({'from': '1', 'to': '${range.drawn}'}),
               child: Text(
-                range.hasUndrawn ? 'Show all drawn rounds' : 'Show all rounds',
+                range.hasUndrawn
+                    ? l10n.matrixShowAllDrawn
+                    : l10n.matrixShowAllRounds,
               ),
             ),
           ),
         if (retired > 0)
           ReportCheckOption(
             key: const ValueKey('cards-include-retired'),
-            label: 'Include retired pilots',
+            label: l10n.cardsIncludeRetired,
             help: options.includeRetired
-                ? 'Retired pilots are marked “Retired” on their cards.'
-                : '$retired retired ${retired == 1 ? 'pilot is' : 'pilots are'} '
-                      'left out.',
+                ? l10n.cardsIncludeRetiredHelp
+                : l10n.cardsRetiredLeftOut(retired),
             value: options.includeRetired,
             onChanged: (on) => context.setFilter('ret', on ? '1' : '0'),
           ),
@@ -94,13 +99,13 @@ List<ReportControlGroup> pilotCardsControls(
       ],
     ),
     ReportControlGroup(
-      title: 'Options',
+      title: l10n.cardsOptions,
       children: [
         ReportSwitchOption(
-          label: 'Pre-fill',
+          label: l10n.cardsPrefill,
           help: !options.prefillAvailable
-              ? 'No scores have been entered yet.'
-              : 'Prints the scores already entered, so pilots can check them.',
+              ? l10n.cardsPrefillUnavailable
+              : l10n.cardsPrefillHelp,
           value: options.prefill,
           enabled: options.prefillAvailable,
           onChanged: (on) => context.setFilter('pre', on ? '1' : '0'),
@@ -108,7 +113,7 @@ List<ReportControlGroup> pilotCardsControls(
       ],
     ),
     ReportControlGroup(
-      title: 'Cards',
+      title: l10n.cardsGroup,
       children: [
         RadioGroup<String>(
           groupValue: options.perPage.key,
@@ -128,15 +133,15 @@ List<ReportControlGroup> pilotCardsControls(
                   contentPadding: EdgeInsets.zero,
                   enabled:
                       choice != CardsPerPageChoice.four || decision.fitsFour,
-                  title: Text(choice.label),
-                  subtitle: Text(_choiceHelp(choice, decision)),
+                  title: Text(choice.label(l10n)),
+                  subtitle: Text(_choiceHelp(l10n, choice, decision)),
                 ),
             ],
           ),
         ),
         ReportFieldMessage(
           key: const ValueKey('cards-up-message'),
-          text: decision.message,
+          text: decision.message(l10n),
           isError: decision.tooMany,
         ),
         const Divider(),
@@ -156,8 +161,8 @@ List<ReportControlGroup> pilotCardsControls(
                   value: margin.key,
                   dense: true,
                   contentPadding: EdgeInsets.zero,
-                  title: Text('${margin.label} margin'),
-                  subtitle: Text(margin.help),
+                  title: Text(l10n.cardsMarginLabel(margin.label(l10n))),
+                  subtitle: Text(margin.help(l10n)),
                 ),
             ],
           ),
@@ -167,9 +172,8 @@ List<ReportControlGroup> pilotCardsControls(
           child: Builder(
             builder: (context) => Text(
               cards == 0 || decision.perPage == null
-                  ? 'No cards'
-                  : '$cards ${cards == 1 ? 'card' : 'cards'} · $pages '
-                        '${pages == 1 ? 'page' : 'pages'}',
+                  ? l10n.cardsNoCards
+                  : l10n.cardsSummary(cards, pages),
               key: const ValueKey('cards-summary'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
@@ -180,15 +184,21 @@ List<ReportControlGroup> pilotCardsControls(
   ];
 }
 
-String _choiceHelp(CardsPerPageChoice choice, CardSheetDecision decision) =>
+String _choiceHelp(
+  AppLocalizations l10n,
+  CardsPerPageChoice choice,
+  CardSheetDecision decision,
+) =>
     switch (choice) {
       CardsPerPageChoice.automatic =>
         decision.tooMany
-            ? 'Too many rounds'
+            ? l10n.cardsTooManyRounds
             : decision.perPage?.count == 4
-            ? 'Using four per page'
-            : 'Using two per page',
+            ? l10n.cardsUsingFourPerPage
+            : l10n.cardsUsingTwoPerPage,
       CardsPerPageChoice.four =>
-        decision.fitsFour ? 'Quarter-page cards' : 'Rows would be under 8 mm',
-      CardsPerPageChoice.two => 'Half-page cards',
+        decision.fitsFour
+            ? l10n.cardsQuarterPage
+            : l10n.cardsRowsUnderEight,
+      CardsPerPageChoice.two => l10n.cardsHalfPage,
     };

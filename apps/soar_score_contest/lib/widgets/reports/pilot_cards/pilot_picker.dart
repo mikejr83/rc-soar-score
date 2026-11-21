@@ -1,7 +1,15 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_localizations_en.dart';
 import '../../../services/reports/pilot_cards/pilot_cards_options.dart';
 import '../../../services/reports/report_pilot.dart';
+
+final AppLocalizations _fallbackL10n = AppLocalizationsEn();
+
+AppLocalizations _l10nOf(BuildContext context) =>
+    Localizations.of<AppLocalizations>(context, AppLocalizations) ??
+    _fallbackL10n;
 
 /// The pilots that get a card: a searchable checkbox list with Select all,
 /// Select none, a team shortcut and a live count. With a search active the
@@ -86,6 +94,7 @@ class _PilotPickerState extends State<PilotPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = _l10nOf(context);
     final theme = Theme.of(context);
     final shown = _shown;
     final searching = _search.text.trim().isNotEmpty;
@@ -99,11 +108,16 @@ class _PilotPickerState extends State<PilotPicker> {
       children: [
         Row(
           children: [
-            Expanded(child: Text('Pilots', style: theme.textTheme.titleSmall)),
+            Expanded(
+              child: Text(
+                l10n.cardsPilotsHeading,
+                style: theme.textTheme.titleSmall,
+              ),
+            ),
             Semantics(
               liveRegion: true,
               child: Text(
-                '$count of $total selected',
+                l10n.cardsPilotCount(count, total),
                 key: const ValueKey('cards-pilot-count'),
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: count == 0
@@ -117,7 +131,7 @@ class _PilotPickerState extends State<PilotPicker> {
         SearchBar(
           key: const ValueKey('cards-pilot-search'),
           controller: _search,
-          hintText: 'Search pilots',
+          hintText: l10n.cardsSearchPilots,
           leading: const Icon(Icons.search),
           elevation: const WidgetStatePropertyAll(0),
           constraints: const BoxConstraints(minHeight: 44, maxHeight: 44),
@@ -131,28 +145,33 @@ class _PilotPickerState extends State<PilotPicker> {
               key: const ValueKey('cards-select-all'),
               onPressed: shown.isEmpty ? null : _selectShown,
               child: Text(
-                searching ? 'Select ${shown.length} shown' : 'Select all',
+                searching
+                    ? l10n.cardsSelectShown(shown.length)
+                    : l10n.cardsSelectAll,
               ),
             ),
             TextButton(
               key: const ValueKey('cards-select-none'),
               onPressed: shown.isEmpty ? null : _deselectShown,
-              child: Text(searching ? 'Clear shown' : 'Select none'),
+              child: Text(searching ? l10n.cardsClearShown : l10n.cardsSelectNone),
             ),
             if (teams.isNotEmpty)
               PopupMenuButton<String>(
                 key: const ValueKey('cards-add-team'),
-                tooltip: 'Add a team’s pilots to the selection',
+                tooltip: l10n.cardsAddTeamHint,
                 onSelected: _addTeam,
                 itemBuilder: (context) => [
                   for (final team in teams)
                     PopupMenuItem(value: team, child: Text(team)),
                 ],
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: [Text('Add a team'), Icon(Icons.arrow_drop_down)],
+                    children: [
+                      Text(l10n.cardsAddTeam),
+                      const Icon(Icons.arrow_drop_down),
+                    ],
                   ),
                 ),
               ),
@@ -160,7 +179,7 @@ class _PilotPickerState extends State<PilotPicker> {
         ),
         Semantics(
           container: true,
-          label: 'Pilot list',
+          label: l10n.cardsPilotList,
           child: Container(
             height: widget.listHeight,
             decoration: BoxDecoration(
@@ -172,8 +191,10 @@ class _PilotPickerState extends State<PilotPicker> {
                     padding: const EdgeInsets.all(16),
                     child: Text(
                       total == 0
-                          ? 'No pilots in this contest yet.'
-                          : 'No pilot matches “${_search.text.trim()}”.',
+                          ? l10n.cardsNoPilotsYet
+                          : l10n.cardsNoPilotMatches(
+                              _search.text.trim(),
+                            ),
                       style: theme.textTheme.bodySmall,
                     ),
                   )
@@ -192,9 +213,11 @@ class _PilotPickerState extends State<PilotPicker> {
                             ? null
                             : Text(_sub(pilot)!),
                         secondary: pilot.isRetired
-                            ? const Text(
-                                'Retired',
-                                style: TextStyle(fontWeight: FontWeight.w500),
+                            ? Text(
+                                l10n.cardsRetired,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                ),
                               )
                             : null,
                       );
