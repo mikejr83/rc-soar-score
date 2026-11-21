@@ -1,3 +1,4 @@
+import '../../../l10n/app_localizations.dart';
 import '../report_availability.dart';
 import '../reports_facts.dart';
 import '../result_status.dart';
@@ -12,6 +13,7 @@ class StandingsStatus {
   const StandingsStatus({required this.status, this.reason, this.action});
 
   factory StandingsStatus.of(
+    AppLocalizations l10n,
     ReportsFacts facts,
     StandingsOptions options,
     StandingsReportData data,
@@ -43,23 +45,16 @@ class StandingsStatus {
     }
     final parts = <String>[];
     for (final entry in missing.take(2)) {
-      final count = entry.value;
-      parts.add(
-        'round ${entry.key} has $count missing '
-        '${count == 1 ? 'score' : 'scores'}',
-      );
+      parts.add(l10n.standingsStatusRoundMissing(entry.key, entry.value));
     }
     if (missing.length > 2) {
-      parts.add('${missing.length - 2} more rounds are missing scores');
+      parts.add(l10n.standingsStatusMoreRounds(missing.length - 2));
     }
     final review = facts.inReviewByRound.entries
         .where((entry) => entry.key <= through)
         .fold<int>(0, (sum, entry) => sum + entry.value.length);
     if (review > 0) {
-      parts.add(
-        '$review ${review == 1 ? 'pilot has' : 'pilots have'} a score '
-        'in review',
-      );
+      parts.add(l10n.standingsStatusReview(review));
     }
     final submitted = unofficial - review;
     if (facts.isCompleted && submitted > 0) {
@@ -76,22 +71,23 @@ class StandingsStatus {
     }
     final String reason;
     if (parts.isEmpty) {
-      reason = 'some scores are not final yet.';
+      reason = l10n.standingsStatusNotFinal;
     } else {
       final hint =
           options.provisional &&
               facts.lastFullyScoredRound > 0 &&
               facts.lastFullyScoredRound < options.to
-          ? ' Turn off Provisional to print rounds 1 to '
-                '${facts.lastFullyScoredRound} as Official.'
-          : '';
+              ? l10n.standingsStatusProvisionalHint(
+                  facts.lastFullyScoredRound,
+                )
+              : '';
       reason = '${parts.join(' and ')}.$hint';
     }
     return StandingsStatus(
       status: ResultStatus.preliminary,
       reason: reason,
       action: ReportAction(
-        'Open Scoring',
+        l10n.standingsStatusOpenScoring,
         ReportDestination.scoring,
         round: missing.isNotEmpty
             ? missing.first.key

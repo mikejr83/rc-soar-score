@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../report_pilot.dart';
 import '../reports_facts.dart';
 import 'standings_options.dart';
@@ -140,8 +141,14 @@ class StandingsTable {
   final bool isF3j;
 
   /// The Flight details labels, in line order.
-  List<String> get detailLabels =>
-      isF3j ? const ['Time', 'Landing'] : const ['Time', 'Landing', 'Height'];
+  List<String> detailLabels(AppLocalizations l10n) =>
+      isF3j
+          ? [l10n.standingsDetailTime, l10n.standingsDetailLanding]
+          : [
+              l10n.standingsDetailTime,
+              l10n.standingsDetailLanding,
+              l10n.standingsDetailHeight,
+            ];
 
   /// The lines under a round score: time, landing points, launch height. A
   /// part that was not recorded is `—`, which is not 0.
@@ -159,7 +166,7 @@ class StandingsTable {
         '—',
       if (detail?.height case final height?) '${height}m' else '—',
     ];
-    return lines.take(detailLabels.length).toList();
+    return lines.take(isF3j ? 2 : 3).toList();
   }
 }
 

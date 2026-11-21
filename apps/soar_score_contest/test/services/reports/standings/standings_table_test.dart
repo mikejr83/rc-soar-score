@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/reports/standings/standings_options.dart';
 import 'package:soar_score_contest/services/reports/standings/standings_report_data.dart';
 import 'package:soar_score_contest/services/reports/standings/standings_status.dart';
@@ -9,6 +10,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 import '../../../support/matrix_test_support.dart';
 import '../../../support/standings_fixtures.dart';
 import '../../../support/workspace_facts_support.dart';
+
+final l10n = AppLocalizationsEn();
 
 StandingsReportData _data(
   StandingsFixture fixture, {
@@ -202,14 +205,14 @@ void main() {
 
   group('status', () {
     test('official when the stored standings are final', () {
-      final status = StandingsStatus.of(facts, options({}), _data(fixture));
+      final status = StandingsStatus.of(l10n, facts, options({}), _data(fixture));
       expect(status.status, ResultStatus.official);
       expect(status.reason, isNull);
     });
 
     test('preliminary when the stored standings say so', () {
       final prelim = StandingsFixture(preliminary: true);
-      final status = StandingsStatus.of(facts, options({}), _data(prelim));
+      final status = StandingsStatus.of(l10n, facts, options({}), _data(prelim));
       expect(status.status, ResultStatus.preliminary);
       expect(status.reason, isNotEmpty);
       expect(status.action?.label, 'Open Scoring');
@@ -225,7 +228,7 @@ void main() {
         flights: _data(fixture).flights,
         details: const {},
       );
-      final status = StandingsStatus.of(facts, options({}), stale);
+      final status = StandingsStatus.of(l10n, facts, options({}), stale);
       expect(status.status, ResultStatus.preliminary);
       expect(status.reason, contains('calculated before the latest change'));
     });
@@ -242,6 +245,7 @@ void main() {
       );
       final prelim = StandingsFixture(preliminary: true);
       final status = StandingsStatus.of(
+        l10n,
         partial,
         StandingsOptions.of(StandingsOptions.defaults(partial), partial),
         _data(prelim),
