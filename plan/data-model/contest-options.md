@@ -58,7 +58,7 @@ A configuration revision holds the **full resolved settings**, not only the dire
 
 ### Public update mode and synced changes
 
-`public_update_mode` applies the same way to changes a native installation syncs as to scores entered through the API. After a sync exchange accepts changes that the public site shows (a score, a configuration such as dropped rounds, the roster or matrix, completing the contest), the server recalculates the results and then republishes an already published contest: `Automatic` for any such change, `RoundCompletion` for any change that is not only score entries and for score entries once a round is complete, `Manual` never. The mode read is the one in the configuration the exchange just accepted. It never creates a publication, and a refused or failed publish leaves the last projection public.
+`public_update_mode` applies the same way to changes a native installation syncs as to scores entered through the API. After a sync exchange accepts changes that the public site shows (a score, a configuration such as dropped rounds, the roster or matrix, completing the contest), the server recalculates the results and then republishes an already published contest: `Automatic` for any such change, `RoundCompletion` for any change that is not only score changes (entries, or a Mark official promotion), and for score changes once a round they touch is complete (the same rule as a score entry through the API; completing the contest always counts), `Manual` never. The mode read is the one in the configuration the exchange just accepted. It never creates a publication, and a refused or failed publish leaves the last projection public.
 
 ### Scores become official
 

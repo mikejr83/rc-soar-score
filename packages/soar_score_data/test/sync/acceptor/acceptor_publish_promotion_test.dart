@@ -1,0 +1,163 @@
+import 'package:soar_score_core/services/services.dart';
+import 'package:soar_score_core/soar_score_core.dart' as core;
+import 'package:soar_score_data/soar_score_data.dart';
+import 'package:test/test.dart';
+
+import '../../support/acceptor_harness.dart';
+import '../../support/backends.dart';
+
+void main() => forEachBackend(_tests);
+
+/// A native Mark official reaches the server as a `ScorePromotion` intent
+/// whose official score the server writes itself, so the incoming entity
+/// types alone do not show the score change.
+void _tests(Backend backend) {
+  late AcceptorHarness harness;
+  late core.Id contestId;
+  late core.ContestScopeKey scope;
+  late core.ScorePlaceholder slot;
+
+  setUp(() async {
+    harness = await AcceptorHarness.open(
+      backend,
+      recalculates: true,
+      publishes: true,
+    );
+    await DemoDataSeeder(
+      harness.clientRepository,
+      localAccountId: harness.account,
+    ).seed();
+    final contest = (await harness.clientRepository.contestRepository.getAll())
+        .firstWhere((c) => c.name == 'Mountain States Team F5J');
+    contestId = contest.id;
+    scope = core.ContestScopeKey(contestId);
+    await harness.uploadAll(contestId);
+    final stored = (await harness.serverRepository.contestRepository.findById(
+      contestId,
+    ))!;
+    await PublicationService(harness.serverRepository).publish(
+      contestId,
+      actorId: harness.account,
+      authority: core.Authority.director,
+      clientMutationId: 'first',
+      sourceContestRevision: stored.revision,
+    );
+    // Automatic mode, so the round the slot belongs to does not matter.
+    final latest = (await harness
+        .clientRepository
+        .contestConfigurationRevisionRepository
+        .latestForContest(contestId))!;
+    await ContestConfigurationService(harness.clientRepository).save(
+      contestId,
+      ConfigurationInput(
+        baseRevisionNumber: latest.revisionNumber,
+        disciplineProfileId: latest.disciplineProfileId,
+        config: core.ContestConfig(
+          core: {
+            ...latest.config.core,
+            'public_update_mode': core.PublicUpdateMode.automatic.json,
+          },
+          discipline: latest.config.discipline,
+        ),
+      ),
+      createdBy: harness.account,
+      metadata: core.MutationMetadata(
+        clientMutationId: 'mode-automatic',
+        authority: core.Authority.director,
+        clientTime: DateTime.utc(2026, 11, 16),
+        actorId: harness.account,
+      ),
+    );
+    final sent = await harness.outbox(scope);
+    final out = await harness.exchange(scope, mutations: sent);
+    await harness.acknowledge(sent, out.results);
+    slot = (await harness.server.stores.of('ScorePlaceholder').all())
+        .cast<core.ScorePlaceholder>()
+        .firstWhere(
+          (p) =>
+              p.contestId == contestId &&
+              p.state == core.ScorePlaceholderState.submitted,
+        );
+  });
+  tearDown(() => harness.close());
+
+  Future<List<core.PublicationProjection>> projections() async {
+    final identity = (await harness
+        .serverRepository
+        .publicationIdentityRepository
+        .findForContest(contestId))!;
+    return harness.serverRepository.publicationProjectionRepository
+        .listForPublication(identity.id);
+  }
+
+  SyncMutation intent() => SyncMutation(
+    id: core.Id.create(),
+    clientMutationId: 'promote-1',
+    entityType: core.promotionReceiptEntityType,
+    entityId: core.Id.parse('01900000-0000-7000-8000-000000000001'),
+    authority: core.Authority.director,
+    clientTime: DateTime.utc(2026, 11, 16),
+    payload: {
+      'version': 1,
+      'data': {
+        'operation': core.SyncCapabilities.promoteScore,
+        'operation_version': 1,
+        'assignment_id': slot.assignmentId.value,
+        'source_attempt_id': slot.currentAttemptId!.value,
+        'expected_score_revision': slot.scoreRevision,
+      },
+    },
+  );
+
+  test(
+    'a promotion-only exchange republishes once; its replay does not',
+    () async {
+      final before = (await projections()).length;
+      final m = intent();
+
+      final first = await harness.exchange(scope, mutations: [m]);
+      expect(first.results.single.outcome, core.MutationOutcome.accepted);
+      final afterFirst = await projections();
+      expect(afterFirst, hasLength(before + 1));
+      final latest = afterFirst.reduce(
+        (a, b) => a.projectionRevision > b.projectionRevision ? a : b,
+      );
+      final earlier = afterFirst.firstWhere(
+        (p) => p.projectionRevision == latest.projectionRevision - 1,
+      );
+      // The official score the server wrote is in the new projection only.
+      expect(latest.standings, isNot(equals(earlier.standings)));
+
+      final replay = await harness.exchange(scope, mutations: [m]);
+      expect(replay.results.single.replayed, isTrue);
+      expect(await projections(), hasLength(before + 1));
+    },
+  );
+
+  test('a refused promotion publishes nothing', () async {
+    final before = (await projections()).length;
+    final stale = SyncMutation(
+      id: core.Id.create(),
+      clientMutationId: 'promote-stale',
+      entityType: core.promotionReceiptEntityType,
+      entityId: core.Id.create(),
+      authority: core.Authority.director,
+      clientTime: DateTime.utc(2026, 11, 16),
+      payload: {
+        'version': 1,
+        'data': {
+          'operation': core.SyncCapabilities.promoteScore,
+          'operation_version': 1,
+          'assignment_id': slot.assignmentId.value,
+          'source_attempt_id': slot.currentAttemptId!.value,
+          'expected_score_revision': slot.scoreRevision + 5,
+        },
+      },
+    );
+
+    final out = await harness.exchange(scope, mutations: [stale]);
+
+    expect(out.results.single.outcome, isNot(core.MutationOutcome.accepted));
+    expect(await projections(), hasLength(before));
+  });
+}

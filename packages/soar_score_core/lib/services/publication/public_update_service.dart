@@ -3,11 +3,13 @@ import 'package:logging/logging.dart';
 import '../../enums/audit_action.dart';
 import '../../enums/audit_outcome.dart';
 import '../../enums/authority.dart';
+import '../../enums/lifecycle_state.dart';
 import '../../enums/public_update_mode.dart';
 import '../../errors/contest_state_error.dart';
 import '../../models/contest/core_options.dart';
 import '../../models/id.dart';
 import '../../models/sync/audit_event.dart';
+import '../../repositories/recorded_score.dart';
 import '../../repositories/repository.dart';
 import '../scores_service.dart';
 import 'publication_service.dart';
@@ -124,11 +126,19 @@ class PublicUpdateService {
     'MatrixAssignment',
     'ScoreAttempt',
     'OfficialScore',
+    promotionReceiptEntityType,
   };
 
-  /// Entity types that are score entries, which the RoundCompletion mode
-  /// holds back until a round is complete.
-  static const _scoreTypes = {'ScoreAttempt', 'OfficialScore'};
+  /// Entity types that carry a score change (a native score write queues
+  /// the attempt, the official score and the placeholder together; Mark
+  /// official arrives as a promotion), which the RoundCompletion mode holds
+  /// back until the affected round is complete.
+  static const _scoreTypes = {
+    'ScoreAttempt',
+    'OfficialScore',
+    'ScorePlaceholder',
+    promotionReceiptEntityType,
+  };
 
   /// Publishes after a sync exchange accepted changes of [entityTypes], so a
   /// change made in the app reaches the public site without a manual publish:
@@ -136,10 +146,16 @@ class PublicUpdateService {
   /// completing the contest, or scores.
   ///
   /// By the update mode: Automatic publishes for any such change;
-  /// RoundCompletion for any change that is not only score entries, and for
-  /// score entries once a round is complete; Manual never. It never creates
-  /// a publication. [exchangeMutationId] (the last accepted mutation of the
-  /// exchange) makes a retried exchange publish once.
+  /// RoundCompletion for any change that is not only score changes, and for
+  /// score changes once a round they touch is complete (the same rule as a
+  /// score entry through the API); Manual never. [assignmentIds] are the
+  /// matrix assignments the accepted score changes belong to. A `Contest`
+  /// change that comes with score changes is their companion (a score write
+  /// saves the contest too) and counts as one, unless the contest is
+  /// Completed, which is the end of the last round and always publishes.
+  ///
+  /// It never creates a publication. [exchangeMutationId] (the last accepted
+  /// mutation of the exchange) makes a retried exchange publish once.
   ///
   /// Returns the publish, or null when the mode, the entity types or the
   /// contest's publication state say not to. A failed publish is audited and
@@ -147,6 +163,7 @@ class PublicUpdateService {
   Future<PublishResult?> afterSync(
     Id contestId, {
     required Set<String> entityTypes,
+    Set<Id> assignmentIds = const {},
     required String exchangeMutationId,
   }) async {
     final changed = entityTypes.intersection(_publicTypes);
@@ -157,8 +174,7 @@ class PublicUpdateService {
     final mode = await _modeOf(contestId);
     if (mode == null || mode == PublicUpdateMode.manual) return null;
     if (mode == PublicUpdateMode.roundCompletion &&
-        _scoreTypes.containsAll(changed) &&
-        !(await _scores.list(contestId)).rounds.any((r) => r.isComplete)) {
+        !await _worthPublishing(contestId, changed, assignmentIds)) {
       return null;
     }
     try {
@@ -172,6 +188,32 @@ class PublicUpdateService {
       await _auditFailure(contestId, identity.id, 'sync-$exchangeMutationId');
       rethrow;
     }
+  }
+
+  /// RoundCompletion's rule for a synced batch of [changed] types.
+  Future<bool> _worthPublishing(
+    Id contestId,
+    Set<String> changed,
+    Set<Id> assignmentIds,
+  ) async {
+    final others = changed.difference({..._scoreTypes, 'Contest'});
+    if (others.isNotEmpty) return true;
+    final scoreChanged = changed.intersection(_scoreTypes).isNotEmpty;
+    if (!scoreChanged) return true; // only the contest itself changed
+    final contest = await repository.contestRepository.findById(contestId);
+    if (contest?.lifecycleState == LifecycleState.completed) return true;
+    final roundIds = <Id>{};
+    for (final id in assignmentIds) {
+      final assignment = await repository.matrixAssignmentRepository.findById(
+        id,
+      );
+      if (assignment != null) roundIds.add(assignment.scheduledRoundId);
+    }
+    if (roundIds.isEmpty) return false;
+    final scores = await _scores.list(contestId);
+    return scores.rounds.any(
+      (round) => roundIds.contains(round.roundId) && round.isComplete,
+    );
   }
 
   Future<PublicUpdateMode?> _modeOf(Id contestId) async {

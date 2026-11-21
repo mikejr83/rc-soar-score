@@ -358,6 +358,7 @@ class SyncAcceptorService {
       await publicUpdates.afterSync(
         scope.contestId,
         entityTypes: {for (final m in accepted) m.entityType},
+        assignmentIds: await _assignmentsOf(accepted),
         exchangeMutationId: accepted.last.clientMutationId,
       );
     } on Object catch (error, stackTrace) {
@@ -368,6 +369,44 @@ class SyncAcceptorService {
         stackTrace,
       );
     }
+  }
+
+  /// The matrix assignments the score changes of [accepted] belong to: a
+  /// placeholder and a promotion intent name theirs, an attempt or official
+  /// score names its placeholder. Deletions and other types name none.
+  Future<Set<Id>> _assignmentsOf(List<SyncMutation> accepted) async {
+    final ids = <Id>{};
+    for (final m in accepted) {
+      try {
+        if (m.entityType == promotionReceiptEntityType) {
+          final data = VersionedPayload.fromJson(m.payload).data;
+          if (data['assignment_id'] case final String id) ids.add(Id.parse(id));
+          continue;
+        }
+        if (!const {
+          'ScorePlaceholder',
+          'ScoreAttempt',
+          'OfficialScore',
+        }.contains(m.entityType)) {
+          continue;
+        }
+        final payload = MutationPayload.parse(m.payload);
+        if (payload.isDelete) continue;
+        if (m.entityType == 'ScorePlaceholder') {
+          if (payload.entity['assignment_id'] case final String id) {
+            ids.add(Id.parse(id));
+          }
+        } else if (payload.entity['score_placeholder_id']
+            case final String id) {
+          final placeholder = await _repository.scorePlaceholderRepository
+              .findById(Id.parse(id));
+          if (placeholder != null) ids.add(placeholder.assignmentId);
+        }
+      } on FormatException {
+        continue; // an accepted mutation is well formed; be defensive anyway
+      }
+    }
+    return ids;
   }
 
   Future<SyncExchangeOutput> _pull(

@@ -427,6 +427,7 @@ void _tests(Backend backend) {
         final waiting = await updates.afterSync(
           contestId,
           entityTypes: {'ScoreAttempt', 'OfficialScore'},
+          assignmentIds: {round1.first.assignmentId},
           exchangeMutationId: 'm1',
         );
         for (final slot in round1) {
@@ -435,6 +436,7 @@ void _tests(Backend backend) {
         final complete = await updates.afterSync(
           contestId,
           entityTypes: {'ScoreAttempt', 'OfficialScore'},
+          assignmentIds: {round1.first.assignmentId},
           exchangeMutationId: 'm2',
         );
 

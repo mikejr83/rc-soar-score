@@ -128,6 +128,86 @@ void _tests(Backend backend) {
     expect(await projectionRevision(), before);
   });
 
+  group('scores in RoundCompletion mode', () {
+    late List<List<core.Id>> rounds;
+
+    setUp(() async {
+      await setUp0(publishes: true);
+      final matrix = await MatrixService(harness.clientRepository)
+          .current(contestId);
+      rounds = [
+        for (final ordinal in [1, 2])
+          [
+            for (final a in matrix.assignments)
+              if (a.scheduledRoundId ==
+                  matrix.rounds.firstWhere((r) => r.ordinal == ordinal).id)
+                a.id,
+          ],
+      ];
+    });
+    tearDown(() => harness.close());
+
+    /// Enters official scores on the client and syncs them as one exchange.
+    Future<void> syncScores(Iterable<core.Id> assignments) async {
+      for (final id in assignments) {
+        final mutation = 'score-${_mutations++}';
+        await ScoresService(harness.clientRepository).enterOfficialScore(
+          contestId,
+          id,
+          clientMutationId: mutation,
+          baseScoreRevision: 0,
+          components: const {
+            'time_flown': 500,
+            'launch_height': 200,
+            'landing': 'points_50',
+          },
+          actorId: harness.account,
+          metadata: core.MutationMetadata(
+            clientMutationId: mutation,
+            authority: core.Authority.director,
+            clientTime: DateTime.utc(2026, 10, 15),
+            actorId: harness.account,
+          ),
+        );
+      }
+      final sent = await harness.outbox(scope);
+      final out = await harness.exchange(scope, mutations: sent);
+      await harness.acknowledge(sent, out.results);
+    }
+
+    test(
+      'a score batch in an incomplete first round publishes nothing',
+      () async {
+        final before = await projectionRevision();
+
+        await syncScores(rounds[0].take(2));
+
+        expect(await projectionRevision(), before);
+      },
+    );
+
+    test('the batch that completes the round publishes', () async {
+      await syncScores(rounds[0].take(2));
+      final before = await projectionRevision();
+
+      await syncScores(rounds[0].skip(2));
+
+      expect(await projectionRevision(), before + 1);
+    });
+
+    test('a batch in an incomplete second round publishes nothing even when '
+        'the first round is complete', () async {
+      await syncScores(rounds[0]);
+      final before = await projectionRevision();
+
+      await syncScores(rounds[1].take(1));
+      expect(await projectionRevision(), before);
+
+      await syncScores(rounds[1].skip(1));
+      expect(await projectionRevision(), before + 1);
+    });
+  });
+
   test(
     'without the update service the projection stays as published',
     () async {
