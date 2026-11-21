@@ -3221,15 +3221,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get scoreAcceptedAutomatically => 'Accepted automatically';
+  String get scoreAcceptedAutomatically => 'Official · automatic';
 
   @override
   String get scoreAutomaticNote =>
-      'The contest accepted this score when its round or group was fully scored. It stays open to a review until you confirm it.';
+      'Made official automatically when its round or group was fully scored. Confirm it to close it to review.';
 
   @override
   String get scoreAutomaticLocked =>
-      'Automatically accepted. This score is locked.';
+      'Official (automatic). This score is locked.';
 
   @override
   String get scoreConfirmQueuedNote =>
