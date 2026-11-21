@@ -98,6 +98,31 @@ void main() {
     expect(tester.widget<TextField>(time).enabled, isFalse);
   });
 
+  testWidgets('a retired row shows no Required hint under its fields', (
+    tester,
+  ) async {
+    await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
+    final height = find.byKey(
+      ValueKey('score-height-${scoringAssignmentId(1, 2).value}'),
+    );
+
+    // Touch the launch height and leave it empty: it is Required.
+    await tester.tap(height);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(ValueKey('score-time-${scoringAssignmentId(1, 2).value}')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Required'), findsOneWidget);
+
+    await _openMenuItem(tester, 1, 2, 'menu-retire');
+    await tester.tap(find.byKey(const ValueKey('retire-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<TextField>(height).enabled, isFalse);
+    expect(find.text('Required'), findsNothing);
+  });
+
   testWidgets('the dialog says which scores stay', (tester) async {
     final server = ScoringServer();
     server.seedScore(scoringAssignmentId(2, 1), {
