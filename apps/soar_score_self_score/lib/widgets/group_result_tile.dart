@@ -43,9 +43,9 @@ class GroupResultTile extends StatelessWidget {
     final chip = switch (row.kind) {
       GroupRowKind.scored => null,
       GroupRowKind.zero => StatusChip(
-        // A zero the director confirmed with no reason (no flag) has none to name.
+        // A recorded zero can have no reason code (confirmed with no flag).
         label: row.zeroReason == null
-            ? 'Zero: no score entered'
+            ? 'Zero recorded'
             : 'Zero: ${row.zeroReason}',
         icon: Icons.location_off_outlined,
         style: StatusChipStyle.tonal,
