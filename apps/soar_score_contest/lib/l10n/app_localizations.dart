@@ -7026,6 +7026,228 @@ abstract class AppLocalizations {
   /// **'Official (automatic). This score is locked.'**
   String get scoreAutomaticLocked;
 
+  /// Status chip of a scoring row with typed values that are not saved yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved'**
+  String get scoreStatusUnsaved;
+
+  /// Status chip of a scoring row with no score yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not entered'**
+  String get scoreStatusNotEntered;
+
+  /// Status chip of a scoring row with a preliminary pilot entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get scoreStatusSubmitted;
+
+  /// Status chip of a scoring row with an official score.
+  ///
+  /// In en, this message translates to:
+  /// **'Official'**
+  String get scoreStatusOfficial;
+
+  /// Status chip of a scoring row that is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get scoreStatusLocked;
+
+  /// Status chip of a scoring row whose pilot is retired from the round.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired'**
+  String get scoreStatusRetired;
+
+  /// Context strip chip: the round has no scores yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Round not flown'**
+  String get scoreRoundNotFlown;
+
+  /// Context strip chip: some, not all, scores of the round are in.
+  ///
+  /// In en, this message translates to:
+  /// **'Round in progress'**
+  String get scoreRoundInProgress;
+
+  /// Context strip chip: every score of the round is in.
+  ///
+  /// In en, this message translates to:
+  /// **'Round scored'**
+  String get scoreRoundScored;
+
+  /// Context strip chip when the group is not locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Open for entry'**
+  String get scoreOpenForEntry;
+
+  /// Context strip chip counting rows with unsaved scores.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 unsaved row} other{{count} unsaved rows}}'**
+  String scoreUnsavedRows(int count);
+
+  /// Tooltip of the round or group picker button.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to…'**
+  String get scorePickerGoTo;
+
+  /// Title of the flight penalty card.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight penalty'**
+  String get scoreFlightPenaltyTitle;
+
+  /// Title of the cumulative penalty card.
+  ///
+  /// In en, this message translates to:
+  /// **'Cumulative penalty'**
+  String get scoreCumulativePenaltyTitle;
+
+  /// Lead of the flight penalty help line; the bold word and the rest follow in their own keys.
+  ///
+  /// In en, this message translates to:
+  /// **'Deducted from '**
+  String get scorePenaltyFlightHelp1;
+
+  /// Bold word in the flight penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **'this flight'**
+  String get scorePenaltyFlightThisFlight;
+
+  /// Middle of the flight penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **' (never below 0). '**
+  String get scorePenaltyFlightHelp2;
+
+  /// Bold word in the flight penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropped'**
+  String get scorePenaltyFlightDropped;
+
+  /// Tail of the flight penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **' if this round is dropped.'**
+  String get scorePenaltyFlightHelp3;
+
+  /// Lead of the cumulative penalty help line; the bold word and the rest follow in their own keys.
+  ///
+  /// In en, this message translates to:
+  /// **'Deducted from the '**
+  String get scorePenaltyCumulativeHelp1;
+
+  /// Bold word in the cumulative penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **'contest total'**
+  String get scorePenaltyCumulativeContestTotal;
+
+  /// Middle of the cumulative penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **'. '**
+  String get scorePenaltyCumulativeHelp2;
+
+  /// Bold word in the cumulative penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **'Never dropped'**
+  String get scorePenaltyCumulativeNeverDropped;
+
+  /// Tail of the cumulative penalty help line.
+  ///
+  /// In en, this message translates to:
+  /// **', and still counts if this flight is re-flown.'**
+  String get scorePenaltyCumulativeHelp3;
+
+  /// State of the cumulative penalty field while it is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No cumulative penalty.'**
+  String get scorePenaltyCumulativeNone;
+
+  /// State of the cumulative penalty field when its value is not a whole number of 0 or more.
+  ///
+  /// In en, this message translates to:
+  /// **'A whole number of points, 0 or more.'**
+  String get scorePenaltyCumulativeInvalid;
+
+  /// State of the cumulative penalty field when it was set to 0.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed. Removing is recorded as an official correction.'**
+  String get scorePenaltyCumulativeRemoved;
+
+  /// State of the cumulative penalty field when a positive value is set.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied: {count} points from the contest total.'**
+  String scorePenaltyCumulativeApplied(String count);
+
+  /// Banner under a score row whose save failed; message is the reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Not saved. {message} Your values are kept.'**
+  String scoreSaveNotSaved(String message);
+
+  /// Banner under a score row whose save was refused; reason is the server's text or a fallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: {reason}. Your values are kept.'**
+  String scoreSaveRefused(String reason);
+
+  /// Fallback reason when the server refuses a save without a message.
+  ///
+  /// In en, this message translates to:
+  /// **'the entry was not accepted'**
+  String get scoreSaveRefusedNoReason;
+
+  /// Stale-row banner action that keeps the director's typed values.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep mine'**
+  String get scoreSaveKeepMine;
+
+  /// Stale-row banner action that takes the newer stored values.
+  ///
+  /// In en, this message translates to:
+  /// **'Take the newer'**
+  String get scoreSaveTakeNewer;
+
+  /// Stale-row banner text naming the director's and the newer stored values.
+  ///
+  /// In en, this message translates to:
+  /// **'This row changed since you opened it. Yours: {mine}. Newer: {newer}.'**
+  String scoreSaveStaleText(String mine, String newer);
+
+  /// Value summary when a row or its other side has no values.
+  ///
+  /// In en, this message translates to:
+  /// **'nothing entered'**
+  String get scoreSaveNothingEntered;
+
+  /// Save-failed banner action that retries the save.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get scoreSaveRetry;
+
+  /// Save-failed or refused banner action that re-reads the row.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get scoreSaveRefresh;
+
   /// Note on a row whose Confirm is queued for the service.
   ///
   /// In en, this message translates to:

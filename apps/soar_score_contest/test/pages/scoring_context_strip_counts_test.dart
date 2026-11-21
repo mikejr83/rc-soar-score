@@ -1,7 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 
 import '../support/scoring_test_support.dart';
+
+final _l10n = AppLocalizationsEn();
 
 const _flight = {'time_flown': 540, 'launch_height': 120};
 
@@ -30,7 +33,7 @@ void main() {
     expect(
       find.descendant(
         of: strip,
-        matching: find.textContaining('Round in progress'),
+        matching: find.textContaining(_l10n.scoreRoundInProgress),
       ),
       findsOneWidget,
     );

@@ -76,6 +76,6 @@ void main() {
     await tester.tap(find.text(_l10n.scoreMarkOfficial));
     await tester.pumpAndSettle();
     expect(find.text(_l10n.scoreMarkOfficial), findsNothing);
-    expect(find.text('Official'), findsOneWidget);
+    expect(find.text(_l10n.scoreStatusOfficial), findsOneWidget);
   });
 }
