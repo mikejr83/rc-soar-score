@@ -176,6 +176,23 @@ void main() {
     expect(find.text('The review keeps the original entry.'), findsOneWidget);
   });
 
+  testWidgets('a zero with no reason reads No score entered', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: GroupResultTile(
+            row: GroupResultRow(
+              name: 'Blake Castillo',
+              kind: GroupRowKind.zero,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('No score entered'), findsOneWidget);
+    expect(find.textContaining('null'), findsNothing);
+  });
+
   for (final (policy, phrase) in [
     (OfficializationPolicy.endOfRound, 'all required scores for its round'),
     (OfficializationPolicy.endOfGroup, 'all required scores for its group'),
