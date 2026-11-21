@@ -263,7 +263,10 @@ class _MatrixGridState extends State<MatrixGrid> {
                   padding: const EdgeInsets.all(12),
                   alignment: Alignment.bottomLeft,
                   color: scheme.surfaceContainer,
-                  child: Text(l10n.matrixGridGroups, style: theme.textTheme.bodySmall),
+                  child: Text(
+                    l10n.matrixGridGroups,
+                    style: theme.textTheme.bodySmall,
+                  ),
                 ),
               );
             }

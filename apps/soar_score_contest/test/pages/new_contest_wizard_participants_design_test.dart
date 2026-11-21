@@ -40,7 +40,7 @@ void main() {
 
   testWidgets(
     'the Models column shows a notice for a pilot without models and never '
-     'blocks continuing',
+    'blocks continuing',
     (tester) async {
       final l10n = AppLocalizationsEn();
       final store = await storeAtStep4(

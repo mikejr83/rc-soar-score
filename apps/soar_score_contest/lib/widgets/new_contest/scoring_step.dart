@@ -13,30 +13,32 @@ import 'wizard_number_field.dart';
 abstract final class ScoringLabels {
   static String groupScore(AppLocalizations l10n, GroupScoreMode mode) =>
       switch (mode) {
-    GroupScoreMode.raw => l10n.wizardGroupScoreRaw,
-    GroupScoreMode.normalized => l10n.wizardGroupScoreNormalized,
-    GroupScoreMode.time => l10n.wizardGroupScoreTime,
-  };
+        GroupScoreMode.raw => l10n.wizardGroupScoreRaw,
+        GroupScoreMode.normalized => l10n.wizardGroupScoreNormalized,
+        GroupScoreMode.time => l10n.wizardGroupScoreTime,
+      };
 
   static String rounding(AppLocalizations l10n, RoundingMode mode) =>
       switch (mode) {
-    RoundingMode.round => l10n.wizardRoundingRound,
-    RoundingMode.truncate => l10n.wizardRoundingTruncate,
-  };
+        RoundingMode.round => l10n.wizardRoundingRound,
+        RoundingMode.truncate => l10n.wizardRoundingTruncate,
+      };
 
   static String publicUpdate(AppLocalizations l10n, PublicUpdateMode mode) =>
       switch (mode) {
-    PublicUpdateMode.automatic => l10n.wizardPublicUpdateAutomatic,
-    PublicUpdateMode.roundCompletion => l10n.wizardPublicUpdateRoundCompletion,
-    PublicUpdateMode.manual => l10n.wizardPublicUpdateManual,
-  };
+        PublicUpdateMode.automatic => l10n.wizardPublicUpdateAutomatic,
+        PublicUpdateMode.roundCompletion =>
+          l10n.wizardPublicUpdateRoundCompletion,
+        PublicUpdateMode.manual => l10n.wizardPublicUpdateManual,
+      };
 
   static String publicUpdateDescription(
     AppLocalizations l10n,
     PublicUpdateMode mode,
   ) => switch (mode) {
     PublicUpdateMode.automatic => l10n.wizardPublicUpdateAutomaticDesc,
-    PublicUpdateMode.roundCompletion => l10n.wizardPublicUpdateRoundCompletionDesc,
+    PublicUpdateMode.roundCompletion =>
+      l10n.wizardPublicUpdateRoundCompletionDesc,
     PublicUpdateMode.manual => l10n.wizardPublicUpdateManualDesc,
   };
 
@@ -266,7 +268,10 @@ class ScoringStep extends StatelessWidget {
             onReset: places.onReset,
             hint: l10n.wizardPrecisionExample(
               ScoringLabels.example(
-                987.4567, settings.decimalPlaces, settings.roundingMode),
+                987.4567,
+                settings.decimalPlaces,
+                settings.roundingMode,
+              ),
             ),
             control: segmented(
               const ValueKey('decimal-places'),

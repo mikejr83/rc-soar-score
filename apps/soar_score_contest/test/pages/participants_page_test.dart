@@ -294,7 +294,9 @@ void main() {
 
     await tester.pumpWidget(participantsApp(client));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip(l10n.participantsDeleteTooltip('Ada Lovelace')));
+    await tester.tap(
+      find.byTooltip(l10n.participantsDeleteTooltip('Ada Lovelace')),
+    );
     await tester.pumpAndSettle();
     expect(find.text(l10n.participantsDeleteTitle), findsOneWidget);
     expect(requests.where((r) => r.method == 'DELETE'), isEmpty);
@@ -322,7 +324,9 @@ void main() {
 
     await tester.pumpWidget(participantsApp(client));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip(l10n.participantsDeleteTooltip('Ada Lovelace')));
+    await tester.tap(
+      find.byTooltip(l10n.participantsDeleteTooltip('Ada Lovelace')),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text(l10n.participantsDeleteConfirm));
     await tester.pumpAndSettle();

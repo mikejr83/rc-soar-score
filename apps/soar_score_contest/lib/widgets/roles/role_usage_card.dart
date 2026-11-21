@@ -40,7 +40,8 @@ class RoleUsageCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           l10n.rolesUsageLoadFailed(
-                              apiErrorText(snapshot.error!)),
+                            apiErrorText(snapshot.error!),
+                          ),
                         ),
                       ),
                       TextButton(
@@ -65,7 +66,9 @@ class RoleUsageCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Text(
                           l10n.rolesUsageItem(
-                              item.contestName, item.participantCount),
+                            item.contestName,
+                            item.participantCount,
+                          ),
                         ),
                       ),
                   ],

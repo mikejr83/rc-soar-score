@@ -92,12 +92,7 @@ class ParticipantDetailPane extends StatelessWidget {
         const SizedBox(height: 24),
         DetailSectionCard(
           title: l10n.participantsSectionContact,
-          items: [
-            DetailItem(
-              l10n.participantsEmailPrivate,
-              profile.email,
-            ),
-          ],
+          items: [DetailItem(l10n.participantsEmailPrivate, profile.email)],
         ),
       ],
     );

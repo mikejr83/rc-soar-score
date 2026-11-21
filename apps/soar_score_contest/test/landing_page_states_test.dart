@@ -1,7 +1,6 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_contest/auth/auth_session.dart';
@@ -14,19 +13,14 @@ import 'support/fake_app_connectivity.dart';
 import 'support/fake_auth_session.dart';
 import 'support/fake_identity_provider_check.dart';
 
-const _delegates = [
-  AppLocalizations.delegate,
-  GlobalMaterialLocalizations.delegate,
-  GlobalWidgetsLocalizations.delegate,
-  GlobalCupertinoLocalizations.delegate,
-];
+const _delegates = appLocalizationDelegates;
 const _locales = [Locale('en')];
 
 Widget _l10nApp(Widget home) => MaterialApp(
-      localizationsDelegates: _delegates,
-      supportedLocales: _locales,
-      home: home,
-    );
+  localizationsDelegates: _delegates,
+  supportedLocales: _locales,
+  home: home,
+);
 
 Widget _app({
   required AuthSession session,
@@ -43,10 +37,7 @@ Widget _app({
   );
 }
 
-Widget _bareApp({
-  required Widget home,
-  FakeAppConnectivity? monitor,
-}) {
+Widget _bareApp({required Widget home, FakeAppConnectivity? monitor}) {
   return AppConnectivityInherited(
     monitor: monitor ?? FakeAppConnectivity(),
     child: _l10nApp(home),
@@ -137,10 +128,7 @@ void main() {
     addTearDown(check.dispose);
 
     await tester.pumpWidget(
-      _bareApp(
-        monitor: monitor,
-        home: LandingPage(isWeb: true),
-      ),
+      _bareApp(monitor: monitor, home: LandingPage(isWeb: true)),
     );
 
     expect(check.probeCalls, 0);
@@ -221,10 +209,7 @@ void main() {
 
     // No inherited session: no check is created and the one is untouched.
     await tester.pumpWidget(
-      _bareApp(
-        monitor: monitor,
-        home: LandingPage(isWeb: true),
-      ),
+      _bareApp(monitor: monitor, home: LandingPage(isWeb: true)),
     );
     expect(injected.probeCalls, 0);
     expect(find.text(l10n.landingCheckingSignIn), findsNothing);
@@ -236,9 +221,7 @@ void main() {
         monitor: monitor,
         child: AuthSessionInherited(
           session: session,
-          child: _l10nApp(
-            LandingPage(isWeb: true, identityCheck: injected),
-          ),
+          child: _l10nApp(LandingPage(isWeb: true, identityCheck: injected)),
         ),
       ),
     );
@@ -252,9 +235,7 @@ void main() {
         monitor: monitor,
         child: AuthSessionInherited(
           session: FakeAuthSession(),
-          child: _l10nApp(
-            LandingPage(isWeb: true, identityCheck: injected),
-          ),
+          child: _l10nApp(LandingPage(isWeb: true, identityCheck: injected)),
         ),
       ),
     );
@@ -264,10 +245,7 @@ void main() {
     // The session disappears: the injected check is released, not disposed
     // (the owner still owns it), and it remains usable.
     await tester.pumpWidget(
-      _bareApp(
-        monitor: monitor,
-        home: LandingPage(isWeb: true),
-      ),
+      _bareApp(monitor: monitor, home: LandingPage(isWeb: true)),
     );
     expect(injected.probeCalls, 1);
     expect(find.text(l10n.landingCheckingSignIn), findsNothing);
@@ -289,9 +267,7 @@ void main() {
         monitor: monitor,
         child: AuthSessionInherited(
           session: session,
-          child: _l10nApp(
-            LandingPage(isWeb: true, identityCheck: injected),
-          ),
+          child: _l10nApp(LandingPage(isWeb: true, identityCheck: injected)),
         ),
       ),
     );
@@ -299,12 +275,7 @@ void main() {
 
     // The page is removed, but the check is owned by the test, so the page
     // must release it without disposing it.
-    await tester.pumpWidget(
-      _bareApp(
-        monitor: monitor,
-        home: const SizedBox(),
-      ),
-    );
+    await tester.pumpWidget(_bareApp(monitor: monitor, home: const SizedBox()));
 
     // Still functional afterwards: a disposed notifier would throw.
     injected.status = IdentityProviderStatus.available;

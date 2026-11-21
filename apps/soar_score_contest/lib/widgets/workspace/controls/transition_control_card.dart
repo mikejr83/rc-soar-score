@@ -24,7 +24,11 @@ class TransitionControlCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final (transition, current, scope, icon) = forControl(l10n, contest, control);
+    final (transition, current, scope, icon) = forControl(
+      l10n,
+      contest,
+      control,
+    );
     final availability = TransitionAvailability.of(contest, transition);
     return ControlCardBody(
       control: control,

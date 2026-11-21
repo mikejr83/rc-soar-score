@@ -52,15 +52,13 @@ class PilotPanel extends StatelessWidget {
     final marker = markers.of(pilot.teamId);
     final first = pilot.name.split(' ').first;
     String place(int round, int group, GridSlot slot) {
-      final base = l10n.matrixPlace(
-        round,
-        DrawFormCheck.groupLetter(group),
-      );
+      final base = l10n.matrixPlace(round, DrawFormCheck.groupLetter(group));
       final lane = slot.lane;
       return model.hasLanes && lane != null
           ? l10n.matrixPlaceLane(base, lane)
           : base;
     }
+
     final places = [
       for (final round in model.rounds)
         for (final (group, slot) in model.slotsOf(pilot.participationId, round))
@@ -114,9 +112,7 @@ class PilotPanel extends StatelessWidget {
       ),
       section(
         l10n.matrixNeverMeets(never.length),
-        never.isEmpty
-            ? l10n.matrixMeetsAll
-            : l10n.matrixNoGroupWith(first),
+        never.isEmpty ? l10n.matrixMeetsAll : l10n.matrixNoGroupWith(first),
         never,
       ),
     ];
@@ -137,7 +133,8 @@ class PilotPanel extends StatelessWidget {
                   [
                     if (pilot.number != null)
                       l10n.matrixPilotNo(pilot.numberText),
-                    if (markers.ordered.isNotEmpty) marker?.name ?? l10n.matrixNoTeam,
+                    if (markers.ordered.isNotEmpty)
+                      marker?.name ?? l10n.matrixNoTeam,
                   ].join(' · '),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,

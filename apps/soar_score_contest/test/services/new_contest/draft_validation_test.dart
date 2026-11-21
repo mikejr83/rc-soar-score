@@ -30,7 +30,10 @@ void main() {
     });
 
     test('blank text counts as missing', () {
-      final errors = DraftValidation.details(_valid.copyWith(name: '   '), _l10n);
+      final errors = DraftValidation.details(
+        _valid.copyWith(name: '   '),
+        _l10n,
+      );
       expect(errors[DetailsField.name], _l10n.wizardValidationEnterName);
     });
 
@@ -39,13 +42,19 @@ void main() {
         _valid.copyWith(startDate: '14/11/2026', endDate: 'Feb 30, 2026'),
         _l10n,
       );
-      expect(errors[DetailsField.startDate], _l10n.wizardValidationStartDateFormat);
+      expect(
+        errors[DetailsField.startDate],
+        _l10n.wizardValidationStartDateFormat,
+      );
       expect(errors[DetailsField.endDate], _l10n.wizardValidationEndDateFormat);
     });
 
     test('the end date may equal but not precede the start date', () {
       expect(
-        DraftValidation.details(_valid.copyWith(endDate: 'Nov 14, 2026'), _l10n),
+        DraftValidation.details(
+          _valid.copyWith(endDate: 'Nov 14, 2026'),
+          _l10n,
+        ),
         isEmpty,
       );
       expect(
@@ -59,7 +68,10 @@ void main() {
   });
 
   test('a discipline is required', () {
-    expect(DraftValidation.discipline(_valid, _l10n), _l10n.wizardValidationChooseDiscipline);
+    expect(
+      DraftValidation.discipline(_valid, _l10n),
+      _l10n.wizardValidationChooseDiscipline,
+    );
     expect(
       DraftValidation.discipline(
         _valid.copyWith(discipline: WizardDiscipline.ales),
@@ -79,13 +91,19 @@ void main() {
     test('must be a whole number above 0 with teams', () {
       for (final bad in ['', '0', '-1', '2.5', 'three']) {
         expect(
-          DraftValidation.teamPilotCount(teams.copyWith(teamPilotCount: bad), _l10n),
+          DraftValidation.teamPilotCount(
+            teams.copyWith(teamPilotCount: bad),
+            _l10n,
+          ),
           _l10n.wizardValidationWholeNumber,
           reason: bad,
         );
       }
       expect(
-        DraftValidation.teamPilotCount(teams.copyWith(teamPilotCount: ' 3 '), _l10n),
+        DraftValidation.teamPilotCount(
+          teams.copyWith(teamPilotCount: ' 3 '),
+          _l10n,
+        ),
         isNull,
       );
     });

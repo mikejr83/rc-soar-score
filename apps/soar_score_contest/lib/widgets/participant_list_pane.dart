@@ -58,7 +58,7 @@ class ParticipantListPane extends StatelessWidget {
     final count = matches.length == participants.length
         ? l10n.participantsCount(participants.length)
         : '${l10n.participantsCountOf(matches.length, participants.length)} '
-            '${l10n.participantsCount(participants.length)}';
+              '${l10n.participantsCount(participants.length)}';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

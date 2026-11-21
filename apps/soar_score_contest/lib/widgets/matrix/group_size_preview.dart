@@ -115,15 +115,15 @@ class GroupSizePreview extends StatelessWidget {
                               ],
                             ],
                           ),
-                            Text(
-                              l10n.matrixGroupPilots(
-                                sizes[i],
-                                sizes[i] == 1 ? '' : 's',
-                              ),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: scheme.onSurfaceVariant,
-                              ),
+                          Text(
+                            l10n.matrixGroupPilots(
+                              sizes[i],
+                              sizes[i] == 1 ? '' : 's',
                             ),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
                         ],
                       ),
                     ),

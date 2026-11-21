@@ -315,7 +315,11 @@ class ParticipantCells {
             },
           )
         : !scoring
-        ? (Icons.badge, l10n.participantStatusNonFlying, scheme.onSurfaceVariant)
+        ? (
+            Icons.badge,
+            l10n.participantStatusNonFlying,
+            scheme.onSurfaceVariant,
+          )
         : issues.isNotEmpty
         ? (
             Icons.error,

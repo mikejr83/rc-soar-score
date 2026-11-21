@@ -90,14 +90,14 @@ class ParticipantsSectionBody extends StatelessWidget {
                     color: scheme.onTertiaryContainer,
                   ),
                   const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        l10n.configParticipantsMinPilotsNote(pilots),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: scheme.onTertiaryContainer,
-                        ),
+                  Expanded(
+                    child: Text(
+                      l10n.configParticipantsMinPilotsNote(pilots),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: scheme.onTertiaryContainer,
                       ),
                     ),
+                  ),
                 ],
               ),
             ),

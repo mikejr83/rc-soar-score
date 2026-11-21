@@ -116,16 +116,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('copy-source-failed')), findsOneWidget);
-    expect(find.text(l10n.wizardSourceFailed('Labor Day F5J Open')), findsOneWidget);
+    expect(
+      find.text(l10n.wizardSourceFailed('Labor Day F5J Open')),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const ValueKey('copy-source-remove')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('copy-source-failed')), findsNothing);
     expect(wizard.store.draft.source, isNull);
-    expect(
-      find.text(l10n.wizardSourceRemoved),
-      findsOneWidget,
-    );
+    expect(find.text(l10n.wizardSourceRemoved), findsOneWidget);
     // The picker is back, so the user can choose again or continue.
     expect(tile, findsOneWidget);
   });

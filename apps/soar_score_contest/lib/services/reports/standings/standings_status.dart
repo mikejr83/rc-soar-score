@@ -77,10 +77,8 @@ class StandingsStatus {
           options.provisional &&
               facts.lastFullyScoredRound > 0 &&
               facts.lastFullyScoredRound < options.to
-              ? l10n.standingsStatusProvisionalHint(
-                  facts.lastFullyScoredRound,
-                )
-              : '';
+          ? l10n.standingsStatusProvisionalHint(facts.lastFullyScoredRound)
+          : '';
       reason = '${parts.join(' and ')}.$hint';
     }
     return StandingsStatus(

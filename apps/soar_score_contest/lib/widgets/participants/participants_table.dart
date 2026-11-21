@@ -215,8 +215,8 @@ class ParticipantsTable extends StatelessWidget {
                     minHeight: 48,
                     lead: Checkbox(
                       value: all ? true : (some ? null : false),
-                       tristate: true,
-                       semanticLabel: l10n.participantSelectAll,
+                      tristate: true,
+                      semanticLabel: l10n.participantSelectAll,
                       onChanged: (_) => onToggleAll(),
                     ),
                     cells: [

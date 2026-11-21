@@ -372,7 +372,8 @@ class _ContestScoringPageState extends State<ContestScoringPage> {
     );
     if (done && mounted) {
       _say(
-        AppLocalizations.of(context).scoreRetiredFromRound(row.pilot.name, c.round),
+        AppLocalizations.of(context)
+            .scoreRetiredFromRound(row.pilot.name, c.round),
       );
     }
   }

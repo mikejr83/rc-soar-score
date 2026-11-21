@@ -80,26 +80,19 @@ class SummaryStep extends StatelessWidget {
     ].where((s) => s.isNotEmpty).join(' – ');
 
     return [
-      _Section(
-        l10n.wizardDetails,
-        1,
-        [
-          (l10n.wizardName, d.name.trim().isEmpty ? '—' : d.name.trim()),
-          (l10n.wizardDates, dates.isEmpty ? '—' : dates),
-          (l10n.wizardVenueHost, d.venue.trim().isEmpty ? '—' : d.venue.trim()),
-          (l10n.wizardLocation, location.isEmpty ? '—' : location),
-          (
-            l10n.wizardTimeZoneLabel,
-            ContestTimeZones.label(
-              TimeZones.effective(d.timeZone, d.country),
-              at: DraftValidation.parseDate(d.startDate),
-            ),
+      _Section(l10n.wizardDetails, 1, [
+        (l10n.wizardName, d.name.trim().isEmpty ? '—' : d.name.trim()),
+        (l10n.wizardDates, dates.isEmpty ? '—' : dates),
+        (l10n.wizardVenueHost, d.venue.trim().isEmpty ? '—' : d.venue.trim()),
+        (l10n.wizardLocation, location.isEmpty ? '—' : location),
+        (
+          l10n.wizardTimeZoneLabel,
+          ContestTimeZones.label(
+            TimeZones.effective(d.timeZone, d.country),
+            at: DraftValidation.parseDate(d.startDate),
           ),
-        ],
-        details == 0
-            ? null
-            : l10n.wizardFieldsNeedAttentionSummary(details),
-      ),
+        ),
+      ], details == 0 ? null : l10n.wizardFieldsNeedAttentionSummary(details)),
       _Section(
         l10n.wizardCopySourceSection,
         1,
@@ -114,7 +107,9 @@ class SummaryStep extends StatelessWidget {
                     CopyMode.selectedPilots =>
                       '${d.selectedPilots.length} of ${source.pilots.length} '
                           'selected',
-                    CopyMode.allPilots => l10n.wizardCopyAllPilots(source.pilots.length),
+                    CopyMode.allPilots => l10n.wizardCopyAllPilots(
+                      source.pilots.length,
+                    ),
                     _ => l10n.wizardCopyNone,
                   },
                 ),
@@ -139,7 +134,10 @@ class SummaryStep extends StatelessWidget {
             ? [
                 (l10n.wizardPeople, '${d.participants.length}'),
                 (l10n.wizardScoringPilots, '$scoringPilots'),
-                (l10n.wizardNonFlying, '${d.participants.length - scoringPilots}'),
+                (
+                  l10n.wizardNonFlying,
+                  '${d.participants.length - scoringPilots}',
+                ),
               ]
             : [(l10n.wizardPilots, '$scoringPilots')],
         scoringPilots < DraftValidation.minScoringPilots
@@ -177,47 +175,81 @@ class SummaryStep extends StatelessWidget {
                 : l10n.wizardModelsEnteredSimple(modelCount),
           ),
       ]),
-      _Section(l10n.wizardParticipantsPublication, 5, [
-        (l10n.wizardGroupScoreLabel, ScoringLabels.groupScore(l10n, scoring.groupScoreMode)),
-        (
-          l10n.wizardPrecisionLabel,
-          '${ScoringLabels.rounding(l10n, scoring.roundingMode)} to '
-              '${scoring.decimalPlaces} dp',
-        ),
-        (l10n.wizardDroppedRoundsLabel, ScoringLabels.drops(l10n, scoring)),
-        (l10n.wizardReviewRequestsLabel, scoring.reviewRequests ? 'On' : 'Off'),
-        (
-          l10n.scoresBecomeOfficialLabel,
-          ScoringLabels.scoresBecomeOfficial(
-            l10n,
-            scoring.scoresBecomeOfficial,
+      _Section(
+        l10n.wizardParticipantsPublication,
+        5,
+        [
+          (
+            l10n.wizardGroupScoreLabel,
+            ScoringLabels.groupScore(l10n, scoring.groupScoreMode),
           ),
-        ),
-        (
-          l10n.wizardPublicUpdateLabel,
-          ScoringLabels.publicUpdate(l10n, scoring.publicUpdateMode),
-        ),
-        (l10n.wizardVisibility, 'Unpublished and private'),
-      ], DraftValidation.scoring(d, l10n) ? null : l10n.wizardDroppedRoundsNeedFixing),
+          (
+            l10n.wizardPrecisionLabel,
+            '${ScoringLabels.rounding(l10n, scoring.roundingMode)} to '
+                '${scoring.decimalPlaces} dp',
+          ),
+          (l10n.wizardDroppedRoundsLabel, ScoringLabels.drops(l10n, scoring)),
+          (
+            l10n.wizardReviewRequestsLabel,
+            scoring.reviewRequests ? 'On' : 'Off',
+          ),
+          (
+            l10n.scoresBecomeOfficialLabel,
+            ScoringLabels.scoresBecomeOfficial(
+              l10n,
+              scoring.scoresBecomeOfficial,
+            ),
+          ),
+          (
+            l10n.wizardPublicUpdateLabel,
+            ScoringLabels.publicUpdate(l10n, scoring.publicUpdateMode),
+          ),
+          (l10n.wizardVisibility, 'Unpublished and private'),
+        ],
+        DraftValidation.scoring(d, l10n)
+            ? null
+            : l10n.wizardDroppedRoundsNeedFixing,
+      ),
       _Section(l10n.wizardStepDrawOptions, 6, [
         (
           l10n.wizardDrawMode,
           draw.seeded
-               ? '${l10n.wizardDrawModeSeeded} (${draw.seededRounds.trim()} seeded)'
+              ? '${l10n.wizardDrawModeSeeded} (${draw.seededRounds.trim()} seeded)'
               : l10n.wizardDrawModeManOnMan,
         ),
-        (l10n.wizardTeamProtection, plan.teamProtection ? l10n.wizardOn : l10n.wizardOff),
+        (
+          l10n.wizardTeamProtection,
+          plan.teamProtection ? l10n.wizardOn : l10n.wizardOff,
+        ),
         (
           l10n.wizardLanes,
-          draw.laneMode.name == 'none' ? l10n.wizardNoLaneAssignment : l10n.wizardLaneRandom,
+          draw.laneMode.name == 'none'
+              ? l10n.wizardNoLaneAssignment
+              : l10n.wizardLaneRandom,
         ),
-        (l10n.wizardBackToBack, draw.allowBackToBack ? l10n.wizardAllowed : l10n.wizardAvoided),
+        (
+          l10n.wizardBackToBack,
+          draw.allowBackToBack ? l10n.wizardAllowed : l10n.wizardAvoided,
+        ),
       ]),
-      _Section(l10n.wizardRoundsGroups, 6, [
-        (l10n.wizardRounds, '${d.roundsText.trim()} (${l10n.wizardRoundsAppendNote})'),
-        (l10n.wizardGroupsPerRound, '${plan.groups}'),
-        (l10n.wizardPilotsPerGroup, plan.groupsValid ? plan.perGroupText : '—'),
-      ], DraftValidation.drawOptions(d, l10n) ? null : l10n.wizardGroupSettingsBlocked),
+      _Section(
+        l10n.wizardRoundsGroups,
+        6,
+        [
+          (
+            l10n.wizardRounds,
+            '${d.roundsText.trim()} (${l10n.wizardRoundsAppendNote})',
+          ),
+          (l10n.wizardGroupsPerRound, '${plan.groups}'),
+          (
+            l10n.wizardPilotsPerGroup,
+            plan.groupsValid ? plan.perGroupText : '—',
+          ),
+        ],
+        DraftValidation.drawOptions(d, l10n)
+            ? null
+            : l10n.wizardGroupSettingsBlocked,
+      ),
     ];
   }
 
@@ -231,10 +263,7 @@ class SummaryStep extends StatelessWidget {
       (Icons.tune, l10n.wizardAfterCreateConfig),
       (Icons.lock, l10n.wizardAfterCreatePrivate),
       (Icons.grid_view, l10n.wizardAfterCreateMatrix),
-      (
-        Icons.rule,
-        l10n.wizardAfterCreateReview(discipline),
-      ),
+      (Icons.rule, l10n.wizardAfterCreateReview(discipline)),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

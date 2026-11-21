@@ -29,10 +29,7 @@ Future<bool> confirmDraw(
       );
       return AlertDialog(
         icon: Icon(Icons.grid_view, color: scheme.primary),
-        title: Text(
-          l10n.matrixDrawConfirmTitle,
-          textAlign: TextAlign.center,
-        ),
+        title: Text(l10n.matrixDrawConfirmTitle, textAlign: TextAlign.center),
         content: SizedBox(
           width: 420,
           child: Column(
@@ -64,10 +61,7 @@ Future<bool> confirmDraw(
                 ),
               ),
               if (data.showNumbers)
-                item(
-                  Icons.pin_outlined,
-                  l10n.matrixDrawConfirmNumbers,
-                ),
+                item(Icons.pin_outlined, l10n.matrixDrawConfirmNumbers),
               const SizedBox(height: 4),
               DecoratedBox(
                 decoration: BoxDecoration(

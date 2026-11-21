@@ -105,20 +105,14 @@ abstract final class SettingNotes {
     }
     if (key == SettingKeys.participantNumbers && draft.phase.isDrawn) {
       notes.add(
-        ConfigNote(
-          icon: Icons.info_outline,
-          text: l10n.configNoteNumbersFixed,
-        ),
+        ConfigNote(icon: Icons.info_outline, text: l10n.configNoteNumbersFixed),
       );
     }
     if ((key == SettingKeys.drop1 || key == SettingKeys.drop2) &&
         !draft.phase.isDrawn &&
         error == null) {
       notes.add(
-        ConfigNote(
-          icon: Icons.info_outline,
-          text: l10n.configNoteDropsChecked,
-        ),
+        ConfigNote(icon: Icons.info_outline, text: l10n.configNoteDropsChecked),
       );
     }
     for (final cleared in draft.clearedBy(key)) {
@@ -136,8 +130,9 @@ abstract final class SettingNotes {
       notes.add(
         ConfigNote(
           icon: Icons.history,
-          text:
-              l10n.configNoteSaved(SettingValues.display(def, draft.saved[key])),
+          text: l10n.configNoteSaved(
+            SettingValues.display(def, draft.saved[key]),
+          ),
           actionLabel: l10n.commonUndo,
           actionIcon: Icons.undo,
           onAction: () => set({key: draft.saved[key]}),
@@ -186,7 +181,10 @@ abstract final class SettingNotes {
     );
   }
 
-  static List<Widget> _dropNotes(AppLocalizations l10n, ConfigurationDraft draft) {
+  static List<Widget> _dropNotes(
+    AppLocalizations l10n,
+    ConfigurationDraft draft,
+  ) {
     final drops =
         SettingValues.parseNumber(draft[SettingKeys.drops])?.toInt() ?? 0;
     String round(String key) {
@@ -208,10 +206,7 @@ abstract final class SettingNotes {
               ),
       ),
       if (drops > 0 && draft['d_motor_restart_mode'] == 'non_droppable')
-        ConfigNote(
-          icon: Icons.info_outline,
-          text: l10n.configNoteMotorRestart,
-        ),
+        ConfigNote(icon: Icons.info_outline, text: l10n.configNoteMotorRestart),
     ];
   }
 }

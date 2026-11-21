@@ -372,8 +372,9 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
               onAdd: (candidate) {
                 _add(candidate.toParticipant());
                 widget.onMessage?.call(
-                    AppLocalizations.of(context)
-                        .wizardAddedAsPilotShort(candidate.name));
+                  AppLocalizations.of(context)
+                      .wizardAddedAsPilotShort(candidate.name),
+                );
               },
             );
             final add = SizedBox(
@@ -415,13 +416,15 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
             children: [
               if (_draft.has(ParticipantOption.roles)) ...[
                 chip(
-                    Icons.groups,
-                    AppLocalizations.of(context)
-                        .wizardPeopleCount(participants.length)),
+                  Icons.groups,
+                  AppLocalizations.of(context)
+                      .wizardPeopleCount(participants.length),
+                ),
                 chip(
-                    Icons.flight_takeoff,
-                    AppLocalizations.of(context)
-                        .wizardScoringPilotsCount(scoring)),
+                  Icons.flight_takeoff,
+                  AppLocalizations.of(context)
+                      .wizardScoringPilotsCount(scoring),
+                ),
                 chip(
                   Icons.badge_outlined,
                   AppLocalizations.of(context)
@@ -429,14 +432,18 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
                 ),
               ] else
                 chip(
-                    Icons.flight_takeoff,
-                    AppLocalizations.of(context).wizardPilotsCount(scoring)),
+                  Icons.flight_takeoff,
+                  AppLocalizations.of(context).wizardPilotsCount(scoring),
+                ),
               if (needing.isNotEmpty)
                 FilterChip(
                   key: const ValueKey('needs-fixing-filter'),
                   selected: onlyFix,
                   avatar: onlyFix ? null : const Icon(Icons.filter_list),
-                  label: Text(AppLocalizations.of(context).wizardNeedsFixingFilter(needing.length)),
+                  label: Text(
+                    AppLocalizations.of(context)
+                        .wizardNeedsFixingFilter(needing.length),
+                  ),
                   onSelected: (value) => setState(() => _onlyFix = value),
                 ),
             ],
@@ -465,23 +472,28 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
                       : p,
                 );
                 widget.onMessage?.call(
-                  AppLocalizations.of(context).wizardClassSet(value, _selected.length),
+                  AppLocalizations.of(context)
+                      .wizardClassSet(value, _selected.length),
                 );
               },
               onRole: (role) {
                 _updateSelected((p) => p.copyWith(role: role));
                 widget.onMessage?.call(
-                  AppLocalizations.of(context).wizardRoleSet(role.displayName, _selected.length),
+                  AppLocalizations.of(context)
+                      .wizardRoleSet(role.displayName, _selected.length),
                 );
               },
             ),
           ],
           if (_query.trim().isNotEmpty) ...[
             const SizedBox(height: 12),
-              Text(
-                AppLocalizations.of(context).wizardShowingMatching(
-                  rows.length, fixRows.length, _query.trim()),
-                key: const ValueKey('participants-filter-note'),
+            Text(
+              AppLocalizations.of(context).wizardShowingMatching(
+                rows.length,
+                fixRows.length,
+                _query.trim(),
+              ),
+              key: const ValueKey('participants-filter-note'),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
@@ -526,8 +538,8 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
               Icon(Icons.keyboard, size: 16, color: scheme.onSurfaceVariant),
               const SizedBox(width: 8),
               Expanded(
-              child: Text(
-                AppLocalizations.of(context).wizardKeyboardHelp,
+                child: Text(
+                  AppLocalizations.of(context).wizardKeyboardHelp,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),

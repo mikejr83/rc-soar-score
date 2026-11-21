@@ -42,7 +42,9 @@ class _ChoosePilotsDialogState extends State<_ChoosePilotsDialog> {
           children: [
             Text(
               l10n.wizardChoosePilotsBody(
-                _selected.length, widget.pilots.length),
+                _selected.length,
+                widget.pilots.length,
+              ),
             ),
             const SizedBox(height: 8),
             CheckboxListTile(

@@ -263,9 +263,7 @@ class _ContestConfigurationPageState extends State<ContestConfigurationPage> {
         draft.configurationChanged
             ? l10n.configSavedRevision(
                 current.configuration!.revisionNumber,
-                recalculationWarning == null
-                    ? ''
-                    : ' $recalculationWarning.',
+                recalculationWarning == null ? '' : ' $recalculationWarning.',
               )
             : l10n.configDetailsSaved,
       );

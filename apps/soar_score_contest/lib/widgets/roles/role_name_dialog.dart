@@ -57,8 +57,7 @@ class _RoleNameDialogState extends State<_RoleNameDialog> {
   Future<void> _submit() async {
     final name = _controller.text.trim();
     if (name.isEmpty) {
-      setState(
-          () => _error = AppLocalizations.of(context).rolesNameError);
+      setState(() => _error = AppLocalizations.of(context).rolesNameError);
       return;
     }
     setState(() {
@@ -91,8 +90,10 @@ class _RoleNameDialogState extends State<_RoleNameDialog> {
         autofocus: true,
         enabled: !_saving,
         textInputAction: TextInputAction.done,
-        decoration:
-            InputDecoration(labelText: l10n.rolesNameLabel, errorText: _error),
+        decoration: InputDecoration(
+          labelText: l10n.rolesNameLabel,
+          errorText: _error,
+        ),
         onSubmitted: (_) => _submit(),
       ),
       actions: [

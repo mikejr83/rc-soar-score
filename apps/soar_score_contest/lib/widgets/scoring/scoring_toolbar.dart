@@ -76,7 +76,10 @@ class ScoringToolbar extends StatelessWidget {
         KeyedSubtree(
           key: const ValueKey('round-picker'),
           child: CompletenessMenu(
-            title: words.scoreToolbarRoundTitle(controller.round, rounds.length),
+            title: words.scoreToolbarRoundTitle(
+              controller.round,
+              rounds.length,
+            ),
             completeness: round == null
                 ? data.roundCompleteness(rounds.first)
                 : data.roundCompleteness(round),

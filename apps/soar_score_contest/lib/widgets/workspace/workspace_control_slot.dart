@@ -4,17 +4,15 @@ import '../../l10n/app_localizations.dart';
 import '../../services/workspace/workspace_control.dart';
 
 /// The title of a control card.
-String workspaceControlLabel(
-  AppLocalizations l10n,
-  WorkspaceControl control,
-) => switch (control) {
-  WorkspaceControl.lifecycle => l10n.workspaceControlLifecycle,
-  WorkspaceControl.scoring => l10n.workspaceControlScoring,
-  WorkspaceControl.results => l10n.workspaceControlResults,
-  WorkspaceControl.administration => l10n.workspaceControlAdministration,
-  WorkspaceControl.publication => l10n.workspaceControlPublication,
-  WorkspaceControl.archive => l10n.workspaceControlArchive,
-};
+String workspaceControlLabel(AppLocalizations l10n, WorkspaceControl control) =>
+    switch (control) {
+      WorkspaceControl.lifecycle => l10n.workspaceControlLifecycle,
+      WorkspaceControl.scoring => l10n.workspaceControlScoring,
+      WorkspaceControl.results => l10n.workspaceControlResults,
+      WorkspaceControl.administration => l10n.workspaceControlAdministration,
+      WorkspaceControl.publication => l10n.workspaceControlPublication,
+      WorkspaceControl.archive => l10n.workspaceControlArchive,
+    };
 
 /// One control card on the workspace page: the deep-link target for the status
 /// panel (#351) and the home of the controls (#250).

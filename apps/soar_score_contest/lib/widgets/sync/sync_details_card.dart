@@ -49,7 +49,10 @@ class SyncDetailsCard extends StatelessWidget {
             if (summary == null)
               Text(l10n.syncChecking)
             else if (summary.localOnly) ...[
-              Text(l10n.syncLocalOnlyText, key: const ValueKey('sync-local-only')),
+              Text(
+                l10n.syncLocalOnlyText,
+                key: const ValueKey('sync-local-only'),
+              ),
               if (problem != null) ..._problemRow(theme, dark, problem),
             ] else ...[
               _row(
@@ -59,11 +62,7 @@ class SyncDetailsCard extends StatelessWidget {
                     ? l10n.syncNotSyncedYet
                     : DirectorTime.of(context)(summary.lastSyncedAt!),
               ),
-              _row(
-                theme,
-                l10n.syncWaitingToSend,
-                '${summary.pendingChanges}',
-              ),
+              _row(theme, l10n.syncWaitingToSend, '${summary.pendingChanges}'),
               _row(
                 theme,
                 l10n.syncRefusedByService,

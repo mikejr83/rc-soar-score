@@ -25,10 +25,7 @@ void main() {
 
     // No caption stands in for the preview; the number carries the meaning.
     expect(find.text('Preview, not saved'), findsNothing);
-    expect(
-      find.byTooltip(_l10n.scorePreviewTooltip),
-      findsOneWidget,
-    );
+    expect(find.byTooltip(_l10n.scorePreviewTooltip), findsOneWidget);
     final number = tester.widget<Text>(
       find.descendant(
         of: find.byTooltip('Preview. Saved when you save the row.'),

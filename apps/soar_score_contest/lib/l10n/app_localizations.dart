@@ -7104,6 +7104,12 @@ abstract class AppLocalizations {
   /// **'Director'**
   String get scoreHistoryDirector;
 
+  /// Line on a score history entry adopted by a director, naming who sent it.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted by {who}'**
+  String scoreHistorySubmittedBy(String who);
+
   /// Note on the current version in the score history when the director confirmed an automatically accepted score.
   ///
   /// In en, this message translates to:

@@ -525,7 +525,10 @@ void main() {
           matrix: configDrawnMatrix(),
         ),
       );
-      expect(find.text(_l10n.configCompletedTitle, skipOffstage: false), findsWidgets);
+      expect(
+        find.text(_l10n.configCompletedTitle, skipOffstage: false),
+        findsWidgets,
+      );
       expect(find.text('Drawn and in sync'), findsNothing);
       expect(
         find.descendant(

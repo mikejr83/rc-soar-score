@@ -47,12 +47,7 @@ class GroupCalculationPanel extends StatelessWidget {
           l10n.wizardPilotsPerGroupProtection(plan.minGroups, plan.largestTeam),
         )
       else if (teamsOn)
-        (
-          Icons.info,
-          muted,
-          '',
-          l10n.wizardPilotsPerGroupProtectionOff,
-        ),
+        (Icons.info, muted, '', l10n.wizardPilotsPerGroupProtectionOff),
     ];
 
     return Semantics(
@@ -85,8 +80,12 @@ class GroupCalculationPanel extends StatelessWidget {
             Text(
               plan.groupsValid
                   ? l10n.wizardPilotsPerGroupCount(
-                      plan.scoring, groups, groups == 1 ? '' : 's',
-                      plan.smallestGroup, plan.largestGroup)
+                      plan.scoring,
+                      groups,
+                      groups == 1 ? '' : 's',
+                      plan.smallestGroup,
+                      plan.largestGroup,
+                    )
                   : l10n.wizardPilotsPerGroupCountNoGroups(plan.scoring),
               style: theme.textTheme.bodyMedium?.copyWith(color: muted),
             ),

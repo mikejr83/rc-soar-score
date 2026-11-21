@@ -30,7 +30,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
     expect(find.byType(NewContestWizardPage), findsNothing);
-    expect(find.text(NewContestWizardPage.leftMessage(AppLocalizationsEn())), findsOneWidget);
+    expect(
+      find.text(NewContestWizardPage.leftMessage(AppLocalizationsEn())),
+      findsOneWidget,
+    );
 
     wizard.router.go(newContestPath);
     await tester.pumpAndSettle();

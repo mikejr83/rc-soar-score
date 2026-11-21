@@ -71,7 +71,10 @@ void main() {
       expect(find.byKey(const ValueKey('rename-role')), findsNothing);
       expect(find.byKey(const ValueKey('delete-role')), findsNothing);
       expect(find.text(RoleDetailPane.pilotExplanation(_l10n)), findsOneWidget);
-      expect(find.text(_l10n.rolesPilot), findsNWidgets(3)); // row, heading, type
+      expect(
+        find.text(_l10n.rolesPilot),
+        findsNWidgets(3),
+      ); // row, heading, type
     });
 
     testWidgets('another system role is protected with its own reason', (
@@ -86,7 +89,10 @@ void main() {
 
       expect(find.byKey(const ValueKey('rename-role')), findsNothing);
       expect(find.byKey(const ValueKey('delete-role')), findsNothing);
-      expect(find.text(RoleDetailPane.systemExplanation(_l10n)), findsOneWidget);
+      expect(
+        find.text(RoleDetailPane.systemExplanation(_l10n)),
+        findsOneWidget,
+      );
       expect(find.text(RoleDetailPane.pilotExplanation(_l10n)), findsNothing);
     });
   });
@@ -262,7 +268,10 @@ void main() {
       await tester.tap(_row('Timer'));
       await tester.pumpAndSettle();
 
-      expect(find.text(_l10n.rolesUsageItem('Fall Classic', 1)), findsOneWidget);
+      expect(
+        find.text(_l10n.rolesUsageItem('Fall Classic', 1)),
+        findsOneWidget,
+      );
       expect(find.text(_l10n.rolesUsageItem('Spring Open', 4)), findsOneWidget);
       expect(find.text(RoleDetailPane.inUseExplanation(_l10n)), findsOneWidget);
       expect(_deleteButton(tester).onPressed, isNull);

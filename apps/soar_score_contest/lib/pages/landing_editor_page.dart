@@ -250,7 +250,9 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
                   TextFormField(
                     key: const ValueKey('landing-name'),
                     controller: _name,
-                    decoration: InputDecoration(labelText: l10n.landingEditorName),
+                    decoration: InputDecoration(
+                      labelText: l10n.landingEditorName,
+                    ),
                     validator: (v) => _required(v, l10n.landingEditorName),
                   ),
                   const SizedBox(height: 8),
@@ -273,7 +275,10 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
                     }),
                   ),
                   const SizedBox(height: 24),
-                  Text(l10n.landingEditorEntries, style: theme.textTheme.titleSmall),
+                  Text(
+                    l10n.landingEditorEntries,
+                    style: theme.textTheme.titleSmall,
+                  ),
                   const SizedBox(height: 8),
                   for (var i = 0; i < _rows.length; i++) _row(i),
                   Align(
@@ -323,7 +328,9 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
             child: TextFormField(
               key: ValueKey('entry-label-$index'),
               controller: row.label,
-              decoration: InputDecoration(labelText: l10n.landingEditorEntryLabel),
+              decoration: InputDecoration(
+                labelText: l10n.landingEditorEntryLabel,
+              ),
               validator: (v) => _labelRule(index, v),
             ),
           ),
@@ -334,7 +341,9 @@ class _LandingEditorPageState extends State<LandingEditorPage> {
               key: ValueKey('entry-points-$index'),
               controller: row.points,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: l10n.landingEditorEntryPoints),
+              decoration: InputDecoration(
+                labelText: l10n.landingEditorEntryPoints,
+              ),
               validator: _pointsRule,
             ),
           ),

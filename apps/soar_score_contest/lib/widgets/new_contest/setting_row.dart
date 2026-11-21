@@ -119,7 +119,10 @@ class SettingRow extends StatelessWidget {
                                   textStyle: theme.textTheme.labelMedium,
                                 ),
                                 onPressed: onReset,
-                                child: Text(AppLocalizations.of(context).wizardResetToDefault),
+                                child: Text(
+                                  AppLocalizations.of(context)
+                                      .wizardResetToDefault,
+                                ),
                               ),
                           ],
                         ),

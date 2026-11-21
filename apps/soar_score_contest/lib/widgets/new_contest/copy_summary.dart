@@ -29,7 +29,8 @@ class CopySummary extends StatelessWidget {
           _ => l10n.wizardCopyNone,
         },
       ),
-      if (mode.copiesPilots) (l10n.wizardCopyPerPilot, l10n.wizardCopyPerPilotValue),
+      if (mode.copiesPilots)
+        (l10n.wizardCopyPerPilot, l10n.wizardCopyPerPilotValue),
       (l10n.wizardCopyNotCopied, l10n.wizardCopyNotCopiedValue),
     ];
     final labelStyle = theme.textTheme.bodyMedium?.copyWith(

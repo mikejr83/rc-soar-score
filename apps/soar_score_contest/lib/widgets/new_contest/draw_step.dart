@@ -21,7 +21,8 @@ class DrawStep extends StatelessWidget {
   final ContestDraft draft;
   final ValueChanged<ContestDraft> onChanged;
 
-  static String whyExclusive(AppLocalizations l10n) => l10n.wizardDrawModeWhyExclusive;
+  static String whyExclusive(AppLocalizations l10n) =>
+      l10n.wizardDrawModeWhyExclusive;
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +127,11 @@ class DrawStep extends StatelessWidget {
           errors.groups ??
               (plan.teamProtection && plan.groups == plan.minGroups
                   ? l10n.wizardMinimumGroups(plan.minGroups, plan.largestTeam)
-                  : l10n.wizardGroupsRange(plan.minGroups, plan.maxGroups, plan.scoring)),
+                  : l10n.wizardGroupsRange(
+                      plan.minGroups,
+                      plan.maxGroups,
+                      plan.scoring,
+                    )),
           style: theme.textTheme.bodySmall?.copyWith(
             color: errors.groups != null ? scheme.error : muted,
           ),
@@ -210,8 +215,14 @@ class DrawStep extends StatelessWidget {
         control: SegmentedButton<LaneMode>(
           key: const ValueKey('lane-mode'),
           segments: [
-            ButtonSegment(value: LaneMode.none, label: Text(l10n.wizardLaneNone)),
-            ButtonSegment(value: LaneMode.random, label: Text(l10n.wizardLaneRandom)),
+            ButtonSegment(
+              value: LaneMode.none,
+              label: Text(l10n.wizardLaneNone),
+            ),
+            ButtonSegment(
+              value: LaneMode.random,
+              label: Text(l10n.wizardLaneRandom),
+            ),
           ],
           selected: {settings.laneMode},
           onSelectionChanged: (picked) =>
@@ -285,7 +296,10 @@ class DrawStep extends StatelessWidget {
               SettingNote.error(
                 Icons.warning,
                 l10n.wizardBackToBackTooSmall,
-                l10n.wizardBackToBackTooSmallBody(plan.groups, plan.groups == 1 ? '' : 's'),
+                l10n.wizardBackToBackTooSmallBody(
+                  plan.groups,
+                  plan.groups == 1 ? '' : 's',
+                ),
               ),
           ],
         ],

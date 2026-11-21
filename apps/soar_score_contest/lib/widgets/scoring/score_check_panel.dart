@@ -61,10 +61,7 @@ class ScoreCheckPanel extends StatelessWidget {
                   style: theme.textTheme.titleSmall,
                 ),
               ),
-              TextButton(
-                onPressed: onClose,
-                child: Text(l10n.scoreCheckClose),
-              ),
+              TextButton(onPressed: onClose, child: Text(l10n.scoreCheckClose)),
             ],
           ),
           for (final entry in byPilot.entries) ...[

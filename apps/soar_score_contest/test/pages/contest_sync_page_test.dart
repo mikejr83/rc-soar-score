@@ -1,8 +1,7 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app_sync_provider.dart';
-import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/pages/contest/sync_page.dart';
 import 'package:soar_score_contest/services/sync/app_sync_state.dart';
@@ -26,12 +25,7 @@ Future<void> _pump(WidgetTester tester, FakeAppSync sync) async {
       AppSyncInherited(
         sync: sync,
         child: MaterialApp(
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
+          localizationsDelegates: appLocalizationDelegates,
           supportedLocales: const [Locale('en')],
           home: const ContestSyncPage(contestId: _contestId),
         ),
@@ -108,12 +102,7 @@ void main() {
       AppSyncInherited(
         sync: sync,
         child: MaterialApp(
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
+          localizationsDelegates: appLocalizationDelegates,
           supportedLocales: const [Locale('en')],
           home: const ContestSyncPage(contestId: _contestId),
         ),
@@ -263,9 +252,6 @@ void conflictTests() {
   testWidgets('says so when nothing waits for a decision', (tester) async {
     await _pump(tester, FakeAppSync(state: _state(const SyncScopeSummary())));
 
-    expect(
-      find.text(l10n.syncConflictsNone),
-      findsOneWidget,
-    );
+    expect(find.text(l10n.syncConflictsNone), findsOneWidget);
   });
 }

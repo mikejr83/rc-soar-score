@@ -119,8 +119,12 @@ void main() {
     expect(find.text('Gator Cup'), findsOneWidget);
     expect(find.text('Unpublished and private'), findsOneWidget);
 
-    await tester.ensureVisible(find.byKey(ValueKey('edit-${l10n.wizardDisciplineSection}')));
-    await tester.tap(find.byKey(ValueKey('edit-${l10n.wizardDisciplineSection}')));
+    await tester.ensureVisible(
+      find.byKey(ValueKey('edit-${l10n.wizardDisciplineSection}')),
+    );
+    await tester.tap(
+      find.byKey(ValueKey('edit-${l10n.wizardDisciplineSection}')),
+    );
     await tester.pumpAndSettle();
     expect(stepTitle(tester), l10n.wizardStepDiscipline);
   });
@@ -151,14 +155,8 @@ void main() {
     expect(find.text(l10n.wizardNonFlying), findsNothing);
     expect(find.text(l10n.wizardNoLaneAssignment), findsOneWidget);
     expect(find.text(l10n.wizardAfterCreateConfig), findsOne);
-    expect(
-      find.text(l10n.wizardAfterCreateMatrix),
-      findsOneWidget,
-    );
-    expect(
-      find.text(l10n.wizardDraftKeptNote),
-      findsOneWidget,
-    );
+    expect(find.text(l10n.wizardAfterCreateMatrix), findsOneWidget);
+    expect(find.text(l10n.wizardDraftKeptNote), findsOneWidget);
   });
 
   testWidgets('Create is disabled with its reason while a step is invalid', (
@@ -181,7 +179,9 @@ void main() {
     await next(tester);
     expect(api.contestPosts, 0);
 
-    await tester.tap(find.text(l10n.wizardGoToStep(l10n.wizardStepParticipants)));
+    await tester.tap(
+      find.text(l10n.wizardGoToStep(l10n.wizardStepParticipants)),
+    );
     await tester.pumpAndSettle();
     expect(stepTitle(tester), l10n.wizardStepParticipants);
   });

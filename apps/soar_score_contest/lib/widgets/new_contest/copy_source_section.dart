@@ -252,7 +252,10 @@ class _CopySourceSectionState extends State<CopySourceSection> {
         name: contest.name,
         subtitle: l10n.wizardLoadingSource,
         outlined: true,
-        trailing: TextButton(onPressed: _remove, child: Text(l10n.wizardCancel)),
+        trailing: TextButton(
+          onPressed: _remove,
+          child: Text(l10n.wizardCancel),
+        ),
         footer: const LinearProgressIndicator(),
       ),
     );
@@ -295,10 +298,7 @@ class _CopySourceSectionState extends State<CopySourceSection> {
                           l10n.wizardSourceFailed(contest.name),
                           style: style?.copyWith(fontWeight: FontWeight.w500),
                         ),
-                        Text(
-                          l10n.wizardSourceFailedBody,
-                          style: style,
-                        ),
+                        Text(l10n.wizardSourceFailedBody, style: style),
                       ],
                     ),
                   ),
@@ -410,7 +410,8 @@ class _CopySourceSectionState extends State<CopySourceSection> {
           _note(
             Icons.public,
             l10n.wizardPublicUnavailable(
-              CopySourceSection.localLabel(l10n).toLowerCase()),
+              CopySourceSection.localLabel(l10n).toLowerCase(),
+            ),
             key: const ValueKey('copy-source-public-unavailable'),
           ),
       ],
@@ -502,8 +503,7 @@ class _CopySourceSectionState extends State<CopySourceSection> {
     final scheme = theme.colorScheme;
     final chosen = widget.draft.participants;
     final names = chosen.take(3).map((pilot) => pilot.name).join(', ');
-    final more =
-        chosen.length > 3 ? l10n.wizardAndMore(chosen.length - 3) : '';
+    final more = chosen.length > 3 ? l10n.wizardAndMore(chosen.length - 3) : '';
     return Container(
       key: const ValueKey('copy-source-subset'),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -529,7 +529,9 @@ class _CopySourceSectionState extends State<CopySourceSection> {
                     children: [
                       Text(
                         l10n.wizardPilotsSelected(
-                          chosen.length, source.pilots.length),
+                          chosen.length,
+                          source.pilots.length,
+                        ),
                         style: theme.textTheme.bodyLarge,
                       ),
                       Text(

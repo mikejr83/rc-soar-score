@@ -10,7 +10,7 @@ import '../support/participants_step_support.dart';
 
 void main() {
   testWidgets('Two dropped on F5J marks the second drop as changed, and '
-       'review and publication settings show no discipline default', (
+      'review and publication settings show no discipline default', (
     tester,
   ) async {
     final l10n = AppLocalizationsEn();
@@ -61,10 +61,7 @@ void main() {
 
     expect(stepTitle(tester), l10n.wizardStepDrawOptions);
     expect(rounds(), '6');
-    expect(
-      find.text(l10n.wizardRoundsAppendNote),
-      findsOneWidget,
-    );
+    expect(find.text(l10n.wizardRoundsAppendNote), findsOneWidget);
     expect(store.draft.roundsText, '6');
 
     await store.update(

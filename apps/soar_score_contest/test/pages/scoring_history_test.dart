@@ -33,10 +33,7 @@ void main() {
 
     await _openHistory(tester, 1, 1);
 
-    expect(
-      find.text(_l10n.scoreHistoryTitle('Ann Lee')),
-      findsOneWidget,
-    );
+    expect(find.text(_l10n.scoreHistoryTitle('Ann Lee')), findsOneWidget);
     expect(find.text(_l10n.scoreHistoryRevision(2)), findsOneWidget);
     expect(find.text(_l10n.scoreHistoryRevision(1)), findsOneWidget);
     expect(find.text(_l10n.scoreHistoryCurrent), findsOneWidget);
@@ -72,10 +69,7 @@ void main() {
     expect(find.text(_l10n.scoreHistoryNotAdopted), findsOneWidget);
     expect(find.text(_l10n.scoreHistorySubmission), findsOneWidget);
     expect(find.text('10:00 · 120 m'), findsOneWidget);
-    expect(
-      find.text(_l10n.scoreHistoryAuthorityParticipant),
-      findsOneWidget,
-    );
+    expect(find.text(_l10n.scoreHistoryAuthorityParticipant), findsOneWidget);
   });
 
   testWidgets('a submission awaiting the director is pending, not lost', (

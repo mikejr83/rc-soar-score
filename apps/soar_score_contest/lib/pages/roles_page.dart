@@ -210,33 +210,33 @@ class _RolesPageState extends State<RolesPage> {
         if (all == null) {
           return PageStateView.loading(label: l10n.rolesLoading);
         }
-      // The first role is selected until one is chosen (or when the chosen
-      // one is gone).
-      final selected = all.firstWhere(
-        (role) => role.id == _selectedId,
-        orElse: () => all.first,
-      );
-      return MasterDetail(
-        showDetail: _showDetail,
-        list: (context, wide) => RoleListPane(
-          roles: all,
-          selectedId: selected.id,
-          highlight: wide,
-          onSelect: (role) => setState(() {
-            _selectedId = role.id;
-            _showDetail = true;
-          }),
-        ),
-        detail: (context, wide) => RoleDetailPane(
-          role: selected,
-          usage: _usageOf(selected),
-          onRetryUsage: _reloadUsage,
-          onBack: wide ? null : () => setState(() => _showDetail = false),
-          onRename: () => _rename(selected),
-          onDelete: () => _delete(selected),
-        ),
-      );
-    },
+        // The first role is selected until one is chosen (or when the chosen
+        // one is gone).
+        final selected = all.firstWhere(
+          (role) => role.id == _selectedId,
+          orElse: () => all.first,
+        );
+        return MasterDetail(
+          showDetail: _showDetail,
+          list: (context, wide) => RoleListPane(
+            roles: all,
+            selectedId: selected.id,
+            highlight: wide,
+            onSelect: (role) => setState(() {
+              _selectedId = role.id;
+              _showDetail = true;
+            }),
+          ),
+          detail: (context, wide) => RoleDetailPane(
+            role: selected,
+            usage: _usageOf(selected),
+            onRetryUsage: _reloadUsage,
+            onBack: wide ? null : () => setState(() => _showDetail = false),
+            onRename: () => _rename(selected),
+            onDelete: () => _delete(selected),
+          ),
+        );
+      },
     );
   }
 }

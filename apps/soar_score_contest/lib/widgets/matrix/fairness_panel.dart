@@ -123,7 +123,9 @@ class _FairnessPanelState extends State<FairnessPanel> {
                     open ? Icons.expand_less : Icons.expand_more,
                     size: 18,
                   ),
-                  label: Text(open ? l10n.matrixHideSummary : l10n.matrixShowSummary),
+                  label: Text(
+                    open ? l10n.matrixHideSummary : l10n.matrixShowSummary,
+                  ),
                 );
                 // As in the design, "Hide summary" sits at the right end.
                 // There is no room for that on a narrow bar, so it wraps in
@@ -469,7 +471,11 @@ class _Details extends StatelessWidget {
       ),
       (l10n.matrixDetailAlgorithm, revision.algorithmVersion, false),
       (l10n.matrixDetailRandomSeed, '${revision.randomSeed}', true),
-      (l10n.matrixDetailDrawn, DirectorTime.of(context)(revision.createdAt), false),
+      (
+        l10n.matrixDetailDrawn,
+        DirectorTime.of(context)(revision.createdAt),
+        false,
+      ),
     ];
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
@@ -501,9 +507,7 @@ class _Details extends StatelessWidget {
                             await Clipboard.setData(ClipboardData(text: value));
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l10n.matrixSeedCopied),
-                                ),
+                                SnackBar(content: Text(l10n.matrixSeedCopied)),
                               );
                             }
                           },

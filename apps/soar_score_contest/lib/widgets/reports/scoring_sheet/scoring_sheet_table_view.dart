@@ -68,7 +68,10 @@ class ScoringSheetTableView extends StatelessWidget {
         width: page.strip.width,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [_headings(), for (final item in page.items) _row(l10n, item)],
+          children: [
+            _headings(),
+            for (final item in page.items) _row(l10n, item),
+          ],
         ),
       ),
     );

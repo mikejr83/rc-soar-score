@@ -250,9 +250,9 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
           reportName: widget.report!.title,
           pageNumber: i + 1,
           pageCount: count,
-           extraSideMargin: _definition!.extraSideMargin,
-           generated: _l10n.viewerGenerated(stamp),
-           status: document.status,
+          extraSideMargin: _definition!.extraSideMargin,
+          generated: _l10n.viewerGenerated(stamp),
+          status: document.status,
           body: document.pages[i],
         ),
     ];
@@ -453,7 +453,7 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
           kind: ViewerBannerKind.official,
           icon: Icons.verified,
           lead: l10n.viewerOfficialLead,
-            text: document?.statusReason ?? l10n.viewerOfficialDefault,
+          text: document?.statusReason ?? l10n.viewerOfficialDefault,
         ),
       );
     } else if (status == ResultStatus.preliminary) {
@@ -667,7 +667,10 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
           ViewerToolbar(
             pageText: nothing
                 ? l10n.viewerNoPages
-                : l10n.viewerPageIndicator(_page.clamp(1, pageCount), pageCount),
+                : l10n.viewerPageIndicator(
+                    _page.clamp(1, pageCount),
+                    pageCount,
+                  ),
             legend: nothing ? l10n.viewerNothingToPrint : legend,
             zoom: controller.params.zoom,
             fit: _fit,

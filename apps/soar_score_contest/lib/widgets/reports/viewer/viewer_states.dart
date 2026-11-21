@@ -6,11 +6,7 @@ import 'paper_style.dart';
 /// The viewer's loading state: a grey page-shaped skeleton with a progress bar
 /// on the sheet backdrop.
 class ViewerLoading extends StatelessWidget {
-  const ViewerLoading({
-    super.key,
-    required this.pageAspect,
-    this.label,
-  });
+  const ViewerLoading({super.key, required this.pageAspect, this.label});
 
   /// Page width over height.
   final double pageAspect;

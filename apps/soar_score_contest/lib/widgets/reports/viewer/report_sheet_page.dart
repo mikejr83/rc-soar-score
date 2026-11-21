@@ -64,25 +64,21 @@ class ReportBarePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = _l10nOf(context);
     return Theme(
-    data: PaperStyle.theme(),
-    child: DefaultTextStyle(
-      style: PaperStyle.body,
-      child: Semantics(
-        container: true,
-        label: l10n.viewerSheetPageLabel(
-          reportName,
-          pageNumber,
-          pageCount,
-        ),
-        child: Container(
-          width: setup.width,
-          height: setup.height,
-          color: PaperStyle.paper,
-          padding: margins,
-          child: ClipRect(child: body),
+      data: PaperStyle.theme(),
+      child: DefaultTextStyle(
+        style: PaperStyle.body,
+        child: Semantics(
+          container: true,
+          label: l10n.viewerSheetPageLabel(reportName, pageNumber, pageCount),
+          child: Container(
+            width: setup.width,
+            height: setup.height,
+            color: PaperStyle.paper,
+            padding: margins,
+            child: ClipRect(child: body),
+          ),
         ),
       ),
-    ),
     );
   }
 }
@@ -140,11 +136,7 @@ class ReportSheetPage extends StatelessWidget {
         style: PaperStyle.body,
         child: Semantics(
           container: true,
-          label: l10n.viewerSheetPageLabel(
-            reportName,
-            pageNumber,
-            pageCount,
-          ),
+          label: l10n.viewerSheetPageLabel(reportName, pageNumber, pageCount),
           child: Container(
             width: setup.width,
             height: setup.height,
@@ -272,7 +264,8 @@ class _Footer extends StatelessWidget {
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                         TextSpan(
-                          text: ' · '
+                          text:
+                              ' · '
                               '${l10n.viewerPageOf(pageNumber, pageCount)}',
                         ),
                       ],
@@ -312,44 +305,44 @@ class ResultStamp extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = _l10nOf(context);
     return Semantics(
-    label: l10n.viewerResultStampSemantics(text),
-    child: ExcludeSemantics(
-      child: CustomPaint(
-        painter: _HatchPainter(),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            border: Border.all(color: PaperStyle.ink, width: 2),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                color: PaperStyle.paper,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  text,
-                  style: PaperStyle.body.copyWith(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.5,
+      label: l10n.viewerResultStampSemantics(text),
+      child: ExcludeSemantics(
+        child: CustomPaint(
+          painter: _HatchPainter(),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              border: Border.all(color: PaperStyle.ink, width: 2),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  color: PaperStyle.paper,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    text,
+                    style: PaperStyle.body.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.5,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Container(
-                color: PaperStyle.paper,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  l10n.viewerStampNotFinal,
-                  style: PaperStyle.body.copyWith(fontSize: 9),
+                const SizedBox(height: 2),
+                Container(
+                  color: PaperStyle.paper,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    l10n.viewerStampNotFinal,
+                    style: PaperStyle.body.copyWith(fontSize: 9),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
     );
   }
 }

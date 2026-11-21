@@ -52,11 +52,7 @@ class WizardDotStepper extends StatelessWidget {
 }
 
 class _Dot extends StatelessWidget {
-  const _Dot({
-    required this.step,
-    required this.total,
-    required this.onSelect,
-  });
+  const _Dot({required this.step, required this.total, required this.onSelect});
 
   final WizardStepEntry step;
   final int total;
