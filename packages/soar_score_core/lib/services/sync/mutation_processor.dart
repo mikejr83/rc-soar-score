@@ -23,6 +23,7 @@ import 'mutation_replay.dart';
 import 'mutation_result.dart';
 import 'pilot_link_collisions.dart';
 import 'promotion_operation.dart';
+import '../publication/public_update_service.dart' show publicContestChanged;
 import 'sync_entity_catalog.dart';
 import 'sync_log.dart';
 import 'sync_mutation.dart';
@@ -281,6 +282,12 @@ class MutationProcessor {
         : await _saveImmutable(step);
 
     if (result.outcome == MutationOutcome.accepted) {
+      if (m.entityType == 'Contest' && !payload.isDelete && stored != null) {
+        final after = await tx.findEntity('Contest', m.entityId);
+        if (after != null && publicContestChanged(stored, after)) {
+          ctx.publicContestChange = true;
+        }
+      }
       if (links) {
         // A change to the stored link ends the reviews that compared it.
         await _links.storedLinkChanged(tx, ctx, m.entityId);

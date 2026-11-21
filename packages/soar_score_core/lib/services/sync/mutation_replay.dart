@@ -22,6 +22,7 @@ Future<MutationResult> replayDecision(
       outcome: MutationOutcome.accepted,
       revision: payload.isDelete ? null : payload.entity['revision'] as int?,
       sequence: prior.sequence,
+      replayed: true,
     );
   }
   final stored = await tx.findEntity(prior.entityType, prior.entityId);

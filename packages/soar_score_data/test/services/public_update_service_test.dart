@@ -400,6 +400,71 @@ void _tests(Backend backend) {
       expect(await projections(), hasLength(1));
     });
 
+    test('a synced change publishes by mode, once per exchange', () async {
+      await publishFirst();
+
+      final config = await updates.afterSync(
+        contestId,
+        entityTypes: {'ContestConfigurationRevision'},
+        exchangeMutationId: 'm1',
+      );
+      final retried = await updates.afterSync(
+        contestId,
+        entityTypes: {'ContestConfigurationRevision'},
+        exchangeMutationId: 'm1',
+      );
+
+      expect(config!.created, isTrue);
+      expect(retried!.created, isFalse);
+      expect(await projections(), hasLength(2));
+    });
+
+    test(
+      'synced scores wait for a complete round in RoundCompletion mode',
+      () async {
+        await publishFirst();
+
+        final waiting = await updates.afterSync(
+          contestId,
+          entityTypes: {'ScoreAttempt', 'OfficialScore'},
+          assignmentIds: {round1.first.assignmentId},
+          exchangeMutationId: 'm1',
+        );
+        for (final slot in round1) {
+          await enter(slot, 500);
+        }
+        final complete = await updates.afterSync(
+          contestId,
+          entityTypes: {'ScoreAttempt', 'OfficialScore'},
+          assignmentIds: {round1.first.assignmentId},
+          exchangeMutationId: 'm2',
+        );
+
+        expect(waiting, isNull);
+        expect(complete!.created, isTrue);
+      },
+    );
+
+    test('a synced change of an unrelated type or in Manual mode is left '
+        'alone', () async {
+      await publishFirst();
+      final unrelated = await updates.afterSync(
+        contestId,
+        entityTypes: {'ReviewRequest'},
+        exchangeMutationId: 'm1',
+      );
+      await useMode(core.PublicUpdateMode.manual);
+      final manual = await updates.afterSync(
+        contestId,
+        entityTypes: {'ContestConfigurationRevision'},
+        exchangeMutationId: 'm2',
+      );
+
+      expect(unrelated, isNull);
+      expect(manual, isNull);
+      expect(await projections(), hasLength(1));
+    });
+
     test('a delisted publication is left alone', () async {
       await useMode(core.PublicUpdateMode.automatic);
       await publishFirst();

@@ -40,6 +40,14 @@ class ExchangeContext {
   /// Completed. Null when the request created no contest.
   Id? createdContestId;
 
+  /// An accepted `Contest` write of this request changed what the public site
+  /// shows: the contest details, the results visibility, or becoming
+  /// Completed. Decided inside the write's own transaction, from the row it
+  /// replaced and the row it stored, so nothing else touching the contest
+  /// can set it. Scoring access, the administration lock and the other
+  /// lifecycle steps leave it false.
+  bool publicContestChange = false;
+
   /// The conflicts the request created.
   final List<SyncConflictPointer> conflicts = [];
 }

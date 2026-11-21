@@ -109,7 +109,16 @@ void _tests(Backend backend) {
 
       final again = await harness.exchange(scope, mutations: mutations);
 
-      expect(again.results, first.results);
+      // The same answers, each now marked as an answered replay.
+      expect(again.results.every((r) => r.replayed), isTrue);
+      expect(
+        [for (final r in again.results) r.clientMutationId],
+        [for (final r in first.results) r.clientMutationId],
+      );
+      expect(
+        [for (final r in again.results) (r.outcome, r.revision, r.sequence)],
+        [for (final r in first.results) (r.outcome, r.revision, r.sequence)],
+      );
       expect(await harness.serverMutationCount(), stored);
       expect(again.serverSequence, first.serverSequence);
     },

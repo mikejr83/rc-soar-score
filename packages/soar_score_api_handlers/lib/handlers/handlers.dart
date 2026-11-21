@@ -107,6 +107,7 @@ createHandlers(
     repository,
     versions: syncVersions ?? const SyncVersions.exactly(1),
     recalculation: recalculation,
+    publishingEnabled: publishingEnabled,
   );
 
   return (
