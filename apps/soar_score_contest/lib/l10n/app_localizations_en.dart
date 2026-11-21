@@ -8388,4 +8388,116 @@ class AppLocalizationsEn extends AppLocalizations {
   String sheetTablePrefilled(String label) {
     return '$label. Scores already entered are printed in the score cells; the other score cells are blank for officials to write in.';
   }
+
+  @override
+  String get standingsKeyDropped => '* = dropped round (shaded)';
+
+  @override
+  String get standingsKeyNoScore => '— = no score';
+
+  @override
+  String standingsKeyPartial(int round, String partial) {
+    return 'R$round partial: $partial';
+  }
+
+  @override
+  String get standingsKeyFlightDetails =>
+      'Flight details: time m:ss, landing points; — = not recorded';
+
+  @override
+  String get standingsKeyFlightDetailsHeight =>
+      'Flight details: time m:ss, landing points, launch height; — = not recorded';
+
+  @override
+  String get standingsKeyPct => 'Pct = total as % of the winner';
+
+  @override
+  String get standingsKeyRaw => 'Raw = total plus dropped rounds';
+
+  @override
+  String get standingsKeyPenalty =>
+      'Penalty: deducted from the total, not dropped';
+
+  @override
+  String get standingsKeyTied => 'Tied pilots share a rank';
+
+  @override
+  String standingsContinuePage(String text, int page) {
+    return '$text continue on page $page';
+  }
+
+  @override
+  String standingsContinuesPage(String text, int page) {
+    return '$text continues on page $page';
+  }
+
+  @override
+  String standingsIndicator(int start, int end, String rounds) {
+    return 'Pilots $start to $end · $rounds';
+  }
+
+  @override
+  String get standingsIndicatorPenalty => ' + Penalty';
+
+  @override
+  String get standingsKeyRoundsPenalty => 'Penalty';
+
+  @override
+  String get standingsKeyRoundsNone => 'No rounds';
+
+  @override
+  String standingsKeyRoundsRange(int from, int to) {
+    return 'Rounds $from to $to';
+  }
+
+  @override
+  String standingsStatusRoundMissing(int round, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'scores',
+      one: 'score',
+    );
+    return 'round $round has $count missing $_temp0';
+  }
+
+  @override
+  String standingsStatusMoreRounds(int count) {
+    return '$count more rounds are missing scores';
+  }
+
+  @override
+  String standingsStatusReview(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'pilots have',
+      one: 'pilot has',
+    );
+    return '$count $_temp0 a score in review';
+  }
+
+  @override
+  String get standingsStatusStale =>
+      'these results were calculated before the latest change to the scores, the configuration or the matrix.';
+
+  @override
+  String get standingsStatusNotFinal => 'some scores are not final yet.';
+
+  @override
+  String standingsStatusProvisionalHint(int round) {
+    return ' Turn off Provisional to print rounds 1 to $round as Official.';
+  }
+
+  @override
+  String get standingsStatusOpenScoring => 'Open Scoring';
+
+  @override
+  String get standingsDetailTime => 'Time';
+
+  @override
+  String get standingsDetailLanding => 'Landing';
+
+  @override
+  String get standingsDetailHeight => 'Height';
 }

@@ -41,8 +41,13 @@ class StandingsPageBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = _l10nOf(context);
-    final note = StandingsKey.continuation(page: page, layout: layout);
+    final note = StandingsKey.continuation(
+      l10n,
+      page: page,
+      layout: layout,
+    );
     final key = StandingsKey.items(
+      l10n,
       table: table,
       page: page,
       partialRounds: partialRounds,
@@ -57,7 +62,7 @@ class StandingsPageBody extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
             child: Text(
-              StandingsKey.indicator(page: page),
+              StandingsKey.indicator(l10n, page: page),
               style: PaperStyle.body.copyWith(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,

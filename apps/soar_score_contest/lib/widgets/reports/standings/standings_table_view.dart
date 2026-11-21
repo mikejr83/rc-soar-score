@@ -372,7 +372,7 @@ class _RowView extends StatelessWidget {
       }
     }
     if (details) {
-      cells.add(cell(l10n.standingsScoreCell, lines: table.detailLabels));
+      cells.add(cell(l10n.standingsScoreCell, lines: table.detailLabels(l10n)));
     }
     for (final round in page.rounds) {
       final value = row.cells[round];

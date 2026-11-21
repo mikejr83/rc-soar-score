@@ -12626,6 +12626,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{label}. Scores already entered are printed in the score cells; the other score cells are blank for officials to write in.'**
   String sheetTablePrefilled(String label);
+
+  /// Key line for a dropped round.
+  ///
+  /// In en, this message translates to:
+  /// **'* = dropped round (shaded)'**
+  String get standingsKeyDropped;
+
+  /// Key line for a no-score cell.
+  ///
+  /// In en, this message translates to:
+  /// **'— = no score'**
+  String get standingsKeyNoScore;
+
+  /// Key line for a partly scored round.
+  ///
+  /// In en, this message translates to:
+  /// **'R{round} partial: {partial}'**
+  String standingsKeyPartial(int round, String partial);
+
+  /// Key line for flight details without height.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight details: time m:ss, landing points; — = not recorded'**
+  String get standingsKeyFlightDetails;
+
+  /// Key line for flight details with height.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight details: time m:ss, landing points, launch height; — = not recorded'**
+  String get standingsKeyFlightDetailsHeight;
+
+  /// Key line for the percentage column.
+  ///
+  /// In en, this message translates to:
+  /// **'Pct = total as % of the winner'**
+  String get standingsKeyPct;
+
+  /// Key line for the raw column.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw = total plus dropped rounds'**
+  String get standingsKeyRaw;
+
+  /// Key line for the penalty column.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty: deducted from the total, not dropped'**
+  String get standingsKeyPenalty;
+
+  /// Key line when pilots are tied.
+  ///
+  /// In en, this message translates to:
+  /// **'Tied pilots share a rank'**
+  String get standingsKeyTied;
+
+  /// Note that several rounds continue on a later page.
+  ///
+  /// In en, this message translates to:
+  /// **'{text} continue on page {page}'**
+  String standingsContinuePage(String text, int page);
+
+  /// Note that one round continues on a later page.
+  ///
+  /// In en, this message translates to:
+  /// **'{text} continues on page {page}'**
+  String standingsContinuesPage(String text, int page);
+
+  /// Indicator of the pilots and rounds a page holds.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots {start} to {end} · {rounds}'**
+  String standingsIndicator(int start, int end, String rounds);
+
+  /// Suffix when the page also holds the penalty set.
+  ///
+  /// In en, this message translates to:
+  /// **' + Penalty'**
+  String get standingsIndicatorPenalty;
+
+  /// Rounds text when the page holds only the penalty set.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty'**
+  String get standingsKeyRoundsPenalty;
+
+  /// Rounds text when the page holds no round set.
+  ///
+  /// In en, this message translates to:
+  /// **'No rounds'**
+  String get standingsKeyRoundsNone;
+
+  /// Rounds text for a range of rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds {from} to {to}'**
+  String standingsKeyRoundsRange(int from, int to);
+
+  /// Reason naming a round with missing scores.
+  ///
+  /// In en, this message translates to:
+  /// **'round {round} has {count} missing {count, plural, =1{score}other{scores}}'**
+  String standingsStatusRoundMissing(int round, int count);
+
+  /// Reason naming further rounds with missing scores.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more rounds are missing scores'**
+  String standingsStatusMoreRounds(int count);
+
+  /// Reason naming pilots with a score in review.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{pilot has}other{pilots have}} a score in review'**
+  String standingsStatusReview(int count);
+
+  /// Reason for stale results.
+  ///
+  /// In en, this message translates to:
+  /// **'these results were calculated before the latest change to the scores, the configuration or the matrix.'**
+  String get standingsStatusStale;
+
+  /// Reason for scores not yet final.
+  ///
+  /// In en, this message translates to:
+  /// **'some scores are not final yet.'**
+  String get standingsStatusNotFinal;
+
+  /// Hint to turn Provisional off.
+  ///
+  /// In en, this message translates to:
+  /// **' Turn off Provisional to print rounds 1 to {round} as Official.'**
+  String standingsStatusProvisionalHint(int round);
+
+  /// Action that opens the Scoring page.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Scoring'**
+  String get standingsStatusOpenScoring;
+
+  /// Flight-detail label for time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get standingsDetailTime;
+
+  /// Flight-detail label for landing points.
+  ///
+  /// In en, this message translates to:
+  /// **'Landing'**
+  String get standingsDetailLanding;
+
+  /// Flight-detail label for launch height.
+  ///
+  /// In en, this message translates to:
+  /// **'Height'**
+  String get standingsDetailHeight;
 }
 
 class _AppLocalizationsDelegate
