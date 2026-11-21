@@ -231,7 +231,7 @@ void main() {
 
     await _openHistory(tester, 1, 1);
 
-    expect(find.text('Revision 1'), findsOneWidget);
+    expect(find.text('Revision 2'), findsOneWidget);
     // The time is the promotion time, so it sits on the official line, not on
     // the submission line.
     expect(

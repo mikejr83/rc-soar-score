@@ -743,9 +743,14 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       // The history keeps the pilot's submission as the official revision and
       // names who sent it and who made it official.
       await openRowHistory(tester, saved);
-      expect(find.text('Revision 1'), findsOneWidget);
+      // The history loads after the dialog opens. A pilot's submission takes
+      // the slot to revision 1, so promoting it makes official revision 2.
+      await pumpUntilFound(
+        tester,
+        find.text('Revision ${saved.slot!.placeholder.scoreRevision}'),
+      );
       expect(find.textContaining('Made official by Director'), findsOneWidget);
-      expect(find.textContaining('Submitted by '), findsOneWidget);
+      expect(find.text('Submitted by Participant'), findsOneWidget);
       await closeHistory(tester);
       await leaveGroupDiscardingPending(tester);
     }),

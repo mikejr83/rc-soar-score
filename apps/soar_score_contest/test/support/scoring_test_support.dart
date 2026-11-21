@@ -238,13 +238,14 @@ class ScoringServer {
   }
 
   /// Pre-fills the history of a pilot's submission that a director made
-  /// official: one entry, the submission itself, as revision 1.
+  /// official: one entry, the submission itself. The submission took the slot
+  /// to revision 1, so the official revision is 2, as in the real service.
   void seedAdoptedSubmission(Id assignmentId, Map<String, Object?> components) {
     (_history[assignmentId] ??= []).add(
       ScoreHistoryEntry(
         attemptId: _automaticAttempt,
         outcome: ScoreHistoryOutcome.current,
-        scoreRevision: 1,
+        scoreRevision: 2,
         components: components,
         reason: 'Made official by the director',
         actorId: Id.parse('01900000-0000-7000-8000-0000000000dd'),
