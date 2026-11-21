@@ -7,11 +7,15 @@ import '../../enums/lifecycle_state.dart';
 import '../../enums/public_update_mode.dart';
 import '../../errors/contest_state_error.dart';
 import '../../models/contest/core_options.dart';
+import '../../models/contest/contest.dart';
 import '../../models/id.dart';
+import '../../models/publication/publication_identity.dart';
 import '../../models/sync/audit_event.dart';
 import '../../repositories/recorded_score.dart';
+import '../../repositories/stale_revision_error.dart';
 import '../../repositories/repository.dart';
 import '../scores_service.dart';
+import 'publication_projection_builder.dart';
 import 'publication_service.dart';
 import 'publication_view.dart';
 
@@ -174,14 +178,24 @@ class PublicUpdateService {
     final mode = await _modeOf(contestId);
     if (mode == null || mode == PublicUpdateMode.manual) return null;
     if (mode == PublicUpdateMode.roundCompletion &&
-        !await _worthPublishing(contestId, changed, assignmentIds)) {
+        !await _worthPublishing(contestId, identity, changed, assignmentIds)) {
       return null;
     }
     try {
-      return await _publication.publishAutomatically(
-        contestId,
-        clientMutationId: 'auto-sync-$exchangeMutationId',
-      );
+      // A manual publish can win the revision race while this one builds
+      // (it may even have built from the configuration this exchange just
+      // replaced), so a stale publication revision rebuilds from the
+      // current data and tries again, under the same exchange key.
+      for (var attempt = 1; ; attempt++) {
+        try {
+          return await _publication.publishAutomatically(
+            contestId,
+            clientMutationId: 'auto-sync-$exchangeMutationId',
+          );
+        } on StaleRevisionError {
+          if (attempt >= _syncPublishAttempts) rethrow;
+        }
+      }
     } on ContestStateError {
       rethrow;
     } on Object {
@@ -190,9 +204,14 @@ class PublicUpdateService {
     }
   }
 
+  /// The most times a synced change tries to publish when the publication
+  /// revision moves underneath it.
+  static const _syncPublishAttempts = 2;
+
   /// RoundCompletion's rule for a synced batch of [changed] types.
   Future<bool> _worthPublishing(
     Id contestId,
+    PublicationIdentity identity,
     Set<String> changed,
     Set<Id> assignmentIds,
   ) async {
@@ -202,6 +221,9 @@ class PublicUpdateService {
     if (!scoreChanged) return true; // only the contest itself changed
     final contest = await repository.contestRepository.findById(contestId);
     if (contest?.lifecycleState == LifecycleState.completed) return true;
+    if (contest != null && await _editsPublicDetails(contest, identity)) {
+      return true;
+    }
     final roundIds = <Id>{};
     for (final id in assignmentIds) {
       final assignment = await repository.matrixAssignmentRepository.findById(
@@ -214,6 +236,29 @@ class PublicUpdateService {
     return scores.rounds.any(
       (round) => roundIds.contains(round.roundId) && round.isComplete,
     );
+  }
+
+  /// Whether [contest] differs from what the public projection shows in a
+  /// way a score cannot cause: its details (name, dates, venue) or how much
+  /// of the results are hidden. Scoring only moves the lifecycle state, which
+  /// is not compared, so a score write's companion `Contest` change is not an
+  /// edit.
+  Future<bool> _editsPublicDetails(
+    Contest contest,
+    PublicationIdentity identity,
+  ) async {
+    final currentId = identity.currentProjectionId;
+    if (currentId == null) return false;
+    final published = await repository.publicationProjectionRepository.findById(
+      currentId,
+    );
+    if (published == null) return false;
+    final now = PublicationProjectionBuilder.detailFields(contest);
+    for (final entry in now.entries) {
+      if (published.contestIdentity[entry.key] != entry.value) return true;
+    }
+    return identity.resultsHiddenThroughRound !=
+        contest.resultsHiddenThroughRound;
   }
 
   Future<PublicUpdateMode?> _modeOf(Id contestId) async {

@@ -21,6 +21,7 @@ class AcceptorHarness {
     int pageSize = 500,
     bool recalculates = false,
     bool publishes = false,
+    PublicUpdateService Function(Repository server)? publicUpdates,
     RecalculationService Function(Repository server)? recalculation,
     DateTime Function()? clock,
   }) async {
@@ -55,9 +56,9 @@ class AcceptorHarness {
           (recalculates
               ? RecalculationService(ResultsService(harness.serverRepository))
               : null),
-      publicUpdates: publishes
-          ? PublicUpdateService(harness.serverRepository)
-          : null,
+      publicUpdates:
+          publicUpdates?.call(harness.serverRepository) ??
+          (publishes ? PublicUpdateService(harness.serverRepository) : null),
     );
     harness.installations = InstallationSyncService(harness.serverRepository);
     await harness.register(harness.installationA, 'Laptop');

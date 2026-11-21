@@ -146,11 +146,9 @@ class PublicationProjectionBuilder {
     );
   }
 
-  Map<String, Object?> _identity(
-    Contest contest,
-    String disciplineName,
-    DateTime? lastActivityAt,
-  ) => {
+  /// The contest details the projection's identity shows, as it stores
+  /// them. A change to any of these is a public edit.
+  static Map<String, Object?> detailFields(Contest contest) => {
     'name': contest.name,
     'start': formatUtcTimestamp(contest.startDateTime),
     'end': formatUtcTimestamp(contest.endDateTime),
@@ -159,6 +157,14 @@ class PublicationProjectionBuilder {
     'city': contest.city,
     'state': contest.state,
     'country': contest.country,
+  };
+
+  Map<String, Object?> _identity(
+    Contest contest,
+    String disciplineName,
+    DateTime? lastActivityAt,
+  ) => {
+    ...detailFields(contest),
     'discipline': disciplineName,
     // What the status is worked out from when the contest is read (#454):
     // the lifecycle state and the last activity at publish time. The status

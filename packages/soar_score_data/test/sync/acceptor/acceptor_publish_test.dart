@@ -60,6 +60,15 @@ void _tests(Backend backend) {
     return current!.projectionRevision;
   }
 
+  Future<core.PublicationProjection> currentProjection() async {
+    final identity = (await harness
+        .serverRepository
+        .publicationIdentityRepository
+        .findForContest(contestId))!;
+    return (await harness.serverRepository.publicationProjectionRepository
+        .findById(identity.currentProjectionId!))!;
+  }
+
   Future<int> publishedConfigRevision() async {
     final identity = (await harness
         .serverRepository
@@ -185,6 +194,38 @@ void _tests(Backend backend) {
         expect(await projectionRevision(), before);
       },
     );
+
+    test('a name edit in the same exchange as a partial-round score '
+        'publishes the name', () async {
+      final before = await projectionRevision();
+      final contest = (await harness.clientRepository.contestRepository
+          .findById(contestId))!;
+      await ContestsService(harness.clientRepository).updateContest(
+        contestId,
+        ContestDetails(
+          name: 'Renamed Open',
+          host: contest.host,
+          city: contest.city,
+          startDateTime: contest.startDateTime,
+          endDateTime: contest.endDateTime,
+        ),
+        baseRevision: contest.revision,
+        metadata: core.MutationMetadata(
+          clientMutationId: 'rename-${_mutations++}',
+          authority: core.Authority.director,
+          clientTime: DateTime.utc(2026, 10, 15),
+          actorId: harness.account,
+        ),
+      );
+
+      await syncScores(rounds[0].take(1));
+
+      expect(await projectionRevision(), before + 1);
+      expect(
+        await currentProjection().then((p) => p.contestIdentity['name']),
+        'Renamed Open',
+      );
+    });
 
     test('the batch that completes the round publishes', () async {
       await syncScores(rounds[0].take(2));
