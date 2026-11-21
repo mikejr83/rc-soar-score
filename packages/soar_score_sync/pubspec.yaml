@@ -8,6 +8,7 @@ environment:
   sdk: ">=3.13.0 <4.0.0"
 
 dependencies:
+  logging: ^1.3.0
   soar_score_api:
     path: ../soar_score_api
   soar_score_core:

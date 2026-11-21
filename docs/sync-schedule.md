@@ -78,3 +78,16 @@ again and again, which loads the service.
 
 The code is `RevisionAppSync`; the intervals are the same `SyncPoller`
 constants.
+
+## Sync logging
+
+The sync engine, scheduler and poller write to the app log (`logs/` beside
+`soar_score.db`, included in the support export) at INFO: one line when a sync
+starts and ends, one per exchange (purpose, mutations sent, results by
+outcome, changes received, duration), one per local store of pulled changes,
+and retry waits after a server error. An exchange that takes 10 seconds or
+more is logged as a warning marked `(slow)`. The server logs one `Exchange
+handled` line per exchange with counts and the acceptor time.
+
+Lines carry counts, sizes, durations, entity types, reason codes and contest
+ids only: never tokens, emails, invitation links, account ids or payloads.

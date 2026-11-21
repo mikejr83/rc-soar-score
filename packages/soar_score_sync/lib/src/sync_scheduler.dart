@@ -1,9 +1,13 @@
 import 'dart:async';
 
+import 'package:logging/logging.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import 'sync_engine.dart';
 import 'sync_failure_kind.dart';
+import 'sync_scope_label.dart';
+
+final _logger = Logger('SyncScheduler');
 
 /// Turns "a local change was committed" into a push.
 ///
@@ -63,18 +67,28 @@ class SyncScheduler {
     // A timer already waiting covers this change too.
     if (_timers.containsKey(scope) && delay > Duration.zero) return;
     _timers.remove(scope)?.cancel();
+    _logger.fine(
+      'Sync scheduled: scope=${syncScopeLabel(scope)} in ${delay.inMilliseconds} ms',
+    );
     _timers[scope] = _timerFactory(delay, () => _run(scope));
   }
 
   Future<void> _run(SyncScopeKey scope) async {
     _timers.remove(scope);
     if (_disposed) return;
+    _logger.info(
+      'Sync triggered by a local change or reconnect: scope=${syncScopeLabel(scope)}',
+    );
     final failure = await _engine.syncScope(scope);
     if (failure == SyncFailureKind.serverError) {
       final attempt = (_failures[scope] ?? 0) + 1;
       _failures[scope] = attempt;
       var delay = window * (1 << attempt.clamp(1, 20));
       if (delay > maxBackoff) delay = maxBackoff;
+      _logger.info(
+        'Sync will retry after a server error: scope=${syncScopeLabel(scope)} attempt=$attempt '
+        'wait=${delay.inSeconds} s',
+      );
       _schedule(scope, delay);
     } else {
       _failures.remove(scope);

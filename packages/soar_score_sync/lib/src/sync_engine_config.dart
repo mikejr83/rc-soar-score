@@ -14,6 +14,7 @@ class SyncEngineConfig {
     this.capabilityRecheckInterval = const Duration(minutes: 1),
     this.maxExchangeBytes = syncExchangeMaxBodyBytes,
     this.maxExchangeMutations = syncExchangeMaxMutations,
+    this.slowExchange = const Duration(seconds: 10),
   });
 
   /// This installation's own identifier, generated once and kept.
@@ -36,6 +37,9 @@ class SyncEngineConfig {
   /// The service's limits on one exchange; a push is cut to fit them.
   final int maxExchangeBytes;
   final int maxExchangeMutations;
+
+  /// An exchange that takes at least this long is logged as a warning.
+  final Duration slowExchange;
 
   /// How long a scope with `promote_score` intents held back waits before it
   /// reads the service's capabilities again.
