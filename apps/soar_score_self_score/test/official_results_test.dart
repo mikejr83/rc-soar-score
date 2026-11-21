@@ -176,7 +176,9 @@ void main() {
     expect(find.text('The review keeps the original entry.'), findsOneWidget);
   });
 
-  testWidgets('a zero with no reason reads No score entered', (tester) async {
+  testWidgets('a zero with no reason reads Zero: no score entered', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -189,7 +191,7 @@ void main() {
         ),
       ),
     );
-    expect(find.text('No score entered'), findsOneWidget);
+    expect(find.text('Zero: no score entered'), findsOneWidget);
     expect(find.textContaining('null'), findsNothing);
   });
 
