@@ -161,6 +161,82 @@ Score accounts first. The Action's ID token claim is a prompt signal.
 
 [Auth0 account linking implementation](https://auth0.com/docs/manage-users/user-accounts/user-account-linking/link-user-accounts)
 
+### Email provider (Amazon SES)
+
+Auth0's built-in email provider is for testing only: a fixed
+`no-reply@auth0user.net` sender, 10 emails a minute with the excess silently
+dropped, and no template changes. The tenant sends its mail (verification,
+password reset) through Amazon SES instead. Email verification is not required
+by the apps yet, so a missing or late verification email never blocks sign-in.
+
+The sender uses the same SES account and region as the support form
+([deploy-api-fly.md](deploy-api-fly.md#public-support-form-220)): Ohio,
+`us-east-2`, with the `rcsoarscore.com` domain identity verified and Easy DKIM
+on. The DKIM records in Cloudflare must be DNS only (not proxied). SPF and
+DMARC need no change: SES mail passes DMARC through DKIM alignment.
+
+1. **IAM user.** In IAM, create `auth0-ses-sender` with no console access and
+   attach a customer-managed policy named `auth0-ses-send`. Do not reuse the
+   support form's key, so each can be rotated on its own.
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Sid": "SendAsNoReplyOnly",
+         "Effect": "Allow",
+         "Action": ["ses:SendEmail", "ses:SendRawEmail"],
+         "Resource": [
+           "arn:aws:ses:us-east-2:<account id>:identity/rcsoarscore.com"
+         ],
+         "Condition": {
+           "StringEquals": { "ses:FromAddress": "no-reply@rcsoarscore.com" }
+         }
+       }
+     ]
+   }
+   ```
+
+   While SES is in the sandbox it also checks the recipient's identity, so add
+   `arn:aws:ses:us-east-2:<account id>:identity/<address>` to `Resource` for
+   each verified test recipient. Remove those lines after SES production
+   access is granted.
+
+2. **Access key.** Create an access key for the user (use case: application
+   running outside AWS). Enter it only in Auth0; never put it in the
+   repository, a build or a Fly secret. Rotate it by creating a second key,
+   updating Auth0, testing, then deleting the old key.
+3. **Auth0 provider.** Branding, Email Provider (Emails, Custom Email
+   Providers in newer dashboards): turn on **Use my own email provider**,
+   choose **Amazon SES**, set From `no-reply@rcsoarscore.com`, the key, and
+   region `us-east-2`, then Save and use **Send test email**.
+4. **Verification template.** Branding, Email Templates, Verification Email
+   (Link): set From `no-reply@rcsoarscore.com`, a subject such as "Verify your
+   RC Soar Score email", add a line pointing to `support@rcsoarscore.com` for
+   questions (the template editor has no confirmed Reply-To field), and keep
+   the default 5 day URL lifetime. Leave **Redirect To** empty: non-enterprise
+   tenants cannot customise it (Auth0 answers "Customizations for resultUrl
+   are not allowed for non-enterprise tenants").
+5. **Where users land.** With Redirect To empty, set each application's
+   **Application Login URI** (Settings, Application URIs): the contest web
+   app `https://app.rcsoarscore.com/`, the self-scoring app
+   `https://score.rcsoarscore.com/`. Leave the Windows app's blank, since it
+   has no web page to return to. Landing behaviour after the verification link
+   is not yet tested with real users; if Auth0 shows its own confirmation page
+   instead, users return to the app by hand.
+
+**Sandbox.** Until SES production access is granted (a request per region, in
+the SES console), SES delivers only to verified addresses, at most 200 a day
+and 1 a second. Real pilots signing up with email and password do not receive
+verification mail until then. Google sign-in arrives already verified. SES
+costs about $0.10 per 1,000 messages.
+
+**Verified email in the app.** The server copies `email_verified` from
+`/userinfo` when an account is first created and does not refresh it (#1024).
+Verifying later does not change what the server stores until that ticket is
+done.
+
 ## Who can do what
 
 Auth0 only proves who the caller is. It does not decide what they may do. RBAC
@@ -203,10 +279,11 @@ states the principle, the code and tickets state the current rules.
   second Single Page Web Application the same way as the contest web app.
 - A post-login Action adding name and email to the access token. The server
   ticket (#148) decides between that and calling `/userinfo`.
-- A production tenant. Repeat sections 1 to 4 in it before release and keep its
+- A separate production tenant. The free Auth0 plan has one tenant, so the
+  tenant above is also the one used for release. If a second tenant is added,
+  repeat sections 1 to 4 (including the email provider) in it and keep its
   identifiers out of the development defaults. Create your own Google OAuth
-  client for it and settle the custom login domain first (tracked in release
-  readiness, #157).
+  client for it (tracked in release readiness, #157).
 
 ## Checking it
 
