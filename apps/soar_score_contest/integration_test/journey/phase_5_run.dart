@@ -915,7 +915,7 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
         expect(row.hasPendingSubmission, isFalse, reason: name);
         expect(row.status, RowStatus.official, reason: name);
         expect(row.isAutomaticUnconfirmed, isTrue, reason: name);
-        expect(find.text('Accepted automatically'), findsWidgets);
+        expect(find.text('Official · automatic'), findsWidgets);
         expect(_key('score-confirm-automatic-${row.id.value}'), findsOneWidget);
         // The submission it came from is still the row's source.
         expect(

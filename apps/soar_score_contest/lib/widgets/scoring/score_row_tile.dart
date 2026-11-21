@@ -1019,8 +1019,8 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     shape: const StadiumBorder(),
   );
 
-  /// The Confirm button and its explanation under the "Accepted
-  /// automatically" chip: the contest accepted this score when its round or
+  /// The Confirm button and its explanation under the "Official ·
+  /// automatic" chip: the contest made this score when its round or
   /// group was fully scored, and confirming it records the director's
   /// decision and closes review without a second official version.
   Widget _confirmAutomatic(BuildContext context, MarkOfficialSkip? skip) {

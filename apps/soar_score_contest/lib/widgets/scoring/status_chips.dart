@@ -91,7 +91,7 @@ class RowStatusChip extends StatelessWidget {
   final bool unsaved;
 
   /// An official score the contest accepted on its own that the director has
-  /// not confirmed: shown as "Accepted automatically" instead of "Official".
+  /// not confirmed: shown as "Official · automatic" instead of plain "Official".
   final bool automatic;
 
   @override
