@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/scoring/scoring_completeness.dart';
 import 'status_chips.dart';
 
@@ -49,8 +50,9 @@ class CompletenessMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final words = AppLocalizations.of(context);
     return PopupMenuButton<int>(
-      tooltip: 'Go to…',
+      tooltip: words.scorePickerGoTo,
       onSelected: onSelected,
       itemBuilder: (context) => [
         for (final choice in choices)

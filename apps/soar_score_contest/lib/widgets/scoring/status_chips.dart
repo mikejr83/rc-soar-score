@@ -107,48 +107,49 @@ class RowStatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final colors = MatrixColors.of(context);
+    final words = AppLocalizations.of(context);
     if (unsaved) {
       return StatusChip(
         icon: Icons.edit_note,
-        label: 'Unsaved',
+        label: words.scoreStatusUnsaved,
         background: scheme.tertiaryContainer,
         foreground: scheme.onTertiaryContainer,
       );
     }
     return switch (status) {
-      RowStatus.notEntered => const StatusChip(
+      RowStatus.notEntered => StatusChip(
         icon: Icons.radio_button_unchecked,
-        label: 'Not entered',
+        label: words.scoreStatusNotEntered,
         dashed: true,
       ),
       RowStatus.submitted => StatusChip(
         icon: Icons.inbox,
-        label: 'Submitted',
+        label: words.scoreStatusSubmitted,
         background: scheme.surfaceContainerHighest,
         foreground: scheme.onSurface,
       ),
       RowStatus.official when automatic => StatusChip(
         icon: Icons.auto_mode,
-        label: AppLocalizations.of(context).scoreAcceptedAutomatically,
+        label: words.scoreAcceptedAutomatically,
         wrap: true,
         background: colors.successContainer,
         foreground: colors.onSuccessContainer,
       ),
       RowStatus.official => StatusChip(
         icon: Icons.verified,
-        label: 'Official',
+        label: words.scoreStatusOfficial,
         background: colors.successContainer,
         foreground: colors.onSuccessContainer,
       ),
       RowStatus.locked => StatusChip(
         icon: Icons.lock,
-        label: 'Locked',
+        label: words.scoreStatusLocked,
         background: scheme.inverseSurface,
         foreground: scheme.onInverseSurface,
       ),
       RowStatus.retired => StatusChip(
         icon: Icons.person_off_outlined,
-        label: 'Retired',
+        label: words.scoreStatusRetired,
         background: scheme.surfaceContainerHighest,
         foreground: scheme.onSurface,
       ),

@@ -252,7 +252,7 @@ void main() {
       'landing': 'within_1m',
     });
     // The next pilot's row is open for entry.
-    expect(find.text('Official'), findsOneWidget);
+    expect(find.text(_l10n.scoreStatusOfficial), findsOneWidget);
   });
 
   testWidgets('late landing clears and disables the landing', (tester) async {
@@ -1199,7 +1199,7 @@ void main() {
 
     testWidgets('the status line starts at the left edge', (tester) async {
       await pumpScoringPage(tester, ScoringServer(), round: 1, group: 1);
-      final chip = tester.getTopLeft(find.text('Round not flown'));
+      final chip = tester.getTopLeft(find.text(_l10n.scoreRoundNotFlown));
       expect(chip.dx, lessThan(60));
     });
 

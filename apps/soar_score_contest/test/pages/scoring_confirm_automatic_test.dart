@@ -31,7 +31,7 @@ void main() {
     // Only the automatic row has the chip and the button; a director's score
     // stays plain Official.
     expect(find.text(_words.scoreAcceptedAutomatically), findsOneWidget);
-    expect(find.text('Official'), findsOneWidget);
+    expect(find.text(_words.scoreStatusOfficial), findsOneWidget);
     expect(find.text(_words.scoreConfirm), findsOneWidget);
     expect(_key('score-confirm-automatic-${first.value}'), findsOneWidget);
     expect(_key('score-automatic-note-${first.value}'), findsOneWidget);
@@ -80,7 +80,7 @@ void main() {
     expect(server.confirmedAssignments, [first]);
     expect(server.promotedBodies.single['expected_score_revision'], 1);
     expect(find.text(_words.scoreAcceptedAutomatically), findsNothing);
-    expect(find.text('Official'), findsOneWidget);
+    expect(find.text(_words.scoreStatusOfficial), findsOneWidget);
     expect(find.text(_words.scoreConfirm), findsNothing);
   });
 

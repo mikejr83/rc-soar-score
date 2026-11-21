@@ -32,7 +32,7 @@ void main() {
       ..seedScore(second, _flight);
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
-    expect(find.text('Official'), findsNWidgets(2));
+    expect(find.text(_l10n.scoreStatusOfficial), findsNWidgets(2));
     expect(_key('score-indicator-pilot-entry-${first.value}'), findsOneWidget);
     // A score the director typed has no source to point at.
     expect(_key('score-indicator-pilot-entry-${second.value}'), findsNothing);

@@ -4776,6 +4776,136 @@ class AppLocalizationsEn extends AppLocalizations {
       'Official (automatic). This score is locked.';
 
   @override
+  String get scoreStatusUnsaved => 'Unsaved';
+
+  @override
+  String get scoreStatusNotEntered => 'Not entered';
+
+  @override
+  String get scoreStatusSubmitted => 'Submitted';
+
+  @override
+  String get scoreStatusOfficial => 'Official';
+
+  @override
+  String get scoreStatusLocked => 'Locked';
+
+  @override
+  String get scoreStatusRetired => 'Retired';
+
+  @override
+  String get scoreRoundNotFlown => 'Round not flown';
+
+  @override
+  String get scoreRoundInProgress => 'Round in progress';
+
+  @override
+  String get scoreRoundScored => 'Round scored';
+
+  @override
+  String get scoreOpenForEntry => 'Open for entry';
+
+  @override
+  String scoreUnsavedRows(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count unsaved rows',
+      one: '1 unsaved row',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scorePickerGoTo => 'Go to…';
+
+  @override
+  String get scoreFlightPenaltyTitle => 'Flight penalty';
+
+  @override
+  String get scoreCumulativePenaltyTitle => 'Cumulative penalty';
+
+  @override
+  String get scorePenaltyFlightHelp1 => 'Deducted from ';
+
+  @override
+  String get scorePenaltyFlightThisFlight => 'this flight';
+
+  @override
+  String get scorePenaltyFlightHelp2 => ' (never below 0). ';
+
+  @override
+  String get scorePenaltyFlightDropped => 'Dropped';
+
+  @override
+  String get scorePenaltyFlightHelp3 => ' if this round is dropped.';
+
+  @override
+  String get scorePenaltyCumulativeHelp1 => 'Deducted from the ';
+
+  @override
+  String get scorePenaltyCumulativeContestTotal => 'contest total';
+
+  @override
+  String get scorePenaltyCumulativeHelp2 => '. ';
+
+  @override
+  String get scorePenaltyCumulativeNeverDropped => 'Never dropped';
+
+  @override
+  String get scorePenaltyCumulativeHelp3 =>
+      ', and still counts if this flight is re-flown.';
+
+  @override
+  String get scorePenaltyCumulativeNone => 'No cumulative penalty.';
+
+  @override
+  String get scorePenaltyCumulativeInvalid =>
+      'A whole number of points, 0 or more.';
+
+  @override
+  String get scorePenaltyCumulativeRemoved =>
+      'Removed. Removing is recorded as an official correction.';
+
+  @override
+  String scorePenaltyCumulativeApplied(String count) {
+    return 'Applied: $count points from the contest total.';
+  }
+
+  @override
+  String scoreSaveNotSaved(String message) {
+    return 'Not saved. $message Your values are kept.';
+  }
+
+  @override
+  String scoreSaveRefused(String reason) {
+    return 'Refused: $reason. Your values are kept.';
+  }
+
+  @override
+  String get scoreSaveRefusedNoReason => 'the entry was not accepted';
+
+  @override
+  String get scoreSaveKeepMine => 'Keep mine';
+
+  @override
+  String get scoreSaveTakeNewer => 'Take the newer';
+
+  @override
+  String scoreSaveStaleText(String mine, String newer) {
+    return 'This row changed since you opened it. Yours: $mine. Newer: $newer.';
+  }
+
+  @override
+  String get scoreSaveNothingEntered => 'nothing entered';
+
+  @override
+  String get scoreSaveRetry => 'Retry';
+
+  @override
+  String get scoreSaveRefresh => 'Refresh';
+
+  @override
   String get scoreConfirmQueuedNote =>
       'Confirm is queued; the service decides it when this device syncs.';
 
