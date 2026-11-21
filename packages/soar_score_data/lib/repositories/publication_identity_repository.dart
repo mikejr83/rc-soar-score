@@ -97,25 +97,45 @@ class PublicationIdentityRepository extends DriftRepository
   static String _likeEscape(String text) =>
       text.replaceAll('!', '!!').replaceAll('%', '!%').replaceAll('_', '!_');
 
+  /// Stores [identity] as the next revision of the row it was read at.
+  ///
+  /// The revision is compared by the database in the update itself, not
+  /// between a read and a write: two transactions that both read revision N
+  /// cannot both store N + 1, the one that commits second is refused with a
+  /// [core.StaleRevisionError] before it writes anything else of its publish.
   @override
   Future<core.PublicationIdentity> save(core.PublicationIdentity identity) =>
       db.transaction(() async {
         final stored = await _store.findJson(identity.id);
         final storedRevision = stored?['revision'] as int?;
         if (storedRevision != null && storedRevision != identity.revision) {
-          throw core.StaleRevisionError(
-            entityType: _store.entityType,
-            entityId: identity.id,
-            expectedRevision: identity.revision,
-            storedRevision: storedRevision,
-          );
+          throw _stale(identity, storedRevision);
         }
         final json = _store.encode(identity);
         json['revision'] = storedRevision == null
             ? identity.revision
             : storedRevision + 1;
         final saved = _store.decode(json);
-        await _store.upsertJson(_store.encode(saved));
+        final written = await _store.upsertJsonIfRevision(
+          _store.encode(saved),
+          storedRevision,
+        );
+        if (!written) {
+          // Another transaction stored a revision, or the first publish of
+          // this identity, since the read above.
+          final current = await _store.findJson(identity.id);
+          throw _stale(identity, current?['revision'] as int? ?? 0);
+        }
         return saved;
       });
+
+  core.StaleRevisionError _stale(
+    core.PublicationIdentity identity,
+    int storedRevision,
+  ) => core.StaleRevisionError(
+    entityType: _store.entityType,
+    entityId: identity.id,
+    expectedRevision: identity.revision,
+    storedRevision: storedRevision,
+  );
 }

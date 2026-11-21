@@ -383,6 +383,7 @@ class SyncAcceptorService {
   /// score names its placeholder. Deletions and other types name none.
   Future<Set<Id>> _assignmentsOf(List<SyncMutation> accepted) async {
     final ids = <Id>{};
+    final lookedUp = <Id>{};
     for (final m in accepted) {
       try {
         if (m.entityType == promotionReceiptEntityType) {
@@ -405,9 +406,13 @@ class SyncAcceptorService {
           }
         } else if (payload.entity['score_placeholder_id']
             case final String id) {
-          final placeholder = await _repository.scorePlaceholderRepository
-              .findById(Id.parse(id));
-          if (placeholder != null) ids.add(placeholder.assignmentId);
+          // An attempt and its official score name the same placeholder.
+          final placeholderId = Id.parse(id);
+          if (lookedUp.add(placeholderId)) {
+            final placeholder = await _repository.scorePlaceholderRepository
+                .findById(placeholderId);
+            if (placeholder != null) ids.add(placeholder.assignmentId);
+          }
         }
       } on FormatException {
         continue; // an accepted mutation is well formed; be defensive anyway
