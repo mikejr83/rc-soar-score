@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import licences from "@/content/licences.json";
@@ -10,7 +8,6 @@ import {
 } from "@/lib/licences";
 
 const data = licences as LicenceData;
-const repoRoot = path.resolve(process.cwd(), "..", "..");
 
 describe("generated licence data", () => {
   it("has the four shipped products with stable ids", () => {
@@ -55,16 +52,6 @@ describe("generated licence data", () => {
     expect(names).toContain("go_router");
     expect(names.some((n) => n.startsWith("mdbtools"))).toBe(true);
     expect(names).not.toContain("melos");
-  });
-
-  it("is not stale: the lockfiles it was generated from still match", () => {
-    // Fix with scripts/generate-licences.sh (or .ps1) and commit the result.
-    for (const [file, expected] of Object.entries(data.inputs)) {
-      const text = readFileSync(path.join(repoRoot, file), "utf8");
-      expect(fingerprint(text), `${file} changed; regenerate the licences`).toBe(
-        expected,
-      );
-    }
   });
 });
 

@@ -174,7 +174,7 @@ bash scripts/generate-licences.sh --product contest-app --notices THIRD_PARTY_NO
 dart scripts/generate_licences.dart --product contest-app --json contest-licences.json
 ```
 
-All three entry points accept the same options. Run with no options to regenerate the site's JSON. Use `--check` to fail if that JSON is stale. Use `--product ID` with `--notices FILE`, `--json FILE`, or both for per-product output. Product IDs are `contest-app`, `self-scoring`, `server`, and `public-site`.
+All three entry points accept the same options. Run with no options to regenerate the site's JSON. Use `--check` to fail if that JSON lags the lockfiles (not run in CI; releases regenerate it). Use `--product ID` with `--notices FILE`, `--json FILE`, or both for per-product output. Product IDs are `contest-app`, `self-scoring`, `server`, and `public-site`.
 
 ### [generate-enum-catalog.ps1](./generate-enum-catalog.ps1) — PowerShell
 

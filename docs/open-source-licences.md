@@ -46,10 +46,12 @@ asset. The bundled native components (OpenSSL, cpp-httplib, nlohmann/json,
 the GliderScore helpers) are listed in the generator only, so the notices
 file, the in-app list and the web page agree.
 
-The staleness check is a vitest test (`src/lib/licences.test.ts`, run by
-`npm test` and the `public-site` CI job). It fails when `pubspec.lock`,
-`package-lock.json` or the overrides changed since the data was generated.
-`scripts/generate-licences.sh --check` does the full comparison locally.
+There is no staleness test. The committed `licences.json` is a snapshot so CI
+and local runs need no Dart; it may lag the lockfiles. The `public-site` job in
+`.github/workflows/deploy.yml` regenerates it from the release tag (and runs
+the shape tests on the result) before `vercel build`, and `release-windows.yml`
+generates the zip notices. `scripts/generate-licences.sh --check` still compares
+the snapshot with the lockfiles locally if you want to know whether it lags.
 
 ## Copyleft review
 
