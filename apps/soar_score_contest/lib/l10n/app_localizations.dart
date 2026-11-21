@@ -4533,6 +4533,12 @@ abstract class AppLocalizations {
   /// **'Made official by {who}'**
   String scoreHistoryMadeOfficialBy(String who);
 
+  /// Who made a stored submission official in the score history when a director did it.
+  ///
+  /// In en, this message translates to:
+  /// **'Director'**
+  String get scoreHistoryDirector;
+
   /// Note on the current version in the score history when the director confirmed an automatically accepted score.
   ///
   /// In en, this message translates to:

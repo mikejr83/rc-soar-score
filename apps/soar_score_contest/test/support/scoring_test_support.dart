@@ -237,6 +237,25 @@ class ScoringServer {
     );
   }
 
+  /// Pre-fills the history of a pilot's submission that a director made
+  /// official: one entry, the submission itself. The submission took the slot
+  /// to revision 1, so the official revision is 2, as in the real service.
+  void seedAdoptedSubmission(Id assignmentId, Map<String, Object?> components) {
+    (_history[assignmentId] ??= []).add(
+      ScoreHistoryEntry(
+        attemptId: _automaticAttempt,
+        outcome: ScoreHistoryOutcome.current,
+        scoreRevision: 2,
+        components: components,
+        reason: 'Made official by the director',
+        actorId: Id.parse('01900000-0000-7000-8000-0000000000dd'),
+        authority: Authority.participant,
+        selectionOrigin: SelectionOrigin.manual,
+        at: DateTime.utc(2026, 10, 17, 15),
+      ),
+    );
+  }
+
   /// Another director confirms the automatic score of [assignmentId].
   void confirmAsDirector(Id assignmentId) {
     final score = _score[assignmentId]!;

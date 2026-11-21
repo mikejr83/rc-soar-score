@@ -220,4 +220,24 @@ void main() {
     expect(find.text('Revision 1'), findsNWidgets(2));
     expect(find.text('Reason: Timer misread'), findsOneWidget);
   });
+
+  testWidgets('names the submitter and the director who made it official', (
+    tester,
+  ) async {
+    final server = ScoringServer();
+    final slot = scoringAssignmentId(1, 1);
+    server.seedAdoptedSubmission(slot, _first);
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+
+    await _openHistory(tester, 1, 1);
+
+    expect(find.text('Revision 2'), findsOneWidget);
+    // The time is the promotion time, so it sits on the official line, not on
+    // the submission line.
+    expect(
+      find.textContaining('Made official by Director · Sat Oct 17'),
+      findsOneWidget,
+    );
+    expect(find.text('Submitted by Participant'), findsOneWidget);
+  });
 }
