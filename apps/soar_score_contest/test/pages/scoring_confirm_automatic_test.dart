@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -35,6 +36,34 @@ void main() {
     expect(_key('score-confirm-automatic-${first.value}'), findsOneWidget);
     expect(_key('score-automatic-note-${first.value}'), findsOneWidget);
   });
+
+  for (final scale in [1.0, 1.5]) {
+    testWidgets('the automatic chip wraps in its column and is never cut off '
+        'at text scale $scale', (tester) async {
+      final first = scoringAssignmentId(1, 1);
+      final server = ScoringServer()..seedAutomaticScore(first, _flight);
+      await pumpScoringPage(
+        tester,
+        server,
+        round: 1,
+        group: 1,
+        textScale: scale,
+      );
+
+      final label = find.descendant(
+        of: _key('score-row-${first.value}'),
+        matching: find.text(_words.scoreAcceptedAutomatically),
+      );
+      expect(label, findsOneWidget);
+      // An ellipsis would hide the qualifier; the label wraps instead.
+      expect(tester.widget<Text>(label).overflow, isNot(TextOverflow.ellipsis));
+      final paragraph = tester.renderObject<RenderParagraph>(label);
+      expect(paragraph.didExceedMaxLines, isFalse);
+      // Flutter's test font is not the app font, so widths are not measured
+      // here; a layout overflow would still surface as an exception.
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('Confirm sends the official score and ends as Official', (
     tester,

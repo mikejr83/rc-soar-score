@@ -15,6 +15,7 @@ class StatusChip extends StatelessWidget {
     this.foreground,
     this.dashed = false,
     this.dense = false,
+    this.wrap = false,
   });
 
   final IconData icon;
@@ -31,13 +32,21 @@ class StatusChip extends StatelessWidget {
   /// label and the chip grows taller instead of cutting it off.
   final bool dense;
 
+  /// Wraps a long label inside its column instead of ending it with an
+  /// ellipsis, for a label whose second word matters (Official · automatic).
+  /// It uses the small chip's icon, padding and text so the longest word
+  /// still fits the status column (132 px) at the Extra large text size; the
+  /// chip keeps the regular height and radius.
+  final bool wrap;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final fg = foreground ?? scheme.onSurfaceVariant;
+    final small = dense || wrap;
     return Container(
       constraints: BoxConstraints(minHeight: dense ? 22 : 28),
-      padding: dense
+      padding: small
           ? const EdgeInsets.fromLTRB(4, 1, 6, 1)
           : const EdgeInsets.fromLTRB(6, 2, 10, 2),
       decoration: BoxDecoration(
@@ -53,13 +62,13 @@ class StatusChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: dense ? 14 : 18, color: fg),
-          SizedBox(width: dense ? 4 : 6),
+          Icon(icon, size: small ? 14 : 18, color: fg),
+          SizedBox(width: small ? 4 : 6),
           Flexible(
             child: Text(
               label,
-              overflow: dense ? null : TextOverflow.ellipsis,
-              style: dense
+              overflow: small ? null : TextOverflow.ellipsis,
+              style: small
                   ? Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: fg,
                       fontSize: 12,
@@ -121,6 +130,7 @@ class RowStatusChip extends StatelessWidget {
       RowStatus.official when automatic => StatusChip(
         icon: Icons.auto_mode,
         label: AppLocalizations.of(context).scoreAcceptedAutomatically,
+        wrap: true,
         background: colors.successContainer,
         foreground: colors.onSuccessContainer,
       ),
