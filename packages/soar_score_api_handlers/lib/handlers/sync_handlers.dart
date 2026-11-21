@@ -166,6 +166,7 @@ void addSyncRoutes(
         'an exchange takes at most $syncExchangeMaxMutations mutations',
       );
     }
+    final watch = Stopwatch()..start();
     final output = await acceptor.exchange(
       accountId: principal.accountId,
       input: SyncExchangeInput(
@@ -191,6 +192,19 @@ void addSyncRoutes(
             ),
         ],
       ),
+    );
+    final results = <MutationOutcome, int>{};
+    for (final r in output.results) {
+      results[r.outcome] = (results[r.outcome] ?? 0) + 1;
+    }
+    // Counts and timing only: no account, installation or payload.
+    _logger.info(
+      'Exchange handled: scope=${body.scope.contestId == null ? 'director' : 'contest/${body.scope.contestId!.value}'} '
+      'mutationsIn=${body.mutations.length} '
+      'results=${results.isEmpty ? 'none' : results.entries.map((e) => '${e.key.name}:${e.value}').join(',')} '
+      'changesOut=${output.changes.length} '
+      'more=${output.nextPageToken != null} '
+      'acceptorMs=${watch.elapsedMilliseconds}',
     );
     return jsonResponse(
       SyncExchangeResponse(
