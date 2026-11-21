@@ -89,6 +89,12 @@ extension ParticipantsRowStyles on ParticipantsController {
         Icons.check_circle,
         tone: ParticipantStatusTone.success,
       );
+    } else if (row.participation.retiredAtRound != null) {
+      status = ParticipantStatus(
+        'Retired from round ${row.participation.retiredAtRound}',
+        Icons.person_off,
+        tone: ParticipantStatusTone.warning,
+      );
     } else if (!scoring) {
       status = const ParticipantStatus('Non-flying', Icons.badge);
     } else if (rules.issuesOf(row).isNotEmpty) {

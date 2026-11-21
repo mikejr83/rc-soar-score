@@ -844,6 +844,28 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
     timeout: _longStep,
   );
   await journey.step(
+    'Round 3: the Participants list marks the retired pilot and still offers '
+    'their invitation',
+    () => inContest(() async {
+      const retired = 'Tess Valdez';
+      await tapRail(tester, 'Participants');
+      await pumpUntilFound(tester, _key('participants-table'));
+      await pumpUntilFound(tester, find.text(retired));
+      expect(find.text('Retired from round 3'), findsOneWidget);
+      // A retired pilot is still a pilot: the invitation actions are not
+      // refused for them, so selecting the row leaves the menu in place.
+      await tapVisible(
+        tester,
+        find.byWidgetPredicate(
+          (w) => w is Checkbox && w.semanticLabel == 'Select $retired',
+        ),
+      );
+      await tapVisible(tester, _key('invitations-menu'));
+      await pumpUntilFound(tester, _key('invitations-copy'));
+      expect(find.text('Only pilots get invitations.'), findsNothing);
+    }),
+  );
+  await journey.step(
     'Round 3: the contest accepts the last entries itself, the director '
     'confirms one',
     () => inContest(() async {

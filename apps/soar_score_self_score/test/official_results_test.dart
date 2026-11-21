@@ -204,6 +204,16 @@ void main() {
       const GroupResultRow(name: 'Blake Castillo', kind: GroupRowKind.noScore),
     );
     expect(find.text('No score yet'), findsOneWidget);
+
+    await pump(
+      const GroupResultRow(name: 'Kai Larsen', kind: GroupRowKind.retired),
+    );
+    expect(find.text('Retired'), findsOneWidget);
+    expect(find.text('No score yet'), findsNothing);
+    expect(
+      find.text('Retired from this round. No flight expected.'),
+      findsOneWidget,
+    );
   });
 
   for (final (policy, phrase) in [

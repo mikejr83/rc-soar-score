@@ -424,6 +424,15 @@ void main() {
     expect(entry.submittedScore!.details!.enteredBy, 'Alex Rivera');
   });
 
+  test('a retired pilot reads as retired, not as a scored row', () async {
+    final body = jsonDecode(_fixture('group_results')) as Map<String, dynamic>;
+    final rows = (body['rows'] as List).cast<Map<String, dynamic>>();
+    rows[2]['state'] = 'retired';
+    final group = await _repository((_) => _json(jsonEncode(body)))
+        .groupResults('c', 'p', 1);
+    expect(group.rows[2].kind, GroupRowKind.retired);
+  });
+
   test('a snake_case zero reason reads as words', () async {
     final body = jsonDecode(_fixture('group_results')) as Map<String, dynamic>;
     for (final row in (body['rows'] as List).cast<Map<String, dynamic>>()) {

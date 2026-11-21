@@ -188,25 +188,37 @@ void main() {
   });
 
   testWidgets(
-    'row menu disables invitation actions for non-pilots and retired pilots',
+    'row menu disables invitation actions for non-pilots, not retired pilots',
     (tester) async {
       PilotInvitationSources.current = FakePilotInvitationSource(
         links: {personParticipationId(1).value: 'https://x.test/one'},
       );
       await pumpParticipantsPage(tester, ParticipantsServer(retiredPilot: 1));
-      for (final n in [1, 5]) {
-        await openRow(tester, n);
-        expect(
-          tester.widget<MenuItemButton>(rowAction('send', n)).onPressed,
-          isNull,
-        );
-        expect(
-          tester.widget<MenuItemButton>(rowAction('copy', n)).onPressed,
-          isNull,
-        );
-        await tester.tap(rowAction('actions', n));
-        await tester.pumpAndSettle();
-      }
+      // The retired pilot already has a link: Copy works, Send has nothing
+      // to do.
+      await openRow(tester, 1);
+      expect(
+        tester.widget<MenuItemButton>(rowAction('send', 1)).onPressed,
+        isNull,
+      );
+      expect(
+        tester.widget<MenuItemButton>(rowAction('copy', 1)).onPressed,
+        isNotNull,
+      );
+      await tester.tap(rowAction('actions', 1));
+      await tester.pumpAndSettle();
+      // A non-flying participant gets neither.
+      await openRow(tester, 5);
+      expect(
+        tester.widget<MenuItemButton>(rowAction('send', 5)).onPressed,
+        isNull,
+      );
+      expect(
+        tester.widget<MenuItemButton>(rowAction('copy', 5)).onPressed,
+        isNull,
+      );
+      await tester.tap(rowAction('actions', 5));
+      await tester.pumpAndSettle();
     },
   );
 

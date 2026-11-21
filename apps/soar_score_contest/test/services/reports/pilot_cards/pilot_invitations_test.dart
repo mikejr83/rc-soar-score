@@ -93,7 +93,7 @@ void main() {
       scoringUuid: ScoringUuid.create(),
     );
     expect(canHaveInvitation(participation()), isTrue);
-    expect(canHaveInvitation(participation(retiredAtRound: 2)), isFalse);
+    expect(canHaveInvitation(participation(retiredAtRound: 2)), isTrue);
     expect(canHaveInvitation(participation(role: RoleType.nonFlier)), isFalse);
   });
 
