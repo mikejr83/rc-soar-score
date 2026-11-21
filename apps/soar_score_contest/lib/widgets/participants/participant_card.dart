@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/participants/participant_option.dart';
 import '../../services/participants/participant_row.dart';
 import '../../services/participants/participant_row_style.dart';
@@ -29,6 +30,7 @@ class ParticipantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final cells = ParticipantCells(editing, participant, height: 44);
@@ -54,22 +56,26 @@ class ParticipantCard extends StatelessWidget {
     final fields = <Widget>[
       // The number leads, like the table's first column.
       if (editing.rules.has(ParticipantOption.pilotNumbers))
-        labelled('Pilot no.', cells.number(context)),
+        labelled(l10n.participantColumnPilotNo, cells.number(context)),
       for (final option in ParticipantCells.columnsFor(editing))
         ...switch (option) {
-          ParticipantOption.roles => [labelled('Role', cells.role(context))],
+          ParticipantOption.roles => [
+            labelled(l10n.participantColumnRole, cells.role(context)),
+          ],
           ParticipantOption.classes => [
             labelled(
-              'Class *',
+              l10n.participantColumnClass,
               cells.classification(context),
               error: cells.issues.contains(ParticipantIssue.classification),
             ),
           ],
-          ParticipantOption.teams => [labelled('Team', cells.team(context))],
+          ParticipantOption.teams => [
+            labelled(l10n.participantColumnTeam, cells.team(context)),
+          ],
           // The number field already leads the card.
           ParticipantOption.pilotNumbers => const [],
           ParticipantOption.models => [
-            labelled('Models', cells.modelsCell(context)),
+            labelled(l10n.participantColumnModels, cells.modelsCell(context)),
           ],
         },
     ];
@@ -114,10 +120,13 @@ class ParticipantCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                if (selectable) ...[
-                  SizedBox.square(dimension: 44, child: cells.checkbox()),
-                  const SizedBox(width: 8),
-                ],
+                 if (selectable) ...[
+                   SizedBox.square(
+                     dimension: 44,
+                     child: cells.checkbox(context),
+                   ),
+                   const SizedBox(width: 8),
+                 ],
                 cells.avatar(context, size: 36),
                 const SizedBox(width: 8),
                 Expanded(
