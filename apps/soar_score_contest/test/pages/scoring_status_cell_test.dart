@@ -53,7 +53,7 @@ void main() {
     await tester.enterText(_key('score-height-${first.value}'), '99');
     await tester.pumpAndSettle();
 
-    expect(find.text(_l10n.scoreSemUnsaved), findsOneWidget);
+    expect(find.text(_l10n.scoreStatusUnsaved), findsOneWidget);
     expect(find.text('Not saved yet'), findsNothing);
     expect(find.text('Not saved'), findsNothing);
     expect(find.text(_l10n.scoreFixToSave), findsNothing);
@@ -85,7 +85,7 @@ void main() {
     final server = ScoringServer()..seedScore(first, _flight);
     await pumpScoringPage(tester, server, round: 1, group: 1);
 
-    expect(find.text('Unsaved'), findsNothing);
+    expect(find.text(_l10n.scoreStatusUnsaved), findsNothing);
     expect(find.text(_l10n.scoreFixToSave), findsNothing);
   });
 }

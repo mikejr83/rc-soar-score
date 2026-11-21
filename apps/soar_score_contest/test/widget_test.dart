@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/app.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
+import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/pages/home_page.dart';
 import 'package:soar_score_contest/pages/landing_page.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
@@ -86,7 +87,12 @@ void main() {
   testWidgets('web landing page hides offline entry and messaging', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: LandingPage(isWeb: true)));
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: appLocalizationDelegates,
+        home: const LandingPage(isWeb: true),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Continue offline'), findsNothing);
