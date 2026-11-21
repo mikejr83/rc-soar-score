@@ -38,6 +38,7 @@ void addSyncRoutes(
   Repository repository, {
   required SyncVersions versions,
   RecalculationService? recalculation,
+  bool publishingEnabled = false,
 }) {
   final installations = InstallationSyncService(repository);
   // Results never sync, so the service rebuilds a contest's after it accepts
@@ -46,6 +47,8 @@ void addSyncRoutes(
     repository,
     versions: versions,
     recalculation: recalculation ?? RecalculationService.automatic(repository),
+    // A synced change republishes as the contest's update mode calls for.
+    publicUpdates: publishingEnabled ? PublicUpdateService(repository) : null,
   );
 
   router.get(

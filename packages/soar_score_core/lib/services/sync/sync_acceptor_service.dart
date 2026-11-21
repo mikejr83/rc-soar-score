@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:logging/logging.dart';
+
 import '../../enums/conflict_resolution_choice.dart';
 import '../../enums/mutation_outcome.dart';
 import '../../errors/forbidden_error.dart';
@@ -21,13 +23,16 @@ import 'exchange_context.dart';
 import 'keyed_lock.dart';
 import 'mutation_payloads.dart';
 import 'mutation_processor.dart';
+import '../publication/public_update_service.dart';
 import '../recalculation/recalculation_service.dart';
+import '../results_service.dart';
 import 'mutation_result.dart';
 import 'promotion_operation.dart';
 import '../scores_service.dart';
 import 'sync_log.dart';
 import 'sync_entity_catalog.dart';
 import 'sync_exchange.dart';
+import 'sync_mutation.dart';
 import 'sync_scope_ids.dart';
 import 'sync_versions.dart';
 
@@ -36,6 +41,8 @@ import 'sync_versions.dart';
 ///
 /// Specified in `plan/architecture-requirements/sync-protocol.md`. The
 /// service is domain logic; the routes only translate to and from the wire.
+final _logger = Logger('SyncAcceptor');
+
 /// The most records of one aggregate a page may add past its size.
 const _aggregateLimit = 1000;
 
@@ -47,6 +54,7 @@ class SyncAcceptorService {
     Id Function()? newId,
     this.pageSize = SyncProtocol.defaultPageSize,
     this.recalculation,
+    this.publicUpdates,
   }) : _clock = clock ?? (() => DateTime.now().toUtc()),
        _newId = newId ?? Id.create;
 
@@ -61,6 +69,14 @@ class SyncAcceptorService {
   /// holds a synced contest's scores and no standings, and publishing refuses
   /// it as stale. Null (the default) recalculates nothing.
   final RecalculationService? recalculation;
+
+  /// Republishes a contest's public projection after an exchange changed what
+  /// the public site shows, as its update mode calls for. Without it a synced
+  /// change (a score, a configuration such as dropped rounds, completing the
+  /// contest) only reaches the public site at the next manual publish. Null
+  /// (the default) publishes nothing; the hosted routes wire it when
+  /// publishing is enabled.
+  final PublicUpdateService? publicUpdates;
 
   final Repository _repository;
   final DateTime Function() _clock;
@@ -164,7 +180,21 @@ class SyncAcceptorService {
       final results = <MutationResult>[];
       if (position == null) {
         results.addAll(await _decideAll(ctx, input));
-        await _recalculateAfter(scope, results, _isFirstUpload(scope, input));
+        final firstUpload = _isFirstUpload(scope, input);
+        final resultsCurrent = await _recalculateAfter(
+          scope,
+          results,
+          firstUpload,
+        );
+        if (!firstUpload) {
+          await _publishAfter(
+            scope,
+            results,
+            input.mutations,
+            ctx.publicContestChange,
+            resultsCurrent,
+          );
+        }
       }
       final after = position ?? input.lastAcknowledgedSequence;
       return _store.transaction((tx) => _pull(tx, ctx, input, results, after));
@@ -284,36 +314,141 @@ class SyncAcceptorService {
   /// Recalculates the results of the contest in [scope] when [results]
   /// accepted a change to it. The changes are already committed, so a failure
   /// is reported by [RecalculationService] in the log and leaves the results
-  /// stale; it never fails the exchange.
+  /// stale; it never fails the exchange. Returns whether the results are
+  /// current afterwards (false: the recalculation failed).
+  ///
+  /// An exchange that only answers replays changed nothing, so it rewrites
+  /// no results, unless an earlier attempt left them stale: its retry then
+  /// recalculates, so the retry can finish what the first attempt could not.
   ///
   /// The exchanges of a contest's first upload never accept scores: an
   /// imported contest keeps its pending scores pending, and only a later
   /// trigger (a director action, a new submission, a change of the setting)
   /// evaluates it.
-  Future<void> _recalculateAfter(
+  Future<bool> _recalculateAfter(
     SyncScopeKey scope,
     List<MutationResult> results,
     bool firstUpload,
   ) async {
     final recalculation = this.recalculation;
-    if (recalculation == null || scope is! ContestScopeKey) return;
-    // An answered replay changed nothing, so it rewrites no results.
-    if (!results.any(
-      (r) => r.outcome == MutationOutcome.accepted && !r.replayed,
-    )) {
+    if (recalculation == null || scope is! ContestScopeKey) return true;
+    final accepted = results.where(
+      (r) => r.outcome == MutationOutcome.accepted,
+    );
+    if (accepted.isEmpty) return true;
+    if (accepted.every((r) => r.replayed) &&
+        !(await ResultsService(_repository).read(scope.contestId)).isStale) {
+      return true;
+    }
+    final warning = firstUpload
+        ? await recalculation.recalculateWithoutOfficialization(
+            scope.contestId,
+            cause: 'a sync',
+          )
+        : await recalculation.recalculateAfterEntry(
+            scope.contestId,
+            cause: 'a sync',
+          );
+    return warning == null;
+  }
+
+  /// Republishes the contest in [scope] when [results] accepted a change the
+  /// public site shows, as its public update mode calls for. Runs after the
+  /// recalculation, so the projection carries the new results. A failure is
+  /// logged only: the changes are committed and the last projection stays
+  /// public.
+  Future<void> _publishAfter(
+    SyncScopeKey scope,
+    List<MutationResult> results,
+    List<SyncMutation> mutations,
+    bool publicContestChanged,
+    bool resultsCurrent,
+  ) async {
+    final publicUpdates = this.publicUpdates;
+    if (publicUpdates == null || scope is! ContestScopeKey) return;
+    if (!resultsCurrent) {
+      // The projection would be refused as stale. The accepted changes
+      // publish when the exchange is retried: its replay recalculates, then
+      // publishes under the same key.
+      _logger.warning(
+        'Public update after a sync of contest ${scope.contestId} skipped: '
+        'the results are stale',
+      );
       return;
     }
-    if (firstUpload) {
-      await recalculation.recalculateWithoutOfficialization(
+    // The results are in the order of the mutations sent, so pair them by
+    // position: two mutations may carry the same client mutation id.
+    final fresh = <SyncMutation>[];
+    final replays = <SyncMutation>[];
+    for (var i = 0; i < results.length && i < mutations.length; i++) {
+      if (results[i].outcome != MutationOutcome.accepted) continue;
+      (results[i].replayed ? replays : fresh).add(mutations[i]);
+    }
+    // Fresh changes decide. An exchange that only answers replays is a retry
+    // of one whose publication may have failed: it publishes again under the
+    // same key, which does nothing when the first attempt succeeded.
+    final accepted = fresh.isNotEmpty ? fresh : replays;
+    if (accepted.isEmpty) return;
+    try {
+      await publicUpdates.afterSync(
         scope.contestId,
-        cause: 'a sync',
+        entityTypes: {for (final m in accepted) m.entityType},
+        assignmentIds: await _assignmentsOf(accepted),
+        // Null for a retry, which works it out from the contest itself.
+        publicContestChanged: fresh.isNotEmpty ? publicContestChanged : null,
+        exchangeMutationId: accepted.last.clientMutationId,
       );
-    } else {
-      await recalculation.recalculateAfterEntry(
-        scope.contestId,
-        cause: 'a sync',
+    } on Object catch (error, stackTrace) {
+      _logger.warning(
+        'Public update after a sync of contest ${scope.contestId} failed; '
+        'the last projection stays public',
+        error,
+        stackTrace,
       );
     }
+  }
+
+  /// The matrix assignments the score changes of [accepted] belong to: a
+  /// placeholder and a promotion intent name theirs, an attempt or official
+  /// score names its placeholder. Deletions and other types name none.
+  Future<Set<Id>> _assignmentsOf(List<SyncMutation> accepted) async {
+    final ids = <Id>{};
+    final lookedUp = <Id>{};
+    for (final m in accepted) {
+      try {
+        if (m.entityType == promotionReceiptEntityType) {
+          final data = VersionedPayload.fromJson(m.payload).data;
+          if (data['assignment_id'] case final String id) ids.add(Id.parse(id));
+          continue;
+        }
+        if (!const {
+          'ScorePlaceholder',
+          'ScoreAttempt',
+          'OfficialScore',
+        }.contains(m.entityType)) {
+          continue;
+        }
+        final payload = MutationPayload.parse(m.payload);
+        if (payload.isDelete) continue;
+        if (m.entityType == 'ScorePlaceholder') {
+          if (payload.entity['assignment_id'] case final String id) {
+            ids.add(Id.parse(id));
+          }
+        } else if (payload.entity['score_placeholder_id']
+            case final String id) {
+          // An attempt and its official score name the same placeholder.
+          final placeholderId = Id.parse(id);
+          if (lookedUp.add(placeholderId)) {
+            final placeholder = await _repository.scorePlaceholderRepository
+                .findById(placeholderId);
+            if (placeholder != null) ids.add(placeholder.assignmentId);
+          }
+        }
+      } on FormatException {
+        continue; // an accepted mutation is well formed; be defensive anyway
+      }
+    }
+    return ids;
   }
 
   Future<SyncExchangeOutput> _pull(
