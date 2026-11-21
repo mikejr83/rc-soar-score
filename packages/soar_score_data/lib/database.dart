@@ -9,6 +9,7 @@ import 'package:soar_score_data/postgres_config.dart';
 import 'contests_table.dart';
 import 'migrate.dart';
 import 'sync/current_attempt_pointer.dart';
+import 'sync/table_mapper.dart' show sortableTimestamp;
 import 'schema/database_profile.dart';
 import 'schema/enum_values.dart';
 import 'schema/tables/audit_events_table.dart';
@@ -234,6 +235,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
         await _addSelectionOrigin(m);
         await _addUploadOpen();
         await _addAggregateId();
+        await _normalizeClientTimes();
         // Service-only counters (unreleased version 2); IF NOT EXISTS.
         if (profileTables.contains(requestThrottles)) {
           await m.createTable(requestThrottles);
@@ -335,6 +337,25 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     await customStatement(
       'ALTER TABLE mutation_records ADD COLUMN aggregate_id TEXT',
     );
+  }
+
+  /// Rewrites `mutation_records.client_time` with a six-digit fraction, the
+  /// form new rows are written in, so that text order is time order. Rows
+  /// written before kept Dart's three or six digits, and within one
+  /// millisecond `...16.584Z` sorts after `...16.584005Z`. Safe to repeat.
+  Future<void> _normalizeClientTimes() async {
+    final rows = await customSelect(
+      'SELECT id, client_time FROM mutation_records',
+    ).get();
+    for (final row in rows) {
+      final id = row.read<String>('id');
+      final time = row.read<String>('client_time');
+      final fixed = sortableTimestamp(time);
+      if (fixed == time) continue;
+      await customStatement(
+        "UPDATE mutation_records SET client_time = '$fixed' WHERE id = '$id'",
+      );
+    }
   }
 
   /// Adds `installation_activations.upload_open` (unreleased version 2): false
