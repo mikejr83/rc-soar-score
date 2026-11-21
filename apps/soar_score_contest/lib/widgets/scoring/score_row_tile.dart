@@ -500,12 +500,13 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     // field is Required, and a typed value is checked.
     final touched = _heightTouched || d.heightText.trim().isNotEmpty;
     final String? shown;
-    // A saved score (a zero entered without a height) has nothing missing.
+    // A saved score (a zero entered without a height) has nothing missing,
+    // but typed input is still checked.
     final saved = widget.row.isEntered && !d.isDirty;
-    if (!editable || saved || !touched || d.zeroing) {
+    if (!editable || !touched || d.zeroing) {
       shown = null;
     } else if (d.heightText.trim().isEmpty) {
-      shown = 'Required';
+      shown = saved ? null : 'Required';
     } else if (problem != null && !d.heightZero) {
       shown = problem;
     } else {

@@ -339,6 +339,28 @@ void main() {
 
     expect(server.entries, hasLength(1));
     expect(find.text('Required'), findsNothing);
+
+    // An untouched saved zero stays quiet; a malformed paste is still checked
+    // (Save is off) and clearing it removes the message.
+    await _activate(tester, 1, 1);
+    await tester.enterText(_height(1, 1), '99999999999999999999');
+    await tester.pump();
+    expect(tester.widget<FilledButton>(_save(1, 1)).onPressed, isNull);
+    expect(find.text('Required'), findsNothing);
+    final hint = find.descendant(
+      of: find.byKey(ValueKey('score-row-$id')),
+      matching: find.byWidgetPredicate(
+        (w) =>
+            w is Text &&
+            (w.style?.color ==
+                Theme.of(tester.element(_height(1, 1))).colorScheme.error),
+      ),
+    );
+    expect(hint, findsWidgets);
+    await tester.enterText(_height(1, 1), '');
+    await tester.pump();
+    expect(find.text('Required'), findsNothing);
+    expect(hint, findsNothing);
   });
 
   testWidgets(
