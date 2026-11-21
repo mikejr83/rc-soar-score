@@ -424,6 +424,16 @@ void main() {
     expect(entry.submittedScore!.details!.enteredBy, 'Alex Rivera');
   });
 
+  test('a snake_case zero reason reads as words', () async {
+    final body = jsonDecode(_fixture('group_results')) as Map<String, dynamic>;
+    for (final row in (body['rows'] as List).cast<Map<String, dynamic>>()) {
+      if (row['zero_reason'] != null) row['zero_reason'] = 'out_of_bounds';
+    }
+    final group = await _repository((_) => _json(jsonEncode(body)))
+        .groupResults('c', 'p', 1);
+    expect(group.rows[1].zeroReason, 'out of bounds');
+  });
+
   test(
     'group results show the components, points and distinct raw/score',
     () async {

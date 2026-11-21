@@ -820,6 +820,8 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       await tapVisible(tester, _key('retire-confirm'));
       await pumpUntilFound(tester, find.text('Retired'));
       expect(find.text('Retired from round 3'), findsOneWidget);
+      // The retired row's disabled fields carry no entry hint.
+      expect(find.text('Required'), findsNothing);
 
       // The retirement is on the Recent activity card too. On the web run the
       // pilots' waiting entries filled the group's rows, so leaving can ask

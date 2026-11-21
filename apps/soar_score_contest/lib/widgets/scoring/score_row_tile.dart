@@ -450,10 +450,13 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     final d = widget.draft;
     final off = d.measurementsOffReason;
     final t = d.time;
-    final missing = d.problems
-        .where((p) => p.field == 'time_flown' && t.error == null)
-        .map((p) => p.message)
-        .firstOrNull;
+    // A disabled field (retired, locked, queued) shows no entry hints.
+    final missing = !editable
+        ? null
+        : d.problems
+              .where((p) => p.field == 'time_flown' && t.error == null)
+              .map((p) => p.message)
+              .firstOrNull;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -497,10 +500,13 @@ class _ScoreRowTileState extends State<ScoreRowTile> {
     // field is Required, and a typed value is checked.
     final touched = _heightTouched || d.heightText.trim().isNotEmpty;
     final String? shown;
-    if (!touched || d.zeroing) {
+    // A saved score (a zero entered without a height) has nothing missing,
+    // but typed input is still checked.
+    final saved = widget.row.isEntered && !d.editedSinceLoad;
+    if (!editable || !touched || d.zeroing) {
       shown = null;
     } else if (d.heightText.trim().isEmpty) {
-      shown = 'Required';
+      shown = saved ? null : 'Required';
     } else if (problem != null && !d.heightZero) {
       shown = problem;
     } else {

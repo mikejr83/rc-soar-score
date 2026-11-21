@@ -320,6 +320,60 @@ void main() {
     expect(server.entries.single['components'], {'out_of_bounds': true});
   });
 
+  testWidgets('a saved zero leaves no Required hint on the row', (
+    tester,
+  ) async {
+    final server = ScoringServer();
+    await pumpScoringPage(tester, server, round: 1, group: 1);
+    await _activate(tester, 1, 1);
+    final id = scoringAssignmentId(1, 1).value;
+    // Pass through the launch height without typing, so it counts as touched.
+    await tester.tap(_height(1, 1));
+    await tester.pump();
+    await tester.tap(_time(1, 1));
+    await tester.pump();
+    await tester.tap(find.byKey(ValueKey('score-confirm-zero-$id')));
+    await tester.pump();
+    await tester.tap(_save(1, 1));
+    await tester.pumpAndSettle();
+
+    expect(server.entries, hasLength(1));
+    expect(find.text('Required'), findsNothing);
+
+    // An untouched saved zero stays quiet; a malformed paste is still checked
+    // (Save is off) and clearing it removes the message.
+    await _activate(tester, 1, 1);
+    await tester.enterText(_height(1, 1), '99999999999999999999');
+    await tester.pump();
+    expect(tester.widget<FilledButton>(_save(1, 1)).onPressed, isNull);
+    expect(find.text('Required'), findsNothing);
+    final hint = find.descendant(
+      of: find.byKey(ValueKey('score-row-$id')),
+      matching: find.byWidgetPredicate(
+        (w) =>
+            w is Text &&
+            (w.style?.color ==
+                Theme.of(tester.element(_height(1, 1))).colorScheme.error),
+      ),
+    );
+    expect(hint, findsWidgets);
+    await tester.enterText(_height(1, 1), '');
+    await tester.pump();
+    expect(find.text('Required'), findsNothing);
+    expect(hint, findsNothing);
+
+    // An explicit zero time makes the empty height missing again.
+    await tester.tap(_height(1, 1));
+    await tester.pump();
+    await tester.enterText(_time(1, 1), '0');
+    await tester.pump();
+    expect(find.text('Required'), findsOneWidget);
+    expect(tester.widget<FilledButton>(_save(1, 1)).onPressed, isNull);
+    await tester.enterText(_time(1, 1), '');
+    await tester.pump();
+    expect(find.text('Required'), findsNothing);
+  });
+
   testWidgets(
     'removing an applied cumulative penalty asks for a reason first',
     (tester) async {

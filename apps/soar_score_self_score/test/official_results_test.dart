@@ -176,6 +176,36 @@ void main() {
     expect(find.text('The review keeps the original entry.'), findsOneWidget);
   });
 
+  testWidgets('zero, coded zero and missing score read differently', (
+    tester,
+  ) async {
+    Future<void> pump(GroupResultRow row) => tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: GroupResultTile(row: row)),
+      ),
+    );
+
+    await pump(
+      const GroupResultRow(name: 'Blake Castillo', kind: GroupRowKind.zero),
+    );
+    expect(find.text('Zero recorded'), findsOneWidget);
+    expect(find.textContaining('null'), findsNothing);
+
+    await pump(
+      const GroupResultRow(
+        name: 'Blake Castillo',
+        kind: GroupRowKind.zero,
+        zeroReason: 'out of bounds',
+      ),
+    );
+    expect(find.text('Zero: out of bounds'), findsOneWidget);
+
+    await pump(
+      const GroupResultRow(name: 'Blake Castillo', kind: GroupRowKind.noScore),
+    );
+    expect(find.text('No score yet'), findsOneWidget);
+  });
+
   for (final (policy, phrase) in [
     (OfficializationPolicy.endOfRound, 'all required scores for its round'),
     (OfficializationPolicy.endOfGroup, 'all required scores for its group'),
