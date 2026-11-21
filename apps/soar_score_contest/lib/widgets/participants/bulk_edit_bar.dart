@@ -55,6 +55,7 @@ class BulkEditBar extends StatelessWidget {
     final scheme = theme.colorScheme;
     final foreground = scheme.onSecondaryContainer;
     final buttonStyle = TextButton.styleFrom(foregroundColor: foreground);
+    final l10n = AppLocalizations.of(context);
 
     Widget menu<T>({
       required Key key,
@@ -77,7 +78,7 @@ class BulkEditBar extends StatelessWidget {
           ),
         ),
         if (items.isEmpty)
-          const MenuItemButton(child: Text('Nothing entered yet')),
+          MenuItemButton(child: Text(l10n.participantBulkNothing)),
         for (final item in items)
           MenuItemButton(
             leadingIcon: leading(item),
@@ -95,7 +96,6 @@ class BulkEditBar extends StatelessWidget {
       ),
     );
 
-    final l10n = AppLocalizations.of(context);
     return Semantics(
       container: true,
       label: l10n.wizardBulkEditLabel,

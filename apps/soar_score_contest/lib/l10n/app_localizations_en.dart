@@ -8500,4 +8500,194 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get standingsDetailHeight => 'Height';
+
+  @override
+  String get participantsTableLabel => 'Contest participants';
+
+  @override
+  String get participantSelectAll => 'Select all';
+
+  @override
+  String participantSelect(String name) {
+    return 'Select $name';
+  }
+
+  @override
+  String get participantNameFlights => 'Has flights';
+
+  @override
+  String participantRoleSemantics(String name) {
+    return 'Role for $name';
+  }
+
+  @override
+  String participantRoleNotAvailable(String role) {
+    return '$role (not available: has flights)';
+  }
+
+  @override
+  String participantClassSemantics(String name) {
+    return 'Class for $name';
+  }
+
+  @override
+  String get participantClassNone => 'No class';
+
+  @override
+  String get participantClassNotScored => 'Not scored';
+
+  @override
+  String get participantClassRequired => 'Required';
+
+  @override
+  String participantTeamSemantics(String name) {
+    return 'Team for $name';
+  }
+
+  @override
+  String get participantTeamNone => 'No team';
+
+  @override
+  String get participantStatusNonFlying => 'Non-flying';
+
+  @override
+  String participantNeeds(String issues) {
+    return 'Needs $issues';
+  }
+
+  @override
+  String get participantReady => 'Ready';
+
+  @override
+  String get participantColumnPilotNo => 'Pilot no.';
+
+  @override
+  String get participantColumnRole => 'Role';
+
+  @override
+  String get participantColumnClass => 'Class *';
+
+  @override
+  String get participantColumnTeam => 'Team';
+
+  @override
+  String get participantColumnModels => 'Models';
+
+  @override
+  String get participantColumnStatus => 'Status';
+
+  @override
+  String get participantColumnEmail => 'Email';
+
+  @override
+  String get participantColumnName => 'Name';
+
+  @override
+  String get participantBulkNothing => 'Nothing entered yet';
+
+  @override
+  String get participantBulkSelectionHasFlights =>
+      'The selection contains a pilot with flights.';
+
+  @override
+  String get participantLeaveTitle => 'Leave with unsaved changes?';
+
+  @override
+  String participantLeaveBody(int count, String plural, String action) {
+    return 'You have unsaved changes to $count participant$plural. $action discards them.';
+  }
+
+  @override
+  String get participantLeaveClosing => 'Closing the app';
+
+  @override
+  String get participantLeaveLeaving => 'Leaving';
+
+  @override
+  String get participantStay => 'Stay';
+
+  @override
+  String get participantDiscardAndLeave => 'Discard and leave';
+
+  @override
+  String get participantThisContest => 'this contest';
+
+  @override
+  String get participantNoApi => 'No API client is available.';
+
+  @override
+  String get participantLoadFailed => 'The participants could not be loaded.';
+
+  @override
+  String get participantLoading => 'Loading the participants';
+
+  @override
+  String teamCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get teamCaseIgnored => ' · existing team, case ignored';
+
+  @override
+  String teamCreate(String name) {
+    return 'Create team “$name”';
+  }
+
+  @override
+  String get teamNew => 'New team';
+
+  @override
+  String get teamClearSubtitle => 'Clear the name. The pilot stays unassigned.';
+
+  @override
+  String get teamUnassigned => 'Unassigned';
+
+  @override
+  String get searchHint => 'Enter a name or email to search or filter';
+
+  @override
+  String get searchClear => 'Clear search';
+
+  @override
+  String get searchOnline =>
+      'Online: searching remote first, then your profiles';
+
+  @override
+  String get searchOffline => 'Offline: searching your profiles only';
+
+  @override
+  String get searchProfiles => 'Searching your participant profiles';
+
+  @override
+  String get searchHeaderRemote => 'Add from remote and your profiles';
+
+  @override
+  String get searchHeaderProfiles => 'Add from saved profiles';
+
+  @override
+  String get searchLoading => 'Loading people…';
+
+  @override
+  String get searchNoClub => 'No club';
+
+  @override
+  String searchEmailPrefix(String status) {
+    return 'Email: $status';
+  }
+
+  @override
+  String get searchAlready => 'Already in this contest';
+
+  @override
+  String get searchRemote => 'Remote';
+
+  @override
+  String get searchYourProfiles => 'Your profiles';
 }

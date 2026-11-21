@@ -12782,6 +12782,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Height'**
   String get standingsDetailHeight;
+
+  /// Accessibility label for the contest participants list.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest participants'**
+  String get participantsTableLabel;
+
+  /// Accessibility label for the select-all checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get participantSelectAll;
+
+  /// Accessibility label for a row's checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Select {name}'**
+  String participantSelect(String name);
+
+  /// Marker under a pilot's name when they have scores.
+  ///
+  /// In en, this message translates to:
+  /// **'Has flights'**
+  String get participantNameFlights;
+
+  /// Accessibility label for a row's role cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Role for {name}'**
+  String participantRoleSemantics(String name);
+
+  /// A non-flying role a pilot with flights cannot take.
+  ///
+  /// In en, this message translates to:
+  /// **'{role} (not available: has flights)'**
+  String participantRoleNotAvailable(String role);
+
+  /// Accessibility label for a row's class cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Class for {name}'**
+  String participantClassSemantics(String name);
+
+  /// A read-only row with no class.
+  ///
+  /// In en, this message translates to:
+  /// **'No class'**
+  String get participantClassNone;
+
+  /// A non-flying row's class, and the hint for a non-scoring row.
+  ///
+  /// In en, this message translates to:
+  /// **'Not scored'**
+  String get participantClassNotScored;
+
+  /// Hint in a scoring pilot's class cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get participantClassRequired;
+
+  /// Accessibility label for a row's team cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Team for {name}'**
+  String participantTeamSemantics(String name);
+
+  /// A read-only row with no team, and the picker's clear choice.
+  ///
+  /// In en, this message translates to:
+  /// **'No team'**
+  String get participantTeamNone;
+
+  /// Row status for a non-flying participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-flying'**
+  String get participantStatusNonFlying;
+
+  /// Row status naming what a row still needs.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs {issues}'**
+  String participantNeeds(String issues);
+
+  /// Row status for a ready participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get participantReady;
+
+  /// Header and card label for the pilot number column.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot no.'**
+  String get participantColumnPilotNo;
+
+  /// Header and card label for the role column.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get participantColumnRole;
+
+  /// Header and card label for the class column.
+  ///
+  /// In en, this message translates to:
+  /// **'Class *'**
+  String get participantColumnClass;
+
+  /// Header and card label for the team column.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get participantColumnTeam;
+
+  /// Header and card label for the models column.
+  ///
+  /// In en, this message translates to:
+  /// **'Models'**
+  String get participantColumnModels;
+
+  /// Header for the status column.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get participantColumnStatus;
+
+  /// Header for the email column.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get participantColumnEmail;
+
+  /// Header for the name column.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get participantColumnName;
+
+  /// A bulk menu with no choices yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing entered yet'**
+  String get participantBulkNothing;
+
+  /// Why Remove is off for the selection.
+  ///
+  /// In en, this message translates to:
+  /// **'The selection contains a pilot with flights.'**
+  String get participantBulkSelectionHasFlights;
+
+  /// Asking before leaving the participants page with unsaved changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave with unsaved changes?'**
+  String get participantLeaveTitle;
+
+  /// Body of the leave-with-unsaved-changes question.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes to {count} participant{plural}. {action} discards them.'**
+  String participantLeaveBody(int count, String plural, String action);
+
+  /// The leaving action when the app is closing.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing the app'**
+  String get participantLeaveClosing;
+
+  /// The leaving action when leaving the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaving'**
+  String get participantLeaveLeaving;
+
+  /// Keep editing in the leave-with-unsaved-changes dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get participantStay;
+
+  /// Discard and leave in the leave-with-unsaved-changes dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard and leave'**
+  String get participantDiscardAndLeave;
+
+  /// Fallback contest name when it is not known.
+  ///
+  /// In en, this message translates to:
+  /// **'this contest'**
+  String get participantThisContest;
+
+  /// Page state when there is no API client.
+  ///
+  /// In en, this message translates to:
+  /// **'No API client is available.'**
+  String get participantNoApi;
+
+  /// Title of the failed-load view.
+  ///
+  /// In en, this message translates to:
+  /// **'The participants could not be loaded.'**
+  String get participantLoadFailed;
+
+  /// Loading label for the participants page.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the participants'**
+  String get participantLoading;
+
+  /// How many people are on a team, in the team picker.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant} other{{count} participants}}'**
+  String teamCount(int count);
+
+  /// Note when a typed team matches an existing one only by case.
+  ///
+  /// In en, this message translates to:
+  /// **' · existing team, case ignored'**
+  String get teamCaseIgnored;
+
+  /// Picker choice for a new team.
+  ///
+  /// In en, this message translates to:
+  /// **'Create team “{name}”'**
+  String teamCreate(String name);
+
+  /// Subtitle under the create-team choice.
+  ///
+  /// In en, this message translates to:
+  /// **'New team'**
+  String get teamNew;
+
+  /// Subtitle under the no-team choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the name. The pilot stays unassigned.'**
+  String get teamClearSubtitle;
+
+  /// Hint in an empty team cell.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned'**
+  String get teamUnassigned;
+
+  /// Hint in the participant search field.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name or email to search or filter'**
+  String get searchHint;
+
+  /// Tooltip for the clear-search button.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get searchClear;
+
+  /// Search source line when online with a remote directory.
+  ///
+  /// In en, this message translates to:
+  /// **'Online: searching remote first, then your profiles'**
+  String get searchOnline;
+
+  /// Search source line when offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: searching your profiles only'**
+  String get searchOffline;
+
+  /// Search source line when there is no remote directory.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching your participant profiles'**
+  String get searchProfiles;
+
+  /// Header of the search results when remote is available.
+  ///
+  /// In en, this message translates to:
+  /// **'Add from remote and your profiles'**
+  String get searchHeaderRemote;
+
+  /// Header of the search results from saved profiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Add from saved profiles'**
+  String get searchHeaderProfiles;
+
+  /// Shown while the director's profiles load.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading people…'**
+  String get searchLoading;
+
+  /// A search result with no club.
+  ///
+  /// In en, this message translates to:
+  /// **'No club'**
+  String get searchNoClub;
+
+  /// A result's email status, in the subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Email: {status}'**
+  String searchEmailPrefix(String status);
+
+  /// A search result that is already in the contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in this contest'**
+  String get searchAlready;
+
+  /// A result found in the remote directory.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote'**
+  String get searchRemote;
+
+  /// A result from the director's own profiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profiles'**
+  String get searchYourProfiles;
 }
 
 class _AppLocalizationsDelegate
