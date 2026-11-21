@@ -122,5 +122,8 @@ Future<void> saveEditor(WidgetTester tester) async {
 Widget editorApp(ApiClient client, ParticipantEditorPage page) =>
     ApiClientInherited(
       client: client,
-      child: MaterialApp(home: Scaffold(body: page)),
+      child: MaterialApp(
+        localizationsDelegates: appLocalizationDelegates,
+        home: Scaffold(body: page),
+      ),
     );

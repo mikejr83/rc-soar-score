@@ -13112,6 +13112,354 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your profiles'**
   String get searchYourProfiles;
+
+  /// Cancel button in the participant editor action bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get participantEditorCancel;
+
+  /// Button that saves the profile and keeps the editor open for the next one.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and add another'**
+  String get participantEditorSaveAnother;
+
+  /// Status text in the editor action bar while a save runs.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get participantEditorSaving;
+
+  /// Status text in the editor action bar for a dirty edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get participantEditorUnsaved;
+
+  /// Status text in the editor action bar while a duplicate decision is open.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an option above to continue.'**
+  String get participantEditorChooseOption;
+
+  /// Status text in the editor action bar while a stale-revision conflict is open.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve the conflict above to save.'**
+  String get participantEditorResolveConflict;
+
+  /// Save button in the participant editor when editing a stored profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get participantEditorSaveChanges;
+
+  /// Save button in the participant editor opened from the New Contest wizard.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to contest'**
+  String get participantEditorAddToContest;
+
+  /// Header title and save label when creating a new participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Add participant'**
+  String get participantEditorAddTitle;
+
+  /// Header subtitle of an edit whose profile has no club.
+  ///
+  /// In en, this message translates to:
+  /// **'No club'**
+  String get participantEditorNoClub;
+
+  /// Header subtitle when creating a new participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Details are reused in every contest you add them to.'**
+  String get participantEditorReuseDetails;
+
+  /// Checkbox that keeps club and location for the next profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep club and location for the next participant'**
+  String get participantEditorKeepClubLocation;
+
+  /// Explanation under the keep-club-and-location checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Used by Save and add another, so a row of pilots from one club needs them once.'**
+  String get participantEditorKeepClubLocationSub;
+
+  /// Title of the failed-load view in the participant editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t load this participant'**
+  String get participantEditorLoadFailedTitle;
+
+  /// Failed-load action when the editor was opened from the New Contest wizard.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to contest setup'**
+  String get participantEditorBackToWizard;
+
+  /// Title of the save-failed banner in the participant editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t save'**
+  String get participantEditorSaveFailedTitle;
+
+  /// Action on the save-failed banner that retries the save.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get participantEditorSaveFailedTry;
+
+  /// Note under the save-failed banner explaining the entries are safe.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was saved and your entries are kept, so it’s safe to try again.'**
+  String get participantEditorSaveFailedKept;
+
+  /// Snack bar after Save and add another.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added'**
+  String participantEditorAddedSnack(String name);
+
+  /// Title of the discard dialog when leaving the editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get participantEditorDiscardTitle;
+
+  /// Discard-dialog text when the app is closing.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing the app will lose your unsaved changes to this participant.'**
+  String get participantEditorDiscardClosing;
+
+  /// Discard-dialog text when leaving the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Your unsaved changes will be lost.'**
+  String get participantEditorDiscardBody;
+
+  /// Cancel action in the discard dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get participantEditorKeepEditing;
+
+  /// Discard action in the dialog when the app is closing.
+  ///
+  /// In en, this message translates to:
+  /// **'Close and discard'**
+  String get participantEditorDiscardAndClose;
+
+  /// Discard action in the discard dialog when leaving the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get participantEditorDiscard;
+
+  /// Title of the stale-revision banner.
+  ///
+  /// In en, this message translates to:
+  /// **'This participant was changed elsewhere since you opened it.'**
+  String get participantEditorStaleTitle;
+
+  /// Body of the stale-revision banner naming the changed fields.
+  ///
+  /// In en, this message translates to:
+  /// **'{fields} {verb} changed elsewhere. Nothing was saved, and your edits are kept.'**
+  String participantEditorStaleBody(String fields, String verb);
+
+  /// Verb for one changed field in the stale banner.
+  ///
+  /// In en, this message translates to:
+  /// **'was'**
+  String get participantEditorWas;
+
+  /// Verb for several changed fields in the stale banner.
+  ///
+  /// In en, this message translates to:
+  /// **'were'**
+  String get participantEditorWere;
+
+  /// Stale banner action that reloads the stored version.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload their version'**
+  String get participantEditorReloadLatest;
+
+  /// Stale banner action that opens the field-by-field review.
+  ///
+  /// In en, this message translates to:
+  /// **'Review differences'**
+  String get participantEditorReviewStart;
+
+  /// Banner after values were kept from a previous profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Club and location kept from {name}.'**
+  String participantEditorKeptTitle(String name);
+
+  /// Action on the kept-values banner that clears them.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear them'**
+  String get participantEditorClearKept;
+
+  /// Semantics label of the editor loading skeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading participant'**
+  String get participantEditorLoading;
+
+  /// Text in the editor loading skeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading participant…'**
+  String get participantEditorLoadingText;
+
+  /// Label of the country field.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get participantEditorCountry;
+
+  /// Lead line of the duplicate-email decision panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision needed. Nothing has been saved.'**
+  String get participantEditorDuplicateLead;
+
+  /// Title of the duplicate-email decision panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone with this email already exists'**
+  String get participantEditorDuplicateTitle;
+
+  /// Instruction under the duplicate-email title.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare the two and choose. Matching ignores upper and lower case.'**
+  String get participantEditorDuplicateCompare;
+
+  /// Heading of the existing-profile tile.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing participant'**
+  String get participantEditorDuplicateExisting;
+
+  /// Heading of the typed-values tile.
+  ///
+  /// In en, this message translates to:
+  /// **'What you entered'**
+  String get participantEditorDuplicateEntered;
+
+  /// Button that uses the existing profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Use existing participant'**
+  String get participantEditorUseExisting;
+
+  /// Note under Use existing when opened from the wizard.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds {name} to this contest. Nothing new is created and what you typed here isn’t saved.'**
+  String participantEditorDuplicateAdds(String name);
+
+  /// Note under Use existing when opened from the list.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens {name}. Nothing new is created and what you typed here isn’t saved.'**
+  String participantEditorDuplicateOpens(String name);
+
+  /// Button that returns to the form to change the email.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the email'**
+  String get participantEditorChangeEmail;
+
+  /// Note under Change the email.
+  ///
+  /// In en, this message translates to:
+  /// **'Two participants cannot share an email. Go back and enter a different one for {name}.'**
+  String participantEditorDuplicateNote(String name);
+
+  /// Fallback name when the typed name is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'this person'**
+  String get participantEditorThisPerson;
+
+  /// Semantics label for a masked email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email hidden, starts with {letter}'**
+  String participantEditorEmailPrefix(String letter);
+
+  /// Tile name when it is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No name'**
+  String get participantEditorNoName;
+
+  /// Tile place when it is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No location'**
+  String get participantEditorNoLocation;
+
+  /// Title of the field-by-field review panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Review differences'**
+  String get participantEditorReviewTitle;
+
+  /// Instruction under the review panel title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the value to keep for each field that differs. Fields you changed start on your version; fields only they changed start on theirs.'**
+  String get participantEditorReviewBody;
+
+  /// Review action that reloads the stored version.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload their version'**
+  String get participantEditorReviewReload;
+
+  /// Review action that saves the chosen values.
+  ///
+  /// In en, this message translates to:
+  /// **'Save with these choices'**
+  String get participantEditorReviewApply;
+
+  /// Heading of the own-value choice in the review.
+  ///
+  /// In en, this message translates to:
+  /// **'Your version'**
+  String get participantEditorReviewYourVersion;
+
+  /// Heading of the stored-value choice in the review.
+  ///
+  /// In en, this message translates to:
+  /// **'Their version'**
+  String get participantEditorReviewTheirVersion;
+
+  /// Shown for an empty value in the review.
+  ///
+  /// In en, this message translates to:
+  /// **'(blank)'**
+  String get participantEditorReviewBlank;
+
+  /// Semantics label of the storage chip naming where a participant lives.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage: {storage}'**
+  String participantEditorStorage(String storage);
 }
 
 class _AppLocalizationsDelegate

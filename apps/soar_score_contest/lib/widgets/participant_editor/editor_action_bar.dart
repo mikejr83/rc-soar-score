@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// The line of status text in the action bar ("Unsaved changes").
 class EditorBarStatus {
   const EditorBarStatus(this.icon, this.text);
@@ -43,6 +45,7 @@ class EditorActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final words = AppLocalizations.of(context);
     final statusLine = status == null
         ? null
         : Semantics(
@@ -66,14 +69,14 @@ class EditorActionBar extends StatelessWidget {
     final cancel = TextButton(
       key: const ValueKey('cancel-participant'),
       onPressed: saving ? null : onCancel,
-      child: const Text('Cancel'),
+      child: Text(words.participantEditorCancel),
     );
     final another = onSaveAnother == null
         ? null
         : OutlinedButton(
             key: const ValueKey('save-add-another'),
             onPressed: saving || !anotherEnabled ? null : onSaveAnother,
-            child: const Text('Save and add another'),
+            child: Text(words.participantEditorSaveAnother),
           );
     final save = FilledButton(
       key: const ValueKey('save-participant'),

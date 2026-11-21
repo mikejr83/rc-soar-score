@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/participants/participant_field.dart';
 import '../../services/participants/participant_review.dart';
 
@@ -22,6 +23,7 @@ class ReviewDifferencesPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final words = AppLocalizations.of(context);
     return Card(
       key: const ValueKey('review-differences'),
       margin: EdgeInsets.zero,
@@ -30,12 +32,13 @@ class ReviewDifferencesPanel extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Review differences', style: theme.textTheme.titleLarge),
+            Text(
+              words.participantEditorReviewTitle,
+              style: theme.textTheme.titleLarge,
+            ),
             const SizedBox(height: 4),
             Text(
-              'Choose the value to keep for each field that differs. Fields '
-              'you changed start on your version; fields only they changed '
-              'start on theirs.',
+              words.participantEditorReviewBody,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -51,12 +54,12 @@ class ReviewDifferencesPanel extends StatelessWidget {
                 TextButton(
                   key: const ValueKey('review-reload'),
                   onPressed: onReloadTheirs,
-                  child: const Text('Reload their version'),
+                  child: Text(words.participantEditorReviewReload),
                 ),
                 FilledButton(
                   key: const ValueKey('review-apply'),
                   onPressed: onApply,
-                  child: const Text('Save with these choices'),
+                  child: Text(words.participantEditorReviewApply),
                 ),
               ],
             ),
@@ -87,14 +90,15 @@ class ReviewDifferencesPanel extends StatelessWidget {
                 context,
                 difference,
                 ReviewChoice.mine,
-                'Your version',
+                AppLocalizations.of(context).participantEditorReviewYourVersion,
                 difference.mine,
               ),
               _choice(
                 context,
                 difference,
                 ReviewChoice.theirs,
-                'Their version',
+                AppLocalizations.of(context)
+                    .participantEditorReviewTheirVersion,
                 difference.theirs,
               ),
             ],
@@ -112,14 +116,16 @@ class ReviewDifferencesPanel extends StatelessWidget {
     String value,
   ) {
     final theme = Theme.of(context);
+    final words = AppLocalizations.of(context);
     final selected = difference.choice == choice;
     final scheme = theme.colorScheme;
+    final blank = words.participantEditorReviewBlank;
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 200, maxWidth: 320),
       child: Semantics(
         inMutuallyExclusiveGroup: true,
         checked: selected,
-        label: '$heading: ${value.isEmpty ? '(blank)' : value}',
+        label: '$heading: ${value.isEmpty ? blank : value}',
         excludeSemantics: true,
         child: InkWell(
           key: ValueKey('review-${difference.field.name}-${choice.name}'),
@@ -155,7 +161,7 @@ class ReviewDifferencesPanel extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        value.isEmpty ? '(blank)' : value,
+                        value.isEmpty ? blank : value,
                         style: theme.textTheme.bodyLarge,
                       ),
                     ],

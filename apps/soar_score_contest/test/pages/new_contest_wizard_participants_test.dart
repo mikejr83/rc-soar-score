@@ -198,7 +198,7 @@ void main() {
       'jordan.lee@example.com',
     );
     await tester.pump();
-    expect(find.text('Add to contest'), findsOneWidget);
+    expect(find.text(l10n.participantEditorAddToContest), findsOneWidget);
     expect(
       find.byKey(const ValueKey('save-participant')).hitTestable(),
       findsOneWidget,

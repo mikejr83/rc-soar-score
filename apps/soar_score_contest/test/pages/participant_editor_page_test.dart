@@ -3,12 +3,15 @@ import 'dart:convert';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/router.dart';
 
 import '../support/participant_test_support.dart';
 
 Map<String, dynamic> _body(http.Request request) =>
     jsonDecode(request.body) as Map<String, dynamic>;
+
+final _l10n = AppLocalizationsEn();
 
 void main() {
   testWidgets('a pristine add form cannot be saved', (tester) async {
@@ -171,10 +174,10 @@ void main() {
     expect(find.byKey(const ValueKey('save-error')), findsOneWidget);
     expect(find.text('Last name is too long.'), findsOneWidget);
     expect(find.text('Ada'), findsOneWidget);
-    expect(find.text('Add participant'), findsWidgets);
+    expect(find.text(_l10n.participantEditorAddTitle), findsWidgets);
 
     failing = false;
-    await tester.tap(find.text('Try again'));
+    await tester.tap(find.text(_l10n.participantEditorSaveFailedTry));
     await tester.pumpAndSettle();
     expect(find.text('No participants yet.'), findsOneWidget);
   });
@@ -199,7 +202,7 @@ void main() {
 
     await enterField(tester, 'last-name', 'King');
     expect(find.byKey(const ValueKey('save-participant')), findsOneWidget);
-    expect(find.text('Unsaved changes'), findsOneWidget);
+    expect(find.text(_l10n.participantEditorUnsaved), findsOneWidget);
     // The title still shows the saved name.
     expect(find.text('Ada Lovelace'), findsOneWidget);
     await saveEditor(tester);
@@ -242,7 +245,7 @@ void main() {
       participantsApp(client, initial: participantPath(existing.id.value)),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Couldn’t load this participant'), findsOneWidget);
+    expect(find.text(_l10n.participantEditorLoadFailedTitle), findsOneWidget);
     expect(find.text('The server is busy.'), findsOneWidget);
 
     failing = false;
@@ -265,7 +268,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Couldn’t load this participant'), findsOneWidget);
+    expect(find.text(_l10n.participantEditorLoadFailedTitle), findsOneWidget);
     expect(find.text('Retry'), findsNothing);
     expect(find.text('Back to participants'), findsOneWidget);
   });
@@ -282,15 +285,15 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('cancel-participant')));
     await tester.pumpAndSettle();
-    expect(find.text('Discard changes?'), findsOneWidget);
+    expect(find.text(_l10n.participantEditorDiscardTitle), findsOneWidget);
 
-    await tester.tap(find.text('Keep editing'));
+    await tester.tap(find.text(_l10n.participantEditorKeepEditing));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('first-name')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('cancel-participant')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Discard'));
+    await tester.tap(find.text(_l10n.participantEditorDiscard));
     await tester.pumpAndSettle();
     expect(find.text('No participants yet.'), findsOneWidget);
   });
@@ -306,7 +309,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('cancel-participant')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Discard changes?'), findsNothing);
+    expect(find.text(_l10n.participantEditorDiscardTitle), findsNothing);
     expect(find.text('No participants yet.'), findsOneWidget);
   });
 }

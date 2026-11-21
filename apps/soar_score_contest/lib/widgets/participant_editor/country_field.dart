@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/participants/participant_countries.dart';
 import 'editor_message.dart';
 import 'editor_text_field.dart';
@@ -39,7 +40,7 @@ class CountryField extends StatelessWidget {
     },
     fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) =>
         EditorTextField(
-          label: 'Country',
+          label: AppLocalizations.of(context).participantEditorCountry,
           controller: controller,
           focusNode: focusNode,
           fieldKey: fieldKey,
