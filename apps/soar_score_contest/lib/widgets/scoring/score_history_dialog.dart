@@ -191,7 +191,8 @@ class _EntryTile extends StatelessWidget {
               ),
             if (adopted)
               Text(
-                words.scoreHistoryMadeOfficialBy(words.scoreHistoryDirector),
+                '${words.scoreHistoryMadeOfficialBy(words.scoreHistoryDirector)}'
+                '${when == null ? '' : ' · $when'}',
                 key: ValueKey('history-adopted-${entry.attemptId.value}'),
               ),
             if (automatic && entry.reviewClosed)
@@ -201,7 +202,7 @@ class _EntryTile extends StatelessWidget {
               ),
             Text(
               adopted
-                  ? 'Submitted by $_who${when == null ? '' : ' · $when'}'
+                  ? 'Submitted by $_who'
                   : (when == null ? _who : '$_who · $when'),
               style: theme.textTheme.bodySmall,
             ),

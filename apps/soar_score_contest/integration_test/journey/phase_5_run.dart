@@ -744,7 +744,7 @@ Future<void> runRunPhase(Journey journey, JourneyContext data) async {
       // names who sent it and who made it official.
       await openRowHistory(tester, saved);
       expect(find.text('Revision 1'), findsOneWidget);
-      expect(find.text('Made official by Director'), findsOneWidget);
+      expect(find.textContaining('Made official by Director'), findsOneWidget);
       expect(find.textContaining('Submitted by '), findsOneWidget);
       await closeHistory(tester);
       await leaveGroupDiscardingPending(tester);

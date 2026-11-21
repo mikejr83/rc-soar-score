@@ -232,7 +232,12 @@ void main() {
     await _openHistory(tester, 1, 1);
 
     expect(find.text('Revision 1'), findsOneWidget);
-    expect(find.text('Made official by Director'), findsOneWidget);
-    expect(find.textContaining('Submitted by Participant'), findsOneWidget);
+    // The time is the promotion time, so it sits on the official line, not on
+    // the submission line.
+    expect(
+      find.textContaining('Made official by Director · Sat Oct 17'),
+      findsOneWidget,
+    );
+    expect(find.text('Submitted by Participant'), findsOneWidget);
   });
 }
