@@ -44,7 +44,9 @@ class DemoFlight {
         'launch_height': 200,
         'late_landing': true,
       }),
-      (3, 2) => DemoFlight({...ordinary, 'motor_restart': true}),
+      // A zeroing flight records no time, height or landing, as the entry
+      // form would.
+      (3, 2) => DemoFlight({'motor_restart': true}),
       // A cumulative penalty applied to one slot, removed from another with a
       // recorded reason. Both in round 4, slots the other cases do not take.
       (4, 0) => DemoFlight({...ordinary, 'cumulative_penalty': 30}),
