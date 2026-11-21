@@ -108,6 +108,72 @@ class PublicUpdateService {
     }
   }
 
+  /// Entity types whose change alters what the public site shows.
+  static const _publicTypes = {
+    'Contest',
+    'ContestParticipation',
+    'Team',
+    'TeamMembership',
+    'Round',
+    'RoundGroup',
+    'ReFlight',
+    'ReFlightParticipant',
+    'ScorePlaceholder',
+    'ContestConfigurationRevision',
+    'MatrixRevision',
+    'MatrixAssignment',
+    'ScoreAttempt',
+    'OfficialScore',
+  };
+
+  /// Entity types that are score entries, which the RoundCompletion mode
+  /// holds back until a round is complete.
+  static const _scoreTypes = {'ScoreAttempt', 'OfficialScore'};
+
+  /// Publishes after a sync exchange accepted changes of [entityTypes], so a
+  /// change made in the app reaches the public site without a manual publish:
+  /// a configuration change such as dropped rounds, a roster or matrix edit,
+  /// completing the contest, or scores.
+  ///
+  /// By the update mode: Automatic publishes for any such change;
+  /// RoundCompletion for any change that is not only score entries, and for
+  /// score entries once a round is complete; Manual never. It never creates
+  /// a publication. [exchangeMutationId] (the last accepted mutation of the
+  /// exchange) makes a retried exchange publish once.
+  ///
+  /// Returns the publish, or null when the mode, the entity types or the
+  /// contest's publication state say not to. A failed publish is audited and
+  /// thrown for the caller to log; the accepted changes are already stored.
+  Future<PublishResult?> afterSync(
+    Id contestId, {
+    required Set<String> entityTypes,
+    required String exchangeMutationId,
+  }) async {
+    final changed = entityTypes.intersection(_publicTypes);
+    if (changed.isEmpty) return null;
+    final identity = await repository.publicationIdentityRepository
+        .findForContest(contestId);
+    if (identity == null) return null;
+    final mode = await _modeOf(contestId);
+    if (mode == null || mode == PublicUpdateMode.manual) return null;
+    if (mode == PublicUpdateMode.roundCompletion &&
+        _scoreTypes.containsAll(changed) &&
+        !(await _scores.list(contestId)).rounds.any((r) => r.isComplete)) {
+      return null;
+    }
+    try {
+      return await _publication.publishAutomatically(
+        contestId,
+        clientMutationId: 'auto-sync-$exchangeMutationId',
+      );
+    } on ContestStateError {
+      rethrow;
+    } on Object {
+      await _auditFailure(contestId, identity.id, 'sync-$exchangeMutationId');
+      rethrow;
+    }
+  }
+
   Future<PublicUpdateMode?> _modeOf(Id contestId) async {
     final revision = await repository.contestConfigurationRevisionRepository
         .latestForContest(contestId);

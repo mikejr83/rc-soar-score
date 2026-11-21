@@ -56,6 +56,10 @@ A configuration revision holds the **full resolved settings**, not only the dire
 | `scores_become_official`      | `EndOfRound`, `EndOfGroup`, or `Manual`         | see below          | Presentation  | When submitted scores become official without the director. Independent of `public_update_mode`. A fresh contest stores `EndOfRound`; a configuration with no stored value reads as `Manual` |
 | `intended_total_rounds`       | integer, 1 or more, optional                    | none               | Presentation  | Only valid for `SeededManOnMan`. Shown on cards and the public site, for example "Round 4 of 8". Has no effect on the draw                                                                   |
 
+### Public update mode and synced changes
+
+`public_update_mode` applies the same way to changes a native installation syncs as to scores entered through the API. After a sync exchange accepts changes that the public site shows (a score, a configuration such as dropped rounds, the roster or matrix, completing the contest), the server recalculates the results and then republishes an already published contest: `Automatic` for any such change, `RoundCompletion` for any change that is not only score entries and for score entries once a round is complete, `Manual` never. The mode read is the one in the configuration the exchange just accepted. It never creates a publication, and a refused or failed publish leaves the last projection public.
+
 ### Scores become official
 
 - `EndOfRound`: the contest accepts a round's submitted scores once every required score of the round has been submitted. `EndOfGroup`: the same for each flight group. `Manual`: only the director makes scores official. "End" is about score completeness, not the clock.
