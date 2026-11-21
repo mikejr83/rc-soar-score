@@ -12548,6 +12548,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Page {page}, {count} {count, plural, =1{card}other{cards}}'**
   String cardsPageLabel(int page, int count);
+
+  /// Help when include retired pilots is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired pilots stay in every round, marked (R).'**
+  String get sheetIncludeRetiredHelp;
+
+  /// Help when include retired pilots is off.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} retired {count, plural, =1{pilot is}other{pilots are}} left out of the rounds after they retired.'**
+  String sheetRetiredLeftOut(int count);
+
+  /// Help when pre-fill is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Prints the scores already entered. * marks values not yet official.'**
+  String get sheetPrefillOn;
+
+  /// Help when pre-fill is off.
+  ///
+  /// In en, this message translates to:
+  /// **'Prints the scores already entered, so the sheet can be checked against them.'**
+  String get sheetPrefillOff;
+
+  /// Help of the club column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Off by default. Hidden: its width goes to the writing cells.'**
+  String get sheetClubHelp;
+
+  /// Label of the validated column option.
+  ///
+  /// In en, this message translates to:
+  /// **'Validated'**
+  String get sheetValidated;
+
+  /// Help of the validated column option.
+  ///
+  /// In en, this message translates to:
+  /// **'A blank spot for officials’ initials or notes.'**
+  String get sheetValidatedHelp;
+
+  /// Column readout when the columns fit one strip.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing cells {writing} mm of {across} mm across the page'**
+  String sheetWritingCells(int writing, int across);
+
+  /// Column readout when the columns continue onto more strips.
+  ///
+  /// In en, this message translates to:
+  /// **'The columns need more than the {across} mm across this page: they continue on {more} more {more, plural, =1{page}other{pages}} for the same rows.'**
+  String sheetColumnsContinue(int across, int more);
+
+  /// Mark on a carried-on round or group.
+  ///
+  /// In en, this message translates to:
+  /// **' (Continued)'**
+  String get sheetContinued;
+
+  /// Working time on a round row.
+  ///
+  /// In en, this message translates to:
+  /// **'Working Time {time}'**
+  String sheetWorkingTime(String time);
+
+  /// Accessible label of a blank sheet table.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}. Score cells are blank for officials to write in.'**
+  String sheetTableBlank(String label);
+
+  /// Accessible label of a sheet table with pre-filled scores.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}. Scores already entered are printed in the score cells; the other score cells are blank for officials to write in.'**
+  String sheetTablePrefilled(String label);
 }
 
 class _AppLocalizationsDelegate

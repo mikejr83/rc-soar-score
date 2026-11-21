@@ -8320,4 +8320,72 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return 'Page $page, $count $_temp0';
   }
+
+  @override
+  String get sheetIncludeRetiredHelp =>
+      'Retired pilots stay in every round, marked (R).';
+
+  @override
+  String sheetRetiredLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'pilots are',
+      one: 'pilot is',
+    );
+    return '$count retired $_temp0 left out of the rounds after they retired.';
+  }
+
+  @override
+  String get sheetPrefillOn =>
+      'Prints the scores already entered. * marks values not yet official.';
+
+  @override
+  String get sheetPrefillOff =>
+      'Prints the scores already entered, so the sheet can be checked against them.';
+
+  @override
+  String get sheetClubHelp =>
+      'Off by default. Hidden: its width goes to the writing cells.';
+
+  @override
+  String get sheetValidated => 'Validated';
+
+  @override
+  String get sheetValidatedHelp =>
+      'A blank spot for officials’ initials or notes.';
+
+  @override
+  String sheetWritingCells(int writing, int across) {
+    return 'Writing cells $writing mm of $across mm across the page';
+  }
+
+  @override
+  String sheetColumnsContinue(int across, int more) {
+    String _temp0 = intl.Intl.pluralLogic(
+      more,
+      locale: localeName,
+      other: 'pages',
+      one: 'page',
+    );
+    return 'The columns need more than the $across mm across this page: they continue on $more more $_temp0 for the same rows.';
+  }
+
+  @override
+  String get sheetContinued => ' (Continued)';
+
+  @override
+  String sheetWorkingTime(String time) {
+    return 'Working Time $time';
+  }
+
+  @override
+  String sheetTableBlank(String label) {
+    return '$label. Score cells are blank for officials to write in.';
+  }
+
+  @override
+  String sheetTablePrefilled(String label) {
+    return '$label. Scores already entered are printed in the score cells; the other score cells are blank for officials to write in.';
+  }
 }
