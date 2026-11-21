@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 
 import '../../support/acceptor_harness.dart';
 import '../../support/backends.dart';
+import '../../support/overlap_support.dart';
 
 void main() => forEachBackend(_tests);
 
@@ -218,32 +219,41 @@ void _tests(Backend backend) {
     final before = (await projections()).length;
     gated.armed = true;
 
-    final exchange = harness.exchange(scope, mutations: [intent()]);
-    await gated.reached.future;
-    final hosted = (await harness.serverRepository.contestRepository.findById(
-      contestId,
-    ))!;
-    await ContestsService(harness.serverRepository).updateContest(
-      contestId,
-      ContestDetails(
-        name: 'Hosted Rename Mid Exchange',
-        host: hosted.host,
-        city: hosted.city,
-        state: hosted.state,
-        country: hosted.country,
-        startDateTime: hosted.startDateTime,
-        endDateTime: hosted.endDateTime,
-      ),
-      baseRevision: hosted.revision,
-      metadata: core.MutationMetadata(
-        clientMutationId: 'hosted-rename-mid',
-        authority: core.Authority.director,
-        clientTime: DateTime.utc(2026, 11, 16),
-        actorId: harness.account,
-      ),
-    );
-    gated.release.complete();
-    final out = await exchange;
+    Future<SyncExchangeOutput>? exchange;
+    late final SyncExchangeOutput out;
+    try {
+      final started = exchange = harness.exchange(scope, mutations: [intent()])
+        ..ignore();
+      await readyOrDone(gated.reached.future, started);
+      final hosted = (await harness.serverRepository.contestRepository.findById(
+        contestId,
+      ))!;
+      await ContestsService(harness.serverRepository).updateContest(
+        contestId,
+        ContestDetails(
+          name: 'Hosted Rename Mid Exchange',
+          host: hosted.host,
+          city: hosted.city,
+          state: hosted.state,
+          country: hosted.country,
+          startDateTime: hosted.startDateTime,
+          endDateTime: hosted.endDateTime,
+        ),
+        baseRevision: hosted.revision,
+        metadata: core.MutationMetadata(
+          clientMutationId: 'hosted-rename-mid',
+          authority: core.Authority.director,
+          clientTime: DateTime.utc(2026, 11, 16),
+          actorId: harness.account,
+        ),
+      );
+      gated.release.complete();
+      out = await started;
+    } finally {
+      // Whatever failed above, let the exchange end before teardown; the
+      // original failure is the one reported.
+      await settleStarted([gated.release], [exchange]);
+    }
 
     expect(out.results.single.outcome, core.MutationOutcome.accepted);
     expect(await projections(), hasLength(before));

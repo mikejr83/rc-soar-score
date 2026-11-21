@@ -159,6 +159,44 @@ void _tests(Backend backend) {
     expect(await publishedConfigRevision(), configBefore + 1);
   });
 
+  test('a replay of an earlier configuration beside a fresh one does not '
+      'hide the fresh one', () async {
+    await setUp0(publishes: true);
+    addTearDown(harness.close);
+    final base = await publishedConfigRevision();
+    await _saveConfig(
+      harness,
+      contestId,
+      base: base,
+      options: {
+        'drop_after_rounds': [1],
+      },
+    );
+    final first = await harness.outbox(scope);
+    final firstOut = await harness.exchange(scope, mutations: first);
+    await harness.acknowledge(first, firstOut.results);
+    final afterFirst = await projectionRevision();
+    expect(await publishedConfigRevision(), base + 1);
+
+    await _saveConfig(
+      harness,
+      contestId,
+      base: base + 1,
+      options: {
+        'drop_after_rounds': [2],
+      },
+    );
+    final fresh = await harness.outbox(scope);
+
+    // The fresh configuration, then the earlier exchange sent again.
+    final out = await harness.exchange(scope, mutations: [...fresh, ...first]);
+
+    expect(out.results.take(fresh.length).every((r) => !r.replayed), isTrue);
+    expect(out.results.skip(fresh.length).every((r) => r.replayed), isTrue);
+    expect(await projectionRevision(), afterFirst + 1);
+    expect(await publishedConfigRevision(), base + 2);
+  });
+
   test('a synced change does not republish in Manual mode', () async {
     await setUp0(publishes: true, mode: core.PublicUpdateMode.manual);
     addTearDown(harness.close);
