@@ -35,11 +35,8 @@ void main() {
     await rig.engine.syncScope(scope);
 
     final lines = messages();
-    expect(lines.first, startsWith('Checked service versions'));
-    expect(
-      lines.any((l) => l.startsWith('Sync started: scope=contest/')),
-      isTrue,
-    );
+    expect(lines.first, startsWith('Sync started: scope=contest/'));
+    expect(lines.any((l) => l.startsWith('Checked service versions')), isTrue);
     expect(lines.any((l) => l.contains('Exchange (pull)')), isTrue);
     expect(
       lines.any(
