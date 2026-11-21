@@ -9,7 +9,25 @@ import 'package:test/test.dart';
 import '../../support/acceptor_harness.dart';
 import '../../support/backends.dart';
 
-void main() => forPostgresOnly(_tests);
+void main() {
+  forPostgresOnly(_tests);
+
+  test('settling releases the lock and waits for every started operation, '
+      'whatever they did', () async {
+    final release = Completer<void>();
+    var waited = false;
+    final parked = release.future.then((_) async {
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      waited = true;
+    });
+    final failing = Future<void>.error(StateError('exchange failed'))..ignore();
+
+    await settleStarted(release, [parked, failing, null]);
+
+    expect(release.isCompleted, isTrue);
+    expect(waited, isTrue);
+  });
+}
 
 /// Two PostgreSQL sessions publish the same contest at once: a manual publish
 /// built from the old configuration commits first while the synced
@@ -73,53 +91,64 @@ void _tests(Backend backend) {
       stored.complete();
       await commit.future;
     });
-    await stored.future;
-
-    // The configuration edit syncs; its publish has to wait for that row.
-    await ContestConfigurationService(harness.clientRepository).save(
-      contestId,
-      ConfigurationInput(
-        baseRevisionNumber: 1,
-        disciplineProfileId: core.SystemDisciplineProfiles.f5jId,
-        config: core.ContestConfig(
-          core: const {
-            'drop_after_rounds': [1],
-          },
-          discipline: const {'working_time': 600},
-        ),
-      ),
-      createdBy: harness.account,
-      metadata: core.MutationMetadata(
-        clientMutationId: 'drop-rounds',
-        authority: core.Authority.director,
-        clientTime: DateTime.utc(2026, 10, 15),
-        actorId: harness.account,
-      ),
+    Future<SyncExchangeOutput>? sync;
+    // A manual publish that fails before it is ready ends the wait below.
+    manual.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stack) {
+        if (!stored.isCompleted) stored.completeError(error, stack);
+      },
     );
-    final sent = await harness.outbox(scope);
-    final sync = harness.exchange(scope, mutations: sent);
     try {
+      await stored.future;
+
+      // The configuration edit syncs; its publish has to wait for that row.
+      await ContestConfigurationService(harness.clientRepository).save(
+        contestId,
+        ConfigurationInput(
+          baseRevisionNumber: 1,
+          disciplineProfileId: core.SystemDisciplineProfiles.f5jId,
+          config: core.ContestConfig(
+            core: const {
+              'drop_after_rounds': [1],
+            },
+            discipline: const {'working_time': 600},
+          ),
+        ),
+        createdBy: harness.account,
+        metadata: core.MutationMetadata(
+          clientMutationId: 'drop-rounds',
+          authority: core.Authority.director,
+          clientTime: DateTime.utc(2026, 10, 15),
+          actorId: harness.account,
+        ),
+      );
+      final sent = await harness.outbox(scope);
+      final started = sync = harness.exchange(scope, mutations: sent)..ignore();
       // PostgreSQL itself says when the sync publish waits on the manual
       // transaction's lock, so the two overlap whatever the runner's speed.
       await _waitUntilBlockedBy(observerDb, manualPid);
-    } finally {
       commit.complete();
       await manual;
-    }
-    final out = await sync;
-    await harness.acknowledge(sent, out.results);
+      final out = await started;
+      await harness.acknowledge(sent, out.results);
 
-    final identity = (await harness
-        .serverRepository
-        .publicationIdentityRepository
-        .findForContest(contestId))!;
-    final current = (await harness
-        .serverRepository
-        .publicationProjectionRepository
-        .findById(identity.currentProjectionId!))!;
-    expect(current.configRevision, 2);
-    expect(current.clientMutationId, 'auto-sync-drop-rounds');
-    expect(current.projectionRevision, 3);
+      final identity = (await harness
+          .serverRepository
+          .publicationIdentityRepository
+          .findForContest(contestId))!;
+      final current = (await harness
+          .serverRepository
+          .publicationProjectionRepository
+          .findById(identity.currentProjectionId!))!;
+      expect(current.configRevision, 2);
+      expect(current.clientMutationId, 'auto-sync-drop-rounds');
+      expect(current.projectionRevision, 3);
+    } finally {
+      // Whatever failed above, release the lock and let both operations end
+      // before the databases close; the original failure is the one reported.
+      await settleStarted(commit, [manual, sync]);
+    }
   });
 }
 
@@ -141,4 +170,22 @@ Future<void> _waitUntilBlockedBy(
     await Future<void>.delayed(const Duration(milliseconds: 25));
   }
   fail('no session waited for the manual publish within 15 seconds');
+}
+
+/// Completes [release] if it is still pending, then waits for every started
+/// operation in [started] to end, ignoring how they end so that cleanup never
+/// hides the failure that led to it.
+Future<void> settleStarted(
+  Completer<void> release,
+  Iterable<Future<Object?>?> started,
+) async {
+  if (!release.isCompleted) release.complete();
+  for (final operation in started) {
+    if (operation == null) continue;
+    try {
+      await operation;
+    } on Object {
+      // reported by the test body, or by nobody when it was never awaited
+    }
+  }
 }
