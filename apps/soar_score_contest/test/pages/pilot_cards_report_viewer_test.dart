@@ -344,32 +344,33 @@ void main() {
     },
   );
 
-  testWidgets('a retired pilot’s card prints but is never sent an invitation', (
-    tester,
-  ) async {
-    final source = _FakeInvitations();
-    PilotInvitationSources.current = source;
-    await _pump(
-      tester,
-      retired: {4: 2},
-      params: const ReportViewParams(filters: {'ret': '1'}),
-    );
+  testWidgets(
+    'a retired pilot’s card prints and is sent an invitation like any pilot',
+    (tester) async {
+      final source = _FakeInvitations();
+      PilotInvitationSources.current = source;
+      await _pump(
+        tester,
+        retired: {4: 2},
+        params: const ReportViewParams(filters: {'ret': '1'}),
+      );
 
-    // Four cards (the retired pilot's included), three that can have a code.
-    expect(find.byType(PilotCardView), findsNWidgets(4));
-    expect(
-      find.textContaining('Some cards have no QR code. Send invitations'),
-      findsOneWidget,
-    );
-    await tester.tap(find.byKey(const ValueKey('cards-banner-send')));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('3 QR codes'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
-    await tester.pumpAndSettle();
+      // Four cards, the retired pilot's included, all of which can have a code.
+      expect(find.byType(PilotCardView), findsNWidgets(4));
+      expect(
+        find.textContaining('Some cards have no QR code. Send invitations'),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const ValueKey('cards-banner-send')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('4 QR codes'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+      await tester.pumpAndSettle();
 
-    expect(source.lastSent, hasLength(3));
-    expect(find.byType(QrCodeView), findsNWidgets(3));
-  });
+      expect(source.lastSent, hasLength(4));
+      expect(find.byType(QrCodeView), findsNWidgets(4));
+    },
+  );
 
   testWidgets(
     'a send that worked but could not be read back is not a failure',

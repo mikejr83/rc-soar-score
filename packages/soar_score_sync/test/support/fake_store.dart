@@ -92,6 +92,9 @@ class FakeSyncStore implements SyncStore {
     return true;
   }
 
+  /// Thrown by [writeCursor] when set.
+  Object? cursorWriteError;
+
   @override
   Future<int> readCursor(SyncScopeKey scope) async => cursors[scope] ?? 0;
 
@@ -101,6 +104,8 @@ class FakeSyncStore implements SyncStore {
     int lastSyncedSequence, {
     DateTime? syncedAt,
   }) async {
+    final error = cursorWriteError;
+    if (error != null) throw error;
     if (lastSyncedSequence < (cursors[scope] ?? 0)) {
       throw ArgumentError.value(lastSyncedSequence, 'lastSyncedSequence');
     }

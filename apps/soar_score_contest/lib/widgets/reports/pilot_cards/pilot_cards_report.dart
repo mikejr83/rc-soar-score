@@ -199,13 +199,10 @@ class PilotCardsReport extends DataReportDefinition<PilotCardsData> {
     final invitations = session.invitations;
     bool hasQr(ReportPilot pilot) =>
         invitations.synchronized && invitations.has(pilot.participationId);
-    // A retired pilot gets no invitation (`canHaveInvitation`), but their
-    // card still prints, with the link they already have. Only the pilots who
-    // can have one are counted, offered or sent invitations.
-    final invitable = [
-      for (final pilot in selected)
-        if (!pilot.isRetired) pilot,
-    ];
+    // A retired pilot can have an invitation like any pilot
+    // (`canHaveInvitation`), so every selected pilot is counted, offered or
+    // sent one.
+    final invitable = selected;
     final missing = [
       for (final pilot in invitable)
         if (!hasQr(pilot)) pilot,

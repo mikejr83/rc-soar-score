@@ -2,12 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
-/// Whether [participation] can have an invitation: a pilot who still flies.
-/// The workspace and the Participants list share this rule, so neither issues
-/// or shows a link for a retired pilot or a non-flying participant.
+/// Whether [participation] can have an invitation: a pilot. A retired pilot
+/// still can, so a director can send or copy the link whatever the pilot's
+/// state; the server only checks the role. The workspace and the Participants
+/// list share this rule, so neither issues or shows a link for a non-flying
+/// participant.
 bool canHaveInvitation(ContestParticipation participation) =>
-    participation.roleType == RoleType.pilot &&
-    participation.retiredAtRound == null;
+    participation.roleType == RoleType.pilot;
 
 /// The invitations a contest has issued, as the cards need them: for each
 /// pilot that has one, the link its QR code carries.

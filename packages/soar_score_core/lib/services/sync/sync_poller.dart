@@ -144,6 +144,10 @@ class SyncPoller {
     _timer = null;
     if (_disposed || !_enabled || _paused || _polling) return;
     _polling = true;
+    final watch = Stopwatch()..start();
+    _logger.info(
+      'Periodic sync check: focus=${_focus is SyncPollContest ? 'contest' : 'landing'}',
+    );
     try {
       await onPoll(_focus);
     } on Object catch (error, stack) {
@@ -152,6 +156,9 @@ class SyncPoller {
     } finally {
       _polling = false;
     }
+    _logger.fine(
+      'Periodic sync check done: duration=${watch.elapsedMilliseconds} ms',
+    );
     // Always schedules the next check, whether or not the poll synced.
     synced();
   }

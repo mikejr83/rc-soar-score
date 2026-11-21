@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:logging/logging.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
@@ -11,9 +12,12 @@ import 'sync_engine_config.dart';
 import 'sync_failure_kind.dart';
 import 'sync_gateway.dart';
 import 'sync_mappers.dart';
+import 'sync_scope_label.dart';
 import 'sync_scope_state.dart';
 import 'sync_skip_reason.dart';
 import 'sync_state.dart';
+
+final _logger = Logger('SyncEngine');
 
 const _openUpload = 'open';
 const _finishUpload = 'finish';
@@ -159,37 +163,65 @@ class SyncEngine {
   Future<SyncFailureKind?> _syncScope(SyncScopeKey scope) async {
     final syncable = await _config.isSyncable?.call(scope) ?? true;
     if (!syncable) {
+      _logger.info(
+        'Sync skipped: scope=${syncScopeLabel(scope)} reason=accountless',
+      );
       await _refresh(scope, skip: SyncSkipReason.accountless);
       return null;
     }
+    final watch = Stopwatch()..start();
+    // Before the service is prepared, so a failed version check or
+    // registration still follows a start line. The cursor is on the pull's
+    // exchange line, and the pending count on the push plan.
+    _logger.info('Sync started: scope=${syncScopeLabel(scope)}');
     _emit(_state.copyWith(syncing: true));
     try {
-      final failure = await _guard(() async {
-        await _prepare();
-        final cursor = await _store.readCursor(scope);
-        // Pull first, so the push is based on what the service already has.
-        final pulled = await _pull(scope, await _exchange(scope, cursor, []));
-        final pending = inDependencyOrder(await _store.pendingMutations(scope));
-        await _recheckPromotionSupport(pending);
-        final sendable = _withoutHeldBack(scope, pending);
-        if (sendable.isNotEmpty) {
-          await _push(scope, sendable, pulled.cursor);
-        }
-      });
-      if (failure == null) {
-        // Record the sync even when it brought no changes.
-        await _store.writeCursor(
-          scope,
-          await _store.readCursor(scope),
-          syncedAt: _config.now(),
-        );
+      final SyncFailureKind? failure;
+      try {
+        failure = await _runScope(scope);
+        await _refresh(scope, failure: failure);
+      } on Object catch (error) {
+        // Local finalization can throw too (for example a store that rejects
+        // the cursor write after a sign-out). The caller still gets the
+        // error; the trace gets its end.
+        _logThrown(scope, error, watch);
+        rethrow;
       }
-      await _refresh(scope, failure: failure);
+      _logEnd(scope, failure, watch);
       if (!_outcomes.isClosed) _outcomes.add(failure);
       return failure;
     } finally {
       _emit(_state.copyWith(syncing: false));
     }
+  }
+
+  /// The exchanges of one sync and the recording of its time. Returns why it
+  /// failed, or null.
+  Future<SyncFailureKind?> _runScope(SyncScopeKey scope) async {
+    final failure = await _guard(() async {
+      await _prepare();
+      final cursor = await _store.readCursor(scope);
+      // Pull first, so the push is based on what the service already has.
+      final pulled = await _pull(
+        scope,
+        await _exchange(scope, cursor, [], purpose: 'pull'),
+      );
+      final pending = inDependencyOrder(await _store.pendingMutations(scope));
+      await _recheckPromotionSupport(pending);
+      final sendable = _withoutHeldBack(scope, pending);
+      if (sendable.isNotEmpty) {
+        await _push(scope, sendable, pulled.cursor);
+      }
+    });
+    if (failure == null) {
+      // Record the sync even when it brought no changes.
+      await _store.writeCursor(
+        scope,
+        await _store.readCursor(scope),
+        syncedAt: _config.now(),
+      );
+    }
+    return failure;
   }
 
   /// [pending] without the `promote_score` intents the service cannot take.
@@ -297,6 +329,11 @@ class SyncEngine {
       maxBytes: _config.maxExchangeBytes,
       maxMutations: _config.maxExchangeMutations,
     );
+    _logger.info(
+      'Push plan: scope=${syncScopeLabel(scope)} pending=${pending.length} '
+      'batches=${split.batches.length} oversized=${split.oversized.length} '
+      'firstUpload=$firstUpload',
+    );
     for (final tooLarge in split.oversized) {
       await _store.recordOutcome(
         mutationId: tooLarge.id,
@@ -317,7 +354,9 @@ class SyncEngine {
     SyncMutationResult? heldAccepted;
     var sequence = cursor;
     var left = 0;
+    var batchNumber = 0;
     for (final batch in split.batches) {
+      batchNumber++;
       final sendable = <MutationRecord>[];
       for (final m in batch) {
         if (blocked.contains(m.dependsOnMutationId)) {
@@ -327,12 +366,19 @@ class SyncEngine {
           sendable.add(m);
         }
       }
-      if (sendable.isEmpty) continue;
+      if (sendable.isEmpty) {
+        _logger.info(
+          'Push batch $batchNumber of ${split.batches.length} not sent: '
+          'every mutation depends on a refused one',
+        );
+        continue;
+      }
       final response = await _exchange(
         scope,
         sequence,
         sendable.map(mutationToDto).toList(),
         firstUpload: openFlag,
+        purpose: 'push $batchNumber/${split.batches.length}',
       );
       final accepted = <String>{
         for (final r in response.results)
@@ -385,6 +431,7 @@ class SyncEngine {
         sequence,
         const [],
         firstUpload: _finishUpload,
+        purpose: 'finish first upload',
       );
       await _pull(scope, done, from: sequence);
       await _store.recordOutcome(
@@ -398,26 +445,42 @@ class SyncEngine {
 
   Future<SyncFailureKind?> _syncSystemData() async {
     const scope = SystemScopeKey();
+    final watch = Stopwatch()..start();
+    _logger.info('Sync started: scope=system');
     final failure = await _guard(() async {
       await _prepare();
       var cursor = await _store.readCursor(scope);
       String? token;
+      var page = 0;
       do {
-        final page = await _gateway.systemData(
+        page++;
+        final requestWatch = Stopwatch()..start();
+        final response = await _gateway.systemData(
           afterSequence: cursor,
           pageToken: token,
         );
-        cursor = await _storeChanges(scope, page.changes, cursor);
-        token = page.nextPageToken;
+        _logger.info(
+          'System data page $page: changes=${response.changes.length} '
+          'more=${response.nextPageToken != null} '
+          'duration=${requestWatch.elapsedMilliseconds} ms',
+        );
+        cursor = await _storeChanges(scope, response.changes, cursor);
+        token = response.nextPageToken;
       } while (token != null);
     });
+    _logEnd(scope, failure, watch);
     return failure;
   }
 
   /// Checks the versions and registers the installation, once each.
   Future<void> _prepare() async {
     if (!_versionsChecked) {
+      final watch = Stopwatch()..start();
       final info = await _gateway.syncInfo();
+      _logger.info(
+        'Checked service versions: protocol=${info.protocolVersion} '
+        'duration=${watch.elapsedMilliseconds} ms',
+      );
       if (!info.accepts(
         protocol: _config.protocolVersion,
         schema: _config.schemaVersion,
@@ -429,6 +492,7 @@ class SyncEngine {
       _versionsChecked = true;
     }
     if (!_registered) {
+      final watch = Stopwatch()..start();
       await _gateway.registerInstallation(
         RegisterInstallationRequest(
           id: _config.installationId,
@@ -437,6 +501,9 @@ class SyncEngine {
         ),
       );
       _registered = true;
+      _logger.info(
+        'Registered installation: duration=${watch.elapsedMilliseconds} ms',
+      );
     }
   }
 
@@ -446,15 +513,47 @@ class SyncEngine {
     List<SyncMutationDto> mutations, {
     String? pageToken,
     String? firstUpload,
-  }) => _gateway.exchange(
-    _request(
-      scope,
-      cursor,
-      mutations,
-      pageToken: pageToken,
-      firstUpload: firstUpload,
-    ),
-  );
+    required String purpose,
+  }) async {
+    final watch = Stopwatch()..start();
+    try {
+      final response = await _gateway.exchange(
+        _request(
+          scope,
+          cursor,
+          mutations,
+          pageToken: pageToken,
+          firstUpload: firstUpload,
+        ),
+      );
+      final results = <MutationOutcome, int>{};
+      for (final r in response.results) {
+        results[r.outcome] = (results[r.outcome] ?? 0) + 1;
+      }
+      final elapsed = watch.elapsedMilliseconds;
+      _logger.log(
+        elapsed >= _config.slowExchange.inMilliseconds
+            ? Level.WARNING
+            : Level.INFO,
+        'Exchange ($purpose): scope=${syncScopeLabel(scope)} cursor=$cursor '
+        'sent=${mutations.length} '
+        'results=${_formatCounts(results)} '
+        'changes=${response.changes.length} '
+        'more=${response.nextPageToken != null} '
+        'serverSequence=${response.serverSequence} '
+        'duration=$elapsed ms'
+        '${elapsed >= _config.slowExchange.inMilliseconds ? ' (slow)' : ''}',
+      );
+      return response;
+    } on Object catch (error) {
+      _logger.warning(
+        'Exchange ($purpose) failed: scope=${syncScopeLabel(scope)} '
+        'sent=${mutations.length} error=${_describeError(error)} '
+        'duration=${watch.elapsedMilliseconds} ms',
+      );
+      rethrow;
+    }
+  }
 
   SyncExchangeRequest _request(
     SyncScopeKey scope,
@@ -489,7 +588,13 @@ class SyncEngine {
       _remoteSequence[scope] = page.serverSequence;
       final token = page.nextPageToken;
       if (token == null) break;
-      page = await _exchange(scope, requestedFrom, [], pageToken: token);
+      page = await _exchange(
+        scope,
+        requestedFrom,
+        [],
+        pageToken: token,
+        purpose: 'pull page',
+      );
     }
     return (cursor: cursor);
   }
@@ -507,15 +612,24 @@ class SyncEngine {
     // Whatever was written before a failure is already in the store. A change
     // the store already held (a replay after a failed page) writes nothing.
     var changed = false;
+    final watch = Stopwatch()..start();
     try {
       await _applyOrdered(scope, ordered, () => changed = true);
     } finally {
       if (changed) _bumpRevision(scope);
     }
     final highest = ordered.last.sequence;
-    if (highest <= cursor) return cursor;
-    await _store.writeCursor(scope, highest, syncedAt: _config.now());
-    return highest;
+    final moved = highest > cursor;
+    if (moved) {
+      await _store.writeCursor(scope, highest, syncedAt: _config.now());
+    }
+    // After the write, so the cursor reported is the one saved.
+    _logger.info(
+      'Stored changes: scope=${syncScopeLabel(scope)} count=${ordered.length} '
+      'changedLocalData=$changed cursor=$cursor->${moved ? highest : cursor} '
+      'duration=${watch.elapsedMilliseconds} ms',
+    );
+    return moved ? highest : cursor;
   }
 
   void _bumpRevision(SyncScopeKey scope) =>
@@ -594,6 +708,10 @@ class SyncEngine {
           );
         case MutationOutcome.rejected:
         case MutationOutcome.conflict:
+          _logger.warning(
+            'Change not accepted: outcome=${result.outcome.name} '
+            'reason=${result.reasonCode} entityType=${mutation.entityType}',
+          );
           await _store.recordOutcome(
             mutationId: mutation.id,
             outcome: result.outcome,
@@ -665,7 +783,11 @@ class SyncEngine {
       return null;
     } on _UpdateRequired {
       return SyncFailureKind.updateRequired;
-    } on _UnsupportedChange {
+    } on _UnsupportedChange catch (error) {
+      _logger.warning(
+        'Unsupported change from the service: sequence=${error.sequence} '
+        'entityType=${error.entityType}',
+      );
       return SyncFailureKind.unsupportedChange;
     } on SyncRefusedError catch (error) {
       if (error.requiresUpdate) return SyncFailureKind.updateRequired;
@@ -683,6 +805,37 @@ class SyncEngine {
       return SyncFailureKind.serverError;
     }
   }
+
+  /// Logs the end of a sync that threw: the scope, the time and the error's
+  /// type, never its message.
+  void _logThrown(SyncScopeKey scope, Object error, Stopwatch watch) {
+    _logger.warning(
+      'Sync failed: scope=${syncScopeLabel(scope)} '
+      'error=${_describeError(error)} '
+      'duration=${watch.elapsedMilliseconds} ms',
+    );
+  }
+
+  void _logEnd(SyncScopeKey scope, SyncFailureKind? failure, Stopwatch watch) {
+    _logger.log(
+      failure == null ? Level.INFO : Level.WARNING,
+      failure == null
+          ? 'Sync finished: scope=${syncScopeLabel(scope)} '
+                'duration=${watch.elapsedMilliseconds} ms'
+          : 'Sync failed: scope=${syncScopeLabel(scope)} failure=${failure.name} '
+                'duration=${watch.elapsedMilliseconds} ms',
+    );
+  }
+
+  static String _formatCounts(Map<MutationOutcome, int> counts) =>
+      counts.isEmpty
+      ? 'none'
+      : counts.entries.map((e) => '${e.key.name}:${e.value}').join(',');
+
+  /// What a failure is, without its message (which may carry request data).
+  static String _describeError(Object error) => error is ApiHttpError
+      ? '${error.runtimeType} status=${error.statusCode}'
+      : '${error.runtimeType}';
 
   Future<void> _refresh(
     SyncScopeKey scope, {

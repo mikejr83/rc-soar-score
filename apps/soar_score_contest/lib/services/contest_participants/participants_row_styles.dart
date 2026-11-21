@@ -77,6 +77,12 @@ extension ParticipantsRowStyles on ParticipantsController {
         Icons.edit,
         tone: ParticipantStatusTone.primary,
       );
+    } else if (row.participation.retiredAtRound != null) {
+      status = ParticipantStatus(
+        'Retired from round ${row.participation.retiredAtRound}',
+        Icons.person_off,
+        tone: ParticipantStatusTone.warning,
+      );
     } else if (state.outcome == RowOutcome.added) {
       status = ParticipantStatus(
         state.late ? 'Added late' : 'Added',

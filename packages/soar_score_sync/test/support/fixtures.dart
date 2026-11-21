@@ -53,6 +53,7 @@ class Rig {
     bool Function(SyncScopeKey)? syncable,
     int maxBytes = syncExchangeMaxBodyBytes,
     int maxMutations = syncExchangeMaxMutations,
+    Duration slowExchange = const Duration(seconds: 10),
   }) {
     store = FakeSyncStore(log);
     applier = FakeApplier(log);
@@ -69,6 +70,7 @@ class Rig {
         schemaVersion: 1,
         maxExchangeBytes: maxBytes,
         maxExchangeMutations: maxMutations,
+        slowExchange: slowExchange,
         now: () => clock,
         isSyncable: syncable == null ? null : (s) async => syncable(s),
       ),

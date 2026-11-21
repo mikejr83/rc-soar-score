@@ -185,9 +185,24 @@ void main() {
     );
   });
 
-  testWidgets('a retired pilot gets neither Send nor Copy link', (
+  testWidgets('a retired pilot is marked and can still Send and Copy link', (
     tester,
   ) async {
+    PilotInvitationSources.current = FakePilotInvitationSource(
+      links: {personParticipationId(2).value: 'https://x.test/2'},
+    );
+    await pumpParticipantsPage(tester, ParticipantsServer(retiredPilot: 1));
+    expect(find.text('Retired from round 2'), findsOneWidget);
+
+    // Without a link yet, Send is offered.
+    await tester.tap(_check(1));
+    await tester.pumpAndSettle();
+    await _openMenu(tester);
+    expect(menuItem(tester, 'invitations-send').onPressed, isNotNull);
+    expect(menuItem(tester, 'invitations-copy').onPressed, isNull);
+  });
+
+  testWidgets('a retired pilot with a link can copy it', (tester) async {
     PilotInvitationSources.current = FakePilotInvitationSource(
       links: {personParticipationId(1).value: 'https://x.test/1'},
     );
@@ -196,8 +211,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await _openMenu(tester);
-    expect(menuItem(tester, 'invitations-send').onPressed, isNull);
-    expect(menuItem(tester, 'invitations-copy').onPressed, isNull);
+    expect(menuItem(tester, 'invitations-copy').onPressed, isNotNull);
   });
 
   testWidgets('a completed contest still copies a link and issues none', (

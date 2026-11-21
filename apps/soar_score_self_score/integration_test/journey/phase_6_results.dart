@@ -124,5 +124,22 @@ Future<void> phase6Results(
         expect(find.text('Zero recorded'), findsNothing);
       },
     );
+    await journey.step(
+      'A group mate who retired shows as retired in their round',
+      () async {
+        // The server reads the retirement, so this checks the real endpoint:
+        // an unscored mate retired from round 2 is still listed, as retired.
+        final retiree = contest.groupMates(pilot, 2).first;
+        await contest.retire(retiree, round: 2);
+        await openPath(tester, groupResultsPath(contest.id, pilotId, '2'));
+        await pumpUntilFound(tester, find.text('(you)'));
+        expect(find.text(retiree), findsOneWidget);
+        expect(find.text('Retired'), findsOneWidget);
+        expect(
+          find.text('No flight expected after retirement.'),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }

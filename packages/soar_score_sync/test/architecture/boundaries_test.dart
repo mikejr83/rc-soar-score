@@ -3,17 +3,23 @@ import 'dart:io';
 import 'package:test/test.dart';
 
 void main() {
-  test('pubspec depends only on soar_score_core and soar_score_api', () {
-    final lines = File('pubspec.yaml').readAsLinesSync();
-    final start = lines.indexOf('dependencies:');
-    final end = lines.indexOf('dev_dependencies:');
-    final names = [
-      for (final line in lines.sublist(start + 1, end))
-        if (RegExp(r'^  \w').hasMatch(line)) line.trim().split(':').first,
-    ];
+  test(
+    'pubspec depends only on soar_score_core, soar_score_api and logging',
+    () {
+      final lines = File('pubspec.yaml').readAsLinesSync();
+      final start = lines.indexOf('dependencies:');
+      final end = lines.indexOf('dev_dependencies:');
+      final names = [
+        for (final line in lines.sublist(start + 1, end))
+          if (RegExp(r'^  \w').hasMatch(line)) line.trim().split(':').first,
+      ];
 
-    expect(names, unorderedEquals(['soar_score_api', 'soar_score_core']));
-  });
+      expect(
+        names,
+        unorderedEquals(['logging', 'soar_score_api', 'soar_score_core']),
+      );
+    },
+  );
 
   test('lib imports no Flutter, no data layer and no dart:io', () {
     final forbidden = RegExp(
