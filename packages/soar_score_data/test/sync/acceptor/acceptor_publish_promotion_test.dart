@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:soar_score_core/services/services.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
@@ -17,11 +19,15 @@ void _tests(Backend backend) {
   late core.ContestScopeKey scope;
   late core.ScorePlaceholder slot;
 
-  Future<void> open(core.PublicUpdateMode mode) async {
+  Future<void> open(
+    core.PublicUpdateMode mode, {
+    RecalculationService Function(Repository server)? recalculation,
+  }) async {
     harness = await AcceptorHarness.open(
       backend,
       recalculates: true,
       publishes: true,
+      recalculation: recalculation,
     );
     await DemoDataSeeder(
       harness.clientRepository,
@@ -200,4 +206,68 @@ void _tests(Backend backend) {
       expect(await projections(), hasLength(before));
     },
   );
+
+  test('a hosted title edit made while the promotion exchange runs is not '
+      'its change', () async {
+    late _GatedRecalculation gated;
+    await open(
+      core.PublicUpdateMode.roundCompletion,
+      recalculation: (server) =>
+          gated = _GatedRecalculation(ResultsService(server)),
+    );
+    final before = (await projections()).length;
+    gated.armed = true;
+
+    final exchange = harness.exchange(scope, mutations: [intent()]);
+    await gated.reached.future;
+    final hosted = (await harness.serverRepository.contestRepository.findById(
+      contestId,
+    ))!;
+    await ContestsService(harness.serverRepository).updateContest(
+      contestId,
+      ContestDetails(
+        name: 'Hosted Rename Mid Exchange',
+        host: hosted.host,
+        city: hosted.city,
+        state: hosted.state,
+        country: hosted.country,
+        startDateTime: hosted.startDateTime,
+        endDateTime: hosted.endDateTime,
+      ),
+      baseRevision: hosted.revision,
+      metadata: core.MutationMetadata(
+        clientMutationId: 'hosted-rename-mid',
+        authority: core.Authority.director,
+        clientTime: DateTime.utc(2026, 11, 16),
+        actorId: harness.account,
+      ),
+    );
+    gated.release.complete();
+    final out = await exchange;
+
+    expect(out.results.single.outcome, core.MutationOutcome.accepted);
+    expect(await projections(), hasLength(before));
+  });
+}
+
+/// Pauses the recalculation that follows the exchange's accepted changes.
+class _GatedRecalculation extends RecalculationService {
+  _GatedRecalculation(super.results);
+
+  var armed = false;
+  final reached = Completer<void>();
+  final release = Completer<void>();
+
+  @override
+  Future<String?> recalculateAfterEntry(
+    core.Id contestId, {
+    String cause = 'a score entry',
+  }) async {
+    if (armed) {
+      armed = false;
+      reached.complete();
+      await release.future;
+    }
+    return super.recalculateAfterEntry(contestId, cause: cause);
+  }
 }

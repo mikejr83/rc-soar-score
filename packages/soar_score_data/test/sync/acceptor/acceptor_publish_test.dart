@@ -257,6 +257,45 @@ void _tests(Backend backend) {
       expect(await projectionRevision(), before);
     });
 
+    test(
+      'a private control after a partial-round score publishes nothing',
+      () async {
+        final before = await projectionRevision();
+
+        await syncScores(rounds[0].take(1));
+        expect(await projectionRevision(), before);
+
+        for (final action in [
+          core.ContestAction.openScoring,
+          core.ContestAction.lock,
+        ]) {
+          final contest = (await harness.clientRepository.contestRepository
+              .findById(contestId))!;
+          await ContestsService(harness.clientRepository).applyAction(
+            contestId,
+            action,
+            baseRevision: contest.revision,
+            metadata: core.MutationMetadata(
+              clientMutationId: 'control-${_mutations++}',
+              authority: core.Authority.director,
+              clientTime: DateTime.utc(2026, 10, 15),
+              actorId: harness.account,
+            ),
+          );
+          final sent = await harness.outbox(scope);
+          final out = await harness.exchange(scope, mutations: sent);
+          await harness.acknowledge(sent, out.results);
+          expect(
+            out.results.every(
+              (r) => r.outcome == core.MutationOutcome.accepted,
+            ),
+            isTrue,
+          );
+          expect(await projectionRevision(), before);
+        }
+      },
+    );
+
     test('the batch that completes the round publishes', () async {
       await syncScores(rounds[0].take(2));
       final before = await projectionRevision();

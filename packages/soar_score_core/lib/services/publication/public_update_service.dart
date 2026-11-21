@@ -20,6 +20,25 @@ import 'publication_view.dart';
 
 final _logger = Logger('PublicUpdate');
 
+/// Whether replacing the stored contest row [before] with [after] changed
+/// what the public site shows: the contest details, how much of the results
+/// are hidden, or the move to Completed. Scoring access, the administration
+/// lock and the other lifecycle steps are not shown, so they do not count.
+bool publicContestChanged(
+  Map<String, Object?> before,
+  Map<String, Object?> after,
+) {
+  final then = Contest.fromJson(before);
+  final now = Contest.fromJson(after);
+  if (now.lifecycleState == LifecycleState.completed &&
+      then.lifecycleState != LifecycleState.completed) {
+    return true;
+  }
+  final was = PublicUpdateService.publicDetailsOf(then);
+  final is_ = PublicUpdateService.publicDetailsOf(now);
+  return was.entries.any((e) => is_[e.key] != e.value);
+}
+
 /// Decides whether a score entry reaches the public projection, by the
 /// contest's `public_update_mode`:
 ///
@@ -153,11 +172,11 @@ class PublicUpdateService {
   /// score changes once a round they touch is complete (the same rule as a
   /// score entry through the API); Manual never. [assignmentIds] are the
   /// matrix assignments the accepted score changes belong to.
-  /// [publicDetailsChanged] says the exchange's accepted contest write changed
-  /// [publicDetailsOf] (the caller compares before and after). A `Contest`
-  /// change that comes with score changes and did not is their companion (a
-  /// score write saves the contest too) and counts as one, unless the contest
-  /// is Completed, which is the end of the last round and always publishes.
+  /// [publicContestChanged] says an accepted `Contest` write of the exchange
+  /// changed what the public site shows (see [publicContestChanged]: details,
+  /// results visibility, or becoming Completed), decided inside that write.
+  /// Any other `Contest` write (scoring access, the lock, a score's lifecycle
+  /// step) is not public and is ignored before the update mode is looked at.
   ///
   /// It never creates a publication. [exchangeMutationId] (the last accepted
   /// mutation of the exchange) makes a retried exchange publish once.
@@ -169,10 +188,13 @@ class PublicUpdateService {
     Id contestId, {
     required Set<String> entityTypes,
     Set<Id> assignmentIds = const {},
-    bool publicDetailsChanged = false,
+    bool publicContestChanged = false,
     required String exchangeMutationId,
   }) async {
-    final changed = entityTypes.intersection(_publicTypes);
+    // A Contest write counts only when it changed what the public site
+    // shows; scoring access, the lock and a score's lifecycle step do not.
+    final changed = entityTypes.intersection(_publicTypes)
+      ..removeWhere((t) => t == 'Contest' && !publicContestChanged);
     if (changed.isEmpty) return null;
     final identity = await repository.publicationIdentityRepository
         .findForContest(contestId);
@@ -180,12 +202,7 @@ class PublicUpdateService {
     final mode = await _modeOf(contestId);
     if (mode == null || mode == PublicUpdateMode.manual) return null;
     if (mode == PublicUpdateMode.roundCompletion &&
-        !await _worthPublishing(
-          contestId,
-          changed,
-          assignmentIds,
-          publicDetailsChanged,
-        )) {
+        !await _worthPublishing(contestId, changed, assignmentIds)) {
       return null;
     }
     try {
@@ -215,20 +232,14 @@ class PublicUpdateService {
   /// revision moves underneath it.
   static const _syncPublishAttempts = 2;
 
-  /// RoundCompletion's rule for a synced batch of [changed] types.
+  /// RoundCompletion's rule for a synced batch of [changed] types, which
+  /// holds a `Contest` only when it changed what the public site shows.
   Future<bool> _worthPublishing(
     Id contestId,
     Set<String> changed,
     Set<Id> assignmentIds,
-    bool publicDetailsChanged,
   ) async {
-    final others = changed.difference({..._scoreTypes, 'Contest'});
-    if (others.isNotEmpty) return true;
-    final scoreChanged = changed.intersection(_scoreTypes).isNotEmpty;
-    if (!scoreChanged) return true; // only the contest itself changed
-    // An edit of what the public site shows publishes whatever else the
-    // exchange holds; a score's lifecycle companion does not.
-    if (publicDetailsChanged) return true;
+    if (changed.difference(_scoreTypes).isNotEmpty) return true;
     final contest = await repository.contestRepository.findById(contestId);
     if (contest?.lifecycleState == LifecycleState.completed) return true;
     final roundIds = <Id>{};
