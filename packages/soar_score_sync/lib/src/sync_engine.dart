@@ -176,36 +176,52 @@ class SyncEngine {
     _logger.info('Sync started: scope=${syncScopeLabel(scope)}');
     _emit(_state.copyWith(syncing: true));
     try {
-      final failure = await _guard(() async {
-        await _prepare();
-        final cursor = await _store.readCursor(scope);
-        // Pull first, so the push is based on what the service already has.
-        final pulled = await _pull(
-          scope,
-          await _exchange(scope, cursor, [], purpose: 'pull'),
-        );
-        final pending = inDependencyOrder(await _store.pendingMutations(scope));
-        await _recheckPromotionSupport(pending);
-        final sendable = _withoutHeldBack(scope, pending);
-        if (sendable.isNotEmpty) {
-          await _push(scope, sendable, pulled.cursor);
-        }
-      });
-      if (failure == null) {
-        // Record the sync even when it brought no changes.
-        await _store.writeCursor(
-          scope,
-          await _store.readCursor(scope),
-          syncedAt: _config.now(),
-        );
+      final SyncFailureKind? failure;
+      try {
+        failure = await _runScope(scope);
+        await _refresh(scope, failure: failure);
+      } on Object catch (error) {
+        // Local finalization can throw too (for example a store that rejects
+        // the cursor write after a sign-out). The caller still gets the
+        // error; the trace gets its end.
+        _logThrown(scope, error, watch);
+        rethrow;
       }
-      await _refresh(scope, failure: failure);
       _logEnd(scope, failure, watch);
       if (!_outcomes.isClosed) _outcomes.add(failure);
       return failure;
     } finally {
       _emit(_state.copyWith(syncing: false));
     }
+  }
+
+  /// The exchanges of one sync and the recording of its time. Returns why it
+  /// failed, or null.
+  Future<SyncFailureKind?> _runScope(SyncScopeKey scope) async {
+    final failure = await _guard(() async {
+      await _prepare();
+      final cursor = await _store.readCursor(scope);
+      // Pull first, so the push is based on what the service already has.
+      final pulled = await _pull(
+        scope,
+        await _exchange(scope, cursor, [], purpose: 'pull'),
+      );
+      final pending = inDependencyOrder(await _store.pendingMutations(scope));
+      await _recheckPromotionSupport(pending);
+      final sendable = _withoutHeldBack(scope, pending);
+      if (sendable.isNotEmpty) {
+        await _push(scope, sendable, pulled.cursor);
+      }
+    });
+    if (failure == null) {
+      // Record the sync even when it brought no changes.
+      await _store.writeCursor(
+        scope,
+        await _store.readCursor(scope),
+        syncedAt: _config.now(),
+      );
+    }
+    return failure;
   }
 
   /// [pending] without the `promote_score` intents the service cannot take.
@@ -603,15 +619,17 @@ class SyncEngine {
       if (changed) _bumpRevision(scope);
     }
     final highest = ordered.last.sequence;
+    final moved = highest > cursor;
+    if (moved) {
+      await _store.writeCursor(scope, highest, syncedAt: _config.now());
+    }
+    // After the write, so the cursor reported is the one saved.
     _logger.info(
       'Stored changes: scope=${syncScopeLabel(scope)} count=${ordered.length} '
-      'changedLocalData=$changed cursor=$cursor->'
-      '${highest <= cursor ? cursor : highest} '
+      'changedLocalData=$changed cursor=$cursor->${moved ? highest : cursor} '
       'duration=${watch.elapsedMilliseconds} ms',
     );
-    if (highest <= cursor) return cursor;
-    await _store.writeCursor(scope, highest, syncedAt: _config.now());
-    return highest;
+    return moved ? highest : cursor;
   }
 
   void _bumpRevision(SyncScopeKey scope) =>
@@ -692,8 +710,7 @@ class SyncEngine {
         case MutationOutcome.conflict:
           _logger.warning(
             'Change not accepted: outcome=${result.outcome.name} '
-            'reason=${result.reasonCode} entityType=${mutation.entityType} '
-            'mutation=${mutation.clientMutationId}',
+            'reason=${result.reasonCode} entityType=${mutation.entityType}',
           );
           await _store.recordOutcome(
             mutationId: mutation.id,
@@ -787,6 +804,16 @@ class SyncEngine {
     } on ApiException {
       return SyncFailureKind.serverError;
     }
+  }
+
+  /// Logs the end of a sync that threw: the scope, the time and the error's
+  /// type, never its message.
+  void _logThrown(SyncScopeKey scope, Object error, Stopwatch watch) {
+    _logger.warning(
+      'Sync failed: scope=${syncScopeLabel(scope)} '
+      'error=${_describeError(error)} '
+      'duration=${watch.elapsedMilliseconds} ms',
+    );
   }
 
   void _logEnd(SyncScopeKey scope, SyncFailureKind? failure, Stopwatch watch) {
