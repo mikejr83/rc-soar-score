@@ -25,6 +25,7 @@ import 'mutation_payloads.dart';
 import 'mutation_processor.dart';
 import '../publication/public_update_service.dart';
 import '../recalculation/recalculation_service.dart';
+import '../results_service.dart';
 import 'mutation_result.dart';
 import 'promotion_operation.dart';
 import '../scores_service.dart';
@@ -180,13 +181,18 @@ class SyncAcceptorService {
       if (position == null) {
         results.addAll(await _decideAll(ctx, input));
         final firstUpload = _isFirstUpload(scope, input);
-        await _recalculateAfter(scope, results, firstUpload);
+        final resultsCurrent = await _recalculateAfter(
+          scope,
+          results,
+          firstUpload,
+        );
         if (!firstUpload) {
           await _publishAfter(
             scope,
             results,
             input.mutations,
             ctx.publicContestChange,
+            resultsCurrent,
           );
         }
       }
@@ -308,36 +314,42 @@ class SyncAcceptorService {
   /// Recalculates the results of the contest in [scope] when [results]
   /// accepted a change to it. The changes are already committed, so a failure
   /// is reported by [RecalculationService] in the log and leaves the results
-  /// stale; it never fails the exchange.
+  /// stale; it never fails the exchange. Returns whether the results are
+  /// current afterwards (false: the recalculation failed).
+  ///
+  /// An exchange that only answers replays changed nothing, so it rewrites
+  /// no results, unless an earlier attempt left them stale: its retry then
+  /// recalculates, so the retry can finish what the first attempt could not.
   ///
   /// The exchanges of a contest's first upload never accept scores: an
   /// imported contest keeps its pending scores pending, and only a later
   /// trigger (a director action, a new submission, a change of the setting)
   /// evaluates it.
-  Future<void> _recalculateAfter(
+  Future<bool> _recalculateAfter(
     SyncScopeKey scope,
     List<MutationResult> results,
     bool firstUpload,
   ) async {
     final recalculation = this.recalculation;
-    if (recalculation == null || scope is! ContestScopeKey) return;
-    // An answered replay changed nothing, so it rewrites no results.
-    if (!results.any(
-      (r) => r.outcome == MutationOutcome.accepted && !r.replayed,
-    )) {
-      return;
+    if (recalculation == null || scope is! ContestScopeKey) return true;
+    final accepted = results.where(
+      (r) => r.outcome == MutationOutcome.accepted,
+    );
+    if (accepted.isEmpty) return true;
+    if (accepted.every((r) => r.replayed) &&
+        !(await ResultsService(_repository).read(scope.contestId)).isStale) {
+      return true;
     }
-    if (firstUpload) {
-      await recalculation.recalculateWithoutOfficialization(
-        scope.contestId,
-        cause: 'a sync',
-      );
-    } else {
-      await recalculation.recalculateAfterEntry(
-        scope.contestId,
-        cause: 'a sync',
-      );
-    }
+    final warning = firstUpload
+        ? await recalculation.recalculateWithoutOfficialization(
+            scope.contestId,
+            cause: 'a sync',
+          )
+        : await recalculation.recalculateAfterEntry(
+            scope.contestId,
+            cause: 'a sync',
+          );
+    return warning == null;
   }
 
   /// Republishes the contest in [scope] when [results] accepted a change the
@@ -350,24 +362,40 @@ class SyncAcceptorService {
     List<MutationResult> results,
     List<SyncMutation> mutations,
     bool publicContestChanged,
+    bool resultsCurrent,
   ) async {
     final publicUpdates = this.publicUpdates;
     if (publicUpdates == null || scope is! ContestScopeKey) return;
+    if (!resultsCurrent) {
+      // The projection would be refused as stale. The accepted changes
+      // publish when the exchange is retried: its replay recalculates, then
+      // publishes under the same key.
+      _logger.warning(
+        'Public update after a sync of contest ${scope.contestId} skipped: '
+        'the results are stale',
+      );
+      return;
+    }
     // The results are in the order of the mutations sent, so pair them by
     // position: two mutations may carry the same client mutation id.
-    final accepted = [
-      for (var i = 0; i < results.length && i < mutations.length; i++)
-        if (results[i].outcome == MutationOutcome.accepted &&
-            !results[i].replayed)
-          mutations[i],
-    ];
+    final fresh = <SyncMutation>[];
+    final replays = <SyncMutation>[];
+    for (var i = 0; i < results.length && i < mutations.length; i++) {
+      if (results[i].outcome != MutationOutcome.accepted) continue;
+      (results[i].replayed ? replays : fresh).add(mutations[i]);
+    }
+    // Fresh changes decide. An exchange that only answers replays is a retry
+    // of one whose publication may have failed: it publishes again under the
+    // same key, which does nothing when the first attempt succeeded.
+    final accepted = fresh.isNotEmpty ? fresh : replays;
     if (accepted.isEmpty) return;
     try {
       await publicUpdates.afterSync(
         scope.contestId,
         entityTypes: {for (final m in accepted) m.entityType},
         assignmentIds: await _assignmentsOf(accepted),
-        publicContestChanged: publicContestChanged,
+        // Null for a retry, which works it out from the contest itself.
+        publicContestChanged: fresh.isNotEmpty ? publicContestChanged : null,
         exchangeMutationId: accepted.last.clientMutationId,
       );
     } on Object catch (error, stackTrace) {

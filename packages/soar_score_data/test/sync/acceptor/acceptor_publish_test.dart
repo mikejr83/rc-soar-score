@@ -2,6 +2,8 @@ import 'package:soar_score_core/services/services.dart';
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:test/test.dart';
 
+import 'package:soar_score_data/soar_score_data.dart' show Repository;
+
 import '../../support/acceptor_harness.dart';
 import '../../support/backends.dart';
 
@@ -195,6 +197,116 @@ void _tests(Backend backend) {
     expect(out.results.skip(fresh.length).every((r) => r.replayed), isTrue);
     expect(await projectionRevision(), afterFirst + 1);
     expect(await publishedConfigRevision(), base + 2);
+  });
+
+  group('a failed attempt is finished by the retried exchange', () {
+    test('after a failed publish', () async {
+      final failing = _FailingPublication();
+      harness = await AcceptorHarness.open(
+        backend,
+        recalculates: true,
+        publicUpdates: (server) =>
+            PublicUpdateService(server, publication: failing.over(server)),
+      );
+      addTearDown(harness.close);
+      contestId = await harness.drawContestOnClient();
+      scope = core.ContestScopeKey(contestId);
+      await harness.uploadAll(contestId);
+      await _publishFirst(harness, contestId);
+      final base = await publishedConfigRevision();
+      final before = await projectionRevision();
+      await _saveConfig(
+        harness,
+        contestId,
+        base: base,
+        options: {
+          'drop_after_rounds': [1],
+        },
+      );
+      final sent = await harness.outbox(scope);
+      failing.failures = 2; // the attempt and its one retry
+
+      final first = await harness.exchange(scope, mutations: sent);
+      expect(
+        first.results.every((r) => r.outcome == core.MutationOutcome.accepted),
+        isTrue,
+      );
+      expect(await projectionRevision(), before);
+
+      // The response was lost: the identical exchange comes again.
+      final again = await harness.exchange(scope, mutations: sent);
+
+      expect(again.results.every((r) => r.replayed), isTrue);
+      expect(await projectionRevision(), before + 1);
+      expect(await publishedConfigRevision(), base + 1);
+    });
+
+    test('after a failed recalculation', () async {
+      late _FailingRecalculation recalculation;
+      harness = await AcceptorHarness.open(
+        backend,
+        recalculation: (server) =>
+            recalculation = _FailingRecalculation(ResultsService(server)),
+        publishes: true,
+      );
+      addTearDown(harness.close);
+      contestId = await harness.drawContestOnClient();
+      scope = core.ContestScopeKey(contestId);
+      await harness.uploadAll(contestId);
+      await _publishFirst(harness, contestId);
+      final matrix = await MatrixService(harness.clientRepository)
+          .current(contestId);
+      final round1 = matrix.rounds.firstWhere((r) => r.ordinal == 1).id;
+      for (final a in matrix.assignments.where(
+        (a) => a.scheduledRoundId == round1,
+      )) {
+        final mutation = 'score-${_mutations++}';
+        await ScoresService(harness.clientRepository).enterOfficialScore(
+          contestId,
+          a.id,
+          clientMutationId: mutation,
+          baseScoreRevision: 0,
+          components: const {
+            'time_flown': 500,
+            'launch_height': 200,
+            'landing': 'points_50',
+          },
+          actorId: harness.account,
+          metadata: core.MutationMetadata(
+            clientMutationId: mutation,
+            authority: core.Authority.director,
+            clientTime: DateTime.utc(2026, 10, 15),
+            actorId: harness.account,
+          ),
+        );
+      }
+      final scores = await harness.outbox(scope);
+      final scored = await harness.exchange(scope, mutations: scores);
+      await harness.acknowledge(scores, scored.results);
+      final base = await publishedConfigRevision();
+      final before = await projectionRevision();
+
+      await _saveConfig(
+        harness,
+        contestId,
+        base: base,
+        options: {
+          'drop_after_rounds': [1],
+        },
+      );
+      final sent = await harness.outbox(scope);
+      recalculation.failuresLeft = 1;
+
+      await harness.exchange(scope, mutations: sent);
+      // The results are stale, so nothing was published.
+      expect(await projectionRevision(), before);
+
+      final again = await harness.exchange(scope, mutations: sent);
+
+      expect(again.results.every((r) => r.replayed), isTrue);
+      expect(await projectionRevision(), before + 1);
+      expect(await publishedConfigRevision(), base + 1);
+    });
   });
 
   test('a synced change does not republish in Manual mode', () async {
@@ -430,3 +542,65 @@ Future<void> _saveConfig(
     actorId: harness.account,
   ),
 );
+
+Future<void> _publishFirst(AcceptorHarness harness, core.Id contestId) async {
+  final contest = (await harness.serverRepository.contestRepository.findById(
+    contestId,
+  ))!;
+  await PublicationService(harness.serverRepository).publish(
+    contestId,
+    actorId: harness.account,
+    authority: core.Authority.director,
+    clientMutationId: 'first',
+    sourceContestRevision: contest.revision,
+  );
+}
+
+/// A publication service whose automatic publishes fail while [failures]
+/// remain.
+class _FailingPublication {
+  var failures = 0;
+
+  PublicationService over(Repository server) => _FailingService(server, this);
+}
+
+class _FailingService extends PublicationService {
+  _FailingService(super.repository, this._owner);
+
+  final _FailingPublication _owner;
+
+  @override
+  Future<PublishResult?> publishAutomatically(
+    core.Id contestId, {
+    required String clientMutationId,
+  }) {
+    if (_owner.failures > 0) {
+      _owner.failures--;
+      throw StateError('the database went away');
+    }
+    return super.publishAutomatically(
+      contestId,
+      clientMutationId: clientMutationId,
+    );
+  }
+}
+
+/// A recalculation that reports a failure (and leaves the results stale)
+/// while [failuresLeft] remain.
+class _FailingRecalculation extends RecalculationService {
+  _FailingRecalculation(super.results);
+
+  var failuresLeft = 0;
+
+  @override
+  Future<String?> recalculateAfterEntry(
+    core.Id contestId, {
+    String cause = 'a score entry',
+  }) {
+    if (failuresLeft > 0) {
+      failuresLeft--;
+      return Future.value('Recalculation failed after $cause; stale');
+    }
+    return super.recalculateAfterEntry(contestId, cause: cause);
+  }
+}

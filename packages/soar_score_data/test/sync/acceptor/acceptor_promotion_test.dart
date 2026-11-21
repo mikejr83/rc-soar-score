@@ -17,7 +17,9 @@ class _CountingRecalculation extends RecalculationService {
     String cause = 'a score entry',
   }) async {
     runs++;
-    return null;
+    // A real recalculation: the results are current afterwards, so a replay
+    // has nothing to finish.
+    return super.recalculateAfterEntry(contestId, cause: cause);
   }
 }
 
@@ -439,7 +441,7 @@ void _tests(Backend backend) {
     expect(await officials(), hasLength(1));
   });
 
-  test('a replay does not recalculate the results', () async {
+  test('a replay does not recalculate results that are current', () async {
     final counting = _CountingRecalculation(
       ResultsService(harness.serverRepository),
     );

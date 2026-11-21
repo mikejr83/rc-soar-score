@@ -9,9 +9,9 @@ import '../../errors/contest_state_error.dart';
 import '../../models/contest/core_options.dart';
 import '../../models/contest/contest.dart';
 import '../../models/id.dart';
+import '../../models/publication/publication_identity.dart';
 import '../../models/sync/audit_event.dart';
 import '../../repositories/recorded_score.dart';
-import '../../repositories/stale_revision_error.dart';
 import '../../repositories/repository.dart';
 import '../scores_service.dart';
 import 'publication_projection_builder.dart';
@@ -177,6 +177,9 @@ class PublicUpdateService {
   /// results visibility, or becoming Completed), decided inside that write.
   /// Any other `Contest` write (scoring access, the lock, a score's lifecycle
   /// step) is not public and is ignored before the update mode is looked at.
+  /// Null is for a retried exchange (every result a replay): it has no write
+  /// of its own to judge, so the contest counts when it differs from the
+  /// projection that is public now.
   ///
   /// It never creates a publication. [exchangeMutationId] (the last accepted
   /// mutation of the exchange) makes a retried exchange publish once.
@@ -188,17 +191,22 @@ class PublicUpdateService {
     Id contestId, {
     required Set<String> entityTypes,
     Set<Id> assignmentIds = const {},
-    bool publicContestChanged = false,
+    bool? publicContestChanged = false,
     required String exchangeMutationId,
   }) async {
     // A Contest write counts only when it changed what the public site
     // shows; scoring access, the lock and a score's lifecycle step do not.
-    final changed = entityTypes.intersection(_publicTypes)
-      ..removeWhere((t) => t == 'Contest' && !publicContestChanged);
+    final changed = entityTypes.intersection(_publicTypes);
     if (changed.isEmpty) return null;
     final identity = await repository.publicationIdentityRepository
         .findForContest(contestId);
     if (identity == null) return null;
+    // A retry has no before and after of its own: the contest counts when it
+    // differs from the projection that is public now.
+    final contestPublic =
+        publicContestChanged ?? await _contestDiffersFromProjection(identity);
+    if (!contestPublic) changed.remove('Contest');
+    if (changed.isEmpty) return null;
     final mode = await _modeOf(contestId);
     if (mode == null || mode == PublicUpdateMode.manual) return null;
     if (mode == PublicUpdateMode.roundCompletion &&
@@ -216,7 +224,10 @@ class PublicUpdateService {
             contestId,
             clientMutationId: 'auto-sync-$exchangeMutationId',
           );
-        } on StaleRevisionError {
+        } on ContestStateError {
+          rethrow;
+        } on Object {
+          // A lost revision race, or a failure that may pass: once more.
           if (attempt >= _syncPublishAttempts) rethrow;
         }
       }
@@ -229,7 +240,7 @@ class PublicUpdateService {
   }
 
   /// The most times a synced change tries to publish when the publication
-  /// revision moves underneath it.
+  /// revision moves underneath it or the attempt fails.
   static const _syncPublishAttempts = 2;
 
   /// RoundCompletion's rule for a synced batch of [changed] types, which
@@ -254,6 +265,34 @@ class PublicUpdateService {
     return scores.rounds.any(
       (round) => roundIds.contains(round.roundId) && round.isComplete,
     );
+  }
+
+  /// Whether the contest differs from the projection that is public now in
+  /// what the public site shows: its details, how much of the results are
+  /// hidden, or becoming Completed. Used by a retried exchange, which cannot
+  /// compare the write it replays.
+  Future<bool> _contestDiffersFromProjection(
+    PublicationIdentity identity,
+  ) async {
+    final contestId = identity.contestId;
+    if (contestId == null) return false;
+    final contest = await repository.contestRepository.findById(contestId);
+    final currentId = identity.currentProjectionId;
+    if (contest == null || currentId == null) return false;
+    final published = await repository.publicationProjectionRepository.findById(
+      currentId,
+    );
+    if (published == null) return false;
+    final now = publicDetailsOf(contest);
+    final shown = {
+      ...PublicationProjectionBuilder.detailFields(contest)
+          .map((key, _) => MapEntry(key, published.contestIdentity[key])),
+      'results_hidden_through_round': identity.resultsHiddenThroughRound,
+      'results_hidden_at': identity.resultsHiddenAt?.toUtc().toIso8601String(),
+    };
+    if (now.entries.any((e) => shown[e.key] != e.value)) return true;
+    return contest.lifecycleState == LifecycleState.completed &&
+        published.contestIdentity['lifecycle_state'] != 'Completed';
   }
 
   /// The contest fields the public site shows: its details (name, dates,
