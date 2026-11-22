@@ -74,6 +74,21 @@ void _tests(SliceBackend backend) {
     return accountId;
   }
 
+  Future<void> listInDirectory(core.Id accountId, {bool listed = true}) =>
+      repository.participantDirectoryEntryRepository
+          .save(
+            core.ParticipantDirectoryEntry(
+              id: core.Id.create(),
+              accountId: accountId,
+              firstName: 'Listed',
+              lastName: 'Pilot',
+              isListed: listed,
+              createdAt: clock,
+              updatedAt: clock,
+            ),
+          )
+          .then((_) {});
+
   Future<void> contestAction(String action) async => api.expectOk(
     'POST',
     '/contests/$_contestId/actions',
@@ -107,6 +122,7 @@ void _tests(SliceBackend backend) {
     );
     pat = await account('Pat', email: _email);
     otherAccount = await account('Sam', email: 'sam@example.com');
+    await listInDirectory(otherAccount);
     await api.expectOk(
       'POST',
       '/contests',
@@ -529,6 +545,34 @@ void _tests(SliceBackend backend) {
           directorAccountId: api.director,
         ),
         link,
+      );
+    });
+
+    test('an unlisted or unknown pilot is refused, as nothing', () async {
+      final hidden = await account('Hidden');
+      await listInDirectory(hidden, listed: false);
+      final unlisted = await account('Nolist');
+      for (final who in [hidden, unlisted]) {
+        await expectLater(
+          links.linkFromDirectory(
+            profileId: id(_profileId(2)),
+            accountId: who,
+            directorAccountId: api.director,
+          ),
+          throwsA(
+            isA<core.ParticipantLinkError>().having(
+              (e) => e.code,
+              'code',
+              'link_not_found',
+            ),
+          ),
+        );
+      }
+      expect(
+        await repository.participantAccountLinkRepository.listForProfile(
+          id(_profileId(2)),
+        ),
+        isEmpty,
       );
     });
 

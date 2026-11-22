@@ -261,6 +261,13 @@ void main() => forEachBackend((backend) {
               'ALTER TABLE mutation_records DROP COLUMN aggregate_id',
             );
             await _accountColumn(old, add: false);
+            // Version 1 had neither participant-link index (#545).
+            await old.customStatement(
+              'DROP INDEX IF EXISTS participant_profiles_lower_email',
+            );
+            await old.customStatement(
+              'DROP INDEX IF EXISTS participant_account_links_account',
+            );
             await old.customStatement(
               'CREATE TABLE pilot_import_links (unexpected TEXT)',
             );
@@ -349,6 +356,18 @@ void main() => forEachBackend((backend) {
             );
             openDatabase = upgraded;
             final repository = Repository(upgraded);
+            final indexSql = upgraded.executor.dialect == SqlDialect.sqlite
+                ? "SELECT name FROM sqlite_master WHERE type = 'index'"
+                : 'SELECT indexname AS name FROM pg_indexes '
+                      'WHERE schemaname = current_schema()';
+            final indexes = {
+              for (final row in await upgraded.customSelect(indexSql).get())
+                row.read<String>('name'),
+            };
+            expect(indexes, contains('participant_profiles_lower_email'));
+            if (databaseProfile.groups.contains(TableGroup.backendOnly)) {
+              expect(indexes, contains('participant_account_links_account'));
+            }
             expect(
               (await repository.participantProfileRepository.findById(
                 participantId,
