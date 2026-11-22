@@ -251,6 +251,48 @@ void main() {
     expect(stored(a).emailVerified, isTrue);
   });
 
+  test(
+    'a stale verified account with an unchanged profile only restamps',
+    () async {
+      final a = await store(
+        account(
+          verified: true,
+          refreshedAt: clock.subtract(const Duration(hours: 25)),
+        ),
+      );
+      profiles.profile = const UserProfile(
+        givenName: 'Ada',
+        familyName: 'Lovelace',
+        email: 'ada@example.com',
+        emailVerified: true,
+      );
+
+      await refresher.refresh(a, 'jwt');
+
+      expect(profiles.fetches, 1);
+      expect(stored(a).profileRefreshedAt, clock);
+      expect(stored(a).updatedAt, a.updatedAt);
+      expect(stored(a).email, 'ada@example.com');
+    },
+  );
+
+  test(
+    'an email missing at the provider keeps the stored email and flag',
+    () async {
+      final a = await store(account(verified: true, refreshedAt: start));
+      profiles.profile = const UserProfile(
+        givenName: 'Ada',
+        familyName: 'Lovelace',
+      );
+      clock = start.add(const Duration(hours: 25));
+
+      await refresher.refresh(a, 'jwt');
+
+      expect(stored(a).email, 'ada@example.com');
+      expect(stored(a).emailVerified, isTrue);
+    },
+  );
+
   test('never refreshes a guest, local or deleted account', () async {
     profiles.profile = const UserProfile(email: 'x@example.com');
     for (final kind in [

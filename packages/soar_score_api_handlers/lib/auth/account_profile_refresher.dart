@@ -37,6 +37,9 @@ class AccountProfileRefresher {
   final DateTime Function() _now;
 
   /// Whether [account] is due for a refresh at [now].
+  ///
+  /// An archived account cannot sign in, so the resolver never gets here for
+  /// one.
   bool isDue(Account account, DateTime now) {
     if (account.kind != AccountKind.registered) return false;
     final last = account.profileRefreshedAt;
@@ -120,8 +123,11 @@ class AccountProfileRefresher {
         now: now,
       );
     } on Object catch (_) {
-      // Another account took the email between the check and the write.
-      _logger.warning('Profile refresh kept the stored email: it was taken.');
+      // The usual cause is another account taking the email between the check
+      // and the write (the database refuses a duplicate). The contract does
+      // not tell that apart from other write failures, so any failure retries
+      // once with the stored email; a second failure is caught by [refresh].
+      _logger.warning('Profile refresh retried with the stored email.');
       await accounts.applyProfile(
         account.id,
         firstName: firstName,

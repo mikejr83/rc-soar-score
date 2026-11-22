@@ -57,6 +57,41 @@ void _tests(Backend backend) {
       expect((await repo.findById(a.id))!.profileRefreshedAt, later);
     });
 
+    test('compares sub-second instants exactly', () async {
+      final a = await repo.save(account('alex@example.org'));
+      final first = t0.add(
+        const Duration(milliseconds: 1234, microseconds: 56),
+      );
+      final second = first.add(const Duration(minutes: 11, microseconds: 7));
+
+      expect(
+        await repo.claimProfileRefresh(a.id, expected: null, at: first),
+        true,
+      );
+      final read = (await repo.findById(a.id))!.profileRefreshedAt;
+      expect(read, first);
+
+      // A stale value that differs by one microsecond loses.
+      expect(
+        await repo.claimProfileRefresh(
+          a.id,
+          expected: first.add(const Duration(microseconds: 1)),
+          at: second,
+        ),
+        false,
+      );
+      // The value read back wins, once.
+      expect(
+        await repo.claimProfileRefresh(a.id, expected: read, at: second),
+        true,
+      );
+      expect(
+        await repo.claimProfileRefresh(a.id, expected: read, at: second),
+        false,
+      );
+      expect((await repo.findById(a.id))!.profileRefreshedAt, second);
+    });
+
     test('an unknown account is not claimed', () async {
       expect(
         await repo.claimProfileRefresh(
