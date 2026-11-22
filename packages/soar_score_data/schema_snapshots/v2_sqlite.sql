@@ -55,6 +55,8 @@ CREATE TABLE IF NOT EXISTS "local_account" ("slot" INTEGER NOT NULL CHECK("slot"
 CREATE INDEX publication_identities_listing ON publication_identities (visibility, contest_starts_at DESC);
 CREATE UNIQUE INDEX accounts_one_deleted ON accounts (kind) WHERE kind = 'deleted';
 CREATE UNIQUE INDEX participant_account_links_one_confirmed ON participant_account_links (participant_profile_id) WHERE status = 'Confirmed';
+CREATE INDEX IF NOT EXISTS participant_account_links_account ON participant_account_links (account_id);
+CREATE INDEX IF NOT EXISTS participant_profiles_lower_email ON participant_profiles (lower(email));
 CREATE UNIQUE INDEX installation_activations_one_open ON installation_activations (contest_id) WHERE ended_at IS NULL;
 CREATE UNIQUE INDEX delist_requests_one_pending ON delist_requests (publication_id) WHERE state = 'pending';
 CREATE UNIQUE INDEX invitations_one_active ON invitations (contest_participation_id) WHERE state = 'Active';

@@ -82,3 +82,23 @@ class IssuedInvitation {
   @override
   String toString() => 'IssuedInvitation(${invitation.id.value})';
 }
+
+/// An invitation that opens now, looked up without being redeemed.
+class OpenedInvitation extends Equatable {
+  const OpenedInvitation({
+    required this.invitation,
+    required this.participation,
+    required this.contest,
+    required this.readOnly,
+  });
+
+  final Invitation invitation;
+  final ContestParticipation participation;
+  final Contest contest;
+
+  /// True once the contest is completed.
+  final bool readOnly;
+
+  @override
+  List<Object?> get props => [invitation, participation, contest, readOnly];
+}

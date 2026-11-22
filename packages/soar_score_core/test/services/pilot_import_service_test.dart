@@ -16,6 +16,12 @@ class _FakeProfiles implements ParticipantProfileRepository {
   };
 
   @override
+  Future<List<ParticipantProfile>> listByEmail(String email) async => [
+    for (final p in stored.values)
+      if (p.email?.toLowerCase() == email.trim().toLowerCase()) p,
+  ];
+
+  @override
   Future<List<ParticipantProfile>> listForOwner(Id accountId) async => [
     for (final p in stored.values)
       if (p.ownerAccountId == accountId) p,
