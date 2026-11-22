@@ -124,7 +124,8 @@ class ParticipantLinkService {
   /// The match is checked again now, so a stale or guessed [profileId] is
   /// `link_not_found`, the same answer as for a profile that never matched.
   /// Throws `already_linked` when another account confirmed first. Repeating
-  /// it returns the stored link.
+  /// it returns the stored link, after claiming the entries of any guest that
+  /// has opened an invitation of the profile since.
   Future<ParticipantAccountLink> confirmCandidate({
     required Id profileId,
     required Id accountId,
@@ -132,8 +133,13 @@ class ParticipantLinkService {
     final match = await _matchOf(profileId, accountId);
     final own = match.own;
     if (own != null) {
-      if (own.isConfirmed) return own;
-      throw ParticipantLinkError.linkNotFound();
+      if (!own.isConfirmed) throw ParticipantLinkError.linkNotFound();
+      // A repeat: no change to the link, but any late guest is claimed.
+      return _confirm(
+        profileId: profileId,
+        accountId: accountId,
+        origin: own.origin,
+      );
     }
     if (match.confirmedElsewhere) throw ParticipantLinkError.alreadyLinked();
     return _confirm(
@@ -320,7 +326,10 @@ class ParticipantLinkService {
               profileId: profile.id,
               firstName: profile.firstName,
               lastName: profile.lastName,
-              contests: [for (final r in reachable[profile.id]!) r.contest],
+              contests: [
+                for (final r in reachable[profile.id]!)
+                  CandidateContest.of(r.contest),
+              ],
             ),
             confirmedElsewhere: links.any(
               (l) =>
@@ -377,7 +386,15 @@ class ParticipantLinkService {
   }) async {
     final links = repository.participantAccountLinkRepository;
     final existing = await _existingConfirmed(profileId, accountId);
-    if (existing != null) return existing;
+    if (existing != null) {
+      // A repeat changes the link not at all, but a guest may have opened a
+      // later invitation of the profile since: claiming is idempotent (rows
+      // already claimed match nothing), so a Confirmed link never keeps
+      // unclaimed guest entries.
+      final guests = await _guestsOf(profileId);
+      if (guests.isEmpty) return existing;
+      return links.saveClaimingGuests(existing, guestAccountIds: guests);
+    }
 
     final earlier = await links.find(
       participantProfileId: profileId,

@@ -27,7 +27,7 @@ void _tests(Backend backend) {
   // either re-pointed or explained, so a new one cannot be forgotten.
   test('every account column is claimed or explained', () {
     final accountLike = RegExp(
-      r'(account_id|actor_id|_by$|^owner_account_id$|actor)',
+      r'(account_id|actor_id|_by$|^owner_account_id$|actor|requester|redeemed)',
     );
     final claimed = {
       for (final MapEntry(key: table, value: columns)

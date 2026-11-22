@@ -401,10 +401,11 @@ class InvitationService {
       codec.credentialFor(invitation.id, invitation.invitationRevision);
 
   /// Finds the invitation [credential] names and checks that it opens now,
-  /// without redeeming it: no guest account is made, nothing is stored.
+  /// without redeeming it: no guest account is made and nothing is stored on
+  /// success.
   ///
   /// A failure is [InvitationAccessError.invalidLink], logged and audited
-  /// exactly as [resolve] does, so an account that submits a link learns no
+  /// (the failed attempt is stored as an audit event) exactly as [resolve] does, so an account that submits a link learns no
   /// more than an anonymous visitor.
   Future<OpenedInvitation> lookup(String credential) async {
     final opened = await _open(credential);

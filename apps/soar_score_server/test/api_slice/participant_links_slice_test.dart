@@ -327,6 +327,28 @@ void _tests(SliceBackend backend) {
       );
     });
 
+    test(
+      'a repeat claims a guest that opened the link after the link',
+      () async {
+        final issued = await issue(1);
+        await links.confirmCandidate(
+          profileId: id(_profileId(1)),
+          accountId: pat,
+        );
+        final guest = await guestScores(issued.credential);
+        expect(await attemptActors(), {guest.value});
+
+        final again = await links.confirmCandidate(
+          profileId: id(_profileId(1)),
+          accountId: pat,
+        );
+
+        expect(again.accountId, pat);
+        expect(await attemptActors(), {pat.value});
+        expect(await redeemers(1), {pat.value});
+      },
+    );
+
     test('is refused for a profile that is not a match', () async {
       await issue(1);
       await expectLater(
