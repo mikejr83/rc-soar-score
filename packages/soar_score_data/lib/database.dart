@@ -10,6 +10,7 @@ import 'contests_table.dart';
 import 'migrate.dart';
 import 'sync/current_attempt_pointer.dart';
 import 'sync/table_mapper.dart' show sortableTimestamp;
+import 'schema/custom_indexes.dart';
 import 'schema/database_profile.dart';
 import 'schema/enum_values.dart';
 import 'schema/tables/audit_events_table.dart';
@@ -237,6 +238,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
         await _addAggregateId();
         await _addProfileRefreshedAt();
         await _normalizeClientTimes();
+        await _addParticipantLinkIndexes();
         // Service-only counters (unreleased version 2); IF NOT EXISTS.
         if (profileTables.contains(requestThrottles)) {
           await m.createTable(requestThrottles);
@@ -360,6 +362,24 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     await customStatement(
       'ALTER TABLE accounts ADD COLUMN profile_refreshed_at TEXT',
     );
+  }
+
+  /// Creates the indexes of the participant account links and of profile
+  /// emails (unreleased version 2, #545); IF NOT EXISTS. A table the profile
+  /// does not have is skipped.
+  Future<void> _addParticipantLinkIndexes() async {
+    final sqlite = executor.dialect == SqlDialect.sqlite;
+    for (final table in ['participant_account_links', 'participant_profiles']) {
+      final lookup = sqlite
+          ? "SELECT 1 AS x FROM sqlite_master WHERE type = 'table' AND name = '$table'"
+          : "SELECT 1 AS x FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = '$table'";
+      if ((await customSelect(lookup).get()).isEmpty) continue;
+      for (final sql in customIndexes[table] ?? const <String>[]) {
+        if (sql.startsWith('CREATE INDEX IF NOT EXISTS')) {
+          await customStatement(sql);
+        }
+      }
+    }
   }
 
   /// Rewrites `mutation_records.client_time` with a six-digit fraction, the

@@ -13,6 +13,7 @@ const guestAccountReferences = <String, List<String>>{
   'score_attempts': ['actor_id'],
   'invitations': ['redeemed_by_account_id'],
   'audit_events': ['actor_id'],
+  'review_requests': ['requester_id'],
   'mutation_records': ['actor_id'],
 };
 
