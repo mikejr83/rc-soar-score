@@ -16,6 +16,7 @@ class Accounts extends Table {
   BoolColumn get isSystemAdmin => boolean()();
   TextColumn get preferredTimeZone => text().nullable()();
   TextColumn get preferredLocale => text().nullable()();
+  TextColumn get profileRefreshedAt => text().nullable()();
   TextColumn get createdAt => text()();
   TextColumn get updatedAt => text()();
 

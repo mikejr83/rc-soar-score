@@ -235,6 +235,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
         await _addSelectionOrigin(m);
         await _addUploadOpen();
         await _addAggregateId();
+        await _addProfileRefreshedAt();
         await _normalizeClientTimes();
         // Service-only counters (unreleased version 2); IF NOT EXISTS.
         if (profileTables.contains(requestThrottles)) {
@@ -336,6 +337,28 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     if (has.isNotEmpty) return;
     await customStatement(
       'ALTER TABLE mutation_records ADD COLUMN aggregate_id TEXT',
+    );
+  }
+
+  /// Adds `accounts.profile_refreshed_at` (unreleased version 2): null for
+  /// every existing account, so the first request refreshes it. Only the
+  /// server profile has the table.
+  Future<void> _addProfileRefreshedAt() async {
+    final sqlite = executor.dialect == SqlDialect.sqlite;
+    final table = sqlite
+        ? "SELECT 1 AS x FROM sqlite_master WHERE type = 'table' AND name = 'accounts'"
+        : "SELECT 1 AS x FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'accounts'";
+    if ((await customSelect(table).get()).isEmpty) return;
+    final has = sqlite
+        ? await customSelect(
+            "SELECT 1 AS x FROM pragma_table_info('accounts') WHERE name = 'profile_refreshed_at'",
+          ).get()
+        : await customSelect(
+            "SELECT 1 AS x FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'accounts' AND column_name = 'profile_refreshed_at'",
+          ).get();
+    if (has.isNotEmpty) return;
+    await customStatement(
+      'ALTER TABLE accounts ADD COLUMN profile_refreshed_at TEXT',
     );
   }
 

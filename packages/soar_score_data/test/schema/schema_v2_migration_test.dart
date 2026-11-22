@@ -48,12 +48,34 @@ class _Version1Database extends SoarScoreDatabase {
       await m.database.customStatement(
         'ALTER TABLE mutation_records ADD COLUMN aggregate_id TEXT',
       );
+      await _accountColumn(m.database, add: true);
     },
     beforeOpen: (_) async {
       if (executor.dialect == SqlDialect.sqlite) {
         await customStatement('PRAGMA foreign_keys = ON');
       }
     },
+  );
+}
+
+/// Adds or drops `accounts.profile_refreshed_at` on a version 1 database: the
+/// test writes through the current model, which has the column, and drops it
+/// again so that the upgrade has to add it. Only the server profile has the
+/// table.
+Future<void> _accountColumn(GeneratedDatabase db, {required bool add}) async {
+  final sqlite = db.executor.dialect == SqlDialect.sqlite;
+  final table = await db
+      .customSelect(
+        sqlite
+            ? "SELECT 1 AS x FROM sqlite_master WHERE type = 'table' AND name = 'accounts'"
+            : "SELECT 1 AS x FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'accounts'",
+      )
+      .get();
+  if (table.isEmpty) return;
+  await db.customStatement(
+    add
+        ? 'ALTER TABLE accounts ADD COLUMN profile_refreshed_at TEXT'
+        : 'ALTER TABLE accounts DROP COLUMN profile_refreshed_at',
   );
 }
 
@@ -238,6 +260,7 @@ void main() => forEachBackend((backend) {
             await old.customStatement(
               'ALTER TABLE mutation_records DROP COLUMN aggregate_id',
             );
+            await _accountColumn(old, add: false);
             await old.customStatement(
               'CREATE TABLE pilot_import_links (unexpected TEXT)',
             );
@@ -266,6 +289,7 @@ void main() => forEachBackend((backend) {
             await stillOld.customStatement(
               'ALTER TABLE mutation_records ADD COLUMN aggregate_id TEXT',
             );
+            await _accountColumn(stillOld, add: true);
             expect(
               (await Repository(stillOld).participantProfileRepository
                       .findById(participantId))
@@ -315,6 +339,7 @@ void main() => forEachBackend((backend) {
             await stillOld.customStatement(
               'ALTER TABLE mutation_records DROP COLUMN aggregate_id',
             );
+            await _accountColumn(stillOld, add: false);
             await stillOld.close();
             openDatabase = null;
 

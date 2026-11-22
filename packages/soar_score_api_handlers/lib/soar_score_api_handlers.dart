@@ -6,6 +6,7 @@
 library;
 
 export 'auth/account_principal_resolver.dart';
+export 'auth/account_profile_refresher.dart';
 export 'auth/bearer_auth.dart';
 export 'auth/guest_session_auth.dart';
 export 'auth/guest_session_cookie.dart';
