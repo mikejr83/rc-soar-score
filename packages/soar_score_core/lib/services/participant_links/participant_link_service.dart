@@ -64,7 +64,8 @@ class ParticipantLinkService {
   /// syncs later), so it need not exist. When it does, it must belong to
   /// [directorAccountId] (`profile_not_owned` otherwise). Throws
   /// `already_linked` when another account holds the profile, and
-  /// `link_not_found` when [accountId] is not an active registered account.
+  /// `link_not_found` when [accountId] is not an active registered account
+  /// with a listed directory entry.
   /// Repeating it returns the same link.
   Future<ParticipantAccountLink> linkFromDirectory({
     required Id profileId,
@@ -72,6 +73,13 @@ class ParticipantLinkService {
     required Id directorAccountId,
   }) async {
     await _requireLinkable(accountId);
+    // Listing in the directory is the pilot's consent; an unlisted pilot is
+    // refused with the same answer as an unknown one.
+    final entry = await repository.participantDirectoryEntryRepository
+        .findForAccount(accountId);
+    if (entry == null || !entry.isListed) {
+      throw ParticipantLinkError.linkNotFound();
+    }
     final profile = await repository.participantProfileRepository.findById(
       profileId,
     );
