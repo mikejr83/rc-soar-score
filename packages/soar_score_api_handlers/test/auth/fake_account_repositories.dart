@@ -25,7 +25,77 @@ class FakeAccountRepository implements AccountRepository {
     }
     return byId[account.id.value] = account;
   }
+
+  /// Called inside [claimProfileRefresh] before the compare, to simulate a
+  /// concurrent request.
+  void Function()? beforeClaim;
+
+  @override
+  Future<bool> claimProfileRefresh(
+    Id id, {
+    required DateTime? expected,
+    required DateTime at,
+  }) async {
+    beforeClaim?.call();
+    final account = byId[id.value];
+    if (account == null || account.profileRefreshedAt != expected) return false;
+    byId[id.value] = _with(account, profileRefreshedAt: at);
+    return true;
+  }
+
+  @override
+  Future<bool> applyProfile(
+    Id id, {
+    required String firstName,
+    required String lastName,
+    required String? email,
+    required bool emailVerified,
+    required DateTime now,
+  }) async {
+    final account = byId[id.value];
+    if (account == null) return false;
+    if (email != null &&
+        byId.values.any((a) => a.id != id && a.email == email)) {
+      throw StateError('duplicate email');
+    }
+    byId[id.value] = _with(
+      account,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      emailVerified: emailVerified,
+      updatedAt: now,
+    );
+    return true;
+  }
+
+  Account _with(
+    Account a, {
+    String? firstName,
+    String? lastName,
+    Object? email = _keep,
+    bool? emailVerified,
+    DateTime? profileRefreshedAt,
+    DateTime? updatedAt,
+  }) => Account(
+    id: a.id,
+    firstName: firstName ?? a.firstName,
+    lastName: lastName ?? a.lastName,
+    email: identical(email, _keep) ? a.email : email as String?,
+    emailVerified: emailVerified ?? a.emailVerified,
+    kind: a.kind,
+    status: a.status,
+    archivedAt: a.archivedAt,
+    isSystemAdmin: a.isSystemAdmin,
+    preferredTimeZone: a.preferredTimeZone,
+    preferredLocale: a.preferredLocale,
+    profileRefreshedAt: profileRefreshedAt ?? a.profileRefreshedAt,
+    createdAt: a.createdAt,
+    updatedAt: updatedAt ?? a.updatedAt,
+  );
 }
+
+const Object _keep = Object();
 
 /// In-memory [AccountIdentityRepository] for auth tests.
 class FakeAccountIdentityRepository implements AccountIdentityRepository {

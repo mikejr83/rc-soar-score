@@ -16,6 +16,23 @@ class StubAccountRepository implements core.AccountRepository {
   @override
   Future<core.Account> save(core.Account account) async =>
       byId[account.id.value] = account;
+
+  @override
+  Future<bool> claimProfileRefresh(
+    core.Id id, {
+    required DateTime? expected,
+    required DateTime at,
+  }) async => false;
+
+  @override
+  Future<bool> applyProfile(
+    core.Id id, {
+    required String firstName,
+    required String lastName,
+    required String? email,
+    required bool emailVerified,
+    required DateTime now,
+  }) async => false;
 }
 
 /// In-memory account aliases for tests; like the real repository, the first
