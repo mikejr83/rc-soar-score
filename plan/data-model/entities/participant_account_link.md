@@ -32,6 +32,9 @@
 - A link created from a verified email match starts as `Candidate` and becomes `Confirmed` only when the participant confirms it. A `DirectoryPull` link is `Confirmed` on creation, because listing in the directory is the participant's consent. An `InvitationRedemption` link is `Confirmed` on creation, because the director's invitation identifies the person
 - An email match uses a verified account email only. A director never learns from a `Candidate` that the person has an account
 - Linking never copies account data into the profile, and never merges or rewrites the profile or any contest participation
+- Confirming a link and claiming the entries of the profile's guest accounts (score attempts, the invitations they opened, their audit events and mutation records) is one transaction: there is never a Confirmed link with unclaimed guest entries, or claimed entries without the link. The guest account rows are kept
+- Ending a link hands the invitations the account holds back to the guest accounts they came from (to nobody when no guest ever held them), in one transaction. The account's score attempts stay attributed to it. Nothing published changes
+- Re-linking an `Ended` pair re-opens the same row. A candidate the participant declined (`Ended`, never confirmed) or a link they ended is not offered as a candidate again
 
 ## Lifecycle
 

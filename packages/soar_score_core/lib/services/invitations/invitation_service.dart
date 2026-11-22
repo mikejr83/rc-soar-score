@@ -400,13 +400,36 @@ class InvitationService {
   String credentialOf(Invitation invitation) =>
       codec.credentialFor(invitation.id, invitation.invitationRevision);
 
-  /// Opens [credential]: finds the one invitation, contest and participation
-  /// it names, creates the participation's guest account on first use, and
-  /// returns the session to keep.
+  /// Finds the invitation [credential] names and checks that it opens now,
+  /// without redeeming it: no guest account is made, nothing is stored.
   ///
-  /// Throws [InvitationAccessError.invalidLink] for a link that is unknown,
-  /// replaced, revoked or expired, always the same way.
-  Future<InvitationResolution> resolve(String credential) async {
+  /// A failure is [InvitationAccessError.invalidLink], logged and audited
+  /// exactly as [resolve] does, so an account that submits a link learns no
+  /// more than an anonymous visitor.
+  Future<OpenedInvitation> lookup(String credential) async {
+    final opened = await _open(credential);
+    return OpenedInvitation(
+      invitation: opened.invitation,
+      participation: opened.checked.participation,
+      contest: opened.checked.contest,
+      readOnly: opened.checked.readOnly,
+    );
+  }
+
+  Future<
+    ({
+      Invitation invitation,
+      DateTime now,
+      ({
+        ContestParticipation participation,
+        Contest contest,
+        bool readOnly,
+        DateTime? expiry,
+      })
+      checked,
+    })
+  >
+  _open(String credential) async {
     final id = codec.idOf(credential);
     final stored = id == null
         ? null
@@ -429,6 +452,20 @@ class InvitationService {
       );
       throw InvitationAccessError.invalidLink();
     }
+    return (invitation: stored, now: now, checked: checked);
+  }
+
+  /// Opens [credential]: finds the one invitation, contest and participation
+  /// it names, creates the participation's guest account on first use, and
+  /// returns the session to keep.
+  ///
+  /// Throws [InvitationAccessError.invalidLink] for a link that is unknown,
+  /// replaced, revoked or expired, always the same way.
+  Future<InvitationResolution> resolve(String credential) async {
+    final opened = await _open(credential);
+    final stored = opened.invitation;
+    final checked = opened.checked;
+    final now = opened.now;
 
     var invitation = stored;
     final guestId =
@@ -575,12 +612,46 @@ class InvitationService {
     })?
   >
   _check(Invitation invitation, DateTime now) async {
-    if (invitation.state != InvitationState.active) return null;
-    if (invitation.audience != InvitationAudience.pilot) return null;
+    // Cheap refusals first, so no read is made for an invitation that cannot
+    // authorize.
+    if (invitation.state != InvitationState.active ||
+        invitation.audience != InvitationAudience.pilot) {
+      return null;
+    }
     final contest = await repository.contestRepository.findById(
       invitation.contestId,
     );
-    if (contest == null || contest.lifecycleState == LifecycleState.created) {
+    final participation = await repository.contestParticipationRepository
+        .findById(invitation.contestParticipationId);
+    if (contest == null || participation == null) return null;
+    final opens = opening(invitation, contest, participation, now);
+    if (opens == null) return null;
+    return (
+      participation: participation,
+      contest: contest,
+      readOnly: opens.readOnly,
+      expiry: opens.expiry,
+    );
+  }
+
+  /// Whether [invitation] authorizes access at [now] for [contest] and
+  /// [participation], the rows it names: the one rule behind every check, so
+  /// a list of many invitations can apply it to rows read in bulk.
+  ///
+  /// Returns null when it does not authorize. An active, pilot-audience
+  /// invitation opens while its contest is past Created, until the invitation
+  /// expires or [completedGrace] after the contest completed; `readOnly` is
+  /// true once the contest is completed.
+  static ({bool readOnly, DateTime? expiry})? opening(
+    Invitation invitation,
+    Contest contest,
+    ContestParticipation participation,
+    DateTime now,
+  ) {
+    if (invitation.state != InvitationState.active) return null;
+    if (invitation.audience != InvitationAudience.pilot) return null;
+    if (contest.id != invitation.contestId ||
+        contest.lifecycleState == LifecycleState.created) {
       return null;
     }
     final completed = contest.lifecycleState == LifecycleState.completed;
@@ -590,19 +661,12 @@ class InvitationService {
         invitation.expiresAt ??
         (completed ? contest.updatedAt.add(completedGrace) : null);
     if (expiry != null && !now.isBefore(expiry)) return null;
-    final participation = await repository.contestParticipationRepository
-        .findById(invitation.contestParticipationId);
-    if (participation == null ||
+    if (participation.id != invitation.contestParticipationId ||
         participation.contestId != invitation.contestId ||
         participation.roleType != RoleType.pilot) {
       return null;
     }
-    return (
-      participation: participation,
-      contest: contest,
-      readOnly: completed,
-      expiry: expiry,
-    );
+    return (readOnly: completed, expiry: expiry);
   }
 
   /// The guest account of [invitationId], made if it is not there yet.

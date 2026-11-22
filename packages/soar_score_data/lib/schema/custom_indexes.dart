@@ -17,6 +17,19 @@ const customIndexes = <String, List<String>>{
     'CREATE UNIQUE INDEX participant_account_links_one_confirmed ON '
         'participant_account_links (participant_profile_id) '
         "WHERE status = 'Confirmed'",
+    // "Which profiles is this account linked to", on every list read of the
+    // pilot's contests. (profile, account) is unique, which serves the other
+    // direction, but not this one.
+    'CREATE INDEX IF NOT EXISTS participant_account_links_account ON '
+        'participant_account_links (account_id)',
+  ],
+  'participant_profiles': [
+    // "Is this you?" looks a verified account email up across every
+    // director's profiles, ignoring case. Profile emails are stored as typed
+    // on some paths (an import, an older client), so the index is on the
+    // lowercase value, and so is the lookup.
+    'CREATE INDEX IF NOT EXISTS participant_profiles_lower_email ON '
+        'participant_profiles (lower(email))',
   ],
   'installation_activations': [
     // The first release has one administrator installation per contest.

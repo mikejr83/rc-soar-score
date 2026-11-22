@@ -35,3 +35,7 @@ Thin executable that wires dependencies, starts the shelf_io server, and exposes
 ## Guest sessions
 
 `/api/v1/self-scoring/*` is mounted before `/api/v1`, so it skips the Auth0 layer and answers to its own guest session (`guestSessionAuth`, a `ParticipantPrincipal`). `INVITATION_SECRET` turns it on; without it the routes answer 409 `invitations_not_available`. The director's side is `GET`/`POST /api/v1/contests/{id}/invitations` (`invitation_handlers.dart`): list the active links, issue for the listed pilots, never email (#790); links are built from `SELF_SCORING_BASE_URL`. Opening a link is throttled per caller address by `InvitationThrottle`, with counters in the `request_throttles` table (shared by every machine); `TRUSTED_PROXY_SECRET` lets the site's `/api` proxy name the visitor (docs/deploy-api-fly.md, "Throttling invitation links"). The slice test `test/api_slice/invitations_slice_test.dart` runs it on SQLite and PostgreSQL.
+
+## Account links
+
+`ParticipantLinkService` (core) links a pilot's account to a director's participant profile: from the directory, from an invitation, or by a confirmed email match. Confirming a link claims the entries of the profile's guest accounts in one transaction; ending one hands the invitations back to their guests. The account routes that call it come later (#545 B and C); `test/api_slice/participant_links_slice_test.dart` runs it on SQLite and PostgreSQL. A column that a guest can write must be listed in `guestAccountReferences` (`soar_score_data`), or a test fails.
