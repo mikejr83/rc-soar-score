@@ -23,6 +23,10 @@ Account _$AccountFromJson(Map<String, dynamic> json) => Account(
   isSystemAdmin: json['is_system_admin'] as bool? ?? false,
   preferredTimeZone: json['preferred_time_zone'] as String?,
   preferredLocale: json['preferred_locale'] as String?,
+  profileRefreshedAt: _$JsonConverterFromJson<String, DateTime>(
+    json['profile_refreshed_at'],
+    const UtcTimestampConverter().fromJson,
+  ),
   createdAt: const UtcTimestampConverter().fromJson(
     json['created_at'] as String,
   ),
@@ -46,6 +50,10 @@ Map<String, dynamic> _$AccountToJson(Account instance) => <String, dynamic>{
   'is_system_admin': instance.isSystemAdmin,
   'preferred_time_zone': instance.preferredTimeZone,
   'preferred_locale': instance.preferredLocale,
+  'profile_refreshed_at': _$JsonConverterToJson<String, DateTime>(
+    instance.profileRefreshedAt,
+    const UtcTimestampConverter().toJson,
+  ),
   'created_at': const UtcTimestampConverter().toJson(instance.createdAt),
   'updated_at': const UtcTimestampConverter().toJson(instance.updatedAt),
 };

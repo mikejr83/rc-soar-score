@@ -1,7 +1,9 @@
 import 'package:logging/logging.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import 'account_profile_refresher.dart';
 import 'principal.dart';
+import 'profile_names.dart';
 import 'token_verifier.dart';
 import 'user_profile.dart';
 
@@ -12,19 +14,30 @@ final _logger = Logger('AccountPrincipalResolver');
 /// A returning identity maps to its account. A new identity gets a registered
 /// account on its first request, filled in from the identity provider's
 /// profile ([profiles]). Contest ownership then hangs off the account, never
-/// off the issuer and subject.
+/// off the issuer and subject. A returning account's name, email and verified
+/// flag are refreshed from the same profile when due
+/// ([AccountProfileRefresher]).
 class AccountPrincipalResolver {
   AccountPrincipalResolver({
     required this.accounts,
     required this.identities,
     required this.profiles,
     DateTime Function()? now,
-  }) : _now = now ?? DateTime.now;
+    AccountProfileRefresher? refresher,
+  }) : _now = now ?? DateTime.now,
+       _refresher =
+           refresher ??
+           AccountProfileRefresher(
+             accounts: accounts,
+             profiles: profiles,
+             now: now,
+           );
 
   final AccountRepository accounts;
   final AccountIdentityRepository identities;
   final UserProfileSource profiles;
   final DateTime Function() _now;
+  final AccountProfileRefresher _refresher;
 
   /// The principal for [token], which [accessToken] was verified into.
   ///
@@ -45,6 +58,9 @@ class AccountPrincipalResolver {
         'This account cannot sign in.',
       );
     }
+    // After the first request the profile is refreshed when due; a refresh
+    // never fails the request.
+    await _refresher.refresh(account, accessToken);
     return Principal(accountId: account.id);
   }
 
@@ -62,13 +78,14 @@ class AccountPrincipalResolver {
         (email.isEmpty || await accounts.findByEmail(email) != null)) {
       email = null;
     }
-    final names = _names(profile, email);
+    final names = newAccountNames(profile, email);
     final account = Account(
       id: Id.create(),
       firstName: names.$1,
       lastName: names.$2,
       email: email,
       emailVerified: email != null && profile.emailVerified,
+      profileRefreshedAt: now,
       kind: AccountKind.registered,
       createdAt: now,
       updatedAt: now,
@@ -95,28 +112,5 @@ class AccountPrincipalResolver {
       if (existing != null) return existing;
       rethrow;
     }
-  }
-
-  /// First and last name for a new account, which need both to be non-blank.
-  (String, String) _names(UserProfile profile, String? email) {
-    String? clean(String? value) {
-      final trimmed = value?.trim();
-      return trimmed == null || trimmed.isEmpty ? null : trimmed;
-    }
-
-    final given = clean(profile.givenName);
-    final family = clean(profile.familyName);
-    if (given != null && family != null) return (given, family);
-
-    final full = clean(profile.name);
-    if (full != null && full != email) {
-      final parts = full.split(RegExp(r'\s+'));
-      if (parts.length > 1) {
-        return (given ?? parts.first, family ?? parts.skip(1).join(' '));
-      }
-      return (given ?? full, family ?? 'Unknown');
-    }
-    final local = email?.split('@').first;
-    return (given ?? clean(local) ?? 'New user', family ?? 'Unknown');
   }
 }

@@ -75,6 +75,55 @@ void main() {
     },
   );
 
+  test('refreshes an unverified account after ten minutes', () async {
+    var clock = DateTime.utc(2026, 11, 1, 12);
+    resolver = AccountPrincipalResolver(
+      accounts: accounts,
+      identities: identities,
+      profiles: profiles,
+      now: () => clock,
+    );
+    profiles.profile = const UserProfile(
+      givenName: 'Ada',
+      familyName: 'Lovelace',
+      email: 'ada@example.com',
+    );
+    await resolver.resolve(token, 'jwt');
+    profiles.profile = const UserProfile(
+      givenName: 'Ada',
+      familyName: 'Lovelace',
+      email: 'ada@example.com',
+      emailVerified: true,
+    );
+
+    clock = clock.add(const Duration(minutes: 5));
+    await resolver.resolve(token, 'jwt');
+    expect(accounts.byId.values.single.emailVerified, isFalse);
+    expect(profiles.fetches, 1);
+
+    clock = clock.add(const Duration(minutes: 6));
+    await resolver.resolve(token, 'jwt');
+    expect(accounts.byId.values.single.emailVerified, isTrue);
+    expect(profiles.fetches, 2);
+  });
+
+  test('a refresh outage does not fail the request', () async {
+    var clock = DateTime.utc(2026, 11, 1, 12);
+    resolver = AccountPrincipalResolver(
+      accounts: accounts,
+      identities: identities,
+      profiles: profiles,
+      now: () => clock,
+    );
+    final first = await resolver.resolve(token, 'jwt');
+    profiles.profile = null;
+    clock = clock.add(const Duration(days: 2));
+
+    final second = await resolver.resolve(token, 'jwt');
+
+    expect(second.accountId, first.accountId);
+  });
+
   test('the same subject at another issuer is another account', () async {
     final first = await resolver.resolve(token, 'jwt');
     final second = await resolver.resolve(
