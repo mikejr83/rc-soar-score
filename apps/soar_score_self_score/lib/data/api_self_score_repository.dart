@@ -91,11 +91,26 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   }
 
   @override
-  Future<GuestSession> acceptInvitation(String credential) async {
+  Future<GuestSession> acceptInvitation(String credential) => _openInvitation(
+    () => _client.resolveInvitation(
+      ResolveInvitationRequest(credential: credential),
+    ),
+  );
+
+  @override
+  Future<GuestSession> claimInvitation(String credential) => _openInvitation(
+    () => _client.claimInvitation(
+      ResolveInvitationRequest(credential: credential),
+    ),
+    claim: true,
+  );
+
+  Future<GuestSession> _openInvitation(
+    Future<ResolveInvitationResponse> Function() open, {
+    bool claim = false,
+  }) async {
     try {
-      final answer = await _client.resolveInvitation(
-        ResolveInvitationRequest(credential: credential),
-      );
+      final answer = await open();
       return GuestSession(
         contestId: answer.contest.contestId.value,
         contestName: answer.contest.name,
@@ -107,6 +122,11 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
         expiresAt: answer.sessionExpiresAt,
       );
     } on ApiHttpError catch (error) {
+      // Another account already holds this pilot: the pilot can still
+      // continue as a guest.
+      if (claim && error.statusCode == 409) {
+        throw const PilotAlreadyLinkedException();
+      }
       // Every way the server says no to a link reads the same, whatever
       // the body: the bare error, the envelope, or nothing at all.
       if (_codeOf(error) == ParticipantErrorCodes.invalidInvitation ||

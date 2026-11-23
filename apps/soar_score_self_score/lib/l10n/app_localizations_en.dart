@@ -72,6 +72,35 @@ class AppLocalizationsEn extends AppLocalizations {
       'Accounts are coming soon. For now, continue as a guest.';
 
   @override
+  String invitationClaimBody(String contest) {
+    return 'You are scoring for $contest. Continue with your account to keep this pilot\'s scores with it, including any you entered as a guest.';
+  }
+
+  @override
+  String continueAsName(String name) {
+    return 'Continue as $name';
+  }
+
+  @override
+  String get continueAsAccount => 'Continue with my account';
+
+  @override
+  String get invitationKeepScores =>
+      'Sign in or create an account to keep your scores with it. Scores you enter as a guest come along.';
+
+  @override
+  String get claimAlreadyLinked =>
+      'This pilot is already linked to another account. You can continue as a guest.';
+
+  @override
+  String get claimInvalid =>
+      'This link no longer works. Ask the contest director for a new one.';
+
+  @override
+  String get claimFailed =>
+      'Could not continue with your account. Check your network connection and try again, or continue as a guest.';
+
+  @override
   String get invalidLinkTitle => 'This link does not work';
 
   @override

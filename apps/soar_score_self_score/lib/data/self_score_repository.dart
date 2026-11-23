@@ -40,6 +40,15 @@ class InvalidInvitationException implements Exception {
   String toString() => 'The invitation link is not valid.';
 }
 
+/// A signed-in pilot tried to claim an invitation for a pilot that another
+/// account already holds. The link still works as a guest.
+class PilotAlreadyLinkedException implements Exception {
+  const PilotAlreadyLinkedException();
+
+  @override
+  String toString() => 'The pilot is already linked to another account.';
+}
+
 /// Everything the self-scoring pages read. Pages depend on this and not on
 /// the API client, so the API-backed version can replace the sample one
 /// without touching a page. Each method throws [SelfScoreLoadException] when
@@ -49,6 +58,13 @@ abstract interface class SelfScoreRepository {
   /// Throws [InvalidInvitationException] when the link does not work, and
   /// [SelfScoreLoadException] when the server could not be reached.
   Future<GuestSession> acceptInvitation(String credential);
+
+  /// The signed-in pilot opens the invitation link as themselves: the account
+  /// is linked to the pilot the link is for, the entries made as a guest are
+  /// kept under the account, and the session returned acts as the account.
+  /// Throws [InvalidInvitationException] for a link that does not open and
+  /// [PilotAlreadyLinkedException] when another account holds the pilot.
+  Future<GuestSession> claimInvitation(String credential);
 
   /// Sends a score. Resolves with what the server decided; a refusal is a
   /// [ScoreRejected] result, not an exception. Throws

@@ -21,7 +21,7 @@ class E2eAuthSession extends AuthSession {
   Future<void> restore() async {}
 
   @override
-  Future<void> signIn({bool createAccount = false}) async {
+  Future<void> signIn({bool createAccount = false, String? returnTo}) async {
     _signedIn = true;
     notifyListeners();
   }

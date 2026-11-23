@@ -37,8 +37,16 @@ abstract class AuthSession extends ChangeNotifier {
   /// login page opens on its sign-up tab. On the web this leaves the page, and
   /// [restore] completes the session after the redirect back.
   ///
+  /// With [returnTo], an address inside the app, [takeReturnTo] hands it back
+  /// after the redirect so the pilot lands where they were (an invitation
+  /// link, say).
+  ///
   /// Throws [AuthException] when sign-in cannot be started.
-  Future<void> signIn({bool createAccount = false});
+  Future<void> signIn({bool createAccount = false, String? returnTo});
+
+  /// The address passed to [signIn] as `returnTo`, once, after a sign-in
+  /// redirect completed; null otherwise. It is always a path inside the app.
+  String? takeReturnTo() => null;
 
   /// Ends the session here and at Auth0.
   Future<void> signOut();
@@ -63,7 +71,7 @@ class UnavailableAuthSession extends AuthSession {
   Future<void> restore() async {}
 
   @override
-  Future<void> signIn({bool createAccount = false}) async =>
+  Future<void> signIn({bool createAccount = false, String? returnTo}) async =>
       throw const AuthException('Signing in is not available.');
 
   @override

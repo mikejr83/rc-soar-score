@@ -70,6 +70,9 @@ http.Response _fixtures(http.Request request) => switch (request.url.path) {
   '/api/v1/self-scoring/invitations/resolve' => _json(
     _fixture('resolve_invitation_response'),
   ),
+  '/api/v1/account/invitation-claims' => _json(
+    _fixture('resolve_invitation_response'),
+  ),
   _ => _json('{}', 404),
 };
 
@@ -218,6 +221,32 @@ void main() {
     expect(session.pilotId, '0192f6a0-0000-7000-8000-000000000002');
     expect(session.role, 'pilot');
     expect(session.expiresAt, DateTime.utc(2026, 11, 8, 23));
+  });
+
+  test('claiming a link gives the session the account acts in', () async {
+    final session = await _repository(_fixtures).claimInvitation('abc');
+    expect(session.pilotName, 'Alex Rivera');
+    expect(session.pilotId, '0192f6a0-0000-7000-8000-000000000002');
+  });
+
+  test('claiming a pilot another account holds says so', () {
+    final repository = _repository(
+      (_) => _json('{"error":{"code":"already_linked"}}', 409),
+    );
+    expect(
+      repository.claimInvitation('abc'),
+      throwsA(isA<PilotAlreadyLinkedException>()),
+    );
+  });
+
+  test('claiming a bad link is the invalid-link failure', () {
+    final repository = _repository(
+      (_) => _json(_fixture('error_invalid_invitation'), 404),
+    );
+    expect(
+      repository.claimInvitation('nope'),
+      throwsA(isA<InvalidInvitationException>()),
+    );
   });
 
   test('a cookie session keeps no token in the stored session', () async {

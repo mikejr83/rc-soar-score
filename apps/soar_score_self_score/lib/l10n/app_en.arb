@@ -82,6 +82,44 @@
   "@accountsComingSoon": {
     "description": "Shown under the Sign in and Create account buttons while they are not connected."
   },
+  "invitationClaimBody": "You are scoring for {contest}. Continue with your account to keep this pilot's scores with it, including any you entered as a guest.",
+  "@invitationClaimBody": {
+    "description": "Explains the invitation page to a signed-in pilot. Placeholder is the contest name.",
+    "placeholders": {
+      "contest": {
+        "type": "String"
+      }
+    }
+  },
+  "continueAsName": "Continue as {name}",
+  "@continueAsName": {
+    "description": "Primary button on the invitation page when the pilot is signed in. Placeholder is the account's name or email.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "continueAsAccount": "Continue with my account",
+  "@continueAsAccount": {
+    "description": "Primary button on the invitation page when the pilot is signed in and the account has no name to show."
+  },
+  "invitationKeepScores": "Sign in or create an account to keep your scores with it. Scores you enter as a guest come along.",
+  "@invitationKeepScores": {
+    "description": "Hint under the Sign in and Create account buttons on the invitation page."
+  },
+  "claimAlreadyLinked": "This pilot is already linked to another account. You can continue as a guest.",
+  "@claimAlreadyLinked": {
+    "description": "Shown when a signed-in pilot opens an invitation link for a pilot that another account holds."
+  },
+  "claimInvalid": "This link no longer works. Ask the contest director for a new one.",
+  "@claimInvalid": {
+    "description": "Shown when the invitation link stopped working while the pilot was signing in."
+  },
+  "claimFailed": "Could not continue with your account. Check your network connection and try again, or continue as a guest.",
+  "@claimFailed": {
+    "description": "Shown when the invitation could not be claimed for the signed-in pilot."
+  },
   "invalidLinkTitle": "This link does not work",
   "@invalidLinkTitle": {
     "description": "Heading when an invitation link is unknown, expired or replaced."

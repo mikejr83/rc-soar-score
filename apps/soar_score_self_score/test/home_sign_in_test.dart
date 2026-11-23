@@ -14,10 +14,10 @@ class _FakeAuth extends E2eAuthSession {
   bool failNext = false;
 
   @override
-  Future<void> signIn({bool createAccount = false}) async {
+  Future<void> signIn({bool createAccount = false, String? returnTo}) async {
     calls.add(createAccount ? 'sign-up' : 'sign-in');
     if (failNext) throw const AuthException('no');
-    await super.signIn(createAccount: createAccount);
+    await super.signIn(createAccount: createAccount, returnTo: returnTo);
   }
 }
 

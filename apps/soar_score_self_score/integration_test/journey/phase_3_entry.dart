@@ -161,5 +161,44 @@ Future<void> phase3Entry(
       expect(back.controller!.text, stored);
       expect(back.enabled, isFalse);
     });
+    await journey.step(
+      'A guest who signs in keeps their entries with the account',
+      () async {
+        final pilot = contest.pilotNames.first;
+        // The same link, now with the option to sign in from it.
+        await openPath(tester, invitationPath(contest.credentialOf(pilot)));
+        await pumpUntilFound(tester, find.text('Hello, $pilot'));
+        await tapVisible(
+          tester,
+          find.widgetWithText(OutlinedButton, 'Sign in'),
+        );
+        // Signed in, the link asks to continue as the account.
+        await pumpUntilFound(tester, find.text('Continue as Penny Pilot'));
+        expect(find.text('Continue as guest'), findsOneWidget);
+        await tapVisible(tester, find.text('Continue as Penny Pilot'));
+        // The pilot overview acts as the account and still shows round 1.
+        await pumpUntilFound(tester, find.text('2 rounds'));
+        expect(find.text('Submitted'), findsOneWidget);
+        expect(find.text('Next to score'), findsOneWidget);
+        final uri = router.routeInformationProvider.value.uri;
+        expect(uri.toString(), isNot(contains('invitations')));
+        expect(uri.pathSegments, contains(pilotId));
+      },
+    );
+    await journey.step(
+      'Signing out leaves the pilot\'s session alone',
+      () async {
+        await openPath(tester, '/');
+        await pumpUntilFound(tester, find.text('Signed in as Penny Pilot'));
+        await tapVisible(
+          tester,
+          find.widgetWithText(OutlinedButton, 'Sign out'),
+        );
+        await pumpUntilFound(
+          tester,
+          find.widgetWithText(FilledButton, 'Sign in'),
+        );
+      },
+    );
   });
 }

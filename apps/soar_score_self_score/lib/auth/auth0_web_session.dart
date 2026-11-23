@@ -21,6 +21,7 @@ class Auth0WebSession extends AuthSession {
   final String _origin;
   final Auth0Web _auth0;
   UserProfile? _user;
+  String? _returnTo;
 
   /// Where Auth0 returns to after sign-in and sign-out: the app's root, which
   /// must be in the Auth0 application's callback, logout and web-origin lists.
@@ -42,6 +43,7 @@ class Auth0WebSession extends AuthSession {
         cacheLocation: CacheLocation.localStorage,
       );
       _user = credentials?.user;
+      if (credentials != null) _returnTo = _returnToOf(await _auth0.appState);
     } on Object catch (error, stackTrace) {
       // A failed restore (an expired callback, say) is not fatal: the pilot
       // lands on the landing page signed out.
@@ -52,9 +54,28 @@ class Auth0WebSession extends AuthSession {
   }
 
   @override
-  Future<void> signIn({bool createAccount = false}) async {
+  String? takeReturnTo() {
+    final path = _returnTo;
+    _returnTo = null;
+    return path;
+  }
+
+  /// The `returnTo` of the state a sign-in carried, only when it is a path
+  /// inside the app: Auth0 hands the state back unchanged, but nothing outside
+  /// the app is ever followed.
+  static String? _returnToOf(Object? appState) {
+    if (appState is! Map) return null;
+    final path = appState['returnTo'];
+    return path is String && path.startsWith('/') && !path.startsWith('//')
+        ? path
+        : null;
+  }
+
+  @override
+  Future<void> signIn({bool createAccount = false, String? returnTo}) async {
     try {
       await _auth0.loginWithRedirect(
+        appState: returnTo == null ? null : {'returnTo': returnTo},
         audience: _config.audience,
         redirectUrl: _redirectUrl,
         scopes: Auth0Config.scopes,

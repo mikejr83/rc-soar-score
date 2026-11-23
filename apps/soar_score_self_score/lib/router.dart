@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import 'auth/auth_scope.dart';
 import 'pages/app_info_page.dart';
 import 'pages/contests_page.dart';
 import 'pages/group_results_page.dart';
@@ -38,7 +39,13 @@ String groupResultsPath(String contestId, String pilotId, String roundId) =>
 
 final router = GoRouter(
   routes: [
-    GoRoute(path: homePath, builder: (context, state) => const HomePage()),
+    GoRoute(
+      path: homePath,
+      // Signing in leaves the app and returns to the root; a pilot who
+      // started on an invitation link goes back to it, once.
+      redirect: (context, state) => context.auth.takeReturnTo(),
+      builder: (context, state) => const HomePage(),
+    ),
     GoRoute(
       path: appInfoPath,
       builder: (context, state) => const AppInfoPage(),
