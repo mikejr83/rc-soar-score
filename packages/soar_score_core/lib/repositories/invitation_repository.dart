@@ -26,6 +26,13 @@ abstract interface class InvitationRepository {
   /// Every invitation of [contestParticipationId], oldest revision first.
   Future<List<Invitation>> listForParticipation(Id contestParticipationId);
 
+  /// Every invitation of any of [contestParticipationIds], oldest revision
+  /// first within a participation, in one bulk lookup (long lists may take a
+  /// few reads).
+  Future<List<Invitation>> listForParticipations(
+    Iterable<Id> contestParticipationIds,
+  );
+
   /// The active invitation of [contestParticipationId], or `null`.
   Future<Invitation?> findActiveForParticipation(Id contestParticipationId);
 

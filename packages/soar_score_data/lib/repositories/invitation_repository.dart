@@ -49,6 +49,22 @@ class InvitationRepository extends DriftRepository
   );
 
   @override
+  Future<List<core.Invitation>> listForParticipations(
+    Iterable<core.Id> contestParticipationIds,
+  ) async =>
+      (await _store.whereIdIn(
+        'contest_participation_id',
+        contestParticipationIds,
+      ))..sort((a, b) {
+        final byParticipation = a.contestParticipationId.value.compareTo(
+          b.contestParticipationId.value,
+        );
+        return byParticipation != 0
+            ? byParticipation
+            : a.invitationRevision.compareTo(b.invitationRevision);
+      });
+
+  @override
   Future<core.Invitation?> findActiveForParticipation(
     core.Id contestParticipationId,
   ) async {

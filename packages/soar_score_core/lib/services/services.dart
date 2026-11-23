@@ -93,3 +93,5 @@ export 'glider_score_score_mapping.dart';
 export 'invitations/invitation_codec.dart';
 export 'invitations/invitation_service.dart';
 export 'invitations/participant_access.dart';
+export 'participant_links/linked_participation.dart';
+export 'participant_links/participant_link_service.dart';

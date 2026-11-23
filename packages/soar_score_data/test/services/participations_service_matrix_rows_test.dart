@@ -453,6 +453,11 @@ class _Hooked implements core.ContestParticipationRepository {
       _inner.listForProfile(id);
 
   @override
+  Future<List<core.ContestParticipation>> listForProfiles(
+    Iterable<core.Id> ids,
+  ) => _inner.listForProfiles(ids);
+
+  @override
   Future<List<core.ContestParticipation>> listForRole(core.Id roleId) =>
       _inner.listForRole(roleId);
 

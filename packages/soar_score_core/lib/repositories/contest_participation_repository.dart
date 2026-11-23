@@ -13,6 +13,12 @@ abstract interface class ContestParticipationRepository {
   /// Every participation of the profile [participantProfileId].
   Future<List<ContestParticipation>> listForProfile(Id participantProfileId);
 
+  /// Every participation of any of [participantProfileIds], in one bulk
+  /// lookup (long lists may take a few reads).
+  Future<List<ContestParticipation>> listForProfiles(
+    Iterable<Id> participantProfileIds,
+  );
+
   /// Every participation that was assigned the role [roleId].
   Future<List<ContestParticipation>> listForRole(Id roleId);
 

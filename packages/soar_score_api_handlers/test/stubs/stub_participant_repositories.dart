@@ -18,6 +18,12 @@ class StubParticipantProfileRepository implements ParticipantProfileRepository {
   };
 
   @override
+  Future<List<ParticipantProfile>> listByEmail(String email) async => [
+    for (final profile in profiles.values)
+      if (profile.email?.toLowerCase() == email.trim().toLowerCase()) profile,
+  ];
+
+  @override
   Future<List<ParticipantProfile>> listForOwner(Id accountId) async => [
     for (final profile in profiles.values)
       if (profile.ownerAccountId == accountId) profile,
@@ -100,6 +106,14 @@ class StubContestParticipationRepository
   ) async => [
     for (final p in participations.values)
       if (p.participantProfileId == participantProfileId) p,
+  ];
+
+  @override
+  Future<List<ContestParticipation>> listForProfiles(
+    Iterable<Id> participantProfileIds,
+  ) async => [
+    for (final p in participations.values)
+      if (participantProfileIds.contains(p.participantProfileId)) p,
   ];
 
   @override

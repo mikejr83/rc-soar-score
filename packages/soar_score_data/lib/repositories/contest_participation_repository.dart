@@ -82,6 +82,13 @@ class ContestParticipationRepository extends DriftRepository
   );
 
   @override
+  Future<List<core.ContestParticipation>> listForProfiles(
+    Iterable<core.Id> participantProfileIds,
+  ) async =>
+      (await _store.whereIdIn('participant_profile_id', participantProfileIds))
+        ..sort((a, b) => a.id.value.compareTo(b.id.value));
+
+  @override
   Future<List<core.ContestParticipation>> listForRole(core.Id roleId) =>
       _store.whereId('role_id', roleId, orderBy: 'id');
 

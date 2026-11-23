@@ -10,6 +10,13 @@ abstract interface class ParticipantProfileRepository {
   /// absent from the result.
   Future<Map<Id, ParticipantProfile>> findByIds(Iterable<Id> ids);
 
+  /// The profiles whose email equals [email], ignoring case, from every
+  /// director, in the order they were created.
+  ///
+  /// For the account-link candidate lookup only: callers pass the verified
+  /// email of the signed-in account, never a value a user typed.
+  Future<List<ParticipantProfile>> listByEmail(String email);
+
   /// The profiles owned by [accountId], in the order they were created.
   Future<List<ParticipantProfile>> listForOwner(Id accountId);
 

@@ -149,6 +149,14 @@ psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f scripts/add-results-indexes.sql
 
 In PowerShell, pass `$env:DATABASE_URL` in place of `"$DATABASE_URL"`.
 
+### [add-participant-link-indexes.sql](./add-participant-link-indexes.sql) — PostgreSQL
+
+Adds the two indexes introduced in #545 (links by account, profiles by lowercase email) to an existing PostgreSQL database. Same rules as `add-results-indexes.sql`: one transaction, `IF NOT EXISTS`, fresh or reset databases already have them.
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f scripts/add-participant-link-indexes.sql
+```
+
 ## Release, licensing, and data model
 
 ### [generate_release_notes.py](./generate_release_notes.py) — Python

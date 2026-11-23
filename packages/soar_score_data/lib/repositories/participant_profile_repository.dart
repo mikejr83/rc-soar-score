@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'drift_repository.dart';
@@ -19,6 +20,13 @@ class ParticipantProfileRepository extends DriftRepository
     for (final profile in await _store.whereIdIn('id', ids))
       profile.id: profile,
   };
+
+  @override
+  Future<List<core.ParticipantProfile>> listByEmail(String email) =>
+      // lower(email) is indexed (participant_profiles_lower_email).
+      _store.whereSql('lower(email) = ?', [
+        Variable<String>(email.trim().toLowerCase()),
+      ], orderBy: 'created_at, id');
 
   @override
   Future<List<core.ParticipantProfile>> listForOwner(core.Id accountId) =>
