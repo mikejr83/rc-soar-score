@@ -3,6 +3,13 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
+import 'package:soar_score_api_handlers/handlers/participant_handlers.dart'
+    show resolutionResponse;
+import 'package:soar_score_api_handlers/handlers/request_body.dart';
+import 'package:soar_score_api_handlers/middleware/client_address.dart';
+import 'package:soar_score_api_handlers/middleware/error_mapping.dart';
+import 'package:soar_score_api_handlers/middleware/invitation_throttle.dart';
+import 'package:soar_score_api_handlers/middleware/request_id.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 /// Adds the routes where a signed-in pilot sees and manages the link between
@@ -24,6 +31,17 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// - `POST /account/links/{id}/end` ends one ([AccountLinkDto]). Nothing
 ///   published changes, and the invitations go back to their guests.
 ///
+/// - `POST /account/invitation-claims` with a [ResolveInvitationRequest]
+///   ("Continue as _name_?" after opening a link while signed in) links the
+///   account to the pilot the link is for, claims the guests' entries and
+///   answers a [ResolveInvitationResponse]: the session, acting as the
+///   account, in the cookie for the web app. A link that does not open is the
+///   same 404 `invalid_invitation` and 429 `rate_limited` as opening it
+///   anonymously, counted by the same [InvitationThrottle].
+/// - `POST /account/participations/{id}/session` opens a contest of the
+///   participations list the same way, with no body; 404 `link_not_found`
+///   for a participation that is not on the caller's list.
+///
 /// Reads use stored data only and write nothing. Every write is idempotent.
 /// An unknown, foreign or no-longer-eligible id is 404 `link_not_found`;
 /// another account that already holds the pilot is 409 `already_linked`.
@@ -38,7 +56,12 @@ void addAccountLinkRoutes(
   Router router,
   Repository repository, {
   required InvitationService? invitations,
+  InvitationThrottle? throttle,
+  String? trustedProxySecret,
+  DateTime Function()? clock,
 }) {
+  final limits = throttle ?? InvitationThrottle();
+  final now = clock ?? DateTime.now;
   final built = invitations == null
       ? null
       : ParticipantLinkService(repository, invitations);
@@ -129,6 +152,58 @@ void addAccountLinkRoutes(
       accountId: principal.accountId,
     );
     return Response(204, headers: {'cache-control': 'no-store'});
+  });
+
+  router.post('/account/invitation-claims', (Request request) async {
+    final principal = requirePrincipal(request);
+    final links = await service();
+    final address = clientAddressOf(
+      request,
+      trustedProxySecret: trustedProxySecret,
+    );
+    final wait = await limits.admit(address);
+    if (wait != null) {
+      return errorResponse(
+        429,
+        'rate_limited',
+        'Too many attempts. Try again later.',
+        requestId: requestIdOf(request),
+      ).change(headers: {'retry-after': '${wait.inSeconds + 1}'});
+    }
+    final ResolveInvitationRequest body;
+    try {
+      body = await readJsonBody(request, ResolveInvitationRequest.fromJson);
+    } on ArgumentError {
+      await limits.recordFailure(address);
+      rethrow;
+    }
+    try {
+      final claimed = await links.claimInvitation(
+        credential: body.credential.trim(),
+        accountId: principal.accountId,
+      );
+      return await resolutionResponse(
+        repository,
+        request,
+        claimed.session,
+        now: now,
+      );
+    } on InvitationAccessError {
+      await limits.recordFailure(address);
+      rethrow;
+    }
+  });
+
+  router.post('/account/participations/<id>/session', (
+    Request request,
+    String id,
+  ) async {
+    final principal = requirePrincipal(request);
+    final session = await (await service()).openParticipation(
+      participationId: _idOrNotFound(id),
+      accountId: principal.accountId,
+    );
+    return resolutionResponse(repository, request, session, now: now);
   });
 
   router.get('/account/links', (Request request) async {
