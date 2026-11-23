@@ -464,11 +464,25 @@ class InvitationService {
   /// replaced, revoked or expired, always the same way.
   Future<InvitationResolution> resolve(String credential) async {
     final opened = await _open(credential);
-    final stored = opened.invitation;
-    final guestId =
-        stored.redeemedByAccountId ??
-        await _guestFor(stored.id, opened.checked.participation, opened.now);
-    return _session(stored, opened.checked, opened.now, actorId: guestId);
+    var stored = opened.invitation;
+    for (var attempt = 0; attempt < 3; attempt++) {
+      final actorId =
+          stored.redeemedByAccountId ??
+          await _guestFor(stored.id, opened.checked.participation, opened.now);
+      final session = await _session(
+        stored,
+        opened.checked,
+        opened.now,
+        actorId: actorId,
+      );
+      if (session != null) return session;
+      // A concurrent open stored a different redeemer (an account claiming
+      // the link): act as whoever won.
+      final latest = await repository.invitationRepository.findById(stored.id);
+      if (latest == null) break;
+      stored = latest;
+    }
+    throw InvitationAccessError.invalidLink();
   }
 
   /// Opens [invitation] for the signed-in, linked [accountId]: the same
@@ -510,8 +524,12 @@ class InvitationService {
     return _session(stored, checked, now, actorId: accountId);
   }
 
-  /// Stores that [stored] was opened by [actorId] and returns the session.
-  Future<InvitationResolution> _session(
+  /// Stores that [stored] was opened by [actorId] and returns the session, or
+  /// null when a concurrent open stored another redeemer meanwhile (the save
+  /// is a plain upsert, so the last writer wins): the caller then re-reads and
+  /// acts as the redeemer that is stored, so no session it hands out is dead
+  /// on arrival.
+  Future<InvitationResolution?> _session(
     Invitation stored,
     ({
       ContestParticipation participation,
@@ -545,6 +563,8 @@ class InvitationService {
         clientMutationId: stored.clientMutationId,
       ),
     );
+    final after = await repository.invitationRepository.findById(stored.id);
+    if (after != null && after.redeemedByAccountId != actorId) return null;
     await _audit(
       invitation,
       AuditAction.invitationAccessed,

@@ -668,6 +668,10 @@ void _tests(SliceBackend backend) {
       );
 
       expect(response.status, 409);
+      expect(
+        (response.json['error']! as Map)['code'],
+        'invitations_not_available',
+      );
     });
   });
 }

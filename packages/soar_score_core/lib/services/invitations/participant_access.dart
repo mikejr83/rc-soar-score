@@ -17,7 +17,8 @@ class ParticipantAccess extends Equatable {
     required this.readOnly,
   });
 
-  /// The guest account that acts, and is recorded as the actor.
+  /// The account that acts, and is recorded as the actor: the invitation's
+  /// guest account, or the signed-in account linked to the pilot.
   final Id guestAccountId;
 
   /// The invitation the session was opened with; the access reference of
@@ -43,7 +44,7 @@ class ParticipantAccess extends Equatable {
   ];
 }
 
-/// A signed-in guest opened a link: the session to keep, and what it opens.
+/// A guest, or a signed-in linked account, opened a link: the session to keep, and what it opens.
 class InvitationResolution {
   const InvitationResolution({
     required this.access,
