@@ -5,6 +5,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../dto/activate_installation_request.dart';
 import '../dto/add_model_link_request.dart';
+import '../dto/account_participation_dto.dart';
 import '../dto/add_participation_request.dart';
 import '../dto/add_profile_model_request.dart';
 import '../dto/add_team_member_request.dart';
@@ -545,6 +546,69 @@ class ApiClient {
       uri,
       LocalAccountClaimDto.fromJson,
     );
+  }
+
+  /// `GET /api/v1/account/participations` — the contests the signed-in
+  /// account reaches through its confirmed links, newest first.
+  Future<AccountParticipationsDto> accountParticipations() async {
+    final uri = _resolve('/api/v1/account/participations');
+    final response = await _send('GET', uri);
+    return _decode<AccountParticipationsDto>(
+      response,
+      uri,
+      AccountParticipationsDto.fromJson,
+    );
+  }
+
+  /// `GET /api/v1/account/link-candidates` — the "Is this you?" matches of
+  /// the account's verified email; empty when there are none.
+  Future<LinkCandidatesDto> linkCandidates() async {
+    final uri = _resolve('/api/v1/account/link-candidates');
+    final response = await _send('GET', uri);
+    return _decode<LinkCandidatesDto>(
+      response,
+      uri,
+      LinkCandidatesDto.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/account/link-candidates/{id}/confirm` — says the
+  /// candidate [candidateId] is the caller. Repeating it returns the same
+  /// link. Another account that holds the pilot is an [ApiHttpError] with
+  /// status 409 (`already_linked`); a candidate that is not (or no longer)
+  /// one is status 404 (`link_not_found`).
+  Future<AccountLinkDto> confirmLinkCandidate(Id candidateId) async {
+    final uri = _resolve(
+      '/api/v1/account/link-candidates/${candidateId.value}/confirm',
+    );
+    final response = await _send('POST', uri);
+    return _decode<AccountLinkDto>(response, uri, AccountLinkDto.fromJson);
+  }
+
+  /// `POST /api/v1/account/link-candidates/{id}/decline` — says the
+  /// candidate [candidateId] is not the caller, so it is not offered again.
+  /// Repeating it changes nothing.
+  Future<void> declineLinkCandidate(Id candidateId) async {
+    await _send(
+      'POST',
+      _resolve('/api/v1/account/link-candidates/${candidateId.value}/decline'),
+    );
+  }
+
+  /// `GET /api/v1/account/links` — the caller's confirmed links.
+  Future<AccountLinksDto> accountLinks() async {
+    final uri = _resolve('/api/v1/account/links');
+    final response = await _send('GET', uri);
+    return _decode<AccountLinksDto>(response, uri, AccountLinksDto.fromJson);
+  }
+
+  /// `POST /api/v1/account/links/{id}/end` — ends the caller's link
+  /// [linkId]. Ending an ended link returns it unchanged; a link that is not
+  /// the caller's is an [ApiHttpError] with status 404 (`link_not_found`).
+  Future<AccountLinkDto> endAccountLink(Id linkId) async {
+    final uri = _resolve('/api/v1/account/links/${linkId.value}/end');
+    final response = await _send('POST', uri);
+    return _decode<AccountLinkDto>(response, uri, AccountLinkDto.fromJson);
   }
 
   /// `GET /api/v1/account` — the id of the account the caller acts as: the

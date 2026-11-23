@@ -66,6 +66,8 @@ int _retrySeconds(Duration wait) {
 ///
 /// - `SyncRefusal`: its own status and code (426, 409, 403, 410)
 /// - `AccountClaimError`: 409 with its code
+/// - `ParticipantLinkError`: 409 `already_linked`, 404 `link_not_found`,
+///   403 `profile_not_owned`
 /// - `GliderScoreImportError`: its own status (503, 404, 415, 422) and code
 /// - `StaleRevisionError`, `AlreadyStoredError`, `AlreadySupersededError`,
 ///   `ContestStateError`, `BackendOnlyError` (code `backend_only`): 409
@@ -121,6 +123,17 @@ Middleware errorMappingMiddleware() =>
         );
       } on SyncRefusal catch (e) {
         return handledError(request, e.statusCode, e.code, e.message);
+      } on ParticipantLinkError catch (e) {
+        return handledError(
+          request,
+          switch (e.code) {
+            'already_linked' => 409,
+            'profile_not_owned' => 403,
+            _ => 404,
+          },
+          e.code,
+          e.message,
+        );
       } on AccountClaimError catch (e) {
         return handledError(request, 409, e.code, e.message);
       } on GliderScoreImportError catch (e) {
