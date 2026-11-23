@@ -39,21 +39,27 @@ void addAccountLinkRoutes(
   Repository repository, {
   required InvitationService? invitations,
 }) {
-  ParticipantLinkService service() => ParticipantLinkService(
-    repository,
-    invitations ??
-        (throw ContestStateError(
-          'invitations_not_available',
-          'this server does not issue invitations',
-        )),
-  );
+  final built = invitations == null
+      ? null
+      : ParticipantLinkService(repository, invitations);
+
+  Future<ParticipantLinkService> service() async {
+    if (built != null) return built;
+    // An installation has no link tables at all: say so (`backend_only`)
+    // before blaming the missing invitation secret.
+    await repository.participantAccountLinkRepository.findById(Id.create());
+    throw ContestStateError(
+      'invitations_not_available',
+      'this server does not issue invitations',
+    );
+  }
 
   Response answer(Map<String, dynamic> json) =>
       jsonResponse(json).change(headers: {'cache-control': 'no-store'});
 
   router.get('/account/participations', (Request request) async {
     final principal = requirePrincipal(request);
-    final rows = await service().participationsFor(principal.accountId);
+    final rows = await (await service()).participationsFor(principal.accountId);
     return answer(
       AccountParticipationsDto(
         participations: [for (final row in rows) _participationDto(row)],
@@ -63,7 +69,9 @@ void addAccountLinkRoutes(
 
   router.get('/account/link-candidates', (Request request) async {
     final principal = requirePrincipal(request);
-    final candidates = await service().candidatesFor(principal.accountId);
+    final candidates = await (await service()).candidatesFor(
+      principal.accountId,
+    );
     return answer(
       LinkCandidatesDto(
         candidates: [
@@ -96,7 +104,7 @@ void addAccountLinkRoutes(
     String id,
   ) async {
     final principal = requirePrincipal(request);
-    final links = service();
+    final links = await service();
     final link = await links.confirmCandidate(
       profileId: await links.profileOfCandidate(
         candidateId: _idOrNotFound(id),
@@ -112,7 +120,7 @@ void addAccountLinkRoutes(
     String id,
   ) async {
     final principal = requirePrincipal(request);
-    final links = service();
+    final links = await service();
     await links.declineCandidate(
       profileId: await links.profileOfCandidate(
         candidateId: _idOrNotFound(id),
@@ -125,7 +133,9 @@ void addAccountLinkRoutes(
 
   router.get('/account/links', (Request request) async {
     final principal = requirePrincipal(request);
-    final links = await service().confirmedLinksFor(principal.accountId);
+    final links = await (await service()).confirmedLinksFor(
+      principal.accountId,
+    );
     return answer(
       AccountLinksDto(links: await _linkDtos(repository, links)).toJson(),
     );
@@ -133,7 +143,7 @@ void addAccountLinkRoutes(
 
   router.post('/account/links/<id>/end', (Request request, String id) async {
     final principal = requirePrincipal(request);
-    final ended = await service().end(
+    final ended = await (await service()).end(
       linkId: _idOrNotFound(id),
       accountId: principal.accountId,
     );

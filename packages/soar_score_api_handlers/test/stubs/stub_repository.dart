@@ -174,9 +174,20 @@ class StubRepository implements core.Repository {
   core.ReFlightParticipantRepository get reFlightParticipantRepository =>
       StubReFlightParticipantRepository();
 
+  /// Like an installation's database: no backend-only tables.
+  @override
+  core.ParticipantAccountLinkRepository get participantAccountLinkRepository =>
+      _BackendOnlyLinks();
+
   @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not stubbed');
+}
+
+class _BackendOnlyLinks implements core.ParticipantAccountLinkRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw core.BackendOnlyError('ParticipantAccountLink');
 }
 
 class _NoIntents implements core.PromotionIntentRepository {
