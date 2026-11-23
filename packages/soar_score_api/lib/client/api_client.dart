@@ -611,6 +611,45 @@ class ApiClient {
     return _decode<AccountLinkDto>(response, uri, AccountLinkDto.fromJson);
   }
 
+  /// `POST /api/v1/account/invitation-claims` — the signed-in pilot opens an
+  /// invitation link: the account is linked to the pilot the link is for, the
+  /// guest entries are claimed, and the answer is the session to keep,
+  /// acting as the account. Needs the account token. The credential is a
+  /// secret: never log it.
+  ///
+  /// A link that does not open is an [ApiHttpError] whose
+  /// [ApiHttpError.participantError] has code `invalid_invitation`; a pilot
+  /// another account already holds is status 409 (`already_linked`).
+  Future<ResolveInvitationResponse> claimInvitation(
+    ResolveInvitationRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/account/invitation-claims');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<ResolveInvitationResponse>(
+      response,
+      uri,
+      ResolveInvitationResponse.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/account/participations/{id}/session` — opens a contest of
+  /// the participations list: the session, acting as the account. A
+  /// participation that is not on the caller's list is an [ApiHttpError]
+  /// with status 404 (`link_not_found`).
+  Future<ResolveInvitationResponse> openAccountParticipation(
+    Id participationId,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/account/participations/${participationId.value}/session',
+    );
+    final response = await _send('POST', uri);
+    return _decode<ResolveInvitationResponse>(
+      response,
+      uri,
+      ResolveInvitationResponse.fromJson,
+    );
+  }
+
   /// `GET /api/v1/account` — the id of the account the caller acts as: the
   /// id the audit trail records as the actor of the caller's actions. It is
   /// not the sign-in identity's subject.

@@ -60,6 +60,9 @@ createHandlers(
   // One recalculation service for every route that triggers the automatic
   // officialization, so an installation whose contest syncs never accepts
   // scores on its own.
+  // One throttle for opening a link anonymously and signed in, so both count
+  // the same attempts.
+  invitationThrottle ??= InvitationThrottle();
   recalculation ??= RecalculationService.automatic(
     repository,
     promotionIntents: promotionIntents,
@@ -72,7 +75,13 @@ createHandlers(
   addAccountClaimRoutes(router, repository);
   addAccountRoutes(router);
   addAccountPreferencesRoutes(router, repository);
-  addAccountLinkRoutes(router, repository, invitations: invitations);
+  addAccountLinkRoutes(
+    router,
+    repository,
+    invitations: invitations,
+    throttle: invitationThrottle,
+    trustedProxySecret: trustedProxySecret,
+  );
   addContestRoutes(router, repository, publishingEnabled: publishingEnabled);
   addConfigurationRoutes(router, repository, recalculation: recalculation);
   addLandingTableRoutes(router, repository);

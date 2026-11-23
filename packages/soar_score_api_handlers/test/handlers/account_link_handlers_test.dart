@@ -20,6 +20,8 @@ void main() {
     ('POST', '/account/link-candidates/${_id.value}/decline'),
     ('GET', '/account/links'),
     ('POST', '/account/links/${_id.value}/end'),
+    ('POST', '/account/invitation-claims'),
+    ('POST', '/account/participations/${_id.value}/session'),
   ]) {
     test('$method $path answers 409 backend_only on an installation', () async {
       final response = await api.send(method, path);

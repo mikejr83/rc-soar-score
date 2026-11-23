@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -149,6 +150,59 @@ void main() {
     expect(seen.method, 'POST');
     expect(seen.url.path, '/api/v1/account/links/${link.value}/end');
     expect(ended.status, ParticipantLinkStatus.ended);
+  });
+
+  Map<String, dynamic> resolveFixture() => jsonDecode(
+    File('fixtures/self_scoring/resolve_invitation_response.json')
+        .readAsStringSync(),
+  ) as Map<String, dynamic>;
+
+  test('claimInvitation posts the credential with the account token', () async {
+    final client = clientFor((_) => json(resolveFixture()));
+
+    final session = await client.claimInvitation(
+      const ResolveInvitationRequest(credential: 'abc'),
+    );
+
+    expect(seen.method, 'POST');
+    expect(seen.url.path, '/api/v1/account/invitation-claims');
+    expect(jsonDecode(seen.body), {'credential': 'abc', 'device_id': null});
+    expect(session.sessionToken, isNotNull);
+  });
+
+  test('claimInvitation: a link that does not open and a held pilot', () async {
+    var client = clientFor(
+      (_) => json({
+        'error': {'code': 'invalid_invitation', 'message': 'x'},
+      }, 404),
+    );
+    await expectLater(
+      client.claimInvitation(const ResolveInvitationRequest(credential: 'x')),
+      throwsA(isA<ApiHttpError>().having((e) => e.statusCode, 'status', 404)),
+    );
+
+    client = clientFor(
+      (_) => json({
+        'error': {'code': 'already_linked', 'message': 'x'},
+      }, 409),
+    );
+    await expectLater(
+      client.claimInvitation(const ResolveInvitationRequest(credential: 'x')),
+      throwsA(isA<ApiHttpError>().having((e) => e.statusCode, 'status', 409)),
+    );
+  });
+
+  test('openAccountParticipation posts to the participation', () async {
+    final client = clientFor((_) => json(resolveFixture()));
+    final participation = Id.parse('019c0000-0000-7000-8000-00000000d201');
+
+    await client.openAccountParticipation(participation);
+
+    expect(seen.method, 'POST');
+    expect(
+      seen.url.path,
+      '/api/v1/account/participations/${participation.value}/session',
+    );
   });
 
   test('already_linked is a 409 ApiHttpError', () async {

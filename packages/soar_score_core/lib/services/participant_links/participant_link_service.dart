@@ -5,6 +5,7 @@ import '../../enums/account_status.dart';
 import '../../enums/participant_link_origin.dart';
 import '../../enums/participant_link_status.dart';
 import '../../enums/role_type.dart';
+import '../../errors/invitation_access_error.dart';
 import '../../errors/participant_link_error.dart';
 import '../../models/accounts/account.dart';
 import '../../models/accounts/participant_account_link.dart';
@@ -14,6 +15,7 @@ import '../../models/participants/contest_participation.dart';
 import '../../models/scores/invitation.dart';
 import '../../repositories/repository.dart';
 import '../invitations/invitation_service.dart';
+import '../invitations/participant_access.dart';
 import 'linked_participation.dart';
 
 final _logger = Logger('ParticipantLinks');
@@ -111,6 +113,93 @@ class ParticipantLinkService {
       accountId: accountId,
       origin: ParticipantLinkOrigin.invitationRedemption,
     );
+  }
+
+  /// The pilot, signed in, opens the invitation [credential]: the link is
+  /// confirmed (as [linkFromInvitation]) and the guest entries are claimed,
+  /// in one transaction, and the answer is the session to keep, acting as
+  /// the account, as [InvitationService.resolve] gives a guest.
+  ///
+  /// Throws `invalid_invitation` for a link that does not open (the same
+  /// answer as opening it anonymously) and `already_linked` when another
+  /// account holds the profile. Repeating it returns a new session for the
+  /// same link and changes nothing else.
+  Future<({ParticipantAccountLink link, InvitationResolution session})>
+  claimInvitation({required String credential, required Id accountId}) async {
+    await _requireLinkable(accountId);
+    final opened = await invitations.lookup(credential);
+    final profileId = opened.participation.participantProfileId;
+    final link = await _confirm(
+      profileId: profileId,
+      accountId: accountId,
+      origin: ParticipantLinkOrigin.invitationRedemption,
+    );
+    return (
+      link: link,
+      session: await _openAs(opened.invitation, profileId, accountId),
+    );
+  }
+
+  /// The pilot opens one of the contests of their list: the session for the
+  /// active invitation of [participationId], acting as the account.
+  ///
+  /// `link_not_found` unless the account holds the Confirmed link to the
+  /// participation's profile and the participation is on its list (an
+  /// invitation that still opens): the same answer for an id that does not
+  /// exist, so it is no way to probe for participations.
+  Future<InvitationResolution> openParticipation({
+    required Id participationId,
+    required Id accountId,
+  }) async {
+    final participation = await repository.contestParticipationRepository
+        .findById(participationId);
+    if (participation == null || participation.roleType != RoleType.pilot) {
+      throw ParticipantLinkError.linkNotFound();
+    }
+    final profileId = participation.participantProfileId;
+    final link = await repository.participantAccountLinkRepository
+        .findConfirmedForProfile(profileId);
+    if (link == null || link.accountId != accountId) {
+      throw ParticipantLinkError.linkNotFound();
+    }
+    final listed = (await _openParticipations({profileId}))[profileId] ?? [];
+    final row = listed
+        .where((r) => r.participation.id == participationId)
+        .firstOrNull;
+    if (row == null) throw ParticipantLinkError.linkNotFound();
+    // Claims the guests who opened this or an earlier invitation of the
+    // profile since the link was made, so the session sees all their entries.
+    await _confirm(
+      profileId: profileId,
+      accountId: accountId,
+      origin: link.origin,
+    );
+    return _openAs(row.invitation, profileId, accountId);
+  }
+
+  /// Opens [invitation] as [accountId]. A guest that opened it after the
+  /// link was confirmed is claimed first (once), so no guest entry stays
+  /// behind.
+  Future<InvitationResolution> _openAs(
+    Invitation invitation,
+    Id profileId,
+    Id accountId,
+  ) async {
+    for (var attempt = 0; attempt < 2; attempt++) {
+      final session = await invitations.resolveForAccount(
+        invitation,
+        accountId,
+      );
+      if (session != null) return session;
+      await _confirm(
+        profileId: profileId,
+        accountId: accountId,
+        origin: ParticipantLinkOrigin.invitationRedemption,
+      );
+    }
+    // Something else keeps redeeming it: do not guess, refuse like a link
+    // that does not open.
+    throw InvitationAccessError.invalidLink();
   }
 
   /// The profiles that match [accountId]'s verified email and that a
