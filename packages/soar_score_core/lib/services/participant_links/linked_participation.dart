@@ -44,16 +44,24 @@ class LinkedParticipation extends Equatable {
 ///
 /// Carries only what the pilot needs to recognize themselves: the name as
 /// the director typed it and the contests. Never the director, the email or
-/// any id of a director's record other than the profile id the pilot answers
-/// with.
+/// any id of a director's record: the pilot answers with [id], not the
+/// profile id.
 class LinkCandidate extends Equatable {
   const LinkCandidate({
+    required this.id,
     required this.profileId,
     required this.firstName,
     required this.lastName,
     required this.contests,
   });
 
+  /// What the pilot answers with: derived from the account and the profile
+  /// (see `InvitationCodec.candidateIdFor`), so it reveals no id of the
+  /// director's records. Callers show this, never [profileId].
+  final Id id;
+
+  /// The director's profile. For the service and its callers on the server
+  /// only; never sent to the pilot.
   final Id profileId;
   final String firstName;
   final String lastName;
@@ -62,7 +70,7 @@ class LinkCandidate extends Equatable {
   final List<CandidateContest> contests;
 
   @override
-  List<Object?> get props => [profileId, firstName, lastName, contests];
+  List<Object?> get props => [id, profileId, firstName, lastName, contests];
 }
 
 /// What a candidate shows of a contest: enough to recognize it, and nothing

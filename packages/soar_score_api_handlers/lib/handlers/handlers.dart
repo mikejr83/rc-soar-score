@@ -8,6 +8,7 @@ import 'package:soar_score_core/services/matrix/draw_job.dart';
 import 'package:soar_score_core/services/sync/sync_versions.dart';
 import 'package:soar_score_api_handlers/handlers/account_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/account_claim_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/account_link_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/account_preferences_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/configuration_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/contests_handlers.dart';
@@ -71,6 +72,7 @@ createHandlers(
   addAccountClaimRoutes(router, repository);
   addAccountRoutes(router);
   addAccountPreferencesRoutes(router, repository);
+  addAccountLinkRoutes(router, repository, invitations: invitations);
   addContestRoutes(router, repository, publishingEnabled: publishingEnabled);
   addConfigurationRoutes(router, repository, recalculation: recalculation);
   addLandingTableRoutes(router, repository);
