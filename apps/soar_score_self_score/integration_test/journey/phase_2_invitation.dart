@@ -26,7 +26,7 @@ Future<String> phase2Invitation(
   final pilot = contest.pilotNames.first;
   var pilotId = '';
   await journey.phase(2, 'Open the invitation link', () async {
-    await journey.step('The landing page defers sign in and sign up', () async {
+    await journey.step('The landing page offers sign in and sign up', () async {
       await openPath(tester, '/');
       await pumpUntilFound(
         tester,
@@ -36,7 +36,7 @@ Future<String> phase2Invitation(
         tester
             .widget<FilledButton>(find.widgetWithText(FilledButton, 'Sign in'))
             .onPressed,
-        isNull,
+        isNotNull,
       );
       expect(
         tester
@@ -44,9 +44,24 @@ Future<String> phase2Invitation(
               find.widgetWithText(OutlinedButton, 'Sign up'),
             )
             .onPressed,
-        isNull,
+        isNotNull,
       );
-      expect(find.textContaining('coming in a future release'), findsOneWidget);
+      expect(find.textContaining('coming in a future release'), findsNothing);
+    });
+    await journey.step('Signing in shows the pilot and the way on', () async {
+      // The E2E build signs in as the server's seeded pilot account with no
+      // Auth0 round trip (`E2eAuthSession`).
+      await tapVisible(tester, find.widgetWithText(FilledButton, 'Sign in'));
+      await pumpUntilFound(tester, find.text('Signed in as Penny Pilot'));
+      expect(find.widgetWithText(FilledButton, 'My contests'), findsOneWidget);
+    });
+    await journey.step('Signing out returns to the landing page', () async {
+      await tapVisible(tester, find.widgetWithText(OutlinedButton, 'Sign out'));
+      await pumpUntilFound(
+        tester,
+        find.widgetWithText(FilledButton, 'Sign in'),
+      );
+      expect(find.text('Signed in as Penny Pilot'), findsNothing);
     });
     await journey.step('A link that does not exist is refused', () async {
       await openPath(tester, invitationPath('not-a-real-credential'));

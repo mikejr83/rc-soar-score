@@ -5,6 +5,8 @@ import 'package:soar_score_ui/soar_score_ui.dart';
 
 import 'api_client_provider.dart';
 import 'app.dart';
+import 'auth/auth_scope.dart';
+import 'auth/auth_session_factory.dart';
 import 'bundled_licences.dart';
 import 'data/api_self_score_repository.dart';
 import 'data/sample_self_score_repository.dart';
@@ -18,7 +20,8 @@ import 'session/guest_session_scope.dart';
 import 'session/guest_session_store.dart';
 import 'session/score_draft_store.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   // Invitation links are plain paths, not `#/...` addresses.
   usePathUrlStrategy();
   registerBrandFontLicenses();
@@ -36,11 +39,18 @@ void main() {
   final sessions = StringSlotGuestSessionStore(
     KeyValueSlot(storage, 'soar_score_self_score.guest_session'),
   );
+  // Sign-in state. `restore` also completes a sign-in redirect from Auth0, so
+  // it runs before the first frame.
+  final auth = createAuthSession();
+  await auth.restore();
   final client = ApiClient(
     baseUrl: Uri.parse(baseUrl),
     httpClient: openApiHttpClient(),
     defaultHeaders: const {'X-Requested-With': 'soar-score-self-score'},
     tokenProvider: () async => sessions.read()?.token,
+    // The account routes take the Auth0 access token; the participant routes
+    // keep the guest token (a bearer there would take the place of the cookie).
+    accountTokenProvider: auth.accessToken,
   );
 
   // Design review can still run on the sample contest:
@@ -51,15 +61,18 @@ void main() {
       : ApiSelfScoreRepository(client, sessions);
 
   runApp(
-    ApiClientInherited(
-      client: client,
-      child: GuestSessionScope(
-        store: sessions,
-        child: ScoreDraftScope(
-          store: ScoreDraftStore(storage),
-          child: SelfScoreScope(
-            repository: repository,
-            child: const SelfScoreApp(),
+    AuthScope(
+      session: auth,
+      child: ApiClientInherited(
+        client: client,
+        child: GuestSessionScope(
+          store: sessions,
+          child: ScoreDraftScope(
+            store: ScoreDraftStore(storage),
+            child: SelfScoreScope(
+              repository: repository,
+              child: const SelfScoreApp(),
+            ),
           ),
         ),
       ),

@@ -88,6 +88,7 @@ class ApiClient {
     required this.baseUrl,
     http.Client? httpClient,
     this.tokenProvider,
+    this.accountTokenProvider,
     this.defaultHeaders = const {},
   }) : _httpClient = httpClient ?? http.Client();
 
@@ -97,6 +98,15 @@ class ApiClient {
 
   /// Optional bearer-token provider; `null` means no token is ever sent.
   final TokenProvider? tokenProvider;
+
+  /// When set, the bearer-token provider of the signed-in account routes
+  /// (`/api/v1/account/...`), used there instead of [tokenProvider].
+  ///
+  /// The self-scoring app needs two credentials side by side: its guest
+  /// session (which the participant routes read from `Authorization` ahead of
+  /// the cookie, so an account token there would end the session) and the
+  /// identity provider's access token, which only the account routes take.
+  final TokenProvider? accountTokenProvider;
 
   /// Headers added to every request, such as `X-Requested-With`, which the
   /// server wants on cookie-authenticated writes.
@@ -1790,7 +1800,10 @@ class ApiClient {
       ...defaultHeaders,
       'accept': 'application/json',
     };
-    final token = authenticated ? await tokenProvider?.call() : null;
+    final provider = uri.path.startsWith('/api/v1/account/')
+        ? (accountTokenProvider ?? tokenProvider)
+        : tokenProvider;
+    final token = authenticated ? await provider?.call() : null;
     if (token != null) {
       headers['authorization'] = 'Bearer $token';
     }
