@@ -175,9 +175,12 @@ where the finals begin.
 
 ## 4. The smallest test that would prove the value changes the draw
 
-The smallest proof is at the service level, one call per value: a seeded
-contest with the same pilots and the same seed, where `preliminary_rounds` is
-the only thing that differs, and `rounds: 2` is the only draw requested.
+`preliminary_rounds` never reaches the seeded draw itself: a seeded round is
+drawn from the standings at draw time and the seed only, so the value changes
+_which_ rounds are seeded, not _how_ a seeded round is drawn. The smallest
+proof is therefore at the service level, one call per value: a seeded contest
+with the same pilots and the same seed, where `preliminary_rounds` is the
+only thing that differs, and `rounds: 2` is the only draw requested.
 
 - With `preliminary_rounds: 1`, `MatrixService.drawFirst(rounds: 2, ...)`
   must throw `ContestStateError` with reason `seeded_rounds_need_standings`
