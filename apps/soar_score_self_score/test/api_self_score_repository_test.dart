@@ -539,6 +539,114 @@ void main() {
     );
   });
 
+  group('Is this you', () {
+    const candidateId = '019c0000-0000-7000-8000-00000000c101';
+    const linkBody =
+        '{"id":"$candidateId","pilot_name":"Pat Pilot","status":"Confirmed",'
+        '"origin":"EmailMatch","confirmed_at":"2026-10-17T14:00:00.000Z",'
+        '"ended_at":null}';
+
+    test('candidates read as pilot name and dated contests', () async {
+      final repository = _repository((request) {
+        expect(request.url.path, '/api/v1/account/link-candidates');
+        return _json(
+          '{"candidates":[{"id":"$candidateId","first_name":"Pat",'
+          '"last_name":"Pilot","contests":[{"name":"Spring Open",'
+          '"start_date_time":"2026-10-17T14:00:00.000Z",'
+          '"end_date_time":"2026-10-18T22:00:00.000Z",'
+          '"timezone":"America/Denver","host":null,"city":null,'
+          '"state":null,"country":null}]}]}',
+        );
+      });
+
+      final result = await repository.linkCandidates();
+
+      expect(result.single.id, candidateId);
+      expect(result.single.pilotName, 'Pat Pilot');
+      expect(result.single.contests.single.name, 'Spring Open');
+      expect(result.single.contests.single.dates, '17 Oct 2026 to 18 Oct 2026');
+    });
+
+    test('a one-day contest shows one date', () async {
+      final repository = _repository(
+        (_) => _json(
+          '{"candidates":[{"id":"$candidateId","first_name":"Pat",'
+          '"last_name":"Pilot","contests":[{"name":"Spring Open",'
+          '"start_date_time":"2026-10-17T14:00:00.000Z",'
+          '"end_date_time":"2026-10-17T22:00:00.000Z",'
+          '"timezone":"America/Denver"}]}]}',
+        ),
+      );
+      final result = await repository.linkCandidates();
+      expect(result.single.contests.single.dates, '17 Oct 2026');
+    });
+
+    test('confirm and decline post to the candidate', () async {
+      final seen = <String>[];
+      final repository = _repository((request) {
+        seen.add('${request.method} ${request.url.path}');
+        return request.url.path.endsWith('/confirm')
+            ? _json(linkBody)
+            : http.Response('', 204);
+      });
+
+      await repository.confirmLinkCandidate(candidateId);
+      await repository.declineLinkCandidate(candidateId);
+
+      expect(seen, [
+        'POST /api/v1/account/link-candidates/$candidateId/confirm',
+        'POST /api/v1/account/link-candidates/$candidateId/decline',
+      ]);
+    });
+
+    test('409 and 404 end the card, other failures may pass', () async {
+      LinkCandidateGoneReason? reasonOf(Object? error) =>
+          error is LinkCandidateGoneException ? error.reason : null;
+
+      final taken = _repository((_) => _json('{}', 409));
+      await expectLater(
+        taken.confirmLinkCandidate(candidateId),
+        throwsA(
+          predicate(
+            (e) => reasonOf(e) == LinkCandidateGoneReason.alreadyLinked,
+          ),
+        ),
+      );
+      final gone = _repository((_) => _json('{}', 404));
+      await expectLater(
+        gone.declineLinkCandidate(candidateId),
+        throwsA(
+          predicate((e) => reasonOf(e) == LinkCandidateGoneReason.notAvailable),
+        ),
+      );
+      final down = _repository((_) => _json('{}', 500));
+      await expectLater(
+        down.confirmLinkCandidate(candidateId),
+        throwsA(
+          isA<SelfScoreLoadException>().having(
+            (e) => e is LinkCandidateGoneException,
+            'gone',
+            false,
+          ),
+        ),
+      );
+    });
+
+    test('an expired account token does not end the guest session', () async {
+      final repository = _repository((_) => _json('{}', 401));
+      await expectLater(
+        repository.linkCandidates(),
+        throwsA(
+          isA<SelfScoreLoadException>().having(
+            (e) => e is SessionEndedException,
+            'session ended',
+            false,
+          ),
+        ),
+      );
+    });
+  });
+
   test('score and ordinal formatting', () {
     expect(ScoreFormat.score(2184), '2,184');
     expect(ScoreFormat.score(962.5), '962.5');

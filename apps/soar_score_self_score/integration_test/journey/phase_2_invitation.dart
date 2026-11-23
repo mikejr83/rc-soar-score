@@ -15,6 +15,25 @@ Future<void> openPath(WidgetTester tester, String path) async {
   await tester.pumpAndSettle();
 }
 
+/// The [label] button of the Is this you card that names [pilot].
+Finder _answer(String pilot, String label) => find.descendant(
+  of: find.ancestor(
+    of: find.textContaining(pilot),
+    matching: find.byType(Card),
+  ),
+  matching: find.text(label),
+);
+
+/// Pumps until [finder] matches nothing.
+Future<void> _waitGone(WidgetTester tester, Finder finder) async {
+  final end = DateTime.now().add(const Duration(seconds: 30));
+  while (DateTime.now().isBefore(end)) {
+    await tester.pump(const Duration(milliseconds: 200));
+    if (finder.evaluate().isEmpty) return;
+  }
+  fail('Timed out waiting for $finder to go. On screen: ${screenTexts()}');
+}
+
 /// Phase 2: the pilot opens the link from the score card.
 ///
 /// Returns the pilot id of the guest session, read from the overview address.
@@ -54,6 +73,57 @@ Future<String> phase2Invitation(
       await tapVisible(tester, find.widgetWithText(FilledButton, 'Sign in'));
       await pumpUntilFound(tester, find.text('Signed in as Penny Pilot'));
       expect(find.widgetWithText(FilledButton, 'My contests'), findsOneWidget);
+    });
+    await journey.step(
+      'My contests asks Is this you for each email match',
+      () async {
+        // The director typed the pilot's email on two profiles of the contest.
+        final yes = contest.pilotNames[2];
+        final no = contest.pilotNames[3];
+        await contest.linkPilotAccount(yes, state: 'candidate');
+        await contest.linkPilotAccount(no, state: 'candidate');
+        await tapVisible(
+          tester,
+          find.widgetWithText(FilledButton, 'My contests'),
+        );
+        await pumpUntilFound(tester, find.text('Is this you?'));
+        expect(find.text('Is this you?'), findsNWidgets(2));
+        expect(find.textContaining(yes), findsOneWidget);
+        expect(find.textContaining(no), findsOneWidget);
+        expect(find.textContaining('E2E Self-Scoring Open'), findsWidgets);
+        // No director, email or id on the card.
+        expect(find.textContaining('@'), findsNothing);
+      },
+    );
+    await journey.step('Not me drops the match and it stays dropped', () async {
+      final no = contest.pilotNames[3];
+      await tapVisible(tester, _answer(no, 'Not me'));
+      await _waitGone(tester, find.textContaining(no));
+      expect(find.text('Is this you?'), findsOneWidget);
+      // Leave the page and come back: the answer is on the server.
+      await openPath(tester, '/');
+      await tapVisible(
+        tester,
+        find.widgetWithText(FilledButton, 'My contests'),
+      );
+      await pumpUntilFound(tester, find.text('Is this you?'));
+      expect(find.textContaining(no), findsNothing);
+      expect(find.text('Is this you?'), findsOneWidget);
+    });
+    await journey.step('Yes, that is me links the pilot', () async {
+      final yes = contest.pilotNames[2];
+      await tapVisible(tester, _answer(yes, "Yes, that's me"));
+      await _waitGone(tester, find.text('Is this you?'));
+      expect(await contest.linkedPilotNames(), [yes]);
+      // Nothing is offered again.
+      await openPath(tester, '/');
+      await tapVisible(
+        tester,
+        find.widgetWithText(FilledButton, 'My contests'),
+      );
+      await pumpUntilFound(tester, find.text('Your contests'));
+      expect(find.text('Is this you?'), findsNothing);
+      await openPath(tester, '/');
     });
     await journey.step('Signing out returns to the landing page', () async {
       await tapVisible(tester, find.widgetWithText(OutlinedButton, 'Sign out'));

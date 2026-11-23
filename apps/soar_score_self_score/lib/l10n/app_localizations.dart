@@ -628,6 +628,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lost your link? Ask your contest director to send your link again.'**
   String get homeLostLink;
+
+  /// Title of the card that asks a signed-in pilot to confirm the pilot their email matches.
+  ///
+  /// In en, this message translates to:
+  /// **'Is this you?'**
+  String get isThisYouTitle;
+
+  /// Body of the Is this you card. The placeholder is the pilot name as the contest director typed it.
+  ///
+  /// In en, this message translates to:
+  /// **'The email on your account matches the pilot {name}.'**
+  String isThisYouMatches(String name);
+
+  /// One contest line of the Is this you card.
+  ///
+  /// In en, this message translates to:
+  /// **'{contest}, {dates}'**
+  String isThisYouContest(String contest, String dates);
+
+  /// Is this you card button that links the account to the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, that\'s me'**
+  String get isThisYouConfirm;
+
+  /// Is this you card button that says the pilot is someone else; the match is not offered again.
+  ///
+  /// In en, this message translates to:
+  /// **'Not me'**
+  String get isThisYouDecline;
+
+  /// Is this you card message when the answer could not be sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save your answer. Try again.'**
+  String get isThisYouFailed;
+
+  /// Is this you card message when another account holds the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot is already linked to another account.'**
+  String get isThisYouAlreadyLinked;
+
+  /// Is this you card message when the match no longer exists.
+  ///
+  /// In en, this message translates to:
+  /// **'This match is no longer available.'**
+  String get isThisYouNoLongerAvailable;
+
+  /// Contests page note when the Is this you matches could not be loaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check for matching pilots.'**
+  String get isThisYouLoadFailed;
+
+  /// Button that loads the Is this you matches again.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get isThisYouRetry;
 }
 
 class _AppLocalizationsDelegate

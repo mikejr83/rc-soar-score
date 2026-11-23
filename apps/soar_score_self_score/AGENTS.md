@@ -29,6 +29,10 @@ On the web the guest session is an HttpOnly cookie (`__Host-soar_guest`, host-on
 
 `lib/auth/` holds the sign-in: `AuthSession` (the interface pages see), `Auth0WebSession` (Auth0's SPA SDK, redirect flow, returns to the origin root; `restore()` runs in `main` before the first frame), `E2eAuthSession` (the `SOAR_SCORE_E2E` build only: signing in is instant, as the E2E server's seeded pilot) and `UnavailableAuthSession` (the default when no `AuthScope` is above a page, so a page tested alone shows no sign-in). Pages read it with `context.auth`. `ApiClient.accountTokenProvider` sends the Auth0 access token to the account routes only; the participant routes keep the guest token, because a bearer on them takes the place of the guest cookie. Settings are in `docs/auth0-setup.md`.
 
+## Is this you?
+
+`widgets/link_candidates_section.dart` loads the signed-in account's matches itself (`SelfScoreRepository.linkCandidates`, `GET /account/link-candidates`), so a failure there never takes the contests page down; it shows one `IsThisYouCard` per pilot. Yes calls `confirmLinkCandidate` and tells the page to load its list again (the link brings contests); Not me calls `declineLinkCandidate`, which the server remembers. A 409 (another account holds the pilot) or 404 (not a match any more) is a `LinkCandidateGoneException`: the card says why and goes. The account routes use the account token, never the guest token, and their failures never end the guest session. Dates on the card come from the stored UTC instants, not the contest's own zone.
+
 ## Design Notes
 
 - The app is mobile-first: the first release is mobile web, viewed almost always on a phone, with native apps a future goal. Tablet and desktop layouts are very low priority. Official score entry in the contest app is the tablet-first screen (`docs/adr/0002-score-entry-layout.md`); self-scoring is not.

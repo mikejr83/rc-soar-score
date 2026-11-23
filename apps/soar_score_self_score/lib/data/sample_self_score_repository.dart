@@ -3,6 +3,7 @@ import '../models/entry_context.dart';
 import '../models/group_results.dart';
 import '../models/guest_session.dart';
 import '../models/landing_result.dart';
+import '../models/link_candidate.dart';
 import '../models/pilot_overview.dart';
 import '../models/pilot_round.dart';
 import '../models/results_view.dart';
@@ -55,9 +56,6 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
 
   @override
   Future<ContestsView> contests() async => const ContestsView(
-    matchPrompt:
-        'Your email matches ${SampleData.pilotName}, pilot 12, in '
-        '${SampleData.contestName}.',
     contests: [
       ContestSummary(
         id: SampleData.contestId,
@@ -67,6 +65,26 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
       ),
     ],
   );
+
+  @override
+  Future<List<LinkCandidate>> linkCandidates() async => const [
+    LinkCandidate(
+      id: 'sample-candidate',
+      pilotName: SampleData.pilotName,
+      contests: [
+        LinkCandidateContest(
+          name: SampleData.contestName,
+          dates: '10 Oct 2026 to 11 Oct 2026',
+        ),
+      ],
+    ),
+  ];
+
+  @override
+  Future<void> confirmLinkCandidate(String candidateId) async {}
+
+  @override
+  Future<void> declineLinkCandidate(String candidateId) async {}
 
   @override
   Future<TeamOverview> teamOverview(String contestId) async {

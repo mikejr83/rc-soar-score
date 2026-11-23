@@ -170,6 +170,50 @@ class SeededContest {
   /// The credential in [name]'s link (the last path segment).
   String credentialOf(String name) => Uri.parse(links[name]!).pathSegments.last;
 
+  /// Offers the E2E server's seeded pilot account [name]'s profile as an "Is
+  /// this you?" match (`state: 'candidate'`), or links it (`'confirmed'`).
+  /// The profile gets the pilot account's verified email, as the director
+  /// typing the pilot's address would.
+  Future<void> linkPilotAccount(String name, {required String state}) async {
+    final response = await http.post(
+      Uri.parse(
+        '${const String.fromEnvironment('SOAR_SCORE_API_BASE_URL')}'
+        '/__e2e/pilot-account-link',
+      ),
+      headers: {'content-type': 'application/json'},
+      body: jsonEncode({
+        'participation_id': participations[name],
+        'state': state,
+      }),
+    );
+    if (response.statusCode != 200) {
+      throw StateError(
+        'pilot-account-link answered ${response.statusCode}: ${response.body}',
+      );
+    }
+  }
+
+  /// The names of the pilots the seeded pilot account is linked to, read as
+  /// the signed-in app would (`GET /account/links`).
+  Future<List<String>> linkedPilotNames() async {
+    final response = await http.get(
+      Uri.parse(
+        '${const String.fromEnvironment('SOAR_SCORE_API_BASE_URL')}'
+        '/api/v1/account/links',
+      ),
+      headers: {'authorization': 'Bearer e2e-pilot'},
+    );
+    if (response.statusCode != 200) {
+      throw StateError('account/links answered ${response.statusCode}');
+    }
+    final links = (jsonDecode(response.body) as Map)['links'] as List;
+    return [
+      for (final link in links)
+        if ((link as Map)['status'] == 'Confirmed')
+          link['pilot_name'] as String,
+    ];
+  }
+
   /// Moves the E2E server's invitation clock forward.
   Future<void> advanceClock(int hours) async {
     final response = await http.post(

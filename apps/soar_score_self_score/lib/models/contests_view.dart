@@ -17,11 +17,9 @@ class ContestSummary {
   final String? next;
 }
 
-/// The contests page: the contests, and an "Is this you?" prompt when the
-/// account's email matches an unlinked participant.
+/// The contests page: the contests the account reaches.
 class ContestsView {
-  const ContestsView({required this.contests, this.matchPrompt});
+  const ContestsView({required this.contests});
 
   final List<ContestSummary> contests;
-  final String? matchPrompt;
 }

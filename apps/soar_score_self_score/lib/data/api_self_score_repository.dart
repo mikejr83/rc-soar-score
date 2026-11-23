@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:intl/intl.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 
 import '../models/contests_view.dart';
@@ -9,6 +10,7 @@ import '../models/group_results.dart';
 import '../models/guest_session.dart';
 import '../models/officialization_policy.dart';
 import '../models/landing_result.dart';
+import '../models/link_candidate.dart';
 import '../models/pilot_overview.dart';
 import '../models/pilot_round.dart';
 import '../models/results_snapshot.dart';
@@ -201,9 +203,80 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   // `async`, so the error reaches the page as a failed future. A plain `=>
   // throw` threw while the page built, which crashed the contests page that
   // sits under every pilot page in the router's stack.
-  Future<ContestsView> contests() async => throw const SelfScoreLoadException(
-    'Signing in is coming soon. Use the link from your contest director.',
+  // Interim until the contests list is built (#546 step 2): the page opens
+  // empty so the "Is this you?" cards above it can be answered.
+  Future<ContestsView> contests() async => const ContestsView(contests: []);
+
+  @override
+  Future<List<LinkCandidate>> linkCandidates() async {
+    final answer = await _readAccount(_client.linkCandidates);
+    return [
+      for (final candidate in answer.candidates)
+        LinkCandidate(
+          id: candidate.id.value,
+          pilotName: '${candidate.firstName} ${candidate.lastName}'.trim(),
+          contests: [
+            for (final contest in candidate.contests)
+              LinkCandidateContest(
+                name: contest.name,
+                dates: _dateRange(contest.startDateTime, contest.endDateTime),
+              ),
+          ],
+        ),
+    ];
+  }
+
+  @override
+  Future<void> confirmLinkCandidate(String candidateId) => _answerCandidate(
+    () => _client.confirmLinkCandidate(ApiId.parse(candidateId)),
   );
+
+  @override
+  Future<void> declineLinkCandidate(String candidateId) => _answerCandidate(
+    () => _client.declineLinkCandidate(ApiId.parse(candidateId)),
+  );
+
+  /// Sends an "Is this you?" answer. A 409 (another account holds the pilot)
+  /// and a 404 (not a match any more) end the card; anything else may pass.
+  Future<void> _answerCandidate(Future<Object?> Function() send) async {
+    try {
+      await _readAccount(send);
+    } on ApiHttpError catch (error) {
+      throw switch (error.statusCode) {
+        409 => const LinkCandidateGoneException(
+          LinkCandidateGoneReason.alreadyLinked,
+        ),
+        404 => const LinkCandidateGoneException(
+          LinkCandidateGoneReason.notAvailable,
+        ),
+        _ => const SelfScoreLoadException(_unreachable),
+      };
+    }
+  }
+
+  /// Runs a call to an account route. Unlike [_read], a refusal is never a
+  /// guest session ending: the account token has its own life, and the pilot
+  /// can still use their guest link.
+  Future<T> _readAccount<T>(Future<T> Function() call) async {
+    try {
+      return await call();
+    } on ApiHttpError catch (error) {
+      if (error.statusCode == 404 || error.statusCode == 409) rethrow;
+      throw const SelfScoreLoadException(_unreachable);
+    } on ApiException {
+      throw const SelfScoreLoadException(_unreachable);
+    }
+  }
+
+  /// `10 Oct 2026` or `10 Oct 2026 to 11 Oct 2026`, from the stored UTC
+  /// instants. The contest's own zone is not applied here, so a contest that
+  /// starts early in the morning far east of UTC can show the day before.
+  static String _dateRange(DateTime start, DateTime end) {
+    final format = DateFormat('d MMM y', 'en_US');
+    final from = format.format(start.toUtc());
+    final to = format.format(end.toUtc());
+    return from == to ? from : '$from to $to';
+  }
 
   @override
   Future<TeamOverview> teamOverview(String contestId) async =>

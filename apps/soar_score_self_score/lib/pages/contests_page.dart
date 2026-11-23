@@ -6,13 +6,22 @@ import '../models/contests_view.dart';
 import '../router.dart';
 import '../widgets/connection_indicator.dart';
 import '../widgets/contest_card.dart';
-import '../widgets/is_this_you_card.dart';
+import '../widgets/link_candidates_section.dart';
 import '../widgets/loadable_scaffold.dart';
 import '../widgets/self_score_app_bar.dart';
 
 /// The signed-in person's contests, with the "Is this you?" match prompt.
-class ContestsPage extends StatelessWidget {
+class ContestsPage extends StatefulWidget {
   const ContestsPage({super.key});
+
+  @override
+  State<ContestsPage> createState() => _ContestsPageState();
+}
+
+class _ContestsPageState extends State<ContestsPage> {
+  /// Counts confirmed "Is this you?" answers; the list loads again after one,
+  /// because the link brings contests.
+  int _linked = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +30,7 @@ class ContestsPage extends StatelessWidget {
     final muted = theme.colorScheme.onSurfaceVariant;
     return LoadableScaffold<ContestsView>(
       load: repository.contests,
-      reloadKey: repository,
+      reloadKey: (repository, _linked),
       appBar: (context, data) => const SelfScoreAppBar(
         title: 'Contests',
         actions: [ConnectionIndicator()],
@@ -29,10 +38,7 @@ class ContestsPage extends StatelessWidget {
       builder: (context, data) => ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          if (data.matchPrompt != null) ...[
-            IsThisYouCard(message: data.matchPrompt!),
-            const SizedBox(height: 16),
-          ],
+          LinkCandidatesSection(onLinked: () => setState(() => _linked++)),
           Text('Your contests', style: theme.textTheme.headlineMedium),
           const SizedBox(height: 8),
           if (data.contests.isEmpty)
