@@ -80,4 +80,36 @@ void main() {
       expect(codec.verifySession(codec.credentialFor(id, 1)), isNull);
     });
   });
+
+  test(
+    'a candidate id is stable, per account and profile, and not either id',
+    () {
+      final account = Id.create();
+      final profile = Id.create();
+      final candidate = codec.candidateIdFor(
+        accountId: account,
+        profileId: profile,
+      );
+
+      expect(
+        codec.candidateIdFor(accountId: account, profileId: profile),
+        candidate,
+      );
+      expect(
+        codec.candidateIdFor(accountId: Id.create(), profileId: profile),
+        isNot(candidate),
+      );
+      expect(
+        codec.candidateIdFor(accountId: account, profileId: Id.create()),
+        isNot(candidate),
+      );
+      expect(candidate, isNot(profile));
+      expect(candidate, isNot(account));
+      expect(
+        InvitationCodec.fromText('y' * 40)
+            .candidateIdFor(accountId: account, profileId: profile),
+        isNot(candidate),
+      );
+    },
+  );
 }

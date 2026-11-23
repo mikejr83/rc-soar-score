@@ -284,11 +284,16 @@ void _tests(SliceBackend backend) {
       (await call(as, 'GET', '/account/participations')).json['participations']
           as List<Object?>;
 
+  /// The id [as] sees for the candidate of [profile].
+  String cid(core.Id as, String profile) => invitations.codec
+      .candidateIdFor(accountId: as, profileId: id(profile))
+      .value;
+
   Future<String> confirm(core.Id as, String profile) async {
     final response = await call(
       as,
       'POST',
-      '/account/link-candidates/$profile/confirm',
+      '/account/link-candidates/${cid(as, profile)}/confirm',
     );
     expect(response.status, 200, reason: response.text);
     return response.json['id']! as String;
@@ -305,7 +310,9 @@ void _tests(SliceBackend backend) {
         expect(response.status, 200, reason: response.text);
         final list = response.json['candidates']! as List<Object?>;
         final candidate = list.single! as Map<String, Object?>;
-        expect(candidate['id'], _profileId(1));
+        expect(candidate['id'], cid(pat, _profileId(1)));
+        expect(candidate['id'], isNot(_profileId(1)));
+        expect(response.text, isNot(contains(_profileId(1))));
         expect(candidate['first_name'], 'Pilot1');
         expect(candidate['last_name'], 'Rivera');
         final contest =
@@ -389,7 +396,8 @@ void _tests(SliceBackend backend) {
       await issue(1);
       await issue(2);
       for (final path in [
-        '/account/link-candidates/${_profileId(2)}/confirm', // other email
+        '/account/link-candidates/${cid(pat, _profileId(2))}/confirm', // other email
+        '/account/link-candidates/${_profileId(1)}/confirm', // the profile id itself
         '/account/link-candidates/${core.Id.create().value}/confirm',
         '/account/link-candidates/not-an-id/confirm',
       ]) {
@@ -400,9 +408,13 @@ void _tests(SliceBackend backend) {
       final foreign = await call(
         otherAccount,
         'POST',
-        '/account/link-candidates/${_profileId(1)}/confirm',
+        '/account/link-candidates/${cid(pat, _profileId(1))}/confirm',
       );
-      expect(foreign.status, 404, reason: 'not Sam\'s email');
+      expect(
+        foreign.status,
+        404,
+        reason: 'Pat\'s candidate id is no use to Sam',
+      );
       expect(
         await repository.participantAccountLinkRepository.listForAccount(pat),
         isEmpty,
@@ -422,7 +434,7 @@ void _tests(SliceBackend backend) {
         final response = await call(
           pat,
           'POST',
-          '/account/link-candidates/${_profileId(1)}/confirm',
+          '/account/link-candidates/${cid(pat, _profileId(1))}/confirm',
         );
 
         expect(response.status, 409);
@@ -441,7 +453,8 @@ void _tests(SliceBackend backend) {
   group('decline', () {
     test('answers 204, is not offered again and repeats as a no-op', () async {
       await issue(1);
-      final path = '/account/link-candidates/${_profileId(1)}/decline';
+      final path =
+          '/account/link-candidates/${cid(pat, _profileId(1))}/decline';
 
       expect((await call(pat, 'POST', path)).status, 204);
       expect(await candidates(pat), isEmpty);
@@ -449,7 +462,7 @@ void _tests(SliceBackend backend) {
       final confirmAfter = await call(
         pat,
         'POST',
-        '/account/link-candidates/${_profileId(1)}/confirm',
+        '/account/link-candidates/${cid(pat, _profileId(1))}/confirm',
       );
       expect(confirmAfter.status, 404);
       expect(
@@ -463,7 +476,7 @@ void _tests(SliceBackend backend) {
       final response = await call(
         otherAccount,
         'POST',
-        '/account/link-candidates/${_profileId(1)}/decline',
+        '/account/link-candidates/${cid(pat, _profileId(1))}/decline',
       );
       expect(response.status, 404);
     });
