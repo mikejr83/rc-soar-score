@@ -450,6 +450,59 @@ void _tests(SliceBackend backend) {
     );
   });
 
+  group('another account holds the pilot', () {
+    setUp(() async {
+      await issue(1);
+      await links.linkFromDirectory(
+        profileId: id(_profileId(1)),
+        accountId: otherAccount,
+        directorAccountId: api.director,
+      );
+    });
+
+    test('the candidate is no longer listed', () async {
+      expect(await candidates(pat), isEmpty);
+    });
+
+    test('declining it is 204 and leaves the holder\'s link alone', () async {
+      final response = await call(
+        pat,
+        'POST',
+        '/account/link-candidates/${cid(pat, _profileId(1))}/decline',
+      );
+
+      expect(response.status, 204);
+      expect(
+        (await repository.participantAccountLinkRepository
+                .findConfirmedForProfile(id(_profileId(1))))
+            ?.accountId,
+        otherAccount,
+      );
+      expect(
+        (await call(otherAccount, 'GET', '/account/links')).json['links'],
+        hasLength(1),
+      );
+    });
+  });
+
+  group('a stale candidate', () {
+    test('cannot be confirmed once its invitation stops opening', () async {
+      await issue(1);
+      final path =
+          '/account/link-candidates/${cid(pat, _profileId(1))}/confirm';
+      await setLifecycle(core.LifecycleState.created);
+
+      final response = await call(pat, 'POST', path);
+
+      expect(response.status, 404);
+      expect((response.json['error']! as Map)['code'], 'link_not_found');
+      expect(
+        await repository.participantAccountLinkRepository.listForAccount(pat),
+        isEmpty,
+      );
+    });
+  });
+
   group('decline', () {
     test('answers 204, is not offered again and repeats as a no-op', () async {
       await issue(1);
@@ -529,6 +582,22 @@ void _tests(SliceBackend backend) {
     test('are empty for an account with no link', () async {
       await issue(1);
       expect(await participations(otherAccount), isEmpty);
+    });
+
+    test('every route is 409 without an invitation secret', () async {
+      for (final (method, path) in [
+        ('POST', '/account/link-candidates/${core.Id.create().value}/confirm'),
+        ('POST', '/account/link-candidates/${core.Id.create().value}/decline'),
+        ('GET', '/account/links'),
+        ('POST', '/account/links/${core.Id.create().value}/end'),
+      ]) {
+        final response = await call(pat, method, path, withSecret: false);
+        expect(response.status, 409, reason: '$method $path');
+        expect(
+          (response.json['error']! as Map)['code'],
+          'invitations_not_available',
+        );
+      }
     });
 
     test('are 409 without an invitation secret', () async {
