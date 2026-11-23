@@ -359,5 +359,54 @@
   "zeroReasonOverflight": "overflight over one minute",
   "@zeroReasonOverflight": {
     "description": "Zero reason: the flight overran the window by more than a minute. Follows 'Zero: '."
+  },
+  "homeHeadline": "Score your flights at the field",
+  "@homeHeadline": {
+    "description": "Headline of the landing page."
+  },
+  "homeIntro": "This is the self-scoring app for RC Soar Score. Open the link your contest director sent you to start scoring.",
+  "@homeIntro": {
+    "description": "Intro text of the landing page."
+  },
+  "homeSignUpButton": "Sign up",
+  "@homeSignUpButton": {
+    "description": "Landing page button that opens the sign-up page of the identity provider."
+  },
+  "homeAccountsComingSoon": "Sign in and sign up are coming in a future release, when pilots can create accounts that track their results over time.",
+  "@homeAccountsComingSoon": {
+    "description": "Landing page note shown in a build where signing in is not available."
+  },
+  "homeAccountsUnavailableHint": "Sign in and sign up are not available yet. Use the link your contest director sent you.",
+  "@homeAccountsUnavailableHint": {
+    "description": "Screen reader hint of the landing page's disabled sign-in buttons."
+  },
+  "homeSignedInAs": "Signed in as {name}",
+  "@homeSignedInAs": {
+    "description": "Landing page line for a signed-in pilot. The placeholder is their name or email.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSignedIn": "You are signed in.",
+  "@homeSignedIn": {
+    "description": "Landing page line for a signed-in pilot whose name is not known."
+  },
+  "homeMyContests": "My contests",
+  "@homeMyContests": {
+    "description": "Landing page button that opens the signed-in pilot's contest list."
+  },
+  "homeSignOutButton": "Sign out",
+  "@homeSignOutButton": {
+    "description": "Landing page button that signs the pilot out."
+  },
+  "homeSignInFailed": "Sign-in could not be started. Try again.",
+  "@homeSignInFailed": {
+    "description": "Landing page message when the sign-in redirect could not start."
+  },
+  "homeLostLink": "Lost your link? Ask your contest director to send your link again.",
+  "@homeLostLink": {
+    "description": "Landing page hint for a pilot who lost their invitation link."
   }
 }
