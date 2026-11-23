@@ -127,9 +127,11 @@ Middleware errorMappingMiddleware() =>
         return handledError(
           request,
           switch (e.code) {
-            'already_linked' => 409,
+            'link_not_found' => 404,
             'profile_not_owned' => 403,
-            _ => 404,
+            // `already_linked`, and any later code: a refusal because of
+            // what is stored.
+            _ => 409,
           },
           e.code,
           e.message,

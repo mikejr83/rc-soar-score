@@ -17,7 +17,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   account's verified email ([LinkCandidatesDto]); empty without one.
 /// - `POST /account/link-candidates/{id}/confirm` says the candidate is the
 ///   caller ([AccountLinkDto]) and claims the entries their guest accounts
-///   made, in one transaction. `{id}` is the candidate's `id`.
+///   made, in one transaction. `{id}` is the candidate's own `id`, not a profile id.
 /// - `POST /account/link-candidates/{id}/decline` says it is not (204); it is
 ///   not offered again.
 /// - `GET /account/links` lists the confirmed links ([AccountLinksDto]).
@@ -69,7 +69,7 @@ void addAccountLinkRoutes(
         candidates: [
           for (final c in candidates)
             LinkCandidateDto(
-              id: c.profileId,
+              id: c.id,
               firstName: c.firstName,
               lastName: c.lastName,
               contests: [
@@ -96,8 +96,12 @@ void addAccountLinkRoutes(
     String id,
   ) async {
     final principal = requirePrincipal(request);
-    final link = await service().confirmCandidate(
-      profileId: _candidateId(id),
+    final links = service();
+    final link = await links.confirmCandidate(
+      profileId: await links.profileOfCandidate(
+        candidateId: _idOrNotFound(id),
+        accountId: principal.accountId,
+      ),
       accountId: principal.accountId,
     );
     return answer((await _linkDtos(repository, [link])).single.toJson());
@@ -108,8 +112,12 @@ void addAccountLinkRoutes(
     String id,
   ) async {
     final principal = requirePrincipal(request);
-    await service().declineCandidate(
-      profileId: _candidateId(id),
+    final links = service();
+    await links.declineCandidate(
+      profileId: await links.profileOfCandidate(
+        candidateId: _idOrNotFound(id),
+        accountId: principal.accountId,
+      ),
       accountId: principal.accountId,
     );
     return Response(204, headers: {'cache-control': 'no-store'});
@@ -126,7 +134,7 @@ void addAccountLinkRoutes(
   router.post('/account/links/<id>/end', (Request request, String id) async {
     final principal = requirePrincipal(request);
     final ended = await service().end(
-      linkId: _linkId(id),
+      linkId: _idOrNotFound(id),
       accountId: principal.accountId,
     );
     return answer((await _linkDtos(repository, [ended])).single.toJson());
@@ -135,10 +143,6 @@ void addAccountLinkRoutes(
 
 /// A path id that is not an id cannot be anyone's candidate or link: the same
 /// answer as one that is not theirs.
-Id _candidateId(String text) => _idOrNotFound(text);
-
-Id _linkId(String text) => _idOrNotFound(text);
-
 Id _idOrNotFound(String text) {
   try {
     return Id.parse(text);

@@ -126,6 +126,19 @@ class ParticipantLinkService {
       if (!match.confirmedElsewhere && match.own == null) match.candidate,
   ];
 
+  /// The profile behind the candidate [candidateId] of [accountId] (see
+  /// [LinkCandidate.id]), among the account's email matches right now.
+  /// `link_not_found` for any other id.
+  Future<Id> profileOfCandidate({
+    required Id candidateId,
+    required Id accountId,
+  }) async {
+    for (final match in await _matching(accountId)) {
+      if (match.candidate.id == candidateId) return match.candidate.profileId;
+    }
+    throw ParticipantLinkError.linkNotFound();
+  }
+
   /// The pilot says a candidate is them: Confirmed, and the guest entries of
   /// the profile are claimed, in one transaction.
   ///
@@ -331,6 +344,10 @@ class ParticipantLinkService {
         if ((reachable[profile.id] ?? const []).isNotEmpty)
           (
             candidate: LinkCandidate(
+              id: invitations.codec.candidateIdFor(
+                accountId: accountId,
+                profileId: profile.id,
+              ),
               profileId: profile.id,
               firstName: profile.firstName,
               lastName: profile.lastName,
