@@ -55,7 +55,46 @@ Future<String> phase2Invitation(
       await pumpUntilFound(tester, find.text('Signed in as Penny Pilot'));
       expect(find.widgetWithText(FilledButton, 'My contests'), findsOneWidget);
     });
+    // The last pilot: the later phases score the first two.
+    final linked = contest.pilotNames.last;
+    await journey.step(
+      'A signed-in pilot with no contest sees a calm page',
+      () async {
+        await tapVisible(
+          tester,
+          find.widgetWithText(FilledButton, 'My contests'),
+        );
+        await pumpUntilFound(tester, find.text('No contests yet'));
+        expect(find.textContaining('invites you'), findsOneWidget);
+        expect(find.text('Invited'), findsNothing);
+      },
+    );
+    await journey.step('A linked contest is listed as invited', () async {
+      await contest.linkPilotAccount(linked);
+      // Leave and come back: the page loads its list when it opens.
+      await openPath(tester, '/');
+      await tapVisible(
+        tester,
+        find.widgetWithText(FilledButton, 'My contests'),
+      );
+      await pumpUntilFound(tester, find.text('E2E Self-Scoring Open'));
+      expect(find.text('Invited'), findsWidgets);
+      expect(find.text('No contests yet'), findsNothing);
+      // A contest that is not published has no public results.
+      expect(find.text('Public results'), findsNothing);
+    });
+    await journey.step('Opening it from the list opens the pilot', () async {
+      await tapVisible(tester, find.text('E2E Self-Scoring Open'));
+      await pumpUntilFound(tester, find.text('2 rounds'));
+      final uri = router.routeInformationProvider.value.uri;
+      expect(
+        uri.pathSegments[uri.pathSegments.indexOf('pilots') + 1],
+        contest.participations[linked],
+      );
+      expect(find.textContaining(linked), findsWidgets);
+    });
     await journey.step('Signing out returns to the landing page', () async {
+      await openPath(tester, '/');
       await tapVisible(tester, find.widgetWithText(OutlinedButton, 'Sign out'));
       await pumpUntilFound(
         tester,

@@ -3,6 +3,8 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_api_handlers/auth/principal.dart';
 import 'package:soar_score_api_handlers/handlers/health_handler.dart';
+import 'package:soar_score_api_handlers/handlers/invitation_handlers.dart'
+    show defaultPublicSiteBaseUrl;
 import 'package:soar_score_api_handlers/handlers/participant_handlers.dart'
     show resolutionResponse;
 import 'package:soar_score_api_handlers/handlers/request_body.dart';
@@ -42,6 +44,10 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   participations list the same way, with no body; 404 `link_not_found`
 ///   for a participation that is not on the caller's list.
 ///
+/// Each participation carries `public_results_url` when the contest is
+/// published and public (the apex site's results page, [publicSiteBaseUrl]),
+/// and null otherwise.
+///
 /// Reads use stored data only and write nothing. Every write is idempotent.
 /// An unknown, foreign or no-longer-eligible id is 404 `link_not_found`;
 /// another account that already holds the pilot is 409 `already_linked`.
@@ -59,6 +65,7 @@ void addAccountLinkRoutes(
   InvitationThrottle? throttle,
   String? trustedProxySecret,
   DateTime Function()? clock,
+  String publicSiteBaseUrl = defaultPublicSiteBaseUrl,
 }) {
   final limits = throttle ?? InvitationThrottle();
   final now = clock ?? DateTime.now;
@@ -83,9 +90,15 @@ void addAccountLinkRoutes(
   router.get('/account/participations', (Request request) async {
     final principal = requirePrincipal(request);
     final rows = await (await service()).participationsFor(principal.accountId);
+    final addresses = await _publicResultsUrls(repository, publicSiteBaseUrl, {
+      for (final row in rows) row.contest.id,
+    });
     return answer(
       AccountParticipationsDto(
-        participations: [for (final row in rows) _participationDto(row)],
+        participations: [
+          for (final row in rows)
+            _participationDto(row, addresses[row.contest.id]),
+        ],
       ).toJson(),
     );
   });
@@ -238,7 +251,34 @@ Id _idOrNotFound(String text) {
   }
 }
 
-AccountParticipationDto _participationDto(LinkedParticipation row) {
+/// The public results address of each contest in [contestIds] that is
+/// published and public; the others have no entry. An unlisted or delisted
+/// contest has none, so the list never links to a page the public cannot find.
+Future<Map<Id, String>> _publicResultsUrls(
+  Repository repository,
+  String baseUrl,
+  Set<Id> contestIds,
+) async {
+  final base = baseUrl.replaceAll(RegExp(r'/+$'), '');
+  final found = await Future.wait([
+    for (final id in contestIds)
+      repository.publicationIdentityRepository.findForContest(id),
+  ]);
+  return {
+    for (final publication in found)
+      if (publication != null &&
+          publication.contestId != null &&
+          publication.visibility == PublicationVisibility.public &&
+          publication.publishedAt != null)
+        publication.contestId!:
+            '$base/results/contests/${publication.id.value}',
+  };
+}
+
+AccountParticipationDto _participationDto(
+  LinkedParticipation row,
+  String? publicResultsUrl,
+) {
   final contest = row.contest;
   return AccountParticipationDto(
     participationId: row.participationId,
@@ -246,6 +286,11 @@ AccountParticipationDto _participationDto(LinkedParticipation row) {
     contestName: contest.name,
     startDateTime: contest.startDateTime,
     endDateTime: contest.endDateTime,
+    startDate: ContestTimeZones.localDate(
+      contest.timezone,
+      contest.startDateTime,
+    ),
+    endDate: ContestTimeZones.localDate(contest.timezone, contest.endDateTime),
     timezone: contest.timezone,
     phase: switch (contest.lifecycleState) {
       LifecycleState.completed => AccountParticipationPhase.completed,
@@ -257,6 +302,7 @@ AccountParticipationDto _participationDto(LinkedParticipation row) {
     city: contest.city,
     state: contest.state,
     country: contest.country,
+    publicResultsUrl: publicResultsUrl,
   );
 }
 

@@ -7,6 +7,7 @@ import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_self_score/data/api_self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_repository.dart';
+import 'package:soar_score_self_score/models/contests_view.dart';
 import 'package:soar_score_self_score/models/entry_context.dart';
 import 'package:soar_score_self_score/models/group_result_row.dart';
 import 'package:soar_score_self_score/models/guest_session.dart';
@@ -556,5 +557,89 @@ void main() {
       '22nd',
       '103rd',
     ]);
+  });
+
+  group('contests', () {
+    const participation = '019c0000-0000-7000-8000-00000000d201';
+
+    String list(Map<String, Object?> extra) => jsonEncode({
+      'participations': [
+        {
+          'participation_id': participation,
+          'contest_id': '019c0000-0000-7000-8000-000000000045',
+          'contest_name': 'Spring Open',
+          'start_date_time': '2026-10-17T14:00:00.000Z',
+          'end_date_time': '2026-10-19T04:00:00.000Z',
+          'start_date': '2026-10-17',
+          'end_date': '2026-10-18',
+          'timezone': 'America/Denver',
+          'phase': 'in_progress',
+          'read_only': false,
+          'host': null,
+          'city': 'Denver',
+          'state': 'CO',
+          'country': ' ',
+          'public_results_url': null,
+          ...extra,
+        },
+      ],
+    });
+
+    test('reads the list, with dates as the contest wrote them', () async {
+      final view = await _repository((request) {
+        expect(request.url.path, '/api/v1/account/participations');
+        return _json(
+          list({'public_results_url': 'https://rcsoarscore.com/results/x'}),
+        );
+      }).contests();
+
+      final contest = view.contests.single;
+      expect(contest.participationId, participation);
+      expect(contest.name, 'Spring Open');
+      expect(contest.startDate, DateTime.utc(2026, 10, 17));
+      expect(contest.endDate, DateTime.utc(2026, 10, 18));
+      expect(contest.phase, ContestPhase.inProgress);
+      expect(contest.location, 'Denver, CO');
+      expect(
+        contest.publicResultsUrl,
+        Uri.parse('https://rcsoarscore.com/results/x'),
+      );
+    });
+
+    test('an address that is not a web page is no address', () async {
+      final view = await _repository(
+        (_) => _json(list({'public_results_url': 'javascript:alert(1)'})),
+      ).contests();
+
+      expect(view.contests.single.publicResultsUrl, isNull);
+    });
+
+    test('a 401 is the sign-in ending, not the guest session', () async {
+      await expectLater(
+        _repository((_) => _json('', 401)).contests(),
+        throwsA(isA<SignedOutException>()),
+      );
+    });
+
+    test('opening a contest gives the session the server sent', () async {
+      final session = await _repository((request) {
+        expect(
+          request.url.path,
+          '/api/v1/account/participations/$participation/session',
+        );
+        expect(request.method, 'POST');
+        return _json(_fixture('resolve_invitation_response'));
+      }).openContest(participation);
+
+      expect(session.pilotName, 'Alex Rivera');
+      expect(session.token, 'example-session-token');
+    });
+
+    test('a contest that left the list is said so', () async {
+      await expectLater(
+        _repository((_) => _json('{}', 404)).openContest(participation),
+        throwsA(isA<ContestNotOnListException>()),
+      );
+    });
   });
 }

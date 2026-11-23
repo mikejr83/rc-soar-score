@@ -55,6 +55,7 @@ createHandlers(
   String? trustedProxySecret,
   Set<String> corsAllowedOrigins = const {},
   String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
+  String publicSiteBaseUrl = defaultPublicSiteBaseUrl,
   PromotionIntentPolicy? promotionIntents,
 }) {
   // One recalculation service for every route that triggers the automatic
@@ -81,6 +82,7 @@ createHandlers(
     invitations: invitations,
     throttle: invitationThrottle,
     trustedProxySecret: trustedProxySecret,
+    publicSiteBaseUrl: publicSiteBaseUrl,
   );
   addContestRoutes(router, repository, publishingEnabled: publishingEnabled);
   addConfigurationRoutes(router, repository, recalculation: recalculation);

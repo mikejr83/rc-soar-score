@@ -31,6 +31,8 @@ class AccountParticipationDto {
     required this.contestName,
     required this.startDateTime,
     required this.endDateTime,
+    required this.startDate,
+    required this.endDate,
     required this.timezone,
     required this.phase,
     required this.readOnly,
@@ -38,6 +40,7 @@ class AccountParticipationDto {
     this.city,
     this.state,
     this.country,
+    this.publicResultsUrl,
   });
 
   factory AccountParticipationDto.fromJson(Map<String, dynamic> json) =>
@@ -48,6 +51,12 @@ class AccountParticipationDto {
   final String contestName;
   final DateTime startDateTime;
   final DateTime endDateTime;
+
+  /// The first and last day of the contest in its own time zone, as
+  /// `YYYY-MM-DD`: what a pilot reads on the schedule, which the UTC
+  /// timestamps above cannot give without the zone database.
+  final String startDate;
+  final String endDate;
 
   /// The contest's IANA time zone id.
   final String timezone;
@@ -63,6 +72,10 @@ class AccountParticipationDto {
   final String? city;
   final String? state;
   final String? country;
+
+  /// Where the contest's results are on the public site, or null when the
+  /// contest is not published and public.
+  final String? publicResultsUrl;
 
   Map<String, dynamic> toJson() => _$AccountParticipationDtoToJson(this);
 }

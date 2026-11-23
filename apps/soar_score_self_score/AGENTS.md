@@ -29,6 +29,10 @@ On the web the guest session is an HttpOnly cookie (`__Host-soar_guest`, host-on
 
 `lib/auth/` holds the sign-in: `AuthSession` (the interface pages see), `Auth0WebSession` (Auth0's SPA SDK, redirect flow, returns to the origin root; `restore()` runs in `main` before the first frame), `E2eAuthSession` (the `SOAR_SCORE_E2E` build only: signing in is instant, as the E2E server's seeded pilot) and `UnavailableAuthSession` (the default when no `AuthScope` is above a page, so a page tested alone shows no sign-in). Pages read it with `context.auth`. `ApiClient.accountTokenProvider` sends the Auth0 access token to the account routes only; the participant routes keep the guest token, because a bearer on them takes the place of the guest cookie. Settings are in `docs/auth0-setup.md`.
 
+## Contests page
+
+`/contests` (`pages/contests_page.dart`) is the signed-in pilot's list from `GET /account/participations` (`SelfScoreRepository.contests`): In progress, Invited and Completed sections (a section with no contest has no heading), a calm empty state, and a Sign in prompt when signed out (nothing is loaded then). A card opens the contest through `openContest` (`POST /account/participations/{id}/session`): the answer is stored as the guest session store's session and the router goes to the pilot overview, so everything after it is the guest-session path. A card shows Public results only when the server sent `public_results_url`. A 401 on the account routes is `SignedOutException` (the guest session is left alone); a contest that left the list is `ContestNotOnListException` and the list reloads. Dates arrive as `YYYY-MM-DD` in the contest's zone, because the app carries no zone database. Completed contests leave the list 24 hours after completion; the long-term history is #654.
+
 ## Design Notes
 
 - The app is mobile-first: the first release is mobile web, viewed almost always on a phone, with native apps a future goal. Tablet and desktop layouts are very low priority. Official score entry in the contest app is the tablet-first screen (`docs/adr/0002-score-entry-layout.md`); self-scoring is not.

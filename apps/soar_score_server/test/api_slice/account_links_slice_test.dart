@@ -551,6 +551,8 @@ void _tests(SliceBackend backend) {
       expect(row['contest_id'], _contestId);
       expect(row['contest_name'], 'Spring Open');
       expect(row['timezone'], 'America/Denver');
+      expect(row['start_date'], matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')));
+      expect(row['end_date'], matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')));
       expect(row['phase'], 'invited', reason: 'scoring is open, not running');
       expect(row['read_only'], false);
       expect(response.text, isNot(contains(api.director.value)));
@@ -578,6 +580,54 @@ void _tests(SliceBackend backend) {
       expect(row['phase'], 'completed');
       expect(row['read_only'], true);
     });
+
+    test(
+      'carry the public results address only for a public contest',
+      () async {
+        await issue(1);
+        await confirm(pat, _profileId(1));
+        Future<Object?> address() async =>
+            ((await participations(pat)).single! as Map)['public_results_url'];
+        expect(await address(), isNull, reason: 'never published');
+
+        final publicationId = core.Id.create();
+        Future<void> publication(core.PublicationVisibility visibility) =>
+            repository.publicationIdentityRepository
+                .save(
+                  core.PublicationIdentity(
+                    id: publicationId,
+                    contestId: id(_contestId),
+                    verificationEmail: 'director@example.com',
+                    visibility: visibility,
+                    publishedAt: clock,
+                    contestStartsAt: clock,
+                  ),
+                )
+                .then((_) {});
+
+        await publication(core.PublicationVisibility.unlisted);
+        expect(await address(), isNull, reason: 'unlisted is not public');
+
+        final saved = await repository.publicationIdentityRepository.findById(
+          publicationId,
+        );
+        await repository.publicationIdentityRepository.save(
+          core.PublicationIdentity(
+            id: publicationId,
+            contestId: id(_contestId),
+            verificationEmail: 'director@example.com',
+            visibility: core.PublicationVisibility.public,
+            publishedAt: clock,
+            contestStartsAt: clock,
+            revision: saved!.revision,
+          ),
+        );
+        expect(
+          await address(),
+          'https://rcsoarscore.com/results/contests/${publicationId.value}',
+        );
+      },
+    );
 
     test('are empty for an account with no link', () async {
       await issue(1);

@@ -113,8 +113,12 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
               : widget.builder(context, data);
         } else if (snapshot.hasError) {
           final error = snapshot.error;
-          body = error is SessionEndedException
-              // Retrying cannot help: the person needs their link again.
+          body =
+              error is SelfScoreLoadException &&
+                  (error is SessionEndedException ||
+                      error is SignedOutException)
+              // Retrying cannot help: the person needs their link, or to sign
+              // in, again.
               ? LoadErrorView(
                   message: error.message,
                   onRetry: () => context.go(homePath),
