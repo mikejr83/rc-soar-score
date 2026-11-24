@@ -239,10 +239,22 @@ abstract class AppLocalizations {
   /// **'This link no longer works. Ask the contest director for a new one.'**
   String get claimInvalid;
 
+  /// Shown when the account's sign-in was refused while claiming an invitation link.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sign-in has expired. Go to the landing page, sign in again, then open this link again.'**
+  String get claimSignInExpired;
+
+  /// Shown when the server refuses to link the signed-in account to the pilot, for example when the account's email is not verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account cannot be linked to this pilot. You can continue as a guest.'**
+  String get claimCannotLink;
+
   /// Shown when the invitation could not be claimed for the signed-in pilot.
   ///
   /// In en, this message translates to:
-  /// **'Could not continue with your account. Check your network connection and try again, or continue as a guest.'**
+  /// **'Could not continue with your account. Try again, or continue as a guest.'**
   String get claimFailed;
 
   /// Heading when an invitation link is unknown, expired or replaced.

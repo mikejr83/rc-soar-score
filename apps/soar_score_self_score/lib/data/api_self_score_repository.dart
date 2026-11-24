@@ -127,6 +127,14 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       if (claim && error.statusCode == 409) {
         throw const PilotAlreadyLinkedException();
       }
+      if (claim && error.statusCode == 401) {
+        throw const AccountSignInExpiredException();
+      }
+      // 404 `link_not_found` is the account, not the link: an invalid link
+      // answers `invalid_invitation`.
+      if (claim && _codeOf(error) == 'link_not_found') {
+        throw const AccountCannotLinkException();
+      }
       // Every way the server says no to a link reads the same, whatever
       // the body: the bare error, the envelope, or nothing at all.
       if (_codeOf(error) == ParticipantErrorCodes.invalidInvitation ||

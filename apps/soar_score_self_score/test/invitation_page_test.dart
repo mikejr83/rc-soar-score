@@ -41,6 +41,19 @@ class _AccountRepository extends SampleSelfScoreRepository {
   }
 }
 
+class _ReturningAuth extends E2eAuthSession {
+  _ReturningAuth(this._returnTo);
+
+  String? _returnTo;
+
+  @override
+  String? takeReturnTo() {
+    final path = _returnTo;
+    _returnTo = null;
+    return path;
+  }
+}
+
 class _RecordingAuth extends E2eAuthSession {
   final signIns = <String?>[];
 
@@ -525,6 +538,28 @@ void _accountTests() {
     await tester.tap(find.widgetWithText(OutlinedButton, 'Sign in'));
     await tester.pumpAndSettle();
     expect(auth.signIns, [invitationPath('sample-link')]);
+  });
+
+  testWidgets('coming back from sign-in lands on the link once', (
+    tester,
+  ) async {
+    final auth = _ReturningAuth(invitationPath('sample-link'));
+    await auth.signIn();
+    await _pump(tester, store: MemoryGuestSessionStore(), auth: auth);
+    router.go('/app-info');
+    await tester.pumpAndSettle();
+    router.go('/');
+    await tester.pumpAndSettle();
+    expect(find.text('Hello, Jane Smith'), findsOneWidget);
+    expect(find.text('Continue as Penny Pilot'), findsOneWidget);
+
+    // The value is spent: the next visit to the landing page stays there.
+    router.go('/app-info');
+    await tester.pumpAndSettle();
+    router.go('/');
+    await tester.pumpAndSettle();
+    expect(find.text('Hello, Jane Smith'), findsNothing);
+    expect(find.text('Signed in as Penny Pilot'), findsOneWidget);
   });
 
   testWidgets('signed in, Continue as <name> claims the link', (tester) async {

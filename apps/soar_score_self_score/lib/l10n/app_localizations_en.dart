@@ -97,8 +97,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'This link no longer works. Ask the contest director for a new one.';
 
   @override
+  String get claimSignInExpired =>
+      'Your sign-in has expired. Go to the landing page, sign in again, then open this link again.';
+
+  @override
+  String get claimCannotLink =>
+      'Your account cannot be linked to this pilot. You can continue as a guest.';
+
+  @override
   String get claimFailed =>
-      'Could not continue with your account. Check your network connection and try again, or continue as a guest.';
+      'Could not continue with your account. Try again, or continue as a guest.';
 
   @override
   String get invalidLinkTitle => 'This link does not work';

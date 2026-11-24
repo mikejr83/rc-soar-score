@@ -59,6 +59,10 @@ class _InvitationPageState extends State<InvitationPage> {
       return null;
     } on PilotAlreadyLinkedException {
       return ClaimFailure.alreadyLinked;
+    } on AccountSignInExpiredException {
+      return ClaimFailure.signInExpired;
+    } on AccountCannotLinkException {
+      return ClaimFailure.cannotLink;
     } on InvalidInvitationException {
       return ClaimFailure.invalid;
     } on Object {
@@ -128,7 +132,13 @@ class _InvitationPageState extends State<InvitationPage> {
 }
 
 /// Why claiming a link for the signed-in account did not work.
-enum ClaimFailure { alreadyLinked, invalid, unreachable }
+enum ClaimFailure {
+  alreadyLinked,
+  signInExpired,
+  cannotLink,
+  invalid,
+  unreachable,
+}
 
 class _Welcome extends StatefulWidget {
   const _Welcome({
@@ -152,6 +162,7 @@ class _WelcomeState extends State<_Welcome> {
   bool _claiming = false;
   ClaimFailure? _failure;
   bool _signInFailed = false;
+  bool _signingIn = false;
 
   Future<void> _claim() async {
     setState(() {
@@ -168,11 +179,17 @@ class _WelcomeState extends State<_Welcome> {
   }
 
   Future<void> _signIn(AuthSession auth, {required bool createAccount}) async {
-    setState(() => _signInFailed = false);
+    if (_signingIn) return;
+    setState(() {
+      _signInFailed = false;
+      _signingIn = true;
+    });
     try {
       await widget.onSignIn(auth, createAccount: createAccount);
     } on AuthException {
       if (mounted) setState(() => _signInFailed = true);
+    } finally {
+      if (mounted) setState(() => _signingIn = false);
     }
   }
 
@@ -238,6 +255,8 @@ class _WelcomeState extends State<_Welcome> {
               child: Text(
                 switch (failure) {
                   ClaimFailure.alreadyLinked => l10n.claimAlreadyLinked,
+                  ClaimFailure.signInExpired => l10n.claimSignInExpired,
+                  ClaimFailure.cannotLink => l10n.claimCannotLink,
                   ClaimFailure.invalid => l10n.claimInvalid,
                   ClaimFailure.unreachable => l10n.claimFailed,
                 },

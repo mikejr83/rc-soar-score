@@ -49,6 +49,23 @@ class PilotAlreadyLinkedException implements Exception {
   String toString() => 'The pilot is already linked to another account.';
 }
 
+/// The signed-in pilot's access token was refused while claiming a link.
+class AccountSignInExpiredException implements Exception {
+  const AccountSignInExpiredException();
+
+  @override
+  String toString() => 'The account sign-in has expired.';
+}
+
+/// The server cannot link the signed-in account to this pilot (for example,
+/// its email is not verified). The link itself is fine.
+class AccountCannotLinkException implements Exception {
+  const AccountCannotLinkException();
+
+  @override
+  String toString() => 'The account cannot be linked to this pilot.';
+}
+
 /// Everything the self-scoring pages read. Pages depend on this and not on
 /// the API client, so the API-backed version can replace the sample one
 /// without touching a page. Each method throws [SelfScoreLoadException] when
@@ -63,7 +80,9 @@ abstract interface class SelfScoreRepository {
   /// is linked to the pilot the link is for, the entries made as a guest are
   /// kept under the account, and the session returned acts as the account.
   /// Throws [InvalidInvitationException] for a link that does not open and
-  /// [PilotAlreadyLinkedException] when another account holds the pilot.
+  /// [PilotAlreadyLinkedException] when another account holds the pilot,
+  /// [AccountSignInExpiredException] when the sign-in was refused and
+  /// [AccountCannotLinkException] when the account cannot be linked.
   Future<GuestSession> claimInvitation(String credential);
 
   /// Sends a score. Resolves with what the server decided; a refusal is a

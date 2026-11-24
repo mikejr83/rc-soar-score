@@ -116,7 +116,15 @@
   "@claimInvalid": {
     "description": "Shown when the invitation link stopped working while the pilot was signing in."
   },
-  "claimFailed": "Could not continue with your account. Check your network connection and try again, or continue as a guest.",
+  "claimSignInExpired": "Your sign-in has expired. Go to the landing page, sign in again, then open this link again.",
+  "@claimSignInExpired": {
+    "description": "Shown when the account's sign-in was refused while claiming an invitation link."
+  },
+  "claimCannotLink": "Your account cannot be linked to this pilot. You can continue as a guest.",
+  "@claimCannotLink": {
+    "description": "Shown when the server refuses to link the signed-in account to the pilot, for example when the account's email is not verified."
+  },
+  "claimFailed": "Could not continue with your account. Try again, or continue as a guest.",
   "@claimFailed": {
     "description": "Shown when the invitation could not be claimed for the signed-in pilot."
   },

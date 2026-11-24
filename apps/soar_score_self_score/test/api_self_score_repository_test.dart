@@ -239,6 +239,24 @@ void main() {
     );
   });
 
+  test('claiming with a refused sign-in says the sign-in expired', () {
+    final repository = _repository((_) => _json('{}', 401));
+    expect(
+      repository.claimInvitation('abc'),
+      throwsA(isA<AccountSignInExpiredException>()),
+    );
+  });
+
+  test('claiming with an account that cannot link is not the link', () {
+    final repository = _repository(
+      (_) => _json('{"error":{"code":"link_not_found"}}', 404),
+    );
+    expect(
+      repository.claimInvitation('abc'),
+      throwsA(isA<AccountCannotLinkException>()),
+    );
+  });
+
   test('claiming a bad link is the invalid-link failure', () {
     final repository = _repository(
       (_) => _json(_fixture('error_invalid_invitation'), 404),
