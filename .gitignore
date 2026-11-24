@@ -46,3 +46,6 @@ graphify-out/*
 /.kilo/plans
 # Chrome and chromedriver installed by scripts/e2e-setup
 /.e2e-tools/
+kilo_export/
+tools/other/
+apps/soar_score_contest/translation_test/

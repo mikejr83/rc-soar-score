@@ -7011,19 +7011,19 @@ abstract class AppLocalizations {
   /// Status chip of a scoring row whose official score the contest accepted on its own and the director has not confirmed.
   ///
   /// In en, this message translates to:
-  /// **'Official · automatic'**
+  /// **'Official · auto'**
   String get scoreAcceptedAutomatically;
 
   /// Explanation under the Official · automatic chip of a scoring row.
   ///
   /// In en, this message translates to:
-  /// **'Made official automatically when its round or group was fully scored. Confirm it to close it to review.'**
+  /// **'Confirm it to close it to review.'**
   String get scoreAutomaticNote;
 
   /// Note on a scoring row whose automatically accepted score is locked, so review and Confirm no longer apply.
   ///
   /// In en, this message translates to:
-  /// **'Official (automatic). This score is locked.'**
+  /// **'Official (auto). This score is locked.'**
   String get scoreAutomaticLocked;
 
   /// Status chip of a scoring row with typed values that are not saved yet.
