@@ -118,8 +118,9 @@ class ResultsService {
     };
     final placeholders = {
       for (final placeholder
-          in await repository.scorePlaceholderRepository
-              .listForAssignments(groupOf.keys))
+          in await repository.scorePlaceholderRepository.listForAssignments(
+            groupOf.keys,
+          ))
         placeholder.id: placeholder,
     };
     final flights = <RoundFlightResult>[];

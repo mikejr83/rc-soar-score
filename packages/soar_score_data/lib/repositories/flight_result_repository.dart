@@ -32,14 +32,10 @@ class FlightResultRepository extends DriftRepository
   Future<List<core.FlightResult>> listForRound(
     core.Id contestId,
     core.Id roundId,
-  ) => _store.whereSql(
-    'contest_id = ? AND credited_round_id = ?',
-    [
-      Variable<String>(contestId.value),
-      Variable<String>(roundId.value),
-    ],
-    orderBy: 'id',
-  );
+  ) => _store.whereSql('contest_id = ? AND credited_round_id = ?', [
+    Variable<String>(contestId.value),
+    Variable<String>(roundId.value),
+  ], orderBy: 'id');
 
   @override
   Future<List<core.FlightResult>> listForParticipation(

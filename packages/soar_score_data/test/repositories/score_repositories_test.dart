@@ -97,7 +97,9 @@ void _tests(Backend backend) {
 
       expect(
         await repo.listForAssignments(ids),
-        unorderedEquals(placeholders.where((p) => ids.contains(p.assignmentId))),
+        unorderedEquals(
+          placeholders.where((p) => ids.contains(p.assignmentId)),
+        ),
       );
       expect(await repo.listForAssignments(const []), isEmpty);
     });
