@@ -7,7 +7,7 @@ Thin executable that wires dependencies, starts the shelf_io server, and exposes
 - `lib/main.dart` — entry point; parse flags, wire, call `shelf_io.serve`
 - `lib/server.dart` — startup, dependency injection, port binding
 - `lib/auth/` — Auth0 token verification (JWKS) and the `/userinfo` profile source
-- `tool/e2e_server.dart` � test-only server for the web E2E tests: SQLite, demo data, **no token checks**. Never deploy it.
+- `tool/e2e_server.dart` � test-only server for the web E2E tests: SQLite, demo data, **no token checks**. Never deploy it. With `--profile server` it also has a pilot account (Penny Pilot, verified email): a request with `Authorization: Bearer e2e-pilot` acts as it, any other as the director, and `POST /__e2e/pilot-account-link` (`tool/e2e_pilot_account.dart`) puts it in front of a participation as an "Is this you?" candidate or a confirmed link, for the signed-in self-scoring journeys (#546).
 - `lib/handler.dart` — wires `soar_score_api_handlers` to the repositories
 
 ## Boundaries

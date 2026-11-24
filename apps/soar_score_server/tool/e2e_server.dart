@@ -26,6 +26,7 @@ import 'package:soar_score_core/soar_score_core.dart'
 import 'package:soar_score_data/soar_score_data.dart';
 
 import 'e2e_database.dart';
+import 'e2e_pilot_account.dart';
 
 /// The secret the E2E server signs invitation links with. Public on purpose:
 /// this server is never deployed.
@@ -93,6 +94,14 @@ const e2eInvitationSecret = 'e2e-invitation-secret-at-least-32-bytes-long';
 /// the answer says how many were adopted. Test-only, like the rest of this
 /// server.
 ///
+/// With `--profile server` the server also has a pilot account, Penny Pilot
+/// (registered, verified email [e2ePilotEmail], no contests), which a request
+/// acts as when it sends `Authorization: Bearer e2e-pilot` ([e2ePilotToken]);
+/// every other request acts as the director, as before. This stands in for the
+/// signed-in self-scoring app's Auth0 token. `POST /__e2e/pilot-account-link`
+/// puts the account in front of a participation as an "Is this you?" candidate
+/// or a confirmed link; see [e2ePilotAccountLink]. Test-only.
+///
 /// Invitations (the self-scoring app's links and guest sessions) are on, signed
 /// with the fixed [e2eInvitationSecret]. `POST /__e2e/advance-clock?hours=N`
 /// moves the invitation service's clock forward by N hours, so a journey can
@@ -124,6 +133,18 @@ Future<void> main(List<String> args) async {
   final repository = Repository(database);
 
   final clock = _AdvanceableClock();
+  // Only the service gets the advanceable clock: link and guest session
+  // expiry are enforced inside it. The participant handler keeps the real
+  // clock, which only sets the cookie's Max-Age at resolve time; do not hand
+  // it this clock.
+  final invitations = InvitationService(
+    repository,
+    InvitationCodec.fromText(e2eInvitationSecret),
+    clock: clock.now,
+  );
+  // The server profile also has the pilot account the signed-in self-scoring
+  // app acts as; the installation profile has no such accounts.
+  final pilotId = serverProfile ? await seedE2ePilotAccount(repository) : null;
   final inFlight = InFlightRequests();
   final handler = Pipeline()
       .addMiddleware(inFlight.middleware)
@@ -135,6 +156,11 @@ Future<void> main(List<String> args) async {
       .addMiddleware(_pilotSubmission(repository))
       .addMiddleware(_pilotReview(repository))
       .addMiddleware(_directorAdopt(repository, localAccountId))
+      .addMiddleware(
+        pilotId == null
+            ? (inner) => inner
+            : e2ePilotAccountLink(repository, invitations, pilot: pilotId),
+      )
       .addHandler(
         buildApiHandler(
           name: 'soar_score_e2e',
@@ -143,16 +169,10 @@ Future<void> main(List<String> args) async {
           schemaRevision: database.schemaVersion,
           repository: repository,
           publishingEnabled: publishingEnabled,
-          // Only the service gets the advanceable clock: link and guest
-          // session expiry are enforced inside it. The participant handler
-          // keeps the real clock, which only sets the cookie's Max-Age at
-          // resolve time; do not hand it this clock.
-          invitations: InvitationService(
-            repository,
-            InvitationCodec.fromText(e2eInvitationSecret),
-            clock: clock.now,
-          ),
-          authMiddleware: fixedPrincipal(Principal(accountId: localAccountId)),
+          invitations: invitations,
+          authMiddleware: pilotId == null
+              ? fixedPrincipal(Principal(accountId: localAccountId))
+              : e2ePrincipal(director: localAccountId, pilot: pilotId),
           // Draws are held a few seconds so a journey can see their progress
           // and cancel one.
           drawRunner: const DelayedDrawRunner(IsolateDrawRunner()),
