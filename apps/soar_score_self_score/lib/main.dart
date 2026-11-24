@@ -1,6 +1,9 @@
+import 'package:logging/logging.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_core/soar_score_core.dart'
+    show LogFormat, configureLogging;
 import 'package:soar_score_ui/soar_score_ui.dart';
 
 import 'api_client_provider.dart';
@@ -22,6 +25,8 @@ import 'session/score_draft_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Warnings (a failed sign-in restore, say) go to the browser console.
+  configureLogging(level: Level.INFO, format: LogFormat.text, sink: debugPrint);
   // Invitation links are plain paths, not `#/...` addresses.
   usePathUrlStrategy();
   registerBrandFontLicenses();

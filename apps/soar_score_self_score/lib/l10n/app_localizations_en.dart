@@ -328,4 +328,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get homeLostLink =>
       'Lost your link? Ask your contest director to send your link again.';
+
+  @override
+  String get homeSignOutFailed => 'Sign-out could not be completed. Try again.';
 }

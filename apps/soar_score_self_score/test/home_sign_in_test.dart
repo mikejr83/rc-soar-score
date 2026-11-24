@@ -12,6 +12,13 @@ import 'package:soar_score_self_score/router.dart';
 class _FakeAuth extends E2eAuthSession {
   final calls = <String>[];
   bool failNext = false;
+  bool failSignOut = false;
+
+  @override
+  Future<void> signOut() async {
+    if (failSignOut) throw StateError('logout failed');
+    await super.signOut();
+  }
 
   @override
   Future<void> signIn({bool createAccount = false}) async {
@@ -104,6 +111,20 @@ void main() {
     await tester.pumpAndSettle();
     expect(auth.isSignedIn, isFalse);
     expect(find.widgetWithText(FilledButton, 'Sign in'), findsOneWidget);
+  });
+
+  testWidgets('a sign-out that fails says so and stays signed in', (
+    tester,
+  ) async {
+    final auth = _FakeAuth();
+    await auth.signIn();
+    auth.failSignOut = true;
+    await _pump(tester, auth);
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Sign out'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sign-out could not be completed. Try again.'), findsOne);
+    expect(auth.isSignedIn, isTrue);
   });
 
   test('the E2E session gives the E2E server its pilot token', () async {

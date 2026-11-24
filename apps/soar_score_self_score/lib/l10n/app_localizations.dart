@@ -628,6 +628,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lost your link? Ask your contest director to send your link again.'**
   String get homeLostLink;
+
+  /// Landing page message when signing out failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-out could not be completed. Try again.'**
+  String get homeSignOutFailed;
 }
 
 class _AppLocalizationsDelegate

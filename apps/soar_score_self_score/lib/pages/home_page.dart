@@ -181,17 +181,33 @@ class _SignedOut extends StatelessWidget {
   }
 }
 
-class _SignedIn extends StatelessWidget {
+class _SignedIn extends StatefulWidget {
   const _SignedIn({required this.auth});
 
   final AuthSession auth;
+
+  @override
+  State<_SignedIn> createState() => _SignedInState();
+}
+
+class _SignedInState extends State<_SignedIn> {
+  bool _failed = false;
+
+  Future<void> _signOut() async {
+    setState(() => _failed = false);
+    try {
+      await widget.auth.signOut();
+    } on Object {
+      if (mounted) setState(() => _failed = true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
-    final name = auth.displayName;
+    final name = widget.auth.displayName;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -212,9 +228,17 @@ class _SignedIn extends StatelessWidget {
             minimumSize: const Size.fromHeight(48),
             side: BorderSide(color: scheme.onSurface, width: 1.5),
           ),
-          onPressed: auth.signOut,
+          onPressed: _signOut,
           child: Text(l10n.homeSignOutButton),
         ),
+        if (_failed) ...[
+          const SizedBox(height: 8),
+          Text(
+            l10n.homeSignOutFailed,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(color: scheme.error),
+          ),
+        ],
       ],
     );
   }
