@@ -15,6 +15,10 @@ abstract interface class FlightResultRepository {
   /// The results of [contestId], in the order they were created.
   Future<List<FlightResult>> listForContest(Id contestId);
 
+  /// The results of [contestId] credited to [roundId], in the order they
+  /// were created.
+  Future<List<FlightResult>> listForRound(Id contestId, Id roundId);
+
   /// The results of [contestParticipationId], in the order they were created.
   Future<List<FlightResult>> listForParticipation(Id contestParticipationId);
 

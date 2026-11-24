@@ -198,6 +198,17 @@ class StubScorePlaceholderRepository implements ScorePlaceholderRepository {
   ];
 
   @override
+  Future<List<ScorePlaceholder>> listForAssignments(
+    Iterable<Id> assignmentIds,
+  ) async {
+    final ids = assignmentIds.toSet();
+    return [
+      for (final placeholder in stored)
+        if (ids.contains(placeholder.assignmentId)) placeholder,
+    ];
+  }
+
+  @override
   Future<ScorePlaceholder?> findForAssignment(Id assignmentId) async => stored
       .where((placeholder) => placeholder.assignmentId == assignmentId)
       .firstOrNull;

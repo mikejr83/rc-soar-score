@@ -43,6 +43,11 @@ class ScorePlaceholderRepository extends DriftRepository
   );
 
   @override
+  Future<List<core.ScorePlaceholder>> listForAssignments(
+    Iterable<core.Id> assignmentIds,
+  ) => _store.whereIdIn('assignment_id', assignmentIds, orderBy: 'id');
+
+  @override
   Future<core.ScorePlaceholder> save(
     core.ScorePlaceholder placeholder, {
     required core.MutationMetadata metadata,

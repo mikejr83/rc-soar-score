@@ -92,6 +92,16 @@ void _tests(Backend backend) {
       );
     });
 
+    test('lists by assignments', () async {
+      final ids = {for (final p in placeholders.take(2)) p.assignmentId};
+
+      expect(
+        await repo.listForAssignments(ids),
+        unorderedEquals(placeholders.where((p) => ids.contains(p.assignmentId))),
+      );
+      expect(await repo.listForAssignments(const []), isEmpty);
+    });
+
     test('save bumps the revision and refuses a stale copy', () async {
       final saved = await repo.save(
         withState(open, 'Submitted'),
