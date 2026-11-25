@@ -65,24 +65,34 @@ class ParticipantAccountLinkRepository extends DriftRepository
     required Iterable<core.Id> guestAccountIds,
   }) => db.transaction(() async {
     final saved = await save(link);
+    await _claim(link.accountId, guestAccountIds);
+    return saved;
+  });
+
+  @override
+  Future<void> claimGuests(
+    core.Id accountId, {
+    required Iterable<core.Id> guestAccountIds,
+  }) => db.transaction(() => _claim(accountId, guestAccountIds));
+
+  Future<void> _claim(
+    core.Id accountId,
+    Iterable<core.Id> guestAccountIds,
+  ) async {
     for (final guest in guestAccountIds.toSet()) {
-      if (guest == link.accountId) continue;
+      if (guest == accountId) continue;
       for (final MapEntry(key: table, value: columns)
           in guestAccountReferences.entries) {
         for (final column in columns) {
           await _repoint(
             table,
             'UPDATE $table SET $column = ? WHERE $column = ?',
-            [
-              Variable<String>(link.accountId.value),
-              Variable<String>(guest.value),
-            ],
+            [Variable<String>(accountId.value), Variable<String>(guest.value)],
           );
         }
       }
     }
-    return saved;
-  });
+  }
 
   @override
   Future<core.ParticipantAccountLink> saveReleasingInvitations(

@@ -482,7 +482,9 @@ class InvitationService {
         actorId: guest,
       );
       if (session != null) return session;
-      // A concurrent open changed the redeemer first: read it again.
+      // A concurrent open changed the redeemer first: read it again, when
+      // another attempt follows.
+      if (attempt == 2) break;
       final latest = await repository.invitationRepository.findById(stored.id);
       if (latest == null) break;
       stored = latest;

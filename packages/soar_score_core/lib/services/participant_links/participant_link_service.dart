@@ -510,9 +510,13 @@ class ParticipantLinkService {
       // later invitation of the profile since: claiming is idempotent (rows
       // already claimed match nothing), so a Confirmed link never keeps
       // unclaimed guest entries.
+      // The link itself is not rewritten, so two opens of the same account
+      // claiming at once cannot conflict on its revision.
       final guests = await _guestsOf(profileId);
-      if (guests.isEmpty) return existing;
-      return links.saveClaimingGuests(existing, guestAccountIds: guests);
+      if (guests.isNotEmpty) {
+        await links.claimGuests(accountId, guestAccountIds: guests);
+      }
+      return existing;
     }
 
     final earlier = await links.find(

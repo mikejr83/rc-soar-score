@@ -39,6 +39,18 @@ abstract interface class ParticipantAccountLinkRepository {
   ///
   /// Either both happen or neither. Repeating it is a no-op once nothing is
   /// held by the guests. The guest account rows are kept.
+  /// Makes [accountId] the owner of what the guest accounts in
+  /// [guestAccountIds] hold, as [saveClaimingGuests] does, without storing or
+  /// changing any link, in one transaction.
+  ///
+  /// For a link that is already Confirmed: it never conflicts with another
+  /// request that claims the same guests, and repeating it is a no-op once
+  /// nothing is held by the guests.
+  Future<void> claimGuests(
+    Id accountId, {
+    required Iterable<Id> guestAccountIds,
+  });
+
   Future<ParticipantAccountLink> saveClaimingGuests(
     ParticipantAccountLink link, {
     required Iterable<Id> guestAccountIds,

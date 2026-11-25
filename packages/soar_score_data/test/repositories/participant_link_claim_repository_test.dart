@@ -116,6 +116,31 @@ void _tests(Backend backend) {
     });
   });
 
+  group('claimGuests', () {
+    test('re-points what the guest holds and stores no link', () async {
+      final total = await held(_guests);
+      final linksBefore = await links.listForAccount(pilot);
+
+      await links.claimGuests(pilot, guestAccountIds: _guests);
+
+      expect(await held(_guests), {for (final k in total.keys) k: 0});
+      expect(await held([pilot]), total);
+      expect(await links.listForAccount(pilot), linksBefore);
+    });
+
+    test('repeating it, or an unknown guest, changes nothing', () async {
+      await links.claimGuests(pilot, guestAccountIds: _guests);
+      final claimed = await held([pilot]);
+
+      await links.claimGuests(
+        pilot,
+        guestAccountIds: [..._guests, core.Id.create(), pilot],
+      );
+
+      expect(await held([pilot]), claimed);
+    });
+  });
+
   group('saveClaimingGuests', () {
     test('stores the link and re-points everything the guest holds', () async {
       final before = await held(_guests);

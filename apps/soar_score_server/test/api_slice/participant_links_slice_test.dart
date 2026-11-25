@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
@@ -7,6 +8,7 @@ import 'package:soar_score_data/soar_score_data.dart';
 import 'package:soar_score_server/handler.dart';
 import 'package:test/test.dart';
 
+import 'gated_repository.dart';
 import 'slice_client.dart';
 
 const _contestId = '019c0000-0000-7000-8000-000000000045';
@@ -773,6 +775,199 @@ void _tests(SliceBackend backend) {
       clock = clock.add(const Duration(hours: 25));
 
       expect(await links.participationsFor(pat), isEmpty);
+    });
+  });
+
+  /// Submits [round] as the holder of [token] and returns the status.
+  Future<int> submitAs(String token, int round, String key) async {
+    final response = await handler(
+      Request(
+        'POST',
+        Uri.parse('http://localhost/api/v1/self-scoring/rounds/$round/scores'),
+        body: jsonEncode({
+          'client_mutation_id': key,
+          'matrix_revision': matrixRevision,
+          'components': _goodScore,
+        }),
+        headers: {'authorization': 'Bearer $token'},
+      ),
+    );
+    return response.statusCode;
+  }
+
+  group('concurrent opens', () {
+    test('two opens by one account after a guest took the invitation back '
+        'both succeed and claim the guest once', () async {
+      final issued = await issue(1);
+      await guestScores(issued.credential);
+      await links.linkFromInvitation(
+        credential: issued.credential,
+        accountId: pat,
+      );
+      // The pilot's guest browser opens the link again and scores round 2.
+      final guestAgain = await invitations.resolve(issued.credential);
+      expect(await submitAs(guestAgain.sessionToken, 2, 'guest-2'), 201);
+      final guest = guestAgain.access.guestAccountId;
+      expect(await redeemers(1), {guest.value});
+
+      final gated = GatedRepository(api.database);
+      final waiting = <Completer<void>>[];
+      gated.beforeClaim = () {
+        final gate = Completer<void>();
+        waiting.add(gate);
+        // Both opens have found the guest; release the first, and the second
+        // once the first has written.
+        if (waiting.length == 2) waiting.first.complete();
+        return gate.future;
+      };
+      gated.afterClaim = () {
+        if (!waiting.last.isCompleted) waiting.last.complete();
+      };
+      final racingInvitations = core.InvitationService(
+        gated,
+        invitations.codec,
+        clock: () => clock,
+      );
+      final racing = core.ParticipantLinkService(
+        gated,
+        racingInvitations,
+        clock: () => clock,
+      );
+
+      final opened = await Future.wait([
+        for (var i = 0; i < 2; i++)
+          racing.openParticipation(
+            participationId: id(_participationId(1)),
+            accountId: pat,
+          ),
+      ]);
+
+      for (final session in opened) {
+        expect(
+          (await invitations.authorize(session.sessionToken)).guestAccountId,
+          pat,
+        );
+      }
+      expect(await attemptActors(), {pat.value});
+      expect(await column('SELECT COUNT(*) AS v FROM score_attempts'), {
+        '2',
+      }, reason: 'the guest\'s attempt moved once, none was lost or copied');
+      expect(await redeemers(1), {pat.value});
+    });
+
+    test('a guest open paused after its write and an account taking over '
+        'are both audited, and only the account\'s session works', () async {
+      final issued = await issue(1);
+      final guest = await guestScores(issued.credential);
+      await links.linkFromInvitation(
+        credential: issued.credential,
+        accountId: pat,
+      );
+      Future<int> opens() async => (await column(
+        "SELECT COUNT(*) AS v FROM audit_events WHERE action = "
+        "'InvitationAccessed'",
+      )).map(int.parse).single;
+      final before = await opens();
+
+      final gated = GatedRepository(api.database);
+      final written = Completer<void>();
+      final resume = Completer<void>();
+      gated.afterRedeem = (newRedeemer, applied) async {
+        if (newRedeemer == guest && applied && !written.isCompleted) {
+          written.complete();
+          await resume.future;
+        }
+      };
+      final racingInvitations = core.InvitationService(
+        gated,
+        invitations.codec,
+        clock: () => clock,
+      );
+      final racing = core.ParticipantLinkService(
+        gated,
+        racingInvitations,
+        clock: () => clock,
+      );
+
+      final guestOpen = racingInvitations.resolve(issued.credential);
+      await written.future;
+      expect(await redeemers(1), {guest.value});
+      final accountSession = await racing.openParticipation(
+        participationId: id(_participationId(1)),
+        accountId: pat,
+      );
+      resume.complete();
+      final guestSession = await guestOpen;
+
+      expect(await opens(), before + 2, reason: 'both writes are audited');
+      expect(await redeemers(1), {pat.value});
+      expect(
+        (await invitations.authorize(accountSession.sessionToken))
+            .guestAccountId,
+        pat,
+      );
+      await expectLater(
+        invitations.authorize(guestSession.sessionToken),
+        throwsA(isA<core.InvitationAccessError>()),
+      );
+    });
+  });
+
+  group('contest zones at the REST boundary', () {
+    Map<String, Object?> create(String id, String zone) => {
+      'id': id,
+      'name': 'Zone Test',
+      'start_date_time': '2026-10-17T14:00:00.000Z',
+      'end_date_time': '2026-10-18T22:00:00.000Z',
+      'timezone': zone,
+    };
+
+    test('a new contest with an unknown zone is a 400', () async {
+      final response = await api.send(
+        'POST',
+        '/contests',
+        body: create('019c0000-0000-7000-8000-000000000a01', 'MDT'),
+      );
+
+      expect(response.status, 400);
+      expect((response.body['error']! as Map)['code'], 'invalid_request');
+      expect(
+        await column(
+          "SELECT COUNT(*) AS v FROM contests WHERE id = "
+          "'019c0000-0000-7000-8000-000000000a01'",
+        ),
+        {'0'},
+      );
+    });
+
+    test('replaying the create of a contest stored with a legacy zone '
+        'returns it without a duplicate', () async {
+      const contest = '019c0000-0000-7000-8000-000000000a02';
+      await api.expectOk(
+        'POST',
+        '/contests',
+        status: 201,
+        body: create(contest, 'America/Denver'),
+      );
+      await api.database.customStatement(
+        "UPDATE contests SET timezone = 'MDT' WHERE id = '$contest'",
+      );
+
+      final replay = await api.send(
+        'POST',
+        '/contests',
+        body: create(contest, 'MDT'),
+      );
+
+      expect(replay.status, anyOf(200, 201), reason: '${replay.body}');
+      expect(replay.body['id'], contest);
+      expect(replay.body['timezone'], 'MDT');
+      expect(
+        await column(
+          "SELECT COUNT(*) AS v FROM contests WHERE id = '$contest'",
+        ),
+        {'1'},
+      );
     });
   });
 
