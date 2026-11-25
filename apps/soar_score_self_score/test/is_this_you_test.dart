@@ -615,7 +615,7 @@ class _FlakyTokenAuth extends E2eAuthSession {
   int _calls = 0;
 
   @override
-  Future<void> signIn({bool createAccount = false}) async {
+  Future<void> signIn({bool createAccount = false, String? returnTo}) async {
     signIns++;
   }
 
