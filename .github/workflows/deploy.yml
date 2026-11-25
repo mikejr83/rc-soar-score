@@ -184,6 +184,9 @@ jobs:
         working-directory: apps/${{ matrix.app }}
         run: flutter build web --release --dart-define=SOAR_SCORE_API_BASE_URL=${{ env.API_URL }}
 
+      - name: Copy security headers
+        run: cp apps/${{ matrix.app }}/_headers apps/${{ matrix.app }}/build/web/_headers
+
       - name: Deploy to Cloudflare
         run: >
           npx --yes wrangler@4 deploy

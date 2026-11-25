@@ -1,0 +1,6 @@
+/*
+    X-Content-Type-Options: nosniff
+    Referrer-Policy: strict-origin-when-cross-origin
+    X-Frame-Options: DENY
+    Permissions-Policy: camera=(), microphone=(), geolocation=()
+    Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.auth0.com https://cdn.flutter.io 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.rcsoarscore.com https://login.rcsoarscore.com; img-src 'self' data: blob:; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'
