@@ -12,6 +12,10 @@ import 'package:soar_score_self_score/auth/auth_session.dart';
 import 'package:soar_score_self_score/auth/e2e_auth_session.dart';
 import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/models/guest_session.dart';
+import 'package:soar_score_self_score/pages/contests_page.dart';
+import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
+import 'package:soar_score_self_score/data/self_score_scope.dart';
+import 'package:soar_score_self_score/models/contests_view.dart';
 import 'package:soar_score_self_score/pages/home_page.dart';
 import 'package:soar_score_self_score/router.dart';
 import 'package:soar_score_self_score/session/contest_open_gate.dart';
@@ -19,6 +23,29 @@ import 'package:soar_score_self_score/session/guest_session_scope.dart';
 import 'package:soar_score_self_score/session/guest_session_store.dart';
 
 /// A session that records what the landing page asks of it.
+class _GatedOpenRepository extends SampleSelfScoreRepository {
+  _GatedOpenRepository(this.gate);
+
+  final Future<GuestSession> gate;
+
+  @override
+  Future<ContestsView> contests() async => ContestsView(
+    contests: [
+      ContestSummary(
+        participationId: 'p-b',
+        contestId: 'c-b',
+        name: 'Spring Open',
+        startDate: DateTime.utc(2026, 10, 10),
+        endDate: DateTime.utc(2026, 10, 10),
+        phase: ContestPhase.invited,
+      ),
+    ],
+  );
+
+  @override
+  Future<GuestSession> openContest(String participationId) => gate;
+}
+
 class _FakeAuth extends E2eAuthSession {
   bool initializing = false;
   Completer<void>? signInGate;
@@ -251,6 +278,91 @@ void main() {
       expect(events, ['open answered: set the cookie', 'end']);
       expect(auth.isSignedIn, isFalse);
     });
+
+    testWidgets(
+      'an open finishing during sign-out leaves the pilot on Home with the failure',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 2400);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        final auth = _FakeAuth();
+        await auth.signIn();
+        final sessions = MemoryGuestSessionStore();
+        final gate = ContestOpenGate();
+        final answer = Completer<GuestSession>();
+        final repository = _GatedOpenRepository(answer.future);
+        final router = GoRouter(
+          routes: [
+            GoRoute(path: '/', builder: (context, state) => const HomePage()),
+            GoRoute(
+              path: contestsPath,
+              builder: (context, state) => const ContestsPage(),
+            ),
+            GoRoute(
+              path: '/contests/:contestId/pilots/:pilotId',
+              builder: (context, state) =>
+                  const Scaffold(body: Text('Pilot page')),
+            ),
+          ],
+        );
+        await tester.pumpWidget(
+          AuthScope(
+            session: auth,
+            child: ApiClientInherited(
+              client: ApiClient(
+                baseUrl: Uri.parse('http://localhost:8080'),
+                // The end call fails: the failure has to stay visible on Home.
+                httpClient: MockClient((_) async => http.Response('', 500)),
+              ),
+              child: GuestSessionScope(
+                store: sessions,
+                child: ContestOpenScope(
+                  gate: gate,
+                  child: SelfScoreScope(
+                    repository: repository,
+                    child: MaterialApp.router(
+                      localizationsDelegates: appLocalizationDelegates,
+                      routerConfig: router,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // My contests, and start opening a contest.
+        await tester.tap(find.widgetWithText(FilledButton, 'My contests'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Spring Open'));
+        await tester.pump();
+
+        // Back to Home, and sign out while the open is still out.
+        router.go('/');
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(OutlinedButton, 'Sign out'));
+        await tester.pump();
+        answer.complete(
+          GuestSession(
+            contestId: 'c',
+            contestName: 'n',
+            pilotId: 'p',
+            pilotName: 'x',
+            expiresAt: DateTime.utc(2099),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Pilot page'), findsNothing);
+        expect(sessions.read(), isNull, reason: 'the late result is dropped');
+        expect(
+          find.text('Sign-out could not be completed. Try again.'),
+          findsOneWidget,
+        );
+        expect(auth.isSignedIn, isTrue);
+      },
+    );
 
     testWidgets('a server that cannot end it keeps the pilot signed in', (
       tester,

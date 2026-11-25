@@ -58,9 +58,14 @@ class _ContestsPageState extends State<ContestsPage> {
       );
       // Null: a sign-out is under way and refused the open.
       if (session == null) return;
-      if (!auth.isSignedIn) {
-        // Signed out while the contest was opening: the answer set a fresh
-        // cookie, so end it instead of keeping it.
+      // A sign-out under way (the gate is closed) clears the cookie itself
+      // once this open has settled, and the pilot stays where they are, so
+      // its failure stays visible there. Nothing is stored or opened.
+      if (gate.isClosed) return;
+      if (!mounted || !auth.isSignedIn) {
+        // The pilot left the page or signed out while the contest was
+        // opening: the answer set a fresh cookie that nothing will use, so
+        // end it instead of keeping it.
         await endGuestSession(client, sessions);
         return;
       }
