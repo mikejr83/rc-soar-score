@@ -360,6 +360,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeSignOutButton => 'Sign out';
 
   @override
+  String get contestsTitle => 'Contests';
+
+  @override
+  String get contestsSignedOutMessage =>
+      'Sign in to see the contests you are in.';
+
+  @override
+  String get contestsEmptyTitle => 'No contests yet';
+
+  @override
+  String get contestsEmptyBody =>
+      'When a contest director invites you, the contest shows up here. You can also open the link or scan the QR code on your score card.';
+
+  @override
+  String get contestPhaseInvited => 'Invited';
+
+  @override
+  String get contestPhaseInProgress => 'In progress';
+
+  @override
+  String get contestPhaseCompleted => 'Completed';
+
+  @override
+  String get contestsCompletedNote =>
+      'Completed contests stay on this list for a day.';
+
+  @override
+  String contestDatesRange(String start, String end) {
+    return '$start to $end';
+  }
+
+  @override
+  String get contestPublicResults => 'Public results';
+
+  @override
+  String get contestOpenFailed =>
+      'Could not open this contest. Check your connection and try again.';
+
+  @override
+  String get contestNotOnList => 'This contest is no longer on your list.';
+
+  @override
+  String get contestSignInEnded =>
+      'Your sign-in has ended. Sign in again to open this contest.';
+
+  @override
   String get homeSignInFailed => 'Sign-in could not be started. Try again.';
 
   @override

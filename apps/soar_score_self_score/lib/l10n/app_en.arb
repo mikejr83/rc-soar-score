@@ -758,6 +758,66 @@
   "@homeSignedIn": {
     "description": "Landing page line for a signed-in pilot whose name is not known."
   },
+  "contestsTitle": "Contests",
+  "@contestsTitle": {
+    "description": "Title of the signed-in pilot's contests page."
+  },
+  "contestsSignedOutMessage": "Sign in to see the contests you are in.",
+  "@contestsSignedOutMessage": {
+    "description": "Contests page when nobody is signed in."
+  },
+  "contestsEmptyTitle": "No contests yet",
+  "@contestsEmptyTitle": {
+    "description": "Heading of the contests page when the signed-in pilot has no contest."
+  },
+  "contestsEmptyBody": "When a contest director invites you, the contest shows up here. You can also open the link or scan the QR code on your score card.",
+  "@contestsEmptyBody": {
+    "description": "Explains how a contest gets onto the empty contests page."
+  },
+  "contestPhaseInvited": "Invited",
+  "@contestPhaseInvited": {
+    "description": "Section heading and status of a contest that has not started running."
+  },
+  "contestPhaseInProgress": "In progress",
+  "@contestPhaseInProgress": {
+    "description": "Section heading and status of a running contest."
+  },
+  "contestPhaseCompleted": "Completed",
+  "@contestPhaseCompleted": {
+    "description": "Section heading and status of a finished contest."
+  },
+  "contestsCompletedNote": "Completed contests stay on this list for a day.",
+  "@contestsCompletedNote": {
+    "description": "Under the Completed heading on the contests page."
+  },
+  "contestDatesRange": "{start} to {end}",
+  "@contestDatesRange": {
+    "description": "The first and last day of a contest. The placeholders are dates already formatted for the language.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "contestPublicResults": "Public results",
+  "@contestPublicResults": {
+    "description": "Button on a contest in the list that opens its results on the public site."
+  },
+  "contestOpenFailed": "Could not open this contest. Check your connection and try again.",
+  "@contestOpenFailed": {
+    "description": "Snackbar when opening a contest from the list failed."
+  },
+  "contestNotOnList": "This contest is no longer on your list.",
+  "@contestNotOnList": {
+    "description": "Snackbar when the contest the pilot tapped has left their list."
+  },
+  "contestSignInEnded": "Your sign-in has ended. Sign in again to open this contest.",
+  "@contestSignInEnded": {
+    "description": "Snackbar when opening a contest failed because the sign-in is no longer accepted."
+  },
   "homeMyContests": "My contests",
   "@homeMyContests": {
     "description": "Landing page button that opens the signed-in pilot's contest list."

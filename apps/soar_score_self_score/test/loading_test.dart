@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_self_score/auth/auth_scope.dart';
+import 'package:soar_score_self_score/auth/e2e_auth_session.dart';
 import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/data/sample_data.dart';
 import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
@@ -23,11 +25,15 @@ class _FlakyRepository extends SampleSelfScoreRepository {
   }
 }
 
-Widget _app(SelfScoreRepository repository, Widget home) => SelfScoreScope(
-  repository: repository,
-  child: MaterialApp(
-    localizationsDelegates: appLocalizationDelegates,
-    home: home,
+Widget _app(SelfScoreRepository repository, Widget home) => AuthScope(
+  // The contests page needs a signed-in pilot.
+  session: E2eAuthSession()..signIn(),
+  child: SelfScoreScope(
+    repository: repository,
+    child: MaterialApp(
+      localizationsDelegates: appLocalizationDelegates,
+      home: home,
+    ),
   ),
 );
 

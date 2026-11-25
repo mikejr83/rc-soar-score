@@ -170,6 +170,28 @@ class SeededContest {
   /// The credential in [name]'s link (the last path segment).
   String credentialOf(String name) => Uri.parse(links[name]!).pathSegments.last;
 
+  /// Links the E2E server's seeded pilot account (Penny Pilot) to [name]'s
+  /// participation, as her tap on "Yes, that's me" would. The contest then
+  /// appears in her contests list.
+  Future<void> linkPilotAccount(String name) async {
+    final response = await http.post(
+      Uri.parse(
+        '${const String.fromEnvironment('SOAR_SCORE_API_BASE_URL')}'
+        '/__e2e/pilot-account-link',
+      ),
+      headers: {'content-type': 'application/json'},
+      body: jsonEncode({
+        'participation_id': participations[name],
+        'state': 'confirmed',
+      }),
+    );
+    if (response.statusCode != 200) {
+      throw StateError(
+        'pilot-account-link answered ${response.statusCode}: ${response.body}',
+      );
+    }
+  }
+
   /// Moves the E2E server's invitation clock forward.
   Future<void> advanceClock(int hours) async {
     final response = await http.post(

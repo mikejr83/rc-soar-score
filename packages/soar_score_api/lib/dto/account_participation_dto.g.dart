@@ -30,6 +30,8 @@ AccountParticipationDto _$AccountParticipationDtoFromJson(
         'end_date_time',
         (v) => const UtcTimestampConverter().fromJson(v as String),
       ),
+      startDate: $checkedConvert('start_date', (v) => v as String),
+      endDate: $checkedConvert('end_date', (v) => v as String),
       timezone: $checkedConvert('timezone', (v) => v as String),
       phase: $checkedConvert('phase', (v) => v as String),
       readOnly: $checkedConvert('read_only', (v) => v as bool),
@@ -37,6 +39,10 @@ AccountParticipationDto _$AccountParticipationDtoFromJson(
       city: $checkedConvert('city', (v) => v as String?),
       state: $checkedConvert('state', (v) => v as String?),
       country: $checkedConvert('country', (v) => v as String?),
+      publicResultsUrl: $checkedConvert(
+        'public_results_url',
+        (v) => v as String?,
+      ),
     );
     return val;
   },
@@ -46,7 +52,10 @@ AccountParticipationDto _$AccountParticipationDtoFromJson(
     'contestName': 'contest_name',
     'startDateTime': 'start_date_time',
     'endDateTime': 'end_date_time',
+    'startDate': 'start_date',
+    'endDate': 'end_date',
     'readOnly': 'read_only',
+    'publicResultsUrl': 'public_results_url',
   },
 );
 
@@ -60,6 +69,8 @@ Map<String, dynamic> _$AccountParticipationDtoToJson(
     instance.startDateTime,
   ),
   'end_date_time': const UtcTimestampConverter().toJson(instance.endDateTime),
+  'start_date': instance.startDate,
+  'end_date': instance.endDate,
   'timezone': instance.timezone,
   'phase': instance.phase,
   'read_only': instance.readOnly,
@@ -67,6 +78,7 @@ Map<String, dynamic> _$AccountParticipationDtoToJson(
   'city': instance.city,
   'state': instance.state,
   'country': instance.country,
+  'public_results_url': instance.publicResultsUrl,
 };
 
 AccountParticipationsDto _$AccountParticipationsDtoFromJson(

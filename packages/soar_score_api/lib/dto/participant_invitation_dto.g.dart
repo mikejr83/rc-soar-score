@@ -127,17 +127,12 @@ ResolveInvitationResponse _$ResolveInvitationResponseFromJson(
         (v) => ParticipantLinkDto.fromJson(v as Map<String, dynamic>),
       ),
       sessionToken: $checkedConvert('session_token', (v) => v as String?),
-      actsAsAccount: $checkedConvert(
-        'acts_as_account',
-        (v) => v as bool? ?? false,
-      ),
     );
     return val;
   },
   fieldKeyMap: const {
     'sessionExpiresAt': 'session_expires_at',
     'sessionToken': 'session_token',
-    'actsAsAccount': 'acts_as_account',
   },
 );
 
@@ -148,5 +143,4 @@ Map<String, dynamic> _$ResolveInvitationResponseToJson(
   'session_expires_at': instance.sessionExpiresAt.toIso8601String(),
   'contest': instance.contest,
   'participant': instance.participant,
-  'acts_as_account': instance.actsAsAccount,
 };

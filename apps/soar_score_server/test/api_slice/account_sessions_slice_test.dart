@@ -351,27 +351,6 @@ void _tests(SliceBackend backend) {
       );
     });
 
-    test('says who acts: the account after a claim, a guest before', () async {
-      final issued = await issue(1);
-      Future<Object?> actsAsAccount(core.Id? as) async {
-        final response = await send(
-          as,
-          'POST',
-          as == null
-              ? '/self-scoring/invitations/resolve'
-              : '/account/invitation-claims',
-          body: {'credential': issued.credential},
-        );
-        expect(response.status, 200, reason: response.text);
-        return response.json['acts_as_account'];
-      }
-
-      expect(await actsAsAccount(null), isFalse);
-      expect(await actsAsAccount(pat), isTrue);
-      // The public resolver now acts as the account too, and says so.
-      expect(await actsAsAccount(null), isTrue);
-    });
-
     test('a pilot who never opened the link gets the session too', () async {
       final issued = await issue(1);
 

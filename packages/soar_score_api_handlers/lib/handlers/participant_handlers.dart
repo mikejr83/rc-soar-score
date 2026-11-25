@@ -276,13 +276,7 @@ Future<ResolveInvitationResponse> _resolution(
   InvitationResolution resolution,
 ) async {
   final context = await participantContext(repository, resolution.access);
-  // The actor of the session, not the endpoint that opened it: the public
-  // resolver acts as the account once a signed-in pilot claimed the link.
-  final actor = await repository.accountRepository.findById(
-    resolution.access.guestAccountId,
-  );
   return ResolveInvitationResponse(
-    actsAsAccount: actor != null && actor.kind != AccountKind.guest,
     sessionToken: resolution.sessionToken,
     sessionExpiresAt: resolution.sessionExpiresAt,
     contest: context.contest,

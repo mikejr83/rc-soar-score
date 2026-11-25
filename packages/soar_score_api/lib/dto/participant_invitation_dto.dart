@@ -118,7 +118,6 @@ class ResolveInvitationResponse {
     required this.contest,
     required this.participant,
     this.sessionToken,
-    this.actsAsAccount = false,
   });
 
   factory ResolveInvitationResponse.fromJson(Map<String, dynamic> json) =>
@@ -132,12 +131,6 @@ class ResolveInvitationResponse {
   final DateTime sessionExpiresAt;
   final ParticipantContestDto contest;
   final ParticipantLinkDto participant;
-
-  /// Whether the session acts as a registered account (the invitation was
-  /// claimed by a signed-in pilot) and not as the pilot's guest. An older
-  /// server omits it, which reads as a guest.
-  @JsonKey(defaultValue: false)
-  final bool actsAsAccount;
 
   Map<String, dynamic> toJson() => _$ResolveInvitationResponseToJson(this);
 }

@@ -7,6 +7,7 @@ import '../auth/auth_scope.dart';
 import '../auth/auth_session.dart';
 import '../l10n/app_localizations.dart';
 import '../router.dart';
+import '../session/contest_open_gate.dart';
 import '../session/end_session.dart';
 import '../session/guest_session_scope.dart';
 import '../widgets/legal_footer.dart';
@@ -233,17 +234,26 @@ class _SignedInState extends State<_SignedIn> {
       _failed = false;
       _pending = true;
     });
+    // Ends the contest session in this browser (the API's cookie and the
+    // stored record, whether or not the record is there) before signing out,
+    // so scoring access does not outlive the sign-in. No new opens from My
+    // Contests, and every open already sent settles first: its answer may set
+    // the cookie, and the clear has to come after that.
     final sessions = context.guestSessions;
-    final client = context.maybeApiClient;
+    final client = context
+        .getInheritedWidgetOfExactType<ApiClientInherited>()
+        ?.client;
+    final gate = context.contestOpenGate;
     try {
-      // A session that acts as the account (an invitation claimed while
-      // signed in, or a link claimed earlier) ends first, on the server's
-      // cookie and on this device. If that fails the pilot stays signed in
-      // and can try again; a plain guest session is left alone.
-      if (sessions.read()?.actsAsAccount ?? false) {
-        await endAccountSession(client, sessions);
-      }
-      await widget.auth.signOut();
+      await gate.signOut(() async {
+        final ended = await endGuestSession(
+          client,
+          sessions,
+          clearOnFailure: false,
+        );
+        if (!ended) throw StateError('contest session not ended');
+        await widget.auth.signOut();
+      });
     } on Object {
       if (mounted) setState(() => _failed = true);
     } finally {

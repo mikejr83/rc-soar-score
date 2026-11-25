@@ -24,9 +24,3 @@ extension ApiClientContext on BuildContext {
     return inherited!.client;
   }
 }
-
-extension MaybeApiClientContext on BuildContext {
-  /// The [ApiClient], or null when none is provided (a page tested alone).
-  ApiClient? get maybeApiClient =>
-      getInheritedWidgetOfExactType<ApiClientInherited>()?.client;
-}
