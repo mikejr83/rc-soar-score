@@ -2,13 +2,16 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../api_client_provider.dart';
 import '../auth/auth_scope.dart';
+import '../auth/auth_session.dart';
 import '../data/self_score_repository.dart';
 import '../data/self_score_scope.dart';
 import '../l10n/app_localizations.dart';
 import '../models/contests_view.dart';
 import '../public_site.dart';
 import '../router.dart';
+import '../session/end_session.dart';
 import '../session/guest_session_scope.dart';
 import '../widgets/connection_indicator.dart';
 import '../widgets/contest_card.dart';
@@ -42,9 +45,19 @@ class _ContestsPageState extends State<ContestsPage> {
     final messenger = ScaffoldMessenger.of(context);
     final router = GoRouter.of(context);
     final l10n = AppLocalizations.of(context);
+    final auth = context.auth;
+    final client = context
+        .getInheritedWidgetOfExactType<ApiClientInherited>()
+        ?.client;
     setState(() => _opening = contest.participationId);
     try {
       final session = await repository.openContest(contest.participationId);
+      if (!auth.isSignedIn) {
+        // Signed out while the contest was opening: the answer set a fresh
+        // cookie, so end it instead of keeping it.
+        await endGuestSession(client, sessions);
+        return;
+      }
       sessions.write(session);
       router.go(pilotPath(session.contestId, session.pilotId));
     } on ContestNotOnListException {
@@ -65,9 +78,7 @@ class _ContestsPageState extends State<ContestsPage> {
     if (!context.auth.isSignedIn) {
       return Scaffold(
         appBar: SelfScoreAppBar(title: l10n.contestsTitle),
-        body: SafeArea(
-          child: _SignedOut(onSignIn: () => context.auth.signIn()),
-        ),
+        body: SafeArea(child: _SignedOut(auth: context.auth)),
       );
     }
     final repository = context.repository;
@@ -89,15 +100,33 @@ class _ContestsPageState extends State<ContestsPage> {
   }
 }
 
-class _SignedOut extends StatelessWidget {
-  const _SignedOut({required this.onSignIn});
+class _SignedOut extends StatefulWidget {
+  const _SignedOut({required this.auth});
 
-  final VoidCallback onSignIn;
+  final AuthSession auth;
+
+  @override
+  State<_SignedOut> createState() => _SignedOutState();
+}
+
+class _SignedOutState extends State<_SignedOut> {
+  bool _failed = false;
+
+  Future<void> _signIn() async {
+    setState(() => _failed = false);
+    try {
+      await widget.auth.signIn();
+    } on AuthException {
+      if (mounted) setState(() => _failed = true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final available = widget.auth.isAvailable;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -110,11 +139,31 @@ class _SignedOut extends StatelessWidget {
               style: theme.textTheme.bodyLarge,
             ),
             const SizedBox(height: 16),
-            FilledButton(
-              style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
-              onPressed: onSignIn,
-              child: Text(l10n.signInButton),
+            Semantics(
+              hint: available ? null : l10n.homeAccountsUnavailableHint,
+              child: FilledButton(
+                style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
+                onPressed: available ? _signIn : null,
+                child: Text(l10n.signInButton),
+              ),
             ),
+            const SizedBox(height: 8),
+            if (_failed)
+              Text(
+                l10n.homeSignInFailed,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: scheme.error,
+                ),
+              )
+            else if (!available)
+              Text(
+                l10n.homeAccountsComingSoon,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
           ],
         ),
       ),

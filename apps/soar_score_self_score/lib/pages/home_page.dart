@@ -189,8 +189,8 @@ class _SignedIn extends StatelessWidget {
 
   final AuthSession auth;
 
-  /// Ends the contest session a contest opened from the list left in this
-  /// browser (the API's cookie and the stored record) before signing out, so
+  /// Ends the contest session in this browser (the API's cookie and the stored
+  /// record, whether or not the record is there) before signing out, so
   /// scoring access does not outlive the sign-in. If that cannot be done the
   /// pilot stays signed in and is told, rather than left half signed out.
   Future<void> _signOut(BuildContext context) async {
@@ -200,16 +200,17 @@ class _SignedIn extends StatelessWidget {
         ?.client;
     final messenger = ScaffoldMessenger.of(context);
     final failed = AppLocalizations.of(context).homeSignOutFailed;
-    if (sessions.read() != null) {
-      final ended = await endGuestSession(
-        client,
-        sessions,
-        clearOnFailure: false,
-      );
-      if (!ended) {
-        messenger.showSnackBar(SnackBar(content: Text(failed)));
-        return;
-      }
+    // Always asked, even with no stored record: the cookie is issued
+    // independently of the display record, and the endpoint accepts a request
+    // with no valid session.
+    final ended = await endGuestSession(
+      client,
+      sessions,
+      clearOnFailure: false,
+    );
+    if (!ended) {
+      messenger.showSnackBar(SnackBar(content: Text(failed)));
+      return;
     }
     await auth.signOut();
   }

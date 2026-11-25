@@ -1,6 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_self_score/api_client_provider.dart';
 import 'package:soar_score_self_score/auth/auth_scope.dart';
 import 'package:soar_score_self_score/auth/auth_session.dart';
 import 'package:soar_score_self_score/auth/e2e_auth_session.dart';
@@ -67,12 +73,15 @@ Future<MemoryGuestSessionStore> _pump(
   SelfScoreRepository repository, {
   AuthSession? auth,
   UrlOpener? opener,
+  ApiClient? client,
 }) async {
   tester.view.physicalSize = const Size(800, 2400);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final store = MemoryGuestSessionStore();
   final session = auth ?? (E2eAuthSession()..signIn());
+  Widget wrap(Widget child) =>
+      client == null ? child : ApiClientInherited(client: client, child: child);
   await tester.pumpWidget(
     AuthScope(
       session: session,
@@ -80,23 +89,25 @@ Future<MemoryGuestSessionStore> _pump(
         store: store,
         child: SelfScoreScope(
           repository: repository,
-          child: MaterialApp.router(
-            localizationsDelegates: appLocalizationDelegates,
-            routerConfig: GoRouter(
-              routes: [
-                GoRoute(
-                  path: '/',
-                  builder: (context, state) => opener == null
-                      ? const ContestsPage()
-                      : ContestsPage(opener: opener),
-                ),
-                GoRoute(
-                  path: '/contests/:contestId/pilots/:pilotId',
-                  builder: (context, state) => Scaffold(
-                    body: Text('Pilot ${state.pathParameters['pilotId']}'),
+          child: wrap(
+            MaterialApp.router(
+              localizationsDelegates: appLocalizationDelegates,
+              routerConfig: GoRouter(
+                routes: [
+                  GoRoute(
+                    path: '/',
+                    builder: (context, state) => opener == null
+                        ? const ContestsPage()
+                        : ContestsPage(opener: opener),
                   ),
-                ),
-              ],
+                  GoRoute(
+                    path: '/contests/:contestId/pilots/:pilotId',
+                    builder: (context, state) => Scaffold(
+                      body: Text('Pilot ${state.pathParameters['pilotId']}'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -182,6 +193,79 @@ void main() {
     await tester.pumpAndSettle();
     expect(auth.isSignedIn, isTrue);
     expect(repository.loads, 1);
+  });
+
+  testWidgets('with no sign-in provider the button is off and says why', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      _Repository(const ContestsView(contests: [])),
+      auth: UnavailableAuthSession(),
+    );
+
+    expect(
+      tester
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Sign in'))
+          .onPressed,
+      isNull,
+    );
+    expect(find.textContaining('coming in a future release'), findsOneWidget);
+  });
+
+  testWidgets('a sign-in that cannot start says so', (tester) async {
+    await _pump(
+      tester,
+      _Repository(const ContestsView(contests: [])),
+      auth: _RefusingAuth(),
+    );
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Sign-in could not be started. Try again.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('signing out while a contest opens drops what it opened', (
+    tester,
+  ) async {
+    final gate = Completer<GuestSession>();
+    final auth = E2eAuthSession()..signIn();
+    final repository = _GatedRepository(gate.future);
+    final ended = <String>[];
+    final store = await _pump(
+      tester,
+      repository,
+      auth: auth,
+      client: ApiClient(
+        baseUrl: Uri.parse('http://localhost:8080'),
+        httpClient: MockClient((request) async {
+          ended.add('${request.method} ${request.url.path}');
+          return http.Response('', 204);
+        }),
+      ),
+    );
+
+    await tester.tap(find.text('Spring Open'));
+    await tester.pump();
+    await auth.signOut();
+    gate.complete(
+      GuestSession(
+        contestId: 'c-open',
+        contestName: 'Opened',
+        pilotId: 'pilot-9',
+        pilotName: 'Penny Pilot',
+        expiresAt: DateTime.utc(2099),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(store.read(), isNull);
+    expect(ended, ['POST /api/v1/self-scoring/session/end']);
+    expect(find.text('Pilot pilot-9'), findsNothing);
   });
 
   testWidgets('tapping a contest opens it as the pilot', (tester) async {
@@ -289,6 +373,26 @@ void main() {
     expect(find.text('Back to start'), findsOneWidget);
     expect(store.read(), isNotNull);
   });
+}
+
+class _RefusingAuth extends E2eAuthSession {
+  @override
+  Future<void> signIn({bool createAccount = false}) async =>
+      throw const AuthException('no');
+}
+
+class _GatedRepository extends _Repository {
+  _GatedRepository(this.gate)
+    : super(
+        ContestsView(
+          contests: [_contest('b', 'Spring Open', ContestPhase.invited)],
+        ),
+      );
+
+  final Future<GuestSession> gate;
+
+  @override
+  Future<GuestSession> openContest(String participationId) => gate;
 }
 
 class _SignedOutRepository extends SampleSelfScoreRepository {

@@ -157,6 +157,32 @@ void main() {
       expect(auth.isSignedIn, isFalse);
     });
 
+    testWidgets('is asked to end it even with no stored record', (
+      tester,
+    ) async {
+      final auth = _FakeAuth();
+      await auth.signIn();
+      final calls = <String>[];
+      await _pump(
+        tester,
+        auth,
+        sessions: MemoryGuestSessionStore(),
+        client: ApiClient(
+          baseUrl: Uri.parse('http://localhost:8080'),
+          httpClient: MockClient((request) async {
+            calls.add('${request.method} ${request.url.path}');
+            return http.Response('', 204);
+          }),
+        ),
+      );
+
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Sign out'));
+      await tester.pumpAndSettle();
+
+      expect(calls, ['POST /api/v1/self-scoring/session/end']);
+      expect(auth.isSignedIn, isFalse);
+    });
+
     testWidgets('a server that cannot end it keeps the pilot signed in', (
       tester,
     ) async {
