@@ -203,6 +203,60 @@ abstract class AppLocalizations {
   /// **'Accounts are coming soon. For now, continue as a guest.'**
   String get accountsComingSoon;
 
+  /// Explains the invitation page to a signed-in pilot. Placeholder is the contest name.
+  ///
+  /// In en, this message translates to:
+  /// **'You are scoring for {contest}. Continue with your account to keep this pilot\'s scores with it, including any you entered as a guest.'**
+  String invitationClaimBody(String contest);
+
+  /// Primary button on the invitation page when the pilot is signed in. Placeholder is the account's name or email.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as {name}'**
+  String continueAsName(String name);
+
+  /// Primary button on the invitation page when the pilot is signed in and the account has no name to show.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with my account'**
+  String get continueAsAccount;
+
+  /// Hint under the Sign in and Create account buttons on the invitation page.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in or create an account to keep your scores with it. Scores you enter as a guest come along.'**
+  String get invitationKeepScores;
+
+  /// Shown when a signed-in pilot opens an invitation link for a pilot that another account holds.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot is already linked to another account. You can continue as a guest.'**
+  String get claimAlreadyLinked;
+
+  /// Shown when the invitation link stopped working while the pilot was signing in.
+  ///
+  /// In en, this message translates to:
+  /// **'This link no longer works. Ask the contest director for a new one.'**
+  String get claimInvalid;
+
+  /// Shown when the account's sign-in was refused while claiming an invitation link.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sign-in has expired. Go to the landing page, sign in again, then open this link again.'**
+  String get claimSignInExpired;
+
+  /// Shown when the server refuses to link the signed-in account to the pilot, for example when the account's email is not verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account cannot be linked to this pilot. You can continue as a guest.'**
+  String get claimCannotLink;
+
+  /// Shown when the invitation could not be claimed for the signed-in pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not continue with your account. Try again, or continue as a guest.'**
+  String get claimFailed;
+
   /// Heading when an invitation link is unknown, expired or replaced.
   ///
   /// In en, this message translates to:

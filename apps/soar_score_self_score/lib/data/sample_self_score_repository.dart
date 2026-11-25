@@ -49,6 +49,10 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
   }
 
   @override
+  Future<GuestSession> claimInvitation(String credential) =>
+      acceptInvitation(credential);
+
+  @override
   Future<SubmitResult> submitScore(ScoreSubmission submission) async {
     _requireContest(submission.contestId);
     return const ScoreAccepted(flightScore: '863');

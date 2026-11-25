@@ -432,14 +432,14 @@ class _FakeSignIn extends E2eAuthSession {
   int signIns = 0;
 
   @override
-  Future<void> signIn({bool createAccount = false}) async {
+  Future<void> signIn({bool createAccount = false, String? returnTo}) async {
     signIns++;
   }
 }
 
 class _RefusingAuth extends E2eAuthSession {
   @override
-  Future<void> signIn({bool createAccount = false}) async =>
+  Future<void> signIn({bool createAccount = false, String? returnTo}) async =>
       throw const AuthException('no');
 }
 

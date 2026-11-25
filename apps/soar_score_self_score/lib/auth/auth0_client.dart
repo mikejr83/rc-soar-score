@@ -1,9 +1,13 @@
 /// Who Auth0 says is signed in, as far as the app needs.
 class AuthIdentity {
-  const AuthIdentity({this.name, this.email});
+  const AuthIdentity({this.name, this.email, this.returnTo});
 
   final String? name;
   final String? email;
+
+  /// The in-app path the sign-in was started from, when this identity
+  /// completed a redirect that carried one.
+  final String? returnTo;
 }
 
 /// Thrown by [Auth0Client.accessToken] when Auth0 has ended the session (a
@@ -33,8 +37,12 @@ abstract class Auth0Client {
   Future<AuthIdentity?> onLoad();
 
   /// Leaves the page for Universal Login (its sign-up tab with
-  /// [createAccount]).
-  Future<void> loginWithRedirect({required bool createAccount});
+  /// [createAccount]). [returnTo], a path inside the app, comes back as
+  /// [AuthIdentity.returnTo] from [onLoad] after the redirect.
+  Future<void> loginWithRedirect({
+    required bool createAccount,
+    String? returnTo,
+  });
 
   /// Ends the session at Auth0 and returns to the app's root.
   Future<void> logout();

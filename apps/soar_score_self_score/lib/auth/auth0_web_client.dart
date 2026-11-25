@@ -46,19 +46,37 @@ class Auth0WebClient implements Auth0Client {
       cacheLocation: CacheLocation.localStorage,
     );
     final user = credentials?.user;
-    return user == null
-        ? null
-        : AuthIdentity(name: user.name, email: user.email);
+    if (user == null) return null;
+    return AuthIdentity(
+      name: user.name,
+      email: user.email,
+      returnTo: _returnToOf(await _sdk.appState),
+    );
   }
 
+  /// The `returnTo` of the state a sign-in carried, only when it is an
+  /// invitation link of the app (the only place the app asks to return to): Auth0 hands the state back unchanged, but nothing outside
+  /// the app is ever followed.
+  static String? _returnToOf(Object? appState) {
+    if (appState is! Map) return null;
+    final path = appState['returnTo'];
+    return path is String && _isInvitationPath(path) ? path : null;
+  }
+
+  static bool _isInvitationPath(String path) =>
+      path.startsWith('/invitations/') && !path.contains('//');
+
   @override
-  Future<void> loginWithRedirect({required bool createAccount}) =>
-      _sdk.loginWithRedirect(
-        audience: _config.audience,
-        redirectUrl: _redirectUrl,
-        scopes: Auth0Config.scopes,
-        parameters: createAccount ? const {'screen_hint': 'signup'} : const {},
-      );
+  Future<void> loginWithRedirect({
+    required bool createAccount,
+    String? returnTo,
+  }) => _sdk.loginWithRedirect(
+    appState: returnTo == null ? null : {'returnTo': returnTo},
+    audience: _config.audience,
+    redirectUrl: _redirectUrl,
+    scopes: Auth0Config.scopes,
+    parameters: createAccount ? const {'screen_hint': 'signup'} : const {},
+  );
 
   @override
   Future<void> logout() => _sdk.logout(returnToUrl: _redirectUrl);

@@ -34,6 +34,7 @@ class Auth0Session extends AuthSession {
   bool _initializing = true;
   Future<void>? _restoring;
   Future<void>? _signingIn;
+  String? _returnTo;
   bool _watchingForSdk = false;
 
   /// How long a late SDK script is still waited for after the first timeout.
@@ -59,7 +60,9 @@ class Auth0Session extends AuthSession {
         unawaited(_restoreWhenSdkArrives());
         return;
       }
-      _user = await _client.onLoad();
+      final identity = await _client.onLoad();
+      _user = identity;
+      _returnTo = identity?.returnTo;
       _restored = true;
     } on Object catch (error, stackTrace) {
       // A failed restore (an expired callback, say) is not fatal: the pilot
@@ -92,11 +95,20 @@ class Auth0Session extends AuthSession {
   }
 
   @override
-  Future<void> signIn({bool createAccount = false}) =>
-      _signingIn ??= _signIn(createAccount: createAccount)
-          .whenComplete(() => _signingIn = null);
+  String? takeReturnTo() {
+    final path = _returnTo;
+    _returnTo = null;
+    return path;
+  }
 
-  Future<void> _signIn({required bool createAccount}) async {
+  @override
+  Future<void> signIn({bool createAccount = false, String? returnTo}) =>
+      _signingIn ??= _signIn(
+        createAccount: createAccount,
+        returnTo: returnTo,
+      ).whenComplete(() => _signingIn = null);
+
+  Future<void> _signIn({required bool createAccount, String? returnTo}) async {
     if (!_restored) {
       await restore();
       if (isSignedIn) return;
@@ -105,7 +117,10 @@ class Auth0Session extends AuthSession {
       }
     }
     try {
-      await _client.loginWithRedirect(createAccount: createAccount);
+      await _client.loginWithRedirect(
+        createAccount: createAccount,
+        returnTo: returnTo,
+      );
     } on Object catch (error, stackTrace) {
       _logger.warning('Sign-in failed', error, stackTrace);
       throw const AuthException('Sign-in could not be started.');

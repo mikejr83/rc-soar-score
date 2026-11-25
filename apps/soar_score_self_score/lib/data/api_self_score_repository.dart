@@ -97,14 +97,40 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   }
 
   @override
-  Future<GuestSession> acceptInvitation(String credential) async {
+  Future<GuestSession> acceptInvitation(String credential) => _openInvitation(
+    () => _client.resolveInvitation(
+      ResolveInvitationRequest(credential: credential),
+    ),
+  );
+
+  @override
+  Future<GuestSession> claimInvitation(String credential) => _openInvitation(
+    () => _client.claimInvitation(
+      ResolveInvitationRequest(credential: credential),
+    ),
+    claim: true,
+  );
+
+  Future<GuestSession> _openInvitation(
+    Future<ResolveInvitationResponse> Function() open, {
+    bool claim = false,
+  }) async {
     try {
-      return _sessionOf(
-        await _client.resolveInvitation(
-          ResolveInvitationRequest(credential: credential),
-        ),
-      );
+      return _sessionOf(await open());
     } on ApiHttpError catch (error) {
+      // Another account already holds this pilot: the pilot can still
+      // continue as a guest.
+      if (claim && error.statusCode == 409) {
+        throw const PilotAlreadyLinkedException();
+      }
+      if (claim && error.statusCode == 401) {
+        throw const AccountSignInExpiredException();
+      }
+      // 404 `link_not_found` is the account, not the link: an invalid link
+      // answers `invalid_invitation`.
+      if (claim && _codeOf(error) == 'link_not_found') {
+        throw const AccountCannotLinkException();
+      }
       // Every way the server says no to a link reads the same, whatever
       // the body: the bare error, the envelope, or nothing at all.
       if (_codeOf(error) == ParticipantErrorCodes.invalidInvitation ||

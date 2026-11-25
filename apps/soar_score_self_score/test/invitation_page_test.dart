@@ -1,5 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:soar_score_self_score/auth/auth_scope.dart';
+import 'package:soar_score_self_score/auth/auth_session.dart';
+import 'package:soar_score_self_score/auth/e2e_auth_session.dart';
 import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_scope.dart';
@@ -23,31 +26,71 @@ class _UnreachableRepository extends SampleSelfScoreRepository {
   }
 }
 
+class _AccountRepository extends SampleSelfScoreRepository {
+  _AccountRepository({this.claimError});
+
+  final Object? claimError;
+  final claimed = <String>[];
+
+  @override
+  Future<GuestSession> claimInvitation(String credential) async {
+    claimed.add(credential);
+    final error = claimError;
+    if (error != null) throw error;
+    return super.claimInvitation(credential);
+  }
+}
+
+class _ReturningAuth extends E2eAuthSession {
+  _ReturningAuth(this._returnTo);
+
+  String? _returnTo;
+
+  @override
+  String? takeReturnTo() {
+    final path = _returnTo;
+    _returnTo = null;
+    return path;
+  }
+}
+
+class _RecordingAuth extends E2eAuthSession {
+  final signIns = <String?>[];
+
+  @override
+  Future<void> signIn({bool createAccount = false, String? returnTo}) async {
+    signIns.add(returnTo);
+    await super.signIn(createAccount: createAccount, returnTo: returnTo);
+  }
+}
+
 Future<void> _pump(
   WidgetTester tester, {
   required GuestSessionStore store,
   SelfScoreRepository repository = const SampleSelfScoreRepository(),
+  AuthSession? auth,
 }) async {
   tester.view.physicalSize = const Size(800, 2400);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(
-    GuestSessionScope(
-      store: store,
-      child: SelfScoreScope(
-        repository: repository,
-        child: MaterialApp.router(
-          localizationsDelegates: appLocalizationDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          routerConfig: router,
-        ),
+  Widget app = GuestSessionScope(
+    store: store,
+    child: SelfScoreScope(
+      repository: repository,
+      child: MaterialApp.router(
+        localizationsDelegates: appLocalizationDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: router,
       ),
     ),
   );
+  if (auth != null) app = AuthScope(session: auth, child: app);
+  await tester.pumpWidget(app);
 }
 
 void main() {
   _securityTests();
+  _accountTests();
   testWidgets('a good link asks the pilot to continue as a guest', (
     tester,
   ) async {
@@ -59,7 +102,7 @@ void main() {
     expect(find.text('Hello, Jane Smith'), findsOneWidget);
     expect(find.textContaining('Spring Open'), findsOneWidget);
     expect(find.text('Continue as guest'), findsOneWidget);
-    // Sign in and Create account are shown but not connected yet.
+    // With no sign-in in this build, Sign in is shown but not connected.
     expect(
       tester
           .widget<OutlinedButton>(
@@ -481,4 +524,136 @@ class _ClosedRepository extends SampleSelfScoreRepository {
       access: ScoringAccess.closed,
     );
   }
+}
+
+void _accountTests() {
+  testWidgets('signed out, Sign in returns to this link after the redirect', (
+    tester,
+  ) async {
+    final auth = _RecordingAuth();
+    await _pump(tester, store: MemoryGuestSessionStore(), auth: auth);
+    router.go(invitationPath('sample-link'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Sign in'));
+    await tester.pumpAndSettle();
+    expect(auth.signIns, [invitationPath('sample-link')]);
+  });
+
+  testWidgets('coming back from sign-in lands on the link once', (
+    tester,
+  ) async {
+    final auth = _ReturningAuth(invitationPath('sample-link'));
+    await auth.signIn();
+    // The app starts on the landing page, as it does after the redirect.
+    router.go('/');
+    await _pump(tester, store: MemoryGuestSessionStore(), auth: auth);
+    await tester.pumpAndSettle();
+    expect(find.text('Hello, Jane Smith'), findsOneWidget);
+    expect(find.text('Continue as Penny Pilot'), findsOneWidget);
+
+    // The value is spent: the next visit to the landing page stays there.
+    router.go('/app-info');
+    await tester.pumpAndSettle();
+    router.go('/');
+    await tester.pumpAndSettle();
+    expect(find.text('Hello, Jane Smith'), findsNothing);
+    expect(find.text('Signed in as Penny Pilot'), findsOneWidget);
+  });
+
+  testWidgets('signed in, Continue as <name> claims the link', (tester) async {
+    final store = MemoryGuestSessionStore();
+    final repository = _AccountRepository();
+    final auth = E2eAuthSession();
+    await auth.signIn();
+    await _pump(tester, store: store, repository: repository, auth: auth);
+    router.go(invitationPath('sample-link'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Continue as Penny Pilot'), findsOneWidget);
+    expect(find.text('Continue as guest'), findsOneWidget);
+    await tester.tap(find.text('Continue as Penny Pilot'));
+    await tester.pumpAndSettle();
+
+    expect(repository.claimed, ['sample-link']);
+    expect(store.read(), isNotNull);
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      contains('/pilots/'),
+    );
+  });
+
+  testWidgets('signed in, Continue as guest does not claim', (tester) async {
+    final store = MemoryGuestSessionStore();
+    final repository = _AccountRepository();
+    final auth = E2eAuthSession();
+    await auth.signIn();
+    await _pump(tester, store: store, repository: repository, auth: auth);
+    router.go(invitationPath('sample-link'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Continue as guest'));
+    await tester.pumpAndSettle();
+    expect(repository.claimed, isEmpty);
+    expect(store.read(), isNotNull);
+  });
+
+  testWidgets('a pilot another account holds is told, and can go on', (
+    tester,
+  ) async {
+    final store = MemoryGuestSessionStore();
+    final auth = E2eAuthSession();
+    await auth.signIn();
+    await _pump(
+      tester,
+      store: store,
+      repository: _AccountRepository(
+        claimError: const PilotAlreadyLinkedException(),
+      ),
+      auth: auth,
+    );
+    router.go(invitationPath('sample-link'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Continue as Penny Pilot'));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('already linked to another account'),
+      findsOneWidget,
+    );
+    expect(store.read(), isNull);
+    expect(find.text('Continue as guest'), findsOneWidget);
+  });
+
+  testWidgets('a claim that cannot reach the server offers another try', (
+    tester,
+  ) async {
+    final auth = E2eAuthSession();
+    await auth.signIn();
+    await _pump(
+      tester,
+      store: MemoryGuestSessionStore(),
+      repository: _AccountRepository(
+        claimError: const SelfScoreLoadException('offline'),
+      ),
+      auth: auth,
+    );
+    router.go(invitationPath('sample-link'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Continue as Penny Pilot'));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Could not continue with your account'),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Continue as Penny Pilot'),
+          )
+          .onPressed,
+      isNotNull,
+    );
+  });
 }

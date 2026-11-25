@@ -28,6 +28,22 @@ class _HomePageState extends State<HomePage> {
   bool _failed = false;
   bool _busy = false;
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Signing in leaves the app and returns to the root, and the session is
+    // restored a moment after the first frame. A pilot who started on an
+    // invitation link goes back to it, once, when the restore finishes.
+    final auth = context.auth;
+    if (auth.isInitializing) return;
+    final back = auth.takeReturnTo();
+    if (back != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.go(back);
+      });
+    }
+  }
+
   Future<void> _signIn(AuthSession auth, {required bool createAccount}) async {
     if (_busy) return;
     setState(() {

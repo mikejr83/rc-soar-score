@@ -37,8 +37,10 @@ class _FakeClient implements Auth0Client {
   }
 
   @override
-  Future<void> loginWithRedirect({required bool createAccount}) async =>
-      calls.add(createAccount ? 'sign-up' : 'sign-in');
+  Future<void> loginWithRedirect({
+    required bool createAccount,
+    String? returnTo,
+  }) async => calls.add(createAccount ? 'sign-up' : 'sign-in');
 
   @override
   Future<void> logout() async {
@@ -232,6 +234,11 @@ class _ThrowingOnLoad extends _FakeClient {
   Future<AuthIdentity?> onLoad() async => throw StateError('expired callback');
 
   @override
-  Future<void> loginWithRedirect({required bool createAccount}) =>
-      _inner.loginWithRedirect(createAccount: createAccount);
+  Future<void> loginWithRedirect({
+    required bool createAccount,
+    String? returnTo,
+  }) => _inner.loginWithRedirect(
+    createAccount: createAccount,
+    returnTo: returnTo,
+  );
 }
