@@ -689,12 +689,6 @@ abstract class AppLocalizations {
   /// **'My contests'**
   String get homeMyContests;
 
-  /// Snackbar when ending the contest session failed, so the pilot is still signed in.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not sign out. Check your connection and try again.'**
-  String get homeSignOutFailed;
-
   /// Landing page button that signs the pilot out.
   ///
   /// In en, this message translates to:
@@ -712,6 +706,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lost your link? Ask your contest director to send your link again.'**
   String get homeLostLink;
+
+  /// Landing page message when signing out failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-out could not be completed. Try again.'**
+  String get homeSignOutFailed;
 }
 
 class _AppLocalizationsDelegate

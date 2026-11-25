@@ -1,6 +1,11 @@
+import 'dart:async';
+
+import 'package:logging/logging.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:soar_score_api/soar_score_api.dart';
+import 'package:soar_score_core/soar_score_core.dart'
+    show LogFormat, configureLogging;
 import 'package:soar_score_ui/soar_score_ui.dart';
 
 import 'api_client_provider.dart';
@@ -23,8 +28,10 @@ import 'session/guest_session_scope.dart';
 import 'session/guest_session_store.dart';
 import 'session/score_draft_store.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // Warnings (a failed sign-in restore, say) go to the browser console.
+  configureLogging(level: Level.INFO, format: LogFormat.text, sink: debugPrint);
   // Invitation links are plain paths, not `#/...` addresses.
   usePathUrlStrategy();
   registerBrandFontLicenses();
@@ -42,16 +49,15 @@ Future<void> main() async {
   final sessions = StringSlotGuestSessionStore(
     KeyValueSlot(storage, 'soar_score_self_score.guest_session'),
   );
-  // Sign-in state. `restore` also completes a sign-in redirect from Auth0, so
-  // it runs before the first frame.
+  // Sign-in state. `restore` also completes a sign-in redirect from Auth0; it
+  // starts after the first frame is requested (below) and is not awaited, so a
+  // slow or blocked SDK script never holds back guest routes.
   // Design review can run on the sample contest with no Auth0 settings:
-  // `--dart-define=SOAR_SCORE_SAMPLE_DATA=true` (below) signs in an in-memory
-  // pilot.
+  // `--dart-define=SOAR_SCORE_SAMPLE_DATA=true` signs in an in-memory pilot.
   const useSampleData = bool.fromEnvironment('SOAR_SCORE_SAMPLE_DATA');
   final AuthSession auth = useSampleData
       ? (E2eAuthSession()..signIn())
       : createAuthSession();
-  await auth.restore();
   final client = ApiClient(
     baseUrl: Uri.parse(baseUrl),
     httpClient: openApiHttpClient(),
@@ -87,4 +93,5 @@ Future<void> main() async {
       ),
     ),
   );
+  unawaited(auth.restore());
 }

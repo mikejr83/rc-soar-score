@@ -23,14 +23,20 @@ abstract class AuthSession extends ChangeNotifier {
   /// leaves its buttons off.
   bool get isAvailable => true;
 
+  /// Whether the first [restore] is still running (the SDK is loading, or a
+  /// sign-in redirect is being completed). The pages show guest routes at
+  /// once and keep the sign-in controls off meanwhile.
+  bool get isInitializing => false;
+
   /// Whether a pilot is signed in (a stored or just-returned session).
   bool get isSignedIn;
 
   /// Name or email of the signed-in pilot, if known.
   String? get displayName;
 
-  /// Restores a stored session, or completes a sign-in redirect. Called once
-  /// before the first frame.
+  /// Restores a stored session, or completes a sign-in redirect. Started right
+  /// after the first frame is requested, not awaited by it: guest routes do
+  /// not depend on Auth0. Calls that overlap share one run.
   Future<void> restore();
 
   /// Starts sign-in with Auth0's Universal Login; with [createAccount] the

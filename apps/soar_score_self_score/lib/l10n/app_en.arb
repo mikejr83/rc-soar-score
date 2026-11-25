@@ -457,10 +457,6 @@
   "@homeMyContests": {
     "description": "Landing page button that opens the signed-in pilot's contest list."
   },
-  "homeSignOutFailed": "Could not sign out. Check your connection and try again.",
-  "@homeSignOutFailed": {
-    "description": "Snackbar when ending the contest session failed, so the pilot is still signed in."
-  },
   "homeSignOutButton": "Sign out",
   "@homeSignOutButton": {
     "description": "Landing page button that signs the pilot out."
@@ -472,5 +468,9 @@
   "homeLostLink": "Lost your link? Ask your contest director to send your link again.",
   "@homeLostLink": {
     "description": "Landing page hint for a pilot who lost their invitation link."
+  },
+  "homeSignOutFailed": "Sign-out could not be completed. Try again.",
+  "@homeSignOutFailed": {
+    "description": "Landing page message when signing out failed."
   }
 }

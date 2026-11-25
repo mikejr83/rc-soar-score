@@ -366,10 +366,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeMyContests => 'My contests';
 
   @override
-  String get homeSignOutFailed =>
-      'Could not sign out. Check your connection and try again.';
-
-  @override
   String get homeSignOutButton => 'Sign out';
 
   @override
@@ -378,4 +374,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get homeLostLink =>
       'Lost your link? Ask your contest director to send your link again.';
+
+  @override
+  String get homeSignOutFailed => 'Sign-out could not be completed. Try again.';
 }

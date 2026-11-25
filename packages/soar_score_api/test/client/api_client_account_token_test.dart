@@ -34,6 +34,26 @@ void main() {
     expect(seen.single.headers['authorization'], 'Bearer account-token');
   });
 
+  test('the bare account route sends the account token', () async {
+    final client = ApiClient(
+      baseUrl: Uri.parse('http://localhost:8085'),
+      httpClient: MockClient((request) async {
+        seen = [request];
+        return http.Response(
+          '{"account_id": "019c0000-0000-7000-8000-000000000001"}',
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      }),
+      tokenProvider: () async => 'guest-token',
+      accountTokenProvider: () async => 'account-token',
+    );
+    addTearDown(client.close);
+    await client.accountId();
+    expect(seen.single.url.path, '/api/v1/account');
+    expect(seen.single.headers['authorization'], 'Bearer account-token');
+  });
+
   test('participant routes keep the guest token', () async {
     final client = clientWith(
       tokens: () async => 'guest-token',

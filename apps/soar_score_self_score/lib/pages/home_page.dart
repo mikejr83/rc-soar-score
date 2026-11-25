@@ -26,13 +26,20 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _failed = false;
+  bool _busy = false;
 
   Future<void> _signIn(AuthSession auth, {required bool createAccount}) async {
-    setState(() => _failed = false);
+    if (_busy) return;
+    setState(() {
+      _failed = false;
+      _busy = true;
+    });
     try {
       await auth.signIn(createAccount: createAccount);
     } on AuthException {
       if (mounted) setState(() => _failed = true);
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -83,6 +90,7 @@ class _HomePageState extends State<HomePage> {
                           _SignedOut(
                             auth: auth,
                             failed: _failed,
+                            busy: _busy,
                             onSignIn: () => _signIn(auth, createAccount: false),
                             onSignUp: () => _signIn(auth, createAccount: true),
                           ),
@@ -126,12 +134,16 @@ class _SignedOut extends StatelessWidget {
   const _SignedOut({
     required this.auth,
     required this.failed,
+    required this.busy,
     required this.onSignIn,
     required this.onSignUp,
   });
 
   final AuthSession auth;
   final bool failed;
+
+  /// A sign-in is in flight.
+  final bool busy;
   final VoidCallback onSignIn;
   final VoidCallback onSignUp;
 
@@ -141,6 +153,9 @@ class _SignedOut extends StatelessWidget {
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final available = auth.isAvailable;
+    // Off while Auth0 starts or a sign-in is out: both start the same
+    // callback handling, which must run once.
+    final enabled = available && !auth.isInitializing && !busy;
     return Semantics(
       // Tells a screen reader why the buttons are off in a build with no
       // sign-in.
@@ -152,7 +167,7 @@ class _SignedOut extends StatelessWidget {
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(48),
             ),
-            onPressed: available ? onSignIn : null,
+            onPressed: enabled ? onSignIn : null,
             child: Text(l10n.signInButton),
           ),
           const SizedBox(height: 12),
@@ -161,7 +176,7 @@ class _SignedOut extends StatelessWidget {
               minimumSize: const Size.fromHeight(48),
               side: BorderSide(color: scheme.onSurface, width: 1.5),
             ),
-            onPressed: available ? onSignUp : null,
+            onPressed: enabled ? onSignUp : null,
             child: Text(l10n.homeSignUpButton),
           ),
           const SizedBox(height: 8),
@@ -185,45 +200,54 @@ class _SignedOut extends StatelessWidget {
   }
 }
 
-class _SignedIn extends StatelessWidget {
+class _SignedIn extends StatefulWidget {
   const _SignedIn({required this.auth});
 
   final AuthSession auth;
 
-  /// Ends the contest session in this browser (the API's cookie and the stored
-  /// record, whether or not the record is there) before signing out, so
-  /// scoring access does not outlive the sign-in. If that cannot be done the
-  /// pilot stays signed in and is told, rather than left half signed out.
-  Future<void> _signOut(BuildContext context) async {
+  @override
+  State<_SignedIn> createState() => _SignedInState();
+}
+
+class _SignedInState extends State<_SignedIn> {
+  bool _failed = false;
+  bool _pending = false;
+
+  Future<void> _signOut() async {
+    setState(() {
+      _failed = false;
+      _pending = true;
+    });
+    // Ends the contest session in this browser (the API's cookie and the
+    // stored record, whether or not the record is there) before signing out,
+    // so scoring access does not outlive the sign-in. No new opens from My
+    // Contests, and every open already sent settles first: its answer may set
+    // the cookie, and the clear has to come after that.
     final sessions = context.guestSessions;
     final client = context
         .getInheritedWidgetOfExactType<ApiClientInherited>()
         ?.client;
-    final messenger = ScaffoldMessenger.of(context);
-    final failed = AppLocalizations.of(context).homeSignOutFailed;
     final gate = context.contestOpenGate;
-    // No new opens, and every open already sent settles first: its answer may
-    // set the cookie, and the clear below has to come after that.
-    await gate.closeAndSettle();
-    // Always asked, even with no stored record: the cookie is issued
-    // independently of the display record, and the endpoint accepts a request
-    // with no valid session.
-    final ended = await endGuestSession(
-      client,
-      sessions,
-      clearOnFailure: false,
-    );
-    if (!ended) {
-      gate.reopen();
-      messenger.showSnackBar(SnackBar(content: Text(failed)));
-      return;
-    }
     try {
-      await auth.signOut();
+      await gate.closeAndSettle();
+      final ended = await endGuestSession(
+        client,
+        sessions,
+        clearOnFailure: false,
+      );
+      if (!ended) {
+        gate.reopen();
+        if (mounted) setState(() => _failed = true);
+        return;
+      }
+      await widget.auth.signOut();
+    } on Object {
+      if (mounted) setState(() => _failed = true);
     } finally {
-      // On the web this leaves the page; where it does not, the next sign-in
-      // opens contests again.
+      // On the web a sign-out leaves the page; where it does not, the next
+      // sign-in opens contests again.
       gate.reopen();
+      if (mounted) setState(() => _pending = false);
     }
   }
 
@@ -232,7 +256,7 @@ class _SignedIn extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
-    final name = auth.displayName;
+    final name = widget.auth.displayName;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -253,9 +277,17 @@ class _SignedIn extends StatelessWidget {
             minimumSize: const Size.fromHeight(48),
             side: BorderSide(color: scheme.onSurface, width: 1.5),
           ),
-          onPressed: () => _signOut(context),
+          onPressed: _pending ? null : _signOut,
           child: Text(l10n.homeSignOutButton),
         ),
+        if (_failed) ...[
+          const SizedBox(height: 8),
+          Text(
+            l10n.homeSignOutFailed,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(color: scheme.error),
+          ),
+        ],
       ],
     );
   }
