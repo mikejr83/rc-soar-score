@@ -98,14 +98,24 @@ Middleware e2ePilotAccountLink(
         request.url.path != '__e2e/pilot-account-link') {
       return inner(request);
     }
-    final body =
-        jsonDecode(await request.readAsString()) as Map<String, dynamic>;
+    String bodyText;
+    Map<String, dynamic> body;
+    try {
+      bodyText = await request.readAsString();
+      body = jsonDecode(bodyText) as Map<String, dynamic>;
+    } on FormatException {
+      return Response.badRequest(body: 'Invalid JSON body.');
+    }
     final state = body['state'];
     if (state != 'candidate' && state != 'confirmed') {
       return Response.badRequest(body: 'state is candidate or confirmed.');
     }
+    final participationIdRaw = body['participation_id'];
+    if (participationIdRaw == null) {
+      return Response.badRequest(body: 'participation_id is required.');
+    }
     final participation = await repository.contestParticipationRepository
-        .findById(Id.parse(body['participation_id'] as String));
+        .findById(Id.parse(participationIdRaw as String));
     final profile = participation == null
         ? null
         : await repository.participantProfileRepository.findById(
