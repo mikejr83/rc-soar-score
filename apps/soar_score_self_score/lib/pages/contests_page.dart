@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../api_client_provider.dart';
@@ -10,13 +9,14 @@ import '../data/self_score_scope.dart';
 import '../l10n/app_localizations.dart';
 import '../models/contests_view.dart';
 import '../public_site.dart';
+import '../services/contest_dates.dart';
 import '../router.dart';
 import '../session/contest_open_gate.dart';
 import '../session/end_session.dart';
 import '../session/guest_session_scope.dart';
 import '../widgets/connection_indicator.dart';
 import '../widgets/contest_card.dart';
-import '../widgets/is_this_you_card.dart';
+import '../widgets/link_candidates_section.dart';
 import '../widgets/loadable_scaffold.dart';
 import '../widgets/self_score_app_bar.dart';
 
@@ -128,6 +128,8 @@ class _ContestsPageState extends State<ContestsPage> {
         onOpen: _open,
         onOpenResults: (uri) =>
             openLinkOrExplain(context, uri, opener: widget.opener),
+        // A confirmed link brings contests: load the list again.
+        onLinked: () => setState(() => _reloads++),
       ),
     );
   }
@@ -210,8 +212,10 @@ class _List extends StatelessWidget {
     required this.opening,
     required this.onOpen,
     required this.onOpenResults,
+    required this.onLinked,
   });
 
+  final VoidCallback onLinked;
   final ContestsView view;
   final String? opening;
   final void Function(ContestSummary contest) onOpen;
@@ -223,13 +227,8 @@ class _List extends StatelessWidget {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
     final locale = Localizations.localeOf(context).toString();
-    final format = DateFormat.yMMMEd(locale);
-    String dates(ContestSummary contest) => contest.startDate == contest.endDate
-        ? format.format(contest.startDate)
-        : l10n.contestDatesRange(
-            format.format(contest.startDate),
-            format.format(contest.endDate),
-          );
+    String dates(ContestSummary contest) =>
+        formatContestDates(l10n, locale, contest.startDate, contest.endDate);
 
     Widget section(String heading, ContestPhase phase, {String? note}) {
       final contests = view.inPhase(phase);
@@ -269,10 +268,8 @@ class _List extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        if (view.matchPrompt != null) ...[
-          IsThisYouCard(message: view.matchPrompt!),
-          const SizedBox(height: 16),
-        ],
+        // Only a signed-in account has matches; this page is signed in.
+        LinkCandidatesSection(onLinked: onLinked),
         if (view.contests.isEmpty) ...[
           const SizedBox(height: 24),
           Icon(Icons.flight_outlined, size: 40, color: muted),

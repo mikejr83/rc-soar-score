@@ -113,6 +113,8 @@ class LinkCandidateContestDto {
     required this.name,
     required this.startDateTime,
     required this.endDateTime,
+    required this.startDate,
+    required this.endDate,
     required this.timezone,
     this.host,
     this.city,
@@ -126,6 +128,12 @@ class LinkCandidateContestDto {
   final String name;
   final DateTime startDateTime;
   final DateTime endDateTime;
+
+  /// The first and last day of the contest in its own time zone, as
+  /// `YYYY-MM-DD`: what a pilot reads on the schedule, which the UTC
+  /// timestamps above cannot give without the zone database.
+  final String startDate;
+  final String endDate;
   final String timezone;
   final String? host;
   final String? city;

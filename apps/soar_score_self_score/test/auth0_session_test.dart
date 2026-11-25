@@ -46,8 +46,17 @@ class _FakeClient implements Auth0Client {
     await onLogout?.call();
   }
 
+  /// What each call to [accessToken] does: a value is returned, an error
+  /// thrown. Empty: always `token`.
+  final tokens = <Object>[];
+
   @override
-  Future<String> accessToken() async => 'token';
+  Future<String> accessToken() async {
+    if (tokens.isEmpty) return 'token';
+    final next = tokens.removeAt(0);
+    if (next is String) return next;
+    throw next;
+  }
 }
 
 void main() {
@@ -182,6 +191,32 @@ void main() {
     await session.signOut();
     expect(session.isSignedIn, isFalse);
     expect(notified, 1);
+  });
+
+  test('a failed renewal keeps the pilot signed in for the retry', () async {
+    final client = _FakeClient()
+      ..identity = const AuthIdentity(name: 'Pat')
+      ..tokens.addAll([Exception('network down'), 'renewed']);
+    final session = Auth0Session(client);
+    await session.restore();
+
+    await expectLater(
+      session.accessToken(),
+      throwsA(isA<AuthTokenUnavailableException>()),
+    );
+    expect(session.isSignedIn, isTrue);
+    expect(await session.accessToken(), 'renewed');
+  });
+
+  test('Auth0 ending the session signs the pilot out', () async {
+    final client = _FakeClient()
+      ..identity = const AuthIdentity(name: 'Pat')
+      ..tokens.add(const AuthSessionEndedException());
+    final session = Auth0Session(client);
+    await session.restore();
+
+    expect(await session.accessToken(), isNull);
+    expect(session.isSignedIn, isFalse);
   });
 }
 

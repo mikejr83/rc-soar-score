@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:soar_score_api/soar_score_api.dart';
 
+import '../auth/auth_session.dart';
 import '../models/contests_view.dart';
 import '../models/entry_context.dart';
 import '../models/group_result_row.dart';
@@ -9,6 +10,7 @@ import '../models/group_results.dart';
 import '../models/guest_session.dart';
 import '../models/officialization_policy.dart';
 import '../models/landing_result.dart';
+import '../models/link_candidate.dart';
 import '../models/pilot_overview.dart';
 import '../models/pilot_round.dart';
 import '../models/results_snapshot.dart';
@@ -44,6 +46,8 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
     try {
       return await call();
     } on ApiNetworkError {
+      throw const SelfScoreLoadException(_unreachable);
+    } on AuthTokenUnavailableException {
       throw const SelfScoreLoadException(_unreachable);
     } on ApiHttpError catch (error) {
       final code = _codeOf(error);
@@ -267,6 +271,74 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       // the list (`link_not_found`).
       if (error.message == _notFound) throw const ContestNotOnListException();
       rethrow;
+    }
+  }
+
+  @override
+  Future<List<LinkCandidate>> linkCandidates() async {
+    final answer = await _readAccount(_client.linkCandidates);
+    return [
+      for (final candidate in answer.candidates)
+        LinkCandidate(
+          id: candidate.id.value,
+          pilotName: '${candidate.firstName} ${candidate.lastName}'.trim(),
+          contests: [
+            for (final contest in candidate.contests)
+              LinkCandidateContest(
+                name: contest.name,
+                startDate: _day(contest.startDate),
+                endDate: _day(contest.endDate),
+              ),
+          ],
+        ),
+    ];
+  }
+
+  @override
+  Future<void> confirmLinkCandidate(String candidateId) => _answerCandidate(
+    () => _client.confirmLinkCandidate(ApiId.parse(candidateId)),
+  );
+
+  @override
+  Future<void> declineLinkCandidate(String candidateId) => _answerCandidate(
+    () => _client.declineLinkCandidate(ApiId.parse(candidateId)),
+  );
+
+  /// Sends an "Is this you?" answer. Only the two documented refusals end the
+  /// card: `already_linked` (another account holds the pilot) and
+  /// `link_not_found` (not a match any more). Any other answer, whatever its
+  /// status (a 409 `invitations_not_available` or `backend_only` included),
+  /// may pass, so the card stays and the answer can be sent again.
+  Future<void> _answerCandidate(Future<Object?> Function() send) async {
+    try {
+      await _readAccount(send);
+    } on ApiHttpError catch (error) {
+      throw switch ((error.statusCode, _codeOf(error))) {
+        (409, 'already_linked') => const LinkCandidateGoneException(
+          LinkCandidateGoneReason.alreadyLinked,
+        ),
+        (404, 'link_not_found') => const LinkCandidateGoneException(
+          LinkCandidateGoneReason.notAvailable,
+        ),
+        _ => const SelfScoreLoadException(_unreachable),
+      };
+    }
+  }
+
+  /// Runs a call to an account route. Unlike [_read], a refusal is never a
+  /// guest session ending: the account token has its own life, and the pilot
+  /// can still use their guest link.
+  Future<T> _readAccount<T>(Future<T> Function() call) async {
+    try {
+      return await call();
+    } on ApiHttpError catch (error) {
+      // The answers of a link candidate keep their code for the caller.
+      if (error.statusCode == 404 || error.statusCode == 409) rethrow;
+      throw const SelfScoreLoadException(_unreachable);
+    } on AuthTokenUnavailableException {
+      throw const SelfScoreLoadException(_unreachable);
+    } on ApiException {
+      throw const SelfScoreLoadException(_unreachable);
     }
   }
 

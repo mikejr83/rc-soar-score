@@ -122,6 +122,14 @@ void addAccountLinkRoutes(
                     name: contest.name,
                     startDateTime: contest.startDateTime,
                     endDateTime: contest.endDateTime,
+                    startDate: ContestTimeZones.localDate(
+                      contest.timezone,
+                      contest.startDateTime,
+                    ),
+                    endDate: ContestTimeZones.localDate(
+                      contest.timezone,
+                      contest.endDateTime,
+                    ),
                     timezone: contest.timezone,
                     host: contest.host,
                     city: contest.city,

@@ -129,11 +129,17 @@ class Auth0Session extends AuthSession {
     if (!isSignedIn) return null;
     try {
       return await _client.accessToken();
-    } on Object catch (error, stackTrace) {
-      _logger.warning('No access token available', error, stackTrace);
+    } on AuthSessionEndedException catch (error, stackTrace) {
+      _logger.warning('The Auth0 session has ended', error, stackTrace);
       _user = null;
       notifyListeners();
       return null;
+    } on Object catch (error, stackTrace) {
+      // A dropped connection or a timeout: the pilot stays signed in, and the
+      // caller reports a failure it can retry. Sending the request without a
+      // token would answer 401 and offer only a new sign-in.
+      _logger.warning('No access token for now', error, stackTrace);
+      throw const AuthTokenUnavailableException();
     }
   }
 }

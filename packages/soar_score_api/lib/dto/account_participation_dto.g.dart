@@ -122,6 +122,8 @@ LinkCandidateContestDto _$LinkCandidateContestDtoFromJson(
         'end_date_time',
         (v) => const UtcTimestampConverter().fromJson(v as String),
       ),
+      startDate: $checkedConvert('start_date', (v) => v as String),
+      endDate: $checkedConvert('end_date', (v) => v as String),
       timezone: $checkedConvert('timezone', (v) => v as String),
       host: $checkedConvert('host', (v) => v as String?),
       city: $checkedConvert('city', (v) => v as String?),
@@ -133,6 +135,8 @@ LinkCandidateContestDto _$LinkCandidateContestDtoFromJson(
   fieldKeyMap: const {
     'startDateTime': 'start_date_time',
     'endDateTime': 'end_date_time',
+    'startDate': 'start_date',
+    'endDate': 'end_date',
   },
 );
 
@@ -144,6 +148,8 @@ Map<String, dynamic> _$LinkCandidateContestDtoToJson(
     instance.startDateTime,
   ),
   'end_date_time': const UtcTimestampConverter().toJson(instance.endDateTime),
+  'start_date': instance.startDate,
+  'end_date': instance.endDate,
   'timezone': instance.timezone,
   'host': instance.host,
   'city': instance.city,

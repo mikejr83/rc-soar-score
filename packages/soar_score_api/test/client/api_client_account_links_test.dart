@@ -93,6 +93,8 @@ void main() {
                 'name': 'Spring Open',
                 'start_date_time': '2026-10-17T14:00:00.000Z',
                 'end_date_time': '2026-10-18T22:00:00.000Z',
+                'start_date': '2026-10-17',
+                'end_date': '2026-10-18',
                 'timezone': 'America/Denver',
                 'host': null,
                 'city': null,

@@ -319,6 +319,9 @@ void _tests(SliceBackend backend) {
             (candidate['contests']! as List<Object?>).single!
                 as Map<String, Object?>;
         expect(contest['name'], 'Spring Open');
+        // 14:00 to 22:00 UTC on Oct 17 and 18 is the same days in Denver.
+        expect(contest['start_date'], '2026-10-17');
+        expect(contest['end_date'], '2026-10-18');
         expect(contest.keys, isNot(contains('owner_account_id')));
         expect(response.text, isNot(contains(api.director.value)));
         expect(response.text.toLowerCase(), isNot(contains(_email)));
