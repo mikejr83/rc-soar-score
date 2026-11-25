@@ -191,11 +191,16 @@ class ParticipantLinkService {
         accountId,
       );
       if (session != null) return session;
-      await _confirm(
-        profileId: profileId,
-        accountId: accountId,
-        origin: ParticipantLinkOrigin.invitationRedemption,
-      );
+      // Claim the guest only when another attempt follows: a claim after the
+      // last attempt would end whatever session that guest holds and still
+      // leave the caller without one.
+      if (attempt == 0) {
+        await _confirm(
+          profileId: profileId,
+          accountId: accountId,
+          origin: ParticipantLinkOrigin.invitationRedemption,
+        );
+      }
     }
     // Something else keeps redeeming it: do not guess, refuse like a link
     // that does not open.

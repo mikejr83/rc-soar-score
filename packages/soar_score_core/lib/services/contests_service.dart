@@ -59,13 +59,6 @@ class ContestsService {
     required Id? ownerAccountId,
     required MutationMetadata metadata,
   }) async {
-    if (!ContestTimeZones.isValid(input.timezone)) {
-      throw ArgumentError.value(
-        input.timezone,
-        'timezone',
-        'not a known IANA time zone',
-      );
-    }
     final now = _clock();
     final contest = Contest(
       id: input.id,
@@ -86,6 +79,15 @@ class ContestsService {
     if (stored != null) {
       if (_sameRequest(stored, contest)) return stored;
       throw AlreadyStoredError(entityType: 'Contest', entityId: input.id);
+    }
+    // Checked only for a new contest: a replay of a contest stored before
+    // zones were validated must still find it.
+    if (!ContestTimeZones.isValid(input.timezone)) {
+      throw ArgumentError.value(
+        input.timezone,
+        'timezone',
+        'not a known IANA time zone',
+      );
     }
     return repository.contestRepository.save(contest, metadata: metadata);
   }

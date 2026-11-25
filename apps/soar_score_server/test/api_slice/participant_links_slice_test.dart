@@ -40,6 +40,24 @@ void main() {
   }
 }
 
+/// An [core.InvitationService] that lets a guest open the link just before each
+/// of the account's attempts, the way a concurrent anonymous open would.
+class _GuestOpensBetweenAttempts extends core.InvitationService {
+  _GuestOpensBetweenAttempts(super.repository, super.codec, {super.clock});
+
+  String? credential;
+  core.InvitationResolution? guest;
+
+  @override
+  Future<core.InvitationResolution?> resolveForAccount(
+    core.Invitation invitation,
+    core.Id accountId,
+  ) async {
+    guest = await resolve(credential!);
+    return super.resolveForAccount(invitation, accountId);
+  }
+}
+
 void _tests(SliceBackend backend) {
   late SliceClient api;
   late core.Repository repository;
@@ -755,6 +773,46 @@ void _tests(SliceBackend backend) {
       clock = clock.add(const Duration(hours: 25));
 
       expect(await links.participationsFor(pat), isEmpty);
+    });
+  });
+
+  group('opening a participation', () {
+    test('a failed final attempt does not end a guest session that opened '
+        'in between', () async {
+      final issued = await issue(1);
+      await guestScores(issued.credential);
+      await links.linkFromInvitation(
+        credential: issued.credential,
+        accountId: pat,
+      );
+      // A guest opens again after the claim: the redeemer is the guest.
+      await invitations.resolve(issued.credential);
+      final scripted = _GuestOpensBetweenAttempts(
+        repository,
+        invitations.codec,
+        clock: () => clock,
+      )..credential = issued.credential;
+      final racing = core.ParticipantLinkService(
+        repository,
+        scripted,
+        clock: () => clock,
+      );
+
+      await expectLater(
+        racing.openParticipation(
+          participationId: id(_participationId(1)),
+          accountId: pat,
+        ),
+        throwsA(isA<core.InvitationAccessError>()),
+      );
+
+      // The account's open failed, and its last attempt did not reclaim the
+      // invitation from the guest who opened in between.
+      final guest = scripted.guest!;
+      expect(
+        (await scripted.authorize(guest.sessionToken)).guestAccountId,
+        guest.access.guestAccountId,
+      );
     });
   });
 }
