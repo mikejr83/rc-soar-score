@@ -31,6 +31,21 @@ class SessionEndedException extends SelfScoreLoadException {
     : super('Your session has ended. Open your invitation link again.');
 }
 
+/// The signed-in person's sign-in is no longer accepted by the server: the
+/// token expired or the account was signed out elsewhere. Not a guest session
+/// problem, so the guest session is left alone.
+class SignedOutException extends SelfScoreLoadException {
+  const SignedOutException()
+    : super('Your sign-in has ended. Sign in again to continue.');
+}
+
+/// The contest is not on the signed-in person's list any more: the link was
+/// ended, or the contest finished more than a day ago.
+class ContestNotOnListException extends SelfScoreLoadException {
+  const ContestNotOnListException()
+    : super('This contest is no longer on your list.');
+}
+
 /// The invitation link is unknown, expired or replaced. The three look the
 /// same on purpose, so a link never reveals whether a contest or pilot exists.
 class InvalidInvitationException implements Exception {
@@ -60,7 +75,15 @@ abstract interface class SelfScoreRepository {
   /// Never log it. Throws [SelfScoreLoadException] when it cannot be had.
   Future<String> invitationLink();
 
+  /// The contests the signed-in person reaches through their linked pilots.
+  /// Throws [SignedOutException] when the server no longer accepts the
+  /// sign-in.
   Future<ContestsView> contests();
+
+  /// Opens a contest of [contests] for the signed-in person: a session that
+  /// acts as their account, like the one an invitation link gives. Throws
+  /// [ContestNotOnListException] when it is no longer on their list.
+  Future<GuestSession> openContest(String participationId);
 
   Future<TeamOverview> teamOverview(String contestId);
 

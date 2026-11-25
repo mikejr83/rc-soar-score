@@ -49,6 +49,8 @@ void main() {
             'contest_name': 'Spring Open',
             'start_date_time': '2026-10-17T14:00:00.000Z',
             'end_date_time': '2026-10-18T22:00:00.000Z',
+            'start_date': '2026-10-17',
+            'end_date': '2026-10-18',
             'timezone': 'America/Denver',
             'phase': 'in_progress',
             'read_only': false,
@@ -56,6 +58,7 @@ void main() {
             'city': 'Denver',
             'state': null,
             'country': null,
+            'public_results_url': 'https://rcsoarscore.com/results/contests/x',
           },
         ],
       }),
@@ -66,6 +69,11 @@ void main() {
     expect(seen.method, 'GET');
     expect(seen.url.path, '/api/v1/account/participations');
     expect(result.participations.single.contestName, 'Spring Open');
+    expect(result.participations.single.startDate, '2026-10-17');
+    expect(
+      result.participations.single.publicResultsUrl,
+      'https://rcsoarscore.com/results/contests/x',
+    );
     expect(
       result.participations.single.phase,
       AccountParticipationPhase.inProgress,
@@ -196,7 +204,7 @@ void main() {
     final client = clientFor((_) => json(resolveFixture()));
     final participation = Id.parse('019c0000-0000-7000-8000-00000000d201');
 
-    await client.openAccountParticipation(participation);
+    await client.openAccountParticipation(participation.value);
 
     expect(seen.method, 'POST');
     expect(

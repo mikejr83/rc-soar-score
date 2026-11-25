@@ -25,6 +25,7 @@ Future<String> phase2Invitation(
 ) async {
   final pilot = contest.pilotNames.first;
   var pilotId = '';
+  var openedPath = '';
   await journey.phase(2, 'Open the invitation link', () async {
     await journey.step('The landing page offers sign in and sign up', () async {
       await openPath(tester, '/');
@@ -55,7 +56,47 @@ Future<String> phase2Invitation(
       await pumpUntilFound(tester, find.text('Signed in as Penny Pilot'));
       expect(find.widgetWithText(FilledButton, 'My contests'), findsOneWidget);
     });
+    // The last pilot: the later phases score the first two.
+    final linked = contest.pilotNames.last;
+    await journey.step(
+      'A signed-in pilot with no contest sees a calm page',
+      () async {
+        await tapVisible(
+          tester,
+          find.widgetWithText(FilledButton, 'My contests'),
+        );
+        await pumpUntilFound(tester, find.text('No contests yet'));
+        expect(find.textContaining('invites you'), findsOneWidget);
+        expect(find.text('Invited'), findsNothing);
+      },
+    );
+    await journey.step('A linked contest is listed as invited', () async {
+      await contest.linkPilotAccount(linked);
+      // Leave and come back: the page loads its list when it opens.
+      await openPath(tester, '/');
+      await tapVisible(
+        tester,
+        find.widgetWithText(FilledButton, 'My contests'),
+      );
+      await pumpUntilFound(tester, find.text('E2E Self-Scoring Open'));
+      expect(find.text('Invited'), findsWidgets);
+      expect(find.text('No contests yet'), findsNothing);
+      // A contest that is not published has no public results.
+      expect(find.text('Public results'), findsNothing);
+    });
+    await journey.step('Opening it from the list opens the pilot', () async {
+      await tapVisible(tester, find.text('E2E Self-Scoring Open'));
+      await pumpUntilFound(tester, find.text('2 rounds'));
+      final uri = router.routeInformationProvider.value.uri;
+      openedPath = uri.path;
+      expect(
+        uri.pathSegments[uri.pathSegments.indexOf('pilots') + 1],
+        contest.participations[linked],
+      );
+      expect(find.textContaining(linked), findsWidgets);
+    });
     await journey.step('Signing out returns to the landing page', () async {
+      await openPath(tester, '/');
       await tapVisible(tester, find.widgetWithText(OutlinedButton, 'Sign out'));
       await pumpUntilFound(
         tester,
@@ -63,6 +104,14 @@ Future<String> phase2Invitation(
       );
       expect(find.text('Signed in as Penny Pilot'), findsNothing);
     });
+    await journey.step(
+      'After sign-out the contest opened from the list needs authorization',
+      () async {
+        await openPath(tester, openedPath);
+        await pumpUntilFound(tester, find.textContaining('session has ended'));
+        await openPath(tester, '/');
+      },
+    );
     await journey.step('A link that does not exist is refused', () async {
       await openPath(tester, invitationPath('not-a-real-credential'));
       await pumpUntilFound(tester, find.text('This link does not work'));

@@ -102,6 +102,7 @@ Handler buildApiHandler({
   InvitationThrottle? invitationThrottle,
   String? trustedProxySecret,
   String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
+  String publicSiteBaseUrl = defaultPublicSiteBaseUrl,
   PromotionIntentPolicy? promotionIntents,
   Handler? supportHandler,
 }) {
@@ -121,6 +122,7 @@ Handler buildApiHandler({
     trustedProxySecret: trustedProxySecret,
     corsAllowedOrigins: corsAllowedOrigins,
     selfScoringBaseUrl: selfScoringBaseUrl,
+    publicSiteBaseUrl: publicSiteBaseUrl,
     promotionIntents: promotionIntents,
   );
   Handler api = handlers.apiHandler;

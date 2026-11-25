@@ -48,6 +48,22 @@ abstract final class ContestTimeZones {
     return found;
   }
 
+  /// The calendar date at [instant] in [zoneId], as `YYYY-MM-DD`.
+  ///
+  /// For clients that show a contest's dates without carrying the zone
+  /// database: the date a director on site would write down, not the UTC date.
+  /// A zone the database does not know (an older contest stored any text) gives
+  /// the UTC date, so one such contest never stops a list from loading.
+  static String localDate(String zoneId, DateTime instant) {
+    final local = tz.TZDateTime.from(
+      instant.toUtc(),
+      location(isValid(zoneId) ? zoneId : utc),
+    );
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${local.year.toString().padLeft(4, '0')}-${two(local.month)}-'
+        '${two(local.day)}';
+  }
+
   /// The UTC offset of [zoneId] at [at] (default now), like `UTC+02:00`.
   static String offsetLabel(String zoneId, {DateTime? at}) {
     final instant = (at ?? DateTime.now()).toUtc();

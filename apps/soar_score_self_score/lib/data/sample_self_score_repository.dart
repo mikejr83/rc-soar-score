@@ -54,19 +54,28 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
   }
 
   @override
-  Future<ContestsView> contests() async => const ContestsView(
+  Future<ContestsView> contests() async => ContestsView(
     matchPrompt:
         'Your email matches ${SampleData.pilotName}, pilot 12, in '
         '${SampleData.contestName}.',
     contests: [
       ContestSummary(
-        id: SampleData.contestId,
+        participationId: '12',
+        contestId: SampleData.contestId,
         name: SampleData.contestName,
-        dates: 'Sat 10 Oct 2026 to Sun 11 Oct 2026',
-        next: 'Round 4, Group B, lane 2',
+        startDate: DateTime.utc(2026, 10, 10),
+        endDate: DateTime.utc(2026, 10, 11),
+        phase: ContestPhase.inProgress,
+        location: 'Denver, CO',
       ),
     ],
   );
+
+  @override
+  Future<GuestSession> openContest(String participationId) async {
+    if (participationId != '12') throw const ContestNotOnListException();
+    return acceptInvitation(sampleCredential);
+  }
 
   @override
   Future<TeamOverview> teamOverview(String contestId) async {

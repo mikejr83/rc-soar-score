@@ -32,6 +32,8 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   /// session, so pages that only need a name do not ask the server again.
   final GuestSessionStore _sessions;
 
+  static const _notFound = 'This page could not be found.';
+
   static const _unreachable =
       'Could not reach the server. Check your connection and try again.';
 
@@ -83,7 +85,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
         'Scoring is closed for this contest.',
       ParticipantErrorCodes.staleMatrix =>
         'The draw changed. Reload the page to see the new draw.',
-      _ when status == 404 => 'This page could not be found.',
+      _ when status == 404 => _notFound,
       _ when status == 403 => 'You cannot open this page.',
       _ when status == 429 => 'Too many requests. Wait a moment and try again.',
       _ => 'Could not load this page. Check your connection and try again.',
@@ -93,18 +95,10 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   @override
   Future<GuestSession> acceptInvitation(String credential) async {
     try {
-      final answer = await _client.resolveInvitation(
-        ResolveInvitationRequest(credential: credential),
-      );
-      return GuestSession(
-        contestId: answer.contest.contestId.value,
-        contestName: answer.contest.name,
-        pilotId: answer.participant.participationId.value,
-        pilotName: answer.participant.pilotName,
-        pilotNumber: answer.participant.pilotNumber,
-        token: answer.sessionToken,
-        role: answer.participant.role,
-        expiresAt: answer.sessionExpiresAt,
+      return _sessionOf(
+        await _client.resolveInvitation(
+          ResolveInvitationRequest(credential: credential),
+        ),
       );
     } on ApiHttpError catch (error) {
       // Every way the server says no to a link reads the same, whatever
@@ -119,6 +113,18 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       throw const SelfScoreLoadException(_unreachable);
     }
   }
+
+  static GuestSession _sessionOf(ResolveInvitationResponse answer) =>
+      GuestSession(
+        contestId: answer.contest.contestId.value,
+        contestName: answer.contest.name,
+        pilotId: answer.participant.participationId.value,
+        pilotName: answer.participant.pilotName,
+        pilotNumber: answer.participant.pilotNumber,
+        token: answer.sessionToken,
+        role: answer.participant.role,
+        expiresAt: answer.sessionExpiresAt,
+      );
 
   @override
   Future<SubmitResult> submitScore(ScoreSubmission submission) async {
@@ -198,13 +204,71 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   }
 
   @override
-  // `async`, so the error reaches the page as a failed future. A plain `=>
-  // throw` threw while the page built, which crashed the contests page that
-  // sits under every pilot page in the router's stack.
-  Future<ContestsView> contests() async => throw const SelfScoreLoadException(
-    'Your contests will appear here once they are linked to your account. '
-    'For now, use the link from your contest director.',
+  Future<ContestsView> contests() async {
+    try {
+      final answer = await _read(_client.accountParticipations);
+      return ContestsView(
+        contests: [for (final row in answer.participations) _summary(row)],
+      );
+    } on SessionEndedException {
+      // The account routes answer 401 when the access token is no longer
+      // good. That is the sign-in, not the guest session.
+      throw const SignedOutException();
+    }
+  }
+
+  static ContestSummary _summary(AccountParticipationDto row) => ContestSummary(
+    participationId: row.participationId.value,
+    contestId: row.contestId.value,
+    name: row.contestName,
+    startDate: _day(row.startDate),
+    endDate: _day(row.endDate),
+    phase: switch (row.phase) {
+      AccountParticipationPhase.inProgress => ContestPhase.inProgress,
+      AccountParticipationPhase.completed => ContestPhase.completed,
+      _ => ContestPhase.invited,
+    },
+    location: _place(row),
+    publicResultsUrl: _publicUrl(row.publicResultsUrl),
   );
+
+  /// `YYYY-MM-DD` as UTC midnight.
+  static DateTime _day(String text) {
+    final parts = text.split('-').map(int.parse).toList();
+    return DateTime.utc(parts[0], parts[1], parts[2]);
+  }
+
+  static String? _place(AccountParticipationDto row) {
+    final parts = [
+      for (final part in [row.city, row.state, row.country])
+        if (part != null && part.trim().isNotEmpty) part.trim(),
+    ];
+    return parts.isEmpty ? null : parts.join(', ');
+  }
+
+  /// Only a web address the page can open; anything else is no address.
+  static Uri? _publicUrl(String? text) {
+    final uri = text == null ? null : Uri.tryParse(text);
+    return uri != null && (uri.isScheme('https') || uri.isScheme('http'))
+        ? uri
+        : null;
+  }
+
+  @override
+  Future<GuestSession> openContest(String participationId) async {
+    try {
+      return _sessionOf(
+        await _read(() => _client.openAccountParticipation(participationId)),
+      );
+    } on SessionEndedException {
+      throw const SignedOutException();
+    } on SelfScoreLoadException catch (error) {
+      // `_read` words a 404 as a missing page; here it means the contest left
+      // the list (`link_not_found`).
+      if (error.message == _notFound) throw const ContestNotOnListException();
+      rethrow;
+    }
+  }
 
   @override
   Future<TeamOverview> teamOverview(String contestId) async =>

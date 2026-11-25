@@ -6,13 +6,26 @@ import 'guest_session_store.dart';
 /// then forgets the session on this device. The local session is cleared
 /// whether or not the server could be reached; a draft is kept, so opening
 /// the link again restores it. Never throws.
-Future<void> endGuestSession(ApiClient? client, GuestSessionStore store) async {
+///
+/// Returns whether the server confirmed the end (or had nothing left to end:
+/// a 401 means the session is already dead). With [clearOnFailure] false a
+/// failed call leaves the device session in place, so the caller can say so
+/// and try again with the cookie still known to exist.
+Future<bool> endGuestSession(
+  ApiClient? client,
+  GuestSessionStore store, {
+  bool clearOnFailure = true,
+}) async {
+  var ended = true;
   try {
     await client?.endGuestSession();
+  } on ApiHttpError catch (error) {
+    ended = error.statusCode == 401;
   } on Object {
     // Offline or already dead: the cookie then ends at its own expiry, and
     // the server refuses it once the invitation is replaced.
-  } finally {
-    store.clear();
+    ended = false;
   }
+  if (ended || clearOnFailure) store.clear();
+  return ended;
 }

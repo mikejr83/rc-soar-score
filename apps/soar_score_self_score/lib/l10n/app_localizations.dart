@@ -605,6 +605,84 @@ abstract class AppLocalizations {
   /// **'You are signed in.'**
   String get homeSignedIn;
 
+  /// Title of the signed-in pilot's contests page.
+  ///
+  /// In en, this message translates to:
+  /// **'Contests'**
+  String get contestsTitle;
+
+  /// Contests page when nobody is signed in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to see the contests you are in.'**
+  String get contestsSignedOutMessage;
+
+  /// Heading of the contests page when the signed-in pilot has no contest.
+  ///
+  /// In en, this message translates to:
+  /// **'No contests yet'**
+  String get contestsEmptyTitle;
+
+  /// Explains how a contest gets onto the empty contests page.
+  ///
+  /// In en, this message translates to:
+  /// **'When a contest director invites you, the contest shows up here. You can also open the link or scan the QR code on your score card.'**
+  String get contestsEmptyBody;
+
+  /// Section heading and status of a contest that has not started running.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited'**
+  String get contestPhaseInvited;
+
+  /// Section heading and status of a running contest.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get contestPhaseInProgress;
+
+  /// Section heading and status of a finished contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get contestPhaseCompleted;
+
+  /// Under the Completed heading on the contests page.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed contests stay on this list for a day.'**
+  String get contestsCompletedNote;
+
+  /// The first and last day of a contest. The placeholders are dates already formatted for the language.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} to {end}'**
+  String contestDatesRange(String start, String end);
+
+  /// Button on a contest in the list that opens its results on the public site.
+  ///
+  /// In en, this message translates to:
+  /// **'Public results'**
+  String get contestPublicResults;
+
+  /// Snackbar when opening a contest from the list failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open this contest. Check your connection and try again.'**
+  String get contestOpenFailed;
+
+  /// Snackbar when the contest the pilot tapped has left their list.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest is no longer on your list.'**
+  String get contestNotOnList;
+
+  /// Snackbar when opening a contest failed because the sign-in is no longer accepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sign-in has ended. Sign in again to open this contest.'**
+  String get contestSignInEnded;
+
   /// Landing page button that opens the signed-in pilot's contest list.
   ///
   /// In en, this message translates to:

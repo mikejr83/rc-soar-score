@@ -26,6 +26,32 @@ void main() {
       );
     });
 
+    test('names the local calendar date, not the UTC one', () {
+      final lateEvening = DateTime.utc(2026, 10, 11, 2, 30);
+      expect(
+        ContestTimeZones.localDate('America/Denver', lateEvening),
+        '2026-10-10',
+      );
+      expect(ContestTimeZones.localDate('UTC', lateEvening), '2026-10-11');
+      expect(
+        ContestTimeZones.localDate(
+          'Pacific/Auckland',
+          DateTime.utc(2026, 12, 31, 12),
+        ),
+        '2027-01-01',
+      );
+    });
+
+    test('an unknown zone falls back to the UTC date', () {
+      expect(
+        ContestTimeZones.localDate(
+          'Mars/Olympus',
+          DateTime.utc(2026, 10, 11, 2),
+        ),
+        '2026-10-11',
+      );
+    });
+
     test('validates ids', () {
       expect(ContestTimeZones.isValid('Europe/Rome'), isTrue);
       expect(ContestTimeZones.isValid('Mars/Olympus'), isFalse);

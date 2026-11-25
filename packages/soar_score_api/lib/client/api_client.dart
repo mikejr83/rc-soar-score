@@ -645,12 +645,15 @@ class ApiClient {
   /// `POST /api/v1/account/participations/{id}/session` — opens a contest of
   /// the participations list: the session, acting as the account. A
   /// participation that is not on the caller's list is an [ApiHttpError]
-  /// with status 404 (`link_not_found`).
+  /// with status 404 (`link_not_found`). [participationId] is the id the
+  /// list gave; a text that is not an id throws [FormatException] before any
+  /// request.
   Future<ResolveInvitationResponse> openAccountParticipation(
-    Id participationId,
+    String participationId,
   ) async {
     final uri = _resolve(
-      '/api/v1/account/participations/${participationId.value}/session',
+      '/api/v1/account/participations/${Id.parse(participationId).value}/'
+      'session',
     );
     final response = await _send('POST', uri);
     return _decode<ResolveInvitationResponse>(

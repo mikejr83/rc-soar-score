@@ -2,10 +2,14 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../api_client_provider.dart';
 import '../auth/auth_scope.dart';
 import '../auth/auth_session.dart';
 import '../l10n/app_localizations.dart';
 import '../router.dart';
+import '../session/contest_open_gate.dart';
+import '../session/end_session.dart';
+import '../session/guest_session_scope.dart';
 import '../widgets/legal_footer.dart';
 
 /// The landing page: brand lockup, what the app is for and the ways in.
@@ -214,8 +218,26 @@ class _SignedInState extends State<_SignedIn> {
       _failed = false;
       _pending = true;
     });
+    // Ends the contest session in this browser (the API's cookie and the
+    // stored record, whether or not the record is there) before signing out,
+    // so scoring access does not outlive the sign-in. No new opens from My
+    // Contests, and every open already sent settles first: its answer may set
+    // the cookie, and the clear has to come after that.
+    final sessions = context.guestSessions;
+    final client = context
+        .getInheritedWidgetOfExactType<ApiClientInherited>()
+        ?.client;
+    final gate = context.contestOpenGate;
     try {
-      await widget.auth.signOut();
+      await gate.signOut(() async {
+        final ended = await endGuestSession(
+          client,
+          sessions,
+          clearOnFailure: false,
+        );
+        if (!ended) throw StateError('contest session not ended');
+        await widget.auth.signOut();
+      });
     } on Object {
       if (mounted) setState(() => _failed = true);
     } finally {

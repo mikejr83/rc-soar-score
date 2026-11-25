@@ -11,7 +11,9 @@ import 'package:soar_score_ui/soar_score_ui.dart';
 import 'api_client_provider.dart';
 import 'app.dart';
 import 'auth/auth_scope.dart';
+import 'auth/auth_session.dart';
 import 'auth/auth_session_factory.dart';
+import 'auth/e2e_auth_session.dart';
 import 'bundled_licences.dart';
 import 'data/api_self_score_repository.dart';
 import 'data/sample_self_score_repository.dart';
@@ -21,6 +23,7 @@ import 'session/api_http_client_stub.dart'
     if (dart.library.js_interop) 'session/api_http_client_web.dart';
 import 'session/browser_storage_stub.dart'
     if (dart.library.js_interop) 'session/browser_storage_web.dart';
+import 'session/contest_open_gate.dart';
 import 'session/guest_session_scope.dart';
 import 'session/guest_session_store.dart';
 import 'session/score_draft_store.dart';
@@ -49,7 +52,12 @@ void main() {
   // Sign-in state. `restore` also completes a sign-in redirect from Auth0; it
   // starts after the first frame is requested (below) and is not awaited, so a
   // slow or blocked SDK script never holds back guest routes.
-  final auth = createAuthSession();
+  // Design review can run on the sample contest with no Auth0 settings:
+  // `--dart-define=SOAR_SCORE_SAMPLE_DATA=true` signs in an in-memory pilot.
+  const useSampleData = bool.fromEnvironment('SOAR_SCORE_SAMPLE_DATA');
+  final AuthSession auth = useSampleData
+      ? (E2eAuthSession()..signIn())
+      : createAuthSession();
   final client = ApiClient(
     baseUrl: Uri.parse(baseUrl),
     httpClient: openApiHttpClient(),
@@ -60,9 +68,6 @@ void main() {
     accountTokenProvider: auth.accessToken,
   );
 
-  // Design review can still run on the sample contest:
-  // `--dart-define=SOAR_SCORE_SAMPLE_DATA=true`.
-  const useSampleData = bool.fromEnvironment('SOAR_SCORE_SAMPLE_DATA');
   final SelfScoreRepository repository = useSampleData
       ? const SampleSelfScoreRepository()
       : ApiSelfScoreRepository(client, sessions);
@@ -74,11 +79,14 @@ void main() {
         client: client,
         child: GuestSessionScope(
           store: sessions,
-          child: ScoreDraftScope(
-            store: ScoreDraftStore(storage),
-            child: SelfScoreScope(
-              repository: repository,
-              child: const SelfScoreApp(),
+          child: ContestOpenScope(
+            gate: ContestOpenGate(),
+            child: ScoreDraftScope(
+              store: ScoreDraftStore(storage),
+              child: SelfScoreScope(
+                repository: repository,
+                child: const SelfScoreApp(),
+              ),
             ),
           ),
         ),
