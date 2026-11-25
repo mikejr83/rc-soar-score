@@ -534,7 +534,8 @@ class InvitationService {
   ///
   /// The write is one conditional update on the redeemer that was read
   /// ([InvitationRepository.redeem]), so it changes nothing else and two opens
-  /// cannot both win. The caller re-reads and decides who to act as.
+  /// cannot both win. A successful update is the answer; only a failed one
+  /// makes the caller re-read and decide who to act as.
   Future<InvitationResolution?> _session(
     Invitation stored,
     ({
@@ -554,12 +555,28 @@ class InvitationService {
       usedAt: now,
     );
     if (!applied) return null;
-    final invitation = await repository.invitationRepository.findById(
-      stored.id,
+    // Built from the write that applied, not read back: a read could see a
+    // later open and make this one look lost although its update succeeded.
+    final invitation = Invitation(
+      id: stored.id,
+      contestId: stored.contestId,
+      contestParticipationId: stored.contestParticipationId,
+      type: stored.type,
+      protectedCredential: stored.protectedCredential,
+      invitationRevision: stored.invitationRevision,
+      state: stored.state,
+      audience: stored.audience,
+      issuedBy: stored.issuedBy,
+      issuedAt: stored.issuedAt,
+      expiresAt: stored.expiresAt,
+      firstUsedAt: stored.firstUsedAt ?? now,
+      lastUsedAt: now,
+      revokedAt: stored.revokedAt,
+      replacesInvitationId: stored.replacesInvitationId,
+      redeemedByAccountId: actorId,
+      deliveryOutcomes: stored.deliveryOutcomes,
+      clientMutationId: stored.clientMutationId,
     );
-    if (invitation == null || invitation.redeemedByAccountId != actorId) {
-      return null;
-    }
     await _audit(
       invitation,
       AuditAction.invitationAccessed,

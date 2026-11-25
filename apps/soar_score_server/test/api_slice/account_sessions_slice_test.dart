@@ -380,7 +380,7 @@ void _tests(SliceBackend backend) {
     test('opens by a guest and an account at once leave one redeemer and '
         'a usable session', () async {
       final issued = await issue(1);
-      await guestScores(issued.credential);
+      final guest = await guestScores(issued.credential);
       await claim(otherAccount, issued.credential);
 
       final claiming = send(
@@ -394,16 +394,20 @@ void _tests(SliceBackend backend) {
       ]);
       final claimResponse = await claiming;
 
-      final redeemer = (await redeemers(1)).single;
-      // Every anonymous session acted as the guest.
+      // Every token with the identity it acts as.
+      final tokens = <(core.Id, String)>[
+        for (final r in guests) (r.access.guestAccountId, r.sessionToken),
+      ];
       for (final r in guests) {
-        expect(r.access.guestAccountId, isNot(otherAccount));
+        expect(r.access.guestAccountId, guest);
       }
       // The signed-in open either succeeded or lost to a guest and ended as an
-      // invalid link; both leave the stored redeemer as the only usable actor.
-      final tokens = [for (final r in guests) r.sessionToken];
+      // invalid link.
       if (claimResponse.status == 200) {
-        tokens.add(claimResponse.json['session_token']! as String);
+        tokens.add((
+          otherAccount,
+          claimResponse.json['session_token']! as String,
+        ));
       } else {
         expect(claimResponse.status, 404, reason: claimResponse.text);
         expect(
@@ -411,15 +415,17 @@ void _tests(SliceBackend backend) {
           'invalid_invitation',
         );
       }
+      // Exactly the stored redeemer's tokens work; the other identity's are
+      // refused cleanly.
+      final redeemer = core.Id.parse((await redeemers(1)).single);
+      expect([guest, otherAccount], contains(redeemer));
       var valid = 0;
-      for (final token in tokens) {
-        if (await overviewStatus(token) == 200) valid++;
+      for (final (actor, token) in tokens) {
+        final status = await overviewStatus(token);
+        expect(status, actor == redeemer ? 200 : 401, reason: '$actor');
+        if (status == 200) valid++;
       }
       expect(valid, greaterThan(0));
-      final stored = (await repository.invitationRepository.findById(
-        issued.invitation.id,
-      ))!;
-      expect(stored.redeemedByAccountId!.value, redeemer);
     });
 
     test('a pilot who never opened the link gets the session too', () async {
