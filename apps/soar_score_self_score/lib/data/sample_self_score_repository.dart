@@ -48,8 +48,18 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
   }
 
   @override
-  Future<GuestSession> claimInvitation(String credential) =>
-      acceptInvitation(credential);
+  Future<GuestSession> claimInvitation(String credential) async {
+    final guest = await acceptInvitation(credential);
+    return GuestSession(
+      contestId: guest.contestId,
+      contestName: guest.contestName,
+      pilotId: guest.pilotId,
+      pilotName: guest.pilotName,
+      token: guest.token,
+      expiresAt: guest.expiresAt,
+      actsAsAccount: true,
+    );
+  }
 
   @override
   Future<SubmitResult> submitScore(ScoreSubmission submission) async {

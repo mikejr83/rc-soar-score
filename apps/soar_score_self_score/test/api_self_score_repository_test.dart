@@ -215,6 +215,7 @@ void main() {
 
   test('accepting a link gives a guest session', () async {
     final session = await _repository(_fixtures).acceptInvitation('abc');
+    expect(session.actsAsAccount, isFalse);
     expect(session.pilotName, 'Alex Rivera');
     expect(session.contestName, 'Summer Heater 2026');
     expect(session.token, 'example-session-token');
@@ -225,6 +226,8 @@ void main() {
 
   test('claiming a link gives the session the account acts in', () async {
     final session = await _repository(_fixtures).claimInvitation('abc');
+    expect(session.actsAsAccount, isTrue);
+    expect(session.toJson()['actsAsAccount'], isTrue);
     expect(session.pilotName, 'Alex Rivera');
     expect(session.pilotId, '0192f6a0-0000-7000-8000-000000000002');
   });

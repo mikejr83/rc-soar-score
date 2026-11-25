@@ -10,6 +10,7 @@ class GuestSession {
     this.token,
     this.pilotNumber,
     this.role = 'pilot',
+    this.actsAsAccount = false,
   });
 
   factory GuestSession.fromJson(Map<String, Object?> json) => GuestSession(
@@ -20,6 +21,7 @@ class GuestSession {
     token: json['token'] as String?,
     pilotNumber: json['pilotNumber'] as int?,
     role: json['role'] as String? ?? 'pilot',
+    actsAsAccount: json['actsAsAccount'] as bool? ?? false,
     // A stored session with no readable expiry is refused, not kept for ever.
     expiresAt: DateTime.parse(json['expiresAt']! as String),
   );
@@ -42,6 +44,11 @@ class GuestSession {
   /// field release. The server decides what the role may see.
   final String role;
 
+  /// Whether the session acts as the signed-in pilot's account (an invitation
+  /// claimed while signed in), not as a guest. Signing out ends such a
+  /// session on this device; a guest session is left alone.
+  final bool actsAsAccount;
+
   /// When the server stops accepting the session. Always known: the server
   /// sends it with the session, and a stored one without it is not used.
   final DateTime expiresAt;
@@ -57,6 +64,7 @@ class GuestSession {
     'pilotNumber': ?pilotNumber,
     if (token != null) 'token': token,
     'role': role,
+    if (actsAsAccount) 'actsAsAccount': true,
     'expiresAt': expiresAt.toUtc().toIso8601String(),
   };
 }

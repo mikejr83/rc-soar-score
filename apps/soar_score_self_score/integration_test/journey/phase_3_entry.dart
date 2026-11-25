@@ -185,20 +185,27 @@ Future<void> phase3Entry(
         expect(uri.pathSegments, contains(pilotId));
       },
     );
-    await journey.step(
-      'Signing out leaves the pilot\'s session alone',
-      () async {
-        await openPath(tester, '/');
-        await pumpUntilFound(tester, find.text('Signed in as Penny Pilot'));
-        await tapVisible(
-          tester,
-          find.widgetWithText(OutlinedButton, 'Sign out'),
-        );
-        await pumpUntilFound(
-          tester,
-          find.widgetWithText(FilledButton, 'Sign in'),
-        );
-      },
-    );
+    await journey.step('Signing out ends the session of the account', () async {
+      await openPath(tester, '/');
+      await pumpUntilFound(tester, find.text('Signed in as Penny Pilot'));
+      await tapVisible(tester, find.widgetWithText(OutlinedButton, 'Sign out'));
+      await pumpUntilFound(
+        tester,
+        find.widgetWithText(FilledButton, 'Sign in'),
+      );
+      // The account's session is gone from this device, so the pilot's page
+      // no longer opens from it.
+      await openPath(tester, pilotPath(contest.id, pilotId));
+      await tester.pumpAndSettle();
+      expect(find.text('2 rounds'), findsNothing);
+    });
+    await journey.step('The link opens again as a guest', () async {
+      final pilot = contest.pilotNames.first;
+      await openPath(tester, invitationPath(contest.credentialOf(pilot)));
+      await pumpUntilFound(tester, find.text('Hello, $pilot'));
+      await tapVisible(tester, find.text('Continue as guest'));
+      await pumpUntilFound(tester, find.text('2 rounds'));
+      expect(find.text('Submitted'), findsOneWidget);
+    });
   });
 }

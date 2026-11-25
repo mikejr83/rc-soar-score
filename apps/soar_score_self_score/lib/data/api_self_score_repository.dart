@@ -120,6 +120,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
         token: answer.sessionToken,
         role: answer.participant.role,
         expiresAt: answer.sessionExpiresAt,
+        actsAsAccount: claim,
       );
     } on ApiHttpError catch (error) {
       // Another account already holds this pilot: the pilot can still
