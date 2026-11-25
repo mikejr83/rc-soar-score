@@ -826,6 +826,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try again'**
   String get isThisYouRetry;
+
+  /// Title of the page where a pilot says what contest directors may find.
+  ///
+  /// In en, this message translates to:
+  /// **'Your details'**
+  String get detailsTitle;
+
+  /// Intro under the details page title.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your name and choose what contest directors can see. You can change this later.'**
+  String get detailsIntro;
+
+  /// Label of the first name field on the details page.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get detailsFirstName;
+
+  /// Label of the last name field on the details page.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get detailsLastName;
+
+  /// Error under a blank name field on the details page.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your name'**
+  String get detailsNameRequired;
+
+  /// Checkbox on the details page that lists the pilot in the directory.
+  ///
+  /// In en, this message translates to:
+  /// **'Let contest directors find me'**
+  String get detailsListedTitle;
+
+  /// Help under the 'find me' checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'A director can look you up and add you to a contest without typing your details. They never see whether you are unlisted.'**
+  String get detailsListedHelp;
+
+  /// Checkbox on the details page; ticked means directors do not see the email.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep my email private'**
+  String get detailsEmailPrivateTitle;
+
+  /// Help under the 'keep my email private' checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Directors are only told that an email is available to the system.'**
+  String get detailsEmailPrivateHelp;
+
+  /// Heading of the collapsed section with the optional directory fields.
+  ///
+  /// In en, this message translates to:
+  /// **'More details (optional)'**
+  String get detailsMoreHeading;
+
+  /// Label of the optional FAI number field.
+  ///
+  /// In en, this message translates to:
+  /// **'FAI number'**
+  String get detailsFaiNumber;
+
+  /// Label of the optional national organization ID field.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID'**
+  String get detailsNationalId;
+
+  /// Label of the optional club field.
+  ///
+  /// In en, this message translates to:
+  /// **'Club'**
+  String get detailsClub;
+
+  /// Label of the optional country field.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get detailsCountry;
+
+  /// Button that saves the details and goes to the contests.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get detailsContinue;
+
+  /// Shown when saving the details page failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your details could not be saved. Check your connection and try again.'**
+  String get detailsSaveFailed;
+
+  /// Shown when the details page could not load.
+  ///
+  /// In en, this message translates to:
+  /// **'Your details could not be loaded.'**
+  String get detailsLoadFailed;
+
+  /// Button that loads the details page again.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get detailsRetry;
+
+  /// Title of the card on the contests page that asks a pilot with no entry to set their details.
+  ///
+  /// In en, this message translates to:
+  /// **'Let directors find you'**
+  String get detailsPromptTitle;
+
+  /// Body of the details prompt card.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose whether contest directors can find you, so they can add you to a contest.'**
+  String get detailsPromptBody;
+
+  /// Button on the details prompt card.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your details'**
+  String get detailsPromptAction;
 }
 
 class _AppLocalizationsDelegate

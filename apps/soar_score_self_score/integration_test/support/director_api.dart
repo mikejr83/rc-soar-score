@@ -214,6 +214,23 @@ class SeededContest {
     ];
   }
 
+  /// The seeded pilot account's directory entry as the signed-in app reads it
+  /// (`GET /account/directory-entry`), or null when it has none.
+  Future<Map<String, Object?>?> pilotDirectoryEntry() async {
+    final response = await http.get(
+      Uri.parse(
+        '${const String.fromEnvironment('SOAR_SCORE_API_BASE_URL')}'
+        '/api/v1/account/directory-entry',
+      ),
+      headers: {'authorization': 'Bearer e2e-pilot'},
+    );
+    if (response.statusCode != 200) {
+      throw StateError('directory-entry answered ${response.statusCode}');
+    }
+    final entry = (jsonDecode(response.body) as Map)['entry'];
+    return entry == null ? null : Map<String, Object?>.from(entry as Map);
+  }
+
   /// Moves the E2E server's invitation clock forward.
   Future<void> advanceClock(int hours) async {
     final response = await http.post(

@@ -3,6 +3,7 @@ import '../models/entry_context.dart';
 import '../models/group_results.dart';
 import '../models/guest_session.dart';
 import '../models/link_candidate.dart';
+import '../models/own_directory.dart';
 import '../models/pilot_overview.dart';
 import '../models/results_view.dart';
 import '../models/score_submission.dart';
@@ -152,6 +153,15 @@ abstract interface class SelfScoreRepository {
   /// Says the pilot behind [candidateId] is not the signed-in account, so it
   /// is not offered again. Same failures as [confirmLinkCandidate].
   Future<void> declineLinkCandidate(String candidateId);
+
+  /// The signed-in pilot's directory entry, or their account name with the
+  /// defaults when they have none (#652). Throws [SelfScoreLoadException]
+  /// when it cannot be had.
+  Future<OwnDirectory> ownDirectory();
+
+  /// Creates the signed-in pilot's directory entry or replaces its details.
+  /// Throws [SelfScoreLoadException] when it could not be saved.
+  Future<void> saveOwnDirectory(DirectoryDetails details);
 
   Future<TeamOverview> teamOverview(String contestId);
 

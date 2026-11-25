@@ -4,6 +4,7 @@ import '../models/group_results.dart';
 import '../models/guest_session.dart';
 import '../models/landing_result.dart';
 import '../models/link_candidate.dart';
+import '../models/own_directory.dart';
 import '../models/pilot_overview.dart';
 import '../models/pilot_round.dart';
 import '../models/results_view.dart';
@@ -93,6 +94,17 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
       ],
     ),
   ];
+
+  /// Already has an entry, so signing in goes straight on.
+  @override
+  Future<OwnDirectory> ownDirectory() async => const OwnDirectory(
+    hasEntry: true,
+    initial: DirectoryDetails(firstName: 'Penny', lastName: 'Pilot'),
+    emailAvailable: true,
+  );
+
+  @override
+  Future<void> saveOwnDirectory(DirectoryDetails details) async {}
 
   @override
   Future<void> confirmLinkCandidate(String candidateId) async {}

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -68,13 +70,48 @@ Future<String> phase2Invitation(
       );
       expect(find.textContaining('coming in a future release'), findsNothing);
     });
-    await journey.step('Signing in shows the pilot and the way on', () async {
-      // The E2E build signs in as the server's seeded pilot account with no
-      // Auth0 round trip (`E2eAuthSession`).
-      await tapVisible(tester, find.widgetWithText(FilledButton, 'Sign in'));
-      await pumpUntilFound(tester, find.text('Signed in as Penny Pilot'));
-      expect(find.widgetWithText(FilledButton, 'My contests'), findsOneWidget);
-    });
+    await journey.step(
+      'A first sign-in asks what directors may find, with the defaults',
+      () async {
+        // The E2E build signs in as the server's seeded pilot account with no
+        // Auth0 round trip (`E2eAuthSession`). She has no directory entry.
+        await tapVisible(tester, find.widgetWithText(FilledButton, 'Sign in'));
+        await pumpUntilFound(tester, find.text('Your details'));
+        expect(
+          tester
+              .widget<CheckboxListTile>(find.byKey(const Key('details-listed')))
+              .value,
+          isTrue,
+        );
+        expect(
+          tester
+              .widget<CheckboxListTile>(
+                find.byKey(const Key('details-email-private')),
+              )
+              .value,
+          isTrue,
+        );
+        expect(find.widgetWithText(TextFormField, 'Penny'), findsOneWidget);
+        expect(find.widgetWithText(TextFormField, 'Pilot'), findsOneWidget);
+        // Nothing is made until the pilot continues.
+        expect(await contest.pilotDirectoryEntry(), isNull);
+        // The account's email is nowhere on the page.
+        expect(find.textContaining('@'), findsNothing);
+      },
+    );
+    await journey.step(
+      'Continue makes a listed entry with the email private',
+      () async {
+        await tapVisible(tester, find.byKey(const Key('details-continue')));
+        await pumpUntilFound(tester, find.text('No contests yet'));
+        final entry = await contest.pilotDirectoryEntry();
+        expect(entry, isNotNull);
+        expect(entry!['first_name'], 'Penny');
+        expect(entry['is_listed'], isTrue);
+        expect(entry['email_visible_to_directors'], isFalse);
+        expect(jsonEncode(entry), isNot(contains('@')));
+      },
+    );
     // The last pilot is linked by "Yes, that's me"; the one before declines:
     // the later phases score the first two.
     final linked = contest.pilotNames.last;
@@ -82,12 +119,10 @@ Future<String> phase2Invitation(
     await journey.step(
       'A signed-in pilot with no contest sees a calm page',
       () async {
-        await tapVisible(
-          tester,
-          find.widgetWithText(FilledButton, 'My contests'),
-        );
         await pumpUntilFound(tester, find.text('No contests yet'));
         expect(find.textContaining('invites you'), findsOneWidget);
+        // The pilot has an entry, so nothing asks again.
+        expect(find.text('Let directors find you'), findsNothing);
         expect(find.text('Invited'), findsNothing);
         expect(find.text('Is this you?'), findsNothing);
       },
@@ -167,6 +202,16 @@ Future<String> phase2Invitation(
         find.widgetWithText(FilledButton, 'Sign in'),
       );
       expect(find.text('Signed in as Penny Pilot'), findsNothing);
+    });
+    await journey.step('Signing in again does not ask for details', () async {
+      await tapVisible(tester, find.widgetWithText(FilledButton, 'Sign in'));
+      await pumpUntilFound(tester, find.text('Signed in as Penny Pilot'));
+      expect(find.text('Your details'), findsNothing);
+      await tapVisible(tester, find.widgetWithText(OutlinedButton, 'Sign out'));
+      await pumpUntilFound(
+        tester,
+        find.widgetWithText(FilledButton, 'Sign in'),
+      );
     });
     await journey.step(
       'After sign-out the contest opened from the list needs authorization',

@@ -571,5 +571,89 @@
   "isThisYouRetry": "Try again",
   "@isThisYouRetry": {
     "description": "Button that loads the Is this you matches again."
+  },
+  "detailsTitle": "Your details",
+  "@detailsTitle": {
+    "description": "Title of the page where a pilot says what contest directors may find."
+  },
+  "detailsIntro": "Check your name and choose what contest directors can see. You can change this later.",
+  "@detailsIntro": {
+    "description": "Intro under the details page title."
+  },
+  "detailsFirstName": "First name",
+  "@detailsFirstName": {
+    "description": "Label of the first name field on the details page."
+  },
+  "detailsLastName": "Last name",
+  "@detailsLastName": {
+    "description": "Label of the last name field on the details page."
+  },
+  "detailsNameRequired": "Enter your name",
+  "@detailsNameRequired": {
+    "description": "Error under a blank name field on the details page."
+  },
+  "detailsListedTitle": "Let contest directors find me",
+  "@detailsListedTitle": {
+    "description": "Checkbox on the details page that lists the pilot in the directory."
+  },
+  "detailsListedHelp": "A director can look you up and add you to a contest without typing your details. They never see whether you are unlisted.",
+  "@detailsListedHelp": {
+    "description": "Help under the 'find me' checkbox."
+  },
+  "detailsEmailPrivateTitle": "Keep my email private",
+  "@detailsEmailPrivateTitle": {
+    "description": "Checkbox on the details page; ticked means directors do not see the email."
+  },
+  "detailsEmailPrivateHelp": "Directors are only told that an email is available to the system.",
+  "@detailsEmailPrivateHelp": {
+    "description": "Help under the 'keep my email private' checkbox."
+  },
+  "detailsMoreHeading": "More details (optional)",
+  "@detailsMoreHeading": {
+    "description": "Heading of the collapsed section with the optional directory fields."
+  },
+  "detailsFaiNumber": "FAI number",
+  "@detailsFaiNumber": {
+    "description": "Label of the optional FAI number field."
+  },
+  "detailsNationalId": "National ID",
+  "@detailsNationalId": {
+    "description": "Label of the optional national organization ID field."
+  },
+  "detailsClub": "Club",
+  "@detailsClub": {
+    "description": "Label of the optional club field."
+  },
+  "detailsCountry": "Country",
+  "@detailsCountry": {
+    "description": "Label of the optional country field."
+  },
+  "detailsContinue": "Continue",
+  "@detailsContinue": {
+    "description": "Button that saves the details and goes to the contests."
+  },
+  "detailsSaveFailed": "Your details could not be saved. Check your connection and try again.",
+  "@detailsSaveFailed": {
+    "description": "Shown when saving the details page failed."
+  },
+  "detailsLoadFailed": "Your details could not be loaded.",
+  "@detailsLoadFailed": {
+    "description": "Shown when the details page could not load."
+  },
+  "detailsRetry": "Try again",
+  "@detailsRetry": {
+    "description": "Button that loads the details page again."
+  },
+  "detailsPromptTitle": "Let directors find you",
+  "@detailsPromptTitle": {
+    "description": "Title of the card on the contests page that asks a pilot with no entry to set their details."
+  },
+  "detailsPromptBody": "Choose whether contest directors can find you, so they can add you to a contest.",
+  "@detailsPromptBody": {
+    "description": "Body of the details prompt card."
+  },
+  "detailsPromptAction": "Set your details",
+  "@detailsPromptAction": {
+    "description": "Button on the details prompt card."
   }
 }

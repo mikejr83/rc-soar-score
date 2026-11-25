@@ -16,6 +16,7 @@ import '../session/end_session.dart';
 import '../session/guest_session_scope.dart';
 import '../widgets/connection_indicator.dart';
 import '../widgets/contest_card.dart';
+import '../widgets/directory_prompt_card.dart';
 import '../widgets/link_candidates_section.dart';
 import '../widgets/loadable_scaffold.dart';
 import '../widgets/self_score_app_bar.dart';
@@ -269,6 +270,7 @@ class _List extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       children: [
         // Only a signed-in account has matches; this page is signed in.
+        const DirectoryPromptCard(),
         LinkCandidatesSection(onLinked: onLinked),
         if (view.contests.isEmpty) ...[
           const SizedBox(height: 24),

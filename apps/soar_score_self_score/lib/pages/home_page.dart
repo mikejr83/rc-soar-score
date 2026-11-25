@@ -5,6 +5,8 @@ import 'package:soar_score_ui/soar_score_ui.dart';
 import '../api_client_provider.dart';
 import '../auth/auth_scope.dart';
 import '../auth/auth_session.dart';
+import '../data/self_score_repository.dart';
+import '../data/self_score_scope.dart';
 import '../l10n/app_localizations.dart';
 import '../router.dart';
 import '../session/contest_open_gate.dart';
@@ -28,6 +30,21 @@ class _HomePageState extends State<HomePage> {
   bool _failed = false;
   bool _busy = false;
 
+  /// The pilot's directory entry has been looked for in this visit.
+  bool _checkedDetails = false;
+
+  /// A pilot with no directory entry goes to the details page once after
+  /// signing in (#652). A failed look leaves them where they are: the
+  /// contests page asks again.
+  Future<void> _sendToDetailsIfNew(SelfScoreRepository repository) async {
+    try {
+      final directory = await repository.ownDirectory();
+      if (mounted && !directory.hasEntry) context.go(detailsPath);
+    } on SelfScoreLoadException {
+      // Stay.
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -41,6 +58,9 @@ class _HomePageState extends State<HomePage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) context.go(back);
       });
+    } else if (auth.isSignedIn && !_checkedDetails) {
+      _checkedDetails = true;
+      _sendToDetailsIfNew(context.repository);
     }
   }
 
