@@ -21,7 +21,17 @@ import 'package:soar_score_self_score/session/guest_session_store.dart';
 
 /// A pilot with no directory entry yet (#652) or with one.
 class _Repository extends SampleSelfScoreRepository {
-  _Repository({this.hasEntry = false, this.saveError, this.loadError});
+  _Repository({
+    this.hasEntry = false,
+    this.saveError,
+    this.loadError,
+    this.initial = const DirectoryDetails(
+      firstName: 'Penny',
+      lastName: 'Pilot',
+    ),
+  });
+
+  final DirectoryDetails initial;
 
   final bool hasEntry;
   Object? saveError;
@@ -37,7 +47,7 @@ class _Repository extends SampleSelfScoreRepository {
     return OwnDirectory(
       hasEntry: hasEntry,
       emailAvailable: true,
-      initial: const DirectoryDetails(firstName: 'Penny', lastName: 'Pilot'),
+      initial: initial,
     );
   }
 
@@ -196,6 +206,37 @@ void main() {
       expect(saved.faiNumber, '1234');
     });
 
+    testWidgets('city and state of an existing entry survive a save', (
+      tester,
+    ) async {
+      final repository = _Repository(
+        hasEntry: true,
+        initial: const DirectoryDetails(
+          firstName: 'Penny',
+          lastName: 'Pilot',
+          city: 'Boulder',
+          state: 'CO',
+        ),
+      );
+      await _pump(tester, repository, initial: detailsPath);
+
+      await tester.tap(find.byKey(const Key('details-continue')));
+      await tester.pumpAndSettle();
+      expect(repository.saved.last.city, 'Boulder');
+      expect(repository.saved.last.state, 'CO');
+
+      await _pump(tester, repository, initial: detailsPath);
+      await tester.enterText(
+        find.byKey(const Key('details-first-name')),
+        'Pen',
+      );
+      await tester.tap(find.byKey(const Key('details-continue')));
+      await tester.pumpAndSettle();
+      expect(repository.saved.last.firstName, 'Pen');
+      expect(repository.saved.last.city, 'Boulder');
+      expect(repository.saved.last.state, 'CO');
+    });
+
     testWidgets('a blank name is not saved', (tester) async {
       final repository = _Repository();
       await _pump(tester, repository, initial: detailsPath);
@@ -299,6 +340,35 @@ void main() {
       expect(result.initial.isListed, isFalse);
       expect(result.initial.emailVisibleToDirectors, isTrue);
       expect(result.emailAvailable, isFalse);
+    });
+
+    test('a saved entry keeps city and state through a save', () async {
+      final requests = <http.Request>[];
+      final api = repository((request) {
+        requests.add(request);
+        return json(
+          request.method == 'GET'
+              ? '{"entry":{"id":"019c0000-0000-7000-8000-000000000001",'
+                    '"first_name":"Pat","last_name":"Pilot","club":null,'
+                    '"fai_number":null,"national_org_id":null,'
+                    '"city":"Boulder","state":"CO","country":null,'
+                    '"is_listed":true,"email_visible_to_directors":false,'
+                    '"created_at":"2026-11-25T12:00:00.000Z",'
+                    '"updated_at":"2026-11-25T12:00:00.000Z"},'
+                    '"suggested_first_name":"Pat","suggested_last_name":"Pilot",'
+                    '"email_available":true}'
+              : '{"entry":null,"suggested_first_name":"Pat",'
+                    '"suggested_last_name":"Pilot","email_available":true}',
+        );
+      });
+
+      final loaded = await api.ownDirectory();
+      await api.saveOwnDirectory(loaded.initial);
+
+      final put = requests.last;
+      expect(put.method, 'PUT');
+      expect(put.body, contains('"city":"Boulder"'));
+      expect(put.body, contains('"state":"CO"'));
     });
 
     test('saving sends the details to the entry route', () async {

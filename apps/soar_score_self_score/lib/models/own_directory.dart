@@ -7,6 +7,8 @@ class DirectoryDetails {
     this.faiNumber,
     this.nationalOrgId,
     this.country,
+    this.city,
+    this.state,
     this.isListed = true,
     this.emailVisibleToDirectors = false,
   });
@@ -17,6 +19,11 @@ class DirectoryDetails {
   final String? faiNumber;
   final String? nationalOrgId;
   final String? country;
+
+  /// Not edited on the details page, but carried through every save so that
+  /// saving never clears what the API holds.
+  final String? city;
+  final String? state;
 
   /// "Let contest directors find me". Ticked until the pilot unticks it.
   final bool isListed;

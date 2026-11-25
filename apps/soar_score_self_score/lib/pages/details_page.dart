@@ -106,6 +106,8 @@ class _DetailsFormState extends State<_DetailsForm> {
           faiNumber: _fai.text.trim(),
           nationalOrgId: _national.text.trim(),
           country: _country.text.trim(),
+          city: widget.directory.initial.city,
+          state: widget.directory.initial.state,
           isListed: _listed,
           emailVisibleToDirectors: !_emailPrivate,
         ),
