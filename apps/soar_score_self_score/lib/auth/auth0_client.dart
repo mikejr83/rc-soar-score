@@ -10,6 +10,16 @@ class AuthIdentity {
   final String? returnTo;
 }
 
+/// Thrown by [Auth0Client.accessToken] when Auth0 has ended the session (a
+/// required login, an invalid grant), as opposed to a renewal that failed for
+/// now. The session signs the pilot out on this and on nothing else.
+class AuthSessionEndedException implements Exception {
+  const AuthSessionEndedException();
+
+  @override
+  String toString() => 'The Auth0 session has ended.';
+}
+
 /// The few calls the session makes on Auth0's SPA SDK.
 ///
 /// A thin seam so the session's ordering rules (wait for the SDK, log out
@@ -37,6 +47,8 @@ abstract class Auth0Client {
   /// Ends the session at Auth0 and returns to the app's root.
   Future<void> logout();
 
-  /// A current access token for the API; throws when none can be produced.
+  /// A current access token for the API. Throws [AuthSessionEndedException]
+  /// when Auth0 has ended the session, and any other error when none can be
+  /// produced right now (a dropped connection).
   Future<String> accessToken();
 }

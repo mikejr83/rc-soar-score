@@ -2,6 +2,7 @@ import '../models/contests_view.dart';
 import '../models/entry_context.dart';
 import '../models/group_results.dart';
 import '../models/guest_session.dart';
+import '../models/link_candidate.dart';
 import '../models/pilot_overview.dart';
 import '../models/results_view.dart';
 import '../models/score_submission.dart';
@@ -22,6 +23,24 @@ class SelfScoreLoadException implements Exception {
 /// from one the server refused.
 class SelfScoreOfflineException extends SelfScoreLoadException {
   const SelfScoreOfflineException(super.message);
+}
+
+/// Why an "Is this you?" answer was refused for good.
+enum LinkCandidateGoneReason {
+  /// Another account already holds the pilot.
+  alreadyLinked,
+
+  /// The match is not (or no longer) one.
+  notAvailable,
+}
+
+/// An "Is this you?" answer the server refused for good: retrying will not
+/// help, so the card goes away.
+class LinkCandidateGoneException extends SelfScoreLoadException {
+  const LinkCandidateGoneException(this.reason)
+    : super('This match is no longer available.');
+
+  final LinkCandidateGoneReason reason;
 }
 
 /// The guest session is no longer valid: expired, replaced or revoked. The
@@ -119,6 +138,20 @@ abstract interface class SelfScoreRepository {
   /// acts as their account, like the one an invitation link gives. Throws
   /// [ContestNotOnListException] when it is no longer on their list.
   Future<GuestSession> openContest(String participationId);
+
+  /// The pilots the signed-in account's verified email matches ("Is this
+  /// you?"); empty when there are none. Needs the account token.
+  Future<List<LinkCandidate>> linkCandidates();
+
+  /// Says the pilot behind [candidateId] is the signed-in account. Repeating
+  /// it is harmless. Throws [LinkCandidateGoneException] when the pilot is
+  /// held by another account or the match is gone, and
+  /// [SelfScoreLoadException] when the answer could not be sent.
+  Future<void> confirmLinkCandidate(String candidateId);
+
+  /// Says the pilot behind [candidateId] is not the signed-in account, so it
+  /// is not offered again. Same failures as [confirmLinkCandidate].
+  Future<void> declineLinkCandidate(String candidateId);
 
   Future<TeamOverview> teamOverview(String contestId);
 

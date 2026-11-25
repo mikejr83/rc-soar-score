@@ -1,5 +1,15 @@
 import 'package:flutter/foundation.dart';
 
+/// Raised by [AuthSession.accessToken] when no token can be produced right
+/// now but the sign-in still stands, such as while Auth0 is unreachable. The
+/// caller reports a load failure the pilot can retry; it is not a sign-out.
+class AuthTokenUnavailableException implements Exception {
+  const AuthTokenUnavailableException();
+
+  @override
+  String toString() => 'AuthTokenUnavailableException';
+}
+
 /// Raised when signing in or out fails; [message] is fit to show the pilot.
 class AuthException implements Exception {
   const AuthException(this.message);
@@ -57,8 +67,9 @@ abstract class AuthSession extends ChangeNotifier {
   /// Ends the session here and at Auth0.
   Future<void> signOut();
 
-  /// A current access token for the account routes, or null when signed out
-  /// or none can be produced right now.
+  /// A current access token for the account routes, or null when signed out.
+  /// Throws [AuthTokenUnavailableException] when the pilot is signed in but a
+  /// token cannot be produced right now.
   Future<String?> accessToken();
 }
 
