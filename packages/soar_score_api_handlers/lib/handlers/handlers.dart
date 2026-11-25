@@ -12,6 +12,7 @@ import 'package:soar_score_api_handlers/handlers/account_link_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/account_preferences_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/configuration_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/contests_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/directory_entry_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/landing_table_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/matrix_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/models_handlers.dart';
@@ -76,6 +77,7 @@ createHandlers(
   addAccountClaimRoutes(router, repository);
   addAccountRoutes(router);
   addAccountPreferencesRoutes(router, repository);
+  addDirectoryEntryRoutes(router, repository);
   addAccountLinkRoutes(
     router,
     repository,

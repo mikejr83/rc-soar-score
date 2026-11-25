@@ -19,6 +19,7 @@ import '../dto/create_landing_table_request.dart';
 import '../dto/create_participant_request.dart';
 import '../dto/create_role_request.dart';
 import '../dto/create_team_request.dart';
+import '../dto/directory_entry_dto.dart';
 import '../dto/draw_matrix_request.dart';
 import '../dto/draw_status_dto.dart';
 import '../dto/enter_score_request.dart';
@@ -703,6 +704,45 @@ class ApiClient {
       uri,
       AccountPreferences.fromJson,
     );
+  }
+
+  /// `GET /api/v1/account/directory-entry` — the details the signed-in
+  /// account offers contest directors (`entry` is null until it has made
+  /// them), with the account's own name to start from.
+  ///
+  /// A guest, local or deleted account is an [ApiHttpError] with status 403.
+  Future<DirectoryEntryStateDto> getDirectoryEntry() async {
+    final uri = _resolve('/api/v1/account/directory-entry');
+    final response = await _send('GET', uri);
+    return _decode<DirectoryEntryStateDto>(
+      response,
+      uri,
+      DirectoryEntryStateDto.fromJson,
+    );
+  }
+
+  /// `PUT /api/v1/account/directory-entry` — creates the signed-in account's
+  /// directory entry or replaces its details. Repeating it changes nothing.
+  ///
+  /// A blank name is an [ApiHttpError] with status 400; a guest, local or
+  /// deleted account one with status 403.
+  Future<DirectoryEntryStateDto> putDirectoryEntry(
+    PutDirectoryEntryRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/account/directory-entry');
+    final response = await _send('PUT', uri, body: request.toJson());
+    return _decode<DirectoryEntryStateDto>(
+      response,
+      uri,
+      DirectoryEntryStateDto.fromJson,
+    );
+  }
+
+  /// `DELETE /api/v1/account/directory-entry` — removes the entry; nothing
+  /// happens when there is none.
+  Future<void> deleteDirectoryEntry() async {
+    final uri = _resolve('/api/v1/account/directory-entry');
+    await _send('DELETE', uri);
   }
 
   /// `PUT /api/v1/roles/{id}` — renames the caller's role [id].
