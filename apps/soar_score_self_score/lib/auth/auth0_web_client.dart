@@ -26,8 +26,8 @@ class Auth0WebClient implements Auth0Client {
   String get _redirectUrl => '$_origin/';
 
   @override
-  Future<bool> waitUntilReady() async {
-    final end = DateTime.now().add(_timeout);
+  Future<bool> waitUntilReady({Duration? timeout}) async {
+    final end = DateTime.now().add(timeout ?? _timeout);
     // The SDK script defines `window.auth0` when it runs.
     while (!globalContext.has('auth0')) {
       if (DateTime.now().isAfter(end)) return false;

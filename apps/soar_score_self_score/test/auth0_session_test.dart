@@ -10,12 +10,21 @@ import 'package:soar_score_self_score/auth/auth_session.dart';
 class _FakeClient implements Auth0Client {
   bool ready = true;
   Completer<bool>? readyGate;
+
+  /// Answers the long "late SDK" wait (the one given a timeout).
+  Completer<bool>? lateGate;
   AuthIdentity? identity;
   Future<void> Function()? onLogout;
   final calls = <String>[];
 
   @override
-  Future<bool> waitUntilReady() async {
+  Future<bool> waitUntilReady({Duration? timeout}) async {
+    if (timeout != null) {
+      // The late watch: only a test that gates it sees the SDK arrive.
+      if (lateGate == null) return false;
+      calls.add('late-wait');
+      return lateGate!.future;
+    }
     calls.add('ready:$ready');
     if (readyGate != null) return readyGate!.future;
     return ready;
@@ -102,6 +111,25 @@ void main() {
     },
   );
 
+  test('an SDK that arrives late completes the callback once', () async {
+    final client = _FakeClient()
+      ..ready = false
+      ..lateGate = Completer<bool>()
+      ..identity = const AuthIdentity(name: 'Pat');
+    final session = Auth0Session(client);
+    await session.restore();
+    expect(session.isSignedIn, isFalse);
+    expect(client.calls, contains('late-wait'));
+
+    client.ready = true;
+    client.lateGate!.complete(true);
+    await pumpEventQueue();
+
+    expect(session.isSignedIn, isTrue);
+    expect(client.calls.where((c) => c == 'onLoad'), hasLength(1));
+    expect(client.calls.where((c) => c == 'late-wait'), hasLength(1));
+  });
+
   test('a failed start leaves the controls to try again', () async {
     final client = _FakeClient()..ready = false;
     final session = Auth0Session(client);
@@ -163,7 +191,7 @@ class _ThrowingOnLoad extends _FakeClient {
   final _FakeClient _inner;
 
   @override
-  Future<bool> waitUntilReady() => _inner.waitUntilReady();
+  Future<bool> waitUntilReady({Duration? timeout}) => _inner.waitUntilReady();
 
   @override
   Future<AuthIdentity?> onLoad() async => throw StateError('expired callback');

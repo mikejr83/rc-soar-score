@@ -14,8 +14,9 @@ class AuthIdentity {
 abstract class Auth0Client {
   /// Waits until the SDK's script has loaded. The script is `defer`red while
   /// Flutter's own bootstrap is `async`, so the app can start first. False
-  /// when it did not arrive in time (a blocked CDN, say).
-  Future<bool> waitUntilReady();
+  /// when it did not arrive within [timeout] (a blocked CDN, say); the
+  /// client's own default when null.
+  Future<bool> waitUntilReady({Duration? timeout});
 
   /// Completes a sign-in redirect or restores a stored session; null when
   /// nobody is signed in.

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:logging/logging.dart';
 
 import 'auth0_client.dart';
@@ -12,8 +14,9 @@ final _logger = Logger('Auth0Session');
 /// and [restore] (started right after the first frame) exchanges it. Order
 /// matters:
 ///
-/// - [restore] waits for the SDK script first. If it never arrives, the
-///   pending callback is still unprocessed, so [signIn] runs the restore
+/// - [restore] waits for the SDK script first. If it is late, the session
+///   keeps watching for it and restores when it lands; if it never arrives,
+///   the pending callback is still unprocessed, so [signIn] runs the restore
 ///   again before it starts a new sign-in (and a callback that turns out to be
 ///   good signs the pilot in without another redirect).
 /// - Overlapping calls share one run: a second [restore] or [signIn] while one
@@ -31,6 +34,10 @@ class Auth0Session extends AuthSession {
   bool _initializing = true;
   Future<void>? _restoring;
   Future<void>? _signingIn;
+  bool _watchingForSdk = false;
+
+  /// How long a late SDK script is still waited for after the first timeout.
+  static const _lateSdkWindow = Duration(minutes: 2);
 
   @override
   bool get isInitializing => _initializing;
@@ -49,6 +56,7 @@ class Auth0Session extends AuthSession {
     try {
       if (!await _client.waitUntilReady()) {
         _logger.warning('The Auth0 SDK did not load; session not restored');
+        unawaited(_restoreWhenSdkArrives());
         return;
       }
       _user = await _client.onLoad();
@@ -63,6 +71,23 @@ class Auth0Session extends AuthSession {
     } finally {
       _initializing = false;
       notifyListeners();
+    }
+  }
+
+  /// A slow network can deliver the SDK after the first wait gave up, with a
+  /// sign-in callback still in the URL. Watch for it a while longer and run
+  /// the shared restore (once) when it lands.
+  Future<void> _restoreWhenSdkArrives() async {
+    if (_watchingForSdk) return;
+    _watchingForSdk = true;
+    try {
+      if (await _client.waitUntilReady(timeout: _lateSdkWindow) && !_restored) {
+        await restore();
+      }
+    } on Object catch (error, stackTrace) {
+      _logger.warning('Late Auth0 restore failed', error, stackTrace);
+    } finally {
+      _watchingForSdk = false;
     }
   }
 
