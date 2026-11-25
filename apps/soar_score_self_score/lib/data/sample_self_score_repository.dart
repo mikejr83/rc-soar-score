@@ -3,6 +3,7 @@ import '../models/entry_context.dart';
 import '../models/group_results.dart';
 import '../models/guest_session.dart';
 import '../models/landing_result.dart';
+import '../models/link_candidate.dart';
 import '../models/pilot_overview.dart';
 import '../models/pilot_round.dart';
 import '../models/results_view.dart';
@@ -55,9 +56,6 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
 
   @override
   Future<ContestsView> contests() async => ContestsView(
-    matchPrompt:
-        'Your email matches ${SampleData.pilotName}, pilot 12, in '
-        '${SampleData.contestName}.',
     contests: [
       ContestSummary(
         participationId: '12',
@@ -76,6 +74,27 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
     if (participationId != '12') throw const ContestNotOnListException();
     return acceptInvitation(sampleCredential);
   }
+
+  @override
+  Future<List<LinkCandidate>> linkCandidates() async => [
+    LinkCandidate(
+      id: 'sample-candidate',
+      pilotName: SampleData.pilotName,
+      contests: [
+        LinkCandidateContest(
+          name: SampleData.contestName,
+          startDate: DateTime.utc(2026, 10, 10),
+          endDate: DateTime.utc(2026, 10, 11),
+        ),
+      ],
+    ),
+  ];
+
+  @override
+  Future<void> confirmLinkCandidate(String candidateId) async {}
+
+  @override
+  Future<void> declineLinkCandidate(String candidateId) async {}
 
   @override
   Future<TeamOverview> teamOverview(String contestId) async {

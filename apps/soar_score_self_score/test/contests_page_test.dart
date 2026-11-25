@@ -15,6 +15,7 @@ import 'package:soar_score_self_score/data/self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_scope.dart';
 import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/models/contests_view.dart';
+import 'package:soar_score_self_score/models/link_candidate.dart';
 import 'package:soar_score_self_score/models/guest_session.dart';
 import 'package:soar_score_self_score/pages/contests_page.dart';
 import 'package:soar_score_self_score/public_site.dart';
@@ -51,6 +52,10 @@ class _Repository extends SampleSelfScoreRepository {
     loads++;
     return view;
   }
+
+  /// No "Is this you?" match: these tests are about the list.
+  @override
+  Future<List<LinkCandidate>> linkCandidates() async => const [];
 
   @override
   Future<GuestSession> openContest(String participationId) async {

@@ -15,6 +15,25 @@ Future<void> openPath(WidgetTester tester, String path) async {
   await tester.pumpAndSettle();
 }
 
+/// The [label] button of the Is this you card that names [pilot].
+Finder _answer(String pilot, String label) => find.descendant(
+  of: find.ancestor(
+    of: find.textContaining(pilot),
+    matching: find.byType(Card),
+  ),
+  matching: find.text(label),
+);
+
+/// Pumps until [finder] matches nothing.
+Future<void> _waitGone(WidgetTester tester, Finder finder) async {
+  final end = DateTime.now().add(const Duration(seconds: 30));
+  while (DateTime.now().isBefore(end)) {
+    await tester.pump(const Duration(milliseconds: 200));
+    if (finder.evaluate().isEmpty) return;
+  }
+  fail('Timed out waiting for $finder to go. On screen: ${screenTexts()}');
+}
+
 /// Phase 2: the pilot opens the link from the score card.
 ///
 /// Returns the pilot id of the guest session, read from the overview address.
@@ -56,8 +75,10 @@ Future<String> phase2Invitation(
       await pumpUntilFound(tester, find.text('Signed in as Penny Pilot'));
       expect(find.widgetWithText(FilledButton, 'My contests'), findsOneWidget);
     });
-    // The last pilot: the later phases score the first two.
+    // The last pilot is linked by "Yes, that's me"; the one before declines:
+    // the later phases score the first two.
     final linked = contest.pilotNames.last;
+    final declined = contest.pilotNames[contest.pilotNames.length - 2];
     await journey.step(
       'A signed-in pilot with no contest sees a calm page',
       () async {
@@ -68,22 +89,65 @@ Future<String> phase2Invitation(
         await pumpUntilFound(tester, find.text('No contests yet'));
         expect(find.textContaining('invites you'), findsOneWidget);
         expect(find.text('Invited'), findsNothing);
+        expect(find.text('Is this you?'), findsNothing);
       },
     );
-    await journey.step('A linked contest is listed as invited', () async {
-      await contest.linkPilotAccount(linked);
-      // Leave and come back: the page loads its list when it opens.
+    await journey.step(
+      'My contests asks Is this you for each email match',
+      () async {
+        // The director typed the pilot's email on two profiles of the contest.
+        await contest.linkPilotAccount(linked, state: 'candidate');
+        await contest.linkPilotAccount(declined, state: 'candidate');
+        await openPath(tester, '/');
+        await tapVisible(
+          tester,
+          find.widgetWithText(FilledButton, 'My contests'),
+        );
+        await pumpUntilFound(tester, find.text('Is this you?'));
+        expect(find.text('Is this you?'), findsNWidgets(2));
+        expect(find.textContaining(linked), findsOneWidget);
+        expect(find.textContaining(declined), findsOneWidget);
+        expect(find.textContaining('E2E Self-Scoring Open'), findsWidgets);
+        // No director, email or id on the card.
+        expect(find.textContaining('@'), findsNothing);
+      },
+    );
+    await journey.step('Not me drops the match and it stays dropped', () async {
+      await tapVisible(tester, _answer(declined, 'Not me'));
+      await _waitGone(tester, find.textContaining(declined));
+      expect(find.text('Is this you?'), findsOneWidget);
+      // Leave the page and come back: the answer is on the server.
       await openPath(tester, '/');
       await tapVisible(
         tester,
         find.widgetWithText(FilledButton, 'My contests'),
       );
-      await pumpUntilFound(tester, find.text('E2E Self-Scoring Open'));
-      expect(find.text('Invited'), findsWidgets);
-      expect(find.text('No contests yet'), findsNothing);
-      // A contest that is not published has no public results.
-      expect(find.text('Public results'), findsNothing);
+      await pumpUntilFound(tester, find.text('Is this you?'));
+      expect(find.textContaining(declined), findsNothing);
+      expect(find.text('Is this you?'), findsOneWidget);
     });
+    await journey.step(
+      'Yes, that is me links the pilot and lists the contest',
+      () async {
+        await tapVisible(tester, _answer(linked, "Yes, that's me"));
+        await _waitGone(tester, find.text('Is this you?'));
+        expect(await contest.linkedPilotNames(), [linked]);
+        // The list loads again: the linked contest is on it, as invited.
+        await pumpUntilFound(tester, find.text('E2E Self-Scoring Open'));
+        expect(find.text('Invited'), findsWidgets);
+        expect(find.text('No contests yet'), findsNothing);
+        // Nothing is offered again after leaving and coming back.
+        await openPath(tester, '/');
+        await tapVisible(
+          tester,
+          find.widgetWithText(FilledButton, 'My contests'),
+        );
+        await pumpUntilFound(tester, find.text('E2E Self-Scoring Open'));
+        expect(find.text('Is this you?'), findsNothing);
+        // A contest that is not published has no public results.
+        expect(find.text('Public results'), findsNothing);
+      },
+    );
     await journey.step('Opening it from the list opens the pilot', () async {
       await tapVisible(tester, find.text('E2E Self-Scoring Open'));
       await pumpUntilFound(tester, find.text('2 rounds'));

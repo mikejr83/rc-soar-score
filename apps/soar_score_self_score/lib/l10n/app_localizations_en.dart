@@ -377,4 +377,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeSignOutFailed => 'Sign-out could not be completed. Try again.';
+
+  @override
+  String get isThisYouTitle => 'Is this you?';
+
+  @override
+  String isThisYouMatches(String name) {
+    return 'The email on your account matches the pilot $name.';
+  }
+
+  @override
+  String isThisYouContest(String contest, String dates) {
+    return '$contest, $dates';
+  }
+
+  @override
+  String get isThisYouConfirm => 'Yes, that\'s me';
+
+  @override
+  String get isThisYouDecline => 'Not me';
+
+  @override
+  String get isThisYouFailed => 'Could not save your answer. Try again.';
+
+  @override
+  String get isThisYouAlreadyLinked =>
+      'This pilot is already linked to another account.';
+
+  @override
+  String get isThisYouNoLongerAvailable => 'This match is no longer available.';
+
+  @override
+  String get isThisYouLoadFailed => 'Could not check for matching pilots.';
+
+  @override
+  String get isThisYouRetry => 'Try again';
 }

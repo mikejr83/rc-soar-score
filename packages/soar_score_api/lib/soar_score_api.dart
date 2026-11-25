@@ -5,6 +5,7 @@
 /// only `package:soar_score_api/soar_score_api.dart`.
 library;
 
+export 'api_id.dart';
 export 'client/api_client.dart';
 export 'dto/activate_installation_request.dart';
 export 'sync_limits.dart';

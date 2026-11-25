@@ -540,6 +540,171 @@ void main() {
     );
   });
 
+  group('Is this you', () {
+    const candidateId = '019c0000-0000-7000-8000-00000000c101';
+    const linkBody =
+        '{"id":"$candidateId","pilot_name":"Pat Pilot","status":"Confirmed",'
+        '"origin":"EmailMatch","confirmed_at":"2026-10-17T14:00:00.000Z",'
+        '"ended_at":null}';
+
+    test('candidates read as pilot name and dated contests', () async {
+      final repository = _repository((request) {
+        expect(request.url.path, '/api/v1/account/link-candidates');
+        return _json(
+          '{"candidates":[{"id":"$candidateId","first_name":"Pat",'
+          '"last_name":"Pilot","contests":[{"name":"Spring Open",'
+          '"start_date_time":"2026-10-17T14:00:00.000Z",'
+          '"end_date_time":"2026-10-18T22:00:00.000Z",'
+          '"start_date":"2026-10-17","end_date":"2026-10-18",'
+          '"timezone":"America/Denver","host":null,"city":null,'
+          '"state":null,"country":null}]}]}',
+        );
+      });
+
+      final result = await repository.linkCandidates();
+
+      expect(result.single.id, candidateId);
+      expect(result.single.pilotName, 'Pat Pilot');
+      expect(result.single.contests.single.name, 'Spring Open');
+      expect(
+        result.single.contests.single.startDate,
+        DateTime.utc(2026, 10, 17),
+      );
+      expect(result.single.contests.single.endDate, DateTime.utc(2026, 10, 18));
+    });
+
+    test('a one-day contest shows one date', () async {
+      final repository = _repository(
+        (_) => _json(
+          '{"candidates":[{"id":"$candidateId","first_name":"Pat",'
+          '"last_name":"Pilot","contests":[{"name":"Spring Open",'
+          '"start_date_time":"2026-10-17T14:00:00.000Z",'
+          '"end_date_time":"2026-10-17T22:00:00.000Z",'
+          '"start_date":"2026-10-17","end_date":"2026-10-17",'
+          '"timezone":"America/Denver"}]}]}',
+        ),
+      );
+      final result = await repository.linkCandidates();
+      final day = result.single.contests.single;
+      expect(day.startDate, DateTime.utc(2026, 10, 17));
+      expect(day.endDate, day.startDate);
+    });
+
+    test(
+      'a day in the contest zone shows once, whatever the UTC dates',
+      () async {
+        // Sydney, Saturday 9 am to 3 pm (daylight saving): Friday 22:00 to
+        // Saturday 04:00 UTC, two UTC dates for one local day.
+        final repository = _repository(
+          (_) => _json(
+            '{"candidates":[{"id":"$candidateId","first_name":"Pat",'
+            '"last_name":"Pilot","contests":[{"name":"Sydney Open",'
+            '"start_date_time":"2026-11-27T22:00:00.000Z",'
+            '"end_date_time":"2026-11-28T04:00:00.000Z",'
+            '"start_date":"2026-11-28","end_date":"2026-11-28",'
+            '"timezone":"Australia/Sydney"}]}]}',
+          ),
+        );
+        final result = await repository.linkCandidates();
+        final day = result.single.contests.single;
+        expect(day.startDate, DateTime.utc(2026, 11, 28));
+        expect(day.endDate, day.startDate);
+      },
+    );
+
+    test('confirm and decline post to the candidate', () async {
+      final seen = <String>[];
+      final repository = _repository((request) {
+        seen.add('${request.method} ${request.url.path}');
+        return request.url.path.endsWith('/confirm')
+            ? _json(linkBody)
+            : http.Response('', 204);
+      });
+
+      await repository.confirmLinkCandidate(candidateId);
+      await repository.declineLinkCandidate(candidateId);
+
+      expect(seen, [
+        'POST /api/v1/account/link-candidates/$candidateId/confirm',
+        'POST /api/v1/account/link-candidates/$candidateId/decline',
+      ]);
+    });
+
+    test('409 and 404 end the card, other failures may pass', () async {
+      LinkCandidateGoneReason? reasonOf(Object? error) =>
+          error is LinkCandidateGoneException ? error.reason : null;
+
+      const taken409 = '{"error":{"code":"already_linked","message":"x"}}';
+      const gone404 = '{"error":{"code":"link_not_found","message":"x"}}';
+      final taken = _repository((_) => _json(taken409, 409));
+      await expectLater(
+        taken.confirmLinkCandidate(candidateId),
+        throwsA(
+          predicate(
+            (e) => reasonOf(e) == LinkCandidateGoneReason.alreadyLinked,
+          ),
+        ),
+      );
+      final gone = _repository((_) => _json(gone404, 404));
+      await expectLater(
+        gone.declineLinkCandidate(candidateId),
+        throwsA(
+          predicate((e) => reasonOf(e) == LinkCandidateGoneReason.notAvailable),
+        ),
+      );
+      final down = _repository((_) => _json('{}', 500));
+      await expectLater(
+        down.confirmLinkCandidate(candidateId),
+        throwsA(
+          isA<SelfScoreLoadException>().having(
+            (e) => e is LinkCandidateGoneException,
+            'gone',
+            false,
+          ),
+        ),
+      );
+    });
+
+    test(
+      'other 409 and 404 answers keep the card eligible for retry',
+      () async {
+        for (final (status, code) in [
+          (409, 'invitations_not_available'),
+          (409, 'backend_only'),
+          (404, 'not_found'),
+        ]) {
+          final repository = _repository(
+            (_) => _json('{"error":{"code":"$code","message":"x"}}', status),
+          );
+          await expectLater(
+            repository.confirmLinkCandidate(candidateId),
+            throwsA(
+              isA<SelfScoreLoadException>().having(
+                (e) => e is LinkCandidateGoneException,
+                'gone for $status $code',
+                false,
+              ),
+            ),
+          );
+        }
+      },
+    );
+
+    test('an expired account token does not end the guest session', () async {
+      final repository = _repository((_) => _json('{}', 401));
+      await expectLater(
+        repository.linkCandidates(),
+        throwsA(
+          isA<SelfScoreLoadException>().having(
+            (e) => e is SessionEndedException,
+            'session ended',
+            false,
+          ),
+        ),
+      );
+    });
+  });
+
   test('score and ordinal formatting', () {
     expect(ScoreFormat.score(2184), '2,184');
     expect(ScoreFormat.score(962.5), '962.5');

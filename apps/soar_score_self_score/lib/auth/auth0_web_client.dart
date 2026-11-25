@@ -5,6 +5,7 @@ import 'package:auth0_flutter/auth0_flutter_web.dart';
 
 import 'auth0_client.dart';
 import 'auth_config.dart';
+import 'renewal_policy.dart';
 
 /// [Auth0Client] over `auth0_flutter`'s web SDK.
 class Auth0WebClient implements Auth0Client {
@@ -63,6 +64,14 @@ class Auth0WebClient implements Auth0Client {
   Future<void> logout() => _sdk.logout(returnToUrl: _redirectUrl);
 
   @override
-  Future<String> accessToken() async =>
-      (await _sdk.credentials(audience: _config.audience)).accessToken;
+  Future<String> accessToken() async {
+    try {
+      return (await _sdk.credentials(audience: _config.audience)).accessToken;
+    } on WebException catch (error) {
+      if (renewalEndsSession(error.code, error.details)) {
+        throw const AuthSessionEndedException();
+      }
+      rethrow;
+    }
+  }
 }
