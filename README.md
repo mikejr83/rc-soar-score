@@ -39,6 +39,7 @@ The system is designed for both connected and disconnected field operations, all
   - _Self-Scoring_: Mobile-first score entry portal for pilots and team helpers on their smartphones.
 - **Public Results & Live Projections**: Dedicated public site for real-time leaderboards, round-by-round breakdown, landing stats, and contest archives.
 - **Score Review & Dispute Workflow**: Structured audit trail for contested scores, reflights, penalties, and director score overrides.
+- **GliderScore Import**: Import competitions from existing GliderScore databases (`.mdb` files), including pilots, draws, and scores.
 
 ---
 
@@ -94,6 +95,8 @@ soar-score/
 - [`soar_score_api`](packages/soar_score_api/): Client HTTP library providing strongly-typed DTOs, JSON serialization, and error handling for frontend Flutter apps.
 - [`soar_score_api_handlers`](packages/soar_score_api_handlers/): Composable Shelf routing table and endpoint handlers shared between the standalone server and the local desktop embedded API.
 - [`soar_score_ui`](packages/soar_score_ui/): Shared Flutter widgets, theme tokens, and Material 3 design elements shared across frontend apps.
+- [`soar_score_sync`](packages/soar_score_sync/): Client sync engine providing pull-first synchronization, outbox push, and write-through scheduling.
+- [`soar_score_ui_storage`](packages/soar_score_ui_storage/): Typed, per-account key-value store for UI-only state with SQLite (native) and IndexedDB (web) backends.
 
 ### Layer Diagram
 
