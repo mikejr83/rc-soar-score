@@ -626,10 +626,9 @@ class SyncEngine {
     } on _UnsupportedChange catch (error) {
       // Everything before the refused change was stored; remember its
       // highest sequence so a replay does not rewrite it.
-      final stored = ordered.where((c) => c.sequence < error.sequence).fold(
-        storedBefore ?? 0,
-        (h, c) => h > c.sequence ? h : c.sequence,
-      );
+      final stored = ordered
+          .where((c) => c.sequence < error.sequence)
+          .fold(storedBefore ?? 0, (h, c) => h > c.sequence ? h : c.sequence);
       if (stored > 0) _storedBeforeUnsupported[scope] = stored;
       rethrow;
     } finally {
