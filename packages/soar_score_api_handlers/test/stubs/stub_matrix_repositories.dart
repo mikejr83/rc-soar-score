@@ -205,7 +205,7 @@ class StubScorePlaceholderRepository implements ScorePlaceholderRepository {
     return [
       for (final placeholder in stored)
         if (ids.contains(placeholder.assignmentId)) placeholder,
-    ];
+    ]..sort((a, b) => a.id.compareTo(b.id));
   }
 
   @override
