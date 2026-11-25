@@ -192,13 +192,19 @@ class _SignedIn extends StatefulWidget {
 
 class _SignedInState extends State<_SignedIn> {
   bool _failed = false;
+  bool _pending = false;
 
   Future<void> _signOut() async {
-    setState(() => _failed = false);
+    setState(() {
+      _failed = false;
+      _pending = true;
+    });
     try {
       await widget.auth.signOut();
     } on Object {
       if (mounted) setState(() => _failed = true);
+    } finally {
+      if (mounted) setState(() => _pending = false);
     }
   }
 
@@ -228,7 +234,7 @@ class _SignedInState extends State<_SignedIn> {
             minimumSize: const Size.fromHeight(48),
             side: BorderSide(color: scheme.onSurface, width: 1.5),
           ),
-          onPressed: _signOut,
+          onPressed: _pending ? null : _signOut,
           child: Text(l10n.homeSignOutButton),
         ),
         if (_failed) ...[

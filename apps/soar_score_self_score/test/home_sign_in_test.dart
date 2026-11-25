@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -13,9 +15,12 @@ class _FakeAuth extends E2eAuthSession {
   final calls = <String>[];
   bool failNext = false;
   bool failSignOut = false;
+  Completer<void>? signOutGate;
 
   @override
   Future<void> signOut() async {
+    calls.add('sign-out');
+    await signOutGate?.future;
     if (failSignOut) throw StateError('logout failed');
     await super.signOut();
   }
@@ -134,5 +139,46 @@ void main() {
     expect(await auth.accessToken(), e2ePilotToken);
     await auth.signOut();
     expect(await auth.accessToken(), isNull);
+  });
+
+  testWidgets('Sign out is off while pending, and retry stays on offer', (
+    tester,
+  ) async {
+    final auth = _FakeAuth();
+    await auth.signIn();
+    auth.signOutGate = Completer<void>();
+    await _pump(tester, auth);
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Sign out'));
+    await tester.pump();
+    // The request is out: the page stays signed in and the button is off, so
+    // a second tap cannot send a second request.
+    expect(find.text('Signed in as Penny Pilot'), findsOneWidget);
+    expect(
+      tester
+          .widget<OutlinedButton>(
+            find.widgetWithText(OutlinedButton, 'Sign out'),
+          )
+          .onPressed,
+      isNull,
+    );
+
+    auth.failSignOut = true;
+    auth.signOutGate!.complete();
+    await tester.pumpAndSettle();
+    expect(find.text('Sign-out could not be completed. Try again.'), findsOne);
+    expect(find.text('Signed in as Penny Pilot'), findsOneWidget);
+    final retry = tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, 'Sign out'),
+    );
+    expect(retry.onPressed, isNotNull);
+
+    auth
+      ..failSignOut = false
+      ..signOutGate = null;
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Sign out'));
+    await tester.pumpAndSettle();
+    expect(auth.isSignedIn, isFalse);
+    expect(auth.calls.where((c) => c == 'sign-out'), hasLength(2));
   });
 }
