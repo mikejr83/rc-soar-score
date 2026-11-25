@@ -121,6 +121,133 @@ void _tests(Backend backend) {
     );
   });
 
+  group('redeem', () {
+    final account = core.Id.create();
+    final other = core.Id.create();
+    final at = DateTime.utc(2026, 11, 25, 12);
+
+    Future<core.Invitation> unredeemed() async => repo.save(
+      variant(first, {
+        'redeemed_by_account_id': null,
+        'first_used_at': null,
+        'last_used_at': null,
+      }),
+    );
+
+    test('sets the redeemer and both times on the first open', () async {
+      final stored = await unredeemed();
+
+      final applied = await repo.redeem(
+        stored.id,
+        expectedRedeemer: null,
+        newRedeemer: account,
+        usedAt: at,
+      );
+
+      expect(applied, isTrue);
+      final after = (await repo.findById(stored.id))!;
+      expect(after.redeemedByAccountId, account);
+      expect(after.firstUsedAt, at);
+      expect(after.lastUsedAt, at);
+    });
+
+    test('keeps the first use and moves the last', () async {
+      final stored = await unredeemed();
+      await repo.redeem(
+        stored.id,
+        expectedRedeemer: null,
+        newRedeemer: account,
+        usedAt: at,
+      );
+      final later = at.add(const Duration(hours: 1));
+
+      final applied = await repo.redeem(
+        stored.id,
+        expectedRedeemer: account,
+        newRedeemer: other,
+        usedAt: later,
+      );
+
+      expect(applied, isTrue);
+      final after = (await repo.findById(stored.id))!;
+      expect(after.redeemedByAccountId, other);
+      expect(after.firstUsedAt, at);
+      expect(after.lastUsedAt, later);
+    });
+
+    test('does nothing when the redeemer is not the expected one', () async {
+      final stored = await unredeemed();
+      await repo.redeem(
+        stored.id,
+        expectedRedeemer: null,
+        newRedeemer: account,
+        usedAt: at,
+      );
+      final before = (await repo.findById(stored.id))!;
+
+      expect(
+        await repo.redeem(
+          stored.id,
+          expectedRedeemer: null,
+          newRedeemer: other,
+          usedAt: at.add(const Duration(hours: 1)),
+        ),
+        isFalse,
+      );
+      expect(
+        await repo.redeem(
+          stored.id,
+          expectedRedeemer: other,
+          newRedeemer: other,
+          usedAt: at.add(const Duration(hours: 1)),
+        ),
+        isFalse,
+      );
+      expect(await repo.findById(stored.id), before);
+    });
+
+    test('does nothing for an invitation that is no longer active', () async {
+      final stored = await repo.save(
+        variant(first, {
+          'state': 'Replaced',
+          'redeemed_by_account_id': null,
+          'first_used_at': null,
+          'last_used_at': null,
+        }),
+      );
+
+      expect(
+        await repo.redeem(
+          stored.id,
+          expectedRedeemer: null,
+          newRedeemer: account,
+          usedAt: at,
+        ),
+        isFalse,
+      );
+      expect((await repo.findById(stored.id))!.redeemedByAccountId, isNull);
+    });
+
+    test('leaves every other field as stored', () async {
+      final stored = await unredeemed();
+
+      await repo.redeem(
+        stored.id,
+        expectedRedeemer: null,
+        newRedeemer: account,
+        usedAt: at,
+      );
+
+      final after = (await repo.findById(stored.id))!;
+      expect({
+        ...after.toSyncJson(),
+        'redeemed_by_account_id': null,
+        'first_used_at': null,
+        'last_used_at': null,
+      }, stored.toSyncJson());
+    });
+  });
+
   test('the database refuses a second active invitation', () async {
     await expectLater(
       repo.save(

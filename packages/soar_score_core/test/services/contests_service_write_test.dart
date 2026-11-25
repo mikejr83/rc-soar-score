@@ -73,6 +73,21 @@ void main() {
       expect(created.city, isNull);
     });
 
+    test('refuses a time zone that is not a known IANA zone', () async {
+      for (final zone in ['Mars/Olympus', '', 'MDT']) {
+        await expectLater(
+          service.createContest(
+            NewContest(id: contestId, details: details(), timezone: zone),
+            ownerAccountId: owner,
+            metadata: metadata(),
+          ),
+          throwsArgumentError,
+          reason: 'zone "$zone"',
+        );
+      }
+      expect(contests.stored, isEmpty);
+    });
+
     test('repeating the same request returns the stored contest', () async {
       final first = await service.createContest(
         newContest(),

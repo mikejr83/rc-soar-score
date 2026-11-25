@@ -15,6 +15,7 @@ import '../repositories/stale_revision_error.dart';
 import 'contest_details.dart';
 import 'contest_lifecycle.dart';
 import 'contest_transition_audit.dart';
+import '../time/contest_time_zones.dart';
 import 'scores_service.dart';
 import 'new_contest.dart';
 
@@ -58,6 +59,13 @@ class ContestsService {
     required Id? ownerAccountId,
     required MutationMetadata metadata,
   }) async {
+    if (!ContestTimeZones.isValid(input.timezone)) {
+      throw ArgumentError.value(
+        input.timezone,
+        'timezone',
+        'not a known IANA time zone',
+      );
+    }
     final now = _clock();
     final contest = Contest(
       id: input.id,

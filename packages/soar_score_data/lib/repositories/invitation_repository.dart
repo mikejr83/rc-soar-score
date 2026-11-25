@@ -1,7 +1,9 @@
+import 'package:drift/drift.dart' show UpdateKind, Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'audit_event_repository.dart';
 import 'drift_repository.dart';
+import '../sync/sql_placeholders.dart';
 import 'latest_timestamps.dart';
 
 /// Invitations in the database; backend only, so written without a
@@ -90,6 +92,41 @@ class InvitationRepository extends DriftRepository
   Future<core.Invitation> save(core.Invitation invitation) async {
     await _store.upsertJson(_store.encode(invitation));
     return invitation;
+  }
+
+  @override
+  Future<bool> redeem(
+    core.Id invitationId, {
+    required core.Id? expectedRedeemer,
+    required core.Id newRedeemer,
+    required DateTime usedAt,
+  }) async {
+    final stamp = const core.UtcTimestampConverter().toJson(usedAt.toUtc());
+    // `IS ?` is not portable to PostgreSQL, so a missing redeemer is its own
+    // condition.
+    final expected = expectedRedeemer == null
+        ? 'redeemed_by_account_id IS NULL'
+        : 'redeemed_by_account_id = ?';
+    final changed = await db.customUpdate(
+      portableSql(
+        db,
+        'UPDATE invitations SET redeemed_by_account_id = ?, '
+        'first_used_at = COALESCE(first_used_at, ?), last_used_at = ? '
+        "WHERE id = ? AND state = 'Active' AND $expected",
+      ),
+      variables: [
+        Variable<String>(newRedeemer.value),
+        Variable<String>(stamp),
+        Variable<String>(stamp),
+        Variable<String>(invitationId.value),
+        if (expectedRedeemer != null) Variable<String>(expectedRedeemer.value),
+      ],
+      updates: {
+        db.allTables.firstWhere((t) => t.actualTableName == 'invitations'),
+      },
+      updateKind: UpdateKind.update,
+    );
+    return changed > 0;
   }
 
   @override
