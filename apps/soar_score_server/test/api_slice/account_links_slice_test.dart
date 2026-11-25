@@ -629,6 +629,28 @@ void _tests(SliceBackend backend) {
       },
     );
 
+    test('still list a contest whose stored time zone is unknown', () async {
+      await issue(1);
+      await confirm(pat, _profileId(1));
+      final contest = await repository.contestRepository.findById(
+        id(_contestId),
+      );
+      await repository.contestRepository.save(
+        core.Contest.fromJson({...contest!.toJson(), 'timezone': 'Not/AZone'}),
+        metadata: core.MutationMetadata(
+          clientMutationId: 'legacy-zone',
+          authority: core.Authority.director,
+          clientTime: clock,
+          actorId: api.director,
+        ),
+      );
+
+      final row = (await participations(pat)).single! as Map<String, Object?>;
+
+      expect(row['timezone'], 'Not/AZone');
+      expect(row['start_date'], matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')));
+    });
+
     test('are empty for an account with no link', () async {
       await issue(1);
       expect(await participations(otherAccount), isEmpty);

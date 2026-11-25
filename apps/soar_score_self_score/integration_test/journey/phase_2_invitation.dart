@@ -25,6 +25,7 @@ Future<String> phase2Invitation(
 ) async {
   final pilot = contest.pilotNames.first;
   var pilotId = '';
+  var openedPath = '';
   await journey.phase(2, 'Open the invitation link', () async {
     await journey.step('The landing page offers sign in and sign up', () async {
       await openPath(tester, '/');
@@ -87,6 +88,7 @@ Future<String> phase2Invitation(
       await tapVisible(tester, find.text('E2E Self-Scoring Open'));
       await pumpUntilFound(tester, find.text('2 rounds'));
       final uri = router.routeInformationProvider.value.uri;
+      openedPath = uri.path;
       expect(
         uri.pathSegments[uri.pathSegments.indexOf('pilots') + 1],
         contest.participations[linked],
@@ -102,6 +104,14 @@ Future<String> phase2Invitation(
       );
       expect(find.text('Signed in as Penny Pilot'), findsNothing);
     });
+    await journey.step(
+      'After sign-out the contest opened from the list needs authorization',
+      () async {
+        await openPath(tester, openedPath);
+        await pumpUntilFound(tester, find.textContaining('session has ended'));
+        await openPath(tester, '/');
+      },
+    );
     await journey.step('A link that does not exist is refused', () async {
       await openPath(tester, invitationPath('not-a-real-credential'));
       await pumpUntilFound(tester, find.text('This link does not work'));

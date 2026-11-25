@@ -2,10 +2,13 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../api_client_provider.dart';
 import '../auth/auth_scope.dart';
 import '../auth/auth_session.dart';
 import '../l10n/app_localizations.dart';
 import '../router.dart';
+import '../session/end_session.dart';
+import '../session/guest_session_scope.dart';
 import '../widgets/legal_footer.dart';
 
 /// The landing page: brand lockup, what the app is for and the ways in.
@@ -186,6 +189,31 @@ class _SignedIn extends StatelessWidget {
 
   final AuthSession auth;
 
+  /// Ends the contest session a contest opened from the list left in this
+  /// browser (the API's cookie and the stored record) before signing out, so
+  /// scoring access does not outlive the sign-in. If that cannot be done the
+  /// pilot stays signed in and is told, rather than left half signed out.
+  Future<void> _signOut(BuildContext context) async {
+    final sessions = context.guestSessions;
+    final client = context
+        .getInheritedWidgetOfExactType<ApiClientInherited>()
+        ?.client;
+    final messenger = ScaffoldMessenger.of(context);
+    final failed = AppLocalizations.of(context).homeSignOutFailed;
+    if (sessions.read() != null) {
+      final ended = await endGuestSession(
+        client,
+        sessions,
+        clearOnFailure: false,
+      );
+      if (!ended) {
+        messenger.showSnackBar(SnackBar(content: Text(failed)));
+        return;
+      }
+    }
+    await auth.signOut();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -212,7 +240,7 @@ class _SignedIn extends StatelessWidget {
             minimumSize: const Size.fromHeight(48),
             side: BorderSide(color: scheme.onSurface, width: 1.5),
           ),
-          onPressed: auth.signOut,
+          onPressed: () => _signOut(context),
           child: Text(l10n.homeSignOutButton),
         ),
       ],

@@ -42,6 +42,16 @@ void main() {
       );
     });
 
+    test('an unknown zone falls back to the UTC date', () {
+      expect(
+        ContestTimeZones.localDate(
+          'Mars/Olympus',
+          DateTime.utc(2026, 10, 11, 2),
+        ),
+        '2026-10-11',
+      );
+    });
+
     test('validates ids', () {
       expect(ContestTimeZones.isValid('Europe/Rome'), isTrue);
       expect(ContestTimeZones.isValid('Mars/Olympus'), isFalse);
