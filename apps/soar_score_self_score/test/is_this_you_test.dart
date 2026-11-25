@@ -1,9 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_self_score/auth/auth_scope.dart';
+import 'package:soar_score_self_score/auth/auth_session.dart';
 import 'package:soar_score_self_score/auth/e2e_auth_session.dart';
+import 'package:soar_score_self_score/data/api_self_score_repository.dart';
 import 'package:soar_score_self_score/data/sample_self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_scope.dart';
@@ -11,6 +17,7 @@ import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/models/contests_view.dart';
 import 'package:soar_score_self_score/models/link_candidate.dart';
 import 'package:soar_score_self_score/pages/contests_page.dart';
+import 'package:soar_score_self_score/session/guest_session_store.dart';
 import 'package:soar_score_self_score/widgets/is_this_you_card.dart';
 import 'package:soar_score_self_score/widgets/link_candidates_section.dart';
 
@@ -346,6 +353,76 @@ void main() {
     expect(find.text('Linked Cup', skipOffstage: false), findsOneWidget);
   });
 
+  testWidgets('a renewal that fails once is retried from the load error', (
+    tester,
+  ) async {
+    await _tall(tester);
+    final auth = _FlakyTokenAuth();
+    final requests = <String>[];
+    final api = ApiClient(
+      baseUrl: Uri.parse('http://localhost:8080'),
+      httpClient: MockClient((request) async {
+        requests.add(request.url.path);
+        expect(request.headers['authorization'], 'Bearer renewed');
+        final body = request.url.path.endsWith('link-candidates')
+            ? {'candidates': <Object>[]}
+            : {
+                'participations': [
+                  {
+                    'participation_id': '019c0000-0000-7000-8000-00000000d201',
+                    'contest_id': '019c0000-0000-7000-8000-000000000045',
+                    'contest_name': 'Spring Open',
+                    'start_date_time': '2026-10-17T14:00:00.000Z',
+                    'end_date_time': '2026-10-19T04:00:00.000Z',
+                    'start_date': '2026-10-17',
+                    'end_date': '2026-10-18',
+                    'timezone': 'America/Denver',
+                    'phase': 'in_progress',
+                    'read_only': false,
+                    'host': null,
+                    'city': null,
+                    'state': null,
+                    'country': null,
+                    'public_results_url': null,
+                  },
+                ],
+              };
+        return http.Response(
+          jsonEncode(body),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      }),
+      accountTokenProvider: auth.accessToken,
+    );
+    await tester.pumpWidget(
+      AuthScope(
+        session: auth,
+        child: SelfScoreScope(
+          repository: ApiSelfScoreRepository(api, MemoryGuestSessionStore()),
+          child: MaterialApp(
+            localizationsDelegates: appLocalizationDelegates,
+            home: const ContestsPage(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // The failed renewal sent nothing and offers Retry, not sign-in.
+    expect(requests, isEmpty);
+    expect(find.text('Retry'), findsOneWidget);
+    expect(find.text('Sign in'), findsNothing);
+
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Spring Open'), findsOneWidget);
+    expect(requests, contains('/api/v1/account/participations'));
+    expect(requests, contains('/api/v1/account/link-candidates'));
+    expect(auth.signIns, 0);
+  });
+
   testWidgets('a guest on the contests page never asks for matches', (
     tester,
   ) async {
@@ -525,5 +602,26 @@ class _FlakyCandidates extends _Repository {
   Future<List<LinkCandidate>> linkCandidates() async {
     if (candidateLoads++ == 0) throw const SelfScoreOfflineException('down');
     return candidates;
+  }
+}
+
+/// Signed in, but the first token renewal fails as if Auth0 were unreachable.
+class _FlakyTokenAuth extends E2eAuthSession {
+  _FlakyTokenAuth() {
+    super.signIn();
+  }
+
+  int signIns = 0;
+  int _calls = 0;
+
+  @override
+  Future<void> signIn({bool createAccount = false}) async {
+    signIns++;
+  }
+
+  @override
+  Future<String?> accessToken() async {
+    if (_calls++ == 0) throw const AuthTokenUnavailableException();
+    return 'renewed';
   }
 }

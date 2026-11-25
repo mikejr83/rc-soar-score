@@ -200,7 +200,10 @@ void main() {
     final session = Auth0Session(client);
     await session.restore();
 
-    expect(await session.accessToken(), isNull);
+    await expectLater(
+      session.accessToken(),
+      throwsA(isA<AuthTokenUnavailableException>()),
+    );
     expect(session.isSignedIn, isTrue);
     expect(await session.accessToken(), 'renewed');
   });

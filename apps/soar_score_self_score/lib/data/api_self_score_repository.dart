@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:soar_score_api/soar_score_api.dart';
 
+import '../auth/auth_session.dart';
 import '../models/contests_view.dart';
 import '../models/entry_context.dart';
 import '../models/group_result_row.dart';
@@ -45,6 +46,8 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
     try {
       return await call();
     } on ApiNetworkError {
+      throw const SelfScoreLoadException(_unreachable);
+    } on AuthTokenUnavailableException {
       throw const SelfScoreLoadException(_unreachable);
     } on ApiHttpError catch (error) {
       final code = _codeOf(error);
@@ -331,6 +334,8 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
     } on ApiHttpError catch (error) {
       // The answers of a link candidate keep their code for the caller.
       if (error.statusCode == 404 || error.statusCode == 409) rethrow;
+      throw const SelfScoreLoadException(_unreachable);
+    } on AuthTokenUnavailableException {
       throw const SelfScoreLoadException(_unreachable);
     } on ApiException {
       throw const SelfScoreLoadException(_unreachable);
