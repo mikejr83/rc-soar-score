@@ -19,11 +19,17 @@ class LoadableScaffold<T> extends StatefulWidget {
     required this.appBar,
     required this.builder,
     this.allowRefresh = false,
+    this.onSignedOut,
     this.now = DateTime.now,
     super.key,
   });
 
   final Future<T> Function() load;
+
+  /// What the button does when the server no longer accepts the person's
+  /// sign-in (`SignedOutException`): sign in again. Without it that error
+  /// leads back to the start page.
+  final VoidCallback? onSignedOut;
 
   /// Shows a manual refresh action and the last successful fetch time.
   final bool allowRefresh;
@@ -113,10 +119,16 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
               : widget.builder(context, data);
         } else if (snapshot.hasError) {
           final error = snapshot.error;
-          body =
-              error is SelfScoreLoadException &&
-                  (error is SessionEndedException ||
-                      error is SignedOutException)
+          body = error is SignedOutException && widget.onSignedOut != null
+              ? LoadErrorView(
+                  message: error.message,
+                  onRetry: widget.onSignedOut!,
+                  actionLabel: AppLocalizations.of(context).signInButton,
+                  actionIcon: Icons.login,
+                )
+              : error is SelfScoreLoadException &&
+                    (error is SessionEndedException ||
+                        error is SignedOutException)
               // Retrying cannot help: the person needs their link, or to sign
               // in, again.
               ? LoadErrorView(

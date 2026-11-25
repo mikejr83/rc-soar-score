@@ -11,6 +11,7 @@ import '../l10n/app_localizations.dart';
 import '../models/contests_view.dart';
 import '../public_site.dart';
 import '../router.dart';
+import '../session/contest_open_gate.dart';
 import '../session/end_session.dart';
 import '../session/guest_session_scope.dart';
 import '../widgets/connection_indicator.dart';
@@ -46,12 +47,17 @@ class _ContestsPageState extends State<ContestsPage> {
     final router = GoRouter.of(context);
     final l10n = AppLocalizations.of(context);
     final auth = context.auth;
+    final gate = context.contestOpenGate;
     final client = context
         .getInheritedWidgetOfExactType<ApiClientInherited>()
         ?.client;
     setState(() => _opening = contest.participationId);
     try {
-      final session = await repository.openContest(contest.participationId);
+      final session = await gate.run(
+        () => repository.openContest(contest.participationId),
+      );
+      // Null: a sign-out is under way and refused the open.
+      if (session == null) return;
       if (!auth.isSignedIn) {
         // Signed out while the contest was opening: the answer set a fresh
         // cookie, so end it instead of keeping it.
@@ -64,11 +70,32 @@ class _ContestsPageState extends State<ContestsPage> {
       messenger.showSnackBar(SnackBar(content: Text(l10n.contestNotOnList)));
       if (mounted) setState(() => _reloads++);
     } on SignedOutException {
-      messenger.showSnackBar(SnackBar(content: Text(l10n.contestSignInEnded)));
+      // The server refused a token the provider still holds: offer signing in
+      // again right here. The guest session, if any, is left alone.
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.contestSignInEnded),
+          action: SnackBarAction(
+            label: l10n.signInButton,
+            onPressed: () => _reauthenticate(auth),
+          ),
+        ),
+      );
     } on SelfScoreLoadException {
       messenger.showSnackBar(SnackBar(content: Text(l10n.contestOpenFailed)));
     } finally {
       if (mounted) setState(() => _opening = null);
+    }
+  }
+
+  Future<void> _reauthenticate(AuthSession auth) async {
+    try {
+      await auth.signIn();
+    } on AuthException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).homeSignInFailed)),
+      );
     }
   }
 
@@ -85,6 +112,7 @@ class _ContestsPageState extends State<ContestsPage> {
     return LoadableScaffold<ContestsView>(
       load: repository.contests,
       reloadKey: (repository, _reloads),
+      onSignedOut: () => _reauthenticate(context.auth),
       appBar: (context, data) => SelfScoreAppBar(
         title: l10n.contestsTitle,
         actions: const [ConnectionIndicator()],

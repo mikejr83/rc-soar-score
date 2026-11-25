@@ -648,7 +648,11 @@ void _tests(SliceBackend backend) {
       final row = (await participations(pat)).single! as Map<String, Object?>;
 
       expect(row['timezone'], 'Not/AZone');
-      expect(row['start_date'], matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')));
+      // The UTC date of the start, not a failure.
+      expect(
+        row['start_date'],
+        contest.startDateTime.toUtc().toIso8601String().substring(0, 10),
+      );
     });
 
     test('are empty for an account with no link', () async {

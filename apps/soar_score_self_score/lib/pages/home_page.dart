@@ -7,6 +7,7 @@ import '../auth/auth_scope.dart';
 import '../auth/auth_session.dart';
 import '../l10n/app_localizations.dart';
 import '../router.dart';
+import '../session/contest_open_gate.dart';
 import '../session/end_session.dart';
 import '../session/guest_session_scope.dart';
 import '../widgets/legal_footer.dart';
@@ -200,6 +201,10 @@ class _SignedIn extends StatelessWidget {
         ?.client;
     final messenger = ScaffoldMessenger.of(context);
     final failed = AppLocalizations.of(context).homeSignOutFailed;
+    final gate = context.contestOpenGate;
+    // No new opens, and every open already sent settles first: its answer may
+    // set the cookie, and the clear below has to come after that.
+    await gate.closeAndSettle();
     // Always asked, even with no stored record: the cookie is issued
     // independently of the display record, and the endpoint accepts a request
     // with no valid session.
@@ -209,10 +214,17 @@ class _SignedIn extends StatelessWidget {
       clearOnFailure: false,
     );
     if (!ended) {
+      gate.reopen();
       messenger.showSnackBar(SnackBar(content: Text(failed)));
       return;
     }
-    await auth.signOut();
+    try {
+      await auth.signOut();
+    } finally {
+      // On the web this leaves the page; where it does not, the next sign-in
+      // opens contests again.
+      gate.reopen();
+    }
   }
 
   @override

@@ -229,6 +229,49 @@ void main() {
     );
   });
 
+  testWidgets('a list the server refuses offers signing in again', (
+    tester,
+  ) async {
+    final auth = _FakeSignIn();
+    await _pump(tester, _SignedOutRepository(), auth: auth);
+
+    expect(find.textContaining('Your sign-in has ended'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
+    await tester.pumpAndSettle();
+
+    expect(auth.signIns, 1);
+  });
+
+  testWidgets('an open the server refuses offers signing in again', (
+    tester,
+  ) async {
+    final auth = _FakeSignIn();
+    final repository = _Repository(
+      ContestsView(
+        contests: [_contest('b', 'Spring Open', ContestPhase.invited)],
+      ),
+      openError: const SignedOutException(),
+    );
+    final store = await _pump(tester, repository, auth: auth);
+    store.write(
+      GuestSession(
+        contestId: 'c',
+        contestName: 'n',
+        pilotId: 'p',
+        pilotName: 'x',
+        expiresAt: DateTime.utc(2099),
+      ),
+    );
+
+    await tester.tap(find.text('Spring Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(SnackBarAction, 'Sign in'));
+    await tester.pumpAndSettle();
+
+    expect(auth.signIns, 1);
+    expect(store.read(), isNotNull, reason: 'guest scoring access is kept');
+  });
+
   testWidgets('signing out while a contest opens drops what it opened', (
     tester,
   ) async {
@@ -353,26 +396,40 @@ void main() {
     expect(opened, [Uri.parse('https://rcsoarscore.com/results/contests/x')]);
   });
 
-  testWidgets('a sign-in the server refuses says so and keeps the guest', (
-    tester,
-  ) async {
-    final repository = _SignedOutRepository();
-    final store = await _pump(tester, repository);
-    store.write(
-      GuestSession(
-        contestId: 'c',
-        contestName: 'n',
-        pilotId: 'p',
-        pilotName: 'x',
-        expiresAt: DateTime.utc(2099),
-      ),
-    );
-    await tester.pumpAndSettle();
+  testWidgets(
+    'a sign-in the server refuses says so, offers sign-in and keeps the guest',
+    (tester) async {
+      final repository = _SignedOutRepository();
+      final store = await _pump(tester, repository);
+      store.write(
+        GuestSession(
+          contestId: 'c',
+          contestName: 'n',
+          pilotId: 'p',
+          pilotName: 'x',
+          expiresAt: DateTime.utc(2099),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.textContaining('Your sign-in has ended'), findsOneWidget);
-    expect(find.text('Back to start'), findsOneWidget);
-    expect(store.read(), isNotNull);
-  });
+      expect(find.textContaining('Your sign-in has ended'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Sign in'), findsOneWidget);
+      expect(store.read(), isNotNull);
+    },
+  );
+}
+
+class _FakeSignIn extends E2eAuthSession {
+  _FakeSignIn() {
+    super.signIn();
+  }
+
+  int signIns = 0;
+
+  @override
+  Future<void> signIn({bool createAccount = false}) async {
+    signIns++;
+  }
 }
 
 class _RefusingAuth extends E2eAuthSession {

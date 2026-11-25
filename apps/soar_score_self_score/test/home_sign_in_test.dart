@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -12,6 +14,7 @@ import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/models/guest_session.dart';
 import 'package:soar_score_self_score/pages/home_page.dart';
 import 'package:soar_score_self_score/router.dart';
+import 'package:soar_score_self_score/session/contest_open_gate.dart';
 import 'package:soar_score_self_score/session/guest_session_scope.dart';
 import 'package:soar_score_self_score/session/guest_session_store.dart';
 
@@ -33,6 +36,8 @@ Future<void> _pump(
   AuthSession auth, {
   GuestSessionStore? sessions,
   ApiClient? client,
+  ContestOpenGate? gate,
+  void Function(ContestOpenGate gate)? beforePump,
 }) async {
   tester.view.physicalSize = const Size(800, 2400);
   tester.view.devicePixelRatio = 1;
@@ -55,6 +60,10 @@ Future<void> _pump(
   }
   if (sessions != null) {
     app = GuestSessionScope(store: sessions, child: app);
+  }
+  if (gate != null) {
+    beforePump?.call(gate);
+    app = ContestOpenScope(gate: gate, child: app);
   }
   await tester.pumpWidget(AuthScope(session: auth, child: app));
 }
@@ -180,6 +189,49 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(calls, ['POST /api/v1/self-scoring/session/end']);
+      expect(auth.isSignedIn, isFalse);
+    });
+
+    testWidgets('waits for a contest still opening before clearing it', (
+      tester,
+    ) async {
+      final auth = _FakeAuth();
+      await auth.signIn();
+      final events = <String>[];
+      final answer = Completer<String>();
+      await _pump(
+        tester,
+        auth,
+        sessions: MemoryGuestSessionStore(),
+        client: ApiClient(
+          baseUrl: Uri.parse('http://localhost:8080'),
+          httpClient: MockClient((request) async {
+            events.add('end');
+            return http.Response('', 204);
+          }),
+        ),
+        gate: ContestOpenGate(),
+        beforePump: (gate) {
+          // An open sent from My Contests that has not answered yet.
+          unawaited(
+            gate.run<String>(() async {
+              final text = await answer.future;
+              events.add('open answered: $text');
+              return text;
+            }),
+          );
+        },
+      );
+
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Sign out'));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(events, isEmpty, reason: 'nothing is cleared while it is open');
+      expect(auth.isSignedIn, isTrue);
+
+      answer.complete('set the cookie');
+      await tester.pumpAndSettle();
+
+      expect(events, ['open answered: set the cookie', 'end']);
       expect(auth.isSignedIn, isFalse);
     });
 

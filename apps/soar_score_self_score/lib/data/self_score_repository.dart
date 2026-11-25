@@ -36,7 +36,7 @@ class SessionEndedException extends SelfScoreLoadException {
 /// problem, so the guest session is left alone.
 class SignedOutException extends SelfScoreLoadException {
   const SignedOutException()
-    : super('Your sign-in has ended. Go back to the start to sign in again.');
+    : super('Your sign-in has ended. Sign in again to continue.');
 }
 
 /// The contest is not on the signed-in person's list any more: the link was
