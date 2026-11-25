@@ -378,36 +378,48 @@ void _tests(SliceBackend backend) {
     });
 
     test('opens by a guest and an account at once leave one redeemer and '
-        'sessions that each validate or end cleanly', () async {
+        'a usable session', () async {
       final issued = await issue(1);
       await guestScores(issued.credential);
       await claim(otherAccount, issued.credential);
 
-      final results = await Future.wait([
+      final claiming = send(
+        otherAccount,
+        'POST',
+        '/account/invitation-claims',
+        body: {'credential': issued.credential},
+      );
+      final guests = await Future.wait([
         for (var i = 0; i < 4; i++) invitations.resolve(issued.credential),
-        claim(otherAccount, issued.credential),
       ]);
+      final claimResponse = await claiming;
 
       final redeemer = (await redeemers(1)).single;
-      final stored = (await repository.invitationRepository
-          .findByClientMutationId(
-            contestId: issued.invitation.contestId,
-            clientMutationId: issued.invitation.clientMutationId,
-          ))!;
-      expect(stored.redeemedByAccountId!.value, redeemer);
-      // Every anonymous session acted as the guest, and the one that still
-      // validates is whoever is stored.
-      for (final r in results.whereType<core.InvitationResolution>()) {
+      // Every anonymous session acted as the guest.
+      for (final r in guests) {
         expect(r.access.guestAccountId, isNot(otherAccount));
       }
+      // The signed-in open either succeeded or lost to a guest and ended as an
+      // invalid link; both leave the stored redeemer as the only usable actor.
+      final tokens = [for (final r in guests) r.sessionToken];
+      if (claimResponse.status == 200) {
+        tokens.add(claimResponse.json['session_token']! as String);
+      } else {
+        expect(claimResponse.status, 404, reason: claimResponse.text);
+        expect(
+          (claimResponse.json['error']! as Map)['code'],
+          'invalid_invitation',
+        );
+      }
       var valid = 0;
-      for (final r in results) {
-        final token = r is core.InvitationResolution
-            ? r.sessionToken
-            : r as String;
+      for (final token in tokens) {
         if (await overviewStatus(token) == 200) valid++;
       }
       expect(valid, greaterThan(0));
+      final stored = (await repository.invitationRepository.findById(
+        issued.invitation.id,
+      ))!;
+      expect(stored.redeemedByAccountId!.value, redeemer);
     });
 
     test('a pilot who never opened the link gets the session too', () async {
