@@ -18,7 +18,8 @@ class LinkCandidatesSection extends StatefulWidget {
   State<LinkCandidatesSection> createState() => _LinkCandidatesSectionState();
 }
 
-class _LinkCandidatesSectionState extends State<LinkCandidatesSection> {
+class _LinkCandidatesSectionState extends State<LinkCandidatesSection>
+    with AutomaticKeepAliveClientMixin {
   Future<List<LinkCandidate>>? _future;
   Object? _repository;
   final _answered = <String>{};
@@ -39,8 +40,14 @@ class _LinkCandidatesSectionState extends State<LinkCandidatesSection> {
     });
   }
 
+  // The section is a lazy list child: a confirmation that finishes after it
+  // scrolls away must still reach the page so the new contest shows up.
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return FutureBuilder<List<LinkCandidate>>(

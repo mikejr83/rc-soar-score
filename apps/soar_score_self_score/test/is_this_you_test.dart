@@ -62,8 +62,25 @@ class _Repository extends SampleSelfScoreRepository {
   @override
   Future<ContestsView> contests() async {
     contestLoads++;
-    return const ContestsView(contests: []);
+    return ContestsView(
+      contests: [
+        for (var i = 0; i < manyContests; i++) _summary('Filler $i'),
+        if (confirmed.isNotEmpty) _summary('Linked Cup'),
+      ],
+    );
   }
+
+  /// How many other contests the list holds, to make the page scroll.
+  int manyContests = 0;
+
+  static ContestSummary _summary(String name) => ContestSummary(
+    participationId: 'p-$name',
+    contestId: 'c-$name',
+    name: name,
+    startDate: DateTime.utc(2026, 10, 10),
+    endDate: DateTime.utc(2026, 10, 11),
+    phase: ContestPhase.invited,
+  );
 }
 
 Widget _app(
@@ -303,6 +320,30 @@ void main() {
     await tester.pumpAndSettle();
     expect(repository.contestLoads, 2);
     expect(find.text('Is this you?'), findsNothing);
+  });
+
+  testWidgets('a confirmation that ends offscreen still refreshes the list', (
+    tester,
+  ) async {
+    final release = Completer<void>();
+    final repository = _Repository(answer: () => release.future)
+      ..manyContests = 40;
+    await tester.pumpWidget(_app(repository, const ContestsPage()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text("Yes, that's me"));
+    await tester.pump();
+
+    // Scroll far enough that a lazy list would dispose the section.
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -6000));
+    await tester.pumpAndSettle();
+    expect(find.text('Is this you?'), findsNothing);
+
+    release.complete();
+    await tester.pumpAndSettle();
+    expect(repository.contestLoads, 2);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -6000));
+    await tester.pumpAndSettle();
+    expect(find.text('Linked Cup', skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('a guest on the contests page never asks for matches', (
