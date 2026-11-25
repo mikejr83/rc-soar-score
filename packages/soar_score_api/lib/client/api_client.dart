@@ -1800,7 +1800,10 @@ class ApiClient {
       ...defaultHeaders,
       'accept': 'application/json',
     };
-    final provider = uri.path.startsWith('/api/v1/account/')
+    final isAccountRoute =
+        uri.path == '/api/v1/account' ||
+        uri.path.startsWith('/api/v1/account/');
+    final provider = isAccountRoute
         ? (accountTokenProvider ?? tokenProvider)
         : tokenProvider;
     final token = authenticated ? await provider?.call() : null;

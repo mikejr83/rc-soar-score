@@ -280,7 +280,7 @@ class _WelcomeState extends State<_Welcome> {
             style: OutlinedButton.styleFrom(
               minimumSize: const Size.fromHeight(48),
             ),
-            onPressed: auth.isAvailable
+            onPressed: auth.isAvailable && !auth.isInitializing && !_signingIn
                 ? () => _signIn(auth, createAccount: false)
                 : null,
             child: Text(l10n.signInButton),
@@ -290,7 +290,7 @@ class _WelcomeState extends State<_Welcome> {
             style: OutlinedButton.styleFrom(
               minimumSize: const Size.fromHeight(48),
             ),
-            onPressed: auth.isAvailable
+            onPressed: auth.isAvailable && !auth.isInitializing && !_signingIn
                 ? () => _signIn(auth, createAccount: true)
                 : null,
             child: Text(l10n.createAccountButton),

@@ -25,13 +25,36 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _failed = false;
+  bool _busy = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Signing in leaves the app and returns to the root, and the session is
+    // restored a moment after the first frame. A pilot who started on an
+    // invitation link goes back to it, once, when the restore finishes.
+    final auth = context.auth;
+    if (auth.isInitializing) return;
+    final back = auth.takeReturnTo();
+    if (back != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.go(back);
+      });
+    }
+  }
 
   Future<void> _signIn(AuthSession auth, {required bool createAccount}) async {
-    setState(() => _failed = false);
+    if (_busy) return;
+    setState(() {
+      _failed = false;
+      _busy = true;
+    });
     try {
       await auth.signIn(createAccount: createAccount);
     } on AuthException {
       if (mounted) setState(() => _failed = true);
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -82,6 +105,7 @@ class _HomePageState extends State<HomePage> {
                           _SignedOut(
                             auth: auth,
                             failed: _failed,
+                            busy: _busy,
                             onSignIn: () => _signIn(auth, createAccount: false),
                             onSignUp: () => _signIn(auth, createAccount: true),
                           ),
@@ -125,12 +149,16 @@ class _SignedOut extends StatelessWidget {
   const _SignedOut({
     required this.auth,
     required this.failed,
+    required this.busy,
     required this.onSignIn,
     required this.onSignUp,
   });
 
   final AuthSession auth;
   final bool failed;
+
+  /// A sign-in is in flight.
+  final bool busy;
   final VoidCallback onSignIn;
   final VoidCallback onSignUp;
 
@@ -140,6 +168,9 @@ class _SignedOut extends StatelessWidget {
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final available = auth.isAvailable;
+    // Off while Auth0 starts or a sign-in is out: both start the same
+    // callback handling, which must run once.
+    final enabled = available && !auth.isInitializing && !busy;
     return Semantics(
       // Tells a screen reader why the buttons are off in a build with no
       // sign-in.
@@ -151,7 +182,7 @@ class _SignedOut extends StatelessWidget {
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(48),
             ),
-            onPressed: available ? onSignIn : null,
+            onPressed: enabled ? onSignIn : null,
             child: Text(l10n.signInButton),
           ),
           const SizedBox(height: 12),
@@ -160,7 +191,7 @@ class _SignedOut extends StatelessWidget {
               minimumSize: const Size.fromHeight(48),
               side: BorderSide(color: scheme.onSurface, width: 1.5),
             ),
-            onPressed: available ? onSignUp : null,
+            onPressed: enabled ? onSignUp : null,
             child: Text(l10n.homeSignUpButton),
           ),
           const SizedBox(height: 8),
@@ -194,32 +225,29 @@ class _SignedIn extends StatefulWidget {
 }
 
 class _SignedInState extends State<_SignedIn> {
-  bool _signingOut = false;
   bool _failed = false;
+  bool _pending = false;
 
-  AuthSession get auth => widget.auth;
-
-  /// Signs out. A session that acts as the account (an invitation claimed
-  /// while signed in, or a link claimed earlier) ends first, on the server's
-  /// cookie and on this device. If that fails the pilot stays signed in and
-  /// can try again; a plain guest session is left alone.
   Future<void> _signOut() async {
-    if (_signingOut) return;
     setState(() {
-      _signingOut = true;
       _failed = false;
+      _pending = true;
     });
     final sessions = context.guestSessions;
     final client = context.maybeApiClient;
     try {
+      // A session that acts as the account (an invitation claimed while
+      // signed in, or a link claimed earlier) ends first, on the server's
+      // cookie and on this device. If that fails the pilot stays signed in
+      // and can try again; a plain guest session is left alone.
       if (sessions.read()?.actsAsAccount ?? false) {
         await endAccountSession(client, sessions);
       }
-      await auth.signOut();
+      await widget.auth.signOut();
     } on Object {
       if (mounted) setState(() => _failed = true);
     } finally {
-      if (mounted) setState(() => _signingOut = false);
+      if (mounted) setState(() => _pending = false);
     }
   }
 
@@ -228,7 +256,7 @@ class _SignedInState extends State<_SignedIn> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
-    final name = auth.displayName;
+    final name = widget.auth.displayName;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -249,18 +277,15 @@ class _SignedInState extends State<_SignedIn> {
             minimumSize: const Size.fromHeight(48),
             side: BorderSide(color: scheme.onSurface, width: 1.5),
           ),
-          onPressed: _signingOut ? null : _signOut,
+          onPressed: _pending ? null : _signOut,
           child: Text(l10n.homeSignOutButton),
         ),
         if (_failed) ...[
           const SizedBox(height: 8),
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              l10n.homeSignOutFailed,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(color: scheme.error),
-            ),
+          Text(
+            l10n.homeSignOutFailed,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(color: scheme.error),
           ),
         ],
       ],

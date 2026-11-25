@@ -671,12 +671,6 @@ abstract class AppLocalizations {
   /// **'Sign out'**
   String get homeSignOutButton;
 
-  /// Shown on the landing page when ending the account's scoring session failed during sign-out; the pilot stays signed in and can try again.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not sign you out. Check your connection and try again.'**
-  String get homeSignOutFailed;
-
   /// Landing page message when the sign-in redirect could not start.
   ///
   /// In en, this message translates to:
@@ -688,6 +682,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lost your link? Ask your contest director to send your link again.'**
   String get homeLostLink;
+
+  /// Landing page message when signing out failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-out could not be completed. Try again.'**
+  String get homeSignOutFailed;
 }
 
 class _AppLocalizationsDelegate

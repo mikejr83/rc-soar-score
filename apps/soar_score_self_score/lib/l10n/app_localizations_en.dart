@@ -360,13 +360,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeSignOutButton => 'Sign out';
 
   @override
-  String get homeSignOutFailed =>
-      'Could not sign you out. Check your connection and try again.';
-
-  @override
   String get homeSignInFailed => 'Sign-in could not be started. Try again.';
 
   @override
   String get homeLostLink =>
       'Lost your link? Ask your contest director to send your link again.';
+
+  @override
+  String get homeSignOutFailed => 'Sign-out could not be completed. Try again.';
 }

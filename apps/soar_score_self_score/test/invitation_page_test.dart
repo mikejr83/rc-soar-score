@@ -545,10 +545,9 @@ void _accountTests() {
   ) async {
     final auth = _ReturningAuth(invitationPath('sample-link'));
     await auth.signIn();
-    await _pump(tester, store: MemoryGuestSessionStore(), auth: auth);
-    router.go('/app-info');
-    await tester.pumpAndSettle();
+    // The app starts on the landing page, as it does after the redirect.
     router.go('/');
+    await _pump(tester, store: MemoryGuestSessionStore(), auth: auth);
     await tester.pumpAndSettle();
     expect(find.text('Hello, Jane Smith'), findsOneWidget);
     expect(find.text('Continue as Penny Pilot'), findsOneWidget);
