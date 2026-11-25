@@ -168,6 +168,7 @@ class _WelcomeState extends State<_Welcome> {
     setState(() {
       _claiming = true;
       _failure = null;
+      _signInFailed = false;
     });
     final failure = await widget.onClaim();
     if (mounted) {

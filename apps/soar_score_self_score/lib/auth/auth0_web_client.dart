@@ -54,16 +54,17 @@ class Auth0WebClient implements Auth0Client {
     );
   }
 
-  /// The `returnTo` of the state a sign-in carried, only when it is a path
-  /// inside the app: Auth0 hands the state back unchanged, but nothing outside
+  /// The `returnTo` of the state a sign-in carried, only when it is an
+  /// invitation link of the app (the only place the app asks to return to): Auth0 hands the state back unchanged, but nothing outside
   /// the app is ever followed.
   static String? _returnToOf(Object? appState) {
     if (appState is! Map) return null;
     final path = appState['returnTo'];
-    return path is String && path.startsWith('/') && !path.startsWith('//')
-        ? path
-        : null;
+    return path is String && _isInvitationPath(path) ? path : null;
   }
+
+  static bool _isInvitationPath(String path) =>
+      path.startsWith('/invitations/') && !path.contains('//');
 
   @override
   Future<void> loginWithRedirect({
