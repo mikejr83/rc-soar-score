@@ -64,6 +64,18 @@ void _tests(Backend backend) {
       },
     );
 
+    test('lists by round', () async {
+      final rounds = {for (final f in flights) f.creditedRoundId};
+
+      for (final round in rounds) {
+        expect(
+          await repo.listForRound(contestId, round),
+          unorderedEquals(flights.where((f) => f.creditedRoundId == round)),
+        );
+      }
+      expect(await repo.listForRound(contestId, core.Id.create()), isEmpty);
+    });
+
     test('replaceForContest swaps the results, with no mutation', () async {
       final before = await inst.count('mutation_records');
       final kept = flights.take(2).toList();

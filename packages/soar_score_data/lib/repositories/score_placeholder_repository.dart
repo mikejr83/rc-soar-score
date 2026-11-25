@@ -43,6 +43,17 @@ class ScorePlaceholderRepository extends DriftRepository
   );
 
   @override
+  Future<List<core.ScorePlaceholder>> listForAssignments(
+    Iterable<core.Id> assignmentIds,
+  ) async {
+    final found = await _store.whereIdIn('assignment_id', assignmentIds);
+    // whereIdIn reads in 400-id chunks; UUIDv7 id order is the creation
+    // order, so sort here to keep it across chunk boundaries.
+    found.sort((a, b) => a.id.compareTo(b.id));
+    return found;
+  }
+
+  @override
   Future<core.ScorePlaceholder> save(
     core.ScorePlaceholder placeholder, {
     required core.MutationMetadata metadata,

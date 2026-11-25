@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:drift/drift.dart'
+    show ApplyInterceptor, QueryExecutor, QueryInterceptor;
 import 'package:drift/native.dart';
 import 'package:postgres/postgres.dart' as pg;
 import 'package:soar_score_core/soar_score_core.dart' as core;
@@ -37,11 +39,12 @@ class Installation {
   static Future<Installation> open(
     Backend backend, {
     DatabaseProfile? profile,
+    QueryInterceptor? interceptor,
   }) async {
     switch (backend) {
       case Backend.sqlite:
         final db = SoarScoreDatabase(
-          NativeDatabase.memory(),
+          _intercept(NativeDatabase.memory(), interceptor),
           profile: profile ?? DatabaseProfile.native,
         );
         return Installation._(
@@ -62,7 +65,7 @@ class Installation {
         );
         await admin.execute('CREATE DATABASE "$name"');
         final db = SoarScoreDatabase(
-          config.named(name).toPgDatabase(),
+          _intercept(config.named(name).toPgDatabase(), interceptor),
           profile: profile ?? DatabaseProfile.native,
         );
         return Installation._(
@@ -112,6 +115,11 @@ class Installation {
   Future<int> count(String table) async =>
       (await db.customSelect('SELECT COUNT(*) AS n FROM $table').getSingle())
           .read<int>('n');
+
+  static QueryExecutor _intercept(
+    QueryExecutor executor,
+    QueryInterceptor? interceptor,
+  ) => interceptor == null ? executor : executor.interceptWith(interceptor);
 
   /// Opens another connection to this installation's database, for concurrent
   /// access in a test. On PostgreSQL that is a fresh connection to the same
