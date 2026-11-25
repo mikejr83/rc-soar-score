@@ -511,10 +511,17 @@ class ParticipantLinkService {
       // already claimed match nothing), so a Confirmed link never keeps
       // unclaimed guest entries.
       // The link itself is not rewritten, so two opens of the same account
-      // claiming at once cannot conflict on its revision.
+      // claiming at once cannot conflict on its revision; the claim checks the
+      // link is still Confirmed instead.
       final guests = await _guestsOf(profileId);
       if (guests.isNotEmpty) {
-        await links.claimGuests(accountId, guestAccountIds: guests);
+        // Refused when the link ended or moved since it was read: nothing the
+        // guests did may go to an account that no longer holds the pilot.
+        final claimed = await links.claimGuests(
+          existing,
+          guestAccountIds: guests,
+        );
+        if (!claimed) throw ParticipantLinkError.linkNotFound();
       }
       return existing;
     }

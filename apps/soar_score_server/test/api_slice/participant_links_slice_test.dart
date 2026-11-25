@@ -855,6 +855,69 @@ void _tests(SliceBackend backend) {
       expect(await redeemers(1), {pat.value});
     });
 
+    test('a claim paused before it writes does not take what a guest did '
+        'after the link ended', () async {
+      final issued = await issue(1);
+      await guestScores(issued.credential);
+      final link = await links.linkFromInvitation(
+        credential: issued.credential,
+        accountId: pat,
+      );
+      // The pilot's guest browser opens the link again: the guest holds the
+      // invitation, so the account's next open has something to claim.
+      final guest = (await invitations.resolve(issued.credential))
+          .access
+          .guestAccountId;
+
+      final gated = GatedRepository(api.database);
+      final paused = Completer<void>();
+      final release = Completer<void>();
+      gated.beforeClaim = () {
+        paused.complete();
+        return release.future;
+      };
+      final racingInvitations = core.InvitationService(
+        gated,
+        invitations.codec,
+        clock: () => clock,
+      );
+      final racing = core.ParticipantLinkService(
+        gated,
+        racingInvitations,
+        clock: () => clock,
+      );
+
+      final opening = racing.openParticipation(
+        participationId: id(_participationId(1)),
+        accountId: pat,
+      );
+      final outcome = expectLater(
+        opening,
+        throwsA(
+          isA<core.ParticipantLinkError>().having(
+            (e) => e.code,
+            'code',
+            'link_not_found',
+          ),
+        ),
+      );
+      await paused.future;
+      // The account ends the link, and the guest scores another round.
+      await links.end(linkId: link.id, accountId: pat);
+      final again = await invitations.resolve(issued.credential);
+      expect(await submitAs(again.sessionToken, 2, 'guest-2'), 201);
+      release.complete();
+      await outcome;
+
+      expect(await attemptActors(), {pat.value, guest.value});
+      expect(await redeemers(1), {guest.value});
+      expect(
+        (await invitations.authorize(again.sessionToken)).guestAccountId,
+        guest,
+        reason: 'the guest keeps a working session',
+      );
+    });
+
     test('a guest open paused after its write and an account taking over '
         'are both audited, and only the account\'s session works', () async {
       final issued = await issue(1);

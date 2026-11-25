@@ -113,11 +113,11 @@ class _GatedLinks implements core.ParticipantAccountLinkRepository {
   }
 
   @override
-  Future<void> claimGuests(
-    core.Id accountId, {
+  Future<bool> claimGuests(
+    core.ParticipantAccountLink link, {
     required Iterable<core.Id> guestAccountIds,
   }) => _claiming(
-    () => _real.claimGuests(accountId, guestAccountIds: guestAccountIds),
+    () => _real.claimGuests(link, guestAccountIds: guestAccountIds),
   );
 
   @override

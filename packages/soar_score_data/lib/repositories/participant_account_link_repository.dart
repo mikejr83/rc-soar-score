@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart' show UpdateKind, Variable;
+import 'package:drift/drift.dart' show SqlDialect, UpdateKind, Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import '../schema/guest_account_references.dart';
@@ -70,10 +70,35 @@ class ParticipantAccountLinkRepository extends DriftRepository
   });
 
   @override
-  Future<void> claimGuests(
-    core.Id accountId, {
+  Future<bool> claimGuests(
+    core.ParticipantAccountLink link, {
     required Iterable<core.Id> guestAccountIds,
-  }) => db.transaction(() => _claim(accountId, guestAccountIds));
+  }) => db.transaction(() async {
+    // PostgreSQL holds the row until the transaction ends, so ending or
+    // moving the link waits for this claim; SQLite has one writer.
+    final lock = db.executor.dialect == SqlDialect.postgres
+        ? ' FOR UPDATE'
+        : '';
+    final rows = await db
+        .customSelect(
+          portableSql(
+            db,
+            'SELECT status, account_id, participant_profile_id '
+            'FROM participant_account_links WHERE id = ?$lock',
+          ),
+          variables: [Variable<String>(link.id.value)],
+        )
+        .get();
+    final stored = rows.firstOrNull?.data;
+    if (stored == null ||
+        stored['status'] != 'Confirmed' ||
+        stored['account_id'] != link.accountId.value ||
+        stored['participant_profile_id'] != link.participantProfileId.value) {
+      return false;
+    }
+    await _claim(link.accountId, guestAccountIds);
+    return true;
+  });
 
   Future<void> _claim(
     core.Id accountId,
