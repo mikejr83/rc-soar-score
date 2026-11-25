@@ -226,10 +226,23 @@ void main() {
 
   test('claiming a link gives the session the account acts in', () async {
     final session = await _repository(_fixtures).claimInvitation('abc');
-    expect(session.actsAsAccount, isTrue);
-    expect(session.toJson()['actsAsAccount'], isTrue);
     expect(session.pilotName, 'Alex Rivera');
     expect(session.pilotId, '0192f6a0-0000-7000-8000-000000000002');
+  });
+
+  test('the session actor comes from the server, not the endpoint', () async {
+    final claimed = {
+      ...(jsonDecode(_fixture('resolve_invitation_response')) as Map),
+      'acts_as_account': true,
+    };
+    // The public resolver on an already-claimed link answers as the account.
+    final viaGuestEntry = await _repository((_) => _json(jsonEncode(claimed)))
+        .acceptInvitation('abc');
+    expect(viaGuestEntry.actsAsAccount, isTrue);
+    expect(viaGuestEntry.toJson()['actsAsAccount'], isTrue);
+    // A claim answered as a guest session is not treated as the account.
+    final viaClaim = await _repository(_fixtures).claimInvitation('abc');
+    expect(viaClaim.actsAsAccount, isFalse);
   });
 
   test('claiming a pilot another account holds says so', () {

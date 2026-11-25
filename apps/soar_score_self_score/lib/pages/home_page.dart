@@ -184,20 +184,43 @@ class _SignedOut extends StatelessWidget {
   }
 }
 
-class _SignedIn extends StatelessWidget {
+class _SignedIn extends StatefulWidget {
   const _SignedIn({required this.auth});
 
   final AuthSession auth;
 
+  @override
+  State<_SignedIn> createState() => _SignedInState();
+}
+
+class _SignedInState extends State<_SignedIn> {
+  bool _signingOut = false;
+  bool _failed = false;
+
+  AuthSession get auth => widget.auth;
+
   /// Signs out. A session that acts as the account (an invitation claimed
-  /// while signed in) ends with it, on the server's cookie and on this device,
-  /// so a shared device keeps no access; a plain guest session stays.
-  Future<void> _signOut(BuildContext context) async {
+  /// while signed in, or a link claimed earlier) ends first, on the server's
+  /// cookie and on this device. If that fails the pilot stays signed in and
+  /// can try again; a plain guest session is left alone.
+  Future<void> _signOut() async {
+    if (_signingOut) return;
+    setState(() {
+      _signingOut = true;
+      _failed = false;
+    });
     final sessions = context.guestSessions;
-    if (sessions.read()?.actsAsAccount ?? false) {
-      await endGuestSession(context.maybeApiClient, sessions);
+    final client = context.maybeApiClient;
+    try {
+      if (sessions.read()?.actsAsAccount ?? false) {
+        await endAccountSession(client, sessions);
+      }
+      await auth.signOut();
+    } on Object {
+      if (mounted) setState(() => _failed = true);
+    } finally {
+      if (mounted) setState(() => _signingOut = false);
     }
-    await auth.signOut();
   }
 
   @override
@@ -226,9 +249,20 @@ class _SignedIn extends StatelessWidget {
             minimumSize: const Size.fromHeight(48),
             side: BorderSide(color: scheme.onSurface, width: 1.5),
           ),
-          onPressed: () => _signOut(context),
+          onPressed: _signingOut ? null : _signOut,
           child: Text(l10n.homeSignOutButton),
         ),
+        if (_failed) ...[
+          const SizedBox(height: 8),
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              l10n.homeSignOutFailed,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(color: scheme.error),
+            ),
+          ),
+        ],
       ],
     );
   }

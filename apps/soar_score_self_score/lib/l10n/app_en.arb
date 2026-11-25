@@ -447,6 +447,10 @@
   "@homeSignOutButton": {
     "description": "Landing page button that signs the pilot out."
   },
+  "homeSignOutFailed": "Could not sign you out. Check your connection and try again.",
+  "@homeSignOutFailed": {
+    "description": "Shown on the landing page when ending the account's scoring session failed during sign-out; the pilot stays signed in and can try again."
+  },
   "homeSignInFailed": "Sign-in could not be started. Try again.",
   "@homeSignInFailed": {
     "description": "Landing page message when the sign-in redirect could not start."

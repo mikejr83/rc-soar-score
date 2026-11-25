@@ -33,6 +33,7 @@ Future<void> _pump(
   AuthSession auth, {
   GuestSessionStore? store,
   List<String>? requests,
+  bool Function()? serverUp,
 }) async {
   tester.view.physicalSize = const Size(800, 2400);
   tester.view.devicePixelRatio = 1;
@@ -59,6 +60,7 @@ Future<void> _pump(
         baseUrl: Uri.parse('http://localhost:8080'),
         httpClient: MockClient((request) async {
           requests?.add('${request.method} ${request.url.path}');
+          if (!(serverUp?.call() ?? true)) throw http.ClientException('down');
           return http.Response('', 204);
         }),
       ),
@@ -177,5 +179,28 @@ void main() {
     expect(requests, isEmpty);
     expect(store.read(), isNotNull);
     expect(auth.isSignedIn, isFalse);
+  });
+
+  testWidgets('a failed cleanup keeps the pilot signed in and can be retried', (
+    tester,
+  ) async {
+    final auth = _FakeAuth();
+    await auth.signIn();
+    final store = MemoryGuestSessionStore()
+      ..write(_session(actsAsAccount: true));
+    var up = false;
+    await _pump(tester, auth, store: store, serverUp: () => up);
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Sign out'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Could not sign you out'), findsOneWidget);
+    expect(auth.isSignedIn, isTrue);
+    expect(store.read(), isNotNull);
+
+    up = true;
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Sign out'));
+    await tester.pumpAndSettle();
+    expect(auth.isSignedIn, isFalse);
+    expect(store.read(), isNull);
   });
 }

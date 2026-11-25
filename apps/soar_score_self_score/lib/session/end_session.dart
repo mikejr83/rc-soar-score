@@ -16,3 +16,15 @@ Future<void> endGuestSession(ApiClient? client, GuestSessionStore store) async {
     store.clear();
   }
 }
+
+/// Ends a session that acts as the account, for sign-out. Unlike
+/// [endGuestSession] it does not hide a failure: the server must confirm the
+/// cookie is cleared, and on failure the local session is kept so the pilot can
+/// try again. Throws when the request fails.
+Future<void> endAccountSession(
+  ApiClient? client,
+  GuestSessionStore store,
+) async {
+  await client?.endGuestSession();
+  store.clear();
+}
