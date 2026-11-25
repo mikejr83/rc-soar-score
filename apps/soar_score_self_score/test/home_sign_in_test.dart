@@ -291,6 +291,7 @@ void main() {
         final gate = ContestOpenGate();
         final answer = Completer<GuestSession>();
         final repository = _GatedOpenRepository(answer.future);
+        final endCalls = <String>[];
         final router = GoRouter(
           routes: [
             GoRoute(path: '/', builder: (context, state) => const HomePage()),
@@ -312,7 +313,10 @@ void main() {
               client: ApiClient(
                 baseUrl: Uri.parse('http://localhost:8080'),
                 // The end call fails: the failure has to stay visible on Home.
-                httpClient: MockClient((_) async => http.Response('', 500)),
+                httpClient: MockClient((request) async {
+                  endCalls.add(request.url.path);
+                  return http.Response('', 500);
+                }),
               ),
               child: GuestSessionScope(
                 store: sessions,
@@ -361,6 +365,158 @@ void main() {
           findsOneWidget,
         );
         expect(auth.isSignedIn, isTrue);
+        expect(endCalls, [
+          '/api/v1/self-scoring/session/end',
+        ], reason: 'only the sign-out ends the session, not the late open');
+      },
+    );
+
+    testWidgets(
+      'a contest open finishing while My Contests stays mounted is dropped',
+      (tester) async {
+        final auth = _FakeAuth();
+        await auth.signIn();
+        final sessions = MemoryGuestSessionStore();
+        final gate = ContestOpenGate();
+        final answer = Completer<GuestSession>();
+        final endCalls = <String>[];
+        final router = GoRouter(
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (context, state) => const ContestsPage(),
+            ),
+            GoRoute(
+              path: '/contests/:contestId/pilots/:pilotId',
+              builder: (context, state) =>
+                  const Scaffold(body: Text('Pilot page')),
+            ),
+          ],
+        );
+        await tester.pumpWidget(
+          AuthScope(
+            session: auth,
+            child: ApiClientInherited(
+              client: ApiClient(
+                baseUrl: Uri.parse('http://localhost:8080'),
+                httpClient: MockClient((request) async {
+                  endCalls.add(request.url.path);
+                  return http.Response('', 204);
+                }),
+              ),
+              child: GuestSessionScope(
+                store: sessions,
+                child: ContestOpenScope(
+                  gate: gate,
+                  child: SelfScoreScope(
+                    repository: _GatedOpenRepository(answer.future),
+                    child: MaterialApp.router(
+                      localizationsDelegates: appLocalizationDelegates,
+                      routerConfig: router,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Spring Open'));
+        await tester.pump();
+
+        // A sign-out from elsewhere in the app, while the page is still there.
+        final signOut = gate.signOut(() async {
+          endCalls.add('/sign-out-teardown');
+        });
+        await tester.pump();
+        answer.complete(
+          GuestSession(
+            contestId: 'c',
+            contestName: 'n',
+            pilotId: 'p',
+            pilotName: 'x',
+            expiresAt: DateTime.utc(2099),
+          ),
+        );
+        await signOut;
+        await tester.pumpAndSettle();
+
+        expect(find.text('Pilot page'), findsNothing);
+        expect(sessions.read(), isNull);
+        expect(endCalls, [
+          '/sign-out-teardown',
+        ], reason: 'the page must not end the session itself either');
+      },
+    );
+
+    testWidgets(
+      'Home recreated during a sign-out does not start a second one',
+      (tester) async {
+        final auth = _FakeAuth();
+        await auth.signIn();
+        final sessions = MemoryGuestSessionStore()..write(stored);
+        final gate = ContestOpenGate();
+        final endAnswer = Completer<void>();
+        final endCalls = <String>[];
+        final router = GoRouter(
+          routes: [
+            GoRoute(path: '/', builder: (context, state) => const HomePage()),
+            GoRoute(
+              path: contestsPath,
+              builder: (context, state) =>
+                  const Scaffold(body: Text('Contests page')),
+            ),
+          ],
+        );
+        tester.view.physicalSize = const Size(800, 2400);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await tester.pumpWidget(
+          AuthScope(
+            session: auth,
+            child: ApiClientInherited(
+              client: ApiClient(
+                baseUrl: Uri.parse('http://localhost:8080'),
+                httpClient: MockClient((request) async {
+                  endCalls.add(request.url.path);
+                  await endAnswer.future;
+                  return http.Response('', 204);
+                }),
+              ),
+              child: GuestSessionScope(
+                store: sessions,
+                child: ContestOpenScope(
+                  gate: gate,
+                  child: MaterialApp.router(
+                    localizationsDelegates: appLocalizationDelegates,
+                    routerConfig: router,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.widgetWithText(OutlinedButton, 'Sign out'));
+        await tester.pump();
+        expect(gate.isSigningOut, isTrue);
+
+        // Leave Home and come back: a new Home starts signing out again.
+        router.go(contestsPath);
+        await tester.pumpAndSettle();
+        router.go('/');
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(OutlinedButton, 'Sign out'));
+        await tester.pump();
+
+        expect(endCalls, hasLength(1), reason: 'one teardown, not two');
+        endAnswer.complete();
+        await tester.pumpAndSettle();
+
+        expect(endCalls, hasLength(1));
+        expect(auth.isSignedIn, isFalse);
+        expect(gate.isClosed, isFalse);
       },
     );
 

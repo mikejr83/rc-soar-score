@@ -38,6 +38,28 @@ class ContestOpenGate {
 
   /// Accepts opens again, after a sign-out that did not happen or finished.
   void reopen() => _closed = false;
+
+  Future<void>? _signOut;
+
+  /// Whether a sign-out is under way.
+  bool get isSigningOut => _signOut != null;
+
+  /// Runs the one sign-out of the app: closes the gate, waits for the opens
+  /// already sent, runs [teardown], and reopens the gate only when that has
+  /// finished or failed. A call made while one is under way (the pilot left
+  /// Home and came back) joins it and gets its outcome, so two teardowns never
+  /// overlap and the gate never reopens under a running one.
+  Future<void> signOut(Future<void> Function() teardown) {
+    return _signOut ??= () async {
+      try {
+        await closeAndSettle();
+        await teardown();
+      } finally {
+        reopen();
+        _signOut = null;
+      }
+    }();
+  }
 }
 
 /// Provides the [ContestOpenGate] to the pages.

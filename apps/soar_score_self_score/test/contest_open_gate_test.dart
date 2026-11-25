@@ -43,4 +43,27 @@ void main() {
     gate.reopen();
     expect(await gate.run(() async => 1), 1);
   });
+
+  test('a second sign-out joins the first and the gate reopens once', () async {
+    final gate = ContestOpenGate();
+    final teardown = Completer<void>();
+    var runs = 0;
+    final first = gate.signOut(() async {
+      runs++;
+      await teardown.future;
+    });
+    final second = gate.signOut(() async => runs++);
+    await Future<void>.delayed(Duration.zero);
+    expect(gate.isClosed, isTrue);
+    expect(runs, 1, reason: 'the second call did not start a teardown');
+
+    teardown.completeError(StateError('failed'));
+    await expectLater(first, throwsStateError);
+    await expectLater(second, throwsStateError);
+    expect(gate.isClosed, isFalse);
+    expect(gate.isSigningOut, isFalse);
+
+    await gate.signOut(() async => runs++);
+    expect(runs, 2, reason: 'a later sign-out starts afresh');
+  });
 }

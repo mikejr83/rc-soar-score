@@ -229,24 +229,18 @@ class _SignedInState extends State<_SignedIn> {
         ?.client;
     final gate = context.contestOpenGate;
     try {
-      await gate.closeAndSettle();
-      final ended = await endGuestSession(
-        client,
-        sessions,
-        clearOnFailure: false,
-      );
-      if (!ended) {
-        gate.reopen();
-        if (mounted) setState(() => _failed = true);
-        return;
-      }
-      await widget.auth.signOut();
+      await gate.signOut(() async {
+        final ended = await endGuestSession(
+          client,
+          sessions,
+          clearOnFailure: false,
+        );
+        if (!ended) throw StateError('contest session not ended');
+        await widget.auth.signOut();
+      });
     } on Object {
       if (mounted) setState(() => _failed = true);
     } finally {
-      // On the web a sign-out leaves the page; where it does not, the next
-      // sign-in opens contests again.
-      gate.reopen();
       if (mounted) setState(() => _pending = false);
     }
   }
