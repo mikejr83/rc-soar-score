@@ -8,7 +8,7 @@ import 'package:soar_score_self_score/main.dart' as app;
 /// Run through `scripts/e2e-score.sh` (or `e2e-score.ps1`), which builds the
 /// web app against the E2E server (`SOAR_SCORE_API_BASE_URL`).
 Future<void> launchApp(WidgetTester tester) async {
-  await app.main();
+  app.main();
   await tester.pump(const Duration(milliseconds: 500));
 }
 

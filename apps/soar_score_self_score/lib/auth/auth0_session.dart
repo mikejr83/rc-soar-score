@@ -9,12 +9,17 @@ final _logger = Logger('Auth0Session');
 /// [Auth0Client].
 ///
 /// `signIn` leaves the page; Auth0 returns to the app's origin with a code,
-/// and [restore] (run before the first frame) exchanges it. Order matters:
+/// and [restore] (started right after the first frame) exchanges it. Order
+/// matters:
 ///
 /// - [restore] waits for the SDK script first. If it never arrives, the
 ///   pending callback is still unprocessed, so [signIn] runs the restore
 ///   again before it starts a new sign-in (and a callback that turns out to be
 ///   good signs the pilot in without another redirect).
+/// - Overlapping calls share one run: a second [restore] or [signIn] while one
+///   is in flight returns the first's result. The SDK takes a callback once;
+///   a second pass would find its stored transaction gone and start a new
+///   redirect over a valid code exchange.
 /// - [signOut] clears the session only after Auth0 has logged out, so a
 ///   failure leaves the pilot signed in with the sign-out still on offer.
 class Auth0Session extends AuthSession {
@@ -23,6 +28,12 @@ class Auth0Session extends AuthSession {
   final Auth0Client _client;
   AuthIdentity? _user;
   bool _restored = false;
+  bool _initializing = true;
+  Future<void>? _restoring;
+  Future<void>? _signingIn;
+
+  @override
+  bool get isInitializing => _initializing;
 
   @override
   bool get isSignedIn => _user != null;
@@ -31,7 +42,10 @@ class Auth0Session extends AuthSession {
   String? get displayName => _user?.name ?? _user?.email;
 
   @override
-  Future<void> restore() async {
+  Future<void> restore() =>
+      _restoring ??= _restore().whenComplete(() => _restoring = null);
+
+  Future<void> _restore() async {
     try {
       if (!await _client.waitUntilReady()) {
         _logger.warning('The Auth0 SDK did not load; session not restored');
@@ -47,12 +61,17 @@ class Auth0Session extends AuthSession {
       _user = null;
       _restored = true;
     } finally {
+      _initializing = false;
       notifyListeners();
     }
   }
 
   @override
-  Future<void> signIn({bool createAccount = false}) async {
+  Future<void> signIn({bool createAccount = false}) =>
+      _signingIn ??= _signIn(createAccount: createAccount)
+          .whenComplete(() => _signingIn = null);
+
+  Future<void> _signIn({required bool createAccount}) async {
     if (!_restored) {
       await restore();
       if (isSignedIn) return;

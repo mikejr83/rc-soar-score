@@ -9,6 +9,7 @@ import 'package:soar_score_self_score/auth/auth_session.dart';
 /// signs in, and how logout ends.
 class _FakeClient implements Auth0Client {
   bool ready = true;
+  Completer<bool>? readyGate;
   AuthIdentity? identity;
   Future<void> Function()? onLogout;
   final calls = <String>[];
@@ -16,6 +17,7 @@ class _FakeClient implements Auth0Client {
   @override
   Future<bool> waitUntilReady() async {
     calls.add('ready:$ready');
+    if (readyGate != null) return readyGate!.future;
     return ready;
   }
 
@@ -74,6 +76,39 @@ void main() {
       expect(client.calls, isNot(contains('sign-in')));
     },
   );
+
+  test(
+    'overlapping sign-ins share one restore and start no redirect',
+    () async {
+      final client = _FakeClient()
+        ..readyGate = Completer<bool>()
+        ..identity = const AuthIdentity(name: 'Pat');
+      final session = Auth0Session(client);
+      expect(session.isInitializing, isTrue);
+
+      // Two taps (and the startup restore itself) while the SDK is pending.
+      final startup = session.restore();
+      final first = session.signIn();
+      final second = session.signIn(createAccount: true);
+      client.readyGate!.complete(true);
+      await Future.wait([startup, first, second]);
+
+      expect(session.isInitializing, isFalse);
+      expect(session.isSignedIn, isTrue);
+      expect(client.calls.where((c) => c == 'onLoad'), hasLength(1));
+      expect(client.calls.where((c) => c.startsWith('ready')), hasLength(1));
+      expect(client.calls, isNot(contains('sign-in')));
+      expect(client.calls, isNot(contains('sign-up')));
+    },
+  );
+
+  test('a failed start leaves the controls to try again', () async {
+    final client = _FakeClient()..ready = false;
+    final session = Auth0Session(client);
+    await session.restore();
+    expect(session.isInitializing, isFalse);
+    expect(session.isSignedIn, isFalse);
+  });
 
   test('once restored, sign in and sign up start the redirect', () async {
     final client = _FakeClient();

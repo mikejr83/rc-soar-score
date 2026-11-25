@@ -22,13 +22,20 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _failed = false;
+  bool _busy = false;
 
   Future<void> _signIn(AuthSession auth, {required bool createAccount}) async {
-    setState(() => _failed = false);
+    if (_busy) return;
+    setState(() {
+      _failed = false;
+      _busy = true;
+    });
     try {
       await auth.signIn(createAccount: createAccount);
     } on AuthException {
       if (mounted) setState(() => _failed = true);
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -79,6 +86,7 @@ class _HomePageState extends State<HomePage> {
                           _SignedOut(
                             auth: auth,
                             failed: _failed,
+                            busy: _busy,
                             onSignIn: () => _signIn(auth, createAccount: false),
                             onSignUp: () => _signIn(auth, createAccount: true),
                           ),
@@ -122,12 +130,16 @@ class _SignedOut extends StatelessWidget {
   const _SignedOut({
     required this.auth,
     required this.failed,
+    required this.busy,
     required this.onSignIn,
     required this.onSignUp,
   });
 
   final AuthSession auth;
   final bool failed;
+
+  /// A sign-in is in flight.
+  final bool busy;
   final VoidCallback onSignIn;
   final VoidCallback onSignUp;
 
@@ -137,6 +149,9 @@ class _SignedOut extends StatelessWidget {
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final available = auth.isAvailable;
+    // Off while Auth0 starts or a sign-in is out: both start the same
+    // callback handling, which must run once.
+    final enabled = available && !auth.isInitializing && !busy;
     return Semantics(
       // Tells a screen reader why the buttons are off in a build with no
       // sign-in.
@@ -148,7 +163,7 @@ class _SignedOut extends StatelessWidget {
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(48),
             ),
-            onPressed: available ? onSignIn : null,
+            onPressed: enabled ? onSignIn : null,
             child: Text(l10n.signInButton),
           ),
           const SizedBox(height: 12),
@@ -157,7 +172,7 @@ class _SignedOut extends StatelessWidget {
               minimumSize: const Size.fromHeight(48),
               side: BorderSide(color: scheme.onSurface, width: 1.5),
             ),
-            onPressed: available ? onSignUp : null,
+            onPressed: enabled ? onSignUp : null,
             child: Text(l10n.homeSignUpButton),
           ),
           const SizedBox(height: 8),

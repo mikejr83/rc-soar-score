@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:logging/logging.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -23,7 +25,7 @@ import 'session/guest_session_scope.dart';
 import 'session/guest_session_store.dart';
 import 'session/score_draft_store.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
   // Warnings (a failed sign-in restore, say) go to the browser console.
   configureLogging(level: Level.INFO, format: LogFormat.text, sink: debugPrint);
@@ -44,10 +46,10 @@ Future<void> main() async {
   final sessions = StringSlotGuestSessionStore(
     KeyValueSlot(storage, 'soar_score_self_score.guest_session'),
   );
-  // Sign-in state. `restore` also completes a sign-in redirect from Auth0, so
-  // it runs before the first frame.
+  // Sign-in state. `restore` also completes a sign-in redirect from Auth0; it
+  // starts after the first frame is requested (below) and is not awaited, so a
+  // slow or blocked SDK script never holds back guest routes.
   final auth = createAuthSession();
-  await auth.restore();
   final client = ApiClient(
     baseUrl: Uri.parse(baseUrl),
     httpClient: openApiHttpClient(),
@@ -83,4 +85,5 @@ Future<void> main() async {
       ),
     ),
   );
+  unawaited(auth.restore());
 }

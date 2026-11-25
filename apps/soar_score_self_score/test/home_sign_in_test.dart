@@ -12,6 +12,12 @@ import 'package:soar_score_self_score/router.dart';
 
 /// A session that records what the landing page asks of it.
 class _FakeAuth extends E2eAuthSession {
+  bool initializing = false;
+  Completer<void>? signInGate;
+
+  @override
+  bool get isInitializing => initializing;
+
   final calls = <String>[];
   bool failNext = false;
   bool failSignOut = false;
@@ -28,6 +34,7 @@ class _FakeAuth extends E2eAuthSession {
   @override
   Future<void> signIn({bool createAccount = false}) async {
     calls.add(createAccount ? 'sign-up' : 'sign-in');
+    await signInGate?.future;
     if (failNext) throw const AuthException('no');
     await super.signIn(createAccount: createAccount);
   }
@@ -180,5 +187,50 @@ void main() {
     await tester.pumpAndSettle();
     expect(auth.isSignedIn, isFalse);
     expect(auth.calls.where((c) => c == 'sign-out'), hasLength(2));
+  });
+
+  testWidgets('both sign-in buttons are off while Auth0 starts', (
+    tester,
+  ) async {
+    final auth = _FakeAuth()..initializing = true;
+    await _pump(tester, auth);
+
+    FilledButton signIn() => tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Sign in'),
+    );
+    OutlinedButton signUp() => tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, 'Sign up'),
+    );
+    expect(signIn().onPressed, isNull);
+    expect(signUp().onPressed, isNull);
+
+    auth.initializing = false;
+    auth.notifyListeners();
+    await tester.pump();
+    expect(signIn().onPressed, isNotNull);
+    expect(signUp().onPressed, isNotNull);
+  });
+
+  testWidgets('a second sign-in tap while one is out is ignored', (
+    tester,
+  ) async {
+    final auth = _FakeAuth()..signInGate = Completer<void>();
+    await _pump(tester, auth);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
+    await tester.pump();
+    // The first is out: both controls are off, so no second call can start.
+    expect(
+      tester
+          .widget<OutlinedButton>(
+            find.widgetWithText(OutlinedButton, 'Sign up'),
+          )
+          .onPressed,
+      isNull,
+    );
+    expect(auth.calls, ['sign-in']);
+
+    auth.signInGate!.complete();
+    await tester.pumpAndSettle();
   });
 }
