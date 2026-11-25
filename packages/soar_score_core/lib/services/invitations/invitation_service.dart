@@ -458,26 +458,31 @@ class InvitationService {
 
   /// Opens [credential]: finds the one invitation, contest and participation
   /// it names, creates the participation's guest account on first use, and
-  /// returns the session to keep.
+  /// returns the session to keep, acting as that guest.
+  ///
+  /// Opening anonymously never acts as a registered account, even when an
+  /// account has claimed the link: the redeemer moves back to the guest, and
+  /// the account's next open claims the guest's entries again.
   ///
   /// Throws [InvitationAccessError.invalidLink] for a link that is unknown,
   /// replaced, revoked or expired, always the same way.
   Future<InvitationResolution> resolve(String credential) async {
     final opened = await _open(credential);
     var stored = opened.invitation;
+    final guest = await _guestFor(
+      stored.id,
+      opened.checked.participation,
+      opened.now,
+    );
     for (var attempt = 0; attempt < 3; attempt++) {
-      final actorId =
-          stored.redeemedByAccountId ??
-          await _guestFor(stored.id, opened.checked.participation, opened.now);
       final session = await _session(
         stored,
         opened.checked,
         opened.now,
-        actorId: actorId,
+        actorId: guest,
       );
       if (session != null) return session;
-      // A concurrent open stored a different redeemer (an account claiming
-      // the link): act as whoever won.
+      // A concurrent open changed the redeemer first: read it again.
       final latest = await repository.invitationRepository.findById(stored.id);
       if (latest == null) break;
       stored = latest;
@@ -525,10 +530,12 @@ class InvitationService {
   }
 
   /// Stores that [stored] was opened by [actorId] and returns the session, or
-  /// null when a concurrent open stored another redeemer meanwhile (the save
-  /// is a plain upsert, so the last writer wins): the caller then re-reads and
-  /// acts as the redeemer that is stored, so no session it hands out is dead
-  /// on arrival.
+  /// null when a concurrent open changed the redeemer meanwhile.
+  ///
+  /// The write is one conditional update on the redeemer that was read
+  /// ([InvitationRepository.redeem]), so it changes nothing else and two opens
+  /// cannot both win. A successful update is the answer; only a failed one
+  /// makes the caller re-read and decide who to act as.
   Future<InvitationResolution?> _session(
     Invitation stored,
     ({
@@ -541,30 +548,35 @@ class InvitationService {
     DateTime now, {
     required Id actorId,
   }) async {
-    final invitation = await repository.invitationRepository.save(
-      Invitation(
-        id: stored.id,
-        contestId: stored.contestId,
-        contestParticipationId: stored.contestParticipationId,
-        type: stored.type,
-        protectedCredential: stored.protectedCredential,
-        invitationRevision: stored.invitationRevision,
-        state: stored.state,
-        audience: stored.audience,
-        issuedBy: stored.issuedBy,
-        issuedAt: stored.issuedAt,
-        expiresAt: stored.expiresAt,
-        firstUsedAt: stored.firstUsedAt ?? now,
-        lastUsedAt: now,
-        revokedAt: stored.revokedAt,
-        replacesInvitationId: stored.replacesInvitationId,
-        redeemedByAccountId: actorId,
-        deliveryOutcomes: stored.deliveryOutcomes,
-        clientMutationId: stored.clientMutationId,
-      ),
+    final applied = await repository.invitationRepository.redeem(
+      stored.id,
+      expectedRedeemer: stored.redeemedByAccountId,
+      newRedeemer: actorId,
+      usedAt: now,
     );
-    final after = await repository.invitationRepository.findById(stored.id);
-    if (after != null && after.redeemedByAccountId != actorId) return null;
+    if (!applied) return null;
+    // Built from the write that applied, not read back: a read could see a
+    // later open and make this one look lost although its update succeeded.
+    final invitation = Invitation(
+      id: stored.id,
+      contestId: stored.contestId,
+      contestParticipationId: stored.contestParticipationId,
+      type: stored.type,
+      protectedCredential: stored.protectedCredential,
+      invitationRevision: stored.invitationRevision,
+      state: stored.state,
+      audience: stored.audience,
+      issuedBy: stored.issuedBy,
+      issuedAt: stored.issuedAt,
+      expiresAt: stored.expiresAt,
+      firstUsedAt: stored.firstUsedAt ?? now,
+      lastUsedAt: now,
+      revokedAt: stored.revokedAt,
+      replacesInvitationId: stored.replacesInvitationId,
+      redeemedByAccountId: actorId,
+      deliveryOutcomes: stored.deliveryOutcomes,
+      clientMutationId: stored.clientMutationId,
+    );
     await _audit(
       invitation,
       AuditAction.invitationAccessed,

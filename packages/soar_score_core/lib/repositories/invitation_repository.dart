@@ -48,6 +48,21 @@ abstract interface class InvitationRepository {
 
   Future<Invitation> save(Invitation invitation);
 
+  /// Records that [invitationId] was opened by [newRedeemer] at [usedAt], when
+  /// its stored redeemer is still [expectedRedeemer] (null for none yet).
+  ///
+  /// One conditional write that changes only the redeemer and the usage
+  /// timestamps (the first use is kept once set), so concurrent opens cannot
+  /// overwrite each other or any other field. Returns whether it applied;
+  /// false means another open changed the redeemer first, or the invitation
+  /// is no longer active.
+  Future<bool> redeem(
+    Id invitationId, {
+    required Id? expectedRedeemer,
+    required Id newRedeemer,
+    required DateTime usedAt,
+  });
+
   /// Stores every invitation in [invitations] and every event in [audits] in
   /// one transaction: if any write fails, none is kept.
   Future<void> saveIssued(

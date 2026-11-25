@@ -73,6 +73,53 @@ void main() {
       expect(created.city, isNull);
     });
 
+    test('refuses a time zone that is not a known IANA zone', () async {
+      for (final zone in ['Mars/Olympus', '', 'MDT']) {
+        await expectLater(
+          service.createContest(
+            NewContest(id: contestId, details: details(), timezone: zone),
+            ownerAccountId: owner,
+            metadata: metadata(),
+          ),
+          throwsArgumentError,
+          reason: 'zone "$zone"',
+        );
+      }
+      expect(contests.stored, isEmpty);
+    });
+
+    test('replaying the request of a contest stored with a legacy zone '
+        'returns it, while a new contest with that zone is refused', () async {
+      NewContest legacy() =>
+          NewContest(id: contestId, details: details(), timezone: 'MDT');
+      contests.stored[contestId] = Contest(
+        id: contestId,
+        name: 'Spring Open',
+        startDateTime: start,
+        endDateTime: end,
+        timezone: 'MDT',
+        ownerAccountId: owner,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      final replay = await service.createContest(
+        legacy(),
+        ownerAccountId: owner,
+        metadata: metadata('replay'),
+      );
+
+      expect(replay, contests.stored[contestId]);
+      await expectLater(
+        service.createContest(
+          NewContest(id: id(0x21), details: details(), timezone: 'MDT'),
+          ownerAccountId: owner,
+          metadata: metadata('new'),
+        ),
+        throwsArgumentError,
+      );
+    });
+
     test('repeating the same request returns the stored contest', () async {
       final first = await service.createContest(
         newContest(),

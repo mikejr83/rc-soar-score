@@ -351,6 +351,83 @@ void _tests(SliceBackend backend) {
       );
     });
 
+    test('an anonymous open after the claim acts as the guest, never the '
+        'account', () async {
+      final issued = await issue(1);
+      final guest = await guestScores(issued.credential);
+      final accountToken = await claim(otherAccount, issued.credential);
+      expect(await redeemers(1), {otherAccount.value});
+
+      final anonymous = await invitations.resolve(issued.credential);
+
+      expect(anonymous.access.guestAccountId, guest);
+      expect(await redeemers(1), {guest.value});
+      expect(await submit(anonymous.sessionToken, 2, 'guest-2'), 201);
+      expect(await attemptActors(), {otherAccount.value, guest.value});
+      expect(
+        await overviewStatus(accountToken),
+        401,
+        reason: 'the account signs in again, as after any other open',
+      );
+
+      // The account's next open claims what the guest did since.
+      final again = await claim(otherAccount, issued.credential);
+      expect(await attemptActors(), {otherAccount.value});
+      expect(await redeemers(1), {otherAccount.value});
+      expect(await overviewStatus(again), 200);
+    });
+
+    test('opens by a guest and an account at once leave one redeemer and '
+        'a usable session', () async {
+      final issued = await issue(1);
+      final guest = await guestScores(issued.credential);
+      await claim(otherAccount, issued.credential);
+
+      final claiming = send(
+        otherAccount,
+        'POST',
+        '/account/invitation-claims',
+        body: {'credential': issued.credential},
+      );
+      final guests = await Future.wait([
+        for (var i = 0; i < 4; i++) invitations.resolve(issued.credential),
+      ]);
+      final claimResponse = await claiming;
+
+      // Every token with the identity it acts as.
+      final tokens = <(core.Id, String)>[
+        for (final r in guests) (r.access.guestAccountId, r.sessionToken),
+      ];
+      for (final r in guests) {
+        expect(r.access.guestAccountId, guest);
+      }
+      // The signed-in open either succeeded or lost to a guest and ended as an
+      // invalid link.
+      if (claimResponse.status == 200) {
+        tokens.add((
+          otherAccount,
+          claimResponse.json['session_token']! as String,
+        ));
+      } else {
+        expect(claimResponse.status, 404, reason: claimResponse.text);
+        expect(
+          (claimResponse.json['error']! as Map)['code'],
+          'invalid_invitation',
+        );
+      }
+      // Exactly the stored redeemer's tokens work; the other identity's are
+      // refused cleanly.
+      final redeemer = core.Id.parse((await redeemers(1)).single);
+      expect([guest, otherAccount], contains(redeemer));
+      var valid = 0;
+      for (final (actor, token) in tokens) {
+        final status = await overviewStatus(token);
+        expect(status, actor == redeemer ? 200 : 401, reason: '$actor');
+        if (status == 200) valid++;
+      }
+      expect(valid, greaterThan(0));
+    });
+
     test('a pilot who never opened the link gets the session too', () async {
       final issued = await issue(1);
 
