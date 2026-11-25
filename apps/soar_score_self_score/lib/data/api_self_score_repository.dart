@@ -202,7 +202,8 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   // throw` threw while the page built, which crashed the contests page that
   // sits under every pilot page in the router's stack.
   Future<ContestsView> contests() async => throw const SelfScoreLoadException(
-    'Signing in is coming soon. Use the link from your contest director.',
+    'Your contests will appear here once they are linked to your account. '
+    'For now, use the link from your contest director.',
   );
 
   @override

@@ -18,6 +18,7 @@ server only verifies tokens against the tenant's public keys.
 | API identifier     | `https://soar-score.com/server`                          |
 | Web client ID      | `ALL8oKywE1J31NEKvcaypfSeZSsoDXII`                       |
 | Windows client ID  | `3FdIOOxNr4DF4iT8BDaqKWc9NabpEKbz`                       |
+| Self-scoring ID    | `nDbIIguVqm9rgpebKX3HuThfrhGKnRFT`                       |
 | Windows URL scheme | `com.soarscore.contest` (callback `<scheme>://callback`) |
 
 The tenant domain is on the tenant's Settings page. The region part (`us`) is
@@ -116,6 +117,23 @@ Token Rotation on works as expected: the app stores the new refresh token from
 every response. The session ends, with a notice on the landing page, only when
 Auth0 refuses the refresh token (revoked, expired, or reused). Being offline or
 an Auth0 outage does not end it; the next request tries again.
+
+### Self-scoring app, web
+
+The self-scoring app (`apps/soar_score_self_score`) has its own application,
+set up the same way as the contest web app in section 2: Single Page Web
+Application, client ID `nDbIIguVqm9rgpebKX3HuThfrhGKnRFT`, Authorization Code
+and Refresh Token grants only, refresh token rotation on, the same connections.
+List these origins, each with a trailing slash, in Allowed Callback URLs,
+Allowed Logout URLs, Allowed Web Origins and Allowed Origins (CORS):
+
+- Local development: `http://localhost:8092/` (the port of `.vscode/launch.json`).
+- Deployed: `https://score.rcsoarscore.com/`.
+
+The app returns to the origin root after signing in or out and sends the access
+token only to the account routes (`/api/v1/account/...`); the participant
+routes keep the guest session. A build overrides the client with
+`--dart-define=AUTH0_SELF_SCORE_CLIENT_ID=...`.
 
 ## 4. Connections
 
@@ -267,7 +285,7 @@ states the principle, the code and tickets state the current rules.
 - **Contest app (web and Windows):** signs in with Auth0. "Continue offline" on
   Windows never contacts Auth0.
 - **Self-scoring app (`score.rcsoarscore.com`):** signs in with Auth0, using its
-  own Single Page Web Application (section 5). Wiring is tracked under #140.
+  own Single Page Web Application (section 3, "Self-scoring app, web").
 - **Public site (`rcsoarscore.com`):** does not sign in. Results are anonymous
   reads of the public API.
 
@@ -275,8 +293,6 @@ states the principle, the code and tickets state the current rules.
 
 - A custom login domain. It changes the token issuer, and the issuer is part of
   every account identity, so decide before release.
-- The self-scoring app, which is not wired to sign-in yet. When it is, create a
-  second Single Page Web Application the same way as the contest web app.
 - A post-login Action adding name and email to the access token. The server
   ticket (#148) decides between that and calling `/userinfo`.
 - A separate production tenant. The free Auth0 plan has one tenant, so the

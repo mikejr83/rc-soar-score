@@ -289,4 +289,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get zeroReasonOverflight => 'overflight over one minute';
+
+  @override
+  String get homeHeadline => 'Score your flights at the field';
+
+  @override
+  String get homeIntro =>
+      'This is the self-scoring app for RC Soar Score. Open the link your contest director sent you to start scoring.';
+
+  @override
+  String get homeSignUpButton => 'Sign up';
+
+  @override
+  String get homeAccountsComingSoon =>
+      'Sign in and sign up are coming in a future release, when pilots can create accounts that track their results over time.';
+
+  @override
+  String get homeAccountsUnavailableHint =>
+      'Sign in and sign up are not available yet. Use the link your contest director sent you.';
+
+  @override
+  String homeSignedInAs(String name) {
+    return 'Signed in as $name';
+  }
+
+  @override
+  String get homeSignedIn => 'You are signed in.';
+
+  @override
+  String get homeMyContests => 'My contests';
+
+  @override
+  String get homeSignOutButton => 'Sign out';
+
+  @override
+  String get homeSignInFailed => 'Sign-in could not be started. Try again.';
+
+  @override
+  String get homeLostLink =>
+      'Lost your link? Ask your contest director to send your link again.';
+
+  @override
+  String get homeSignOutFailed => 'Sign-out could not be completed. Try again.';
 }

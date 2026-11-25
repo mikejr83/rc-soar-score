@@ -562,6 +562,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'overflight over one minute'**
   String get zeroReasonOverflight;
+
+  /// Headline of the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Score your flights at the field'**
+  String get homeHeadline;
+
+  /// Intro text of the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the self-scoring app for RC Soar Score. Open the link your contest director sent you to start scoring.'**
+  String get homeIntro;
+
+  /// Landing page button that opens the sign-up page of the identity provider.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get homeSignUpButton;
+
+  /// Landing page note shown in a build where signing in is not available.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in and sign up are coming in a future release, when pilots can create accounts that track their results over time.'**
+  String get homeAccountsComingSoon;
+
+  /// Screen reader hint of the landing page's disabled sign-in buttons.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in and sign up are not available yet. Use the link your contest director sent you.'**
+  String get homeAccountsUnavailableHint;
+
+  /// Landing page line for a signed-in pilot. The placeholder is their name or email.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {name}'**
+  String homeSignedInAs(String name);
+
+  /// Landing page line for a signed-in pilot whose name is not known.
+  ///
+  /// In en, this message translates to:
+  /// **'You are signed in.'**
+  String get homeSignedIn;
+
+  /// Landing page button that opens the signed-in pilot's contest list.
+  ///
+  /// In en, this message translates to:
+  /// **'My contests'**
+  String get homeMyContests;
+
+  /// Landing page button that signs the pilot out.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get homeSignOutButton;
+
+  /// Landing page message when the sign-in redirect could not start.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in could not be started. Try again.'**
+  String get homeSignInFailed;
+
+  /// Landing page hint for a pilot who lost their invitation link.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost your link? Ask your contest director to send your link again.'**
+  String get homeLostLink;
+
+  /// Landing page message when signing out failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-out could not be completed. Try again.'**
+  String get homeSignOutFailed;
 }
 
 class _AppLocalizationsDelegate
