@@ -354,12 +354,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeSignedIn => 'You are signed in.';
 
   @override
-  String get homeMyContests => 'My contests';
-
-  @override
-  String get homeSignOutButton => 'Sign out';
-
-  @override
   String get contestsTitle => 'Contests';
 
   @override
@@ -404,6 +398,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get contestSignInEnded =>
       'Your sign-in has ended. Sign in again to open this contest.';
+
+  @override
+  String get homeMyContests => 'My contests';
+
+  @override
+  String get homeSignOutButton => 'Sign out';
 
   @override
   String get homeSignInFailed => 'Sign-in could not be started. Try again.';

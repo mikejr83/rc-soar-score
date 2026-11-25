@@ -659,18 +659,6 @@ abstract class AppLocalizations {
   /// **'You are signed in.'**
   String get homeSignedIn;
 
-  /// Landing page button that opens the signed-in pilot's contest list.
-  ///
-  /// In en, this message translates to:
-  /// **'My contests'**
-  String get homeMyContests;
-
-  /// Landing page button that signs the pilot out.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign out'**
-  String get homeSignOutButton;
-
   /// Title of the signed-in pilot's contests page.
   ///
   /// In en, this message translates to:
@@ -748,6 +736,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your sign-in has ended. Sign in again to open this contest.'**
   String get contestSignInEnded;
+
+  /// Landing page button that opens the signed-in pilot's contest list.
+  ///
+  /// In en, this message translates to:
+  /// **'My contests'**
+  String get homeMyContests;
+
+  /// Landing page button that signs the pilot out.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get homeSignOutButton;
 
   /// Landing page message when the sign-in redirect could not start.
   ///
