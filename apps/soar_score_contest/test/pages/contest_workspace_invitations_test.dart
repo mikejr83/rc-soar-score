@@ -37,12 +37,17 @@ class _Source implements PilotInvitationSource {
   }
 
   @override
-  Future<void> send(ApiClient client, Id contestId, List<Id> ids) async {
+  Future<InvitationEmailReport> send(
+    ApiClient client,
+    Id contestId,
+    List<Id> ids,
+  ) async {
     if (failSend) throw StateError('no');
     sent.add(ids);
     for (final id in ids) {
       links[id.value] = 'https://x.test/${id.value}';
     }
+    return const InvitationEmailReport.none();
   }
 }
 
@@ -51,6 +56,7 @@ Future<void> _pump(
   MatrixServer server, {
   FakeAppConnectivity? connectivity,
   FakeAppSync? sync,
+  bool failProfiles = false,
 }) async {
   tester.view.physicalSize = const Size(1200, 1800);
   tester.view.devicePixelRatio = 1;
@@ -71,6 +77,9 @@ Future<void> _pump(
           baseUrl: Uri.parse('http://localhost'),
           httpClient: MockClient((request) async {
             final path = request.url.path;
+            if (failProfiles && path.endsWith('/participants')) {
+              return http.Response('{}', 500);
+            }
             if (path.endsWith('/scores') || path.endsWith('/publication')) {
               return http.Response('{}', 404);
             }
@@ -117,16 +126,35 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('workspace-invitations-send')));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Nobody is emailed'), findsWidgets);
+    expect(find.textContaining('emailed their link'), findsWidgets);
     await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
     await tester.pumpAndSettle();
 
     expect(source.sent.single, hasLength(4));
     expect(
-      find.text('4 invitations created. Nobody was emailed.'),
+      find.text('4 invitations sent. Nobody was emailed.'),
       findsOneWidget,
     );
     expect(find.textContaining('All 4 pilots have a QR code'), findsOneWidget);
+  });
+
+  testWidgets('sending waits until the pilots can be named', (tester) async {
+    final source = _Source();
+    PilotInvitationSources.current = source;
+    await _pump(
+      tester,
+      MatrixServer(configuration: matrixConfiguration()),
+      failProfiles: true,
+    );
+    expect(
+      find.byKey(const ValueKey('workspace-invitations-send')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('workspace-invitations-retry')),
+      findsOneWidget,
+    );
+    expect(source.sent, isEmpty);
   });
 
   testWidgets('a sync of the contest updates the card without leaving', (

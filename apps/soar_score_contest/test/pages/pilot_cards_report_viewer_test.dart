@@ -57,7 +57,7 @@ class _FakeInvitations implements PilotInvitationSource {
   }
 
   @override
-  Future<void> send(
+  Future<InvitationEmailReport> send(
     ApiClient client,
     Id contestId,
     List<Id> participations,
@@ -69,6 +69,7 @@ class _FakeInvitations implements PilotInvitationSource {
       throw StateError('no network');
     }
     _invited.addAll(participations.map((id) => id.value));
+    return const InvitationEmailReport.none();
   }
 }
 
@@ -290,6 +291,44 @@ void main() {
     );
   });
 
+  testWidgets('with some links already issued, Send covers every pilot', (
+    tester,
+  ) async {
+    final lee = workspaceData(matrix: drawnMatrix()).participations.first;
+    final source = _FakeInvitations(invited: {lee.id.value});
+    PilotInvitationSources.current = source;
+    await _pump(tester);
+
+    await tester.tap(find.byKey(const ValueKey('cards-banner-send')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(source.sends, 1);
+    expect(source.lastSent, hasLength(4));
+  });
+
+  testWidgets('with every link issued, Send invitations sends again', (
+    tester,
+  ) async {
+    final all = workspaceData(matrix: drawnMatrix()).participations
+        .map((p) => p.id.value)
+        .toSet();
+    final source = _FakeInvitations(invited: all);
+    PilotInvitationSources.current = source;
+    await _pump(tester);
+
+    expect(find.byKey(const ValueKey('cards-banner-send')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('cards-banner-resend-action')));
+    await tester.pumpAndSettle();
+    expect(find.text('Send invitations?'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(source.sends, 1);
+    expect(source.lastSent, hasLength(4));
+  });
+
   testWidgets('sending invitations confirms, then adds the QR codes', (
     tester,
   ) async {
@@ -301,9 +340,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Send invitations?'), findsOneWidget);
     expect(find.textContaining('4 QR codes'), findsOneWidget);
-    // Issuing sends no email, so the dialog and the result must not say so.
-    expect(find.textContaining('Nobody is emailed'), findsOneWidget);
-    expect(find.textContaining('also emailed'), findsNothing);
+    // Sending also emails the pilots who have an address.
+    expect(find.textContaining('emailed their link'), findsWidgets);
     await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
     await tester.pumpAndSettle();
 
