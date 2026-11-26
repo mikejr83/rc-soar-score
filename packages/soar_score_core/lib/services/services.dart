@@ -4,6 +4,7 @@ export 'contest_configuration_rules.dart';
 export 'account_claims_service.dart';
 export 'account_preferences_service.dart';
 export 'directory_entry_service.dart';
+export 'directory_lookup_service.dart';
 export 'contest_configuration_service.dart';
 export 'contest_details.dart';
 export 'contest_results.dart';

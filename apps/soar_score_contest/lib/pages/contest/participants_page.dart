@@ -16,6 +16,8 @@ import '../../services/contest_participants/participants_controller.dart';
 import '../../services/contest_participants/participants_row_styles.dart';
 import '../../services/contest_participants/stored_participant.dart';
 import '../../services/matrix/matrix_rounds_plan.dart';
+import '../../services/participants/directory_pilot_source.dart';
+import '../../services/participants/participant_candidate.dart';
 import '../../services/participants/participant_option.dart';
 import '../../services/participants/participant_row.dart';
 import '../../services/participants/pilot_models_backend.dart';
@@ -29,6 +31,7 @@ import '../../widgets/discard_changes_dialog.dart';
 import '../../widgets/page_states/page_states.dart';
 import '../../widgets/participants/bulk_edit_bar.dart';
 import '../../widgets/participants/cell_focus_registry.dart';
+import '../../widgets/participants/directory_source.dart';
 import '../../widgets/participants/participant_card.dart';
 import '../../widgets/participants/participant_editing.dart';
 import '../../widgets/participants/pilot_models_dialog.dart';
@@ -77,10 +80,12 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
   String? _shownMessage;
   PilotInvitationSession? _invitations;
   AppConnectivity? _monitor;
+  DirectoryPilotSource? _directory;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _directory = directorySourceOf(context, _directory);
     // The Invitations menu follows connectivity, so it goes off when the
     // network is lost instead of failing a request.
     final monitor = appConnectivityOf(context);
@@ -420,6 +425,29 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     c.setRoleForSelected(role);
   }
 
+  /// Copies a pilot the directory found into the director's list, then adds
+  /// the copy to the contest like any of their own profiles.
+  Future<void> _addFromDirectory(ParticipantCandidate candidate) async {
+    final source = _directory;
+    if (source == null) return;
+    try {
+      final profile = await source.copy(candidate);
+      if (!mounted) return;
+      await _addProfile(profile);
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).directoryCopyFailed(candidate.name),
+            ),
+          ),
+        );
+    }
+  }
+
   Future<void> _addProfile(
     ParticipantProfile profile, {
     Role? retryRole,
@@ -664,6 +692,10 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                       narrow: narrow,
                       onAddNew: _addNew,
                       onAddProfile: _addProfile,
+                      remote: _directory?.search,
+                      lookup: _directory?.lookup,
+                      onAddDirectory: (candidate) =>
+                          unawaited(_addFromDirectory(candidate)),
                     ),
                     const SizedBox(height: 16),
                     Column(

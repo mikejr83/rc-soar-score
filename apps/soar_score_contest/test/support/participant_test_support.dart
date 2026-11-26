@@ -22,6 +22,7 @@ ParticipantProfile profile(
   int n = 10,
   String? email,
   String? club,
+  String? fai,
   int revision = 0,
 }) => ParticipantProfile(
   id: Id.parse('019c0000-0000-7000-8000-0000000000$n'),
@@ -30,6 +31,7 @@ ParticipantProfile profile(
   lastName: last,
   email: email ?? '${first.toLowerCase()}@example.com',
   club: club,
+  faiNumber: fai,
   createdAt: DateTime.utc(2026, 9),
   updatedAt: DateTime.utc(2026, 9),
   revision: revision,

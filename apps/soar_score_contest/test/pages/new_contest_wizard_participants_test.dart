@@ -1,12 +1,15 @@
+import 'dart:async';
 import 'dart:convert' as convert;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/widgets/participants/participant_card.dart';
 import 'package:soar_score_contest/widgets/participants/participants_table.dart';
 
+import '../support/fake_auth_session.dart';
 import '../support/new_contest_test_support.dart';
 import '../support/participant_test_support.dart';
 import '../support/participants_step_support.dart';
@@ -308,5 +311,319 @@ void main() {
     expect(find.byType(ParticipantsTable), findsNothing);
     expect(find.byType(ParticipantCard), findsNWidgets(2));
     expect(tester.takeException(), isNull);
+  });
+
+  group('pilots from the directory (#653)', () {
+    const entryId = '019c0000-0000-7000-8000-0000000000a1';
+    late List<http.Request> sent;
+
+    Future<http.Response> directoryApi(http.Request request) async {
+      final path = request.url.path;
+      sent.add(request);
+      Map<String, Object?> match() => {
+        'entry_id': entryId,
+        'first_name': 'Dana',
+        'last_name': 'Directory',
+        'club': 'Soar Club',
+        'fai_number': 'F1234',
+        'national_org_id': null,
+        'city': null,
+        'state': null,
+        'country': null,
+        'email': null,
+        'email_available': true,
+      };
+      if (path.endsWith('/directory/lookups')) {
+        final body = convert.jsonDecode(request.body) as Map<String, dynamic>;
+        return json({
+          'results': body['key'] == 'fai_number' ? [match()] : [],
+        });
+      }
+      if (path.endsWith('/directory/copies')) return json(match());
+      return stepApi(request);
+    }
+
+    Finder searchField() => find.descendant(
+      of: find.byKey(const ValueKey('participant-search')),
+      matching: find.byType(TextField),
+    );
+
+    setUp(() => sent = []);
+
+    testWidgets('a director finds a listed pilot by FAI number and adds them', (
+      tester,
+    ) async {
+      final l10n = AppLocalizationsEn();
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: directoryApi,
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      await tester.enterText(searchField(), 'F1234');
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.searchRemote), findsOneWidget);
+      expect(find.text('Dana Directory'), findsOneWidget);
+      await tester.tap(find.widgetWithText(ListTile, 'Dana Directory'));
+      await tester.pumpAndSettle();
+
+      final copy = sent.singleWhere(
+        (r) => r.url.path.endsWith('/directory/copies'),
+      );
+      final created = sent.singleWhere(
+        (r) => r.method == 'POST' && r.url.path.endsWith('/participants'),
+      );
+      expect(
+        (convert.jsonDecode(copy.body) as Map)['profile_id'],
+        (convert.jsonDecode(created.body) as Map)['id'],
+      );
+      expect(
+        find.text(l10n.wizardAddedAsPilotShort('Dana Directory')),
+        findsOneWidget,
+      );
+      expect(store.draft.participants, hasLength(1));
+    });
+
+    testWidgets('the lookup button finds an ID typing skips', (tester) async {
+      final l10n = AppLocalizationsEn();
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: directoryApi,
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      await tester.enterText(searchField(), 'AB');
+      await tester.pump(const Duration(seconds: 1));
+      expect(sent.where((r) => r.url.path.contains('/directory/')), isEmpty);
+      await tester.tap(find.byKey(const ValueKey('directory-lookup')));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.searchDirectoryResults('AB')), findsOneWidget);
+      await tester.tap(find.widgetWithText(ListTile, 'Dana Directory'));
+      await tester.pumpAndSettle();
+      expect(store.draft.participants, hasLength(1));
+    });
+
+    testWidgets('a directory pilot the director already holds shows as '
+        'that profile', (tester) async {
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: (request) async {
+          final response = await directoryApi(request);
+          if (!request.url.path.endsWith('/directory/lookups')) return response;
+          // The pilot is Mike Gardner, shown by email, under an FAI number
+          // only the directory holds.
+          final body =
+              convert.jsonDecode(response.body) as Map<String, dynamic>;
+          for (final m in body['results'] as List) {
+            (m as Map)
+              ..['first_name'] = 'Mike'
+              ..['last_name'] = 'Gardner'
+              ..['email'] = 'mike@example.com';
+          }
+          return json(body);
+        },
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      await tester.enterText(searchField(), 'F1234');
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(ListTile, 'Mike Gardner'), findsOneWidget);
+      expect(find.text(AppLocalizationsEn().searchRemote), findsNothing);
+    });
+
+    testWidgets('a profile whose FAI number differs only by case does not '
+        'stand in for the directory pilot', (tester) async {
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: (request) async {
+          if (request.url.path.endsWith('/participants') &&
+              request.method == 'GET') {
+            return json({
+              'participants': [
+                profile('Cass', 'Lower', n: 77, fai: 'f1234').toJson(),
+              ],
+            });
+          }
+          return directoryApi(request);
+        },
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      await tester.enterText(searchField(), 'F1234');
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(ListTile, 'Dana Directory'), findsOneWidget);
+      expect(find.text(AppLocalizationsEn().searchRemote), findsOneWidget);
+    });
+
+    testWidgets('a lookup that answers after the text changed or cleared is '
+        'ignored', (tester) async {
+      final l10n = AppLocalizationsEn();
+      final release = Completer<void>();
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: (request) async {
+          if (request.url.path.endsWith('/directory/lookups')) {
+            await release.future;
+          }
+          return directoryApi(request);
+        },
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      for (final change in ['edit', 'clear']) {
+        await tester.enterText(searchField(), 'AB');
+        await tester.pump();
+        await tester.tap(find.byKey(const ValueKey('directory-lookup')));
+        await tester.pump();
+        await tester.enterText(searchField(), change == 'edit' ? 'ABC' : '');
+        await tester.pump();
+        if (!release.isCompleted) release.complete();
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(l10n.searchDirectoryResults('AB')),
+          findsNothing,
+          reason: change,
+        );
+        expect(find.widgetWithText(ListTile, 'Dana Directory'), findsNothing);
+      }
+    });
+
+    testWidgets('an ID shaped like an email is not matched to a profile by '
+        'that text', (tester) async {
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: (request) async {
+          if (request.url.path.endsWith('/participants') &&
+              request.method == 'GET') {
+            return json({
+              'participants': [
+                profile('Cass', 'Local', n: 77, email: 'f1@club.org1').toJson(),
+              ],
+            });
+          }
+          if (request.url.path.endsWith('/directory/lookups')) {
+            final body =
+                convert.jsonDecode(request.body) as Map<String, dynamic>;
+            // Only the FAI lookup finds the pilot, whose email is private.
+            final response = await directoryApi(request);
+            if (body['key'] != 'fai_number') return response;
+            return json({
+              'results': [
+                (convert.jsonDecode(response.body) as Map)['results'][0]
+                  ..['fai_number'] = 'f1@club.org1',
+              ],
+            });
+          }
+          return directoryApi(request);
+        },
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      await tester.enterText(searchField(), 'f1@club.org1');
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(ListTile, 'Dana Directory'), findsOneWidget);
+      expect(find.text(AppLocalizationsEn().searchRemote), findsOneWidget);
+    });
+
+    testWidgets('choosing an autocomplete result drops a lookup still '
+        'waiting', (tester) async {
+      final l10n = AppLocalizationsEn();
+      final release = Completer<void>();
+      var waiting = false;
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: (request) async {
+          if (request.url.path.endsWith('/directory/lookups')) {
+            waiting = true;
+            await release.future;
+          }
+          return directoryApi(request);
+        },
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      // Once someone is in the list the search field stays on screen.
+      await searchAndPick(tester, 'albright', 'Sarah Albright');
+      await tester.enterText(searchField(), 'gardner');
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('directory-lookup')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(waiting, isTrue, reason: 'the lookup was sent');
+      await tester.tap(find.widgetWithText(ListTile, 'Mike Gardner'));
+      await tester.pump();
+      release.complete();
+      await tester.pumpAndSettle();
+
+      expect(store.draft.participants, hasLength(2));
+      expect(find.text(l10n.searchDirectoryResults('gardner')), findsNothing);
+      expect(find.widgetWithText(ListTile, 'Dana Directory'), findsNothing);
+    });
+
+    testWidgets('signed out, the search never calls the directory', (
+      tester,
+    ) async {
+      final store = await storeAtStep4();
+      await pumpWizard(tester, respond: directoryApi, store: store);
+
+      await tester.enterText(searchField(), 'F1234');
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      expect(sent.where((r) => r.url.path.contains('/directory/')), isEmpty);
+    });
+
+    testWidgets('a failed copy says so and adds nobody', (tester) async {
+      final l10n = AppLocalizationsEn();
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: (request) async {
+          if (request.url.path.endsWith('/directory/copies')) {
+            return json({
+              'error': {'code': 'link_not_found', 'message': 'gone'},
+            }, 404);
+          }
+          return directoryApi(request);
+        },
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      await tester.enterText(searchField(), 'F1234');
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(ListTile, 'Dana Directory'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(l10n.directoryCopyFailed('Dana Directory')),
+        findsOneWidget,
+      );
+      expect(store.draft.participants, isEmpty);
+    });
   });
 }

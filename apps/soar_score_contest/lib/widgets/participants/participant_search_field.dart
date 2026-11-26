@@ -21,6 +21,7 @@ class ParticipantSearchField extends StatefulWidget {
     required this.onAdd,
     required this.offline,
     this.remote,
+    this.lookup,
     this.onQueryChanged,
   });
 
@@ -34,6 +35,10 @@ class ParticipantSearchField extends StatefulWidget {
   final bool offline;
   final RemoteParticipantSearch? remote;
 
+  /// Looks the typed text up in the directory on purpose, for an ID the typing
+  /// rules skip. Shown as a button while the app is online.
+  final RemoteParticipantSearch? lookup;
+
   /// Called as the text changes, so the page can filter its list with it.
   final ValueChanged<String>? onQueryChanged;
 
@@ -44,6 +49,14 @@ class ParticipantSearchField extends StatefulWidget {
 class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focus = FocusNode();
+  bool _looking = false;
+
+  /// Counts every edit or clear of the text, so an explicit lookup that
+  /// comes back after one is ignored.
+  int _edits = 0;
+  String? _lookedUp;
+  List<ParticipantCandidate>? _found;
+  bool _lookupFailed = false;
 
   @override
   void dispose() {
@@ -66,19 +79,80 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
 
   Future<Iterable<ParticipantCandidate>> _search(String query) async {
     final local = searchLocalProfiles(widget.profiles ?? const [], query);
-    if (!_searchesRemote || query.trim().isEmpty) {
+    if (!_searchesRemote) return local;
+    if (query.trim().isEmpty) {
+      // Clearing the text still ends a lookup waiting on an earlier one.
+      unawaited(widget.remote!(query).then((_) {}, onError: (Object _) {}));
       return local;
     }
     try {
       final remote = await widget.remote!(query);
-      final localIds = {for (final c in local) c.profileId};
-      return [
-        ...remote.where((c) => !localIds.contains(c.profileId)),
-        ...local,
-      ];
+      return _arrange(remote, local);
     } on Object {
       return local;
     }
+  }
+
+  /// The directory [remote] results before the director's own [local] ones,
+  /// each pilot once.
+  List<ParticipantCandidate> _arrange(
+    List<ParticipantCandidate> remote,
+    List<ParticipantCandidate> local,
+  ) {
+    final localIds = {for (final c in local) c.profileId};
+    final own = widget.profiles ?? const <ParticipantProfile>[];
+    // A pilot the director already holds is offered as that profile, whichever
+    // identifier matched, even when the typed text is not on the profile (a
+    // private email, or a field only the directory has).
+    final copies = <ParticipantCandidate>[];
+    final shown = {...localIds};
+    final fresh = <ParticipantCandidate>[];
+    for (final c in remote) {
+      final held = c.copiesIn(own);
+      if (held.isEmpty) {
+        if (!localIds.contains(c.profileId)) fresh.add(c);
+        continue;
+      }
+      for (final p in held) {
+        if (shown.add(p.id)) copies.add(ParticipantCandidate.local(p));
+      }
+    }
+    return [...fresh, ...copies, ...local];
+  }
+
+  Future<void> _lookUp(String text) async {
+    final asked = _edits;
+    setState(() {
+      _looking = true;
+      _lookupFailed = false;
+    });
+    try {
+      final remote = await widget.lookup!(text);
+      final local = searchLocalProfiles(widget.profiles ?? const [], text);
+      if (!mounted || asked != _edits) return;
+      setState(() {
+        _lookedUp = text.trim();
+        _found = _arrange(remote, local);
+        _looking = false;
+      });
+    } on Object {
+      if (!mounted || asked != _edits) return;
+      setState(() {
+        _lookedUp = text.trim();
+        _found = null;
+        _lookupFailed = true;
+        _looking = false;
+      });
+    }
+  }
+
+  void _forgetLookup() {
+    _edits++;
+    _looking = false;
+    if (_lookedUp == null && !_lookupFailed) return;
+    _lookedUp = null;
+    _found = null;
+    _lookupFailed = false;
   }
 
   @override
@@ -99,6 +173,9 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
               return;
             }
             widget.onAdd(candidate);
+            // A lookup still waiting must not bring results back under the
+            // cleared text.
+            setState(_forgetLookup);
             _controller.clear();
             widget.onQueryChanged?.call('');
           },
@@ -110,6 +187,18 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
                 hintText: l10n.searchHint,
                 leading: const Icon(Icons.person_search),
                 trailing: [
+                  if (widget.lookup != null && !widget.offline)
+                    ValueListenableBuilder(
+                      valueListenable: controller,
+                      builder: (context, value, _) => IconButton(
+                        key: const ValueKey('directory-lookup'),
+                        tooltip: l10n.searchDirectoryLookup,
+                        icon: const Icon(Icons.manage_search),
+                        onPressed: _looking || value.text.trim().isEmpty
+                            ? null
+                            : () => unawaited(_lookUp(value.text)),
+                      ),
+                    ),
                   ValueListenableBuilder(
                     valueListenable: controller,
                     builder: (context, value, _) => value.text.isEmpty
@@ -118,13 +207,17 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
                             tooltip: l10n.searchClear,
                             icon: const Icon(Icons.close),
                             onPressed: () {
+                              setState(_forgetLookup);
                               controller.clear();
                               widget.onQueryChanged?.call('');
                             },
                           ),
                   ),
                 ],
-                onChanged: (value) => widget.onQueryChanged?.call(value),
+                onChanged: (value) {
+                  setState(_forgetLookup);
+                  widget.onQueryChanged?.call(value);
+                },
                 elevation: const WidgetStatePropertyAll(0),
                 backgroundColor: WidgetStatePropertyAll(
                   scheme.surfaceContainerHighest,
@@ -141,6 +234,38 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
             onSelected: onSelected,
           ),
         ),
+        if (_looking) const LinearProgressIndicator(),
+        if (_lookupFailed)
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text(
+              l10n.searchDirectoryFailed,
+              key: const ValueKey('directory-lookup-failed'),
+            ),
+          )
+        else if (_lookedUp != null && (_found?.isEmpty ?? false))
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text(
+              l10n.searchDirectoryNone(_lookedUp!),
+              key: const ValueKey('directory-lookup-none'),
+            ),
+          )
+        else if (_found != null && _found!.isNotEmpty)
+          _ResultsMenu(
+            options: _found!,
+            selected: widget.selected,
+            header: l10n.searchDirectoryResults(_lookedUp!),
+            onSelected: (candidate) {
+              if (widget.selected.contains(candidate.profileId.value)) return;
+              widget.onAdd(candidate);
+              setState(() {
+                _forgetLookup();
+                _controller.clear();
+              });
+              widget.onQueryChanged?.call('');
+            },
+          ),
         const SizedBox(height: 4),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),

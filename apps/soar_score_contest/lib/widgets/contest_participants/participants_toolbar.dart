@@ -16,12 +16,25 @@ class ParticipantsToolbar extends StatelessWidget {
     required this.narrow,
     required this.onAddNew,
     required this.onAddProfile,
+    this.remote,
+    this.lookup,
+    this.onAddDirectory,
   });
 
   final ParticipantsController controller;
   final bool narrow;
   final VoidCallback onAddNew;
   final ValueChanged<ParticipantProfile> onAddProfile;
+
+  /// The directory search, when the director is signed in (#653).
+  final RemoteParticipantSearch? remote;
+
+  /// Looks the typed text up in the directory on purpose.
+  final RemoteParticipantSearch? lookup;
+
+  /// Copies a pilot the directory found into the director's list and adds
+  /// the copy.
+  final ValueChanged<ParticipantCandidate>? onAddDirectory;
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +46,14 @@ class ParticipantsToolbar extends StatelessWidget {
       profiles: canAdd ? c.profiles : const [],
       selected: c.memberProfileIds,
       offline: false,
+      remote: canAdd ? remote : null,
+      lookup: canAdd ? lookup : null,
       onQueryChanged: c.setQuery,
       onAdd: (ParticipantCandidate candidate) {
+        if (candidate.directory != null) {
+          onAddDirectory?.call(candidate);
+          return;
+        }
         final profile = c.profiles
             .where((p) => p.id == candidate.profileId)
             .firstOrNull;

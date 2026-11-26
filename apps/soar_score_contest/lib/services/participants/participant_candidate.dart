@@ -1,3 +1,4 @@
+import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../widgets/participant_search.dart';
@@ -12,7 +13,26 @@ class ParticipantCandidate {
     this.club,
     this.email,
     this.emailVisible = true,
+    this.directory,
+    this.searchedEmail,
   });
+
+  /// A listed pilot the directory found (#653). [profileId] is the id the
+  /// director's copy will have; nothing exists under it yet.
+  factory ParticipantCandidate.directory(
+    DirectoryMatchDto match, {
+    required Id profileId,
+    String? searchedEmail,
+  }) => ParticipantCandidate(
+    profileId: profileId,
+    name: '${match.firstName} ${match.lastName}',
+    source: ParticipantSource.remote,
+    club: match.club,
+    email: match.email,
+    emailVisible: match.email != null,
+    directory: match,
+    searchedEmail: searchedEmail,
+  );
 
   /// One of the director's own [profile]s (its email is always shown).
   factory ParticipantCandidate.local(ParticipantProfile profile) =>
@@ -34,6 +54,43 @@ class ParticipantCandidate {
   /// person's permission; the email must not even reach the UI otherwise.
   final bool emailVisible;
 
+  /// The directory entry this person was found as, or null for one of the
+  /// director's own profiles. A copy of it becomes their profile.
+  final DirectoryMatchDto? directory;
+
+  /// The email the director typed to find this pilot, which the pilot may
+  /// keep private from the result: still enough to see a profile of the
+  /// director's already holds it.
+  final String? searchedEmail;
+
+  /// The director's own [profiles] that already hold this directory pilot:
+  /// the copy made before, or one with the same FAI number, national ID or
+  /// email (the email the pilot shows, else the one the director typed).
+  List<ParticipantProfile> copiesIn(Iterable<ParticipantProfile> profiles) {
+    final match = directory;
+    if (match == null) return const [];
+    // The server looks FAI numbers and national IDs up exactly, so they
+    // match exactly here; only email is case-insensitive.
+    bool exact(String? a, String? b) =>
+        a != null && b != null && a.trim() == b.trim();
+    bool same(String? a, String? b) =>
+        a != null &&
+        b != null &&
+        a.trim().toLowerCase() == b.trim().toLowerCase();
+    return [
+      for (final p in profiles)
+        if (p.id == profileId ||
+            exact(p.faiNumber, match.faiNumber) ||
+            exact(p.nationalOrgId, match.nationalOrgId) ||
+            same(p.email, match.email ?? searchedEmail))
+          p,
+    ];
+  }
+
+  /// Whether one of the director's own [profiles] already holds this pilot.
+  bool isCopiedIn(Iterable<ParticipantProfile> profiles) =>
+      copiesIn(profiles).isNotEmpty;
+
   /// What the email cell says for this person.
   ParticipantEmailStatus get emailStatus {
     if (source == ParticipantSource.remote && !emailVisible) {
@@ -46,9 +103,9 @@ class ParticipantCandidate {
   }
 }
 
-/// Searches the remote participant directory. There is no directory
-/// endpoint yet, so the wizard runs without one; when it exists, pass one to
-/// the Participants step and remote results are listed first.
+/// Searches the remote participant directory (see `DirectoryPilotSource`).
+/// Without one the search only lists the director's own profiles; with one,
+/// remote results are listed first.
 typedef RemoteParticipantSearch = Future<List<ParticipantCandidate>> Function(
   String query,
 );

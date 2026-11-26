@@ -190,6 +190,26 @@ void _tests(Backend backend) {
       });
     });
 
+    test('finds listed entries by exact FAI number or national ID', () async {
+      final listed = core.ParticipantDirectoryEntry.fromJson({
+        ...other(accountIds.first).toJson(),
+        'fai_number': 'FAI-77',
+        'national_org_id': 'NSS-5',
+      });
+      final hidden = core.ParticipantDirectoryEntry.fromJson({
+        ...other(accountIds.last, isListed: false).toJson(),
+        'fai_number': 'FAI-77',
+        'national_org_id': 'NSS-5',
+      });
+      await repo.save(listed);
+      await repo.save(hidden);
+
+      expect(await repo.listListedByFaiNumber('FAI-77'), [listed]);
+      expect(await repo.listListedByNationalOrgId('NSS-5'), [listed]);
+      expect(await repo.listListedByFaiNumber('FAI-7'), isEmpty);
+      expect(await repo.listListedByNationalOrgId('FAI-77'), isEmpty);
+    });
+
     test('save replaces the entry without a mutation record', () async {
       final before = await inst.count('mutation_records');
       final moved = core.ParticipantDirectoryEntry.fromJson({
