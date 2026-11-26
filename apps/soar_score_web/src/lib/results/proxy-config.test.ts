@@ -84,6 +84,8 @@ describe("the /api proxy (#906)", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("public, max-age=30");
     expect(response.headers.get("x-robots-tag")).toBe("noindex, nofollow");
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(response.headers.get("referrer-policy")).toBe("strict-origin-when-cross-origin");
     expect(response.headers.has("set-cookie")).toBe(false);
     expect(await response.text()).toBe(visibleBody);
     expect(upstreamPaths).toContain("/public/publications/visible");
@@ -106,7 +108,12 @@ describe("the /api proxy (#906)", () => {
     expect(await response.text()).toBe(notFoundBody);
   });
 
-  it("sets no headers of its own on the rewrite", () => {
-    expect(nextConfig.headers).toBeUndefined();
+  it("does not override the API's headers on the rewrite", async () => {
+    const rules = nextConfig.headers ? await nextConfig.headers() : [];
+    const own = rules.flatMap((rule) => rule.headers.map((header) => header.key.toLowerCase()));
+    // The API sets these (#906); the site's security headers must not.
+    for (const key of ["cache-control", "x-robots-tag", "content-type", "set-cookie"]) {
+      expect(own).not.toContain(key);
+    }
   });
 }, 30_000);
