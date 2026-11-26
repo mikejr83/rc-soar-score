@@ -820,7 +820,7 @@ void _tests(SliceBackend backend) {
         if (waiting.length == 2) waiting.first.complete();
         return gate.future;
       };
-      gated.afterClaim = () {
+      gated.afterClaim = () async {
         if (!waiting.last.isCompleted) waiting.last.complete();
       };
       final racingInvitations = core.InvitationService(
@@ -956,6 +956,67 @@ void _tests(SliceBackend backend) {
       final ended = await ending;
 
       expect(ended.status, core.ParticipantLinkStatus.ended);
+      expect(await redeemers(1), {guest.value});
+      expect(
+        (await invitations.authorize(guestAgain.sessionToken)).guestAccountId,
+        guest,
+      );
+    });
+
+    test('an open paused after its claim cannot bring back a link that was '
+        'ended meanwhile', () async {
+      final issued = await issue(1);
+      await guestScores(issued.credential);
+      final link = await links.linkFromInvitation(
+        credential: issued.credential,
+        accountId: pat,
+      );
+      final guestAgain = await invitations.resolve(issued.credential);
+      final guest = guestAgain.access.guestAccountId;
+
+      final gated = GatedRepository(api.database);
+      final claimed = Completer<void>();
+      final resume = Completer<void>();
+      var first = true;
+      gated.afterClaim = () async {
+        if (!first) return;
+        first = false;
+        claimed.complete();
+        await resume.future;
+      };
+      final racing = core.ParticipantLinkService(
+        gated,
+        core.InvitationService(gated, invitations.codec, clock: () => clock),
+        clock: () => clock,
+      );
+
+      final opening = racing.openParticipation(
+        participationId: id(_participationId(1)),
+        accountId: pat,
+      );
+      final outcome = expectLater(
+        opening,
+        throwsA(
+          isA<core.ParticipantLinkError>().having(
+            (e) => e.code,
+            'code',
+            'link_not_found',
+          ),
+        ),
+      );
+      await claimed.future;
+      // The open has claimed the guest; the account ends the link now, which
+      // returns the invitation to the guest.
+      await links.end(linkId: link.id, accountId: pat);
+      resume.complete();
+      await outcome;
+
+      expect(
+        (await repository.participantAccountLinkRepository.findById(link.id))!
+            .status,
+        core.ParticipantLinkStatus.ended,
+      );
+      expect(await links.participationsFor(pat), isEmpty);
       expect(await redeemers(1), {guest.value});
       expect(
         (await invitations.authorize(guestAgain.sessionToken)).guestAccountId,

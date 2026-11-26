@@ -13,7 +13,7 @@ class GatedRepository extends Repository {
 
   Future<void> Function(core.Id newRedeemer, bool applied)? afterRedeem;
   Future<void> Function()? beforeClaim;
-  void Function()? afterClaim;
+  Future<void> Function()? afterClaim;
   Future<void> Function()? beforeRelease;
 
   late final _invitations = _GatedInvitations(super.invitationRepository, this);
@@ -110,7 +110,7 @@ class _GatedLinks implements core.ParticipantAccountLinkRepository {
   Future<T> _claiming<T>(Future<T> Function() claim) async {
     await _gate.beforeClaim?.call();
     final result = await claim();
-    _gate.afterClaim?.call();
+    await _gate.afterClaim?.call();
     return result;
   }
 

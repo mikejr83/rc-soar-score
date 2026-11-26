@@ -169,11 +169,7 @@ class ParticipantLinkService {
     if (row == null) throw ParticipantLinkError.linkNotFound();
     // Claims the guests who opened this or an earlier invitation of the
     // profile since the link was made, so the session sees all their entries.
-    await _confirm(
-      profileId: profileId,
-      accountId: accountId,
-      origin: link.origin,
-    );
+    await _claimGuestsOfConfirmed(profileId, accountId);
     return _openAs(row.invitation, profileId, accountId);
   }
 
@@ -194,13 +190,7 @@ class ParticipantLinkService {
       // Claim the guest only when another attempt follows: a claim after the
       // last attempt would end whatever session that guest holds and still
       // leave the caller without one.
-      if (attempt == 0) {
-        await _confirm(
-          profileId: profileId,
-          accountId: accountId,
-          origin: ParticipantLinkOrigin.invitationRedemption,
-        );
-      }
+      if (attempt == 0) await _claimGuestsOfConfirmed(profileId, accountId);
     }
     // Something else keeps redeeming it: do not guess, refuse like a link
     // that does not open.
@@ -496,6 +486,23 @@ class ParticipantLinkService {
       throw ParticipantLinkError.alreadyLinked();
     }
     return confirmed;
+  }
+
+  /// Claims the guests of [profileId] for [accountId], which must hold the
+  /// Confirmed link to it right now.
+  ///
+  /// Never makes or revives a link: opening a contest is not a way to link.
+  /// `link_not_found` when the link is not Confirmed for the account, whether
+  /// it had ended before this call or ends while the claim is pending (the
+  /// claim then writes nothing).
+  Future<void> _claimGuestsOfConfirmed(Id profileId, Id accountId) async {
+    final existing = await _existingConfirmed(profileId, accountId);
+    if (existing == null) throw ParticipantLinkError.linkNotFound();
+    final guests = await _guestsOf(profileId);
+    if (guests.isEmpty) return;
+    final claimed = await repository.participantAccountLinkRepository
+        .claimGuests(existing, guestAccountIds: guests);
+    if (!claimed) throw ParticipantLinkError.linkNotFound();
   }
 
   /// Makes the link of [accountId] to [profileId] Confirmed, claiming the
