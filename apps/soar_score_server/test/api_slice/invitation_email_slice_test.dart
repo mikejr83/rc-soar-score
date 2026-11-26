@@ -363,4 +363,142 @@ void _tests(SliceBackend backend) {
     expect(status, 200);
     expect(resultFor(body, _noEmailPart)['skipped'], 'no_invitation');
   });
+
+  Future<List<core.AuditEvent>> deliveryAudits() => Repository(api.database)
+      .auditEventRepository
+      .listForContest(
+        core.Id.parse(_contestId),
+        action: core.AuditAction.invitationDeliveryRequested,
+      );
+
+  Future<String> credentialOfAlex() async {
+    final invitations = (await listing())['invitations'] as List;
+    final link =
+        invitations.cast<Map<String, Object?>>().singleWhere(
+              (i) => i['participation_id'] == _withEmailPart,
+            )['link']
+            as String;
+    return link.split('/').last;
+  }
+
+  core.InvitationService opener() => core.InvitationService(
+    Repository(api.database),
+    core.InvitationCodec.fromText(_secret),
+  );
+
+  test('a pilot opening the link keeps the send claim, so a retry sends '
+      'nothing', () async {
+    final repository = Repository(api.database);
+    final invitation =
+        (await repository.invitationRepository.listForParticipation(
+          core.Id.parse(_withEmailPart),
+        )).single;
+    // A claim stored, the send not yet answered.
+    await repository.invitationRepository.updateDeliveryOutcomes(
+      invitation.id,
+      (current) => [
+        ...current,
+        {
+          'request_id': 'send-1',
+          'channel': 'email',
+          'status': 'sending',
+          'at': DateTime.now().toUtc().toIso8601String(),
+        },
+      ],
+    );
+    await opener().resolve(await credentialOfAlex());
+
+    final after = await repository.invitationRepository.findById(invitation.id);
+    expect(after!.redeemedByAccountId, isNotNull);
+    expect(after.deliveryOutcomes.single['request_id'], 'send-1');
+    final (_, body) = await email('send-1', [_withEmailPart]);
+    expect(mailer.sent, isEmpty);
+    expect(resultFor(body, _withEmailPart)['status'], 'unconfirmed');
+  });
+
+  test('opening the link while the email is sent keeps every outcome and '
+      'sends once', () async {
+    final credential = await credentialOfAlex();
+    for (var round = 0; round < 3; round++) {
+      await Future.wait([
+        email('send-$round', [_withEmailPart]),
+        opener().resolve(credential),
+        opener().resolve(credential),
+      ]);
+    }
+    expect(mailer.sent, hasLength(3));
+    final invitation =
+        (await Repository(api.database).invitationRepository
+                .listForParticipation(core.Id.parse(_withEmailPart)))
+            .single;
+    expect(invitation.deliveryOutcomes.map((o) => o['request_id']), [
+      'send-0',
+      'send-1',
+      'send-2',
+    ]);
+    expect(
+      invitation.deliveryOutcomes.map((o) => o['status']),
+      everyElement('accepted'),
+    );
+    expect(invitation.redeemedByAccountId, isNotNull);
+  });
+
+  test('stores one delivery audit event with the claim, whatever the '
+      'send does', () async {
+    await email('send-1', [_withEmailPart]);
+    mailer.failure = StateError('boom');
+    await email('send-2', [_withEmailPart]);
+    await email('send-2', [_withEmailPart]); // a repeat adds none
+    final audits = await deliveryAudits();
+    expect(audits, hasLength(2));
+    expect(audits.every((a) => a.actorId == api.director), isTrue);
+    expect(audits.every((a) => a.entityType == 'Invitation'), isTrue);
+  });
+
+  test(
+    'an email that is skipped or refused stores no delivery audit',
+    () async {
+      await email('send-1', [_noEmailPart]);
+      await email('send-2', [core.Id.create().value]);
+      expect(await deliveryAudits(), isEmpty);
+    },
+  );
+
+  test('a claim stored while a pilot opens the link is not erased', () async {
+    final repository = Repository(api.database);
+    final invitation =
+        (await repository.invitationRepository.listForParticipation(
+          core.Id.parse(_withEmailPart),
+        )).single;
+    // The service reads the invitation, then asks the clock for the time of
+    // the open: the claim is stored in that gap, before the open is saved.
+    Future<List<Map<String, Object?>>?>? claim;
+    final racing = core.InvitationService(
+      repository,
+      core.InvitationCodec.fromText(_secret),
+      clock: () {
+        claim ??= repository.invitationRepository.updateDeliveryOutcomes(
+          invitation.id,
+          (current) => [
+            ...current,
+            {
+              'request_id': 'send-1',
+              'channel': 'email',
+              'status': 'sending',
+              'at': DateTime.now().toUtc().toIso8601String(),
+            },
+          ],
+        );
+        return DateTime.now().toUtc();
+      },
+    );
+    await racing.resolve(await credentialOfAlex());
+    await claim;
+
+    final after = await repository.invitationRepository.findById(invitation.id);
+    expect(after!.deliveryOutcomes.map((o) => o['request_id']), ['send-1']);
+    expect(after.redeemedByAccountId, isNotNull);
+    await email('send-1', [_withEmailPart]);
+    expect(mailer.sent, isEmpty);
+  });
 }

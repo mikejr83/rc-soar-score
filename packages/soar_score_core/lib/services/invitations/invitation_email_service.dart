@@ -1,3 +1,5 @@
+import 'package:logging/logging.dart';
+
 import '../../enums/audit_action.dart';
 import '../../enums/audit_outcome.dart';
 import '../../enums/authority.dart';
@@ -137,6 +139,8 @@ class InvitationEmailResult {
   /// so nothing was sent now and [status] is the stored outcome.
   final bool repeated;
 }
+
+final _logger = Logger('InvitationEmail');
 
 /// Emails invitation links to pilots (#790).
 ///
@@ -280,6 +284,18 @@ class InvitationEmailService {
     Map<String, Object?>? earlier;
     await repository.invitationRepository.updateDeliveryOutcomes(
       invitation.id,
+      audit: AuditEvent(
+        id: _newId(),
+        entityType: 'Invitation',
+        entityId: invitation.id,
+        contestId: invitation.contestId,
+        action: AuditAction.invitationDeliveryRequested,
+        actorId: requestedBy,
+        authority: Authority.director,
+        resultingRevision: invitation.invitationRevision,
+        serverTimestamp: now,
+        outcome: AuditOutcome.success,
+      ),
       (current) {
         claimed = false;
         earlier = _entryFor(current, requestId);
@@ -336,48 +352,39 @@ class InvitationEmailService {
         invitation,
         requestId,
         const InvitationMailResult(InvitationEmailStatus.unconfirmed),
-        requestedBy,
       );
     }
-    return _finish(invitation, requestId, result, requestedBy);
+    return _finish(invitation, requestId, result);
   }
 
   Future<InvitationEmailResult> _finish(
     Invitation invitation,
     String requestId,
     InvitationMailResult result,
-    Id requestedBy,
   ) async {
-    await repository.invitationRepository.updateDeliveryOutcomes(
-      invitation.id,
-      (current) => [
-        for (final entry in current)
-          if (entry['request_id'] == requestId)
-            {
-              ...entry,
-              'status': result.status.wire,
-              if (result.messageId != null) 'message_id': result.messageId,
-            }
-          else
-            entry,
-      ],
-    );
-    await repository.auditEventRepository.append(
-      AuditEvent(
-        id: _newId(),
-        entityType: 'Invitation',
-        entityId: invitation.id,
-        contestId: invitation.contestId,
-        action: AuditAction.invitationDeliveryRequested,
-        actorId: requestedBy,
-        authority: Authority.director,
-        resultingRevision: invitation.invitationRevision,
-        serverTimestamp: _clock().toUtc(),
-        outcome: result.status == InvitationEmailStatus.accepted
-            ? AuditOutcome.success
-            : AuditOutcome.rejected,
-      ),
-    );
+    try {
+      await repository.invitationRepository.updateDeliveryOutcomes(
+        invitation.id,
+        (current) => [
+          for (final entry in current)
+            if (entry['request_id'] == requestId)
+              {
+                ...entry,
+                'status': result.status.wire,
+                if (result.messageId != null) 'message_id': result.messageId,
+              }
+            else
+              entry,
+        ],
+      );
+    } on Object {
+      // The mail has been handled by now, and its audit event was stored with
+      // the claim. If this write is lost the entry stays `sending`, which a
+      // retry reads as `unconfirmed` and never sends again, so the director is
+      // told what the provider said and resends with a new request id if the
+      // pilot did not get it.
+      _logger.warning('An invitation email outcome could not be stored.');
+    }
     return InvitationEmailResult.sent(
       invitation.contestParticipationId,
       result.status,

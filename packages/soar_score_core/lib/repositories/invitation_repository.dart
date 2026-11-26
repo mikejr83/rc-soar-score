@@ -41,6 +41,21 @@ abstract interface class InvitationRepository {
 
   Future<Invitation> save(Invitation invitation);
 
+  /// Records that [invitationId] was opened by [newRedeemer] at [usedAt], when
+  /// its stored redeemer is still [expectedRedeemer] (null for none yet).
+  ///
+  /// One conditional write that changes only the redeemer and the usage
+  /// timestamps (the first use is kept once set), so concurrent opens cannot
+  /// overwrite each other or any other field. Returns whether it applied;
+  /// false means another open changed the redeemer first, or the invitation
+  /// is no longer active.
+  Future<bool> redeem(
+    Id invitationId, {
+    required Id? expectedRedeemer,
+    required Id newRedeemer,
+    required DateTime usedAt,
+  });
+
   /// Changes only the delivery outcomes of [invitationId]: [change] receives
   /// the stored list and returns the list to keep, or null to keep it as it
   /// is.
@@ -50,11 +65,16 @@ abstract interface class InvitationRepository {
   /// ones [change] saw (another writer makes it run again with the new list).
   /// Returns the outcomes now stored, or null when there is no such
   /// invitation.
+  ///
+  /// With [audit], that event is stored in the same transaction as the
+  /// change, and only when the change applies, so a stored change never lacks
+  /// its audit event and a failed one leaves none.
   Future<List<Map<String, Object?>>?> updateDeliveryOutcomes(
     Id invitationId,
     List<Map<String, Object?>>? Function(List<Map<String, Object?>> current)
-    change,
-  );
+    change, {
+    AuditEvent? audit,
+  });
 
   /// Stores every invitation in [invitations] and every event in [audits] in
   /// one transaction: if any write fails, none is kept.

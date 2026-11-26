@@ -81,11 +81,47 @@ class InvitationRepository extends DriftRepository
   }
 
   @override
+  Future<bool> redeem(
+    core.Id invitationId, {
+    required core.Id? expectedRedeemer,
+    required core.Id newRedeemer,
+    required DateTime usedAt,
+  }) async {
+    final stamp = const core.UtcTimestampConverter().toJson(usedAt.toUtc());
+    // `IS ?` is not portable to PostgreSQL, so a missing redeemer is its own
+    // condition.
+    final expected = expectedRedeemer == null
+        ? 'redeemed_by_account_id IS NULL'
+        : 'redeemed_by_account_id = ?';
+    final changed = await db.customUpdate(
+      portableSql(
+        db,
+        'UPDATE invitations SET redeemed_by_account_id = ?, '
+        'first_used_at = COALESCE(first_used_at, ?), last_used_at = ? '
+        "WHERE id = ? AND state = 'Active' AND $expected",
+      ),
+      variables: [
+        Variable<String>(newRedeemer.value),
+        Variable<String>(stamp),
+        Variable<String>(stamp),
+        Variable<String>(invitationId.value),
+        if (expectedRedeemer != null) Variable<String>(expectedRedeemer.value),
+      ],
+      updates: {
+        db.allTables.firstWhere((t) => t.actualTableName == 'invitations'),
+      },
+      updateKind: UpdateKind.update,
+    );
+    return changed > 0;
+  }
+
+  @override
   Future<List<Map<String, Object?>>?> updateDeliveryOutcomes(
     core.Id invitationId,
     List<Map<String, Object?>>? Function(List<Map<String, Object?>> current)
-    change,
-  ) async {
+    change, {
+    core.AuditEvent? audit,
+  }) async {
     final table = db.allTables.firstWhere(
       (t) => t.actualTableName == 'invitations',
     );
@@ -110,21 +146,26 @@ class InvitationRepository extends DriftRepository
       ];
       final next = change(current);
       if (next == null) return current;
-      final changed = await db.customUpdate(
-        portableSql(
-          db,
-          'UPDATE invitations SET delivery_outcomes = ? '
-          'WHERE id = ? AND delivery_outcomes = ?',
-        ),
-        variables: [
-          Variable<String>(jsonEncode(next)),
-          Variable<String>(invitationId.value),
-          Variable<String>(stored),
-        ],
-        updates: {table},
-        updateKind: UpdateKind.update,
-      );
-      if (changed > 0) return next;
+      final applied = await db.transaction(() async {
+        final changed = await db.customUpdate(
+          portableSql(
+            db,
+            'UPDATE invitations SET delivery_outcomes = ? '
+            'WHERE id = ? AND delivery_outcomes = ?',
+          ),
+          variables: [
+            Variable<String>(jsonEncode(next)),
+            Variable<String>(invitationId.value),
+            Variable<String>(stored),
+          ],
+          updates: {table},
+          updateKind: UpdateKind.update,
+        );
+        if (changed == 0) return false;
+        if (audit != null) await _audits.append(audit);
+        return true;
+      });
+      if (applied) return next;
     }
     throw StateError('the delivery outcomes kept changing');
   }
