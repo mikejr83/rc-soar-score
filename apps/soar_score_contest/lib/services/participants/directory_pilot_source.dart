@@ -22,7 +22,9 @@ class DirectoryPilotSource {
     this.pause = const Duration(milliseconds: 600),
     this.store,
     this.accountId = '',
-  });
+    this.answerLife = const Duration(seconds: 30),
+    DateTime Function()? clock,
+  }) : _clock = clock ?? DateTime.now;
 
   /// Where the copies this director made are remembered on this device, so a
   /// pilot copied before the profile reached the server is still recognised
@@ -36,8 +38,14 @@ class DirectoryPilotSource {
   final ApiClient local;
   final Duration pause;
 
+  /// How long an answer to typed text is reused. A pilot can list or correct
+  /// their entry at any time, so an explicit [lookup] never reuses one.
+  final Duration answerLife;
+  final DateTime Function() _clock;
+
   int _typed = 0;
-  final Map<String, List<DirectoryMatchDto>> _answers = {};
+  final Map<String, ({DateTime at, List<DirectoryMatchDto> matches})> _answers =
+      {};
 
   /// The profile id a copy of each directory entry gets, kept so choosing the
   /// same pilot again (after a failure, or in another search) is the same copy.
@@ -81,7 +89,9 @@ class DirectoryPilotSource {
     final keys = _typedKeys(text);
     if (keys.isEmpty) return const [];
     final cached = _answers[_cacheKey(text)];
-    if (cached != null) return _candidates(cached, text);
+    if (cached != null && _clock().difference(cached.at) < answerLife) {
+      return _candidates(cached.matches, text);
+    }
     await Future<void>.delayed(pause);
     if (mine != _typed) return const [];
     return _lookup(text, keys);
@@ -101,8 +111,6 @@ class DirectoryPilotSource {
             DirectoryLookupKeyDto.nationalOrgId,
           ];
     if (keys.isEmpty) return const [];
-    final cached = _answers[_cacheKey(text)];
-    if (cached != null) return _candidates(cached, text);
     return _lookup(text, keys);
   }
 
@@ -128,7 +136,7 @@ class DirectoryPilotSource {
       }
     }
     final matches = found.values.toList();
-    _answers[_cacheKey(text)] = matches;
+    _answers[_cacheKey(text)] = (at: _clock(), matches: matches);
     return _candidates(matches, text);
   }
 
@@ -183,13 +191,24 @@ class DirectoryPilotSource {
         'not a directory pilot',
       );
     }
-    final details = await hosted.copyDirectoryEntry(
-      DirectoryCopyRequest(
-        entryId: entry.entryId,
-        profileId: candidate.profileId,
-      ),
-    );
+    // Remember the id before asking: the server may commit the link and the
+    // answer be lost, and a retry must name the same profile.
     await _remember(entry.entryId, candidate.profileId);
+    final DirectoryMatchDto details;
+    try {
+      details = await hosted.copyDirectoryEntry(
+        DirectoryCopyRequest(
+          entryId: entry.entryId,
+          profileId: candidate.profileId,
+        ),
+      );
+    } on ApiHttpError catch (e) {
+      // A refusal (4xx) linked nothing; a server error may have committed.
+      if (e.statusCode >= 400 && e.statusCode < 500) {
+        await _forget(entry.entryId);
+      }
+      rethrow;
+    }
     return local.createParticipant(
       CreateParticipantRequest(
         id: candidate.profileId,
@@ -213,5 +232,15 @@ class DirectoryPilotSource {
     final copies = {...await kept.get(accountId, copiesKey)};
     copies[entryId.value] = profileId.value;
     await kept.set(accountId, copiesKey, copies);
+  }
+
+  Future<void> _forget(Id entryId) async {
+    _profileIds.remove(entryId.value);
+    final kept = store;
+    if (kept == null) return;
+    final copies = {...await kept.get(accountId, copiesKey)};
+    if (copies.remove(entryId.value) != null) {
+      await kept.set(accountId, copiesKey, copies);
+    }
   }
 }

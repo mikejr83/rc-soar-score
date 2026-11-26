@@ -32,7 +32,14 @@ void main() {
   late List<http.Request> localRequests;
   late Map<String, List<Map<String, Object?>>> byKey;
 
-  DirectoryPilotSource source({LocalUiStore? store}) => DirectoryPilotSource(
+  var copyAnswer = 0; // 0: answers, else the status to fail with
+  var copyCommits = false; // the failure comes after the server committed
+
+  DirectoryPilotSource source({
+    LocalUiStore? store,
+    DateTime Function()? clock,
+  }) => DirectoryPilotSource(
+    clock: clock,
     pause: const Duration(milliseconds: 5),
     store: store,
     accountId: 'dana',
@@ -47,6 +54,16 @@ void main() {
           return http.Response(
             jsonEncode({'results': byKey[body['key']] ?? const []}),
             200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+        if (copyAnswer != 0) {
+          if (copyCommits) throw http.ClientException('lost', request.url);
+          return http.Response(
+            jsonEncode({
+              'error': {'code': 'link_not_found', 'message': 'gone'},
+            }),
+            copyAnswer,
             headers: {'content-type': 'application/json'},
           );
         }
@@ -84,6 +101,8 @@ void main() {
     hostedRequests = [];
     localRequests = [];
     byKey = {};
+    copyAnswer = 0;
+    copyCommits = false;
   });
 
   test('text that cannot be a key makes no request', () async {
@@ -269,18 +288,18 @@ void main() {
     },
   );
 
-  test('IDs are cached exactly, emails ignoring case', () async {
+  test('IDs are matched exactly, emails ignoring case', () async {
     byKey['fai_number'] = [_match(_entryA, 'Pat')];
     byKey['email'] = [_match(_entryB, 'Bea')];
     final s = source();
 
-    await s.lookup('ab');
-    await s.lookup('AB');
-    expect(hostedRequests, hasLength(4));
-    hostedRequests.clear();
-    await s.lookup('Bea@Example.com');
-    await s.lookup('bea@example.com');
+    await s.search('bea@example.com');
+    await s.search('Bea@Example.com'); // same email, reused
     expect(hostedRequests, hasLength(1));
+    hostedRequests.clear();
+    await s.search('ab12');
+    await s.search('AB12'); // IDs are exact
+    expect(hostedRequests, hasLength(4));
   });
 
   test('a copy the server already knows keeps its profile id', () async {
@@ -356,5 +375,56 @@ void main() {
     final held = own('nss-1');
 
     expect(candidate.copiesIn([own('x'), held]), [held]);
+  });
+
+  test(
+    'a miss is not remembered past its life, nor by an explicit lookup',
+    () async {
+      var now = DateTime.utc(2026, 11, 26, 12);
+      final s = source(clock: () => now);
+
+      expect(await s.search('F1234'), isEmpty); // not listed yet
+      byKey['fai_number'] = [_match(_entryA, 'Pat')]; // the pilot lists
+      hostedRequests.clear();
+      expect(await s.search('F1234'), isEmpty);
+      expect(hostedRequests, isEmpty); // typing again reuses the answer
+      expect((await s.lookup('F1234')).single.name, 'Pat Pilot'); // retry asks
+
+      now = now.add(const Duration(minutes: 1));
+      byKey['fai_number'] = [_match(_entryA, 'Patricia')]; // corrected
+      expect((await s.search('F1234')).single.name, 'Patricia Pilot');
+    },
+  );
+
+  test('a copy whose answer is lost is retried as the same profile', () async {
+    byKey['fai_number'] = [_match(_entryB, 'Bea')];
+    final store = BackendLocalUiStore(MemoryLocalUiBackend());
+    final first = source(store: store);
+    final candidate = (await first.search('F1234')).single;
+    copyAnswer = 500;
+    copyCommits = true; // the server linked, the answer never came
+
+    await expectLater(first.copy(candidate), throwsA(anything));
+    copyAnswer = 0;
+    final restarted = source(store: store);
+    final again = (await restarted.search('F1234')).single;
+    hostedRequests.clear();
+    await restarted.copy(again);
+
+    expect(again.profileId, candidate.profileId);
+    final sent = jsonDecode(hostedRequests.single.body) as Map<String, Object?>;
+    expect(sent['profile_id'], candidate.profileId.value);
+  });
+
+  test('a refused copy forgets the id', () async {
+    byKey['fai_number'] = [_match(_entryB, 'Bea')];
+    final store = BackendLocalUiStore(MemoryLocalUiBackend());
+    final first = source(store: store);
+    final candidate = (await first.search('F1234')).single;
+    copyAnswer = 404;
+
+    await expectLater(first.copy(candidate), throwsA(isA<ApiHttpError>()));
+
+    expect(await store.get('dana', DirectoryPilotSource.copiesKey), isEmpty);
   });
 }
