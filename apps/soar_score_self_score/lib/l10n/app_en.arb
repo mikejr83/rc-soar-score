@@ -471,6 +471,30 @@
   "@contestsCompletedNote": {
     "description": "Under the Completed heading on the contests page."
   },
+  "pastContestsTitle": "Past contests",
+  "@pastContestsTitle": {
+    "description": "Heading of the list of the signed-in pilot's finished contests on the account page."
+  },
+  "pastContestsNote": "Contests move here a day after they finish.",
+  "@pastContestsNote": {
+    "description": "Under the Past contests heading: when a finished contest leaves the contests page and appears here."
+  },
+  "pastContestsEmpty": "No finished contests yet. They show up here after they end.",
+  "@pastContestsEmpty": {
+    "description": "Past contests list when the pilot has no finished contest."
+  },
+  "pastContestsLoadFailed": "Could not load your past contests.",
+  "@pastContestsLoadFailed": {
+    "description": "Past contests list when loading a page failed."
+  },
+  "pastContestsRetry": "Try again",
+  "@pastContestsRetry": {
+    "description": "Button that loads the past contests again after a failure."
+  },
+  "pastContestsShowMore": "Show more",
+  "@pastContestsShowMore": {
+    "description": "Button that loads the next page of past contests."
+  },
   "contestDatesRange": "{start} to {end}",
   "@contestDatesRange": {
     "description": "The first and last day of a contest. The placeholders are dates already formatted for the language.",

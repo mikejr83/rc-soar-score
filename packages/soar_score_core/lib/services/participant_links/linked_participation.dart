@@ -39,6 +39,23 @@ class LinkedParticipation extends Equatable {
   ];
 }
 
+/// A finished contest in an account's history: the pilot's place in it,
+/// reached through a Confirmed link. No invitation is needed.
+class PastParticipation extends Equatable {
+  const PastParticipation({
+    required this.link,
+    required this.participation,
+    required this.contest,
+  });
+
+  final ParticipantAccountLink link;
+  final ContestParticipation participation;
+  final Contest contest;
+
+  @override
+  List<Object?> get props => [link, participation, contest];
+}
+
 /// A suggested match for "Is this you?": a profile whose email equals the
 /// signed-in account's verified email, and the contests that invited it.
 ///

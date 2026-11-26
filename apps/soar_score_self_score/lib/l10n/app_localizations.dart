@@ -707,6 +707,42 @@ abstract class AppLocalizations {
   /// **'Completed contests stay on this list for a day.'**
   String get contestsCompletedNote;
 
+  /// Heading of the list of the signed-in pilot's finished contests on the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Past contests'**
+  String get pastContestsTitle;
+
+  /// Under the Past contests heading: when a finished contest leaves the contests page and appears here.
+  ///
+  /// In en, this message translates to:
+  /// **'Contests move here a day after they finish.'**
+  String get pastContestsNote;
+
+  /// Past contests list when the pilot has no finished contest.
+  ///
+  /// In en, this message translates to:
+  /// **'No finished contests yet. They show up here after they end.'**
+  String get pastContestsEmpty;
+
+  /// Past contests list when loading a page failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your past contests.'**
+  String get pastContestsLoadFailed;
+
+  /// Button that loads the past contests again after a failure.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get pastContestsRetry;
+
+  /// Button that loads the next page of past contests.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get pastContestsShowMore;
+
   /// The first and last day of a contest. The placeholders are dates already formatted for the language.
   ///
   /// In en, this message translates to:

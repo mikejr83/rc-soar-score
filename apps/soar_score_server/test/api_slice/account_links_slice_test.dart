@@ -51,6 +51,7 @@ void _tests(SliceBackend backend) {
   late core.Id pat; // a registered account with the verified email of pilot 1
   late core.Id otherAccount;
   var clock = DateTime.utc(2026, 10, 17, 16);
+  var stateChanges = 0;
 
   core.Id id(String value) => core.Id.parse(value);
 
@@ -108,7 +109,7 @@ void _tests(SliceBackend backend) {
     await repository.contestRepository.save(
       contest!.copyWithState(lifecycleState: state, updatedAt: clock),
       metadata: core.MutationMetadata(
-        clientMutationId: 'state-${state.name}',
+        clientMutationId: 'state-${state.name}-${stateChanges++}',
         authority: core.Authority.director,
         clientTime: clock,
         actorId: api.director,
@@ -689,6 +690,240 @@ void _tests(SliceBackend backend) {
         withSecret: false,
       );
       expect(response.status, 409);
+    });
+  });
+
+  group('history', () {
+    Future<Map<String, Object?>> history(
+      core.Id as, [
+      String query = '',
+    ]) async {
+      final response = await call(as, 'GET', '/account/history$query');
+      expect(response.status, 200, reason: response.text);
+      return response.json;
+    }
+
+    /// Completes the contest, [hoursAgo] hours before now.
+    Future<void> completedAgo(int hoursAgo) async {
+      clock = DateTime.now().toUtc().subtract(Duration(hours: hoursAgo));
+      await setLifecycle(core.LifecycleState.completed);
+    }
+
+    /// A copy of the contest as it stands, started [daysEarlier] days
+    /// before it, with pilot 1's profile entered, so one pilot has several.
+    Future<void> copyContest(int n, int daysEarlier) async {
+      final contest = (await repository.contestRepository.findById(
+        id(_contestId),
+      ))!;
+      final copy = core.Contest.fromJson({
+        ...contest.toJson(),
+        'id': '019c0000-0000-7000-8000-0000000045${_two(n)}',
+        'name': 'Earlier $n',
+        'start_date_time': contest.startDateTime
+            .subtract(Duration(days: daysEarlier))
+            .toIso8601String(),
+        'end_date_time': contest.endDateTime
+            .subtract(Duration(days: daysEarlier))
+            .toIso8601String(),
+        'revision': 0,
+      });
+      core.MutationMetadata metadata(String what) => core.MutationMetadata(
+        clientMutationId: 'copy-$what-$n',
+        authority: core.Authority.director,
+        clientTime: clock,
+        actorId: api.director,
+      );
+      await repository.contestRepository.save(copy, metadata: metadata('c'));
+      final participation = (await repository.contestParticipationRepository
+          .findById(id(_participationId(1))))!;
+      await repository.contestParticipationRepository.save(
+        core.ContestParticipation.fromJson({
+          ...participation.toJson(),
+          'id': _participationId(10 + n),
+          'contest_id': copy.id.value,
+          'revision': 0,
+        }),
+        metadata: metadata('p'),
+      );
+    }
+
+    test('hold a completed contest once its 24 hours are over', () async {
+      await issue(1);
+      await confirm(pat, _profileId(1));
+      expect((await history(pat))['contests'], isEmpty, reason: 'not finished');
+
+      await completedAgo(1);
+      expect(
+        (await history(pat))['contests'],
+        isEmpty,
+        reason: 'still on the contests list',
+      );
+      expect(await participations(pat), hasLength(1));
+
+      await completedAgo(30);
+      final response = await call(pat, 'GET', '/account/history');
+
+      expect(response.status, 200, reason: response.text);
+      final row =
+          (response.json['contests']! as List<Object?>).single!
+              as Map<String, Object?>;
+      expect(row['participation_id'], _participationId(1));
+      expect(row['contest_id'], _contestId);
+      expect(row['contest_name'], 'Spring Open');
+      expect(row['timezone'], 'America/Denver');
+      expect(row['public_results_url'], isNull);
+      expect(response.json['next_offset'], isNull);
+      expect(response.text, isNot(contains(api.director.value)));
+      expect(response.text.toLowerCase(), isNot(contains(_email)));
+      expect(
+        await participations(pat),
+        isEmpty,
+        reason: 'the contest left the list: no duplicate',
+      );
+    });
+
+    test(
+      'wait for an invitation that is set to outlast the 24 hours',
+      () async {
+        await issue(1);
+        await confirm(pat, _profileId(1));
+        await completedAgo(30);
+        final invitation = (await repository.invitationRepository
+            .findActiveForParticipation(id(_participationId(1))))!;
+        // The director let this link run a day longer than usual.
+        await repository.invitationRepository.save(
+          core.Invitation.fromJson({
+            ...invitation.toSyncJson(),
+            'expires_at': DateTime.now()
+                .toUtc()
+                .add(const Duration(hours: 10))
+                .toIso8601String(),
+          }),
+        );
+
+        expect(await participations(pat), hasLength(1), reason: 'still listed');
+        expect((await history(pat))['contests'], isEmpty, reason: 'no overlap');
+      },
+    );
+
+    test('list a finished contest whose invitation was revoked', () async {
+      await issue(1);
+      await confirm(pat, _profileId(1));
+      await completedAgo(1);
+      final invitation = (await repository.invitationRepository
+          .findActiveForParticipation(id(_participationId(1))))!;
+      await repository.invitationRepository.save(
+        core.Invitation.fromJson({
+          ...invitation.toSyncJson(),
+          'state': 'Revoked',
+          'revoked_at': DateTime.now().toUtc().toIso8601String(),
+        }),
+      );
+
+      expect(await participations(pat), isEmpty);
+      expect((await history(pat))['contests'], hasLength(1));
+    });
+
+    test('carry the public results address of a public contest', () async {
+      await issue(1);
+      await confirm(pat, _profileId(1));
+      await completedAgo(30);
+      final publicationId = core.Id.create();
+      await repository.publicationIdentityRepository.save(
+        core.PublicationIdentity(
+          id: publicationId,
+          contestId: id(_contestId),
+          verificationEmail: 'director@example.com',
+          visibility: core.PublicationVisibility.public,
+          publishedAt: clock,
+          contestStartsAt: clock,
+        ),
+      );
+
+      final row =
+          ((await history(pat))['contests']! as List<Object?>).single!
+              as Map<String, Object?>;
+
+      expect(
+        row['public_results_url'],
+        'https://rcsoarscore.com/results/contests/${publicationId.value}',
+      );
+    });
+
+    test('need no invitation and leave with the link', () async {
+      await issue(1);
+      final linkId = await confirm(pat, _profileId(1));
+      await completedAgo(30);
+      expect((await history(pat))['contests'], hasLength(1));
+
+      await call(pat, 'POST', '/account/links/$linkId/end');
+
+      expect((await history(pat))['contests'], isEmpty);
+    });
+
+    test('are empty for an account with no link, and not shared', () async {
+      await issue(1);
+      await confirm(pat, _profileId(1));
+      await completedAgo(30);
+
+      expect((await history(otherAccount))['contests'], isEmpty);
+    });
+
+    test('page newest first without repeats', () async {
+      await issue(1);
+      await confirm(pat, _profileId(1));
+      await completedAgo(30);
+      for (var n = 1; n <= 4; n++) {
+        await copyContest(n, n * 7);
+      }
+
+      final names = <String>[];
+      var offset = 0;
+      final sizes = <int>[];
+      while (true) {
+        final page = await history(pat, '?limit=2&offset=$offset');
+        final rows = page['contests']! as List<Object?>;
+        sizes.add(rows.length);
+        names.addAll([
+          for (final r in rows) (r! as Map)['contest_name']! as String,
+        ]);
+        final next = page['next_offset'] as int?;
+        if (next == null) break;
+        expect(next, offset + rows.length);
+        offset = next;
+      }
+
+      expect(sizes, [2, 2, 1]);
+      expect(names, [
+        'Spring Open',
+        'Earlier 1',
+        'Earlier 2',
+        'Earlier 3',
+        'Earlier 4',
+      ]);
+    });
+
+    test('refuse a page that is not a number in range', () async {
+      for (final query in [
+        '?limit=0',
+        '?limit=101',
+        '?limit=abc',
+        '?offset=-1',
+        '?offset=x',
+      ]) {
+        final response = await call(pat, 'GET', '/account/history$query');
+        expect(response.status, 400, reason: query);
+      }
+    });
+
+    test('are 409 without an invitation secret', () async {
+      final response = await call(
+        pat,
+        'GET',
+        '/account/history',
+        withSecret: false,
+      );
+      expect(response.status, 409, reason: response.text);
     });
   });
 

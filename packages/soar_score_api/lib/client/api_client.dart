@@ -571,6 +571,24 @@ class ApiClient {
     );
   }
 
+  /// `GET /api/v1/account/history` — one page of the finished contests the
+  /// signed-in account reaches through its confirmed links, newest first.
+  /// [AccountHistoryDto.nextOffset] is the [offset] of the next page.
+  Future<AccountHistoryDto> accountHistory({int? limit, int offset = 0}) async {
+    final query = {
+      if (limit != null) 'limit': '$limit',
+      if (offset != 0) 'offset': '$offset',
+    };
+    var uri = _resolve('/api/v1/account/history');
+    if (query.isNotEmpty) uri = uri.replace(queryParameters: query);
+    final response = await _send('GET', uri);
+    return _decode<AccountHistoryDto>(
+      response,
+      uri,
+      AccountHistoryDto.fromJson,
+    );
+  }
+
   /// `GET /api/v1/account/link-candidates` — the "Is this you?" matches of
   /// the account's verified email; empty when there are none.
   Future<LinkCandidatesDto> linkCandidates() async {

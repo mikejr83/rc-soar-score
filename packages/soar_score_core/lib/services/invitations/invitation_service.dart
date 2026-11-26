@@ -50,6 +50,10 @@ class InvitationService {
   final DateTime Function() _clock;
   final Id Function() _newId;
 
+  /// The current time as this service reads it, so services built on it (the
+  /// participant links) agree with it, including a clock a test moves.
+  DateTime now() => _clock();
+
   /// How long after a contest completes its links still open the read-only
   /// overview.
   static const completedGrace = Duration(hours: 24);

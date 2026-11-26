@@ -98,6 +98,85 @@ class AccountParticipationsDto {
   Map<String, dynamic> toJson() => _$AccountParticipationsDtoToJson(this);
 }
 
+/// One finished contest in a pilot's history
+/// (`GET /api/v1/account/history`, #1048).
+///
+/// What the pilot needs to recognize the contest and find its results, and
+/// nothing of the director: no director name, no email, no scores, no id of a
+/// director's record besides the contest and participation.
+@JsonSerializable(
+  checked: true,
+  fieldRename: FieldRename.snake,
+  includeIfNull: true,
+)
+@IdConverter()
+@UtcTimestampConverter()
+class AccountHistoryEntryDto {
+  const AccountHistoryEntryDto({
+    required this.participationId,
+    required this.contestId,
+    required this.contestName,
+    required this.startDateTime,
+    required this.endDateTime,
+    required this.startDate,
+    required this.endDate,
+    required this.timezone,
+    this.host,
+    this.city,
+    this.state,
+    this.country,
+    this.publicResultsUrl,
+  });
+
+  factory AccountHistoryEntryDto.fromJson(Map<String, dynamic> json) =>
+      _$AccountHistoryEntryDtoFromJson(json);
+
+  final Id participationId;
+  final Id contestId;
+  final String contestName;
+  final DateTime startDateTime;
+  final DateTime endDateTime;
+
+  /// The first and last day of the contest in its own time zone, as
+  /// `YYYY-MM-DD`.
+  final String startDate;
+  final String endDate;
+
+  /// The contest's IANA time zone id.
+  final String timezone;
+  final String? host;
+  final String? city;
+  final String? state;
+  final String? country;
+
+  /// Where the contest's results are on the public site, or null when the
+  /// contest is not published and public.
+  final String? publicResultsUrl;
+
+  Map<String, dynamic> toJson() => _$AccountHistoryEntryDtoToJson(this);
+}
+
+/// Answer of `GET /api/v1/account/history`: one page, newest contest first.
+@JsonSerializable(
+  checked: true,
+  fieldRename: FieldRename.snake,
+  includeIfNull: true,
+  explicitToJson: true,
+)
+class AccountHistoryDto {
+  const AccountHistoryDto({this.contests = const [], this.nextOffset});
+
+  factory AccountHistoryDto.fromJson(Map<String, dynamic> json) =>
+      _$AccountHistoryDtoFromJson(json);
+
+  final List<AccountHistoryEntryDto> contests;
+
+  /// The `offset` of the next page, or null on the last one.
+  final int? nextOffset;
+
+  Map<String, dynamic> toJson() => _$AccountHistoryDtoToJson(this);
+}
+
 /// A contest that invited the profile behind a [LinkCandidateDto].
 ///
 /// What the pilot needs to recognize the contest, and no owner or id of a

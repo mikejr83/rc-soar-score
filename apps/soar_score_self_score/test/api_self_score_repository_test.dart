@@ -771,6 +771,66 @@ void main() {
     ]);
   });
 
+  group('past contests', () {
+    String page({String? results, int? next}) => jsonEncode({
+      'contests': [
+        {
+          'participation_id': '019c0000-0000-7000-8000-00000000d201',
+          'contest_id': '019c0000-0000-7000-8000-000000000045',
+          'contest_name': 'Spring Open',
+          'start_date_time': '2026-04-11T14:00:00.000Z',
+          'end_date_time': '2026-04-12T22:00:00.000Z',
+          'start_date': '2026-04-11',
+          'end_date': '2026-04-12',
+          'timezone': 'America/Denver',
+          'host': null,
+          'city': 'Boulder',
+          'state': 'CO',
+          'country': null,
+          'public_results_url': results,
+        },
+      ],
+      'next_offset': next,
+    });
+
+    test('reads a page and asks for the offset', () async {
+      final result = await _repository((request) {
+        expect(request.url.path, '/api/v1/account/history');
+        expect(request.url.queryParameters['offset'], '50');
+        return _json(
+          page(results: 'https://rcsoarscore.com/results/x', next: 100),
+        );
+      }).pastContests(offset: 50);
+
+      final contest = result.contests.single;
+      expect(contest.name, 'Spring Open');
+      expect(contest.startDate, DateTime.utc(2026, 4, 11));
+      expect(contest.endDate, DateTime.utc(2026, 4, 12));
+      expect(contest.location, 'Boulder, CO');
+      expect(
+        contest.publicResultsUrl,
+        Uri.parse('https://rcsoarscore.com/results/x'),
+      );
+      expect(result.nextOffset, 100);
+    });
+
+    test('an address that is not a web page is no address', () async {
+      final result = await _repository(
+        (_) => _json(page(results: 'javascript:alert(1)')),
+      ).pastContests();
+
+      expect(result.contests.single.publicResultsUrl, isNull);
+      expect(result.nextOffset, isNull);
+    });
+
+    test('a 401 is the sign-in ending, not the guest session', () async {
+      await expectLater(
+        _repository((_) => _json('', 401)).pastContests(),
+        throwsA(isA<SignedOutException>()),
+      );
+    });
+  });
+
   group('contests', () {
     const participation = '019c0000-0000-7000-8000-00000000d201';
 
