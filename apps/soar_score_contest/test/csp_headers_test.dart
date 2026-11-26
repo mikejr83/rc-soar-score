@@ -21,8 +21,8 @@ void main() {
     ];
 
     String resolvePath(String appDir) {
-      // Find the workspace root by walking up and looking for the .kilo directory
-      // (workspace root marker).
+      // Find the workspace root by walking up from the test file's directory
+      // and looking for the .kilo directory (workspace root marker).
       var path = Directory.current.path;
       while (true) {
         if (Directory('$path/.kilo').existsSync()) {
@@ -43,32 +43,48 @@ void main() {
       return headersFile.readAsStringSync();
     }
 
-    Future<String> extractImgSrc(String headers) async {
-      // Find the img-src directive in the CSP
-      final imgSrcMatch = RegExp(r"img-src\s([^;]+);").firstMatch(headers);
-      expect(imgSrcMatch, isNotNull,
-          reason: 'img-src directive should be present in CSP');
-      return imgSrcMatch!.group(1)!.trim();
+    Future<String> extractDirective(String headers, String directive) async {
+      // Find a CSP directive in the headers
+      final regex = RegExp(directive + r'\s([^;]+);');
+      final match = regex.firstMatch(headers);
+      expect(match, isNotNull,
+          reason: '$directive directive should be present in CSP');
+      return match!.group(1)!.trim();
     }
 
-    void expectOriginsPresent(String imgSrc, List<String> origins) {
+    void expectOriginsPresent(
+        String directive, String value, List<String> origins) {
       for (final origin in origins) {
-        expect(imgSrc.contains(origin), true,
-            reason: 'img-src should allow $origin');
+        expect(value.contains(origin), true,
+            reason: '$directive should allow $origin');
       }
     }
 
     test('contest app img-src allows social provider profile images', () async {
       final headers = await readHeadersFile('apps/soar_score_contest');
-      final imgSrc = await extractImgSrc(headers);
-      expectOriginsPresent(imgSrc, requiredOrigins);
+      final imgSrc = await extractDirective(headers, 'img-src');
+      expectOriginsPresent('img-src', imgSrc, requiredOrigins);
     });
 
     test('self-score app img-src allows social provider profile images',
         () async {
       final headers = await readHeadersFile('apps/soar_score_self_score');
-      final imgSrc = await extractImgSrc(headers);
-      expectOriginsPresent(imgSrc, requiredOrigins);
+      final imgSrc = await extractDirective(headers, 'img-src');
+      expectOriginsPresent('img-src', imgSrc, requiredOrigins);
+    });
+
+    // Flutter web's Image.network uses XMLHttpRequest which is governed by
+    // connect-src, not img-src. The connect-src must also allow avatar origins.
+    test('contest app connect-src allows avatar image origins', () async {
+      final headers = await readHeadersFile('apps/soar_score_contest');
+      final connectSrc = await extractDirective(headers, 'connect-src');
+      expectOriginsPresent('connect-src', connectSrc, requiredOrigins);
+    });
+
+    test('self-score app connect-src allows avatar image origins', () async {
+      final headers = await readHeadersFile('apps/soar_score_self_score');
+      final connectSrc = await extractDirective(headers, 'connect-src');
+      expectOriginsPresent('connect-src', connectSrc, requiredOrigins);
     });
   });
 }
