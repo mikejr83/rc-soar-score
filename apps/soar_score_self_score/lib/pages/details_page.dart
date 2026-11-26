@@ -16,7 +16,11 @@ import '../widgets/self_score_app_bar.dart';
 /// no entry yet arrives here once after signing in; continuing always makes
 /// the entry, listed or not.
 class DetailsPage extends StatelessWidget {
-  const DetailsPage({super.key});
+  const DetailsPage({this.returnToAccount = false, super.key});
+
+  /// Opened from the account page: saving goes back there, not to the
+  /// contests.
+  final bool returnToAccount;
 
   @override
   Widget build(BuildContext context) {
@@ -37,15 +41,17 @@ class DetailsPage extends StatelessWidget {
       load: repository.ownDirectory,
       reloadKey: repository,
       appBar: (context, data) => SelfScoreAppBar(title: l10n.detailsTitle),
-      builder: (context, data) => _DetailsForm(directory: data),
+      builder: (context, data) =>
+          _DetailsForm(directory: data, returnToAccount: returnToAccount),
     );
   }
 }
 
 class _DetailsForm extends StatefulWidget {
-  const _DetailsForm({required this.directory});
+  const _DetailsForm({required this.directory, required this.returnToAccount});
 
   final OwnDirectory directory;
+  final bool returnToAccount;
 
   @override
   State<_DetailsForm> createState() => _DetailsFormState();
@@ -114,7 +120,9 @@ class _DetailsFormState extends State<_DetailsForm> {
       );
       // The pilot may have left while the save was out: a late answer must
       // not pull them back to the contests.
-      if (mounted) router.go(contestsPath);
+      if (mounted) {
+        router.go(widget.returnToAccount ? accountPath : contestsPath);
+      }
     } on SelfScoreLoadException {
       if (mounted) setState(() => _failed = true);
     } finally {
@@ -240,7 +248,11 @@ class _DetailsFormState extends State<_DetailsForm> {
                   minimumSize: const Size.fromHeight(48),
                 ),
                 onPressed: _saving ? null : _continue,
-                child: Text(l10n.detailsContinue),
+                child: Text(
+                  widget.returnToAccount
+                      ? l10n.detailsSave
+                      : l10n.detailsContinue,
+                ),
               ),
             ],
           ),

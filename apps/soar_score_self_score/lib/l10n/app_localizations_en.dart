@@ -517,4 +517,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get detailsPromptAction => 'Set your details';
+
+  @override
+  String get detailsSave => 'Save';
+
+  @override
+  String get accountTitle => 'Your account';
+
+  @override
+  String get accountDetailsHeading => 'Your details';
+
+  @override
+  String get accountNoEntry =>
+      'Contest directors cannot find you yet. Set your details to let them add you to a contest.';
+
+  @override
+  String get accountEditDetails => 'Edit details';
+
+  @override
+  String get accountSetDetails => 'Set your details';
+
+  @override
+  String get accountListed => 'Contest directors can find you';
+
+  @override
+  String get accountUnlisted => 'Contest directors cannot find you';
+
+  @override
+  String get accountEmailPrivate => 'Your email is private';
+
+  @override
+  String get accountEmailShared => 'Contest directors can see your email';
+
+  @override
+  String get accountRemoveEntry => 'Remove me from the directory';
+
+  @override
+  String get accountRemoveTitle => 'Remove your directory entry?';
+
+  @override
+  String get accountRemoveBody =>
+      'Directors will no longer be able to find you. Nothing already published changes.';
+
+  @override
+  String get accountRemoveConfirm => 'Remove';
+
+  @override
+  String get accountRemoveFailed =>
+      'Your entry could not be removed. Check your connection and try again.';
+
+  @override
+  String get accountLinksHeading => 'Pilots linked to your account';
+
+  @override
+  String get accountLinksEmpty => 'No pilots are linked to your account.';
+
+  @override
+  String get accountUnlink => 'Unlink';
+
+  @override
+  String get accountUnlinkTitle => 'Unlink this pilot?';
+
+  @override
+  String get accountUnlinkBody =>
+      'This removes the contests of this pilot from your list and ends access through your account. Nothing already published changes, and later results use the name the contest director typed. Your invitation link still works without signing in.';
+
+  @override
+  String get accountUnlinkConfirm => 'Unlink';
+
+  @override
+  String get accountUnlinkFailed =>
+      'The link could not be ended. Check your connection and try again.';
+
+  @override
+  String get accountCancel => 'Cancel';
+
+  @override
+  String get accountBackToContests => 'Back to contests';
 }

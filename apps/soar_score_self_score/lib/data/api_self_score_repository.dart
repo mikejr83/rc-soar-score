@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:soar_score_api/soar_score_api.dart';
 
 import '../auth/auth_session.dart';
+import '../models/account_link.dart';
 import '../models/contests_view.dart';
 import '../models/entry_context.dart';
 import '../models/group_result_row.dart';
@@ -365,6 +366,30 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       ),
     ),
   );
+
+  @override
+  Future<void> deleteOwnDirectory() =>
+      _readDirectory(_client.deleteDirectoryEntry);
+
+  @override
+  Future<List<AccountLink>> accountLinks() async {
+    final answer = await _readDirectory(_client.accountLinks);
+    return [
+      for (final link in answer.links)
+        AccountLink(id: link.id.value, pilotName: link.pilotName),
+    ];
+  }
+
+  @override
+  Future<void> endAccountLink(String linkId) async {
+    try {
+      await _readAccount(() => _client.endAccountLink(ApiId.parse(linkId)));
+    } on ApiHttpError catch (error) {
+      // A link that is gone is the answer the pilot wanted.
+      if (error.statusCode == 404 && _codeOf(error) == 'link_not_found') return;
+      throw const SelfScoreLoadException(_unreachable);
+    }
+  }
 
   @override
   Future<void> confirmLinkCandidate(String candidateId) => _answerCandidate(

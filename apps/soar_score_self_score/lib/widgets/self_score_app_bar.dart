@@ -1,6 +1,9 @@
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
+import '../auth/auth_scope.dart';
+import '../router.dart';
 import 'app_info_button.dart';
 
 /// The flat top bar: brand mark, an optional context line over the page
@@ -88,7 +91,9 @@ class SelfScoreAppBar extends StatelessWidget implements PreferredSizeWidget {
                 if (showAccount)
                   IconButton(
                     tooltip: 'Account',
-                    onPressed: () {},
+                    onPressed: context.auth.isSignedIn
+                        ? () => context.go(accountPath)
+                        : null,
                     icon: const Icon(Icons.account_circle_outlined),
                   ),
                 AppInfoButton(onCopyInvitationLink: onCopyInvitationLink),

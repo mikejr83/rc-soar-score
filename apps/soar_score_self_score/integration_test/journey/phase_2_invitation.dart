@@ -194,6 +194,60 @@ Future<String> phase2Invitation(
       );
       expect(find.textContaining(linked), findsWidgets);
     });
+    await journey.step(
+      'The account page lists the pilot and edits go back',
+      () async {
+        await openPath(tester, accountPath);
+        await pumpUntilFound(
+          tester,
+          find.text('Pilots linked to your account'),
+        );
+        expect(find.text(linked), findsOneWidget);
+        expect(find.text('Contest directors can find you'), findsOneWidget);
+        expect(find.text('Your email is private'), findsOneWidget);
+        // The details are edited on the details page and come back here.
+        await tapVisible(tester, find.byKey(const Key('account-edit-details')));
+        await pumpUntilFound(tester, find.byKey(const Key('details-continue')));
+        await tapVisible(tester, find.byKey(const Key('details-continue')));
+        await pumpUntilFound(tester, find.byKey(const Key('account-details')));
+      },
+    );
+    await journey.step(
+      'Unlinking says nothing published changes and ends the link',
+      () async {
+        await tapVisible(tester, find.widgetWithText(TextButton, 'Unlink'));
+        await pumpUntilFound(tester, find.text('Unlink this pilot?'));
+        expect(
+          find.textContaining('Nothing already published changes'),
+          findsOneWidget,
+        );
+        // Cancel keeps the link.
+        await tapVisible(
+          tester,
+          find.byKey(const Key('account-dialog-cancel')),
+        );
+        await tester.pumpAndSettle();
+        expect(await contest.linkedPilotNames(), [linked]);
+        await tapVisible(tester, find.widgetWithText(TextButton, 'Unlink'));
+        await pumpUntilFound(
+          tester,
+          find.byKey(const Key('account-unlink-confirm')),
+        );
+        await tapVisible(
+          tester,
+          find.byKey(const Key('account-unlink-confirm')),
+        );
+        await pumpUntilFound(
+          tester,
+          find.byKey(const Key('account-links-empty')),
+        );
+        expect(await contest.linkedPilotNames(), isEmpty);
+        // The contest has left the pilot's list.
+        await openPath(tester, contestsPath);
+        await pumpUntilFound(tester, find.text('No contests yet'));
+        expect(find.text('E2E Self-Scoring Open'), findsNothing);
+      },
+    );
     await journey.step('Signing out returns to the landing page', () async {
       await openPath(tester, '/');
       await tapVisible(tester, find.widgetWithText(OutlinedButton, 'Sign out'));
