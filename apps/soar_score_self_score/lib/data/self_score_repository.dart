@@ -4,6 +4,7 @@ import '../models/group_results.dart';
 import '../models/guest_session.dart';
 import '../models/link_candidate.dart';
 import '../models/own_directory.dart';
+import '../models/past_contests.dart';
 import '../models/pilot_overview.dart';
 import '../models/results_view.dart';
 import '../models/score_submission.dart';
@@ -134,6 +135,13 @@ abstract interface class SelfScoreRepository {
   /// Throws [SignedOutException] when the server no longer accepts the
   /// sign-in.
   Future<ContestsView> contests();
+
+  /// One page of the signed-in person's finished contests, newest first,
+  /// starting after [offset] contests (#1048). A contest appears here once it
+  /// has left [contests]. Throws [SignedOutException] when the server no
+  /// longer accepts the sign-in and [SelfScoreLoadException] when the page
+  /// could not be had.
+  Future<PastContestsPage> pastContests({int offset = 0});
 
   /// Opens a contest of [contests] for the signed-in person: a session that
   /// acts as their account, like the one an invitation link gives. Throws

@@ -381,6 +381,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'Completed contests stay on this list for a day.';
 
   @override
+  String get pastContestsTitle => 'Past contests';
+
+  @override
+  String get pastContestsNote => 'Contests move here a day after they finish.';
+
+  @override
+  String get pastContestsEmpty =>
+      'No finished contests yet. They show up here after they end.';
+
+  @override
+  String get pastContestsLoadFailed => 'Could not load your past contests.';
+
+  @override
+  String get pastContestsRetry => 'Try again';
+
+  @override
+  String get pastContestsShowMore => 'Show more';
+
+  @override
   String contestDatesRange(String start, String end) {
     return '$start to $end';
   }

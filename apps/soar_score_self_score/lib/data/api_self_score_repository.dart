@@ -12,6 +12,7 @@ import '../models/officialization_policy.dart';
 import '../models/landing_result.dart';
 import '../models/link_candidate.dart';
 import '../models/own_directory.dart';
+import '../models/past_contests.dart';
 import '../models/pilot_overview.dart';
 import '../models/pilot_round.dart';
 import '../models/results_snapshot.dart';
@@ -248,6 +249,30 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
     }
   }
 
+  @override
+  Future<PastContestsPage> pastContests({int offset = 0}) async {
+    try {
+      final answer = await _read(() => _client.accountHistory(offset: offset));
+      return PastContestsPage(
+        contests: [
+          for (final row in answer.contests)
+            PastContest(
+              participationId: row.participationId.value,
+              contestId: row.contestId.value,
+              name: row.contestName,
+              startDate: _day(row.startDate),
+              endDate: _day(row.endDate),
+              location: _placeOf(row.city, row.state, row.country),
+              publicResultsUrl: _publicUrl(row.publicResultsUrl),
+            ),
+        ],
+        nextOffset: answer.nextOffset,
+      );
+    } on SessionEndedException {
+      throw const SignedOutException();
+    }
+  }
+
   static ContestSummary _summary(AccountParticipationDto row) => ContestSummary(
     participationId: row.participationId.value,
     contestId: row.contestId.value,
@@ -269,9 +294,12 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
     return DateTime.utc(parts[0], parts[1], parts[2]);
   }
 
-  static String? _place(AccountParticipationDto row) {
+  static String? _place(AccountParticipationDto row) =>
+      _placeOf(row.city, row.state, row.country);
+
+  static String? _placeOf(String? city, String? state, String? country) {
     final parts = [
-      for (final part in [row.city, row.state, row.country])
+      for (final part in [city, state, country])
         if (part != null && part.trim().isNotEmpty) part.trim(),
     ];
     return parts.isEmpty ? null : parts.join(', ');

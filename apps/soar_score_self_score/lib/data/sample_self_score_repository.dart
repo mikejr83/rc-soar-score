@@ -5,6 +5,7 @@ import '../models/guest_session.dart';
 import '../models/landing_result.dart';
 import '../models/link_candidate.dart';
 import '../models/own_directory.dart';
+import '../models/past_contests.dart';
 import '../models/pilot_overview.dart';
 import '../models/pilot_round.dart';
 import '../models/results_view.dart';
@@ -73,6 +74,21 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
       ),
     ],
   );
+
+  @override
+  Future<PastContestsPage> pastContests({int offset = 0}) async =>
+      PastContestsPage(
+        contests: [
+          PastContest(
+            participationId: '7',
+            contestId: '019c0000-0000-7000-8000-000000000007',
+            name: 'Spring Open 2026',
+            startDate: DateTime.utc(2026, 4, 11),
+            endDate: DateTime.utc(2026, 4, 12),
+            location: 'Boulder, CO',
+          ),
+        ],
+      );
 
   @override
   Future<GuestSession> openContest(String participationId) async {
