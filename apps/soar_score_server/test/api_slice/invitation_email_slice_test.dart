@@ -501,4 +501,56 @@ void _tests(SliceBackend backend) {
     await email('send-1', [_withEmailPart]);
     expect(mailer.sent, isEmpty);
   });
+
+  test('a retry after the pilot lost the address returns the original '
+      'outcome and sends nothing', () async {
+    await email('send-1', [_withEmailPart]);
+    final profile = await api.expectOk(
+      'GET',
+      '/participants/$_withEmailProfile',
+    );
+    await api.expectOk(
+      'PUT',
+      '/participants/$_withEmailProfile',
+      body: {
+        'first_name': 'Alex',
+        'last_name': 'Rivera',
+        'base_revision': profile['revision'],
+      },
+    );
+    final (status, body) = await email('send-1', [_withEmailPart]);
+    expect(status, 200);
+    expect(mailer.sent, hasLength(1));
+    final result = resultFor(body, _withEmailPart);
+    expect(result['status'], 'accepted');
+    expect(result['skipped'], isNull);
+    expect(result['repeated'], isTrue);
+    // A new request id is checked against the pilot as they are now.
+    final (_, fresh) = await email('send-2', [_withEmailPart]);
+    expect(resultFor(fresh, _withEmailPart)['skipped'], 'no_email');
+  });
+
+  test('a retry after the invitation was replaced returns the original '
+      'outcome', () async {
+    await email('send-1', [_withEmailPart]);
+    final repository = Repository(api.database);
+    final invitation =
+        (await repository.invitationRepository.listForParticipation(
+          core.Id.parse(_withEmailPart),
+        )).single;
+    await repository.invitationRepository.save(
+      core.Invitation.fromJson({
+        ...invitation.toSyncJson(),
+        'state': 'Revoked',
+        'revoked_at': DateTime.now().toUtc().toIso8601String(),
+      }),
+    );
+    final (status, body) = await email('send-1', [_withEmailPart]);
+    expect(status, 200);
+    expect(mailer.sent, hasLength(1));
+    expect(resultFor(body, _withEmailPart)['status'], 'accepted');
+    expect(resultFor(body, _withEmailPart)['repeated'], isTrue);
+    final (_, fresh) = await email('send-2', [_withEmailPart]);
+    expect(resultFor(fresh, _withEmailPart)['skipped'], 'no_invitation');
+  });
 }

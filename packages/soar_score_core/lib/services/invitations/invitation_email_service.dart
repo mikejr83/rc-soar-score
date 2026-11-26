@@ -197,9 +197,6 @@ class InvitationEmailService {
     if (contest == null) {
       throw EntityNotFoundError(entityType: 'Contest', entityId: contestId);
     }
-    final check = invitations.issuability(contest);
-    if (!check.canIssue) throw ContestStateError(check.code!, check.reason!);
-
     final unique = participationIds.toSet().toList();
     final participations = {
       for (final id in unique)
@@ -214,6 +211,22 @@ class InvitationEmailService {
       }
     }
 
+    // A request id that already has an outcome on one of the participation's
+    // invitations (replaced ones included) answers with that outcome, before
+    // anything about the pilot or the contest is checked again: what was
+    // done does not change because the address, the role or the contest has
+    // since changed.
+    final earlier = <Id, Map<String, Object?>>{};
+    for (final invitation
+        in await repository.invitationRepository.listForContest(contestId)) {
+      final entry = _entryFor(invitation.deliveryOutcomes, requestId);
+      if (entry != null) earlier[invitation.contestParticipationId] = entry;
+    }
+    if (unique.any((id) => !earlier.containsKey(id))) {
+      final check = invitations.issuability(contest);
+      if (!check.canIssue) throw ContestStateError(check.code!, check.reason!);
+    }
+
     final active = await invitations.activeForContest(contestId);
     final links = {
       for (final issued in active.links)
@@ -222,6 +235,13 @@ class InvitationEmailService {
 
     final results = <InvitationEmailResult>[];
     for (final id in unique) {
+      final stored = earlier[id];
+      if (stored != null) {
+        results.add(
+          InvitationEmailResult.sent(id, _storedStatus(stored), repeated: true),
+        );
+        continue;
+      }
       final participation = participations[id]!;
       if (participation.roleType != RoleType.pilot) {
         results.add(
@@ -313,14 +333,9 @@ class InvitationEmailService {
       },
     );
     if (!claimed) {
-      final stored = InvitationEmailStatus.fromWire(earlier?['status']);
-      // A claimed send with no answer may or may not have gone out.
-      final status = stored == null || stored == InvitationEmailStatus.sending
-          ? InvitationEmailStatus.unconfirmed
-          : stored;
       return InvitationEmailResult.sent(
         participationId,
-        status,
+        _storedStatus(earlier!),
         repeated: true,
       );
     }
@@ -389,6 +404,15 @@ class InvitationEmailService {
       invitation.contestParticipationId,
       result.status,
     );
+  }
+
+  /// The status to report for a stored entry. A claimed send with no answer
+  /// may or may not have gone out, so it reads as unconfirmed.
+  static InvitationEmailStatus _storedStatus(Map<String, Object?> entry) {
+    final stored = InvitationEmailStatus.fromWire(entry['status']);
+    return stored == null || stored == InvitationEmailStatus.sending
+        ? InvitationEmailStatus.unconfirmed
+        : stored;
   }
 
   static Map<String, Object?>? _entryFor(
