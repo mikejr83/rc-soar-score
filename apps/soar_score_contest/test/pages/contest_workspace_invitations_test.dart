@@ -19,7 +19,13 @@ import '../support/fake_app_sync.dart';
 import '../support/matrix_test_support.dart';
 
 class _Source implements PilotInvitationSource {
-  _Source({this.failSend = false, this.failReadAfterSend = false});
+  _Source({
+    this.failSend = false,
+    this.failReadAfterSend = false,
+    this.report = const InvitationEmailReport.none(),
+  });
+
+  final InvitationEmailReport report;
 
   bool synchronized = true;
 
@@ -47,7 +53,7 @@ class _Source implements PilotInvitationSource {
     for (final id in ids) {
       links[id.value] = 'https://x.test/${id.value}';
     }
-    return const InvitationEmailReport.none();
+    return report;
   }
 }
 
@@ -56,6 +62,7 @@ Future<void> _pump(
   MatrixServer server, {
   FakeAppConnectivity? connectivity,
   FakeAppSync? sync,
+  bool failProfiles = false,
 }) async {
   tester.view.physicalSize = const Size(1200, 1800);
   tester.view.devicePixelRatio = 1;
@@ -76,6 +83,9 @@ Future<void> _pump(
           baseUrl: Uri.parse('http://localhost'),
           httpClient: MockClient((request) async {
             final path = request.url.path;
+            if (failProfiles && path.endsWith('/participants')) {
+              return http.Response('{}', 500);
+            }
             if (path.endsWith('/scores') || path.endsWith('/publication')) {
               return http.Response('{}', 404);
             }
@@ -132,6 +142,34 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('All 4 pilots have a QR code'), findsOneWidget);
+  });
+
+  testWidgets('pilots stay counted when their names could not be loaded', (
+    tester,
+  ) async {
+    final source = _Source(
+      report: InvitationEmailReport(
+        kinds: {
+          for (final p in matrixProfiles())
+            p.id.value: InvitationEmailKind.noAddress,
+        },
+      ),
+    );
+    PilotInvitationSources.current = source;
+    await _pump(
+      tester,
+      MatrixServer(configuration: matrixConfiguration()),
+      failProfiles: true,
+    );
+    await tester.tap(find.byKey(const ValueKey('workspace-invitations-send')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('invitations-result-dialog')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('names could not be loaded'), findsOneWidget);
   });
 
   testWidgets('a sync of the contest updates the card without leaving', (

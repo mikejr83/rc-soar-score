@@ -271,7 +271,9 @@ class ApiPilotInvitationSource implements PilotInvitationSource {
       } on ApiHttpError catch (error) {
         // The server answered and refused (for example it cannot send
         // email): nothing was sent.
-        if (error.statusCode >= 400 && error.statusCode < 500) {
+        // After a lost first answer a refusal on the replay does not say what
+        // the first request did, so it stays unknown.
+        if (attempt == 0 && error.statusCode >= 400 && error.statusCode < 500) {
           return const InvitationEmailReport.unavailable();
         }
         failure = error;

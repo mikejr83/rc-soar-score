@@ -156,11 +156,24 @@ Future<void> showInvitationEmailResult(
 ) {
   final l10n = AppLocalizations.of(context);
   String nameOf(String id) => names[id] ?? '';
-  List<String> namesOf(InvitationEmailKind kind) => [
-    for (final entry in report.kinds.entries)
-      if (entry.value == kind && nameOf(entry.key).isNotEmpty)
-        nameOf(entry.key),
-  ]..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+  // Pilots whose name is not known are still counted, never dropped.
+  List<String> namesOf(InvitationEmailKind kind) {
+    final listed = <String>[];
+    var unnamed = 0;
+    for (final entry in report.kinds.entries) {
+      if (entry.value != kind) continue;
+      final name = nameOf(entry.key);
+      if (name.isEmpty) {
+        unnamed++;
+      } else {
+        listed.add(name);
+      }
+    }
+    listed.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    if (unnamed > 0) listed.add(l10n.invitationsResultUnnamed(unnamed));
+    return listed;
+  }
+
   final groups = [
     (l10n.invitationsResultNotSent, namesOf(InvitationEmailKind.notSent)),
     (l10n.invitationsResultLimit, namesOf(InvitationEmailKind.limitReached)),
@@ -256,13 +269,18 @@ Future<bool> sendInvitationsGuarded(
   }
   if (!announce) return ok;
   final noAddress = report.count(InvitationEmailKind.noAddress);
+  final unknown = report.count(InvitationEmailKind.unknown);
+  final emailed = report.count(InvitationEmailKind.emailed);
   _say(
     context,
     ok
-        ? l10n.invitationsSentSnack(
-                participations.length,
-                report.count(InvitationEmailKind.emailed),
-              ) +
+        ? (unknown > 0
+                  ? l10n.invitationsSentUnconfirmedSnack(
+                      participations.length,
+                      emailed,
+                      unknown,
+                    )
+                  : l10n.invitationsSentSnack(participations.length, emailed)) +
               (noAddress > 0
                   ? l10n.invitationsSentNoAddressNote(noAddress)
                   : '')

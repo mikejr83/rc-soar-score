@@ -6612,6 +6612,18 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 invitation sent} other{{count} invitations sent}}. {emailed, plural, =0{Nobody was emailed.} =1{1 pilot emailed.} other{{emailed} pilots emailed.}}'**
   String invitationsSentSnack(int count, int emailed);
 
+  /// Snack bar after sending when the outcome of some emails is unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 invitation sent} other{{count} invitations sent}}. {emailed} confirmed emailed, {unknown} not confirmed: they may or may not have been emailed, so check before sending again.'**
+  String invitationsSentUnconfirmedSnack(int count, int emailed, int unknown);
+
+  /// Shown in the send result dialog for pilots whose names are not known, so they are still counted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 pilot whose name could not be loaded} other{{count} pilots whose names could not be loaded}}'**
+  String invitationsResultUnnamed(int count);
+
   /// Added to the snack bar after sending when some pilots have no email address, so only their link exists.
   ///
   /// In en, this message translates to:

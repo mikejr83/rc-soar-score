@@ -4461,6 +4461,28 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String invitationsSentUnconfirmedSnack(int count, int emailed, int unknown) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count invitations sent',
+      one: '1 invitation sent',
+    );
+    return '$_temp0. $emailed confirmed emailed, $unknown not confirmed: they may or may not have been emailed, so check before sending again.';
+  }
+
+  @override
+  String invitationsResultUnnamed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pilots whose names could not be loaded',
+      one: '1 pilot whose name could not be loaded',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String invitationsSentNoAddressNote(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

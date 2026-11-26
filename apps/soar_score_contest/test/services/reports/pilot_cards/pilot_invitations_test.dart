@@ -253,6 +253,24 @@ void main() {
       },
     );
 
+    test(
+      'a refusal on the replay of a lost first answer stays unknown',
+      () async {
+        var emailCalls = 0;
+        final client = clientFor((request) {
+          if (!request.url.path.endsWith('/email')) return okIssue();
+          emailCalls++;
+          return emailCalls == 1
+              ? http.Response('boom', 503, headers: headers)
+              : error(409, 'email_not_available');
+        });
+        final report = await source.send(client, contest, [lee]);
+        expect(emailCalls, 2);
+        expect(report.serviceUnavailable, isFalse);
+        expect(report.kindOf(lee), InvitationEmailKind.unknown);
+      },
+    );
+
     test('a failed issue is a failed send and nothing is emailed', () async {
       paths.clear();
       final client = clientFor((request) {

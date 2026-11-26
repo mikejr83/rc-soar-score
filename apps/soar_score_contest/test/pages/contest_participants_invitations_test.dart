@@ -160,6 +160,28 @@ void main() {
     expect(source.links, hasLength(2));
   });
 
+  testWidgets('lost answers never say that nobody was emailed', (tester) async {
+    final source = FakePilotInvitationSource(
+      email: (ids) => InvitationEmailReport(
+        kinds: {for (final id in ids) id.value: InvitationEmailKind.unknown},
+      ),
+    );
+    PilotInvitationSources.current = source;
+    await pumpParticipantsPage(tester, ParticipantsServer());
+    await tester.tap(_check(1));
+    await tester.tap(_check(2));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('invitations-send')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('invitations-result-close')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Nobody was emailed'), findsNothing);
+    expect(find.textContaining('2 not confirmed'), findsOneWidget);
+  });
+
   testWidgets('a server that cannot email says so and keeps the links', (
     tester,
   ) async {
