@@ -106,6 +106,102 @@ Map<String, dynamic> _$AccountParticipationsDtoToJson(
   'participations': instance.participations.map((e) => e.toJson()).toList(),
 };
 
+AccountHistoryEntryDto _$AccountHistoryEntryDtoFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  'AccountHistoryEntryDto',
+  json,
+  ($checkedConvert) {
+    final val = AccountHistoryEntryDto(
+      participationId: $checkedConvert(
+        'participation_id',
+        (v) => const IdConverter().fromJson(v as String),
+      ),
+      contestId: $checkedConvert(
+        'contest_id',
+        (v) => const IdConverter().fromJson(v as String),
+      ),
+      contestName: $checkedConvert('contest_name', (v) => v as String),
+      startDateTime: $checkedConvert(
+        'start_date_time',
+        (v) => const UtcTimestampConverter().fromJson(v as String),
+      ),
+      endDateTime: $checkedConvert(
+        'end_date_time',
+        (v) => const UtcTimestampConverter().fromJson(v as String),
+      ),
+      startDate: $checkedConvert('start_date', (v) => v as String),
+      endDate: $checkedConvert('end_date', (v) => v as String),
+      timezone: $checkedConvert('timezone', (v) => v as String),
+      host: $checkedConvert('host', (v) => v as String?),
+      city: $checkedConvert('city', (v) => v as String?),
+      state: $checkedConvert('state', (v) => v as String?),
+      country: $checkedConvert('country', (v) => v as String?),
+      publicResultsUrl: $checkedConvert(
+        'public_results_url',
+        (v) => v as String?,
+      ),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'participationId': 'participation_id',
+    'contestId': 'contest_id',
+    'contestName': 'contest_name',
+    'startDateTime': 'start_date_time',
+    'endDateTime': 'end_date_time',
+    'startDate': 'start_date',
+    'endDate': 'end_date',
+    'publicResultsUrl': 'public_results_url',
+  },
+);
+
+Map<String, dynamic> _$AccountHistoryEntryDtoToJson(
+  AccountHistoryEntryDto instance,
+) => <String, dynamic>{
+  'participation_id': const IdConverter().toJson(instance.participationId),
+  'contest_id': const IdConverter().toJson(instance.contestId),
+  'contest_name': instance.contestName,
+  'start_date_time': const UtcTimestampConverter().toJson(
+    instance.startDateTime,
+  ),
+  'end_date_time': const UtcTimestampConverter().toJson(instance.endDateTime),
+  'start_date': instance.startDate,
+  'end_date': instance.endDate,
+  'timezone': instance.timezone,
+  'host': instance.host,
+  'city': instance.city,
+  'state': instance.state,
+  'country': instance.country,
+  'public_results_url': instance.publicResultsUrl,
+};
+
+AccountHistoryDto _$AccountHistoryDtoFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('AccountHistoryDto', json, ($checkedConvert) {
+      final val = AccountHistoryDto(
+        contests: $checkedConvert(
+          'contests',
+          (v) =>
+              (v as List<dynamic>?)
+                  ?.map(
+                    (e) => AccountHistoryEntryDto.fromJson(
+                      e as Map<String, dynamic>,
+                    ),
+                  )
+                  .toList() ??
+              const [],
+        ),
+        nextOffset: $checkedConvert('next_offset', (v) => (v as num?)?.toInt()),
+      );
+      return val;
+    }, fieldKeyMap: const {'nextOffset': 'next_offset'});
+
+Map<String, dynamic> _$AccountHistoryDtoToJson(AccountHistoryDto instance) =>
+    <String, dynamic>{
+      'contests': instance.contests.map((e) => e.toJson()).toList(),
+      'next_offset': instance.nextOffset,
+    };
+
 LinkCandidateContestDto _$LinkCandidateContestDtoFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate(

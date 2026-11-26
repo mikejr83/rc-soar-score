@@ -22,6 +22,12 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   through its confirmed links, newest first ([AccountParticipationsDto]).
 ///   A later invitation of a linked profile appears with no further
 ///   confirmation.
+/// - `GET /account/history` lists the finished contests the account reaches
+///   through its confirmed links, once their read-only window on the list
+///   above is over; no invitation needed ([AccountHistoryDto]). Paged with
+///   `limit` (1 to 100, default 50) and `offset`; `next_offset` is null on
+///   the last page. A contest reached only through an ended link is not
+///   listed.
 /// - `GET /account/link-candidates` lists the "Is this you?" matches of the
 ///   account's verified email ([LinkCandidatesDto]); empty without one.
 /// - `POST /account/link-candidates/{id}/confirm` says the candidate is the
@@ -99,6 +105,29 @@ void addAccountLinkRoutes(
           for (final row in rows)
             _participationDto(row, addresses[row.contest.id]),
         ],
+      ).toJson(),
+    );
+  });
+
+  router.get('/account/history', (Request request) async {
+    final principal = requirePrincipal(request);
+    final limit = _pageNumber(request, 'limit', fallback: 50, min: 1, max: 100);
+    final offset = _pageNumber(request, 'offset', fallback: 0, min: 0);
+    final page = await (await service()).historyFor(
+      principal.accountId,
+      limit: limit,
+      offset: offset,
+    );
+    final addresses = await _publicResultsUrls(repository, publicSiteBaseUrl, {
+      for (final row in page.rows) row.contest.id,
+    });
+    return answer(
+      AccountHistoryDto(
+        contests: [
+          for (final row in page.rows)
+            _historyDto(row, addresses[row.contest.id]),
+        ],
+        nextOffset: page.hasMore ? offset + page.rows.length : null,
       ).toJson(),
     );
   });
@@ -281,6 +310,54 @@ Future<Map<Id, String>> _publicResultsUrls(
         publication.contestId!:
             '$base/results/contests/${publication.id.value}',
   };
+}
+
+/// The query parameter [name] as a whole number in [min]..[max], or
+/// [fallback] when absent. Anything else is a 400.
+int _pageNumber(
+  Request request,
+  String name, {
+  required int fallback,
+  required int min,
+  int? max,
+}) {
+  final text = request.url.queryParameters[name];
+  if (text == null) return fallback;
+  final value = int.tryParse(text);
+  if (value == null || value < min || (max != null && value > max)) {
+    throw ArgumentError.value(
+      text,
+      name,
+      'must be a whole number from $min'
+      '${max == null ? '' : ' to $max'}',
+    );
+  }
+  return value;
+}
+
+AccountHistoryEntryDto _historyDto(
+  PastParticipation row,
+  String? publicResultsUrl,
+) {
+  final contest = row.contest;
+  return AccountHistoryEntryDto(
+    participationId: row.participation.id,
+    contestId: contest.id,
+    contestName: contest.name,
+    startDateTime: contest.startDateTime,
+    endDateTime: contest.endDateTime,
+    startDate: ContestTimeZones.localDate(
+      contest.timezone,
+      contest.startDateTime,
+    ),
+    endDate: ContestTimeZones.localDate(contest.timezone, contest.endDateTime),
+    timezone: contest.timezone,
+    host: contest.host,
+    city: contest.city,
+    state: contest.state,
+    country: contest.country,
+    publicResultsUrl: publicResultsUrl,
+  );
 }
 
 AccountParticipationDto _participationDto(
