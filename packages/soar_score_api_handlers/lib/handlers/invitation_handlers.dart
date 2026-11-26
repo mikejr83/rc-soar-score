@@ -25,7 +25,9 @@ const defaultSelfScoringBaseUrl = 'https://score.rcsoarscore.com';
 /// - `POST /contests/{id}/invitations/email` emails the active invitation
 ///   link of each listed pilot who has an address ([EmailInvitationsRequest]).
 ///   The link exists whatever the outcome; a repeated request id sends
-///   nothing again to a pilot already sent (a skipped pilot is judged afresh). With [email] null it answers 409 `email_not_available`.
+///   nothing again to a pilot already sent (a skipped pilot is judged afresh).
+///   A director can start at most 300 new emails per contest per hour; past
+///   that a pilot comes back `limited`. With [email] null it answers 409 `email_not_available`.
 ///
 /// All need the contest's director. With [service] null (no invitation
 /// secret) they answer 409 `invitations_not_available`. The links are

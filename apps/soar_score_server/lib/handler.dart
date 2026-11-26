@@ -27,6 +27,9 @@ const String serverVersion = '0.1.0';
 /// [trustedProxySecret] is what the site's `/api` proxy sends with the
 /// visitor's address (see `clientAddressOf`).
 ///
+/// [invitationEmailLimit] replaces the hourly cap of new invitation emails per
+/// director and contest (tests).
+///
 /// [invitationMailer] sends invitation emails (#790); without it the email
 /// route answers 409 `email_not_available`.
 ///
@@ -48,6 +51,7 @@ Handler createServerHandler(
   PromotionIntentPolicy? promotionIntents,
   Handler? supportHandler,
   InvitationMailer? invitationMailer,
+  int? invitationEmailLimit,
 }) {
   final repository = Repository(database);
   final invitations = invitationSecret == null
@@ -88,6 +92,10 @@ Handler createServerHandler(
             invitations,
             invitationMailer,
             linkFor: (credential) => '$linkBase/invitations/$credential',
+            throttle: RequestThrottleStore(database),
+            maxSendsPerWindow:
+                invitationEmailLimit ??
+                InvitationEmailService.defaultMaxSendsPerWindow,
           ),
   );
 }

@@ -12,6 +12,7 @@ import '../../models/participants/participant_profile.dart';
 import '../../models/scores/invitation.dart';
 import '../../models/sync/audit_event.dart';
 import '../../repositories/repository.dart';
+import '../../repositories/request_throttle_store.dart';
 import 'invitation_service.dart';
 import 'participant_access.dart';
 
@@ -41,7 +42,11 @@ enum InvitationEmailStatus {
   bounced('bounced'),
 
   /// The recipient later marked the mail as unwanted.
-  complained('complained');
+  complained('complained'),
+
+  /// Not sent: the director has reached the hourly limit of new emails for
+  /// the contest. Nothing was sent; a later request with a new id can send.
+  limited('limited');
 
   const InvitationEmailStatus(this.wire);
 
@@ -157,6 +162,9 @@ class InvitationEmailService {
     this.invitations,
     this.mailer, {
     required this.linkFor,
+    this.throttle,
+    this.maxSendsPerWindow = defaultMaxSendsPerWindow,
+    this.window = const Duration(hours: 1),
     DateTime Function()? clock,
     Id Function()? newId,
   }) : _clock = clock ?? DateTime.now,
@@ -173,6 +181,22 @@ class InvitationEmailService {
 
   /// The most participations one request takes.
   static const maxParticipations = 500;
+
+  /// The most new emails one director may start for one contest in a
+  /// [window]. A contest of 100 pilots emailed once, with a few resends,
+  /// stays well under it.
+  static const defaultMaxSendsPerWindow = 300;
+
+  /// The bucket of the delivery counter in [throttle]; the caller is
+  /// `{director id}:{contest id}`.
+  static const throttleBucket = 'invitation-email';
+
+  /// Counts each new send (never a retry of a request id that already has an
+  /// outcome) in a counter shared by every server instance. Null means no
+  /// limit, for tests that do not exercise it.
+  final RequestThrottleStore? throttle;
+  final int maxSendsPerWindow;
+  final Duration window;
 
   static final _address = RegExp(
     r"^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+"
@@ -344,6 +368,31 @@ class InvitationEmailService {
         _storedStatus(earlier!),
         repeated: true,
       );
+    }
+
+    // The send is counted once it is ours: a retry of a request id, or the
+    // loser of two requests racing with the same id, found the claim above and
+    // never gets here, so it uses no capacity. Over the limit, or with the
+    // counter unreadable, nothing is sent and the entry says why.
+    final counter = throttle;
+    if (counter != null) {
+      InvitationEmailStatus? refused;
+      try {
+        final count = await counter.hit(
+          throttleBucket,
+          '${requestedBy.value}:${contest.id.value}',
+          window: window,
+          now: now,
+        );
+        if (count.count > maxSendsPerWindow) {
+          refused = InvitationEmailStatus.limited;
+        }
+      } on Object {
+        refused = InvitationEmailStatus.unavailable;
+      }
+      if (refused != null) {
+        return _finish(invitation, requestId, InvitationMailResult(refused));
+      }
     }
 
     final InvitationMailResult result;

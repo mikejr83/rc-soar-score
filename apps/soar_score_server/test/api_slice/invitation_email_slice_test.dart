@@ -55,11 +55,12 @@ void _tests(SliceBackend backend) {
   late _FakeMailer mailer;
   late Handler handler;
 
-  Handler build({bool withMailer = true}) => createServerHandler(
+  Handler build({bool withMailer = true, int? limit}) => createServerHandler(
     api.database,
     authMiddleware: fixedPrincipal(Principal(accountId: api.director)),
     invitationSecret: _secret,
     invitationMailer: withMailer ? mailer : null,
+    invitationEmailLimit: limit,
   );
 
   Future<(int, Map<String, Object?>)> call(
@@ -580,5 +581,76 @@ void _tests(SliceBackend backend) {
     final (_, again) = await email('send-1', [_withEmailPart, _noEmailPart]);
     expect(resultFor(again, _noEmailPart)['repeated'], isTrue);
     expect(mailer.sent, hasLength(2));
+  });
+
+  Future<int?> sendsCounted() async =>
+      (await RequestThrottleStore(api.database).read(
+        core.InvitationEmailService.throttleBucket,
+        '${api.director.value}:$_contestId',
+        window: const Duration(hours: 1),
+      ))?.count;
+
+  test('new request ids stop sending at the hourly limit, and a retry '
+      'uses no capacity', () async {
+    handler = build(limit: 2);
+    for (final id in ['send-1', 'send-2']) {
+      final (_, body) = await email(id, [_withEmailPart]);
+      expect(resultFor(body, _withEmailPart)['status'], 'accepted');
+    }
+    final (status, over) = await email('send-3', [_withEmailPart]);
+    expect(status, 200);
+    expect(resultFor(over, _withEmailPart)['status'], 'limited');
+    expect(mailer.sent, hasLength(2));
+    expect(await sendsCounted(), 3);
+
+    // Retries of requests that already have an outcome count nothing and
+    // send nothing, limited ones included.
+    for (final id in ['send-1', 'send-3', 'send-3']) {
+      final (_, body) = await email(id, [_withEmailPart]);
+      expect(resultFor(body, _withEmailPart)['repeated'], isTrue);
+    }
+    expect(mailer.sent, hasLength(2));
+    expect(await sendsCounted(), 3);
+    expect(await deliveryAudits(), hasLength(3));
+  });
+
+  test('concurrent fresh request ids never send past the limit', () async {
+    handler = build(limit: 2);
+    final answers = await Future.wait([
+      for (var i = 0; i < 6; i++) email('fresh-$i', [_withEmailPart]),
+    ]);
+    final statuses = [
+      for (final (_, body) in answers)
+        resultFor(body, _withEmailPart)['status'],
+    ];
+    expect(statuses.where((s) => s == 'accepted'), hasLength(2));
+    expect(statuses.where((s) => s == 'limited'), hasLength(4));
+    expect(mailer.sent, hasLength(2));
+  });
+
+  test('concurrent requests with one id count and send once', () async {
+    handler = build(limit: 5);
+    await Future.wait([
+      for (var i = 0; i < 5; i++) email('same', [_withEmailPart]),
+    ]);
+    expect(mailer.sent, hasLength(1));
+    expect(await sendsCounted(), 1);
+  });
+
+  test('another contest director is not held to this limit', () async {
+    handler = build(limit: 1);
+    await email('send-1', [_withEmailPart]);
+    final (_, body) = await email('send-2', [_withEmailPart]);
+    expect(resultFor(body, _withEmailPart)['status'], 'limited');
+    // A new window or another actor starts from zero: the counter is keyed by
+    // director and contest.
+    expect(
+      await RequestThrottleStore(api.database).read(
+        core.InvitationEmailService.throttleBucket,
+        '${core.Id.create().value}:$_contestId',
+        window: const Duration(hours: 1),
+      ),
+      isNull,
+    );
   });
 }

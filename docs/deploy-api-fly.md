@@ -389,7 +389,7 @@ only the first two variables, the delivery mode and the SES key pair, so they
 work as soon as those are valid, with or without the support settings. They are
 sent from `notifications@rcsoarscore.com` with no Reply-To. In redirect mode
 every invitation email goes to `test@rcsoarscore.com` with a `[TEST]` subject.
-Without valid mail settings the route answers 409 `email_not_available` and the
+A director may start at most 300 new invitation emails per contest per hour (a counter in the service database, shared by every instance; retries of a request id are not counted); past it a pilot comes back `limited` and nothing is sent. Without valid mail settings the route answers 409 `email_not_available` and the
 server logs "Invitation email disabled" at startup. Outcomes are stored per
 invitation (no address, text or link); a bounce reported by SES is recorded by
 a later change, so until then `accepted` does not mean delivered.
