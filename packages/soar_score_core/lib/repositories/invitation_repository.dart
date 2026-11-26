@@ -23,6 +23,15 @@ abstract interface class InvitationRepository {
   /// or `null`.
   Future<Invitation?> findByProtectedCredential(String credential);
 
+  /// The id of the invitation whose delivery outcomes hold an email with the
+  /// provider's [messageId], or `null`. [messageId] must be letters, digits
+  /// and hyphens only; anything else finds nothing.
+  ///
+  /// Used to attach a bounce or complaint to the email it is about. It reads
+  /// the outcomes of every invitation, so it is for rare provider reports,
+  /// not for request paths.
+  Future<Id?> findIdByDeliveryMessageId(String messageId);
+
   /// Every invitation of [contestParticipationId], oldest revision first.
   Future<List<Invitation>> listForParticipation(Id contestParticipationId);
 

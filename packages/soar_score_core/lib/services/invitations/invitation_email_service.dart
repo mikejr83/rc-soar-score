@@ -61,6 +61,21 @@ enum InvitationEmailStatus {
   }
 }
 
+/// What the provider later reported about an email it had accepted.
+enum InvitationEmailFeedback {
+  /// The address does not accept mail (a hard bounce, or a soft one the
+  /// provider gave up on).
+  bounce(InvitationEmailStatus.bounced),
+
+  /// The recipient marked the mail as unwanted.
+  complaint(InvitationEmailStatus.complained);
+
+  const InvitationEmailFeedback(this.status);
+
+  /// The status stored for it.
+  final InvitationEmailStatus status;
+}
+
 /// One invitation email to send.
 ///
 /// [link] is the pilot's secret link: whoever sends this must never log it.
@@ -143,6 +158,75 @@ class InvitationEmailResult {
   /// True when the request id had already been used for this participation,
   /// so nothing was sent now and [status] is the stored outcome.
   final bool repeated;
+}
+
+/// Attaches what the email provider reports later (a bounce or a complaint)
+/// to the invitation email it is about (#790).
+///
+/// It needs only the repository, so reports about mail already sent are still
+/// recorded when sending is switched off.
+class InvitationDeliveryFeedback {
+  InvitationDeliveryFeedback(this.repository, {DateTime Function()? clock})
+    : _clock = clock ?? DateTime.now;
+
+  final Repository repository;
+  final DateTime Function() _clock;
+
+  /// Records what the provider reported about the email it accepted under
+  /// [messageId]: the entry's status becomes `bounced` or `complained`, with
+  /// `reported_at` and, for a bounce, the provider's [bounceType]
+  /// (`permanent`, `transient` or `undetermined`). Nothing else about the
+  /// invitation or its link changes.
+  ///
+  /// Repeating a report changes nothing, a complaint replaces a bounce, and a
+  /// bounce never replaces a complaint. Only an entry the provider accepted
+  /// can be reported on. Returns whether a stored outcome changed; false for
+  /// a message id that is not an invitation email (a support message, say).
+  Future<bool> recordFeedback({
+    required String messageId,
+    required InvitationEmailFeedback feedback,
+    String? bounceType,
+  }) async {
+    final invitationId = await repository.invitationRepository
+        .findIdByDeliveryMessageId(messageId);
+    if (invitationId == null) return false;
+    final reportedAt = _clock().toUtc().toIso8601String();
+    var changed = false;
+    await repository.invitationRepository.updateDeliveryOutcomes(invitationId, (
+      current,
+    ) {
+      changed = false;
+      final index = current.indexWhere(
+        (entry) =>
+            entry['channel'] == 'email' && entry['message_id'] == messageId,
+      );
+      if (index < 0) return null;
+      final entry = current[index];
+      final stored = InvitationEmailStatus.fromWire(entry['status']);
+      final wanted = feedback.status;
+      final replaceable =
+          stored == InvitationEmailStatus.accepted ||
+          (stored == InvitationEmailStatus.bounced &&
+              wanted == InvitationEmailStatus.complained);
+      if (!replaceable) return null;
+      changed = true;
+      return [
+        for (var i = 0; i < current.length; i++)
+          if (i == index)
+            {
+              ...entry,
+              'status': wanted.wire,
+              'reported_at': reportedAt,
+              if (feedback == InvitationEmailFeedback.bounce &&
+                  bounceType != null)
+                'bounce_type': bounceType,
+            }
+          else
+            current[i],
+      ];
+    });
+    return changed;
+  }
 }
 
 final _logger = Logger('InvitationEmail');

@@ -43,6 +43,31 @@ class InvitationRepository extends DriftRepository
     return found.firstOrNull;
   }
 
+  static final _messageId = RegExp(r'^[A-Za-z0-9-]{1,128}$');
+
+  @override
+  Future<core.Id?> findIdByDeliveryMessageId(String messageId) async {
+    if (!_messageId.hasMatch(messageId)) return null;
+    final table = db.allTables.firstWhere(
+      (t) => t.actualTableName == 'invitations',
+    );
+    // The outcomes are JSON text written by `jsonEncode`, so an entry's id is
+    // always the exact text `"message_id":"<id>"`; the id has no LIKE
+    // wildcards (letters, digits and hyphens only).
+    final rows = await db
+        .customSelect(
+          portableSql(
+            db,
+            'SELECT id FROM invitations WHERE delivery_outcomes LIKE ? '
+            'ORDER BY id',
+          ),
+          variables: [Variable<String>('%"message_id":"$messageId"%')],
+          readsFrom: {table},
+        )
+        .get();
+    return rows.isEmpty ? null : core.Id.parse(rows.first.read<String>('id'));
+  }
+
   @override
   Future<List<core.Invitation>> listForParticipation(
     core.Id contestParticipationId,

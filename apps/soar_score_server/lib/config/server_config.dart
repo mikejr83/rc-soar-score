@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:soar_score_data/soar_score_data.dart';
 
 import 'config_exception.dart';
+import '../mail/ses_feedback/sns_verifier.dart';
 import 'mail_config.dart';
 import 'support_config.dart';
 
@@ -22,6 +23,7 @@ import 'package:soar_score_core/config/log_format.dart';
 /// | `INVITATION_SECRET` | at least 32 characters; signs invitation links and guest sessions. Without it the participant routes answer 409 `invitations_not_available`. Changing it ends every link and session | none |
 /// | `TRUSTED_PROXY_SECRET` | at least 32 characters; the secret the web site's `/api` proxy sends with the visitor's address, so rate limits count visitors and not the proxy. Without it the proxy's own address is counted (docs/deploy-api-fly.md) | none |
 /// | `SELF_SCORING_BASE_URL` | the self-scoring site invitation links point at, an `https://` URL (or `http://` for local use) with no path | `https://score.rcsoarscore.com` |
+/// | `SES_FEEDBACK_TOPIC_ARN` | the SNS topic (`arn:aws:sns:us-east-2:123456789012:name`) that carries SES bounce and complaint reports. Without it `POST /webhooks/ses-feedback` answers 503 and bounces are not recorded | none |
 /// | `LOG_DB_STATEMENT_DURATIONS` | `true` logs one line per database statement with its duration, SQL text and argument count (never values); `false` or unset is off | off |
 /// | `DATABASE_URL` | a `postgresql://` connection URL (authority with password, database in the path, `sslmode` optional) | none — the URL wins over the discrete variables |
 /// | `POSTGRES_PASSWORD` | database password, when no `DATABASE_URL` is set | required |
@@ -41,6 +43,7 @@ class ServerConfig {
     this.logStatementDurations = false,
     this.support,
     this.mail,
+    this.sesFeedbackTopic,
   });
 
   /// The variables [ServerConfig.parse] reads.
@@ -55,6 +58,7 @@ class ServerConfig {
     'SELF_SCORING_BASE_URL',
     'TRUSTED_PROXY_SECRET',
     'LOG_DB_STATEMENT_DURATIONS',
+    'SES_FEEDBACK_TOPIC_ARN',
     ...SupportConfig.environmentKeys,
     ...MailConfig.environmentKeys,
     'DATABASE_URL',
@@ -101,6 +105,11 @@ class ServerConfig {
   /// sending is disabled (see [MailConfig.parse]). Disabling never stops the
   /// server.
   final MailConfig? mail;
+
+  /// The SNS topic whose bounce and complaint reports are accepted, or null
+  /// when the feedback endpoint is disabled. Independent of [mail]: a report
+  /// about mail already sent is recorded even if sending is off.
+  final SnsTopic? sesFeedbackTopic;
 
   /// Parses [environment].
   ///
@@ -216,6 +225,18 @@ class ServerConfig {
       }
     }
 
+    SnsTopic? feedbackTopic;
+    final rawTopic = value('SES_FEEDBACK_TOPIC_ARN');
+    if (rawTopic != null) {
+      feedbackTopic = SnsTopic.parse(rawTopic);
+      if (feedbackTopic == null) {
+        problems.add(
+          'SES_FEEDBACK_TOPIC_ARN must be an SNS topic ARN such as '
+          'arn:aws:sns:us-east-2:123456789012:topic-name.',
+        );
+      }
+    }
+
     var logStatementDurations = false;
     final rawDurations = value('LOG_DB_STATEMENT_DURATIONS');
     if (rawDurations != null) {
@@ -282,6 +303,7 @@ class ServerConfig {
       logStatementDurations: logStatementDurations,
       support: SupportConfig.parse(environment),
       mail: MailConfig.parse(environment),
+      sesFeedbackTopic: feedbackTopic,
     );
   }
 
