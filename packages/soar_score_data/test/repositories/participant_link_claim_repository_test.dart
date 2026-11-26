@@ -116,6 +116,88 @@ void _tests(Backend backend) {
     });
   });
 
+  group('claimGuests', () {
+    Future<core.ParticipantAccountLink> storedLink() =>
+        links.save(confirmed(core.Id.create()));
+
+    test(
+      're-points what the guest holds and leaves the link as it was',
+      () async {
+        final link = await storedLink();
+        final total = await held(_guests);
+
+        expect(await links.claimGuests(link, guestAccountIds: _guests), isTrue);
+
+        expect(await held(_guests), {for (final k in total.keys) k: 0});
+        expect(await held([pilot]), total);
+        expect(await links.findById(link.id), link);
+      },
+    );
+
+    test('repeating it, or an unknown guest, changes nothing', () async {
+      final link = await storedLink();
+      await links.claimGuests(link, guestAccountIds: _guests);
+      final claimed = await held([pilot]);
+
+      expect(
+        await links.claimGuests(
+          link,
+          guestAccountIds: [..._guests, core.Id.create(), pilot],
+        ),
+        isTrue,
+      );
+
+      expect(await held([pilot]), claimed);
+    });
+
+    test('claims nothing once the link has ended', () async {
+      final link = await storedLink();
+      await links.save(
+        core.ParticipantAccountLink(
+          id: link.id,
+          participantProfileId: link.participantProfileId,
+          accountId: link.accountId,
+          status: core.ParticipantLinkStatus.ended,
+          origin: link.origin,
+          createdAt: link.createdAt,
+          confirmedAt: link.confirmedAt,
+          endedAt: DateTime.utc(2026, 10, 3),
+          revision: link.revision,
+        ),
+      );
+      final before = await held(_guests);
+
+      expect(await links.claimGuests(link, guestAccountIds: _guests), isFalse);
+
+      expect(await held(_guests), before);
+    });
+
+    test('claims nothing for a link that is not stored, or is another '
+        "account's", () async {
+      final before = await held(_guests);
+      final link = await storedLink();
+      final other = core.ParticipantAccountLink(
+        id: link.id,
+        participantProfileId: link.participantProfileId,
+        accountId: core.Id.create(),
+        status: core.ParticipantLinkStatus.confirmed,
+        origin: link.origin,
+        createdAt: link.createdAt,
+        confirmedAt: link.confirmedAt,
+      );
+
+      expect(
+        await links.claimGuests(
+          confirmed(core.Id.create()),
+          guestAccountIds: _guests,
+        ),
+        isFalse,
+      );
+      expect(await links.claimGuests(other, guestAccountIds: _guests), isFalse);
+      expect(await held(_guests), before);
+    });
+  });
+
   group('saveClaimingGuests', () {
     test('stores the link and re-points everything the guest holds', () async {
       final before = await held(_guests);
@@ -206,7 +288,7 @@ void _tests(Backend backend) {
 
         await links.saveReleasingInvitations(
           link,
-          invitationToGuest: {invitationId: _opener},
+          releases: () async => {invitationId: _opener},
         );
 
         final invitation = (await repository.invitationRepository.findById(
@@ -217,6 +299,48 @@ void _tests(Backend backend) {
       },
     );
 
+    test('decides what to release inside the transaction, after the link '
+        'is saved', () async {
+      final link = await links.save(confirmed(core.Id.create()));
+      core.ParticipantLinkStatus? seen;
+
+      await links.saveReleasingInvitations(
+        core.ParticipantAccountLink(
+          id: link.id,
+          participantProfileId: link.participantProfileId,
+          accountId: link.accountId,
+          status: core.ParticipantLinkStatus.ended,
+          origin: link.origin,
+          createdAt: link.createdAt,
+          confirmedAt: link.confirmedAt,
+          endedAt: DateTime.utc(2026, 10, 3),
+          revision: link.revision,
+        ),
+        releases: () async {
+          seen = (await links.findById(link.id))!.status;
+          return {};
+        },
+      );
+
+      expect(seen, core.ParticipantLinkStatus.ended);
+    });
+
+    test('hands it to nobody when its guest account does not exist', () async {
+      final link = await links.save(confirmed(core.Id.create()));
+      await links.saveClaimingGuests(link, guestAccountIds: _guests);
+
+      await links.saveReleasingInvitations(
+        (await links.findById(link.id))!,
+        releases: () async => {invitationId: core.Id.create()},
+      );
+
+      expect(
+        (await repository.invitationRepository.findById(invitationId))!
+            .redeemedByAccountId,
+        isNull,
+      );
+    });
+
     test(
       'can hand it back to nobody, and skips one the account does not hold',
       () async {
@@ -224,7 +348,7 @@ void _tests(Backend backend) {
         // Held by the example account, not by the pilot: left as it is.
         await links.saveReleasingInvitations(
           link,
-          invitationToGuest: {invitationId: null},
+          releases: () async => {invitationId: null},
         );
         expect(
           (await repository.invitationRepository.findById(invitationId))!
@@ -238,7 +362,7 @@ void _tests(Backend backend) {
         );
         await links.saveReleasingInvitations(
           (await links.findById(link.id))!,
-          invitationToGuest: {invitationId: null},
+          releases: () async => {invitationId: null},
         );
         expect(
           (await repository.invitationRepository.findById(invitationId))!

@@ -169,11 +169,7 @@ class ParticipantLinkService {
     if (row == null) throw ParticipantLinkError.linkNotFound();
     // Claims the guests who opened this or an earlier invitation of the
     // profile since the link was made, so the session sees all their entries.
-    await _confirm(
-      profileId: profileId,
-      accountId: accountId,
-      origin: link.origin,
-    );
+    await _claimGuestsOfConfirmed(profileId, accountId);
     return _openAs(row.invitation, profileId, accountId);
   }
 
@@ -194,13 +190,7 @@ class ParticipantLinkService {
       // Claim the guest only when another attempt follows: a claim after the
       // last attempt would end whatever session that guest holds and still
       // leave the caller without one.
-      if (attempt == 0) {
-        await _confirm(
-          profileId: profileId,
-          accountId: accountId,
-          origin: ParticipantLinkOrigin.invitationRedemption,
-        );
-      }
+      if (attempt == 0) await _claimGuestsOfConfirmed(profileId, accountId);
     }
     // Something else keeps redeeming it: do not guess, refuse like a link
     // that does not open.
@@ -327,17 +317,19 @@ class ParticipantLinkService {
     if (link.status == ParticipantLinkStatus.candidate) {
       throw ParticipantLinkError.linkNotFound();
     }
-    final held = await _invitationsOf(link.participantProfileId);
-    final release = <Id, Id?>{};
-    for (final invitation in held) {
-      if (invitation.redeemedByAccountId != accountId) continue;
-      final guest = invitations.codec.guestAccountIdFor(invitation.id);
-      final exists = await repository.accountRepository.findById(guest) != null;
-      release[invitation.id] = exists ? guest : null;
-    }
+    // Decided inside the transaction, under the claim lock: the invitations
+    // the account holds then, each with its own guest, so a claim that
+    // completed first (even of an invitation issued after this call began)
+    // is released too.
     final ended = await links.saveReleasingInvitations(
       _ended(link),
-      invitationToGuest: release,
+      releases: () async => {
+        for (final invitation in await _invitationsOf(
+          link.participantProfileId,
+        ))
+          if (invitation.redeemedByAccountId == accountId)
+            invitation.id: invitations.codec.guestAccountIdFor(invitation.id),
+      },
     );
     _logger.info('Link ${ended.id.value} ended.');
     return ended;
@@ -496,6 +488,23 @@ class ParticipantLinkService {
     return confirmed;
   }
 
+  /// Claims the guests of [profileId] for [accountId], which must hold the
+  /// Confirmed link to it right now.
+  ///
+  /// Never makes or revives a link: opening a contest is not a way to link.
+  /// `link_not_found` when the link is not Confirmed for the account, whether
+  /// it had ended before this call or ends while the claim is pending (the
+  /// claim then writes nothing).
+  Future<void> _claimGuestsOfConfirmed(Id profileId, Id accountId) async {
+    final existing = await _existingConfirmed(profileId, accountId);
+    if (existing == null) throw ParticipantLinkError.linkNotFound();
+    final guests = await _guestsOf(profileId);
+    if (guests.isEmpty) return;
+    final claimed = await repository.participantAccountLinkRepository
+        .claimGuests(existing, guestAccountIds: guests);
+    if (!claimed) throw ParticipantLinkError.linkNotFound();
+  }
+
   /// Makes the link of [accountId] to [profileId] Confirmed, claiming the
   /// guests of the profile, as one transaction.
   Future<ParticipantAccountLink> _confirm({
@@ -510,9 +519,20 @@ class ParticipantLinkService {
       // later invitation of the profile since: claiming is idempotent (rows
       // already claimed match nothing), so a Confirmed link never keeps
       // unclaimed guest entries.
+      // The link itself is not rewritten, so two opens of the same account
+      // claiming at once cannot conflict on its revision; the claim checks the
+      // link is still Confirmed instead.
       final guests = await _guestsOf(profileId);
-      if (guests.isEmpty) return existing;
-      return links.saveClaimingGuests(existing, guestAccountIds: guests);
+      if (guests.isNotEmpty) {
+        // Refused when the link ended or moved since it was read: nothing the
+        // guests did may go to an account that no longer holds the pilot.
+        final claimed = await links.claimGuests(
+          existing,
+          guestAccountIds: guests,
+        );
+        if (!claimed) throw ParticipantLinkError.linkNotFound();
+      }
+      return existing;
     }
 
     final earlier = await links.find(

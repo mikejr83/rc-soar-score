@@ -44,14 +44,35 @@ abstract interface class ParticipantAccountLinkRepository {
     required Iterable<Id> guestAccountIds,
   });
 
+  /// Makes the account of [link] the owner of what the guest accounts in
+  /// [guestAccountIds] hold, as [saveClaimingGuests] does, without storing or
+  /// changing any link, in one transaction. For a link the caller read as
+  /// Confirmed.
+  ///
+  /// The transaction first locks the stored link and checks that it is still
+  /// Confirmed for the same account and profile; it returns false and claims
+  /// nothing otherwise, so a claim cannot run after the link ended or moved.
+  /// Ending the link waits for a claim in progress and the other way round.
+  /// Two claims by one account never conflict, and repeating it is a no-op
+  /// once nothing is held by the guests.
+  Future<bool> claimGuests(
+    ParticipantAccountLink link, {
+    required Iterable<Id> guestAccountIds,
+  });
+
   /// Stores [link] as [save] does and, in the same transaction, hands each
-  /// invitation in [invitationToGuest] (by invitation id) back to its guest
-  /// account (or to nobody, for a null value), when the account of [link]
-  /// holds it. Score attempts stay with
-  /// the account.
+  /// invitation in the map [releases] returns (by invitation id) that the
+  /// account of [link] holds back to the guest account named by its value, or
+  /// to nobody when that guest account does not exist or the value is null.
+  /// Score attempts stay with the account.
+  ///
+  /// [releases] runs inside the transaction, after the stored link has been
+  /// locked with the lock [claimGuests] takes, so it sees every claim that
+  /// completed before and none can complete after. An invitation in the map
+  /// that the account does not hold is left alone.
   Future<ParticipantAccountLink> saveReleasingInvitations(
     ParticipantAccountLink link, {
-    required Map<Id, Id?> invitationToGuest,
+    required Future<Map<Id, Id?>> Function() releases,
   });
 
   /// Stores [link], bumping its revision, and returns it as stored.
