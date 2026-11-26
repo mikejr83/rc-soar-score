@@ -327,14 +327,13 @@ class ParticipantLinkService {
     if (link.status == ParticipantLinkStatus.candidate) {
       throw ParticipantLinkError.linkNotFound();
     }
-    final held = await _invitationsOf(link.participantProfileId);
-    final release = <Id, Id?>{};
-    for (final invitation in held) {
-      if (invitation.redeemedByAccountId != accountId) continue;
-      final guest = invitations.codec.guestAccountIdFor(invitation.id);
-      final exists = await repository.accountRepository.findById(guest) != null;
-      release[invitation.id] = exists ? guest : null;
-    }
+    // Every invitation of the profile with its own guest: which ones the
+    // account holds is decided inside the transaction, after any claim in
+    // progress has finished, not here.
+    final release = <Id, Id?>{
+      for (final invitation in await _invitationsOf(link.participantProfileId))
+        invitation.id: invitations.codec.guestAccountIdFor(invitation.id),
+    };
     final ended = await links.saveReleasingInvitations(
       _ended(link),
       invitationToGuest: release,

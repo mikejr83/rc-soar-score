@@ -299,6 +299,22 @@ void _tests(Backend backend) {
       },
     );
 
+    test('hands it to nobody when its guest account does not exist', () async {
+      final link = await links.save(confirmed(core.Id.create()));
+      await links.saveClaimingGuests(link, guestAccountIds: _guests);
+
+      await links.saveReleasingInvitations(
+        (await links.findById(link.id))!,
+        invitationToGuest: {invitationId: core.Id.create()},
+      );
+
+      expect(
+        (await repository.invitationRepository.findById(invitationId))!
+            .redeemedByAccountId,
+        isNull,
+      );
+    });
+
     test(
       'can hand it back to nobody, and skips one the account does not hold',
       () async {

@@ -61,10 +61,14 @@ abstract interface class ParticipantAccountLinkRepository {
   });
 
   /// Stores [link] as [save] does and, in the same transaction, hands each
-  /// invitation in [invitationToGuest] (by invitation id) back to its guest
-  /// account (or to nobody, for a null value), when the account of [link]
-  /// holds it. Score attempts stay with
-  /// the account.
+  /// invitation in [invitationToGuest] (by invitation id) that the account of
+  /// [link] holds back to the guest account named by its value, or to nobody
+  /// when that guest account does not exist or the value is null. Score
+  /// attempts stay with the account.
+  ///
+  /// What the account holds is read inside the transaction, under the lock
+  /// that [claimGuests] takes, so the map may list every invitation of the
+  /// profile: one the account does not hold is left alone.
   Future<ParticipantAccountLink> saveReleasingInvitations(
     ParticipantAccountLink link, {
     required Map<Id, Id?> invitationToGuest,

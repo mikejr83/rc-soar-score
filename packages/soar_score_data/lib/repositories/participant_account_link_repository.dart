@@ -74,22 +74,8 @@ class ParticipantAccountLinkRepository extends DriftRepository
     core.ParticipantAccountLink link, {
     required Iterable<core.Id> guestAccountIds,
   }) => db.transaction(() async {
-    // PostgreSQL holds the row until the transaction ends, so ending or
-    // moving the link waits for this claim; SQLite has one writer.
-    final lock = db.executor.dialect == SqlDialect.postgres
-        ? ' FOR UPDATE'
-        : '';
-    final rows = await db
-        .customSelect(
-          portableSql(
-            db,
-            'SELECT status, account_id, participant_profile_id '
-            'FROM participant_account_links WHERE id = ?$lock',
-          ),
-          variables: [Variable<String>(link.id.value)],
-        )
-        .get();
-    final stored = rows.firstOrNull?.data;
+    // Ending or moving the link waits for this claim (see _lockLink).
+    final stored = await _lockLink(link.id);
     if (stored == null ||
         stored['status'] != 'Confirmed' ||
         stored['account_id'] != link.accountId.value ||
@@ -124,12 +110,18 @@ class ParticipantAccountLinkRepository extends DriftRepository
     core.ParticipantAccountLink link, {
     required Map<core.Id, core.Id?> invitationToGuest,
   }) => db.transaction(() async {
+    // Under the same lock a claim takes, so a claim in progress finishes
+    // first, and what the account holds is decided here, not before.
+    await _lockLink(link.id);
     final saved = await save(link);
     for (final MapEntry(key: invitationId, value: guest)
         in invitationToGuest.entries) {
+      // Only an invitation the account holds now moves, and only to its guest
+      // when that guest account exists (else to nobody).
       await _repoint(
         'invitations',
-        'UPDATE invitations SET redeemed_by_account_id = ? '
+        'UPDATE invitations SET redeemed_by_account_id = '
+            '(SELECT id FROM accounts WHERE id = ?) '
             'WHERE id = ? AND redeemed_by_account_id = ?',
         [
           Variable<String>(guest?.value),
@@ -140,6 +132,25 @@ class ParticipantAccountLinkRepository extends DriftRepository
     }
     return saved;
   });
+
+  /// Locks the stored link row until the transaction ends (PostgreSQL; SQLite
+  /// has one writer) and returns its status, account and profile.
+  Future<Map<String, Object?>?> _lockLink(core.Id linkId) async {
+    final lock = db.executor.dialect == SqlDialect.postgres
+        ? ' FOR UPDATE'
+        : '';
+    final rows = await db
+        .customSelect(
+          portableSql(
+            db,
+            'SELECT status, account_id, participant_profile_id '
+            'FROM participant_account_links WHERE id = ?$lock',
+          ),
+          variables: [Variable<String>(linkId.value)],
+        )
+        .get();
+    return rows.firstOrNull?.data;
+  }
 
   Future<void> _repoint(
     String table,

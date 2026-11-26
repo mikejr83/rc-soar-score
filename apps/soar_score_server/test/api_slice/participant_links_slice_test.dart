@@ -918,6 +918,51 @@ void _tests(SliceBackend backend) {
       );
     });
 
+    test('ending a link while a guest claim completes hands the invitation '
+        'back to the guest', () async {
+      final issued = await issue(1);
+      await guestScores(issued.credential);
+      final link = await links.linkFromInvitation(
+        credential: issued.credential,
+        accountId: pat,
+      );
+      // The guest holds the invitation when the account starts to end the link.
+      final guestAgain = await invitations.resolve(issued.credential);
+      final guest = guestAgain.access.guestAccountId;
+      expect(await redeemers(1), {guest.value});
+
+      final gated = GatedRepository(api.database);
+      final paused = Completer<void>();
+      final release = Completer<void>();
+      gated.beforeRelease = () {
+        paused.complete();
+        return release.future;
+      };
+      final racing = core.ParticipantLinkService(
+        gated,
+        core.InvitationService(gated, invitations.codec, clock: () => clock),
+        clock: () => clock,
+      );
+
+      final ending = racing.end(linkId: link.id, accountId: pat);
+      await paused.future;
+      // The account's own open claims the guest while the end is paused.
+      await links.openParticipation(
+        participationId: id(_participationId(1)),
+        accountId: pat,
+      );
+      expect(await redeemers(1), {pat.value});
+      release.complete();
+      final ended = await ending;
+
+      expect(ended.status, core.ParticipantLinkStatus.ended);
+      expect(await redeemers(1), {guest.value});
+      expect(
+        (await invitations.authorize(guestAgain.sessionToken)).guestAccountId,
+        guest,
+      );
+    });
+
     test('a guest open paused after its write and an account taking over '
         'are both audited, and only the account\'s session works', () async {
       final issued = await issue(1);
