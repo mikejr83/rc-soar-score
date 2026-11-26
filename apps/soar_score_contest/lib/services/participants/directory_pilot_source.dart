@@ -35,18 +35,52 @@ class DirectoryPilotSource {
   static final _email = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
 
   /// The listed pilots whose email, FAI number or national ID is exactly
-  /// [query]; empty while the text is not yet any of those, or when a newer
-  /// query arrived during the pause.
+  /// [query], as the director types: empty while the text is not yet any of
+  /// those (a name makes no lookup), or when a newer change arrived during the
+  /// pause.
   Future<List<ParticipantCandidate>> search(String query) async {
     // Any change of the text ends the wait of an earlier one.
     final mine = ++_typed;
     final text = query.trim();
-    final keys = _keysFor(text);
+    final keys = _typedKeys(text);
     if (keys.isEmpty) return const [];
-    final cached = _answers[text.toLowerCase()];
+    final cached = _answers[_cacheKey(text)];
     if (cached != null) return _candidates(cached, text);
     await Future<void>.delayed(pause);
     if (mine != _typed) return const [];
+    return _lookup(text, keys);
+  }
+
+  /// The same lookup the director asked for on purpose, for an ID the typing
+  /// rules skip (a short one, one with letters only or with spaces). No
+  /// pause, since asking is the pause; the server's limit still applies.
+  Future<List<ParticipantCandidate>> lookup(String query) async {
+    ++_typed;
+    final text = query.trim();
+    if (text.isEmpty || text.length > maxLookupLength) return const [];
+    final keys = text.contains('@')
+        ? _typedKeys(text)
+        : const [
+            DirectoryLookupKeyDto.faiNumber,
+            DirectoryLookupKeyDto.nationalOrgId,
+          ];
+    if (keys.isEmpty) return const [];
+    final cached = _answers[_cacheKey(text)];
+    if (cached != null) return _candidates(cached, text);
+    return _lookup(text, keys);
+  }
+
+  /// The longest text a lookup takes.
+  static const maxLookupLength = 64;
+
+  /// Emails ignore case; IDs are matched exactly.
+  static String _cacheKey(String text) =>
+      text.contains('@') ? text.toLowerCase() : text;
+
+  Future<List<ParticipantCandidate>> _lookup(
+    String text,
+    List<DirectoryLookupKeyDto> keys,
+  ) async {
     final found = <String, DirectoryMatchDto>{};
     for (final key in keys) {
       final response = await hosted.lookupDirectory(
@@ -57,7 +91,7 @@ class DirectoryPilotSource {
       }
     }
     final matches = found.values.toList();
-    _answers[text.toLowerCase()] = matches;
+    _answers[_cacheKey(text)] = matches;
     return _candidates(matches, text);
   }
 
@@ -68,17 +102,21 @@ class DirectoryPilotSource {
     for (final match in matches)
       ParticipantCandidate.directory(
         match,
-        profileId: _profileIds.putIfAbsent(match.entryId.value, Id.create),
+        // The copy the server knows this director already made, else the id
+        // chosen for this session.
+        profileId:
+            match.copiedProfileId ??
+            _profileIds.putIfAbsent(match.entryId.value, Id.create),
         searchedEmail: text.contains('@') ? text : null,
       ),
   ];
 
-  static List<DirectoryLookupKeyDto> _keysFor(String text) {
+  static List<DirectoryLookupKeyDto> _typedKeys(String text) {
     if (text.contains('@')) {
       return _email.hasMatch(text) ? [DirectoryLookupKeyDto.email] : const [];
     }
-    // FAI numbers and national IDs carry digits; a name never does, so typing
-    // a name makes no lookup.
+    // FAI numbers and national IDs usually carry digits; a name never does,
+    // so typing a name makes no lookup. Other IDs use [lookup].
     if (text.length < 4 ||
         text.contains(RegExp(r'\s')) ||
         !text.contains(RegExp(r'\d'))) {

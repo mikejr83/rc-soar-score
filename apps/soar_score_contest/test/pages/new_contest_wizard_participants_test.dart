@@ -386,6 +386,28 @@ void main() {
       expect(store.draft.participants, hasLength(1));
     });
 
+    testWidgets('the lookup button finds an ID typing skips', (tester) async {
+      final l10n = AppLocalizationsEn();
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: directoryApi,
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      await tester.enterText(searchField(), 'AB');
+      await tester.pump(const Duration(seconds: 1));
+      expect(sent.where((r) => r.url.path.contains('/directory/')), isEmpty);
+      await tester.tap(find.byKey(const ValueKey('directory-lookup')));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.searchDirectoryResults('AB')), findsOneWidget);
+      await tester.tap(find.widgetWithText(ListTile, 'Dana Directory'));
+      await tester.pumpAndSettle();
+      expect(store.draft.participants, hasLength(1));
+    });
+
     testWidgets('signed out, the search never calls the directory', (
       tester,
     ) async {

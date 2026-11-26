@@ -693,6 +693,7 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                       onAddNew: _addNew,
                       onAddProfile: _addProfile,
                       remote: _directory?.search,
+                      lookup: _directory?.lookup,
                       onAddDirectory: (candidate) =>
                           unawaited(_addFromDirectory(candidate)),
                     ),

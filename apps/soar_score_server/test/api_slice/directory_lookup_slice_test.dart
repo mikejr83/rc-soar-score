@@ -357,6 +357,26 @@ void _tests(SliceBackend backend) {
       },
     );
 
+    test('a repeated search names the director\'s own copy only', () async {
+      final created = await call(
+        dana,
+        '/participants',
+        body: {'id': profile.value, 'first_name': 'Pat', 'last_name': 'Pilot'},
+      );
+      expect(created.status, 201, reason: created.text);
+      await call(
+        dana,
+        '/directory/copies',
+        body: copyBody(patEntry.id, profile),
+      );
+
+      final mine = await lookup(dana, 'fai_number', 'F1');
+      final theirs = await lookup(sam, 'fai_number', 'F1');
+
+      expect((mine.single! as Map)['copied_profile_id'], profile.value);
+      expect((theirs.single! as Map)['copied_profile_id'], isNull);
+    });
+
     test('several directors can copy the same pilot', () async {
       final danaProfile = core.Id.create();
       final samProfile = core.Id.create();

@@ -139,9 +139,10 @@ void main() {
     final s = source();
 
     await s.search('F1234');
-    await s.search('f1234');
-
+    await s.search('F1234');
     expect(hostedRequests, hasLength(2));
+    await s.search('f1234'); // IDs are matched exactly, so asked again
+    expect(hostedRequests, hasLength(4));
   });
 
   test('the same pilot always gets the same profile id', () async {
@@ -243,5 +244,60 @@ void main() {
 
     expect(await waiting, isEmpty);
     expect(hostedRequests, isEmpty);
+  });
+
+  test(
+    'an explicit lookup takes IDs typing skips: short, letters, spaces',
+    () async {
+      byKey['fai_number'] = [_match(_entryA, 'Pat')];
+      final s = source();
+
+      for (final id in ['AB', 'ABCDEF', 'NSS 12 A']) {
+        expect(await s.search(id), isEmpty, reason: id);
+      }
+      expect(hostedRequests, isEmpty);
+      for (final id in ['AB', 'ABCDEF', 'NSS 12 A']) {
+        expect((await s.lookup(id)).map((c) => c.name), [
+          'Pat Pilot',
+        ], reason: id);
+      }
+      expect(await s.lookup('  '), isEmpty);
+      expect(await s.lookup('x' * 65), isEmpty);
+    },
+  );
+
+  test('IDs are cached exactly, emails ignoring case', () async {
+    byKey['fai_number'] = [_match(_entryA, 'Pat')];
+    byKey['email'] = [_match(_entryB, 'Bea')];
+    final s = source();
+
+    await s.lookup('ab');
+    await s.lookup('AB');
+    expect(hostedRequests, hasLength(4));
+    hostedRequests.clear();
+    await s.lookup('Bea@Example.com');
+    await s.lookup('bea@example.com');
+    expect(hostedRequests, hasLength(1));
+  });
+
+  test('a copy the server already knows keeps its profile id', () async {
+    final known = Id.create();
+    byKey['fai_number'] = [
+      {..._match(_entryA, 'Pat'), 'copied_profile_id': known.value},
+    ];
+    final s = source();
+
+    final candidate = (await s.search('F1234')).single;
+
+    expect(candidate.profileId, known);
+    final own = ParticipantProfile(
+      id: known,
+      ownerAccountId: Id.create(),
+      firstName: 'Pat',
+      lastName: 'Pilot',
+      createdAt: DateTime.utc(2026, 11, 1),
+      updatedAt: DateTime.utc(2026, 11, 1),
+    );
+    expect(candidate.isCopiedIn([own]), isTrue);
   });
 }

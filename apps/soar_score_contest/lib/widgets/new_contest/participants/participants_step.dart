@@ -398,6 +398,7 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
               selected: ids,
               offline: widget.offline,
               remote: widget.remote ?? _directory?.search,
+              lookup: _directory?.lookup,
               onQueryChanged: (value) => setState(() => _query = value),
               onAdd: (candidate) {
                 if (candidate.directory != null) {

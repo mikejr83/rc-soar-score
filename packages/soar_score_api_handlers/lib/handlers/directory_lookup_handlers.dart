@@ -69,6 +69,7 @@ void addDirectoryLookupRoutes(
     country: match.entry.country,
     email: match.email,
     emailAvailable: match.emailAvailable,
+    copiedProfileId: match.copiedProfileId,
   );
 
   Response answer(Map<String, dynamic> json) =>

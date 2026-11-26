@@ -13329,6 +13329,30 @@ abstract class AppLocalizations {
   /// **'Directory'**
   String get searchRemote;
 
+  /// Tooltip of the button that looks the typed text up in the pilot directory on purpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up in the directory by exact email, FAI number or national ID'**
+  String get searchDirectoryLookup;
+
+  /// Header of the directory results of an explicit lookup.
+  ///
+  /// In en, this message translates to:
+  /// **'Directory results for “{text}”'**
+  String searchDirectoryResults(String text);
+
+  /// Shown when an explicit directory lookup found nobody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody listed matches “{text}” exactly.'**
+  String searchDirectoryNone(String text);
+
+  /// Shown when an explicit directory lookup failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The directory could not be searched. Try again.'**
+  String get searchDirectoryFailed;
+
   /// Message when copying a pilot from the directory into the director's list failed.
   ///
   /// In en, this message translates to:

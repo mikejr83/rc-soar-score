@@ -52,6 +52,7 @@ class DirectoryMatchDto {
     this.country,
     this.email,
     required this.emailAvailable,
+    this.copiedProfileId,
   });
 
   factory DirectoryMatchDto.fromJson(Map<String, dynamic> json) =>
@@ -68,6 +69,11 @@ class DirectoryMatchDto {
   final String? country;
   final String? email;
   final bool emailAvailable;
+
+  /// The director's own profile this pilot was already copied to, if any: a
+  /// repeated search offers that copy, not a new one. Never another
+  /// director's profile.
+  final Id? copiedProfileId;
 
   Map<String, dynamic> toJson() => _$DirectoryMatchDtoToJson(this);
 }

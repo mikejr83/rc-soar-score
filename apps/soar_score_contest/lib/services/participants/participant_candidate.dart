@@ -69,6 +69,7 @@ class ParticipantCandidate {
   bool isCopiedIn(Iterable<ParticipantProfile> profiles) {
     final match = directory;
     if (match == null) return false;
+    if (profiles.any((p) => p.id == profileId)) return true;
     bool same(String? a, String? b) =>
         a != null &&
         b != null &&

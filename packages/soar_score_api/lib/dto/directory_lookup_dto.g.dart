@@ -55,6 +55,13 @@ DirectoryMatchDto _$DirectoryMatchDtoFromJson(Map<String, dynamic> json) =>
           country: $checkedConvert('country', (v) => v as String?),
           email: $checkedConvert('email', (v) => v as String?),
           emailAvailable: $checkedConvert('email_available', (v) => v as bool),
+          copiedProfileId: $checkedConvert(
+            'copied_profile_id',
+            (v) => _$JsonConverterFromJson<String, Id>(
+              v,
+              const IdConverter().fromJson,
+            ),
+          ),
         );
         return val;
       },
@@ -65,6 +72,7 @@ DirectoryMatchDto _$DirectoryMatchDtoFromJson(Map<String, dynamic> json) =>
         'faiNumber': 'fai_number',
         'nationalOrgId': 'national_org_id',
         'emailAvailable': 'email_available',
+        'copiedProfileId': 'copied_profile_id',
       },
     );
 
@@ -81,7 +89,21 @@ Map<String, dynamic> _$DirectoryMatchDtoToJson(DirectoryMatchDto instance) =>
       'country': instance.country,
       'email': instance.email,
       'email_available': instance.emailAvailable,
+      'copied_profile_id': _$JsonConverterToJson<String, Id>(
+        instance.copiedProfileId,
+        const IdConverter().toJson,
+      ),
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);
 
 DirectoryLookupResponse _$DirectoryLookupResponseFromJson(
   Map<String, dynamic> json,

@@ -17,6 +17,7 @@ class ParticipantsToolbar extends StatelessWidget {
     required this.onAddNew,
     required this.onAddProfile,
     this.remote,
+    this.lookup,
     this.onAddDirectory,
   });
 
@@ -27,6 +28,9 @@ class ParticipantsToolbar extends StatelessWidget {
 
   /// The directory search, when the director is signed in (#653).
   final RemoteParticipantSearch? remote;
+
+  /// Looks the typed text up in the directory on purpose.
+  final RemoteParticipantSearch? lookup;
 
   /// Copies a pilot the directory found into the director's list and adds
   /// the copy.
@@ -43,6 +47,7 @@ class ParticipantsToolbar extends StatelessWidget {
       selected: c.memberProfileIds,
       offline: false,
       remote: canAdd ? remote : null,
+      lookup: canAdd ? lookup : null,
       onQueryChanged: c.setQuery,
       onAdd: (ParticipantCandidate candidate) {
         if (candidate.directory != null) {

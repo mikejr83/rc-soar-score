@@ -8822,6 +8822,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchRemote => 'Directory';
 
   @override
+  String get searchDirectoryLookup =>
+      'Look up in the directory by exact email, FAI number or national ID';
+
+  @override
+  String searchDirectoryResults(String text) {
+    return 'Directory results for “$text”';
+  }
+
+  @override
+  String searchDirectoryNone(String text) {
+    return 'Nobody listed matches “$text” exactly.';
+  }
+
+  @override
+  String get searchDirectoryFailed =>
+      'The directory could not be searched. Try again.';
+
+  @override
   String directoryCopyFailed(String name) {
     return 'Could not add $name from the directory. Try again.';
   }

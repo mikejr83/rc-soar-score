@@ -31,14 +31,21 @@ class DirectoryMatch extends Equatable {
     required this.entry,
     required this.email,
     required this.emailAvailable,
+    this.copiedProfileId,
   });
 
   final ParticipantDirectoryEntry entry;
   final String? email;
   final bool emailAvailable;
 
+  /// The asking director's own profile this pilot was already copied to (the
+  /// pilot's confirmed directory link to a profile that director owns), so a
+  /// repeated search finds the same copy. Only the caller's own profiles are
+  /// ever named.
+  final Id? copiedProfileId;
+
   @override
-  List<Object?> get props => [entry, email, emailAvailable];
+  List<Object?> get props => [entry, email, emailAvailable, copiedProfileId];
 }
 
 /// A director finds listed pilots in the directory and copies one into their
@@ -83,14 +90,14 @@ class DirectoryLookupService {
     }
     final entries = repository.participantDirectoryEntryRepository;
     final matches = switch (key) {
-      DirectoryLookupKey.email => await _byEmail(text),
+      DirectoryLookupKey.email => await _byEmail(text, directorAccountId),
       DirectoryLookupKey.faiNumber => [
         for (final entry in await entries.listListedByFaiNumber(text))
-          await _match(entry),
+          await _match(entry, directorAccountId),
       ],
       DirectoryLookupKey.nationalOrgId => [
         for (final entry in await entries.listListedByNationalOrgId(text))
-          await _match(entry),
+          await _match(entry, directorAccountId),
       ],
     };
     _logger.info(
@@ -119,7 +126,7 @@ class DirectoryLookupService {
       accountId: entry.accountId,
       directorAccountId: directorAccountId,
     );
-    final match = await _match(entry);
+    final match = await _match(entry, directorAccountId);
     if (match == null) throw ParticipantLinkError.linkNotFound();
     _logger.info(
       'copy director=${directorAccountId.value} profile=${profileId.value}',
@@ -155,7 +162,7 @@ class DirectoryLookupService {
     if (link == null || !_isDirectoryLink(link)) {
       throw ParticipantLinkError.linkNotFound();
     }
-    final match = await _match(entry);
+    final match = await _match(entry, directorAccountId);
     if (match == null) throw ParticipantLinkError.linkNotFound();
     return match;
   }
@@ -179,7 +186,10 @@ class DirectoryLookupService {
   /// Every outcome that answers "nobody" (no such account, an unverified
   /// email, no entry, an unlisted one) does the same two reads, so the
   /// answer's timing says nothing about which it was.
-  Future<List<DirectoryMatch?>> _byEmail(String email) async {
+  Future<List<DirectoryMatch?>> _byEmail(
+    String email,
+    Id directorAccountId,
+  ) async {
     final account = await repository.accountRepository.findByEmail(email);
     final entry = await repository.participantDirectoryEntryRepository
         .findForAccount(account?.id ?? Id.create());
@@ -189,7 +199,7 @@ class DirectoryLookupService {
         !entry.isListed) {
       return const [];
     }
-    return [_view(entry, account)];
+    return [await _view(entry, account, directorAccountId)];
   }
 
   ParticipantLinkService get _links =>
@@ -201,15 +211,22 @@ class DirectoryLookupService {
 
   /// The entry as a director may see it, or null when its account can no
   /// longer be found by directors (not an active registered account).
-  Future<DirectoryMatch?> _match(ParticipantDirectoryEntry entry) async {
+  Future<DirectoryMatch?> _match(
+    ParticipantDirectoryEntry entry,
+    Id directorAccountId,
+  ) async {
     final account = await repository.accountRepository.findById(
       entry.accountId,
     );
     if (account == null) return null;
-    return _view(entry, account);
+    return _view(entry, account, directorAccountId);
   }
 
-  DirectoryMatch? _view(ParticipantDirectoryEntry entry, Account account) {
+  Future<DirectoryMatch?> _view(
+    ParticipantDirectoryEntry entry,
+    Account account,
+    Id directorAccountId,
+  ) async {
     if (account.kind != AccountKind.registered ||
         account.status != AccountStatus.active) {
       return null;
@@ -219,7 +236,24 @@ class DirectoryLookupService {
       entry: entry,
       email: available && entry.emailVisibleToDirectors ? account.email : null,
       emailAvailable: available,
+      copiedProfileId: await _copiedProfile(directorAccountId, account.id),
     );
+  }
+
+  /// The profile of [directorAccountId] that [accountId] was copied to.
+  Future<Id?> _copiedProfile(Id directorAccountId, Id accountId) async {
+    final links = await repository.participantAccountLinkRepository
+        .listForAccount(accountId);
+    for (final link in links) {
+      if (!_isDirectoryLink(link)) continue;
+      final profile = await repository.participantProfileRepository.findById(
+        link.participantProfileId,
+      );
+      if (profile != null && profile.ownerAccountId == directorAccountId) {
+        return profile.id;
+      }
+    }
+    return null;
   }
 
   Future<Account> _requireDirector(Id accountId) async {
