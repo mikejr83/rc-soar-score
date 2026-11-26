@@ -20,6 +20,7 @@ Routes have no host and no leading context beyond what is shown. A pilot and a h
 | ---------------------- | ------------------------------------------------------------ | ------------------ |
 | Landing page           | `/`                                                          | Anyone             |
 | Invitation handler     | `/invitations/{credential}`                                  | Anyone with a link |
+| Your details           | `/details`                                                   | Signed-in accounts |
 | Contests               | `/contests`                                                  | Signed-in accounts |
 | Contest entry          | `/contests/{contest_id}`                                     | Participants       |
 | Team overview          | `/contests/{contest_id}/team`                                | Helpers            |
@@ -50,6 +51,12 @@ When the link is valid the page offers three choices:
 - **Create an account.** The same as sign in, after creating the account.
 
 The page names the participant and contest so the person can see the link is theirs. After any choice the person is sent to the contest entry route. A person who has already linked their account is not asked to confirm again.
+
+## Your details page
+
+Route: `/details`.
+
+A signed-in participant with no directory entry arrives here once after signing in from the landing page (an invitation link they started from is never interrupted). It asks for their name, prefilled from the account, and two choices, both ticked by default: "Let contest directors find me" and "Keep my email private". "More details (optional)" holds FAI number, national ID, club and country. Continue always makes the entry, listed or not, and goes to the contests page. There is no skip: continuing with the defaults is one tap. A participant who reaches the contests page with no entry sees a short "Let directors find you" card that opens this page. The page edits an existing entry the same way; the account page (#654) links to it.
 
 ## Contests page
 

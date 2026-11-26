@@ -11,6 +11,7 @@ import '../models/guest_session.dart';
 import '../models/officialization_policy.dart';
 import '../models/landing_result.dart';
 import '../models/link_candidate.dart';
+import '../models/own_directory.dart';
 import '../models/pilot_overview.dart';
 import '../models/pilot_round.dart';
 import '../models/results_snapshot.dart';
@@ -321,6 +322,51 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   }
 
   @override
+  Future<OwnDirectory> ownDirectory() async {
+    final state = await _readDirectory(_client.getDirectoryEntry);
+    final entry = state.entry;
+    return OwnDirectory(
+      hasEntry: entry != null,
+      emailAvailable: state.emailAvailable,
+      initial: entry == null
+          ? DirectoryDetails(
+              firstName: state.suggestedFirstName,
+              lastName: state.suggestedLastName,
+            )
+          : DirectoryDetails(
+              firstName: entry.firstName,
+              lastName: entry.lastName,
+              club: entry.club,
+              faiNumber: entry.faiNumber,
+              nationalOrgId: entry.nationalOrgId,
+              country: entry.country,
+              city: entry.city,
+              state: entry.state,
+              isListed: entry.isListed,
+              emailVisibleToDirectors: entry.emailVisibleToDirectors,
+            ),
+    );
+  }
+
+  @override
+  Future<void> saveOwnDirectory(DirectoryDetails details) => _readDirectory(
+    () => _client.putDirectoryEntry(
+      PutDirectoryEntryRequest(
+        firstName: details.firstName,
+        lastName: details.lastName,
+        club: details.club,
+        faiNumber: details.faiNumber,
+        nationalOrgId: details.nationalOrgId,
+        country: details.country,
+        city: details.city,
+        state: details.state,
+        isListed: details.isListed,
+        emailVisibleToDirectors: details.emailVisibleToDirectors,
+      ),
+    ),
+  );
+
+  @override
   Future<void> confirmLinkCandidate(String candidateId) => _answerCandidate(
     () => _client.confirmLinkCandidate(ApiId.parse(candidateId)),
   );
@@ -348,6 +394,17 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
         ),
         _ => const SelfScoreLoadException(_unreachable),
       };
+    }
+  }
+
+  /// Runs a call to the directory entry routes: every failure, a 404 or 409
+  /// included, is a [SelfScoreLoadException] the pages handle. (`_readAccount`
+  /// lets those two through for the "Is this you?" answers.)
+  Future<T> _readDirectory<T>(Future<T> Function() call) async {
+    try {
+      return await _readAccount(call);
+    } on ApiHttpError {
+      throw const SelfScoreLoadException(_unreachable);
     }
   }
 

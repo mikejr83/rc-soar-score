@@ -449,4 +449,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get isThisYouRetry => 'Try again';
+
+  @override
+  String get detailsTitle => 'Your details';
+
+  @override
+  String get detailsIntro =>
+      'Check your name and choose what contest directors can see. You can change this later.';
+
+  @override
+  String get detailsFirstName => 'First name';
+
+  @override
+  String get detailsLastName => 'Last name';
+
+  @override
+  String get detailsNameRequired => 'Enter your name';
+
+  @override
+  String get detailsListedTitle => 'Let contest directors find me';
+
+  @override
+  String get detailsListedHelp =>
+      'A director can look you up and add you to a contest without typing your details. They never see whether you are unlisted.';
+
+  @override
+  String get detailsEmailPrivateTitle => 'Keep my email private';
+
+  @override
+  String get detailsEmailPrivateHelp =>
+      'Directors are only told that an email is available to the system.';
+
+  @override
+  String get detailsMoreHeading => 'More details (optional)';
+
+  @override
+  String get detailsFaiNumber => 'FAI number';
+
+  @override
+  String get detailsNationalId => 'National ID';
+
+  @override
+  String get detailsClub => 'Club';
+
+  @override
+  String get detailsCountry => 'Country';
+
+  @override
+  String get detailsContinue => 'Continue';
+
+  @override
+  String get detailsSaveFailed =>
+      'Your details could not be saved. Check your connection and try again.';
+
+  @override
+  String get detailsLoadFailed => 'Your details could not be loaded.';
+
+  @override
+  String get detailsRetry => 'Try again';
+
+  @override
+  String get detailsPromptTitle => 'Let directors find you';
+
+  @override
+  String get detailsPromptBody =>
+      'Choose whether contest directors can find you, so they can add you to a contest.';
+
+  @override
+  String get detailsPromptAction => 'Set your details';
 }
