@@ -252,7 +252,7 @@ void main() {
       ownerAccountId: Id.create(),
       firstName: 'Bea',
       lastName: 'Pilot',
-      faiNumber: ' f1 ',
+      faiNumber: ' F1 ',
       createdAt: DateTime.utc(2026, 11, 1),
       updatedAt: DateTime.utc(2026, 11, 1),
     );
@@ -384,6 +384,35 @@ void main() {
     },
   );
 
+  test('FAI numbers and national IDs match exactly, as the server looks '
+      'them up', () async {
+    byKey['fai_number'] = [
+      {..._match(_entryB, 'Bea'), 'national_org_id': 'NSS-1'},
+    ];
+    final s = source();
+    final candidate = (await s.search('F1234')).single;
+    ParticipantProfile own({String? fai, String? national}) =>
+        ParticipantProfile(
+          id: Id.create(),
+          ownerAccountId: Id.create(),
+          firstName: 'Other',
+          lastName: 'Pilot',
+          faiNumber: fai,
+          nationalOrgId: national,
+          createdAt: DateTime.utc(2026, 11, 1),
+          updatedAt: DateTime.utc(2026, 11, 1),
+        );
+
+    expect(candidate.copiesIn([own(fai: 'f1')]), isEmpty);
+    expect(candidate.copiesIn([own(national: 'nss-1')]), isEmpty);
+    final exactFai = own(fai: 'F1');
+    final exactNational = own(national: 'NSS-1');
+    expect(candidate.copiesIn([own(fai: 'f1'), exactFai, exactNational]), [
+      exactFai,
+      exactNational,
+    ]);
+  });
+
   test('a profile that shares any identifier is shown, not hidden', () async {
     byKey['fai_number'] = [
       {..._match(_entryB, 'Bea'), 'national_org_id': 'NSS-1'},
@@ -399,7 +428,7 @@ void main() {
       createdAt: DateTime.utc(2026, 11, 1),
       updatedAt: DateTime.utc(2026, 11, 1),
     );
-    final held = own('nss-1');
+    final held = own(' NSS-1 ');
 
     expect(candidate.copiesIn([own('x'), held]), [held]);
   });

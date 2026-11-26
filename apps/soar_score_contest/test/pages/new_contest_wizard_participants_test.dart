@@ -441,6 +441,34 @@ void main() {
       expect(find.text(AppLocalizationsEn().searchRemote), findsNothing);
     });
 
+    testWidgets('a profile whose FAI number differs only by case does not '
+        'stand in for the directory pilot', (tester) async {
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: (request) async {
+          if (request.url.path.endsWith('/participants') &&
+              request.method == 'GET') {
+            return json({
+              'participants': [
+                profile('Cass', 'Lower', n: 77, fai: 'f1234').toJson(),
+              ],
+            });
+          }
+          return directoryApi(request);
+        },
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      await tester.enterText(searchField(), 'F1234');
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(ListTile, 'Dana Directory'), findsOneWidget);
+      expect(find.text(AppLocalizationsEn().searchRemote), findsOneWidget);
+    });
+
     testWidgets('a lookup that answers after the text changed or cleared is '
         'ignored', (tester) async {
       final l10n = AppLocalizationsEn();

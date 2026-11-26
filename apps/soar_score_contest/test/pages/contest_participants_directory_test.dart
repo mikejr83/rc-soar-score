@@ -83,6 +83,52 @@ void main() {
     expect(find.text('Directory'), findsNothing);
   });
 
+  testWidgets('a profile whose FAI number differs only by case is not the '
+      'directory pilot', (tester) async {
+    await pumpParticipantsPage(
+      tester,
+      ParticipantsServer(),
+      auth: FakeAuthSession(signedIn: true),
+      intercept: (request) async {
+        if (request.url.path.endsWith('/directory/lookups')) {
+          return json({
+            'results': [
+              {
+                ..._match(),
+                'first_name': 'Dora',
+                'last_name': 'Exact',
+                'email': null,
+              },
+            ],
+          });
+        }
+        if (request.url.path.endsWith('/participants') &&
+            request.method == 'GET') {
+          return json({
+            'participants': [
+              profile('Cass', 'Lower', n: 77, fai: 'f9999').toJson(),
+            ],
+          });
+        }
+        return null;
+      },
+    );
+
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const ValueKey('participant-search')),
+        matching: find.byType(TextField),
+      ),
+      'F9999',
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    // The match is offered from the directory; Cass is a different pilot.
+    expect(find.widgetWithText(ListTile, 'Dora Exact'), findsOneWidget);
+    expect(find.text('Directory'), findsOneWidget);
+  });
+
   testWidgets('a lookup that answers after the text was cleared is ignored', (
     tester,
   ) async {

@@ -69,6 +69,10 @@ class ParticipantCandidate {
   List<ParticipantProfile> copiesIn(Iterable<ParticipantProfile> profiles) {
     final match = directory;
     if (match == null) return const [];
+    // The server looks FAI numbers and national IDs up exactly, so they
+    // match exactly here; only email is case-insensitive.
+    bool exact(String? a, String? b) =>
+        a != null && b != null && a.trim() == b.trim();
     bool same(String? a, String? b) =>
         a != null &&
         b != null &&
@@ -76,8 +80,8 @@ class ParticipantCandidate {
     return [
       for (final p in profiles)
         if (p.id == profileId ||
-            same(p.faiNumber, match.faiNumber) ||
-            same(p.nationalOrgId, match.nationalOrgId) ||
+            exact(p.faiNumber, match.faiNumber) ||
+            exact(p.nationalOrgId, match.nationalOrgId) ||
             same(p.email, match.email ?? searchedEmail))
           p,
     ];
