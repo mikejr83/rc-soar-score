@@ -782,6 +782,48 @@ void _tests(SliceBackend backend) {
       );
     });
 
+    test(
+      'wait for an invitation that is set to outlast the 24 hours',
+      () async {
+        await issue(1);
+        await confirm(pat, _profileId(1));
+        await completedAgo(30);
+        final invitation = (await repository.invitationRepository
+            .findActiveForParticipation(id(_participationId(1))))!;
+        // The director let this link run a day longer than usual.
+        await repository.invitationRepository.save(
+          core.Invitation.fromJson({
+            ...invitation.toSyncJson(),
+            'expires_at': DateTime.now()
+                .toUtc()
+                .add(const Duration(hours: 10))
+                .toIso8601String(),
+          }),
+        );
+
+        expect(await participations(pat), hasLength(1), reason: 'still listed');
+        expect((await history(pat))['contests'], isEmpty, reason: 'no overlap');
+      },
+    );
+
+    test('list a finished contest whose invitation was revoked', () async {
+      await issue(1);
+      await confirm(pat, _profileId(1));
+      await completedAgo(1);
+      final invitation = (await repository.invitationRepository
+          .findActiveForParticipation(id(_participationId(1))))!;
+      await repository.invitationRepository.save(
+        core.Invitation.fromJson({
+          ...invitation.toSyncJson(),
+          'state': 'Revoked',
+          'revoked_at': DateTime.now().toUtc().toIso8601String(),
+        }),
+      );
+
+      expect(await participations(pat), isEmpty);
+      expect((await history(pat))['contests'], hasLength(1));
+    });
+
     test('carry the public results address of a public contest', () async {
       await issue(1);
       await confirm(pat, _profileId(1));

@@ -394,8 +394,11 @@ class ParticipantLinkService {
   /// Confirmed links: the history that starts where [participationsFor]
   /// leaves off, [InvitationService.completedGrace] after a contest completed.
   ///
-  /// Needs no invitation, so history outlives them. A contest reached only
-  /// through an ended link is not listed; linking again brings it back.
+  /// A contest is here exactly when it is finished and no invitation of the
+  /// pilot opens it any more, so this list and [participationsFor] never
+  /// overlap. Nothing is needed once it leaves: history outlives invitations.
+  /// A contest reached only through an ended link is not listed; linking
+  /// again brings it back.
   /// Ordered by contest start, newest first, then [offset] rows skipped and
   /// at most [limit] returned; [hasMore] says whether more follow.
   ///
@@ -423,11 +426,22 @@ class ParticipantLinkService {
     final contests = await repository.contestRepository.findByIds({
       for (final p in participations) p.contestId,
     });
+    final active = {
+      for (final i
+          in await repository.invitationRepository.listForParticipations([
+            for (final p in participations) p.id,
+          ]))
+        if (i.isActive) i.contestParticipationId: i,
+    };
     final now = _clock().toUtc();
     final rows = <PastParticipation>[
       for (final participation in participations)
         if (contests[participation.contestId] case final contest?)
-          if (_isHistory(contest, now))
+          // Exactly what [participationsFor] leaves out, so the two lists
+          // never overlap: finished, and no invitation that still opens
+          // (which honors an explicit expiry as well as the 24 hours).
+          if (contest.lifecycleState == LifecycleState.completed &&
+              !_opens(active[participation.id], contest, participation, now))
             PastParticipation(
               link: linkOf[participation.participantProfileId]!,
               participation: participation,
@@ -446,12 +460,15 @@ class ParticipantLinkService {
     return (rows: page, hasMore: offset + page.length < rows.length);
   }
 
-  /// A completed contest whose read-only window on the contests list is over
-  /// (the completion time stands in as the last update, as in
-  /// [InvitationService.opening]).
-  static bool _isHistory(Contest contest, DateTime now) =>
-      contest.lifecycleState == LifecycleState.completed &&
-      !now.isBefore(contest.updatedAt.add(InvitationService.completedGrace));
+  static bool _opens(
+    Invitation? invitation,
+    Contest contest,
+    ContestParticipation participation,
+    DateTime now,
+  ) =>
+      invitation != null &&
+      InvitationService.opening(invitation, contest, participation, now) !=
+          null;
 
   // -- internals ----------------------------------------------------------
 
