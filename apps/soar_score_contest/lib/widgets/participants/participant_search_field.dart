@@ -173,6 +173,9 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
               return;
             }
             widget.onAdd(candidate);
+            // A lookup still waiting must not bring results back under the
+            // cleared text.
+            setState(_forgetLookup);
             _controller.clear();
             widget.onQueryChanged?.call('');
           },

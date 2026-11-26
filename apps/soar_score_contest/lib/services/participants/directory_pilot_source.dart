@@ -44,8 +44,7 @@ class DirectoryPilotSource {
   final DateTime Function() _clock;
 
   int _typed = 0;
-  final Map<String, ({DateTime at, List<DirectoryMatchDto> matches})> _answers =
-      {};
+  final Map<String, ({DateTime at, _Found found})> _answers = {};
 
   /// The profile id a copy of each directory entry gets, kept so choosing the
   /// same pilot again (after a failure, or in another search) is the same copy.
@@ -90,7 +89,7 @@ class DirectoryPilotSource {
     if (keys.isEmpty) return const [];
     final cached = _answers[_cacheKey(text, keys)];
     if (cached != null && _clock().difference(cached.at) < answerLife) {
-      return _candidates(cached.matches, text);
+      return _candidates(cached.found);
     }
     await Future<void>.delayed(pause);
     if (mine != _typed) return const [];
@@ -133,24 +132,25 @@ class DirectoryPilotSource {
   ) async {
     await _load();
     final found = <String, DirectoryMatchDto>{};
+    final viaEmail = <String>{};
     for (final key in keys) {
       final response = await hosted.lookupDirectory(
         DirectoryLookupRequest(key: key, value: text),
       );
       for (final match in response.results) {
         found[match.entryId.value] = match;
+        if (key == DirectoryLookupKeyDto.email) {
+          viaEmail.add(match.entryId.value);
+        }
       }
     }
-    final matches = found.values.toList();
-    _answers[_cacheKey(text, keys)] = (at: _clock(), matches: matches);
-    return _candidates(matches, text);
+    final answer = _Found(text, found.values.toList(), viaEmail);
+    _answers[_cacheKey(text, keys)] = (at: _clock(), found: answer);
+    return _candidates(answer);
   }
 
-  List<ParticipantCandidate> _candidates(
-    List<DirectoryMatchDto> matches,
-    String text,
-  ) => [
-    for (final match in matches)
+  List<ParticipantCandidate> _candidates(_Found answer) => [
+    for (final match in answer.matches)
       ParticipantCandidate.directory(
         match,
         // The copy the server knows this director already made, else the id
@@ -158,7 +158,11 @@ class DirectoryPilotSource {
         profileId:
             match.copiedProfileId ??
             _profileIds.putIfAbsent(match.entryId.value, Id.create),
-        searchedEmail: _email.hasMatch(text) ? text : null,
+        // The typed email only names entries the email lookup returned,
+        // never one an ID lookup found.
+        searchedEmail: answer.viaEmail.contains(match.entryId.value)
+            ? answer.text
+            : null,
       ),
   ];
 
@@ -238,4 +242,13 @@ class DirectoryPilotSource {
     copies[entryId.value] = profileId.value;
     await kept.set(accountId, copiesKey, copies);
   }
+}
+
+/// The answer to one lookup and which entries the email key returned.
+class _Found {
+  const _Found(this.text, this.matches, this.viaEmail);
+
+  final String text;
+  final List<DirectoryMatchDto> matches;
+  final Set<String> viaEmail;
 }

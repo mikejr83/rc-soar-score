@@ -129,6 +129,101 @@ void main() {
     expect(find.text('Directory'), findsOneWidget);
   });
 
+  testWidgets('an ID shaped like an email is not matched to a profile by '
+      'that text', (tester) async {
+    await pumpParticipantsPage(
+      tester,
+      ParticipantsServer(),
+      auth: FakeAuthSession(signedIn: true),
+      intercept: (request) async {
+        if (request.url.path.endsWith('/directory/lookups')) {
+          final body = jsonDecode(request.body) as Map<String, dynamic>;
+          return json({
+            'results': body['key'] == 'fai_number'
+                ? [
+                    {
+                      ..._match(),
+                      'first_name': 'Dora',
+                      'last_name': 'Exact',
+                      'fai_number': 'f1@club.org1',
+                      'email': null,
+                    },
+                  ]
+                : [],
+          });
+        }
+        if (request.url.path.endsWith('/participants') &&
+            request.method == 'GET') {
+          return json({
+            'participants': [
+              profile('Cass', 'Local', n: 77, email: 'f1@club.org1').toJson(),
+            ],
+          });
+        }
+        return null;
+      },
+    );
+
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const ValueKey('participant-search')),
+        matching: find.byType(TextField),
+      ),
+      'f1@club.org1',
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(ListTile, 'Dora Exact'), findsOneWidget);
+    expect(find.text('Directory'), findsOneWidget);
+  });
+
+  testWidgets('choosing an autocomplete result drops a lookup still waiting', (
+    tester,
+  ) async {
+    final release = Completer<void>();
+    var waiting = false;
+    await pumpParticipantsPage(
+      tester,
+      ParticipantsServer(),
+      auth: FakeAuthSession(signedIn: true),
+      intercept: (request) async {
+        if (request.url.path.endsWith('/directory/lookups')) {
+          waiting = true;
+          await release.future;
+          return json({
+            'results': [
+              {
+                ..._match(),
+                'first_name': 'Dora',
+                'last_name': 'Exact',
+                'email': null,
+              },
+            ],
+          });
+        }
+        return null;
+      },
+    );
+    final field = find.descendant(
+      of: find.byKey(const ValueKey('participant-search')),
+      matching: find.byType(TextField),
+    );
+
+    await tester.enterText(field, 'Pia');
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('directory-lookup')));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(waiting, isTrue, reason: 'the lookup was sent');
+    await tester.tap(find.widgetWithText(ListTile, 'Pia Ward'));
+    await tester.pump();
+    release.complete();
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(ListTile, 'Dora Exact'), findsNothing);
+    expect(find.text('Directory'), findsNothing);
+  });
+
   testWidgets('a lookup that answers after the text was cleared is ignored', (
     tester,
   ) async {
