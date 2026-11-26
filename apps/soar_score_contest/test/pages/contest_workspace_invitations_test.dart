@@ -37,12 +37,17 @@ class _Source implements PilotInvitationSource {
   }
 
   @override
-  Future<void> send(ApiClient client, Id contestId, List<Id> ids) async {
+  Future<InvitationEmailReport> send(
+    ApiClient client,
+    Id contestId,
+    List<Id> ids,
+  ) async {
     if (failSend) throw StateError('no');
     sent.add(ids);
     for (final id in ids) {
       links[id.value] = 'https://x.test/${id.value}';
     }
+    return const InvitationEmailReport.none();
   }
 }
 
@@ -117,13 +122,13 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('workspace-invitations-send')));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Nobody is emailed'), findsWidgets);
+    expect(find.textContaining('emailed their link'), findsWidgets);
     await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
     await tester.pumpAndSettle();
 
     expect(source.sent.single, hasLength(4));
     expect(
-      find.text('4 invitations created. Nobody was emailed.'),
+      find.text('4 invitations sent. Nobody was emailed.'),
       findsOneWidget,
     );
     expect(find.textContaining('All 4 pilots have a QR code'), findsOneWidget);

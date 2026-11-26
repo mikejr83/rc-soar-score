@@ -176,12 +176,12 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
     old?.dispose();
   }
 
-  Future<void> _sendInvitations(List<Id> missing) async {
+  Future<void> _sendInvitations(List<Id> pilots, InvitationNames names) async {
     final session = _invitations;
     if (session == null) return;
     _sendingInvitations = true;
     try {
-      await sendInvitationsGuarded(context, session, missing);
+      await sendInvitationsGuarded(context, session, pilots, names: names);
     } finally {
       _sendingInvitations = false;
       if (_invitationsRefreshDeferred && mounted) {
@@ -214,10 +214,14 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
       for (final row in targets)
         if (canHaveInvitation(row.participation)) row.participation.id,
     ];
-    final missing = [
-      for (final id in pilots)
-        if (!session.has(id)) id,
-    ];
+    final names = <String, String>{
+      for (final row in targets)
+        if (canHaveInvitation(row.participation))
+          row.participation.id.value: [
+            row.profile.firstName,
+            row.profile.lastName,
+          ].where((part) => part.trim().isNotEmpty).join(' '),
+    };
     final unavailable = invitationsUnavailableText(
       l10n,
       session.invitations,
@@ -229,10 +233,6 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
             ? l10n.invitationsSelectPilots
             : pilots.isEmpty
             ? l10n.invitationsOnlyPilots
-            : missing.isEmpty
-            ? (forRow
-                  ? l10n.participantInvitationExists
-                  : l10n.invitationsAllHaveLinks)
             : null);
     // Copy needs exactly one row, and it must be a pilot.
     final oneRow = targets.length == 1 && pilots.length == 1;
@@ -244,11 +244,11 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
         : null;
     final canSend = sendReason == null && !session.sending && !saving;
     return (
-      send: canSend ? () => _sendInvitations(missing) : null,
+      send: canSend ? () => _sendInvitations(pilots, names) : null,
       copy: link == null ? null : () => _copyLink(link),
       sendReason: sendReason,
       copyReason: copyReason,
-      count: missing.length,
+      count: pilots.length,
     );
   }
 

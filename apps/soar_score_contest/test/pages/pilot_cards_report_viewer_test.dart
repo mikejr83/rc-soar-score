@@ -57,7 +57,7 @@ class _FakeInvitations implements PilotInvitationSource {
   }
 
   @override
-  Future<void> send(
+  Future<InvitationEmailReport> send(
     ApiClient client,
     Id contestId,
     List<Id> participations,
@@ -69,6 +69,7 @@ class _FakeInvitations implements PilotInvitationSource {
       throw StateError('no network');
     }
     _invited.addAll(participations.map((id) => id.value));
+    return const InvitationEmailReport.none();
   }
 }
 
@@ -301,9 +302,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Send invitations?'), findsOneWidget);
     expect(find.textContaining('4 QR codes'), findsOneWidget);
-    // Issuing sends no email, so the dialog and the result must not say so.
-    expect(find.textContaining('Nobody is emailed'), findsOneWidget);
-    expect(find.textContaining('also emailed'), findsNothing);
+    // Sending also emails the pilots who have an address.
+    expect(find.textContaining('emailed their link'), findsWidgets);
     await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
     await tester.pumpAndSettle();
 

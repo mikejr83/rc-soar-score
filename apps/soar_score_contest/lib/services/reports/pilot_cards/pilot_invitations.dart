@@ -10,6 +10,77 @@ import 'package:soar_score_core/soar_score_core.dart';
 bool canHaveInvitation(ContestParticipation participation) =>
     participation.roleType == RoleType.pilot;
 
+/// What the last send did for one pilot's email. The link is issued whatever
+/// this says: it only tells the director whether to pass the link on another
+/// way. `accepted` means the mail service took the message, not that the
+/// pilot has read it.
+enum InvitationEmailKind {
+  /// The mail service accepted the message.
+  emailed,
+
+  /// The pilot has no email address on file, so only the link exists.
+  noAddress,
+
+  /// Not sent: the mail service refused it, could not send now, or the
+  /// pilot's address bounced afterwards.
+  notSent,
+
+  /// The hourly limit of new emails for the contest was reached.
+  limitReached,
+
+  /// The send may or may not have gone out.
+  unknown,
+}
+
+/// The kind a stored email status (`accepted`, `rejected`, ...) stands for,
+/// or `null` for a status this app does not know.
+InvitationEmailKind? emailKindOfStatus(String? status) => switch (status) {
+  'accepted' => InvitationEmailKind.emailed,
+  'rejected' ||
+  'unavailable' ||
+  'bounced' ||
+  'complained' => InvitationEmailKind.notSent,
+  'limited' => InvitationEmailKind.limitReached,
+  'sending' || 'unconfirmed' => InvitationEmailKind.unknown,
+  _ => null,
+};
+
+/// What a send did about email, by participation id.
+class InvitationEmailReport {
+  const InvitationEmailReport({
+    this.kinds = const {},
+    this.serviceUnavailable = false,
+  });
+
+  /// No email was attempted (a source that has none, or nothing to email).
+  const InvitationEmailReport.none() : this();
+
+  /// The links were issued but the server could not be asked to email them.
+  const InvitationEmailReport.unavailable()
+    : kinds = const {},
+      serviceUnavailable = true;
+
+  final Map<String, InvitationEmailKind> kinds;
+
+  /// The email step could not run at all (the server cannot send email, or the
+  /// request failed): every pilot keeps the link, nobody was emailed.
+  final bool serviceUnavailable;
+
+  InvitationEmailKind? kindOf(Id participation) => kinds[participation.value];
+
+  int count(InvitationEmailKind kind) =>
+      kinds.values.where((value) => value == kind).length;
+
+  /// Pilots whose email did not go out, so the director should pass their
+  /// link on another way.
+  List<String> get needAnotherWay => [
+    for (final entry in kinds.entries)
+      if (entry.value != InvitationEmailKind.emailed) entry.key,
+  ];
+
+  bool get isEmpty => kinds.isEmpty && !serviceUnavailable;
+}
+
 /// The invitations a contest has issued, as the cards need them: for each
 /// pilot that has one, the link its QR code carries.
 ///
@@ -34,6 +105,7 @@ enum SendUnavailable {
 class PilotInvitations {
   const PilotInvitations({
     this.links = const {},
+    this.emailStatus = const {},
     this.synchronized = true,
     this.sendUnavailable,
     this.sendUnavailableReason,
@@ -46,6 +118,15 @@ class PilotInvitations {
 
   /// The invitation link by participation id.
   final Map<String, String> links;
+
+  /// The latest email status stored for each participation that was ever
+  /// emailed (`accepted`, `rejected`, ...), by participation id.
+  final Map<String, String> emailStatus;
+
+  /// What the latest email for [participation] did, or `null` when it was
+  /// never emailed.
+  InvitationEmailKind? emailKindOf(Id participation) =>
+      emailKindOfStatus(emailStatus[participation.value]);
 
   /// False for a contest organized offline that has not synchronized yet: no
   /// QR codes can be made until it has.
@@ -74,9 +155,15 @@ abstract interface class PilotInvitationSource {
   /// The invitations issued for [contestId].
   Future<PilotInvitations> read(ApiClient client, Id contestId);
 
-  /// Issues an invitation for each of [participations] that has none. Never
-  /// emails (#790). Throws when nothing could be issued.
-  Future<void> send(ApiClient client, Id contestId, List<Id> participations);
+  /// Sends invitations to [participations]: issues a link for each that has
+  /// none, then emails every pilot who has an address their link (again, for a
+  /// pilot emailed before). The links never depend on the email: throws only
+  /// when nothing could be issued, and answers how the email step went.
+  Future<InvitationEmailReport> send(
+    ApiClient client,
+    Id contestId,
+    List<Id> participations,
+  );
 }
 
 /// The stand-in until the API exists: nobody has an invitation, and sending is
@@ -89,8 +176,11 @@ class UnavailablePilotInvitationSource implements PilotInvitationSource {
       const PilotInvitations(sendUnavailable: SendUnavailable.notInThisVersion);
 
   @override
-  Future<void> send(ApiClient client, Id contestId, List<Id> participations) =>
-      Future.error(StateError('Sending invitations is not available.'));
+  Future<InvitationEmailReport> send(
+    ApiClient client,
+    Id contestId,
+    List<Id> participations,
+  ) => Future.error(StateError('Sending invitations is not available.'));
 }
 
 /// The invitations API of the server the client talks to (#589):
@@ -114,6 +204,11 @@ class ApiPilotInvitationSource implements PilotInvitationSource {
       };
       return PilotInvitations(
         links: links,
+        emailStatus: {
+          for (final invitation in answer.invitations)
+            if (invitation.emailStatus != null)
+              invitation.participationId.value: invitation.emailStatus!,
+        },
         sendUnavailableReason: answer.canIssue
             ? null
             : answer.cannotIssueReason,
@@ -142,14 +237,46 @@ class ApiPilotInvitationSource implements PilotInvitationSource {
   }
 
   @override
-  Future<void> send(ApiClient client, Id contestId, List<Id> participations) =>
-      client.issueInvitations(
+  Future<InvitationEmailReport> send(
+    ApiClient client,
+    Id contestId,
+    List<Id> participations,
+  ) async {
+    // Links first: they are the invitation. A failure here is a failed send.
+    await client.issueInvitations(
+      contestId,
+      IssueInvitationsRequest(
+        requestId: Id.create().value,
+        participationIds: participations,
+      ),
+    );
+    // Then the email, one request id per press so a retry of this very call
+    // cannot send twice. Whatever happens here, the links exist.
+    try {
+      final answer = await client.emailInvitations(
         contestId,
-        IssueInvitationsRequest(
+        EmailInvitationsRequest(
           requestId: Id.create().value,
           participationIds: participations,
         ),
       );
+      return InvitationEmailReport(
+        kinds: {
+          for (final result in answer.results)
+            result.participationId.value: _kindOf(result),
+        },
+      );
+    } on ApiException {
+      return const InvitationEmailReport.unavailable();
+    }
+  }
+
+  static InvitationEmailKind _kindOf(EmailInvitationResultDto result) =>
+      switch (result.skipped) {
+        'no_email' => InvitationEmailKind.noAddress,
+        null => emailKindOfStatus(result.status) ?? InvitationEmailKind.unknown,
+        _ => InvitationEmailKind.notSent,
+      };
 }
 
 /// The source the cards use. Held here so an E2E journey or a test can swap
@@ -216,12 +343,16 @@ class PilotInvitationSession extends ChangeNotifier {
   final Id contestId;
 
   PilotInvitations _invitations;
+  InvitationEmailReport _lastEmail = const InvitationEmailReport.none();
   InvitationPhase _phase;
   bool _disposed = false;
 
   PilotInvitations get invitations => _invitations;
   InvitationPhase get phase => _phase;
   bool get sending => _phase == InvitationPhase.sending;
+
+  /// How the email step of the last send went.
+  InvitationEmailReport get lastEmail => _lastEmail;
 
   bool has(Id participation) => _invitations.has(participation);
 
@@ -232,8 +363,9 @@ class PilotInvitationSession extends ChangeNotifier {
       return false;
     }
     _set(InvitationPhase.sending);
+    _lastEmail = const InvitationEmailReport.none();
     try {
-      await source.send(client, contestId, participations);
+      _lastEmail = await source.send(client, contestId, participations);
     } on Object {
       if (!_disposed) {
         _set(InvitationPhase.failed);

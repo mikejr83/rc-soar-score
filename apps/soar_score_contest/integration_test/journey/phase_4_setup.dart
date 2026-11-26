@@ -409,10 +409,11 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
         expect(find.byType(QrCodeView), findsNothing);
         await pumpUntilFound(tester, _key('cards-banner-missing'));
 
-        // Sending has its own confirmation, which says nothing is emailed.
+        // Sending has its own confirmation, which says pilots with an
+        // address on file are emailed their link.
         await tapVisible(tester, _key('cards-banner-send'));
         await pumpUntilFound(tester, _key('cards-send-dialog'));
-        expect(find.textContaining('Nobody is emailed'), findsOneWidget);
+        expect(find.textContaining('are emailed their link'), findsOneWidget);
         await tapVisible(tester, _key('cards-send-confirm'));
         await pumpUntilFound(tester, _key('cards-banner-sent'));
         expect(stub.issuingSends, 1);
@@ -459,11 +460,22 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
           expect(_key('setup-checklist-card'), findsOneWidget);
           await tapVisible(tester, _key('workspace-invitations-send'));
           await pumpUntilFound(tester, _key('cards-send-dialog'));
-          expect(find.textContaining('Nobody is emailed'), findsWidgets);
+          expect(find.textContaining('are emailed their link'), findsWidgets);
           await tapVisible(tester, _key('cards-send-confirm'));
           await pumpUntilFound(tester, _key('invitations-snackbar'));
           expect(stub.issuingSends, 1);
+          // The stand-in knows no addresses, so every pilot is skipped for
+          // having none and nothing is emailed.
+          expect(stub.emailsSent, isEmpty);
           await pumpUntilFound(tester, find.textContaining('a QR code. Print'));
+
+          // Send invitations is still there for a resend: it issues nothing
+          // new and goes through the same confirmation.
+          await tapVisible(tester, _key('workspace-invitations-send'));
+          await pumpUntilFound(tester, _key('cards-send-dialog'));
+          await tapVisible(tester, _key('cards-send-confirm'));
+          await pumpUntilFound(tester, _key('invitations-snackbar'));
+          expect(stub.issuingSends, 1);
 
           // The Participants list copies the link of one selected pilot.
           await tapRail(tester, 'Participants');

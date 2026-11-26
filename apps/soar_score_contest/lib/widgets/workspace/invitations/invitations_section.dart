@@ -14,8 +14,9 @@ import '../../invitations/send_invitations_flow.dart';
 import '../../sync/reload_on_sync.dart';
 
 /// The workspace card under the setup checklist that sends pilot invitations:
-/// the same send as the pilot cards report, without opening it. Issuing never
-/// emails; the QR codes are printed on the cards.
+/// the same send as the pilot cards report, without opening it. Sending
+/// creates the links and QR codes of the pilots who have none and emails the
+/// pilots with an address; once everyone has one, the same button sends again.
 class InvitationsSection extends StatefulWidget {
   const InvitationsSection({super.key, required this.contest});
 
@@ -28,6 +29,7 @@ class InvitationsSection extends StatefulWidget {
 class _InvitationsSectionState extends State<InvitationsSection> {
   PilotInvitationSession? _session;
   List<Id> _pilots = const [];
+  InvitationNames _names = const {};
   bool _loading = true;
   bool _failed = false;
   bool _started = false;
@@ -74,6 +76,20 @@ class _InvitationsSectionState extends State<InvitationsSection> {
     }
     try {
       final participations = await client.participations(widget.contest.id);
+      // Names for the send dialogs only; without them the dialogs still work.
+      final profiles = <String, String>{};
+      try {
+        for (final profile in await client.contestParticipants(
+          widget.contest.id,
+        )) {
+          profiles[profile.id.value] = [
+            profile.firstName,
+            profile.lastName,
+          ].where((part) => part.trim().isNotEmpty).join(' ');
+        }
+      } on Object {
+        // Names are optional.
+      }
       final session = await PilotInvitationSession.open(
         source: PilotInvitationSources.current,
         client: publication,
@@ -90,6 +106,12 @@ class _InvitationsSectionState extends State<InvitationsSection> {
           for (final p in participations)
             if (canHaveInvitation(p)) p.id,
         ];
+        _names = {
+          for (final p in participations)
+            if (canHaveInvitation(p) &&
+                profiles[p.participantProfileId.value] != null)
+              p.id.value: profiles[p.participantProfileId.value]!,
+        };
         _session = session..addListener(_changed);
         _loading = false;
         _failed = session.phase == InvitationPhase.loadFailed;
@@ -154,10 +176,13 @@ class _InvitationsSectionState extends State<InvitationsSection> {
         _pilots.length,
       );
     }
+    // Pilots without a link get one and an email; once everyone has a link the
+    // button sends to all of them again.
+    final targets = missing.isNotEmpty ? missing : _pilots;
     final canSend =
         session != null &&
         !session.sending &&
-        missing.isNotEmpty &&
+        targets.isNotEmpty &&
         reason == null;
     return Card(
       key: const ValueKey('workspace-invitations'),
@@ -181,7 +206,7 @@ class _InvitationsSectionState extends State<InvitationsSection> {
               ],
             ),
             Text(text, key: const ValueKey('workspace-invitations-text')),
-            if (reason != null && missing.isNotEmpty)
+            if (reason != null && targets.isNotEmpty)
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 8,
@@ -208,7 +233,8 @@ class _InvitationsSectionState extends State<InvitationsSection> {
                             await sendInvitationsGuarded(
                               context,
                               session,
-                              missing,
+                              targets,
+                              names: _names,
                             );
                           }
                         : null,

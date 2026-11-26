@@ -92,9 +92,15 @@ Future<bool> remindAboutMissingQr({
       return true;
     case _Reminder.sendAndPrint:
       if (!context.mounted) return false;
-      return sendInvitationsGuarded(context, session, [
-        for (final p in missing) p.participationId,
-      ], announce: false);
+      return sendInvitationsGuarded(
+        context,
+        session,
+        [for (final p in missing) p.participationId],
+        announce: false,
+        names: {
+          for (final p in missing) p.participationId.value: p.givenSurname,
+        },
+      );
     case _Reminder.cancel:
     case null:
       return false;
@@ -252,7 +258,11 @@ Future<void> _send(
   PilotInvitationSession session,
   List<ReportPilot> missing,
 ) async {
-  await sendInvitationsGuarded(context, session, [
-    for (final p in missing) p.participationId,
-  ], announce: false);
+  await sendInvitationsGuarded(
+    context,
+    session,
+    [for (final p in missing) p.participationId],
+    announce: false,
+    names: {for (final p in missing) p.participationId.value: p.givenSurname},
+  );
 }
