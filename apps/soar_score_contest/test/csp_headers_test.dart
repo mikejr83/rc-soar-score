@@ -7,7 +7,7 @@ void main() {
       'https://lh3.googleusercontent.com',
       'https://lh4.googleusercontent.com',
       'https://graph.facebook.com',
-      'https://scontent-*.fbcdn.net',
+      'https://*.fbcdn.net',
       'https://avatars.githubusercontent.com',
       'https://pbs.twimg.com',
       'https://abs.twimg.com',
@@ -21,9 +21,13 @@ void main() {
     ];
 
     String resolvePath(String appDir) {
-      // Find the workspace root by walking up from test directory
+      // Find the workspace root by walking up and looking for the .kilo directory
+      // (workspace root marker).
       var path = Directory.current.path;
-      while (!path.endsWith('soar-score') && !path.endsWith('abrupt-soap')) {
+      while (true) {
+        if (Directory('$path/.kilo').existsSync()) {
+          break;
+        }
         final parent = Directory(path).parent.path;
         if (parent == path) break;
         path = parent;
