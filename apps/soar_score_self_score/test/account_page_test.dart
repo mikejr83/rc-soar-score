@@ -16,6 +16,7 @@ import 'package:soar_score_self_score/l10n/app_localization_delegates.dart';
 import 'package:soar_score_self_score/models/account_link.dart';
 import 'package:soar_score_self_score/models/contests_view.dart';
 import 'package:soar_score_self_score/models/own_directory.dart';
+import 'package:soar_score_self_score/models/past_contests.dart';
 import 'package:soar_score_self_score/pages/account_page.dart';
 import 'package:soar_score_self_score/pages/details_page.dart';
 import 'package:soar_score_self_score/router.dart';
@@ -76,6 +77,26 @@ class _Repository extends SampleSelfScoreRepository {
 
   @override
   Future<ContestsView> contests() async => const ContestsView(contests: []);
+
+  /// One past contest per link still held, so unlinking shows in the list.
+  int historyLoads = 0;
+
+  @override
+  Future<PastContestsPage> pastContests({int offset = 0}) async {
+    historyLoads++;
+    return PastContestsPage(
+      contests: [
+        for (final link in links)
+          PastContest(
+            participationId: 'p-${link.id}',
+            contestId: 'c-${link.id}',
+            name: 'Past of ${link.id}',
+            startDate: DateTime.utc(2026, 4, 11),
+            endDate: DateTime.utc(2026, 4, 12),
+          ),
+      ],
+    );
+  }
 
   @override
   Future<List<Never>> linkCandidates() async => const [];
@@ -153,6 +174,29 @@ void main() {
       expect(find.text('Contest directors cannot find you'), findsOneWidget);
       expect(find.text('Your email is private'), findsOneWidget);
       expect(find.byKey(const Key('account-unlink-link-1')), findsOneWidget);
+    });
+
+    testWidgets('lists the past contests under the links', (tester) async {
+      await _pump(tester, _Repository());
+
+      expect(find.text('Past contests'), findsOneWidget);
+      expect(find.text('Past of link-1'), findsOneWidget);
+      expect(find.text('Past of link-2'), findsOneWidget);
+    });
+
+    testWidgets('unlinking loads the past contests again', (tester) async {
+      final repository = _Repository();
+      await _pump(tester, repository);
+      expect(repository.historyLoads, 1);
+
+      await tester.tap(find.byKey(const Key('account-unlink-link-1')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('account-unlink-confirm')));
+      await tester.pumpAndSettle();
+
+      expect(repository.historyLoads, 2);
+      expect(find.text('Past of link-1'), findsNothing);
+      expect(find.text('Past of link-2'), findsOneWidget);
     });
 
     testWidgets('says so when no pilot is linked', (tester) async {

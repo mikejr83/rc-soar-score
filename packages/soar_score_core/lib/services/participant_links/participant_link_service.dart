@@ -51,7 +51,7 @@ class ParticipantLinkService {
     this.invitations, {
     DateTime Function()? clock,
     Id Function()? newId,
-  }) : _clock = clock ?? DateTime.now,
+  }) : _clock = clock ?? invitations.now,
        _newId = newId ?? Id.create;
 
   final Repository repository;

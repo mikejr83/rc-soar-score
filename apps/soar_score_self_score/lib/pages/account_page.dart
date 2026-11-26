@@ -9,6 +9,7 @@ import '../models/account_link.dart';
 import '../models/own_directory.dart';
 import '../router.dart';
 import '../widgets/loadable_scaffold.dart';
+import '../widgets/past_contests_section.dart';
 import '../widgets/self_score_app_bar.dart';
 
 /// What the account page shows: the pilot's directory entry and the pilots
@@ -273,6 +274,12 @@ class _AccountBody extends StatelessWidget {
                     ),
                   ),
                 ),
+            const SizedBox(height: 24),
+            // Keyed by the links, so unlinking (which removes that pilot's
+            // contests) loads the history again.
+            PastContestsSection(
+              key: Key('account-past-${[for (final l in data.links) l.id]}'),
+            ),
           ],
         ),
       ),
