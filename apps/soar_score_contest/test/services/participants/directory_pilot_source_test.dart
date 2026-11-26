@@ -154,6 +154,48 @@ void main() {
     expect(sent, {'key': 'email', 'value': 'pat@example.com'});
   });
 
+  List<String> keysAsked() => [
+    for (final r in hostedRequests)
+      (jsonDecode(r.body) as Map<String, Object?>)['key']! as String,
+  ];
+
+  test('an ID with an @ is found, also when it looks like an email', () async {
+    byKey['fai_number'] = [_match(_entryA, 'Pat')];
+    final s = source();
+
+    // Valid email shape with a digit: asked as every key.
+    final found = await s.search('f1@x.org2');
+    expect(found.map((c) => c.name), ['Pat Pilot']);
+    expect(keysAsked(), ['email', 'fai_number', 'national_org_id']);
+
+    // Not an email, with a digit: asked as the ID keys.
+    hostedRequests.clear();
+    expect((await s.search('F@12')).map((c) => c.name), ['Pat Pilot']);
+    expect(keysAsked(), ['fai_number', 'national_org_id']);
+
+    // Not an email and no digit: typing does not ask, the lookup button does.
+    hostedRequests.clear();
+    expect(await s.search('ab@cd'), isEmpty);
+    expect(hostedRequests, isEmpty);
+    expect((await s.lookup('ab@cd')).map((c) => c.name), ['Pat Pilot']);
+    expect(keysAsked(), ['fai_number', 'national_org_id']);
+
+    // An email address the director types by button is also still an email.
+    hostedRequests.clear();
+    await s.lookup('pat@example.com');
+    expect(keysAsked(), ['email', 'fai_number', 'national_org_id']);
+  });
+
+  test('IDs differing only by case are separate questions', () async {
+    byKey['fai_number'] = [_match(_entryA, 'Pat')];
+    final s = source();
+
+    await s.search('F@12');
+    await s.search('f@12');
+
+    expect(hostedRequests, hasLength(4));
+  });
+
   test(
     'an id is tried as FAI number and national ID, once per pilot',
     () async {

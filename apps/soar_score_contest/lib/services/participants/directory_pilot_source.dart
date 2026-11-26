@@ -88,7 +88,7 @@ class DirectoryPilotSource {
     final text = query.trim();
     final keys = _typedKeys(text);
     if (keys.isEmpty) return const [];
-    final cached = _answers[_cacheKey(text)];
+    final cached = _answers[_cacheKey(text, keys)];
     if (cached != null && _clock().difference(cached.at) < answerLife) {
       return _candidates(cached.matches, text);
     }
@@ -104,22 +104,28 @@ class DirectoryPilotSource {
     ++_typed;
     final text = query.trim();
     if (text.isEmpty || text.length > maxLookupLength) return const [];
-    final keys = text.contains('@')
-        ? _typedKeys(text)
-        : const [
-            DirectoryLookupKeyDto.faiNumber,
-            DirectoryLookupKeyDto.nationalOrgId,
-          ];
-    if (keys.isEmpty) return const [];
-    return _lookup(text, keys);
+    // Asked on purpose, any text is also an ID, even one with an `@`.
+    return _lookup(text, _keysFor(text));
   }
 
   /// The longest text a lookup takes.
   static const maxLookupLength = 64;
 
-  /// Emails ignore case; IDs are matched exactly.
-  static String _cacheKey(String text) =>
-      text.contains('@') ? text.toLowerCase() : text;
+  /// Emails ignore case, but text that is also asked as an ID is matched
+  /// exactly, so two spellings that differ only by case are two questions.
+  static String _cacheKey(String text, List<DirectoryLookupKeyDto> keys) =>
+      keys.length == 1 ? text.toLowerCase() : text;
+
+  static const _idKeys = [
+    DirectoryLookupKeyDto.faiNumber,
+    DirectoryLookupKeyDto.nationalOrgId,
+  ];
+
+  /// An email-shaped text may also be an ID that happens to contain an `@`.
+  static List<DirectoryLookupKeyDto> _keysFor(String text) => [
+    if (_email.hasMatch(text)) DirectoryLookupKeyDto.email,
+    ..._idKeys,
+  ];
 
   Future<List<ParticipantCandidate>> _lookup(
     String text,
@@ -136,7 +142,7 @@ class DirectoryPilotSource {
       }
     }
     final matches = found.values.toList();
-    _answers[_cacheKey(text)] = (at: _clock(), matches: matches);
+    _answers[_cacheKey(text, keys)] = (at: _clock(), matches: matches);
     return _candidates(matches, text);
   }
 
@@ -152,24 +158,21 @@ class DirectoryPilotSource {
         profileId:
             match.copiedProfileId ??
             _profileIds.putIfAbsent(match.entryId.value, Id.create),
-        searchedEmail: text.contains('@') ? text : null,
+        searchedEmail: _email.hasMatch(text) ? text : null,
       ),
   ];
 
   static List<DirectoryLookupKeyDto> _typedKeys(String text) {
-    if (text.contains('@')) {
-      return _email.hasMatch(text) ? [DirectoryLookupKeyDto.email] : const [];
-    }
-    // FAI numbers and national IDs usually carry digits; a name never does,
-    // so typing a name makes no lookup. Other IDs use [lookup].
-    if (text.length < 4 ||
-        text.contains(RegExp(r'\s')) ||
-        !text.contains(RegExp(r'\d'))) {
-      return const [];
-    }
+    // An email is looked up whatever it contains; FAI numbers and national IDs
+    // usually carry digits and a name never does, so typing a name makes no
+    // lookup. Other IDs use [lookup].
+    final idLike =
+        text.length >= 4 &&
+        !text.contains(RegExp(r'\s')) &&
+        text.contains(RegExp(r'\d'));
     return [
-      DirectoryLookupKeyDto.faiNumber,
-      DirectoryLookupKeyDto.nationalOrgId,
+      if (_email.hasMatch(text)) DirectoryLookupKeyDto.email,
+      if (idLike) ..._idKeys,
     ];
   }
 
