@@ -186,7 +186,13 @@ class InvitationEmailService {
   /// every id must belong to it; otherwise nothing is sent. A participation
   /// that cannot be emailed (no address, no invitation) comes back skipped and
   /// the others are still sent. Repeating a [requestId] returns the stored
-  /// outcome for each participation and sends nothing.
+  /// outcome for each participation that was sent and sends nothing again.
+  ///
+  /// A request id guarantees at most one send per participation, not a
+  /// remembered skip: a skip sends nothing and stores nothing, so a retry of
+  /// the same id judges that pilot afresh and sends if they have become
+  /// eligible (an address added, an invitation issued). That send is then
+  /// stored, and a further retry returns it.
   Future<List<InvitationEmailResult>> emailMany({
     required Id contestId,
     required List<Id> participationIds,

@@ -553,4 +553,32 @@ void _tests(SliceBackend backend) {
     final (_, fresh) = await email('send-2', [_withEmailPart]);
     expect(resultFor(fresh, _withEmailPart)['skipped'], 'no_invitation');
   });
+
+  test('a skipped pilot is judged afresh on a retry of the same request id, '
+      'and the send that follows is stored once', () async {
+    final (_, first) = await email('send-1', [_withEmailPart, _noEmailPart]);
+    expect(resultFor(first, _noEmailPart)['skipped'], 'no_email');
+    expect(mailer.sent, hasLength(1));
+
+    final profile = await api.expectOk('GET', '/participants/$_noEmailProfile');
+    await api.expectOk(
+      'PUT',
+      '/participants/$_noEmailProfile',
+      body: {
+        'first_name': 'Blake',
+        'last_name': 'Rivera',
+        'email': 'blake@example.com',
+        'base_revision': profile['revision'],
+      },
+    );
+    final (_, retry) = await email('send-1', [_withEmailPart, _noEmailPart]);
+    expect(resultFor(retry, _withEmailPart)['repeated'], isTrue);
+    expect(resultFor(retry, _noEmailPart)['status'], 'accepted');
+    expect(mailer.sent, hasLength(2));
+    expect(mailer.sent.last.to, 'blake@example.com');
+
+    final (_, again) = await email('send-1', [_withEmailPart, _noEmailPart]);
+    expect(resultFor(again, _noEmailPart)['repeated'], isTrue);
+    expect(mailer.sent, hasLength(2));
+  });
 }

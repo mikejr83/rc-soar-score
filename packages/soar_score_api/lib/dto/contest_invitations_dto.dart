@@ -138,7 +138,8 @@ class IssueInvitationsResponse {
 
 /// Body of `POST /api/v1/contests/{id}/invitations/email`: email the active
 /// invitation link of each listed pilot. Repeating a [requestId] sends
-/// nothing again; a resend uses a new one.
+/// nothing again to a pilot already sent; a pilot that was skipped is judged
+/// afresh by the retry. A resend uses a new one.
 @JsonSerializable(
   checked: true,
   fieldRename: FieldRename.snake,
