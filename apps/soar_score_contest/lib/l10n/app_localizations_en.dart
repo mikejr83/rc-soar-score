@@ -4396,6 +4396,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get pilotCardsResendLead => 'Every card has a QR code.';
+
+  @override
+  String get pilotCardsResendText =>
+      'To email these pilots their link again, send invitations. Nothing new is created.';
+
+  @override
   String get pilotCardsSendAction => 'Send invitations';
 
   @override

@@ -6552,6 +6552,18 @@ abstract class AppLocalizations {
   /// **'{reason} You can still print without QR codes.'**
   String pilotCardsMissingReason(String reason);
 
+  /// Lead of the banner shown when every selected pilot already has an invitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Every card has a QR code.'**
+  String get pilotCardsResendLead;
+
+  /// Text of the banner that offers to send invitations again to the selected pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'To email these pilots their link again, send invitations. Nothing new is created.'**
+  String get pilotCardsResendText;
+
   /// Button on the banner that creates the QR codes.
   ///
   /// In en, this message translates to:
