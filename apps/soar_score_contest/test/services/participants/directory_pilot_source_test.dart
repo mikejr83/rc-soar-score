@@ -416,15 +416,36 @@ void main() {
     expect(sent['profile_id'], candidate.profileId.value);
   });
 
-  test('a refused copy forgets the id', () async {
-    byKey['fai_number'] = [_match(_entryB, 'Bea')];
-    final store = BackendLocalUiStore(MemoryLocalUiBackend());
-    final first = source(store: store);
-    final candidate = (await first.search('F1234')).single;
-    copyAnswer = 404;
+  test(
+    'a refused retry keeps the id of a copy whose answer was lost',
+    () async {
+      byKey['fai_number'] = [_match(_entryB, 'Bea')];
+      final store = BackendLocalUiStore(MemoryLocalUiBackend());
+      final candidate = (await source(store: store).search('F1234')).single;
+      copyAnswer = 500;
+      copyCommits = true; // linked on the server, the answer never came
+      await expectLater(
+        source(store: store).copy(candidate),
+        throwsA(anything),
+      );
 
-    await expectLater(first.copy(candidate), throwsA(isA<ApiHttpError>()));
+      copyCommits = false;
+      copyAnswer = 429; // the retry is refused
+      final second = source(store: store);
+      final again = (await second.search('F1234')).single;
+      await expectLater(second.copy(again), throwsA(isA<ApiHttpError>()));
 
-    expect(await store.get('dana', DirectoryPilotSource.copiesKey), isEmpty);
-  });
+      copyAnswer = 0; // after another recreation, a retry succeeds
+      final third = source(store: store);
+      final last = (await third.search('F1234')).single;
+      hostedRequests.clear();
+      await third.copy(last);
+
+      expect(again.profileId, candidate.profileId);
+      expect(last.profileId, candidate.profileId);
+      final sent =
+          jsonDecode(hostedRequests.single.body) as Map<String, Object?>;
+      expect(sent['profile_id'], candidate.profileId.value);
+    },
+  );
 }

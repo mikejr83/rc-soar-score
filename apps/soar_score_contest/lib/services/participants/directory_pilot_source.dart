@@ -194,21 +194,14 @@ class DirectoryPilotSource {
     // Remember the id before asking: the server may commit the link and the
     // answer be lost, and a retry must name the same profile.
     await _remember(entry.entryId, candidate.profileId);
-    final DirectoryMatchDto details;
-    try {
-      details = await hosted.copyDirectoryEntry(
-        DirectoryCopyRequest(
-          entryId: entry.entryId,
-          profileId: candidate.profileId,
-        ),
-      );
-    } on ApiHttpError catch (e) {
-      // A refusal (4xx) linked nothing; a server error may have committed.
-      if (e.statusCode >= 400 && e.statusCode < 500) {
-        await _forget(entry.entryId);
-      }
-      rethrow;
-    }
+    // A refusal of this attempt does not say an earlier one failed (its answer
+    // may have been lost after the server linked), so the id is kept.
+    final details = await hosted.copyDirectoryEntry(
+      DirectoryCopyRequest(
+        entryId: entry.entryId,
+        profileId: candidate.profileId,
+      ),
+    );
     return local.createParticipant(
       CreateParticipantRequest(
         id: candidate.profileId,
@@ -232,15 +225,5 @@ class DirectoryPilotSource {
     final copies = {...await kept.get(accountId, copiesKey)};
     copies[entryId.value] = profileId.value;
     await kept.set(accountId, copiesKey, copies);
-  }
-
-  Future<void> _forget(Id entryId) async {
-    _profileIds.remove(entryId.value);
-    final kept = store;
-    if (kept == null) return;
-    final copies = {...await kept.get(accountId, copiesKey)};
-    if (copies.remove(entryId.value) != null) {
-      await kept.set(accountId, copiesKey, copies);
-    }
   }
 }
