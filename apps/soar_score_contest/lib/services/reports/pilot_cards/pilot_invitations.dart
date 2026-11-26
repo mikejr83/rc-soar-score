@@ -252,23 +252,41 @@ class ApiPilotInvitationSource implements PilotInvitationSource {
     );
     // Then the email, one request id per press so a retry of this very call
     // cannot send twice. Whatever happens here, the links exist.
-    try {
-      final answer = await client.emailInvitations(
-        contestId,
-        EmailInvitationsRequest(
-          requestId: Id.create().value,
-          participationIds: participations,
-        ),
-      );
-      return InvitationEmailReport(
-        kinds: {
-          for (final result in answer.results)
-            result.participationId.value: _kindOf(result),
-        },
-      );
-    } on ApiException {
-      return const InvitationEmailReport.unavailable();
+    final request = EmailInvitationsRequest(
+      requestId: Id.create().value,
+      participationIds: participations,
+    );
+    ApiException? failure;
+    // A lost answer is asked again once with the same request id: the server
+    // answers with what it stored and never sends twice.
+    for (var attempt = 0; attempt < 2; attempt++) {
+      try {
+        final answer = await client.emailInvitations(contestId, request);
+        return InvitationEmailReport(
+          kinds: {
+            for (final result in answer.results)
+              result.participationId.value: _kindOf(result),
+          },
+        );
+      } on ApiHttpError catch (error) {
+        // The server answered and refused (for example it cannot send
+        // email): nothing was sent.
+        if (error.statusCode >= 400 && error.statusCode < 500) {
+          return const InvitationEmailReport.unavailable();
+        }
+        failure = error;
+      } on ApiException catch (error) {
+        failure = error;
+      }
     }
+    // No usable answer: the server may have sent the emails. Say so, and
+    // never call it "nobody was emailed".
+    assert(failure != null);
+    return InvitationEmailReport(
+      kinds: {
+        for (final id in participations) id.value: InvitationEmailKind.unknown,
+      },
+    );
   }
 
   static InvitationEmailKind _kindOf(EmailInvitationResultDto result) =>

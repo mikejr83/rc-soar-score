@@ -232,6 +232,27 @@ void main() {
       expect(report.kinds, isEmpty);
     });
 
+    test(
+      'a lost answer is asked again with the same id, then unknown',
+      () async {
+        final ids = <String>[];
+        final client = clientFor((request) {
+          if (!request.url.path.endsWith('/email')) return okIssue();
+          ids.add(
+            (jsonDecode(request.body) as Map<String, Object?>)['request_id']!
+                as String,
+          );
+          return http.Response('boom', 503, headers: headers);
+        });
+        final report = await source.send(client, contest, [lee, kim]);
+        expect(ids, hasLength(2));
+        expect(ids.toSet(), hasLength(1), reason: 'same request id');
+        expect(report.serviceUnavailable, isFalse);
+        expect(report.kindOf(lee), InvitationEmailKind.unknown);
+        expect(report.kindOf(kim), InvitationEmailKind.unknown);
+      },
+    );
+
     test('a failed issue is a failed send and nothing is emailed', () async {
       paths.clear();
       final client = clientFor((request) {

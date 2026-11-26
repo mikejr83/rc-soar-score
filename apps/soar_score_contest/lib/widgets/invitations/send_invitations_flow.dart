@@ -249,7 +249,8 @@ Future<bool> sendInvitationsGuarded(
       (report.serviceUnavailable ||
           report.count(InvitationEmailKind.notSent) > 0 ||
           report.count(InvitationEmailKind.limitReached) > 0 ||
-          report.count(InvitationEmailKind.unknown) > 0)) {
+          report.count(InvitationEmailKind.unknown) > 0 ||
+          report.count(InvitationEmailKind.noAddress) > 0)) {
     await showInvitationEmailResult(context, report, names);
     if (!context.mounted) return ok;
   }

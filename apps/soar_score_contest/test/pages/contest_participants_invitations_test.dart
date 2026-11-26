@@ -183,36 +183,41 @@ void main() {
     expect(source.links, hasLength(2));
   });
 
-  testWidgets('pilots with no address only get a note in the snack bar', (
-    tester,
-  ) async {
-    final source = FakePilotInvitationSource(
-      email: (ids) => InvitationEmailReport(
-        kinds: {
-          ids[0].value: InvitationEmailKind.emailed,
-          ids[1].value: InvitationEmailKind.noAddress,
-        },
-      ),
-    );
-    PilotInvitationSources.current = source;
-    await pumpParticipantsPage(tester, ParticipantsServer());
-    await tester.tap(_check(1));
-    await tester.tap(_check(2));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('invitations-send')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'pilots with no address are listed by name and noted in the snack bar',
+    (tester) async {
+      final source = FakePilotInvitationSource(
+        email: (ids) => InvitationEmailReport(
+          kinds: {
+            ids[0].value: InvitationEmailKind.emailed,
+            ids[1].value: InvitationEmailKind.noAddress,
+          },
+        ),
+      );
+      PilotInvitationSources.current = source;
+      await pumpParticipantsPage(tester, ParticipantsServer());
+      await tester.tap(_check(1));
+      await tester.tap(_check(2));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('invitations-send')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+      await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const ValueKey('invitations-result-dialog')),
-      findsNothing,
-    );
-    expect(
-      find.textContaining('1 pilot has no email address on file.'),
-      findsOneWidget,
-    );
-  });
+      final dialog = find.byKey(const ValueKey('invitations-result-dialog'));
+      expect(dialog, findsOneWidget);
+      expect(
+        find.descendant(of: dialog, matching: find.text('Bo Ray')),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const ValueKey('invitations-result-close')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('1 pilot has no email address on file.'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('non-flying participants are not sent invitations', (
     tester,

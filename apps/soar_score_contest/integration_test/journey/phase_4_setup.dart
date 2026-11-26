@@ -415,6 +415,10 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
         await pumpUntilFound(tester, _key('cards-send-dialog'));
         expect(find.textContaining('are emailed their link'), findsOneWidget);
         await tapVisible(tester, _key('cards-send-confirm'));
+        // The stand-in knows no addresses, so the pilots to hand a link to
+        // are listed by name.
+        await pumpUntilFound(tester, _key('invitations-result-dialog'));
+        await tapVisible(tester, _key('invitations-result-close'));
         await pumpUntilFound(tester, _key('cards-banner-sent'));
         expect(stub.issuingSends, 1);
 
@@ -462,6 +466,8 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
           await pumpUntilFound(tester, _key('cards-send-dialog'));
           expect(find.textContaining('are emailed their link'), findsWidgets);
           await tapVisible(tester, _key('cards-send-confirm'));
+          await pumpUntilFound(tester, _key('invitations-result-dialog'));
+          await tapVisible(tester, _key('invitations-result-close'));
           await pumpUntilFound(tester, _key('invitations-snackbar'));
           expect(stub.issuingSends, 1);
           // The stand-in knows no addresses, so every pilot is skipped for
@@ -474,6 +480,8 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
           await tapVisible(tester, _key('workspace-invitations-send'));
           await pumpUntilFound(tester, _key('cards-send-dialog'));
           await tapVisible(tester, _key('cards-send-confirm'));
+          await pumpUntilFound(tester, _key('invitations-result-dialog'));
+          await tapVisible(tester, _key('invitations-result-close'));
           await pumpUntilFound(tester, _key('invitations-snackbar'));
           expect(stub.issuingSends, 1);
 
