@@ -1,3 +1,4 @@
+import '../models/account_link.dart';
 import '../models/contests_view.dart';
 import '../models/entry_context.dart';
 import '../models/group_results.dart';
@@ -105,6 +106,17 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
 
   @override
   Future<void> saveOwnDirectory(DirectoryDetails details) async {}
+
+  @override
+  Future<void> deleteOwnDirectory() async {}
+
+  @override
+  Future<List<AccountLink>> accountLinks() async => const [
+    AccountLink(id: 'sample-link', pilotName: SampleData.pilotName),
+  ];
+
+  @override
+  Future<void> endAccountLink(String linkId) async {}
 
   @override
   Future<void> confirmLinkCandidate(String candidateId) async {}
