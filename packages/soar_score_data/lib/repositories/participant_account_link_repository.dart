@@ -108,14 +108,14 @@ class ParticipantAccountLinkRepository extends DriftRepository
   @override
   Future<core.ParticipantAccountLink> saveReleasingInvitations(
     core.ParticipantAccountLink link, {
-    required Map<core.Id, core.Id?> invitationToGuest,
+    required Future<Map<core.Id, core.Id?>> Function() releases,
   }) => db.transaction(() async {
     // Under the same lock a claim takes, so a claim in progress finishes
     // first, and what the account holds is decided here, not before.
     await _lockLink(link.id);
     final saved = await save(link);
     for (final MapEntry(key: invitationId, value: guest)
-        in invitationToGuest.entries) {
+        in (await releases()).entries) {
       // Only an invitation the account holds now moves, and only to its guest
       // when that guest account exists (else to nobody).
       await _repoint(

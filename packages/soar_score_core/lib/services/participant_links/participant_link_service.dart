@@ -327,16 +327,19 @@ class ParticipantLinkService {
     if (link.status == ParticipantLinkStatus.candidate) {
       throw ParticipantLinkError.linkNotFound();
     }
-    // Every invitation of the profile with its own guest: which ones the
-    // account holds is decided inside the transaction, after any claim in
-    // progress has finished, not here.
-    final release = <Id, Id?>{
-      for (final invitation in await _invitationsOf(link.participantProfileId))
-        invitation.id: invitations.codec.guestAccountIdFor(invitation.id),
-    };
+    // Decided inside the transaction, under the claim lock: the invitations
+    // the account holds then, each with its own guest, so a claim that
+    // completed first (even of an invitation issued after this call began)
+    // is released too.
     final ended = await links.saveReleasingInvitations(
       _ended(link),
-      invitationToGuest: release,
+      releases: () async => {
+        for (final invitation in await _invitationsOf(
+          link.participantProfileId,
+        ))
+          if (invitation.redeemedByAccountId == accountId)
+            invitation.id: invitations.codec.guestAccountIdFor(invitation.id),
+      },
     );
     _logger.info('Link ${ended.id.value} ended.');
     return ended;

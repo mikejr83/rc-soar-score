@@ -165,13 +165,10 @@ class _GatedLinks implements core.ParticipantAccountLinkRepository {
   @override
   Future<core.ParticipantAccountLink> saveReleasingInvitations(
     core.ParticipantAccountLink link, {
-    required Map<core.Id, core.Id?> invitationToGuest,
+    required Future<Map<core.Id, core.Id?>> Function() releases,
   }) async {
     await _gate.beforeRelease?.call();
-    return _real.saveReleasingInvitations(
-      link,
-      invitationToGuest: invitationToGuest,
-    );
+    return _real.saveReleasingInvitations(link, releases: releases);
   }
 
   @override

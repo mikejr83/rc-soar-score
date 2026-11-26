@@ -288,7 +288,7 @@ void _tests(Backend backend) {
 
         await links.saveReleasingInvitations(
           link,
-          invitationToGuest: {invitationId: _opener},
+          releases: () async => {invitationId: _opener},
         );
 
         final invitation = (await repository.invitationRepository.findById(
@@ -299,13 +299,39 @@ void _tests(Backend backend) {
       },
     );
 
+    test('decides what to release inside the transaction, after the link '
+        'is saved', () async {
+      final link = await links.save(confirmed(core.Id.create()));
+      core.ParticipantLinkStatus? seen;
+
+      await links.saveReleasingInvitations(
+        core.ParticipantAccountLink(
+          id: link.id,
+          participantProfileId: link.participantProfileId,
+          accountId: link.accountId,
+          status: core.ParticipantLinkStatus.ended,
+          origin: link.origin,
+          createdAt: link.createdAt,
+          confirmedAt: link.confirmedAt,
+          endedAt: DateTime.utc(2026, 10, 3),
+          revision: link.revision,
+        ),
+        releases: () async {
+          seen = (await links.findById(link.id))!.status;
+          return {};
+        },
+      );
+
+      expect(seen, core.ParticipantLinkStatus.ended);
+    });
+
     test('hands it to nobody when its guest account does not exist', () async {
       final link = await links.save(confirmed(core.Id.create()));
       await links.saveClaimingGuests(link, guestAccountIds: _guests);
 
       await links.saveReleasingInvitations(
         (await links.findById(link.id))!,
-        invitationToGuest: {invitationId: core.Id.create()},
+        releases: () async => {invitationId: core.Id.create()},
       );
 
       expect(
@@ -322,7 +348,7 @@ void _tests(Backend backend) {
         // Held by the example account, not by the pilot: left as it is.
         await links.saveReleasingInvitations(
           link,
-          invitationToGuest: {invitationId: null},
+          releases: () async => {invitationId: null},
         );
         expect(
           (await repository.invitationRepository.findById(invitationId))!
@@ -336,7 +362,7 @@ void _tests(Backend backend) {
         );
         await links.saveReleasingInvitations(
           (await links.findById(link.id))!,
-          invitationToGuest: {invitationId: null},
+          releases: () async => {invitationId: null},
         );
         expect(
           (await repository.invitationRepository.findById(invitationId))!
