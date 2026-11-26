@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:soar_score_data/soar_score_data.dart';
 
 import 'config_exception.dart';
+import 'mail_config.dart';
 import 'support_config.dart';
 
 import 'package:soar_score_core/config/log_format.dart';
@@ -39,6 +40,7 @@ class ServerConfig {
     this.trustedProxySecret,
     this.logStatementDurations = false,
     this.support,
+    this.mail,
   });
 
   /// The variables [ServerConfig.parse] reads.
@@ -54,6 +56,7 @@ class ServerConfig {
     'TRUSTED_PROXY_SECRET',
     'LOG_DB_STATEMENT_DURATIONS',
     ...SupportConfig.environmentKeys,
+    ...MailConfig.environmentKeys,
     'DATABASE_URL',
     'POSTGRES_PASSWORD',
     'POSTGRES_HOST',
@@ -93,6 +96,11 @@ class ServerConfig {
   /// The public support endpoint's settings, or null when it is disabled
   /// (see [SupportConfig.parse]). Disabling never stops the server.
   final SupportConfig? support;
+
+  /// The settings for sending mail (invitation emails), or null when
+  /// sending is disabled (see [MailConfig.parse]). Disabling never stops the
+  /// server.
+  final MailConfig? mail;
 
   /// Parses [environment].
   ///
@@ -273,6 +281,7 @@ class ServerConfig {
       trustedProxySecret: proxySecret,
       logStatementDurations: logStatementDurations,
       support: SupportConfig.parse(environment),
+      mail: MailConfig.parse(environment),
     );
   }
 

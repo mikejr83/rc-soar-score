@@ -41,6 +41,21 @@ abstract interface class InvitationRepository {
 
   Future<Invitation> save(Invitation invitation);
 
+  /// Changes only the delivery outcomes of [invitationId]: [change] receives
+  /// the stored list and returns the list to keep, or null to keep it as it
+  /// is.
+  ///
+  /// The write replaces nothing else on the invitation, so it cannot undo a
+  /// concurrent redemption, and it applies only if the outcomes are still the
+  /// ones [change] saw (another writer makes it run again with the new list).
+  /// Returns the outcomes now stored, or null when there is no such
+  /// invitation.
+  Future<List<Map<String, Object?>>?> updateDeliveryOutcomes(
+    Id invitationId,
+    List<Map<String, Object?>>? Function(List<Map<String, Object?>> current)
+    change,
+  );
+
   /// Stores every invitation in [invitations] and every event in [audits] in
   /// one transaction: if any write fails, none is kept.
   Future<void> saveIssued(

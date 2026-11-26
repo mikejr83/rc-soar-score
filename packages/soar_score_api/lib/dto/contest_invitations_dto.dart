@@ -21,6 +21,7 @@ class ContestInvitationDto {
   const ContestInvitationDto({
     required this.participationId,
     required this.link,
+    this.emailStatus,
   });
 
   factory ContestInvitationDto.fromJson(Map<String, dynamic> json) =>
@@ -28,6 +29,11 @@ class ContestInvitationDto {
 
   final Id participationId;
   final String link;
+
+  /// The latest email outcome for this invitation (`sending`, `accepted`,
+  /// `rejected`, `unavailable`, `unconfirmed`, `bounced` or `complained`), or
+  /// null when no email was requested. Never proof the pilot received it.
+  final String? emailStatus;
 
   Map<String, dynamic> toJson() => _$ContestInvitationDtoToJson(this);
 }
@@ -128,4 +134,75 @@ class IssueInvitationsResponse {
   final List<ContestInvitationDto> invitations;
 
   Map<String, dynamic> toJson() => _$IssueInvitationsResponseToJson(this);
+}
+
+/// Body of `POST /api/v1/contests/{id}/invitations/email`: email the active
+/// invitation link of each listed pilot. Repeating a [requestId] sends
+/// nothing again; a resend uses a new one.
+@JsonSerializable(
+  checked: true,
+  fieldRename: FieldRename.snake,
+  includeIfNull: true,
+)
+@IdConverter()
+class EmailInvitationsRequest {
+  const EmailInvitationsRequest({
+    required this.requestId,
+    required this.participationIds,
+  });
+
+  factory EmailInvitationsRequest.fromJson(Map<String, dynamic> json) =>
+      _$EmailInvitationsRequestFromJson(json);
+
+  final String requestId;
+  final List<Id> participationIds;
+
+  Map<String, dynamic> toJson() => _$EmailInvitationsRequestToJson(this);
+}
+
+/// What happened to one participation in an email request: its [status], or
+/// the reason it was [skipped] (`no_email`, `no_invitation`,
+/// `link_unavailable`, `not_pilot`). [repeated] is true when the request id
+/// had been used before, so nothing was sent now.
+@JsonSerializable(
+  checked: true,
+  fieldRename: FieldRename.snake,
+  includeIfNull: true,
+)
+@IdConverter()
+class EmailInvitationResultDto {
+  const EmailInvitationResultDto({
+    required this.participationId,
+    this.status,
+    this.skipped,
+    this.repeated = false,
+  });
+
+  factory EmailInvitationResultDto.fromJson(Map<String, dynamic> json) =>
+      _$EmailInvitationResultDtoFromJson(json);
+
+  final Id participationId;
+  final String? status;
+  final String? skipped;
+  final bool repeated;
+
+  Map<String, dynamic> toJson() => _$EmailInvitationResultDtoToJson(this);
+}
+
+/// Answer of `POST /api/v1/contests/{id}/invitations/email`.
+@JsonSerializable(
+  checked: true,
+  fieldRename: FieldRename.snake,
+  includeIfNull: true,
+  explicitToJson: true,
+)
+class EmailInvitationsResponse {
+  const EmailInvitationsResponse({required this.results});
+
+  factory EmailInvitationsResponse.fromJson(Map<String, dynamic> json) =>
+      _$EmailInvitationsResponseFromJson(json);
+
+  final List<EmailInvitationResultDto> results;
+
+  Map<String, dynamic> toJson() => _$EmailInvitationsResponseToJson(this);
 }

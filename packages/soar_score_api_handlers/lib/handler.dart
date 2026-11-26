@@ -6,6 +6,7 @@ import 'package:soar_score_api_handlers/middleware/invitation_throttle.dart';
 import 'package:soar_score_api_handlers/middleware/middleware.dart';
 import 'package:soar_score_core/repositories/promotion_intent_policy.dart';
 import 'package:soar_score_core/repositories/repository.dart';
+import 'package:soar_score_core/services/invitations/invitation_email_service.dart';
 import 'package:soar_score_core/services/invitations/invitation_service.dart';
 import 'package:soar_score_core/services/recalculation/recalculation_service.dart';
 import 'package:soar_score_core/services/sync/sync_versions.dart';
@@ -99,6 +100,7 @@ Handler buildApiHandler({
   DrawRunner? drawRunner,
   Set<String> corsAllowedOrigins = const {},
   InvitationService? invitations,
+  InvitationEmailService? invitationEmail,
   InvitationThrottle? invitationThrottle,
   String? trustedProxySecret,
   String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
@@ -117,6 +119,7 @@ Handler buildApiHandler({
     gliderScoreImport: gliderScoreImport,
     drawRunner: drawRunner,
     invitations: invitations,
+    invitationEmail: invitationEmail,
     invitationThrottle: invitationThrottle,
     trustedProxySecret: trustedProxySecret,
     corsAllowedOrigins: corsAllowedOrigins,

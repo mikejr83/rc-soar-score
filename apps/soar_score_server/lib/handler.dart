@@ -1,7 +1,12 @@
 import 'package:shelf/shelf.dart';
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
 import 'package:soar_score_core/soar_score_core.dart'
-    show InvitationCodec, InvitationService, PromotionIntentPolicy;
+    show
+        InvitationCodec,
+        InvitationEmailService,
+        InvitationMailer,
+        InvitationService,
+        PromotionIntentPolicy;
 import 'package:soar_score_data/soar_score_data.dart';
 
 import 'support/support_wiring.dart';
@@ -22,6 +27,9 @@ const String serverVersion = '0.1.0';
 /// [trustedProxySecret] is what the site's `/api` proxy sends with the
 /// visitor's address (see `clientAddressOf`).
 ///
+/// [invitationMailer] sends invitation emails (#790); without it the email
+/// route answers 409 `email_not_available`.
+///
 /// [supportHandler] serves `POST /public/support`; it defaults to an
 /// unavailable (503) handler so a hosted server without support settings
 /// still serves everything else.
@@ -39,8 +47,19 @@ Handler createServerHandler(
   InvitationThrottle? invitationThrottle,
   PromotionIntentPolicy? promotionIntents,
   Handler? supportHandler,
+  InvitationMailer? invitationMailer,
 }) {
   final repository = Repository(database);
+  final invitations = invitationSecret == null
+      ? null
+      : InvitationService(
+          repository,
+          InvitationCodec.fromText(invitationSecret),
+        );
+  final linkBase = (selfScoringBaseUrl ?? defaultSelfScoringBaseUrl).replaceAll(
+    RegExp(r'/+$'),
+    '',
+  );
   return buildApiHandler(
     name: serverName,
     displayName: serverDisplayName,
@@ -61,11 +80,14 @@ Handler createServerHandler(
                 store: RequestThrottleStore(database),
                 keySecret: invitationSecret,
               ),
-    invitations: invitationSecret == null
+    invitations: invitations,
+    invitationEmail: invitations == null || invitationMailer == null
         ? null
-        : InvitationService(
+        : InvitationEmailService(
             repository,
-            InvitationCodec.fromText(invitationSecret),
+            invitations,
+            invitationMailer,
+            linkFor: (credential) => '$linkBase/invitations/$credential',
           ),
   );
 }

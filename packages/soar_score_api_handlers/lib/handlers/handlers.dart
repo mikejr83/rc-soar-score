@@ -4,6 +4,7 @@ import 'package:soar_score_api_handlers/handlers/health_handler.dart';
 import 'package:soar_score_api_handlers/draw/isolate_draw_runner.dart';
 import 'package:soar_score_core/repositories/promotion_intent_policy.dart';
 import 'package:soar_score_core/repositories/repository.dart';
+import 'package:soar_score_core/services/invitations/invitation_email_service.dart';
 import 'package:soar_score_core/services/matrix/draw_job.dart';
 import 'package:soar_score_core/services/sync/sync_versions.dart';
 import 'package:soar_score_api_handlers/handlers/account_handlers.dart';
@@ -50,6 +51,7 @@ createHandlers(
   GliderScoreImportRunner? gliderScoreImport,
   DrawRunner? drawRunner,
   InvitationService? invitations,
+  InvitationEmailService? invitationEmail,
   InvitationThrottle? invitationThrottle,
   String? trustedProxySecret,
   Set<String> corsAllowedOrigins = const {},
@@ -79,6 +81,7 @@ createHandlers(
     router,
     repository,
     service: invitations,
+    email: invitationEmail,
     selfScoringBaseUrl: selfScoringBaseUrl,
   );
   addModelRoutes(router, repository);
