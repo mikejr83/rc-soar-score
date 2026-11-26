@@ -76,19 +76,17 @@ class _InvitationsSectionState extends State<InvitationsSection> {
     }
     try {
       final participations = await client.participations(widget.contest.id);
-      // Names for the send dialogs only; without them the dialogs still work.
+      // The send dialogs name the pilots who need their link passed on, so
+      // sending waits until the names are known: a failed lookup shows the
+      // card's retry instead.
       final profiles = <String, String>{};
-      try {
-        for (final profile in await client.contestParticipants(
-          widget.contest.id,
-        )) {
-          profiles[profile.id.value] = [
-            profile.firstName,
-            profile.lastName,
-          ].where((part) => part.trim().isNotEmpty).join(' ');
-        }
-      } on Object {
-        // Names are optional.
+      for (final profile in await client.contestParticipants(
+        widget.contest.id,
+      )) {
+        profiles[profile.id.value] = [
+          profile.firstName,
+          profile.lastName,
+        ].where((part) => part.trim().isNotEmpty).join(' ');
       }
       final session = await PilotInvitationSession.open(
         source: PilotInvitationSources.current,

@@ -202,6 +202,15 @@ void main() {
       find.textContaining('Email could not be sent right now'),
       findsOneWidget,
     );
+    // Both pilots are named, though the server answered for nobody.
+    final dialog = find.byKey(const ValueKey('invitations-result-dialog'));
+    expect(
+      find.descendant(
+        of: dialog,
+        matching: find.textContaining('Ann Lee, Bo Ray'),
+      ),
+      findsOneWidget,
+    );
     expect(source.links, hasLength(2));
   });
 

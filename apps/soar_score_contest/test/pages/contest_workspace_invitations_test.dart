@@ -144,32 +144,23 @@ void main() {
     expect(find.textContaining('All 4 pilots have a QR code'), findsOneWidget);
   });
 
-  testWidgets('pilots stay counted when their names could not be loaded', (
-    tester,
-  ) async {
-    final source = _Source(
-      report: InvitationEmailReport(
-        kinds: {
-          for (final p in matrixProfiles())
-            p.id.value: InvitationEmailKind.noAddress,
-        },
-      ),
-    );
+  testWidgets('sending waits until the pilots can be named', (tester) async {
+    final source = _Source();
     PilotInvitationSources.current = source;
     await _pump(
       tester,
       MatrixServer(configuration: matrixConfiguration()),
       failProfiles: true,
     );
-    await tester.tap(find.byKey(const ValueKey('workspace-invitations-send')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
-    await tester.pumpAndSettle();
     expect(
-      find.byKey(const ValueKey('invitations-result-dialog')),
+      find.byKey(const ValueKey('workspace-invitations-send')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('workspace-invitations-retry')),
       findsOneWidget,
     );
-    expect(find.textContaining('names could not be loaded'), findsOneWidget);
+    expect(source.sent, isEmpty);
   });
 
   testWidgets('a sync of the contest updates the card without leaving', (

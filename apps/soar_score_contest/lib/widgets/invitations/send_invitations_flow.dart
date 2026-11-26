@@ -152,9 +152,18 @@ Future<bool> confirmSendInvitations(
 Future<void> showInvitationEmailResult(
   BuildContext context,
   InvitationEmailReport report,
-  InvitationNames names,
-) {
+  InvitationNames names, {
+  List<Id> targets = const [],
+}) {
   final l10n = AppLocalizations.of(context);
+  // A service-wide failure answers for nobody in particular: every target
+  // is a pilot whose email did not go out.
+  if (report.serviceUnavailable && report.kinds.isEmpty) {
+    report = InvitationEmailReport(
+      kinds: {for (final id in targets) id.value: InvitationEmailKind.notSent},
+      serviceUnavailable: true,
+    );
+  }
   String nameOf(String id) => names[id] ?? '';
   // Pilots whose name is not known are still counted, never dropped.
   List<String> namesOf(InvitationEmailKind kind) {
@@ -264,7 +273,12 @@ Future<bool> sendInvitationsGuarded(
           report.count(InvitationEmailKind.limitReached) > 0 ||
           report.count(InvitationEmailKind.unknown) > 0 ||
           report.count(InvitationEmailKind.noAddress) > 0)) {
-    await showInvitationEmailResult(context, report, names);
+    await showInvitationEmailResult(
+      context,
+      report,
+      names,
+      targets: participations,
+    );
     if (!context.mounted) return ok;
   }
   if (!announce) return ok;
