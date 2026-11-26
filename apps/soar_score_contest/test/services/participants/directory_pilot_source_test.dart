@@ -32,6 +32,8 @@ void main() {
   late List<http.Request> localRequests;
   late Map<String, List<Map<String, Object?>>> byKey;
 
+  final created = <String, Map<String, Object?>>{};
+  var localLosesAnswer = false;
   var copyAnswer = 0; // 0: answers, else the status to fail with
   var copyCommits = false; // the failure comes after the server committed
 
@@ -82,17 +84,40 @@ void main() {
       baseUrl: Uri.parse('http://local.invalid'),
       httpClient: MockClient((request) async {
         localRequests.add(request);
+        Map<String, Object?> row(Map<String, Object?> body) => {
+          ...body,
+          'owner_account_id': Id.create().value,
+          'created_at': '2026-11-26T12:00:00Z',
+          'updated_at': '2026-11-26T12:00:00Z',
+        };
+        http.Response ok(Map<String, Object?> body, int status) =>
+            http.Response(
+              jsonEncode(row(body)),
+              status,
+              headers: {'content-type': 'application/json'},
+            );
+        if (request.method == 'GET') {
+          final id = request.url.pathSegments.last;
+          return ok(created[id]!, 200);
+        }
         final body = jsonDecode(request.body) as Map<String, Object?>;
-        return http.Response(
-          jsonEncode({
-            ...body,
-            'owner_account_id': Id.create().value,
-            'created_at': '2026-11-26T12:00:00Z',
-            'updated_at': '2026-11-26T12:00:00Z',
-          }),
-          201,
-          headers: {'content-type': 'application/json'},
-        );
+        final id = body['id']! as String;
+        final stored = created[id];
+        if (stored != null && jsonEncode(stored) != jsonEncode(body)) {
+          return http.Response(
+            jsonEncode({
+              'error': {'code': 'conflict', 'message': 'different'},
+            }),
+            409,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+        created[id] = body;
+        if (localLosesAnswer) {
+          localLosesAnswer = false;
+          throw http.ClientException('lost', request.url);
+        }
+        return ok(body, 201);
       }),
     ),
   );
@@ -103,6 +128,8 @@ void main() {
     byKey = {};
     copyAnswer = 0;
     copyCommits = false;
+    created.clear();
+    localLosesAnswer = false;
   });
 
   test('text that cannot be a key makes no request', () async {
@@ -448,4 +475,23 @@ void main() {
       expect(sent['profile_id'], candidate.profileId.value);
     },
   );
+
+  test('a profile created with its answer lost is found again after the entry changes', () async {
+    byKey['fai_number'] = [_match(_entryB, 'Bea')];
+    final store = BackendLocalUiStore(MemoryLocalUiBackend());
+    final s = source(store: store);
+    final candidate = (await s.search('F1234')).single;
+    localLosesAnswer = true;
+    await expectLater(s.copy(candidate), throwsA(anything));
+
+    // The pilot changes a detail before the retry.
+    byKey['fai_number'] = [
+      {..._match(_entryB, 'Bea'), 'club': 'New Club'},
+    ];
+    final again = (await source(store: store).lookup('F1234')).single;
+    final profile = await source(store: store).copy(again);
+
+    expect(profile.id, candidate.profileId);
+    expect(profile.club, 'Soar Club'); // the first create stands
+  });
 }

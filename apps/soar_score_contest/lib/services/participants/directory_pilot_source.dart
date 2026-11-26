@@ -202,20 +202,29 @@ class DirectoryPilotSource {
         profileId: candidate.profileId,
       ),
     );
-    return local.createParticipant(
-      CreateParticipantRequest(
-        id: candidate.profileId,
-        firstName: details.firstName,
-        lastName: details.lastName,
-        club: details.club,
-        faiNumber: details.faiNumber,
-        nationalOrgId: details.nationalOrgId,
-        city: details.city,
-        state: details.state,
-        country: details.country,
-        email: details.email,
-      ),
-    );
+    try {
+      return await local.createParticipant(
+        CreateParticipantRequest(
+          id: candidate.profileId,
+          firstName: details.firstName,
+          lastName: details.lastName,
+          club: details.club,
+          faiNumber: details.faiNumber,
+          nationalOrgId: details.nationalOrgId,
+          city: details.city,
+          state: details.state,
+          country: details.country,
+          email: details.email,
+        ),
+      );
+    } on ApiHttpError catch (e) {
+      // The profile exists under this id with other details: an earlier
+      // create got through and its answer was lost, and the pilot has
+      // changed their entry since. Take it as it is; the director's copy is
+      // never overwritten (a refresh offers the new details).
+      if (e.statusCode != 409) rethrow;
+      return local.participant(candidate.profileId);
+    }
   }
 
   Future<void> _remember(Id entryId, Id profileId) async {
