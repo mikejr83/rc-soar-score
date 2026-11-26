@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:test/test.dart';
 
 void main() {
@@ -38,8 +39,11 @@ void main() {
     Future<String> readHeadersFile(String appDir) async {
       final headersPath = resolvePath(appDir);
       final headersFile = File(headersPath);
-      expect(headersFile.existsSync(), true,
-          reason: 'web/_headers file should exist at $headersPath');
+      expect(
+        headersFile.existsSync(),
+        true,
+        reason: 'web/_headers file should exist at $headersPath',
+      );
       return headersFile.readAsStringSync();
     }
 
@@ -47,16 +51,25 @@ void main() {
       // Find a CSP directive in the headers
       final regex = RegExp(directive + r'\s([^;]+);');
       final match = regex.firstMatch(headers);
-      expect(match, isNotNull,
-          reason: '$directive directive should be present in CSP');
+      expect(
+        match,
+        isNotNull,
+        reason: '$directive directive should be present in CSP',
+      );
       return match!.group(1)!.trim();
     }
 
     void expectOriginsPresent(
-        String directive, String value, List<String> origins) {
+      String directive,
+      String value,
+      List<String> origins,
+    ) {
       for (final origin in origins) {
-        expect(value.contains(origin), true,
-            reason: '$directive should allow $origin');
+        expect(
+          value.contains(origin),
+          true,
+          reason: '$directive should allow $origin',
+        );
       }
     }
 
@@ -66,12 +79,14 @@ void main() {
       expectOriginsPresent('img-src', imgSrc, requiredOrigins);
     });
 
-    test('self-score app img-src allows social provider profile images',
-        () async {
-      final headers = await readHeadersFile('apps/soar_score_self_score');
-      final imgSrc = await extractDirective(headers, 'img-src');
-      expectOriginsPresent('img-src', imgSrc, requiredOrigins);
-    });
+    test(
+      'self-score app img-src allows social provider profile images',
+      () async {
+        final headers = await readHeadersFile('apps/soar_score_self_score');
+        final imgSrc = await extractDirective(headers, 'img-src');
+        expectOriginsPresent('img-src', imgSrc, requiredOrigins);
+      },
+    );
 
     // Flutter web's Image.network uses XMLHttpRequest which is governed by
     // connect-src, not img-src. The connect-src must also allow avatar origins.
