@@ -13272,7 +13272,7 @@ abstract class AppLocalizations {
   /// Search source line when online with a remote directory.
   ///
   /// In en, this message translates to:
-  /// **'Online: searching remote first, then your profiles'**
+  /// **'Online: also finds listed pilots by exact email, FAI number or national ID'**
   String get searchOnline;
 
   /// Search source line when offline.
@@ -13290,7 +13290,7 @@ abstract class AppLocalizations {
   /// Header of the search results when remote is available.
   ///
   /// In en, this message translates to:
-  /// **'Add from remote and your profiles'**
+  /// **'Add from the directory and your profiles'**
   String get searchHeaderRemote;
 
   /// Header of the search results from saved profiles.
@@ -13323,11 +13323,17 @@ abstract class AppLocalizations {
   /// **'Already in this contest'**
   String get searchAlready;
 
-  /// A result found in the remote directory.
+  /// A result found in the pilot directory.
   ///
   /// In en, this message translates to:
-  /// **'Remote'**
+  /// **'Directory'**
   String get searchRemote;
+
+  /// Message when copying a pilot from the directory into the director's list failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not add {name} from the directory. Try again.'**
+  String directoryCopyFailed(String name);
 
   /// A result from the director's own profiles.
   ///

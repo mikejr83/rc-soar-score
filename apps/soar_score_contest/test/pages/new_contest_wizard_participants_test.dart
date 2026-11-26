@@ -2,11 +2,13 @@ import 'dart:convert' as convert;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:soar_score_contest/l10n/app_localizations_en.dart';
 import 'package:soar_score_contest/services/participants/participant_option.dart';
 import 'package:soar_score_contest/widgets/participants/participant_card.dart';
 import 'package:soar_score_contest/widgets/participants/participants_table.dart';
 
+import '../support/fake_auth_session.dart';
 import '../support/new_contest_test_support.dart';
 import '../support/participant_test_support.dart';
 import '../support/participants_step_support.dart';
@@ -308,5 +310,123 @@ void main() {
     expect(find.byType(ParticipantsTable), findsNothing);
     expect(find.byType(ParticipantCard), findsNWidgets(2));
     expect(tester.takeException(), isNull);
+  });
+
+  group('pilots from the directory (#653)', () {
+    const entryId = '019c0000-0000-7000-8000-0000000000a1';
+    late List<http.Request> sent;
+
+    Future<http.Response> directoryApi(http.Request request) async {
+      final path = request.url.path;
+      sent.add(request);
+      Map<String, Object?> match() => {
+        'entry_id': entryId,
+        'first_name': 'Dana',
+        'last_name': 'Directory',
+        'club': 'Soar Club',
+        'fai_number': 'F1234',
+        'national_org_id': null,
+        'city': null,
+        'state': null,
+        'country': null,
+        'email': null,
+        'email_available': true,
+      };
+      if (path.endsWith('/directory/lookups')) {
+        final body = convert.jsonDecode(request.body) as Map<String, dynamic>;
+        return json({
+          'results': body['key'] == 'fai_number' ? [match()] : [],
+        });
+      }
+      if (path.endsWith('/directory/copies')) return json(match());
+      return stepApi(request);
+    }
+
+    Finder searchField() => find.descendant(
+      of: find.byKey(const ValueKey('participant-search')),
+      matching: find.byType(TextField),
+    );
+
+    setUp(() => sent = []);
+
+    testWidgets('a director finds a listed pilot by FAI number and adds them', (
+      tester,
+    ) async {
+      final l10n = AppLocalizationsEn();
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: directoryApi,
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      await tester.enterText(searchField(), 'F1234');
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.searchRemote), findsOneWidget);
+      expect(find.text('Dana Directory'), findsOneWidget);
+      await tester.tap(find.widgetWithText(ListTile, 'Dana Directory'));
+      await tester.pumpAndSettle();
+
+      final copy = sent.singleWhere(
+        (r) => r.url.path.endsWith('/directory/copies'),
+      );
+      final created = sent.singleWhere(
+        (r) => r.method == 'POST' && r.url.path.endsWith('/participants'),
+      );
+      expect(
+        (convert.jsonDecode(copy.body) as Map)['profile_id'],
+        (convert.jsonDecode(created.body) as Map)['id'],
+      );
+      expect(
+        find.text(l10n.wizardAddedAsPilotShort('Dana Directory')),
+        findsOneWidget,
+      );
+      expect(store.draft.participants, hasLength(1));
+    });
+
+    testWidgets('signed out, the search never calls the directory', (
+      tester,
+    ) async {
+      final store = await storeAtStep4();
+      await pumpWizard(tester, respond: directoryApi, store: store);
+
+      await tester.enterText(searchField(), 'F1234');
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      expect(sent.where((r) => r.url.path.contains('/directory/')), isEmpty);
+    });
+
+    testWidgets('a failed copy says so and adds nobody', (tester) async {
+      final l10n = AppLocalizationsEn();
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: (request) async {
+          if (request.url.path.endsWith('/directory/copies')) {
+            return json({
+              'error': {'code': 'link_not_found', 'message': 'gone'},
+            }, 404);
+          }
+          return directoryApi(request);
+        },
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      await tester.enterText(searchField(), 'F1234');
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(ListTile, 'Dana Directory'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(l10n.directoryCopyFailed('Dana Directory')),
+        findsOneWidget,
+      );
+      expect(store.draft.participants, isEmpty);
+    });
   });
 }

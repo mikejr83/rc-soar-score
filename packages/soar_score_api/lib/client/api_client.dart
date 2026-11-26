@@ -20,6 +20,7 @@ import '../dto/create_participant_request.dart';
 import '../dto/create_role_request.dart';
 import '../dto/create_team_request.dart';
 import '../dto/directory_entry_dto.dart';
+import '../dto/directory_lookup_dto.dart';
 import '../dto/draw_matrix_request.dart';
 import '../dto/draw_status_dto.dart';
 import '../dto/enter_score_request.dart';
@@ -753,6 +754,54 @@ class ApiClient {
       response,
       uri,
       DirectoryEntryStateDto.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/directory/lookups` — the listed pilots whose [key] is
+  /// exactly [value] (empty when there are none). Needs a signed-in director
+  /// account; rate limited (status 429). A stored email is returned only for
+  /// a pilot who made it visible.
+  Future<DirectoryLookupResponse> lookupDirectory(
+    DirectoryLookupRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/directory/lookups');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<DirectoryLookupResponse>(
+      response,
+      uri,
+      DirectoryLookupResponse.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/directory/copies` — links the pilot of the listed entry
+  /// to the director's profile [DirectoryCopyRequest.profileId] and returns
+  /// the details to copy. Repeating it changes nothing. A pilot who is not
+  /// listed is status 404 (`link_not_found`); a profile owned by another
+  /// director is 403 (`profile_not_owned`).
+  Future<DirectoryMatchDto> copyDirectoryEntry(
+    DirectoryCopyRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/directory/copies');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<DirectoryMatchDto>(
+      response,
+      uri,
+      DirectoryMatchDto.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/directory/refreshes` — the pilot's current details, for a
+  /// profile this director copied them to. Writes nothing; status 404
+  /// (`link_not_found`) for any other profile or an entry no longer listed.
+  Future<DirectoryMatchDto> refreshDirectoryEntry(
+    DirectoryCopyRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/directory/refreshes');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<DirectoryMatchDto>(
+      response,
+      uri,
+      DirectoryMatchDto.fromJson,
     );
   }
 

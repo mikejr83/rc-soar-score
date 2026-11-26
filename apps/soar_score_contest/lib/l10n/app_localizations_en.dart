@@ -8790,7 +8790,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchOnline =>
-      'Online: searching remote first, then your profiles';
+      'Online: also finds listed pilots by exact email, FAI number or national ID';
 
   @override
   String get searchOffline => 'Offline: searching your profiles only';
@@ -8799,7 +8799,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchProfiles => 'Searching your participant profiles';
 
   @override
-  String get searchHeaderRemote => 'Add from remote and your profiles';
+  String get searchHeaderRemote => 'Add from the directory and your profiles';
 
   @override
   String get searchHeaderProfiles => 'Add from saved profiles';
@@ -8819,7 +8819,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchAlready => 'Already in this contest';
 
   @override
-  String get searchRemote => 'Remote';
+  String get searchRemote => 'Directory';
+
+  @override
+  String directoryCopyFailed(String name) {
+    return 'Could not add $name from the directory. Try again.';
+  }
 
   @override
   String get searchYourProfiles => 'Your profiles';

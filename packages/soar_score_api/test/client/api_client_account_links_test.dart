@@ -277,4 +277,77 @@ void main() {
       throwsA(isA<ApiHttpError>().having((e) => e.statusCode, 'status', 409)),
     );
   });
+
+  group('directory (#653)', () {
+    final entry = Id.parse('019c0000-0000-7000-8000-00000000a101');
+    final profile = Id.parse('019c0000-0000-7000-8000-00000000b101');
+    final match = {
+      'entry_id': entry.value,
+      'first_name': 'Pat',
+      'last_name': 'Pilot',
+      'club': null,
+      'fai_number': 'F1',
+      'national_org_id': null,
+      'city': null,
+      'state': null,
+      'country': null,
+      'email': null,
+      'email_available': true,
+    };
+
+    test('lookupDirectory posts the key and value', () async {
+      final client = clientFor(
+        (_) => json({
+          'results': [match],
+        }),
+      );
+
+      final response = await client.lookupDirectory(
+        const DirectoryLookupRequest(
+          key: DirectoryLookupKeyDto.faiNumber,
+          value: 'F1',
+        ),
+      );
+
+      expect(seen.method, 'POST');
+      expect(seen.url.path, '/api/v1/directory/lookups');
+      expect(jsonDecode(seen.body), {'key': 'fai_number', 'value': 'F1'});
+      expect(seen.url.query, isEmpty);
+      expect(response.results.single.entryId, entry);
+      expect(response.results.single.email, isNull);
+      expect(response.results.single.emailAvailable, isTrue);
+    });
+
+    test('copy and refresh post the entry and profile ids', () async {
+      final client = clientFor((_) => json(match));
+      final request = DirectoryCopyRequest(entryId: entry, profileId: profile);
+
+      final copied = await client.copyDirectoryEntry(request);
+      expect(seen.url.path, '/api/v1/directory/copies');
+      expect(jsonDecode(seen.body), {
+        'entry_id': entry.value,
+        'profile_id': profile.value,
+      });
+      final refreshed = await client.refreshDirectoryEntry(request);
+      expect(seen.url.path, '/api/v1/directory/refreshes');
+
+      expect(copied.firstName, 'Pat');
+      expect(refreshed.faiNumber, 'F1');
+    });
+
+    test('a refused copy is an ApiHttpError', () async {
+      final client = clientFor(
+        (_) => json({
+          'error': {'code': 'link_not_found', 'message': 'gone'},
+        }, 404),
+      );
+
+      await expectLater(
+        client.copyDirectoryEntry(
+          DirectoryCopyRequest(entryId: entry, profileId: profile),
+        ),
+        throwsA(isA<ApiHttpError>().having((e) => e.statusCode, 'status', 404)),
+      );
+    });
+  });
 }

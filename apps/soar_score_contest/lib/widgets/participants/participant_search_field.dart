@@ -72,8 +72,11 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
     try {
       final remote = await widget.remote!(query);
       final localIds = {for (final c in local) c.profileId};
+      final own = widget.profiles ?? const <ParticipantProfile>[];
       return [
-        ...remote.where((c) => !localIds.contains(c.profileId)),
+        ...remote.where(
+          (c) => !localIds.contains(c.profileId) && !c.isCopiedIn(own),
+        ),
         ...local,
       ];
     } on Object {

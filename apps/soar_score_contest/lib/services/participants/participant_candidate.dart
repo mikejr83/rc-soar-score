@@ -1,3 +1,4 @@
+import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../widgets/participant_search.dart';
@@ -12,7 +13,23 @@ class ParticipantCandidate {
     this.club,
     this.email,
     this.emailVisible = true,
+    this.directory,
   });
+
+  /// A listed pilot the directory found (#653). [profileId] is the id the
+  /// director's copy will have; nothing exists under it yet.
+  factory ParticipantCandidate.directory(
+    DirectoryMatchDto match, {
+    required Id profileId,
+  }) => ParticipantCandidate(
+    profileId: profileId,
+    name: '${match.firstName} ${match.lastName}',
+    source: ParticipantSource.remote,
+    club: match.club,
+    email: match.email,
+    emailVisible: match.email != null,
+    directory: match,
+  );
 
   /// One of the director's own [profile]s (its email is always shown).
   factory ParticipantCandidate.local(ParticipantProfile profile) =>
@@ -34,6 +51,28 @@ class ParticipantCandidate {
   /// person's permission; the email must not even reach the UI otherwise.
   final bool emailVisible;
 
+  /// The directory entry this person was found as, or null for one of the
+  /// director's own profiles. A copy of it becomes their profile.
+  final DirectoryMatchDto? directory;
+
+  /// Whether one of the director's own [profiles] already holds this
+  /// directory pilot (same FAI number, national ID or visible email), so it
+  /// is offered once, as that profile.
+  bool isCopiedIn(Iterable<ParticipantProfile> profiles) {
+    final match = directory;
+    if (match == null) return false;
+    bool same(String? a, String? b) =>
+        a != null &&
+        b != null &&
+        a.trim().toLowerCase() == b.trim().toLowerCase();
+    return profiles.any(
+      (p) =>
+          same(p.faiNumber, match.faiNumber) ||
+          same(p.nationalOrgId, match.nationalOrgId) ||
+          same(p.email, match.email),
+    );
+  }
+
   /// What the email cell says for this person.
   ParticipantEmailStatus get emailStatus {
     if (source == ParticipantSource.remote && !emailVisible) {
@@ -46,9 +85,9 @@ class ParticipantCandidate {
   }
 }
 
-/// Searches the remote participant directory. There is no directory
-/// endpoint yet, so the wizard runs without one; when it exists, pass one to
-/// the Participants step and remote results are listed first.
+/// Searches the remote participant directory (see `DirectoryPilotSource`).
+/// Without one the search only lists the director's own profiles; with one,
+/// remote results are listed first.
 typedef RemoteParticipantSearch = Future<List<ParticipantCandidate>> Function(
   String query,
 );
