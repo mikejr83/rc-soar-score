@@ -19,13 +19,7 @@ import '../support/fake_app_sync.dart';
 import '../support/matrix_test_support.dart';
 
 class _Source implements PilotInvitationSource {
-  _Source({
-    this.failSend = false,
-    this.failReadAfterSend = false,
-    this.report = const InvitationEmailReport.none(),
-  });
-
-  final InvitationEmailReport report;
+  _Source({this.failSend = false, this.failReadAfterSend = false});
 
   bool synchronized = true;
 
@@ -53,7 +47,7 @@ class _Source implements PilotInvitationSource {
     for (final id in ids) {
       links[id.value] = 'https://x.test/${id.value}';
     }
-    return report;
+    return const InvitationEmailReport.none();
   }
 }
 
