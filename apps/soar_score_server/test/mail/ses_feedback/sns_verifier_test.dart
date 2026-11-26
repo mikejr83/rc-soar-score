@@ -85,7 +85,11 @@ void main() {
         final message = parse(
           signedSnsMessage(signatureVersion: version, subject: 'Hello'),
         );
-        expect(await verifier.verify(message), isTrue, reason: version);
+        expect(
+          await verifier.verify(message),
+          SnsVerification.valid,
+          reason: version,
+        );
       }
     });
 
@@ -94,7 +98,7 @@ void main() {
         await verifier.verify(
           parse(signedSnsMessage(type: 'SubscriptionConfirmation')),
         ),
-        isTrue,
+        SnsVerification.valid,
       );
     });
 
@@ -114,7 +118,7 @@ void main() {
       ]) {
         expect(
           await verifier.verify(parse({...fields, ...change})),
-          isFalse,
+          SnsVerification.invalid,
           reason: '$change',
         );
       }
@@ -124,19 +128,19 @@ void main() {
       final fields = signedSnsMessage();
       expect(
         await verifier.verify(parse({...fields, 'SignatureVersion': '1'})),
-        isFalse,
+        SnsVerification.invalid,
       );
       expect(
         await verifier.verify(parse({...fields, 'SignatureVersion': '3'})),
-        isFalse,
+        SnsVerification.invalid,
       );
       expect(
         await verifier.verify(parse({...fields, 'Signature': '!!not base64'})),
-        isFalse,
+        SnsVerification.invalid,
       );
       expect(
         await verifier.verify(parse({...fields, 'Signature': 'AAAA'})),
-        isFalse,
+        SnsVerification.invalid,
       );
     });
 
@@ -144,7 +148,7 @@ void main() {
       final other = signedSnsMessage(
         topicArn: 'arn:aws:sns:us-east-2:999999999999:attacker',
       );
-      expect(await verifier.verify(parse(other)), isFalse);
+      expect(await verifier.verify(parse(other)), SnsVerification.invalid);
       expect(fetched, isEmpty);
     });
 
@@ -161,37 +165,49 @@ void main() {
       ]) {
         expect(
           await verifier.verify(parse(signedSnsMessage(certUrl: url))),
-          isFalse,
+          SnsVerification.invalid,
           reason: url,
         );
       }
       expect(fetched, isEmpty);
     });
 
-    test('refuses when the certificate cannot be fetched or read', () async {
+    test('cannot decide, and says so, when the certificate cannot be fetched or read', () async {
       certificateStatus = 500;
-      expect(await verifier.verify(parse(signedSnsMessage())), isFalse);
+      expect(
+        await verifier.verify(parse(signedSnsMessage())),
+        SnsVerification.unavailable,
+      );
 
       final unreadable = SnsVerifier(
         topic: SnsTopic.parse(testTopicArn)!,
         client: MockClient((_) async => http.Response('garbage', 200)),
       );
-      expect(await unreadable.verify(parse(signedSnsMessage())), isFalse);
+      expect(
+        await unreadable.verify(parse(signedSnsMessage())),
+        SnsVerification.unavailable,
+      );
 
       final failing = SnsVerifier(
         topic: SnsTopic.parse(testTopicArn)!,
         client: MockClient((_) async => throw http.ClientException('down')),
       );
-      expect(await failing.verify(parse(signedSnsMessage())), isFalse);
+      expect(
+        await failing.verify(parse(signedSnsMessage())),
+        SnsVerification.unavailable,
+      );
     });
 
-    test('refuses an oversized certificate', () async {
+    test('cannot decide with an oversized certificate', () async {
       final small = SnsVerifier(
         topic: SnsTopic.parse(testTopicArn)!,
         client: client,
         maxCertificateBytes: 100,
       );
-      expect(await small.verify(parse(signedSnsMessage())), isFalse);
+      expect(
+        await small.verify(parse(signedSnsMessage())),
+        SnsVerification.unavailable,
+      );
     });
   });
 }

@@ -475,7 +475,14 @@ endpoint, and the server calls nothing but the public SNS certificate address.
 - The log has one line per recorded report ("An invitation email was reported
   as bounce") and one per subscription event. Message ids, addresses, headers
   and links are never logged.
-- SNS retries a delivery that fails with 5xx. A repeated report is harmless.
+- The endpoint answers 503 when it should be asked again: the SNS signing
+  certificate could not be fetched, a subscription confirmation request failed,
+  or a report arrived while an invitation email was still being sent (SES can
+  report before the send's own answer is stored). SNS retries a 5xx delivery
+  (its default HTTP policy makes a few attempts over about a minute; raise it
+  with a topic delivery policy if reports are ever lost during a long outage).
+  A 403 or 400 is never retried, and is only given to messages that are not
+  genuine. A repeated report is harmless.
 - A bounce marks the email, whatever its type; `bounce_type` (`permanent`,
   `transient` or `undetermined`) is kept on the stored entry.
 - The message id is looked up by scanning the invitations' delivery outcomes

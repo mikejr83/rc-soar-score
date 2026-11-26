@@ -160,6 +160,25 @@ class InvitationEmailResult {
   final bool repeated;
 }
 
+/// What [InvitationDeliveryFeedback.recordFeedback] did with a report.
+enum InvitationFeedbackResult {
+  /// The email's stored outcome changed.
+  recorded,
+
+  /// The report is about an invitation email but changes nothing (a repeat,
+  /// or a bounce after a complaint).
+  unchanged,
+
+  /// No invitation email has that message id, and no send is in flight that
+  /// it could belong to: not ours (a support message, say).
+  unmatched,
+
+  /// No stored email has that message id yet, but a send started moments ago
+  /// has not stored its answer. The report may be about it, so the caller
+  /// should ask the provider to deliver it again later.
+  pending,
+}
+
 /// Attaches what the email provider reports later (a bounce or a complaint)
 /// to the invitation email it is about (#790).
 ///
@@ -180,16 +199,25 @@ class InvitationDeliveryFeedback {
   ///
   /// Repeating a report changes nothing, a complaint replaces a bounce, and a
   /// bounce never replaces a complaint. Only an entry the provider accepted
-  /// can be reported on. Returns whether a stored outcome changed; false for
-  /// a message id that is not an invitation email (a support message, say).
-  Future<bool> recordFeedback({
+  /// can be reported on.
+  ///
+  /// A report can overtake the send that caused it: the provider may report
+  /// before the send's own answer, with the message id, is stored. A report
+  /// that matches nothing while a send started within [pendingSendWindow] is
+  /// still unanswered comes back [InvitationFeedbackResult.pending], so it is
+  /// not lost.
+  Future<InvitationFeedbackResult> recordFeedback({
     required String messageId,
     required InvitationEmailFeedback feedback,
     String? bounceType,
   }) async {
     final invitationId = await repository.invitationRepository
         .findIdByDeliveryMessageId(messageId);
-    if (invitationId == null) return false;
+    if (invitationId == null) {
+      return await _anySendPending()
+          ? InvitationFeedbackResult.pending
+          : InvitationFeedbackResult.unmatched;
+    }
     final reportedAt = _clock().toUtc().toIso8601String();
     var changed = false;
     await repository.invitationRepository.updateDeliveryOutcomes(invitationId, (
@@ -225,7 +253,32 @@ class InvitationDeliveryFeedback {
             current[i],
       ];
     });
-    return changed;
+    return changed
+        ? InvitationFeedbackResult.recorded
+        : InvitationFeedbackResult.unchanged;
+  }
+
+  /// How long a send with no stored answer is assumed to be still running. A
+  /// longer-lived `sending` entry is a send the server lost track of, and
+  /// reports are not held back for it.
+  static const pendingSendWindow = Duration(minutes: 10);
+
+  Future<bool> _anySendPending() async {
+    final cutoff = _clock().toUtc().subtract(pendingSendWindow);
+    for (final id
+        in await repository.invitationRepository.listIdsWithSendingEmail()) {
+      final invitation = await repository.invitationRepository.findById(id);
+      if (invitation == null) continue;
+      for (final entry in invitation.deliveryOutcomes) {
+        if (entry['channel'] != 'email' ||
+            entry['status'] != InvitationEmailStatus.sending.wire) {
+          continue;
+        }
+        final at = DateTime.tryParse('${entry['at']}');
+        if (at != null && at.isAfter(cutoff)) return true;
+      }
+    }
+    return false;
   }
 }
 

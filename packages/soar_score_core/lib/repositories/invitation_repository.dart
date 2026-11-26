@@ -32,6 +32,10 @@ abstract interface class InvitationRepository {
   /// not for request paths.
   Future<Id?> findIdByDeliveryMessageId(String messageId);
 
+  /// The ids of the invitations with an email send still in flight (an
+  /// outcome stored as `sending`). Same cost as [findIdByDeliveryMessageId].
+  Future<List<Id>> listIdsWithSendingEmail();
+
   /// Every invitation of [contestParticipationId], oldest revision first.
   Future<List<Invitation>> listForParticipation(Id contestParticipationId);
 

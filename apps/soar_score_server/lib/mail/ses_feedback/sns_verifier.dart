@@ -48,6 +48,19 @@ class SnsTopic {
   }
 }
 
+/// The verdict on one SNS message.
+enum SnsVerification {
+  /// Signed by SNS for the configured topic.
+  valid,
+
+  /// Not genuine (wrong topic, bad certificate address, bad signature).
+  invalid,
+
+  /// Could not be decided: the signing certificate could not be fetched or
+  /// read right now. The sender should try again later.
+  unavailable,
+}
+
 /// Decides whether an SNS message is genuinely from the configured topic.
 ///
 /// SNS cannot send a secret with a delivery, so the proof is the message's
@@ -74,30 +87,32 @@ class SnsVerifier {
 
   /// Whether [message] is signed by SNS for the configured topic.
   ///
-  /// False for a wrong topic, a certificate address that is not the topic
-  /// region's SNS host, an unreadable or unreachable certificate, an unknown
-  /// signature version, or a signature that does not match.
-  Future<bool> verify(SnsMessage message) async {
-    if (message.topicArn != topic.arn) return false;
+  /// [SnsVerification.invalid] for a wrong topic, a certificate address that
+  /// is not the topic region's SNS host, an unknown signature version, or a
+  /// signature that does not match. [SnsVerification.unavailable] when the
+  /// certificate could not be fetched or read, which says nothing about the
+  /// message and must not make the sender give up on it.
+  Future<SnsVerification> verify(SnsMessage message) async {
+    if (message.topicArn != topic.arn) return SnsVerification.invalid;
     if (!topic.allowsUrl(message.signingCertUrl, pathSuffix: '.pem')) {
-      return false;
+      return SnsVerification.invalid;
     }
     final digest = switch (message.signatureVersion) {
       '1' => (pc.SHA1Digest(), '06052b0e03021a'),
       '2' => (pc.SHA256Digest(), '0609608648016503040201'),
       _ => null,
     };
-    if (digest == null) return false;
+    if (digest == null) return SnsVerification.invalid;
 
     final Uint8List signature;
     try {
       signature = base64.decode(message.signature);
     } on FormatException {
-      return false;
+      return SnsVerification.invalid;
     }
 
     final key = await _certificateKey(message.signingCertUrl);
-    if (key == null) return false;
+    if (key == null) return SnsVerification.unavailable;
     try {
       final verifier = pc.RSASigner(digest.$1, digest.$2)
         ..init(
@@ -107,12 +122,14 @@ class SnsVerifier {
           ),
         );
       return verifier.verifySignature(
-        Uint8List.fromList(utf8.encode(message.stringToSign)),
-        pc.RSASignature(signature),
-      );
+            Uint8List.fromList(utf8.encode(message.stringToSign)),
+            pc.RSASignature(signature),
+          )
+          ? SnsVerification.valid
+          : SnsVerification.invalid;
     } on Object {
       // pointycastle throws on a signature of the wrong length or shape.
-      return false;
+      return SnsVerification.invalid;
     }
   }
 

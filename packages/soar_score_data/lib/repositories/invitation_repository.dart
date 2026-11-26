@@ -69,6 +69,25 @@ class InvitationRepository extends DriftRepository
   }
 
   @override
+  Future<List<core.Id>> listIdsWithSendingEmail() async {
+    final table = db.allTables.firstWhere(
+      (t) => t.actualTableName == 'invitations',
+    );
+    final rows = await db
+        .customSelect(
+          portableSql(
+            db,
+            'SELECT id FROM invitations WHERE delivery_outcomes LIKE ? '
+            'ORDER BY id',
+          ),
+          variables: [Variable<String>('%"status":"sending"%')],
+          readsFrom: {table},
+        )
+        .get();
+    return [for (final row in rows) core.Id.parse(row.read<String>('id'))];
+  }
+
+  @override
   Future<List<core.Invitation>> listForParticipation(
     core.Id contestParticipationId,
   ) async => _store.whereId(

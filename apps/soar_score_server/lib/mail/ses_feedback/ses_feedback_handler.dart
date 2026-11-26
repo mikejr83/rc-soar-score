@@ -6,7 +6,10 @@ import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart';
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
 import 'package:soar_score_core/soar_score_core.dart'
-    show InvitationDeliveryFeedback, InvitationEmailFeedback;
+    show
+        InvitationDeliveryFeedback,
+        InvitationEmailFeedback,
+        InvitationFeedbackResult;
 
 import 'sns_message.dart';
 import 'sns_verifier.dart';
@@ -57,17 +60,40 @@ Handler sesFeedbackHandler({
     if (message == null) {
       return handledError(request, 400, 'bad_request', 'Not an SNS message.');
     }
-    if (!await verifier.verify(message)) {
-      return handledError(request, 403, 'forbidden', 'Not a valid message.');
+    switch (await verifier.verify(message)) {
+      case SnsVerification.valid:
+        break;
+      case SnsVerification.invalid:
+        return handledError(request, 403, 'forbidden', 'Not a valid message.');
+      case SnsVerification.unavailable:
+        // Nothing is wrong with the message; we could not check it. A 5xx
+        // makes SNS deliver it again, where a 403 would drop it for good.
+        return handledError(
+          request,
+          503,
+          'verification_unavailable',
+          'The message could not be verified right now. Try again later.',
+        );
     }
 
+    final bool done;
     switch (message.type) {
       case SnsMessageType.subscriptionConfirmation:
-        await _confirm(message, verifier.topic, client);
+        done = await _confirm(message, verifier.topic, client);
       case SnsMessageType.unsubscribeConfirmation:
         _logger.warning('SNS reports that the feedback subscription ended.');
+        done = true;
       case SnsMessageType.notification:
-        await _record(message, feedback);
+        done = await _record(message, feedback);
+    }
+    if (!done) {
+      // Retryable: SNS delivers the message again after a short wait.
+      return handledError(
+        request,
+        503,
+        'try_again',
+        'The message could not be handled yet. Try again later.',
+      );
     }
     return Response.ok(
       '{}',
@@ -92,7 +118,9 @@ Future<String?> _readBody(Request request) async {
   }
 }
 
-Future<void> _confirm(
+/// True when the subscription is confirmed, or the message is not one to act
+/// on; false when the confirmation request failed and SNS should try again.
+Future<bool> _confirm(
   SnsMessage message,
   SnsTopic topic,
   http.Client client,
@@ -103,24 +131,30 @@ Future<void> _confirm(
   // chose.
   if (!topic.allowsUrl(url)) {
     _logger.warning('A subscription confirmation named an unexpected host.');
-    return;
+    return true;
   }
   try {
     final response = await client.get(Uri.parse(url)).timeout(_confirmDeadline);
-    _logger.info(
-      response.statusCode == 200
-          ? 'Feedback subscription confirmed.'
-          : 'Feedback subscription confirmation was refused '
-                '(HTTP ${response.statusCode}).',
+    if (response.statusCode == 200) {
+      _logger.info('Feedback subscription confirmed.');
+      return true;
+    }
+    _logger.warning(
+      'Feedback subscription confirmation was refused '
+      '(HTTP ${response.statusCode}).',
     );
+    return false;
   } on Object catch (error) {
     _logger.warning(
       'Feedback subscription confirmation failed (${error.runtimeType}).',
     );
+    return false;
   }
 }
 
-Future<void> _record(
+/// True when the report is dealt with; false when it may belong to a send
+/// whose answer is not stored yet, so SNS should deliver it again.
+Future<bool> _record(
   SnsMessage message,
   InvitationDeliveryFeedback feedback,
 ) async {
@@ -128,13 +162,13 @@ Future<void> _record(
   try {
     payload = jsonDecode(message.message);
   } on FormatException {
-    return;
+    return true;
   }
-  if (payload is! Map) return;
+  if (payload is! Map) return true;
   final kind = payload['notificationType'] ?? payload['eventType'];
   final mail = payload['mail'];
   final messageId = mail is Map ? mail['messageId'] : null;
-  if (messageId is! String) return;
+  if (messageId is! String) return true;
 
   final InvitationEmailFeedback report;
   String? bounceType;
@@ -151,14 +185,22 @@ Future<void> _record(
     case 'Complaint':
       report = InvitationEmailFeedback.complaint;
     default:
-      return;
+      return true;
   }
-  final changed = await feedback.recordFeedback(
+  final result = await feedback.recordFeedback(
     messageId: messageId,
     feedback: report,
     bounceType: bounceType,
   );
-  if (changed) {
-    _logger.info('An invitation email was reported as ${report.name}.');
+  switch (result) {
+    case InvitationFeedbackResult.recorded:
+      _logger.info('An invitation email was reported as ${report.name}.');
+    case InvitationFeedbackResult.pending:
+      _logger.info('A report is waiting for a send to store its answer.');
+      return false;
+    case InvitationFeedbackResult.unchanged:
+    case InvitationFeedbackResult.unmatched:
+      break;
   }
+  return true;
 }

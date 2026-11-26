@@ -52,16 +52,23 @@ void _tests(SliceBackend backend) {
   late SliceClient api;
   late Handler handler;
   late List<Uri> confirmed;
+  var certificateDown = false;
+  var confirmationStatus = 200;
   late List<LogRecord> logs;
   late StreamSubscription<LogRecord> logSubscription;
 
   Handler build({bool configured = true}) {
     final upstream = MockClient((request) async {
       if (request.url.path.endsWith('.pem')) {
-        return http.Response(testSigningCertPem, 200);
+        return certificateDown
+            ? http.Response('down', 503)
+            : http.Response(testSigningCertPem, 200);
       }
       confirmed.add(request.url);
-      return http.Response('<ConfirmSubscriptionResponse/>', 200);
+      return http.Response(
+        '<ConfirmSubscriptionResponse/>',
+        confirmationStatus,
+      );
     });
     return createServerHandler(
       api.database,
@@ -125,6 +132,8 @@ void _tests(SliceBackend backend) {
 
   setUp(() async {
     confirmed = [];
+    certificateDown = false;
+    confirmationStatus = 200;
     logs = [];
     Logger.root.level = Level.ALL;
     logSubscription = Logger.root.onRecord.listen(logs.add);
@@ -287,6 +296,108 @@ void _tests(SliceBackend backend) {
     }
     expect((await outcome())['status'], 'accepted');
   });
+
+  test(
+    'asks SNS to try again when the certificate cannot be fetched',
+    () async {
+      certificateDown = true;
+      final response = await report('Bounce', _messageId);
+      expect(response.statusCode, 503);
+      expect((await outcome())['status'], 'accepted');
+
+      certificateDown = false;
+      expect((await report('Bounce', _messageId)).statusCode, 200);
+      expect((await outcome())['status'], 'bounced');
+    },
+  );
+
+  test('asks SNS to try again when a confirmation fails', () async {
+    confirmationStatus = 500;
+    final message = signedSnsMessage(type: 'SubscriptionConfirmation');
+    expect((await post(message)).statusCode, 503);
+
+    confirmationStatus = 200;
+    expect((await post(message)).statusCode, 200);
+  });
+
+  test('holds a report that overtakes the send it is about', () async {
+    // A second send is in flight: its entry is stored before the send, its
+    // message id only after SES answers.
+    final invitations = Repository(api.database).invitationRepository;
+    final id = (await invitations.listForParticipation(
+      core.Id.parse(_participation),
+    )).single.id;
+    const late = '0100019a-4b6c-7000-cccc-000000000003-000000';
+    await invitations.updateDeliveryOutcomes(
+      id,
+      (current) => [
+        ...current,
+        {
+          'request_id': 'send-2',
+          'channel': 'email',
+          'status': 'sending',
+          'at': DateTime.now().toUtc().toIso8601String(),
+        },
+      ],
+    );
+
+    // The report arrives first: not lost, SNS is asked to deliver it again.
+    expect((await report('Bounce', late)).statusCode, 503);
+
+    // The answer is stored; the redelivered report is recorded.
+    await invitations.updateDeliveryOutcomes(
+      id,
+      (current) => [
+        for (final entry in current)
+          if (entry['request_id'] == 'send-2')
+            {...entry, 'status': 'accepted', 'message_id': late}
+          else
+            entry,
+      ],
+    );
+    expect((await report('Bounce', late)).statusCode, 200);
+    final stored = (await invitations.findById(id))!.deliveryOutcomes;
+    expect(stored.last['status'], 'bounced');
+    expect(stored.first['status'], 'accepted');
+  });
+
+  test('does not hold reports for a send that stopped long ago', () async {
+    final invitations = Repository(api.database).invitationRepository;
+    final id = (await invitations.listForParticipation(
+      core.Id.parse(_participation),
+    )).single.id;
+    await invitations.updateDeliveryOutcomes(
+      id,
+      (current) => [
+        ...current,
+        {
+          'request_id': 'send-2',
+          'channel': 'email',
+          'status': 'sending',
+          'at': DateTime.now()
+              .toUtc()
+              .subtract(const Duration(hours: 1))
+              .toIso8601String(),
+        },
+      ],
+    );
+    final response = await report(
+      'Bounce',
+      '0100019a-4b6c-7000-dddd-000000000004-000000',
+    );
+    expect(response.statusCode, 200);
+  });
+
+  test(
+    'a report for unrelated mail is acknowledged when no send is open',
+    () async {
+      final response = await report(
+        'Bounce',
+        '0100019a-4b6c-7000-eeee-000000000005-000000',
+      );
+      expect(response.statusCode, 200);
+    },
+  );
 
   test('refuses a body that is too large and other methods', () async {
     expect((await post('x' * (300 * 1024))).statusCode, 413);
