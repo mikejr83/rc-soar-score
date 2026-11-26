@@ -296,6 +296,44 @@ void main() {
       expect(find.byKey(const Key('directory-prompt')), findsNothing);
     });
 
+    testWidgets('the inputs are off while a save is out', (tester) async {
+      final gate = Completer<void>();
+      final repository = _Repository(saveGate: gate);
+      await _pump(tester, repository, initial: detailsPath);
+
+      await tester.tap(find.byKey(const Key('details-continue')));
+      await tester.pump();
+      // Attempts to change the choices and a field are ignored.
+      await tester.tap(find.byKey(const Key('details-listed')));
+      await tester.tap(find.byKey(const Key('details-email-private')));
+      await tester.enterText(find.byKey(const Key('details-first-name')), 'X');
+      await tester.pump();
+
+      expect(
+        tester
+            .widget<CheckboxListTile>(find.byKey(const Key('details-listed')))
+            .value,
+        isTrue,
+      );
+      expect(
+        tester
+            .widget<CheckboxListTile>(
+              find.byKey(const Key('details-email-private')),
+            )
+            .value,
+        isTrue,
+      );
+      expect(find.widgetWithText(TextFormField, 'Penny'), findsOneWidget);
+
+      gate.complete();
+      await tester.pumpAndSettle();
+
+      final saved = repository.saved.single;
+      expect(saved.isListed, isTrue);
+      expect(saved.emailVisibleToDirectors, isFalse);
+      expect(saved.firstName, 'Penny');
+    });
+
     testWidgets('a blank name is not saved', (tester) async {
       final repository = _Repository();
       await _pump(tester, repository, initial: detailsPath);

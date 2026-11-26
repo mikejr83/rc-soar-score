@@ -146,6 +146,7 @@ class _DetailsFormState extends State<_DetailsForm> {
               TextFormField(
                 key: const Key('details-first-name'),
                 controller: _first,
+                enabled: !_saving,
                 textCapitalization: TextCapitalization.words,
                 autofillHints: const [AutofillHints.givenName],
                 decoration: InputDecoration(labelText: l10n.detailsFirstName),
@@ -155,6 +156,7 @@ class _DetailsFormState extends State<_DetailsForm> {
               TextFormField(
                 key: const Key('details-last-name'),
                 controller: _last,
+                enabled: !_saving,
                 textCapitalization: TextCapitalization.words,
                 autofillHints: const [AutofillHints.familyName],
                 decoration: InputDecoration(labelText: l10n.detailsLastName),
@@ -166,7 +168,9 @@ class _DetailsFormState extends State<_DetailsForm> {
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
                 value: _listed,
-                onChanged: (value) => setState(() => _listed = value ?? true),
+                onChanged: _saving
+                    ? null
+                    : (value) => setState(() => _listed = value ?? true),
                 title: Text(l10n.detailsListedTitle),
                 subtitle: Text(l10n.detailsListedHelp),
               ),
@@ -175,8 +179,9 @@ class _DetailsFormState extends State<_DetailsForm> {
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
                 value: _emailPrivate,
-                onChanged: (value) =>
-                    setState(() => _emailPrivate = value ?? true),
+                onChanged: _saving
+                    ? null
+                    : (value) => setState(() => _emailPrivate = value ?? true),
                 title: Text(l10n.detailsEmailPrivateTitle),
                 subtitle: Text(l10n.detailsEmailPrivateHelp),
               ),
@@ -189,6 +194,7 @@ class _DetailsFormState extends State<_DetailsForm> {
                   TextFormField(
                     key: const Key('details-fai'),
                     controller: _fai,
+                    enabled: !_saving,
                     decoration: InputDecoration(
                       labelText: l10n.detailsFaiNumber,
                     ),
@@ -197,6 +203,7 @@ class _DetailsFormState extends State<_DetailsForm> {
                   TextFormField(
                     key: const Key('details-national-id'),
                     controller: _national,
+                    enabled: !_saving,
                     decoration: InputDecoration(
                       labelText: l10n.detailsNationalId,
                     ),
@@ -205,12 +212,14 @@ class _DetailsFormState extends State<_DetailsForm> {
                   TextFormField(
                     key: const Key('details-club'),
                     controller: _club,
+                    enabled: !_saving,
                     decoration: InputDecoration(labelText: l10n.detailsClub),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     key: const Key('details-country'),
                     controller: _country,
+                    enabled: !_saving,
                     decoration: InputDecoration(labelText: l10n.detailsCountry),
                   ),
                 ],
