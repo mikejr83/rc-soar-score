@@ -1,6 +1,10 @@
+import 'dart:convert';
+
+import 'package:drift/drift.dart' show Variable, UpdateKind;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'audit_event_repository.dart';
+import '../sync/sql_placeholders.dart';
 import 'drift_repository.dart';
 import 'latest_timestamps.dart';
 
@@ -74,6 +78,96 @@ class InvitationRepository extends DriftRepository
   Future<core.Invitation> save(core.Invitation invitation) async {
     await _store.upsertJson(_store.encode(invitation));
     return invitation;
+  }
+
+  @override
+  Future<bool> redeem(
+    core.Id invitationId, {
+    required core.Id? expectedRedeemer,
+    required core.Id newRedeemer,
+    required DateTime usedAt,
+  }) async {
+    final stamp = const core.UtcTimestampConverter().toJson(usedAt.toUtc());
+    // `IS ?` is not portable to PostgreSQL, so a missing redeemer is its own
+    // condition.
+    final expected = expectedRedeemer == null
+        ? 'redeemed_by_account_id IS NULL'
+        : 'redeemed_by_account_id = ?';
+    final changed = await db.customUpdate(
+      portableSql(
+        db,
+        'UPDATE invitations SET redeemed_by_account_id = ?, '
+        'first_used_at = COALESCE(first_used_at, ?), last_used_at = ? '
+        "WHERE id = ? AND state = 'Active' AND $expected",
+      ),
+      variables: [
+        Variable<String>(newRedeemer.value),
+        Variable<String>(stamp),
+        Variable<String>(stamp),
+        Variable<String>(invitationId.value),
+        if (expectedRedeemer != null) Variable<String>(expectedRedeemer.value),
+      ],
+      updates: {
+        db.allTables.firstWhere((t) => t.actualTableName == 'invitations'),
+      },
+      updateKind: UpdateKind.update,
+    );
+    return changed > 0;
+  }
+
+  @override
+  Future<List<Map<String, Object?>>?> updateDeliveryOutcomes(
+    core.Id invitationId,
+    List<Map<String, Object?>>? Function(List<Map<String, Object?>> current)
+    change, {
+    core.AuditEvent? audit,
+  }) async {
+    final table = db.allTables.firstWhere(
+      (t) => t.actualTableName == 'invitations',
+    );
+    // Compare and swap on the stored text: writers that race re-read and
+    // decide again, and nothing but this column is ever written.
+    for (var attempt = 0; attempt < 8; attempt++) {
+      final rows = await db
+          .customSelect(
+            portableSql(
+              db,
+              'SELECT delivery_outcomes FROM invitations WHERE id = ?',
+            ),
+            variables: [Variable<String>(invitationId.value)],
+            readsFrom: {table},
+          )
+          .get();
+      if (rows.isEmpty) return null;
+      final stored = rows.single.read<String>('delivery_outcomes');
+      final current = [
+        for (final item in jsonDecode(stored) as List)
+          Map<String, Object?>.from(item as Map),
+      ];
+      final next = change(current);
+      if (next == null) return current;
+      final applied = await db.transaction(() async {
+        final changed = await db.customUpdate(
+          portableSql(
+            db,
+            'UPDATE invitations SET delivery_outcomes = ? '
+            'WHERE id = ? AND delivery_outcomes = ?',
+          ),
+          variables: [
+            Variable<String>(jsonEncode(next)),
+            Variable<String>(invitationId.value),
+            Variable<String>(stored),
+          ],
+          updates: {table},
+          updateKind: UpdateKind.update,
+        );
+        if (changed == 0) return false;
+        if (audit != null) await _audits.append(audit);
+        return true;
+      });
+      if (applied) return next;
+    }
+    throw StateError('the delivery outcomes kept changing');
   }
 
   @override

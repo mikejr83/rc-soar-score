@@ -430,31 +430,48 @@ class InvitationService {
       throw InvitationAccessError.invalidLink();
     }
 
-    var invitation = stored;
-    final guestId =
+    // Only the redeemer and the usage times are written, as one conditional
+    // update: a whole-row save would put back whatever else this read saw (a
+    // delivery outcome stored meanwhile, for one).
+    var current = stored;
+    var guestId =
         stored.redeemedByAccountId ??
         await _guestFor(stored.id, checked.participation, now);
-    invitation = await repository.invitationRepository.save(
-      Invitation(
-        id: stored.id,
-        contestId: stored.contestId,
-        contestParticipationId: stored.contestParticipationId,
-        type: stored.type,
-        protectedCredential: stored.protectedCredential,
-        invitationRevision: stored.invitationRevision,
-        state: stored.state,
-        audience: stored.audience,
-        issuedBy: stored.issuedBy,
-        issuedAt: stored.issuedAt,
-        expiresAt: stored.expiresAt,
-        firstUsedAt: stored.firstUsedAt ?? now,
-        lastUsedAt: now,
-        revokedAt: stored.revokedAt,
-        replacesInvitationId: stored.replacesInvitationId,
-        redeemedByAccountId: guestId,
-        deliveryOutcomes: stored.deliveryOutcomes,
-        clientMutationId: stored.clientMutationId,
-      ),
+    var redeemed = false;
+    for (var attempt = 0; attempt < 3 && !redeemed; attempt++) {
+      redeemed = await repository.invitationRepository.redeem(
+        current.id,
+        expectedRedeemer: current.redeemedByAccountId,
+        newRedeemer: guestId,
+        usedAt: now,
+      );
+      if (redeemed) break;
+      // A concurrent open changed the redeemer first: read it again.
+      final latest = await repository.invitationRepository.findById(current.id);
+      if (latest == null || !latest.isActive) break;
+      current = latest;
+      guestId = latest.redeemedByAccountId ?? guestId;
+    }
+    if (!redeemed) throw InvitationAccessError.invalidLink();
+    final invitation = Invitation(
+      id: current.id,
+      contestId: current.contestId,
+      contestParticipationId: current.contestParticipationId,
+      type: current.type,
+      protectedCredential: current.protectedCredential,
+      invitationRevision: current.invitationRevision,
+      state: current.state,
+      audience: current.audience,
+      issuedBy: current.issuedBy,
+      issuedAt: current.issuedAt,
+      expiresAt: current.expiresAt,
+      firstUsedAt: current.firstUsedAt ?? now,
+      lastUsedAt: now,
+      revokedAt: current.revokedAt,
+      replacesInvitationId: current.replacesInvitationId,
+      redeemedByAccountId: guestId,
+      deliveryOutcomes: current.deliveryOutcomes,
+      clientMutationId: current.clientMutationId,
     );
     await _audit(
       invitation,

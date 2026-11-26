@@ -384,6 +384,16 @@ setting below is valid. Disabling it never stops the rest of the API.
 | `SUPPORT_ALLOWED_HOSTNAMES`                  | Comma-separated exact hostnames the widget may report, without scheme or port (for example `localhost` locally, the public site host in production).                                                            |
 | `SUPPORT_THROTTLE_SECRET`                    | At least 32 characters; keys the shared per-caller attempt count (5 attempts per 10 minutes).                                                                                                                   |
 
+Invitation emails (`POST /api/v1/contests/{id}/invitations/email`, #790) use
+only the first two variables, the delivery mode and the SES key pair, so they
+work as soon as those are valid, with or without the support settings. They are
+sent from `notifications@rcsoarscore.com` with no Reply-To. In redirect mode
+every invitation email goes to `test@rcsoarscore.com` with a `[TEST]` subject.
+A director may start at most 300 new invitation emails per contest per hour (a counter in the service database, shared by every instance; retries of a request id are not counted); past it a pilot comes back `limited` and nothing is sent. Without valid mail settings the route answers 409 `email_not_available` and the
+server logs "Invitation email disabled" at startup. Outcomes are stored per
+invitation (no address, text or link); a bounce reported by SES is recorded by
+a later change, so until then `accepted` does not mean delivered.
+
 The public site needs the matching Turnstile site key, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`,
 in its Vercel production environment before the production build (see
 [deploying.md](deploying.md), "Environment variables on each host"). The site key is

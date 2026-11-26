@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:aws_common/aws_common.dart';
 
 import '../mail/ses_v2_sender.dart';
+import 'mail_config.dart';
 
-/// The Fly app that serves the hosted API. Only it may send live mail.
-const productionFlyApp = 'rc-soar-score-api';
+export 'mail_config.dart' show productionFlyApp;
 
 /// Cloudflare's published dummy Turnstile secrets: they pass or fail every
 /// challenge, so a live server must never run with one.
@@ -57,20 +57,9 @@ class SupportConfig {
       return v == null || v.isEmpty ? null : v;
     }
 
-    final rawMode = value('MAIL_DELIVERY_MODE');
-    final MailDeliveryMode mode;
-    if (value('FLY_APP_NAME') == productionFlyApp) {
-      if (rawMode != 'live') return null;
-      mode = MailDeliveryMode.live;
-    } else if (rawMode == null || rawMode == 'redirect') {
-      mode = MailDeliveryMode.redirect;
-    } else {
-      return null;
-    }
-
-    final accessKeyId = value('SES_ACCESS_KEY_ID');
-    final secretAccessKey = value('SES_SECRET_ACCESS_KEY');
-    if (accessKeyId == null || secretAccessKey == null) return null;
+    final mail = MailConfig.parse(environment);
+    if (mail == null) return null;
+    final mode = mail.mode;
 
     final turnstile = value('TURNSTILE_SECRET_KEY');
     if (turnstile == null) return null;
@@ -93,7 +82,7 @@ class SupportConfig {
 
     return SupportConfig(
       mode: mode,
-      sesCredentials: AWSCredentials(accessKeyId, secretAccessKey),
+      sesCredentials: mail.sesCredentials,
       turnstileSecret: turnstile,
       allowedHostnames: hosts,
       throttleSecret: throttle,
