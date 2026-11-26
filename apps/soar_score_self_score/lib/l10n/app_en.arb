@@ -679,5 +679,101 @@
   "detailsPromptAction": "Set your details",
   "@detailsPromptAction": {
     "description": "Button on the details prompt card."
+  },
+  "detailsSave": "Save",
+  "@detailsSave": {
+    "description": "Button on the details page that saves and returns to the account page."
+  },
+  "accountTitle": "Your account",
+  "@accountTitle": {
+    "description": "Title of the account page."
+  },
+  "accountDetailsHeading": "Your details",
+  "@accountDetailsHeading": {
+    "description": "Heading of the directory details section on the account page."
+  },
+  "accountNoEntry": "Contest directors cannot find you yet. Set your details to let them add you to a contest.",
+  "@accountNoEntry": {
+    "description": "Shown on the account page when the pilot has no directory entry."
+  },
+  "accountEditDetails": "Edit details",
+  "@accountEditDetails": {
+    "description": "Button on the account page that opens the details form."
+  },
+  "accountSetDetails": "Set your details",
+  "@accountSetDetails": {
+    "description": "Button on the account page when there is no directory entry."
+  },
+  "accountListed": "Contest directors can find you",
+  "@accountListed": {
+    "description": "Account page line when the pilot is listed."
+  },
+  "accountUnlisted": "Contest directors cannot find you",
+  "@accountUnlisted": {
+    "description": "Account page line when the pilot is not listed."
+  },
+  "accountEmailPrivate": "Your email is private",
+  "@accountEmailPrivate": {
+    "description": "Account page line when the email is private."
+  },
+  "accountEmailShared": "Contest directors can see your email",
+  "@accountEmailShared": {
+    "description": "Account page line when the email is visible to directors."
+  },
+  "accountRemoveEntry": "Remove me from the directory",
+  "@accountRemoveEntry": {
+    "description": "Button on the account page that deletes the directory entry."
+  },
+  "accountRemoveTitle": "Remove your directory entry?",
+  "@accountRemoveTitle": {
+    "description": "Title of the dialog confirming removal of the directory entry."
+  },
+  "accountRemoveBody": "Directors will no longer be able to find you. Nothing already published changes.",
+  "@accountRemoveBody": {
+    "description": "Body of the dialog confirming removal of the directory entry."
+  },
+  "accountRemoveConfirm": "Remove",
+  "@accountRemoveConfirm": {
+    "description": "Confirm button in the remove-entry dialog."
+  },
+  "accountRemoveFailed": "Your entry could not be removed. Check your connection and try again.",
+  "@accountRemoveFailed": {
+    "description": "Snack bar when removing the directory entry failed."
+  },
+  "accountLinksHeading": "Pilots linked to your account",
+  "@accountLinksHeading": {
+    "description": "Heading of the linked pilots section on the account page."
+  },
+  "accountLinksEmpty": "No pilots are linked to your account.",
+  "@accountLinksEmpty": {
+    "description": "Shown when the account has no confirmed links."
+  },
+  "accountUnlink": "Unlink",
+  "@accountUnlink": {
+    "description": "Button that ends a link to a pilot."
+  },
+  "accountUnlinkTitle": "Unlink this pilot?",
+  "@accountUnlinkTitle": {
+    "description": "Title of the unlink dialog."
+  },
+  "accountUnlinkBody": "This removes the contests of this pilot from your list and ends access through your account. Nothing already published changes, and later results use the name the contest director typed. Your invitation link still works without signing in.",
+  "@accountUnlinkBody": {
+    "description": "Body of the unlink dialog."
+  },
+  "accountUnlinkConfirm": "Unlink",
+  "@accountUnlinkConfirm": {
+    "description": "Confirm button in the unlink dialog."
+  },
+  "accountUnlinkFailed": "The link could not be ended. Check your connection and try again.",
+  "@accountUnlinkFailed": {
+    "description": "Snack bar when ending a link failed."
+  },
+  "accountCancel": "Cancel",
+  "@accountCancel": {
+    "description": "Cancel button in the account page dialogs."
+  },
+  "accountBackToContests": "Back to contests",
+  "@accountBackToContests": {
+    "description": "Tooltip of the back arrow on the account page."
   }
 }

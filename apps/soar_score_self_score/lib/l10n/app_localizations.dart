@@ -988,6 +988,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set your details'**
   String get detailsPromptAction;
+
+  /// Button on the details page that saves and returns to the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get detailsSave;
+
+  /// Title of the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account'**
+  String get accountTitle;
+
+  /// Heading of the directory details section on the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Your details'**
+  String get accountDetailsHeading;
+
+  /// Shown on the account page when the pilot has no directory entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest directors cannot find you yet. Set your details to let them add you to a contest.'**
+  String get accountNoEntry;
+
+  /// Button on the account page that opens the details form.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit details'**
+  String get accountEditDetails;
+
+  /// Button on the account page when there is no directory entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your details'**
+  String get accountSetDetails;
+
+  /// Account page line when the pilot is listed.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest directors can find you'**
+  String get accountListed;
+
+  /// Account page line when the pilot is not listed.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest directors cannot find you'**
+  String get accountUnlisted;
+
+  /// Account page line when the email is private.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email is private'**
+  String get accountEmailPrivate;
+
+  /// Account page line when the email is visible to directors.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest directors can see your email'**
+  String get accountEmailShared;
+
+  /// Button on the account page that deletes the directory entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove me from the directory'**
+  String get accountRemoveEntry;
+
+  /// Title of the dialog confirming removal of the directory entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove your directory entry?'**
+  String get accountRemoveTitle;
+
+  /// Body of the dialog confirming removal of the directory entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Directors will no longer be able to find you. Nothing already published changes.'**
+  String get accountRemoveBody;
+
+  /// Confirm button in the remove-entry dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get accountRemoveConfirm;
+
+  /// Snack bar when removing the directory entry failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your entry could not be removed. Check your connection and try again.'**
+  String get accountRemoveFailed;
+
+  /// Heading of the linked pilots section on the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots linked to your account'**
+  String get accountLinksHeading;
+
+  /// Shown when the account has no confirmed links.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilots are linked to your account.'**
+  String get accountLinksEmpty;
+
+  /// Button that ends a link to a pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get accountUnlink;
+
+  /// Title of the unlink dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink this pilot?'**
+  String get accountUnlinkTitle;
+
+  /// Body of the unlink dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the contests of this pilot from your list and ends access through your account. Nothing already published changes, and later results use the name the contest director typed. Your invitation link still works without signing in.'**
+  String get accountUnlinkBody;
+
+  /// Confirm button in the unlink dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get accountUnlinkConfirm;
+
+  /// Snack bar when ending a link failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The link could not be ended. Check your connection and try again.'**
+  String get accountUnlinkFailed;
+
+  /// Cancel button in the account page dialogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get accountCancel;
+
+  /// Tooltip of the back arrow on the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to contests'**
+  String get accountBackToContests;
 }
 
 class _AppLocalizationsDelegate

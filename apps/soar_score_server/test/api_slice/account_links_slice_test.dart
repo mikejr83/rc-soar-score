@@ -47,6 +47,7 @@ void _tests(SliceBackend backend) {
   late core.ParticipantLinkService links;
   late Handler handler;
   late int matrixRevision;
+  late List<Map<String, Object?>> assignments;
   late core.Id pat; // a registered account with the verified email of pilot 1
   late core.Id otherAccount;
   var clock = DateTime.utc(2026, 10, 17, 16);
@@ -199,6 +200,7 @@ void _tests(SliceBackend backend) {
       },
     );
     expect(matrix['rounds'], isNotEmpty);
+    assignments = (matrix['assignments']! as List).cast<Map<String, Object?>>();
     matrixRevision =
         (await repository.matrixRevisionRepository.latestForContest(
           id(_contestId),
@@ -931,6 +933,52 @@ void _tests(SliceBackend backend) {
         expect(reopened.access.guestAccountId, guest);
       },
     );
+
+    test('unlinking never changes a published contest\'s results', () async {
+      await issue(1);
+      final linkId = await confirm(pat, _profileId(1));
+      var mutations = 0;
+      for (var n = 1; n <= 2; n++) {
+        final slot = assignments.firstWhere(
+          (a) => a['contest_participation_id'] == _participationId(n),
+        );
+        await api.expectOk(
+          'POST',
+          '/contests/$_contestId/assignments/${slot['id']}/scores',
+          status: 201,
+          body: {
+            'client_mutation_id': 'entry-${mutations++}',
+            'base_score_revision': 0,
+            'components': {
+              'time_flown': 600 - n * 10,
+              'launch_height': 100,
+              'landing': 'points_50',
+            },
+          },
+        );
+      }
+      await api.expectOk('POST', '/contests/$_contestId/results/recalculation');
+      final contest = await api.expectOk('GET', '/contests/$_contestId');
+      final published = await api.expectOk(
+        'POST',
+        '/contests/$_contestId/publication',
+        status: 201,
+        body: {
+          'client_mutation_id': 'publish-1',
+          'source_contest_revision': contest['revision'],
+        },
+      );
+      final path = '/publications/${published['publication_id']}';
+      final before = await api.publicGet(path);
+      expect(before.status, 200, reason: '${before.body}');
+
+      final ended = await call(pat, 'POST', '/account/links/$linkId/end');
+      expect(ended.status, 200, reason: ended.text);
+
+      final after = await api.publicGet(path);
+      expect(after.status, 200);
+      expect(after.body, before.body, reason: 'the publication is unchanged');
+    });
 
     test('ending another account\'s link or a bad id is 404', () async {
       await issue(1);

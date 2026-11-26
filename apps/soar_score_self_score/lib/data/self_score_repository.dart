@@ -1,3 +1,4 @@
+import '../models/account_link.dart';
 import '../models/contests_view.dart';
 import '../models/entry_context.dart';
 import '../models/group_results.dart';
@@ -170,6 +171,20 @@ abstract interface class SelfScoreRepository {
   /// Creates the signed-in pilot's directory entry or replaces its details.
   /// Throws [SelfScoreLoadException] when it could not be saved.
   Future<void> saveOwnDirectory(DirectoryDetails details);
+
+  /// Removes the signed-in pilot's directory entry. Nothing already published
+  /// changes. Throws [SelfScoreLoadException] when it could not be removed.
+  Future<void> deleteOwnDirectory();
+
+  /// The pilots the signed-in account is linked to (#654). Throws
+  /// [SelfScoreLoadException] when they cannot be had.
+  Future<List<AccountLink>> accountLinks();
+
+  /// Ends the link [linkId]: the contest leaves the pilot's list, and nothing
+  /// already published changes. Ending a link that is already ended or gone
+  /// is not an error. Throws [SelfScoreLoadException] when it could not be
+  /// sent.
+  Future<void> endAccountLink(String linkId);
 
   Future<TeamOverview> teamOverview(String contestId);
 
