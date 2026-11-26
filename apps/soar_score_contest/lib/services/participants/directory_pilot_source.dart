@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
 import 'participant_candidate.dart';
 
@@ -19,7 +20,17 @@ class DirectoryPilotSource {
     required this.hosted,
     required this.local,
     this.pause = const Duration(milliseconds: 600),
+    this.store,
+    this.accountId = '',
   });
+
+  /// Where the copies this director made are remembered on this device, so a
+  /// pilot copied before the profile reached the server is still recognised
+  /// after the app restarts (the server names the copy once it has synced).
+  final LocalUiStore? store;
+
+  /// The account whose copies [store] holds.
+  final String accountId;
 
   final ApiClient hosted;
   final ApiClient local;
@@ -31,6 +42,31 @@ class DirectoryPilotSource {
   /// The profile id a copy of each directory entry gets, kept so choosing the
   /// same pilot again (after a failure, or in another search) is the same copy.
   final Map<String, Id> _profileIds = {};
+  Future<void>? _loaded;
+
+  /// The directory entry id -> profile id of every copy made on this device.
+  static final copiesKey = LocalUiKey<Map<String, String>>(
+    name: 'directory_copies',
+    defaultValue: const <String, String>{},
+    encode: (copies) => copies,
+    decode: (data) => {
+      if (data is Map)
+        for (final e in data.entries)
+          if (e.key is String && e.value is String)
+            e.key as String: e.value as String,
+    },
+  );
+
+  Future<void> _load() => _loaded ??= () async {
+    final remembered = await store?.get(accountId, copiesKey);
+    for (final e in (remembered ?? const <String, String>{}).entries) {
+      try {
+        _profileIds.putIfAbsent(e.key, () => Id.parse(e.value));
+      } on ArgumentError {
+        // A value that is not an id is forgotten.
+      }
+    }
+  }();
 
   static final _email = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
 
@@ -81,6 +117,7 @@ class DirectoryPilotSource {
     String text,
     List<DirectoryLookupKeyDto> keys,
   ) async {
+    await _load();
     final found = <String, DirectoryMatchDto>{};
     for (final key in keys) {
       final response = await hosted.lookupDirectory(
@@ -152,6 +189,7 @@ class DirectoryPilotSource {
         profileId: candidate.profileId,
       ),
     );
+    await _remember(entry.entryId, candidate.profileId);
     return local.createParticipant(
       CreateParticipantRequest(
         id: candidate.profileId,
@@ -166,5 +204,14 @@ class DirectoryPilotSource {
         email: details.email,
       ),
     );
+  }
+
+  Future<void> _remember(Id entryId, Id profileId) async {
+    _profileIds[entryId.value] = profileId;
+    final kept = store;
+    if (kept == null) return;
+    final copies = {...await kept.get(accountId, copiesKey)};
+    copies[entryId.value] = profileId.value;
+    await kept.set(accountId, copiesKey, copies);
   }
 }

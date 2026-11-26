@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert' as convert;
 
 import 'package:material_ui/material_ui.dart';
@@ -406,6 +407,74 @@ void main() {
       await tester.tap(find.widgetWithText(ListTile, 'Dana Directory'));
       await tester.pumpAndSettle();
       expect(store.draft.participants, hasLength(1));
+    });
+
+    testWidgets('a directory pilot the director already holds shows as '
+        'that profile', (tester) async {
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: (request) async {
+          final response = await directoryApi(request);
+          if (!request.url.path.endsWith('/directory/lookups')) return response;
+          // The pilot is Mike Gardner, shown by email, under an FAI number
+          // only the directory holds.
+          final body =
+              convert.jsonDecode(response.body) as Map<String, dynamic>;
+          for (final m in body['results'] as List) {
+            (m as Map)
+              ..['first_name'] = 'Mike'
+              ..['last_name'] = 'Gardner'
+              ..['email'] = 'mike@example.com';
+          }
+          return json(body);
+        },
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      await tester.enterText(searchField(), 'F1234');
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(ListTile, 'Mike Gardner'), findsOneWidget);
+      expect(find.text(AppLocalizationsEn().searchRemote), findsNothing);
+    });
+
+    testWidgets('a lookup that answers after the text changed or cleared is '
+        'ignored', (tester) async {
+      final l10n = AppLocalizationsEn();
+      final release = Completer<void>();
+      final store = await storeAtStep4();
+      await pumpWizard(
+        tester,
+        respond: (request) async {
+          if (request.url.path.endsWith('/directory/lookups')) {
+            await release.future;
+          }
+          return directoryApi(request);
+        },
+        store: store,
+        auth: FakeAuthSession(signedIn: true),
+      );
+
+      for (final change in ['edit', 'clear']) {
+        await tester.enterText(searchField(), 'AB');
+        await tester.pump();
+        await tester.tap(find.byKey(const ValueKey('directory-lookup')));
+        await tester.pump();
+        await tester.enterText(searchField(), change == 'edit' ? 'ABC' : '');
+        await tester.pump();
+        if (!release.isCompleted) release.complete();
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(l10n.searchDirectoryResults('AB')),
+          findsNothing,
+          reason: change,
+        );
+        expect(find.widgetWithText(ListTile, 'Dana Directory'), findsNothing);
+      }
     });
 
     testWidgets('signed out, the search never calls the directory', (

@@ -6,6 +6,7 @@ import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/services/participants/directory_pilot_source.dart';
 import 'package:soar_score_core/soar_score_core.dart';
+import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
 final _entryA = Id.parse('019c0000-0000-7000-8000-0000000000a1');
 final _entryB = Id.parse('019c0000-0000-7000-8000-0000000000b1');
@@ -31,8 +32,10 @@ void main() {
   late List<http.Request> localRequests;
   late Map<String, List<Map<String, Object?>>> byKey;
 
-  DirectoryPilotSource source() => DirectoryPilotSource(
+  DirectoryPilotSource source({LocalUiStore? store}) => DirectoryPilotSource(
     pause: const Duration(milliseconds: 5),
+    store: store,
+    accountId: 'dana',
     hosted: ApiClient(
       baseUrl: Uri.parse('http://hosted.invalid'),
       tokenProvider: () async => 'token',
@@ -299,5 +302,59 @@ void main() {
       updatedAt: DateTime.utc(2026, 11, 1),
     );
     expect(candidate.isCopiedIn([own]), isTrue);
+  });
+
+  test(
+    'a copy made before the profile synced is remembered by a new source',
+    () async {
+      // The hosted server never names a copy: the profile has not synced.
+      byKey['fai_number'] = [_match(_entryB, 'Bea')];
+      final store = BackendLocalUiStore(MemoryLocalUiBackend());
+      final first = source(store: store);
+      final candidate = (await first.search('F1234')).single;
+      await first.copy(candidate);
+
+      final restarted = source(store: store); // a new page, or a restart
+      final again = (await restarted.search('F1234')).single;
+
+      expect(again.profileId, candidate.profileId);
+      hostedRequests.clear();
+      await restarted.copy(again);
+      final sent =
+          jsonDecode(hostedRequests.single.body) as Map<String, Object?>;
+      expect(sent['profile_id'], candidate.profileId.value);
+      // Another account on the device has not copied them.
+      final other = DirectoryPilotSource(
+        pause: const Duration(milliseconds: 5),
+        hosted: first.hosted,
+        local: first.local,
+        store: store,
+        accountId: 'sam',
+      );
+      expect(
+        (await other.search('F1234')).single.profileId,
+        isNot(candidate.profileId),
+      );
+    },
+  );
+
+  test('a profile that shares any identifier is shown, not hidden', () async {
+    byKey['fai_number'] = [
+      {..._match(_entryB, 'Bea'), 'national_org_id': 'NSS-1'},
+    ];
+    final s = source();
+    final candidate = (await s.search('F1234')).single;
+    ParticipantProfile own(String? national) => ParticipantProfile(
+      id: Id.create(),
+      ownerAccountId: Id.create(),
+      firstName: 'Bea',
+      lastName: 'P',
+      nationalOrgId: national,
+      createdAt: DateTime.utc(2026, 11, 1),
+      updatedAt: DateTime.utc(2026, 11, 1),
+    );
+    final held = own('nss-1');
+
+    expect(candidate.copiesIn([own('x'), held]), [held]);
   });
 }

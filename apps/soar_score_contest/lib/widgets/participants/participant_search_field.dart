@@ -50,6 +50,10 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focus = FocusNode();
   bool _looking = false;
+
+  /// Counts every edit or clear of the text, so an explicit lookup that
+  /// comes back after one is ignored.
+  int _edits = 0;
   String? _lookedUp;
   List<ParticipantCandidate>? _found;
   bool _lookupFailed = false;
@@ -97,24 +101,27 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
   ) {
     final localIds = {for (final c in local) c.profileId};
     final own = widget.profiles ?? const <ParticipantProfile>[];
-    // A pilot the director already copied is offered as that profile, even
-    // when what they typed is not on it (a private email).
-    final copies = [
-      for (final c in remote)
-        for (final p in own)
-          if (p.id == c.profileId && !localIds.contains(p.id))
-            ParticipantCandidate.local(p),
-    ];
-    return [
-      ...remote.where(
-        (c) => !localIds.contains(c.profileId) && !c.isCopiedIn(own),
-      ),
-      ...copies,
-      ...local,
-    ];
+    // A pilot the director already holds is offered as that profile, whichever
+    // identifier matched, even when the typed text is not on the profile (a
+    // private email, or a field only the directory has).
+    final copies = <ParticipantCandidate>[];
+    final shown = {...localIds};
+    final fresh = <ParticipantCandidate>[];
+    for (final c in remote) {
+      final held = c.copiesIn(own);
+      if (held.isEmpty) {
+        if (!localIds.contains(c.profileId)) fresh.add(c);
+        continue;
+      }
+      for (final p in held) {
+        if (shown.add(p.id)) copies.add(ParticipantCandidate.local(p));
+      }
+    }
+    return [...fresh, ...copies, ...local];
   }
 
   Future<void> _lookUp(String text) async {
+    final asked = _edits;
     setState(() {
       _looking = true;
       _lookupFailed = false;
@@ -122,14 +129,14 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
     try {
       final remote = await widget.lookup!(text);
       final local = searchLocalProfiles(widget.profiles ?? const [], text);
-      if (!mounted) return;
+      if (!mounted || asked != _edits) return;
       setState(() {
         _lookedUp = text.trim();
         _found = _arrange(remote, local);
         _looking = false;
       });
     } on Object {
-      if (!mounted) return;
+      if (!mounted || asked != _edits) return;
       setState(() {
         _lookedUp = text.trim();
         _found = null;
@@ -140,6 +147,8 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
   }
 
   void _forgetLookup() {
+    _edits++;
+    _looking = false;
     if (_lookedUp == null && !_lookupFailed) return;
     _lookedUp = null;
     _found = null;

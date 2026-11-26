@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import '../../api_client_provider.dart';
 import '../../auth/auth_session_inherited.dart';
+import '../../local_ui_store_provider.dart';
+import '../../ui_account_provider.dart';
 import '../../services/participants/directory_pilot_source.dart';
 
 /// The directory search for the signed-in director, or null when there is
@@ -18,10 +20,19 @@ DirectoryPilotSource? directorySourceOf(
   final hosted = publicationClientOf(context);
   final local = apiClientOf(context);
   if (!signedIn || hosted == null || local == null) return null;
+  final store = localUiStoreOf(context);
+  final accountId = uiAccountIdOf(context);
   if (previous != null &&
       identical(previous.hosted, hosted) &&
-      identical(previous.local, local)) {
+      identical(previous.local, local) &&
+      identical(previous.store, store) &&
+      previous.accountId == accountId) {
     return previous;
   }
-  return DirectoryPilotSource(hosted: hosted, local: local);
+  return DirectoryPilotSource(
+    hosted: hosted,
+    local: local,
+    store: store,
+    accountId: accountId,
+  );
 }

@@ -8,6 +8,8 @@ import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/app_sync_provider.dart';
+import 'package:soar_score_contest/auth/auth_session.dart';
+import 'package:soar_score_contest/auth/auth_session_inherited.dart';
 import 'package:soar_score_contest/services/sync/app_sync.dart';
 import 'package:soar_score_contest/connectivity_provider.dart';
 import 'package:soar_score_contest/services/connectivity/app_connectivity.dart';
@@ -596,6 +598,8 @@ Future<void> pumpParticipantsPage(
   UnsavedChangesGuard? guard,
   AppConnectivity? connectivity,
   AppSync? sync,
+  AuthSession? auth,
+  Future<http.Response?> Function(http.Request)? intercept,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -636,14 +640,18 @@ Future<void> pumpParticipantsPage(
     app = AppConnectivityInherited(monitor: connectivity, child: app);
   }
   if (sync != null) app = AppSyncInherited(sync: sync, child: app);
-  await tester.pumpWidget(
-    ApiClientInherited(
-      client: ApiClient(
-        baseUrl: Uri.parse('http://localhost'),
-        httpClient: MockClient(server.handle),
+  final shell = ApiClientInherited(
+    client: ApiClient(
+      baseUrl: Uri.parse('http://localhost'),
+      httpClient: MockClient(
+        (request) async =>
+            await intercept?.call(request) ?? server.handle(request),
       ),
-      child: app,
     ),
+    child: app,
+  );
+  await tester.pumpWidget(
+    auth == null ? shell : AuthSessionInherited(session: auth, child: shell),
   );
   await tester.pumpAndSettle();
 }

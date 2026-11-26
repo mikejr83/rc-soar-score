@@ -63,24 +63,29 @@ class ParticipantCandidate {
   /// director's already holds it.
   final String? searchedEmail;
 
-  /// Whether one of the director's own [profiles] already holds this
-  /// directory pilot (same FAI number, national ID or visible email), so it
-  /// is offered once, as that profile.
-  bool isCopiedIn(Iterable<ParticipantProfile> profiles) {
+  /// The director's own [profiles] that already hold this directory pilot:
+  /// the copy made before, or one with the same FAI number, national ID or
+  /// email (the email the pilot shows, else the one the director typed).
+  List<ParticipantProfile> copiesIn(Iterable<ParticipantProfile> profiles) {
     final match = directory;
-    if (match == null) return false;
-    if (profiles.any((p) => p.id == profileId)) return true;
+    if (match == null) return const [];
     bool same(String? a, String? b) =>
         a != null &&
         b != null &&
         a.trim().toLowerCase() == b.trim().toLowerCase();
-    return profiles.any(
-      (p) =>
-          same(p.faiNumber, match.faiNumber) ||
-          same(p.nationalOrgId, match.nationalOrgId) ||
-          same(p.email, match.email ?? searchedEmail),
-    );
+    return [
+      for (final p in profiles)
+        if (p.id == profileId ||
+            same(p.faiNumber, match.faiNumber) ||
+            same(p.nationalOrgId, match.nationalOrgId) ||
+            same(p.email, match.email ?? searchedEmail))
+          p,
+    ];
   }
+
+  /// Whether one of the director's own [profiles] already holds this pilot.
+  bool isCopiedIn(Iterable<ParticipantProfile> profiles) =>
+      copiesIn(profiles).isNotEmpty;
 
   /// What the email cell says for this person.
   ParticipantEmailStatus get emailStatus {
