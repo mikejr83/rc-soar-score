@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -22,6 +24,7 @@ import 'package:soar_score_self_score/session/guest_session_store.dart';
 /// A pilot with no directory entry yet (#652) or with one.
 class _Repository extends SampleSelfScoreRepository {
   _Repository({
+    this.saveGate,
     this.hasEntry = false,
     this.saveError,
     this.loadError,
@@ -32,6 +35,9 @@ class _Repository extends SampleSelfScoreRepository {
   });
 
   final DirectoryDetails initial;
+
+  /// Holds a save until completed.
+  final Completer<void>? saveGate;
 
   final bool hasEntry;
   Object? saveError;
@@ -53,6 +59,7 @@ class _Repository extends SampleSelfScoreRepository {
 
   @override
   Future<void> saveOwnDirectory(DirectoryDetails details) async {
+    await saveGate?.future;
     final error = saveError;
     if (error != null) throw error;
     saved.add(details);
@@ -87,6 +94,10 @@ Future<E2eAuthSession> _pump(
             initialLocation: initial,
             routes: [
               GoRoute(path: '/', builder: (_, _) => const HomePage()),
+              GoRoute(
+                path: '/elsewhere',
+                builder: (_, _) => const Scaffold(body: Text('Elsewhere')),
+              ),
               GoRoute(
                 path: detailsPath,
                 builder: (_, _) => const DetailsPage(),
@@ -261,6 +272,28 @@ void main() {
       expect(repository.saved.last.firstName, 'Pen');
       expect(repository.saved.last.city, 'Boulder');
       expect(repository.saved.last.state, 'CO');
+    });
+
+    testWidgets('a save that finishes after the pilot left stays put', (
+      tester,
+    ) async {
+      final gate = Completer<void>();
+      final repository = _Repository(saveGate: gate);
+      await _pump(tester, repository, initial: detailsPath);
+
+      await tester.tap(find.byKey(const Key('details-continue')));
+      await tester.pump();
+      GoRouter.of(tester.element(find.byKey(const Key('details-continue'))))
+          .go('/elsewhere');
+      await tester.pumpAndSettle();
+      expect(find.text('Elsewhere'), findsOneWidget);
+
+      gate.complete();
+      await tester.pumpAndSettle();
+
+      expect(repository.saved, hasLength(1));
+      expect(find.text('Elsewhere'), findsOneWidget);
+      expect(find.byKey(const Key('directory-prompt')), findsNothing);
     });
 
     testWidgets('a blank name is not saved', (tester) async {

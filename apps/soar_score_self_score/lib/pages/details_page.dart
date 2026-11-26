@@ -112,7 +112,9 @@ class _DetailsFormState extends State<_DetailsForm> {
           emailVisibleToDirectors: !_emailPrivate,
         ),
       );
-      router.go(contestsPath);
+      // The pilot may have left while the save was out: a late answer must
+      // not pull them back to the contests.
+      if (mounted) router.go(contestsPath);
     } on SelfScoreLoadException {
       if (mounted) setState(() => _failed = true);
     } finally {
