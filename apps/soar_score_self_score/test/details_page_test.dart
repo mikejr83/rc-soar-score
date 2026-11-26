@@ -67,7 +67,7 @@ class _Repository extends SampleSelfScoreRepository {
 
 Future<E2eAuthSession> _pump(
   WidgetTester tester,
-  _Repository repository, {
+  SelfScoreRepository repository, {
   String initial = '/',
   bool signedIn = true,
 }) async {
@@ -104,6 +104,32 @@ Future<E2eAuthSession> _pump(
   await tester.pumpAndSettle();
   return auth;
 }
+
+http.Response _json(String body, [int status = 200]) => http.Response(
+  body,
+  status,
+  headers: {'content-type': 'application/json; charset=utf-8'},
+);
+
+const _noEntry =
+    '{"entry":null,"suggested_first_name":"Penny","suggested_last_name":"Pilot",'
+    '"email_available":true}';
+
+/// The real repository over a server that answers [put] to the save and
+/// [get] to the lookup.
+ApiSelfScoreRepository _api({int get = 200, int put = 200}) =>
+    ApiSelfScoreRepository(
+      ApiClient(
+        baseUrl: Uri.parse('http://localhost:8080'),
+        httpClient: MockClient(
+          (request) async => request.method == 'GET'
+              ? _json(get == 200 ? _noEntry : '{}', get)
+              : _json(put == 200 ? _noEntry : '{}', put),
+        ),
+        tokenProvider: () async => 't',
+      ),
+      MemoryGuestSessionStore(),
+    );
 
 void main() {
   group('first sign-in', () {
@@ -268,6 +294,48 @@ void main() {
       expect(find.byKey(const Key('details-continue')), findsNothing);
       expect(find.text('Sign in'), findsWidgets);
     });
+  });
+
+  group('server refusals', () {
+    for (final status in [404, 409]) {
+      testWidgets('a $status on save shows the save-failed message', (
+        tester,
+      ) async {
+        await _pump(tester, _api(put: status), initial: detailsPath);
+
+        await tester.tap(find.byKey(const Key('details-continue')));
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('could not be saved'), findsOneWidget);
+        expect(find.byKey(const Key('details-continue')), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('a $status on the landing lookup leaves the pilot there', (
+        tester,
+      ) async {
+        await _pump(tester, _api(get: status));
+
+        expect(find.text('My contests'), findsOneWidget);
+        expect(find.byKey(const Key('details-continue')), findsNothing);
+        expect(tester.takeException(), isNull);
+      });
+
+      test('a $status is a load failure for both calls', () async {
+        final api = _api(get: status, put: status);
+
+        await expectLater(
+          api.ownDirectory(),
+          throwsA(isA<SelfScoreLoadException>()),
+        );
+        await expectLater(
+          api.saveOwnDirectory(
+            const DirectoryDetails(firstName: 'Pat', lastName: 'Pilot'),
+          ),
+          throwsA(isA<SelfScoreLoadException>()),
+        );
+      });
+    }
   });
 
   group('contests page card', () {

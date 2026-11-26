@@ -323,7 +323,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
 
   @override
   Future<OwnDirectory> ownDirectory() async {
-    final state = await _readAccount(_client.getDirectoryEntry);
+    final state = await _readDirectory(_client.getDirectoryEntry);
     final entry = state.entry;
     return OwnDirectory(
       hasEntry: entry != null,
@@ -349,7 +349,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   }
 
   @override
-  Future<void> saveOwnDirectory(DirectoryDetails details) => _readAccount(
+  Future<void> saveOwnDirectory(DirectoryDetails details) => _readDirectory(
     () => _client.putDirectoryEntry(
       PutDirectoryEntryRequest(
         firstName: details.firstName,
@@ -394,6 +394,17 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
         ),
         _ => const SelfScoreLoadException(_unreachable),
       };
+    }
+  }
+
+  /// Runs a call to the directory entry routes: every failure, a 404 or 409
+  /// included, is a [SelfScoreLoadException] the pages handle. (`_readAccount`
+  /// lets those two through for the "Is this you?" answers.)
+  Future<T> _readDirectory<T>(Future<T> Function() call) async {
+    try {
+      return await _readAccount(call);
+    } on ApiHttpError {
+      throw const SelfScoreLoadException(_unreachable);
     }
   }
 
