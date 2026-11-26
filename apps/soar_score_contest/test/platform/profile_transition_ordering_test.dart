@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -85,13 +84,16 @@ void main() {
     test('signing out does not stop an import', () async {
       await app.auth.signInAs('auth0|a');
       await app.claimer.run();
+      var hookRan = false;
       app.server.beforeCommitHook = () async {
         app.server.beforeCommitHook = null;
+        hookRan = true;
         await app.auth.signOut();
       };
 
       await importFile();
 
+      expect(hookRan, isTrue, reason: 'the import never reached its commit');
       expect(await importedRows(), 1);
       expect(app.acting.profileAccess, ProfileAccess.verified);
     });
@@ -100,13 +102,16 @@ void main() {
       await app.auth.signInAs('auth0|a');
       await app.claimer.run();
       await app.auth.signOut();
+      var hookRan = false;
       app.server.beforeCommitHook = () async {
         app.server.beforeCommitHook = null;
+        hookRan = true;
         app.acting.signedIn('auth0|a');
       };
 
       await importFile();
 
+      expect(hookRan, isTrue, reason: 'the import never reached its commit');
       expect(await importedRows(), 1);
     });
   });
@@ -137,13 +142,17 @@ void main() {
       app.server.beforeCommitHook = () async {
         app.server.beforeCommitHook = null;
         // The sign-in starts the claim, which brackets the re-pointing before
-        // it waits for the import's transaction.
+        // it waits for the import's transaction. Wait for that bracket itself.
         claim = app.auth.signInAs('auth0|a');
-        await pumpEventQueue();
+        await app.claimStarted;
       };
 
       await expectLater(importFile(), refused());
+      expect(claim, isNotNull, reason: 'the import never reached its commit');
       await claim;
+      // The claim the sign-in started was held back by the import and ends
+      // blocked; the next run, with nothing in the way, completes it.
+      await app.claimer.run();
       await app.claimer.run();
 
       expect(await importedRows(), 0);
@@ -155,10 +164,12 @@ void main() {
 
   group('the database shutting down', () {
     test('ends an import held at its commit without hanging', () async {
+      Future<void>? closing;
       app.server.beforeCommitHook = () async {
         app.server.beforeCommitHook = null;
-        unawaited(app.server.close(drainTimeout: Duration.zero));
-        await pumpEventQueue();
+        // close() begins synchronously, so the shutdown has started once this
+        // call returns; no turns need to pass.
+        closing = app.server.close(drainTimeout: Duration.zero);
       };
 
       // Either outcome is clean: it commits before the close, or it fails.
@@ -166,6 +177,8 @@ void main() {
       await importFile()
           .then<void>((_) {}, onError: (Object _) {})
           .timeout(const Duration(seconds: 20));
+      expect(closing, isNotNull, reason: 'the import never reached its commit');
+      await closing;
     });
   });
 }
