@@ -210,4 +210,38 @@ void main() {
     expect(candidate.isCopiedIn([own]), isTrue);
     expect(candidate.isCopiedIn(const []), isFalse);
   });
+
+  test(
+    'a private email the director typed still finds their own profile',
+    () async {
+      byKey['email'] = [_match(_entryB, 'Bea')];
+      final s = source();
+      final candidate = (await s.search('bea@example.com')).single;
+      ParticipantProfile own(String? email, String? fai) => ParticipantProfile(
+        id: Id.create(),
+        ownerAccountId: Id.create(),
+        firstName: 'Bea',
+        lastName: 'Pilot',
+        email: email,
+        faiNumber: fai,
+        createdAt: DateTime.utc(2026, 11, 1),
+        updatedAt: DateTime.utc(2026, 11, 1),
+      );
+
+      expect(candidate.directory!.email, isNull);
+      expect(candidate.isCopiedIn([own('Bea@Example.com', 'other')]), isTrue);
+      expect(candidate.isCopiedIn([own('x@example.com', 'other')]), isFalse);
+    },
+  );
+
+  test('clearing or an invalid text ends a lookup that is waiting', () async {
+    byKey['fai_number'] = [_match(_entryA, 'Pat')];
+    final s = source();
+
+    final waiting = s.search('F1234');
+    await s.search('');
+
+    expect(await waiting, isEmpty);
+    expect(hostedRequests, isEmpty);
+  });
 }

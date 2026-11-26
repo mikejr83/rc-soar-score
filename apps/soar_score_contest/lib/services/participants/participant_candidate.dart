@@ -14,6 +14,7 @@ class ParticipantCandidate {
     this.email,
     this.emailVisible = true,
     this.directory,
+    this.searchedEmail,
   });
 
   /// A listed pilot the directory found (#653). [profileId] is the id the
@@ -21,6 +22,7 @@ class ParticipantCandidate {
   factory ParticipantCandidate.directory(
     DirectoryMatchDto match, {
     required Id profileId,
+    String? searchedEmail,
   }) => ParticipantCandidate(
     profileId: profileId,
     name: '${match.firstName} ${match.lastName}',
@@ -29,6 +31,7 @@ class ParticipantCandidate {
     email: match.email,
     emailVisible: match.email != null,
     directory: match,
+    searchedEmail: searchedEmail,
   );
 
   /// One of the director's own [profile]s (its email is always shown).
@@ -55,6 +58,11 @@ class ParticipantCandidate {
   /// director's own profiles. A copy of it becomes their profile.
   final DirectoryMatchDto? directory;
 
+  /// The email the director typed to find this pilot, which the pilot may
+  /// keep private from the result: still enough to see a profile of the
+  /// director's already holds it.
+  final String? searchedEmail;
+
   /// Whether one of the director's own [profiles] already holds this
   /// directory pilot (same FAI number, national ID or visible email), so it
   /// is offered once, as that profile.
@@ -69,7 +77,7 @@ class ParticipantCandidate {
       (p) =>
           same(p.faiNumber, match.faiNumber) ||
           same(p.nationalOrgId, match.nationalOrgId) ||
-          same(p.email, match.email),
+          same(p.email, match.email ?? searchedEmail),
     );
   }
 

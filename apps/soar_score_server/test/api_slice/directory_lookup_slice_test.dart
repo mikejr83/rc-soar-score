@@ -86,13 +86,14 @@ void _tests(SliceBackend backend) {
     String path, {
     Object? body,
     String method = 'POST',
+    bool withSecret = true,
   }) async {
     final handler = callers.putIfAbsent(
-      as,
+      withSecret ? as : core.Id.create(),
       () => createServerHandler(
         api.database,
         authMiddleware: fixedPrincipal(Principal(accountId: as)),
-        invitationSecret: _secret,
+        invitationSecret: withSecret ? _secret : null,
       ),
     );
     final response = await handler(
@@ -244,6 +245,36 @@ void _tests(SliceBackend backend) {
 
       expect(r.status, 403);
       expect((r.json['error']! as Map)['code'], 'registered_account_required');
+    });
+
+    test('lookup needs no invitation secret; copy does', () async {
+      final listed = await entry(pat, fai: 'F1');
+      final guest = await account('Gus', kind: core.AccountKind.guest);
+
+      final found = await call(
+        dana,
+        '/directory/lookups',
+        body: {'key': 'fai_number', 'value': 'F1'},
+        withSecret: false,
+      );
+      final copy = await call(
+        dana,
+        '/directory/copies',
+        body: copyBody(listed.id, core.Id.create()),
+        withSecret: false,
+      );
+      final guestCopy = await call(
+        guest,
+        '/directory/copies',
+        body: copyBody(listed.id, core.Id.create()),
+        withSecret: false,
+      );
+
+      expect(found.status, 200);
+      expect(found.json['results'], hasLength(1));
+      expect(copy.status, 409);
+      expect((copy.json['error']! as Map)['code'], 'invitations_not_available');
+      expect(guestCopy.status, 403);
     });
 
     test('a blank value is refused', () async {

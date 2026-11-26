@@ -33,9 +33,9 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// Any number of directors can copy the same pilot, each to their own
 /// profile. A stored email is returned only when the pilot made it visible,
 /// and neither it nor the email a director typed is logged. A guest, local or
-/// deleted account is 403 `registered_account_required`. With [invitations]
-/// null (no invitation secret) copying and refreshing answer 409
-/// `invitations_not_available`; the embedded instance has no accounts and
+/// deleted account is 403 `registered_account_required`, before anything else
+/// is said. With [invitations] null (no invitation secret) lookups still
+/// work and copying answers 409 `invitations_not_available`; the embedded instance has no accounts and
 /// answers 403 for the Local account.
 void addDirectoryLookupRoutes(
   Router router,
@@ -48,21 +48,14 @@ void addDirectoryLookupRoutes(
   final limiter =
       lookupLimiter ??
       RequestRateLimiter(maxRequests: 60, window: const Duration(minutes: 10));
-  final built = invitations == null
-      ? null
-      : DirectoryLookupService(
-          repository,
-          ParticipantLinkService(repository, invitations),
-        );
-
-  Future<DirectoryLookupService> service() async {
-    if (built != null) return built;
-    await repository.participantDirectoryEntryRepository.findById(Id.create());
-    throw ContestStateError(
-      'invitations_not_available',
-      'this server does not issue invitations',
-    );
-  }
+  // Looking up needs no invitation secret; copying does, and says so only
+  // to a signed-in director.
+  final service = DirectoryLookupService(
+    repository,
+    invitations == null
+        ? null
+        : ParticipantLinkService(repository, invitations),
+  );
 
   DirectoryMatchDto dto(DirectoryMatch match) => DirectoryMatchDto(
     entryId: match.entry.id,
@@ -85,7 +78,7 @@ void addDirectoryLookupRoutes(
     final principal = requirePrincipal(request);
     final body = await readJsonBody(request, DirectoryLookupRequest.fromJson);
     limiter.check('lookup:${principal.accountId.value}');
-    final matches = await (await service()).lookup(
+    final matches = await service.lookup(
       directorAccountId: principal.accountId,
       key: switch (body.key) {
         DirectoryLookupKeyDto.email => DirectoryLookupKey.email,
@@ -104,7 +97,7 @@ void addDirectoryLookupRoutes(
     final principal = requirePrincipal(request);
     final body = await readJsonBody(request, DirectoryCopyRequest.fromJson);
     limiter.check('copy:${principal.accountId.value}');
-    final match = await (await service()).copy(
+    final match = await service.copy(
       directorAccountId: principal.accountId,
       entryId: body.entryId,
       profileId: body.profileId,
@@ -116,7 +109,7 @@ void addDirectoryLookupRoutes(
     final principal = requirePrincipal(request);
     final body = await readJsonBody(request, DirectoryCopyRequest.fromJson);
     limiter.check('refresh:${principal.accountId.value}');
-    final match = await (await service()).refresh(
+    final match = await service.refresh(
       directorAccountId: principal.accountId,
       entryId: body.entryId,
       profileId: body.profileId,

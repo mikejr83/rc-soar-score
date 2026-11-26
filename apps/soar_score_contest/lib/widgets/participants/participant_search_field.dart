@@ -66,7 +66,10 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
 
   Future<Iterable<ParticipantCandidate>> _search(String query) async {
     final local = searchLocalProfiles(widget.profiles ?? const [], query);
-    if (!_searchesRemote || query.trim().isEmpty) {
+    if (!_searchesRemote) return local;
+    if (query.trim().isEmpty) {
+      // Clearing the text still ends a lookup waiting on an earlier one.
+      unawaited(widget.remote!(query).then((_) {}, onError: (Object _) {}));
       return local;
     }
     try {

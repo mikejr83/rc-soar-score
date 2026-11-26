@@ -5,6 +5,7 @@ import '../enums/account_kind.dart';
 import '../enums/account_status.dart';
 import '../enums/participant_link_origin.dart';
 import '../enums/participant_link_status.dart';
+import '../errors/contest_state_error.dart';
 import '../errors/entity_not_found_error.dart';
 import '../errors/forbidden_error.dart';
 import '../errors/participant_link_error.dart';
@@ -57,10 +58,13 @@ class DirectoryMatch extends Equatable {
 ///   whose confirmed directory link is still in place, and only while the
 ///   entry is still listed. It never writes.
 class DirectoryLookupService {
-  DirectoryLookupService(this.repository, this.links);
+  DirectoryLookupService(this.repository, [this.links]);
 
   final Repository repository;
-  final ParticipantLinkService links;
+
+  /// Needed to copy; null where the server issues no invitations. Looking up
+  /// needs only the repository.
+  final ParticipantLinkService? links;
 
   /// Listed entries of [key] = [value] for [directorAccountId].
   ///
@@ -78,13 +82,17 @@ class DirectoryLookupService {
       throw ArgumentError.value(value, 'value', 'must not be blank');
     }
     final entries = repository.participantDirectoryEntryRepository;
-    final found = switch (key) {
+    final matches = switch (key) {
       DirectoryLookupKey.email => await _byEmail(text),
-      DirectoryLookupKey.faiNumber => await entries.listListedByFaiNumber(text),
-      DirectoryLookupKey.nationalOrgId =>
-        await entries.listListedByNationalOrgId(text),
+      DirectoryLookupKey.faiNumber => [
+        for (final entry in await entries.listListedByFaiNumber(text))
+          await _match(entry),
+      ],
+      DirectoryLookupKey.nationalOrgId => [
+        for (final entry in await entries.listListedByNationalOrgId(text))
+          await _match(entry),
+      ],
     };
-    final matches = [for (final entry in found) await _match(entry)];
     _logger.info(
       'lookup director=${directorAccountId.value} key=${key.name} '
       'results=${matches.length}',
@@ -106,7 +114,7 @@ class DirectoryLookupService {
   }) async {
     await _requireDirector(directorAccountId);
     final entry = await _listedEntry(entryId);
-    await links.linkFromDirectory(
+    await _links.linkFromDirectory(
       profileId: profileId,
       accountId: entry.accountId,
       directorAccountId: directorAccountId,
@@ -166,13 +174,30 @@ class DirectoryLookupService {
     return entry;
   }
 
-  Future<List<ParticipantDirectoryEntry>> _byEmail(String email) async {
+  /// The match of the verified [email], if its account is listed.
+  ///
+  /// Every outcome that answers "nobody" (no such account, an unverified
+  /// email, no entry, an unlisted one) does the same two reads, so the
+  /// answer's timing says nothing about which it was.
+  Future<List<DirectoryMatch?>> _byEmail(String email) async {
     final account = await repository.accountRepository.findByEmail(email);
-    if (account == null || !account.emailVerified) return const [];
     final entry = await repository.participantDirectoryEntryRepository
-        .findForAccount(account.id);
-    return entry == null || !entry.isListed ? const [] : [entry];
+        .findForAccount(account?.id ?? Id.create());
+    if (account == null ||
+        !account.emailVerified ||
+        entry == null ||
+        !entry.isListed) {
+      return const [];
+    }
+    return [_view(entry, account)];
   }
+
+  ParticipantLinkService get _links =>
+      links ??
+      (throw ContestStateError(
+        'invitations_not_available',
+        'this server does not issue invitations',
+      ));
 
   /// The entry as a director may see it, or null when its account can no
   /// longer be found by directors (not an active registered account).
@@ -180,8 +205,12 @@ class DirectoryLookupService {
     final account = await repository.accountRepository.findById(
       entry.accountId,
     );
-    if (account == null ||
-        account.kind != AccountKind.registered ||
+    if (account == null) return null;
+    return _view(entry, account);
+  }
+
+  DirectoryMatch? _view(ParticipantDirectoryEntry entry, Account account) {
+    if (account.kind != AccountKind.registered ||
         account.status != AccountStatus.active) {
       return null;
     }

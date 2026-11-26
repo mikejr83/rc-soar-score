@@ -38,12 +38,13 @@ class DirectoryPilotSource {
   /// [query]; empty while the text is not yet any of those, or when a newer
   /// query arrived during the pause.
   Future<List<ParticipantCandidate>> search(String query) async {
+    // Any change of the text ends the wait of an earlier one.
+    final mine = ++_typed;
     final text = query.trim();
     final keys = _keysFor(text);
     if (keys.isEmpty) return const [];
     final cached = _answers[text.toLowerCase()];
-    if (cached != null) return _candidates(cached);
-    final mine = ++_typed;
+    if (cached != null) return _candidates(cached, text);
     await Future<void>.delayed(pause);
     if (mine != _typed) return const [];
     final found = <String, DirectoryMatchDto>{};
@@ -57,14 +58,18 @@ class DirectoryPilotSource {
     }
     final matches = found.values.toList();
     _answers[text.toLowerCase()] = matches;
-    return _candidates(matches);
+    return _candidates(matches, text);
   }
 
-  List<ParticipantCandidate> _candidates(List<DirectoryMatchDto> matches) => [
+  List<ParticipantCandidate> _candidates(
+    List<DirectoryMatchDto> matches,
+    String text,
+  ) => [
     for (final match in matches)
       ParticipantCandidate.directory(
         match,
         profileId: _profileIds.putIfAbsent(match.entryId.value, Id.create),
+        searchedEmail: text.contains('@') ? text : null,
       ),
   ];
 
