@@ -71,6 +71,15 @@ class _IsThisYouCardState extends State<IsThisYouCard> {
       });
       // Leave the reason on screen long enough to read, then drop the card.
       _dismissal = Timer(const Duration(seconds: 3), widget.onGone);
+    } on SignedOutException {
+      // The sign-in ended: the card stays, so the answer can be sent after
+      // signing in again.
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _error = AppLocalizations.of(context).accountSignInEnded;
+        });
+      }
     } on SelfScoreLoadException {
       if (mounted) {
         setState(() {

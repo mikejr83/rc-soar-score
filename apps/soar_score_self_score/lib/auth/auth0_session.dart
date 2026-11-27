@@ -136,6 +136,7 @@ class Auth0Session extends AuthSession {
       throw const AuthException('Sign-out could not be completed.');
     }
     _user = null;
+    detailsChecked = false;
     notifyListeners();
   }
 
@@ -147,6 +148,7 @@ class Auth0Session extends AuthSession {
     } on AuthSessionEndedException catch (error, stackTrace) {
       _logger.warning('The Auth0 session has ended', error, stackTrace);
       _user = null;
+      detailsChecked = false;
       notifyListeners();
       return null;
     } on Object catch (error, stackTrace) {

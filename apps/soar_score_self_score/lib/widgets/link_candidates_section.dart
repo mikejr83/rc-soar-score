@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../auth/sign_in_again.dart';
+import '../data/self_score_repository.dart';
 import '../data/self_score_scope.dart';
 import '../l10n/app_localizations.dart';
 import '../models/link_candidate.dart';
@@ -54,19 +56,32 @@ class _LinkCandidatesSectionState extends State<LinkCandidatesSection>
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
+          // A refused token is the sign-in ending: trying again cannot help.
+          final signedOut = snapshot.error is SignedOutException;
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: Row(
               children: [
                 Expanded(
                   child: Text(
-                    l10n.isThisYouLoadFailed,
+                    signedOut
+                        ? l10n.accountSignInEnded
+                        : l10n.isThisYouLoadFailed,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
-                TextButton(onPressed: _retry, child: Text(l10n.isThisYouRetry)),
+                if (signedOut)
+                  TextButton(
+                    onPressed: () => signInAgain(context),
+                    child: Text(l10n.signInAgainButton),
+                  )
+                else
+                  TextButton(
+                    onPressed: _retry,
+                    child: Text(l10n.isThisYouRetry),
+                  ),
               ],
             ),
           );

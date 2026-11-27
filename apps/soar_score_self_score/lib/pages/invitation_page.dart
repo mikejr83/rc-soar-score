@@ -207,11 +207,11 @@ class _WelcomeState extends State<_Welcome> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
       children: [
-        const Center(
+        Center(
           child: BrandLogo(
             variant: BrandLogoVariant.lockup,
             height: 96,
-            semanticLabel: 'RC Soar Score, glider contest scoring',
+            semanticLabel: l10n.brandLogoLabel,
           ),
         ),
         const SizedBox(height: 32),
@@ -267,6 +267,21 @@ class _WelcomeState extends State<_Welcome> {
                 ),
               ),
             ),
+            if (failure == ClaimFailure.signInExpired) ...[
+              const SizedBox(height: 12),
+              // The server no longer accepts the stored sign-in: sign in
+              // again and come back to this link.
+              FilledButton(
+                key: const Key('claim-sign-in-again'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                onPressed: _signingIn
+                    ? null
+                    : () => _signIn(auth, createAccount: false),
+                child: Text(l10n.signInAgainButton),
+              ),
+            ],
           ],
         ] else ...[
           FilledButton(

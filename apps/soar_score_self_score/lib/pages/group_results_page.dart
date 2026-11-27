@@ -56,7 +56,6 @@ class GroupResultsPage extends StatelessWidget {
         onBack: () => context.canPop()
             ? context.pop()
             : context.go(pilotPath(contestId, pilotId)),
-        backLabel: 'Back',
         showAccount: false,
       ),
       builder: (context, data) => ListView(

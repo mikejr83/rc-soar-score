@@ -116,7 +116,7 @@
   "@claimInvalid": {
     "description": "Shown when the invitation link stopped working while the pilot was signing in."
   },
-  "claimSignInExpired": "Your sign-in has expired. Go to the landing page, sign in again, then open this link again.",
+  "claimSignInExpired": "Your sign-in has expired. Sign in again to continue with your account, or continue as a guest.",
   "@claimSignInExpired": {
     "description": "Shown when the account's sign-in was refused while claiming an invitation link."
   },
@@ -523,6 +523,48 @@
   "@contestSignInEnded": {
     "description": "Snackbar when opening a contest failed because the sign-in is no longer accepted."
   },
+  "signInAgainButton": "Sign in again",
+  "@signInAgainButton": {
+    "description": "Button that starts a new sign-in after the server stopped accepting the old one."
+  },
+  "accountSignInEnded": "Your sign-in has ended. Sign in again to continue.",
+  "@accountSignInEnded": {
+    "description": "Snackbar or message when an account action failed because the sign-in is no longer accepted."
+  },
+  "brandLogoLabel": "RC Soar Score, glider contest scoring",
+  "@brandLogoLabel": {
+    "description": "Screen reader label of the large brand lockup on the landing and invitation pages."
+  },
+  "appBarLogoLabel": "Soar Score",
+  "@appBarLogoLabel": {
+    "description": "Screen reader label of the brand mark in the top bar."
+  },
+  "appBarAccountTooltip": "Account",
+  "@appBarAccountTooltip": {
+    "description": "Tooltip and label of the top bar button that opens the account page."
+  },
+  "appBarBackTooltip": "Back",
+  "@appBarBackTooltip": {
+    "description": "Tooltip and label of the top bar's default back button."
+  },
+  "loadFailedGeneric": "Could not load this page. Check your connection and try again.",
+  "@loadFailedGeneric": {
+    "description": "Shown on a page that failed to load for a reason with no message of its own."
+  },
+  "accountUnlinkFor": "Unlink {pilot}",
+  "@accountUnlinkFor": {
+    "description": "Screen reader label of a pilot's Unlink button on the account page.",
+    "placeholders": {
+      "pilot": {"type": "String"}
+    }
+  },
+  "contestPublicResultsFor": "Public results for {contest}",
+  "@contestPublicResultsFor": {
+    "description": "Screen reader label of a contest's Public results button.",
+    "placeholders": {
+      "contest": {"type": "String"}
+    }
+  },
   "homeMyContests": "My contests",
   "@homeMyContests": {
     "description": "Landing page button that opens the signed-in pilot's contest list."
@@ -659,14 +701,6 @@
   "detailsSaveFailed": "Your details could not be saved. Check your connection and try again.",
   "@detailsSaveFailed": {
     "description": "Shown when saving the details page failed."
-  },
-  "detailsLoadFailed": "Your details could not be loaded.",
-  "@detailsLoadFailed": {
-    "description": "Shown when the details page could not load."
-  },
-  "detailsRetry": "Try again",
-  "@detailsRetry": {
-    "description": "Button that loads the details page again."
   },
   "detailsPromptTitle": "Let directors find you",
   "@detailsPromptTitle": {
