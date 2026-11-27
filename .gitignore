@@ -44,6 +44,9 @@ graphify-out/*
 .worktrees/
 # Kilo agent plans
 /.kilo/plans
+# PR revision pipeline operational files
+/.kilo/pr_context.md
+/.kilo/PR_REVISION_PLAN.md
 # Chrome and chromedriver installed by scripts/e2e-setup
 /.e2e-tools/
 kilo_export/

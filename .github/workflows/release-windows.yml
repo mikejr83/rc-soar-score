@@ -27,7 +27,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Work out the version
         id: version
@@ -74,7 +74,7 @@ jobs:
       # with other tags. Run workflow_dispatch on master to warm this cache
       # before a release, and again after the runner image/toolchain changes.
       - name: Cache native dependency binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ steps.vcpkg.outputs.cache-path }}
           key: vcpkg-${{ runner.os }}-${{ runner.arch }}-${{ steps.vcpkg.outputs.image }}-${{ steps.vcpkg.outputs.revision }}-${{ hashFiles('.github/workflows/release-windows.yml') }}
@@ -123,7 +123,7 @@ jobs:
       # artifact itself and a zip would arrive zipped twice.
       - name: Keep the build as a workflow artifact (dry runs)
         if: github.ref_type != 'tag'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ZIP_NAME }}
           path: stage/${{ env.ZIP_NAME }}

@@ -23,6 +23,19 @@ abstract interface class InvitationRepository {
   /// or `null`.
   Future<Invitation?> findByProtectedCredential(String credential);
 
+  /// The id of the invitation whose delivery outcomes hold an email with the
+  /// provider's [messageId], or `null`. [messageId] must be letters, digits
+  /// and hyphens only; anything else finds nothing.
+  ///
+  /// Used to attach a bounce or complaint to the email it is about. It reads
+  /// the outcomes of every invitation, so it is for rare provider reports,
+  /// not for request paths.
+  Future<Id?> findIdByDeliveryMessageId(String messageId);
+
+  /// The ids of the invitations with an email send still in flight (an
+  /// outcome stored as `sending`). Same cost as [findIdByDeliveryMessageId].
+  Future<List<Id>> listIdsWithSendingEmail();
+
   /// Every invitation of [contestParticipationId], oldest revision first.
   Future<List<Invitation>> listForParticipation(Id contestParticipationId);
 
@@ -68,6 +81,26 @@ abstract interface class InvitationRepository {
     required Id newRedeemer,
     required DateTime usedAt,
     ({Id profileId, Id accountId})? requireConfirmedLinkOf,
+  });
+
+  /// Changes only the delivery outcomes of [invitationId]: [change] receives
+  /// the stored list and returns the list to keep, or null to keep it as it
+  /// is.
+  ///
+  /// The write replaces nothing else on the invitation, so it cannot undo a
+  /// concurrent redemption, and it applies only if the outcomes are still the
+  /// ones [change] saw (another writer makes it run again with the new list).
+  /// Returns the outcomes now stored, or null when there is no such
+  /// invitation.
+  ///
+  /// With [audit], that event is stored in the same transaction as the
+  /// change, and only when the change applies, so a stored change never lacks
+  /// its audit event and a failed one leaves none.
+  Future<List<Map<String, Object?>>?> updateDeliveryOutcomes(
+    Id invitationId,
+    List<Map<String, Object?>>? Function(List<Map<String, Object?>> current)
+    change, {
+    AuditEvent? audit,
   });
 
   /// Stores every invitation in [invitations] and every event in [audits] in

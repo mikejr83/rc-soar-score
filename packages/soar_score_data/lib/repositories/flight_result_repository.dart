@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'drift_repository.dart';
@@ -26,6 +27,15 @@ class FlightResultRepository extends DriftRepository
   @override
   Future<List<core.FlightResult>> listForContest(core.Id contestId) =>
       _store.whereId('contest_id', contestId, orderBy: 'id');
+
+  @override
+  Future<List<core.FlightResult>> listForRound(
+    core.Id contestId,
+    core.Id roundId,
+  ) => _store.whereSql('contest_id = ? AND credited_round_id = ?', [
+    Variable<String>(contestId.value),
+    Variable<String>(roundId.value),
+  ], orderBy: 'id');
 
   @override
   Future<List<core.FlightResult>> listForParticipation(

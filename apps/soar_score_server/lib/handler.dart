@@ -1,9 +1,17 @@
 import 'package:shelf/shelf.dart';
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
 import 'package:soar_score_core/soar_score_core.dart'
-    show InvitationCodec, InvitationService, PromotionIntentPolicy;
+    show
+        InvitationCodec,
+        InvitationDeliveryFeedback,
+        InvitationEmailService,
+        InvitationMailer,
+        InvitationService,
+        PromotionIntentPolicy;
 import 'package:soar_score_data/soar_score_data.dart';
 
+import 'mail/ses_feedback/ses_feedback_handler.dart'
+    show unavailableSesFeedbackHandler;
 import 'support/support_wiring.dart';
 
 const String serverName = 'soar_score_server';
@@ -22,6 +30,17 @@ const String serverVersion = '0.1.0';
 /// [trustedProxySecret] is what the site's `/api` proxy sends with the
 /// visitor's address (see `clientAddressOf`).
 ///
+/// [invitationEmailLimit] replaces the hourly cap of new invitation emails per
+/// director and contest (tests).
+///
+/// [invitationMailer] sends invitation emails (#790); without it the email
+/// route answers 409 `email_not_available`.
+///
+/// [sesFeedbackHandler] serves `POST /webhooks/ses-feedback` (bounce and
+/// complaint reports, #790); it defaults to an unavailable (503) handler.
+/// Recording a report needs no sending, so [feedback] is wired whether or not
+/// [invitationMailer] is set.
+///
 /// [supportHandler] serves `POST /public/support`; it defaults to an
 /// unavailable (503) handler so a hosted server without support settings
 /// still serves everything else.
@@ -39,8 +58,21 @@ Handler createServerHandler(
   InvitationThrottle? invitationThrottle,
   PromotionIntentPolicy? promotionIntents,
   Handler? supportHandler,
+  Handler Function(InvitationDeliveryFeedback feedback)? sesFeedbackHandler,
+  InvitationMailer? invitationMailer,
+  int? invitationEmailLimit,
 }) {
   final repository = Repository(database);
+  final invitations = invitationSecret == null
+      ? null
+      : InvitationService(
+          repository,
+          InvitationCodec.fromText(invitationSecret),
+        );
+  final linkBase = (selfScoringBaseUrl ?? defaultSelfScoringBaseUrl).replaceAll(
+    RegExp(r'/+$'),
+    '',
+  );
   return buildApiHandler(
     name: serverName,
     displayName: serverDisplayName,
@@ -61,11 +93,21 @@ Handler createServerHandler(
                 store: RequestThrottleStore(database),
                 keySecret: invitationSecret,
               ),
-    invitations: invitationSecret == null
+    sesFeedbackHandler: sesFeedbackHandler == null
+        ? unavailableSesFeedbackHandler()
+        : sesFeedbackHandler(InvitationDeliveryFeedback(repository)),
+    invitations: invitations,
+    invitationEmail: invitations == null || invitationMailer == null
         ? null
-        : InvitationService(
+        : InvitationEmailService(
             repository,
-            InvitationCodec.fromText(invitationSecret),
+            invitations,
+            invitationMailer,
+            linkFor: (credential) => '$linkBase/invitations/$credential',
+            throttle: RequestThrottleStore(database),
+            maxSendsPerWindow:
+                invitationEmailLimit ??
+                InvitationEmailService.defaultMaxSendsPerWindow,
           ),
   );
 }

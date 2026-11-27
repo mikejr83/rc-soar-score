@@ -178,4 +178,155 @@ void main() {
       throwsA(isA<ApiHttpError>()),
     );
   });
+
+  group('send', () {
+    final kim = Id.parse('019c0000-0000-7000-8000-000000000202');
+    final noAddress = Id.parse('019c0000-0000-7000-8000-000000000203');
+    final paths = <String>[];
+
+    http.Response okIssue() => http.Response(
+      jsonEncode({'issued_count': 3, 'invitations': <Object>[]}),
+      200,
+      headers: headers,
+    );
+
+    test('issues the links, then emails, and reports each pilot', () async {
+      paths.clear();
+      final client = clientFor((request) {
+        paths.add(request.url.path);
+        if (request.url.path.endsWith('/email')) {
+          return http.Response(
+            jsonEncode({
+              'results': [
+                {'participation_id': lee.value, 'status': 'accepted'},
+                {'participation_id': kim.value, 'status': 'rejected'},
+                {'participation_id': noAddress.value, 'skipped': 'no_email'},
+              ],
+            }),
+            200,
+            headers: headers,
+          );
+        }
+        return okIssue();
+      });
+      final report = await source.send(client, contest, [lee, kim, noAddress]);
+      expect(paths, [
+        '/api/v1/contests/${contest.value}/invitations',
+        '/api/v1/contests/${contest.value}/invitations/email',
+      ]);
+      expect(report.kindOf(lee), InvitationEmailKind.emailed);
+      expect(report.kindOf(kim), InvitationEmailKind.notSent);
+      expect(report.kindOf(noAddress), InvitationEmailKind.noAddress);
+      expect(report.serviceUnavailable, isFalse);
+      expect(report.needAnotherWay, [kim.value, noAddress.value]);
+    });
+
+    test('a server that cannot email still leaves the links issued', () async {
+      final client = clientFor(
+        (request) => request.url.path.endsWith('/email')
+            ? error(409, 'email_not_available')
+            : okIssue(),
+      );
+      final report = await source.send(client, contest, [lee]);
+      expect(report.serviceUnavailable, isTrue);
+      expect(report.kinds, isEmpty);
+    });
+
+    test(
+      'a lost answer is asked again with the same id, then unknown',
+      () async {
+        final ids = <String>[];
+        final client = clientFor((request) {
+          if (!request.url.path.endsWith('/email')) return okIssue();
+          ids.add(
+            (jsonDecode(request.body) as Map<String, Object?>)['request_id']!
+                as String,
+          );
+          return http.Response('boom', 503, headers: headers);
+        });
+        final report = await source.send(client, contest, [lee, kim]);
+        expect(ids, hasLength(2));
+        expect(ids.toSet(), hasLength(1), reason: 'same request id');
+        expect(report.serviceUnavailable, isFalse);
+        expect(report.kindOf(lee), InvitationEmailKind.unknown);
+        expect(report.kindOf(kim), InvitationEmailKind.unknown);
+      },
+    );
+
+    test(
+      'a refusal on the replay of a lost first answer stays unknown',
+      () async {
+        var emailCalls = 0;
+        final client = clientFor((request) {
+          if (!request.url.path.endsWith('/email')) return okIssue();
+          emailCalls++;
+          return emailCalls == 1
+              ? http.Response('boom', 503, headers: headers)
+              : error(409, 'email_not_available');
+        });
+        final report = await source.send(client, contest, [lee]);
+        expect(emailCalls, 2);
+        expect(report.serviceUnavailable, isFalse);
+        expect(report.kindOf(lee), InvitationEmailKind.unknown);
+      },
+    );
+
+    test('a failed issue is a failed send and nothing is emailed', () async {
+      paths.clear();
+      final client = clientFor((request) {
+        paths.add(request.url.path);
+        return error(409, 'invitations_not_issuable');
+      });
+      await expectLater(
+        source.send(client, contest, [lee]),
+        throwsA(isA<ApiException>()),
+      );
+      expect(paths, hasLength(1));
+    });
+
+    test('each press uses its own request ids', () async {
+      final ids = <String>[];
+      final client = clientFor((request) {
+        ids.add(
+          (jsonDecode(request.body) as Map<String, Object?>)['request_id']!
+              as String,
+        );
+        return request.url.path.endsWith('/email')
+            ? http.Response(
+                jsonEncode({'results': <Object>[]}),
+                200,
+                headers: headers,
+              )
+            : okIssue();
+      });
+      await source.send(client, contest, [lee]);
+      await source.send(client, contest, [lee]);
+      expect(ids.toSet(), hasLength(4));
+    });
+  });
+
+  test('the listing carries each pilot’s latest email status', () async {
+    final client = clientFor(
+      (_) => http.Response(
+        jsonEncode({
+          'contest_id': contest.value,
+          'can_issue': true,
+          'invitations': [
+            {
+              'participation_id': lee.value,
+              'link': 'https://s.example/i/abc',
+              'email_status': 'bounced',
+            },
+          ],
+        }),
+        200,
+        headers: headers,
+      ),
+    );
+    final read = await source.read(client, contest);
+    expect(read.emailKindOf(lee), InvitationEmailKind.notSent);
+    expect(emailKindOfStatus('limited'), InvitationEmailKind.limitReached);
+    expect(emailKindOfStatus('sending'), InvitationEmailKind.unknown);
+    expect(emailKindOfStatus('nope'), isNull);
+  });
 }

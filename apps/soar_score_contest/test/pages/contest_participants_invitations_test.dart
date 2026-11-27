@@ -47,7 +47,9 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('invitations-send')));
     await tester.pumpAndSettle();
     expect(find.text('Send invitations?'), findsOneWidget);
-    expect(find.textContaining('Nobody is emailed'), findsOneWidget);
+    // Sending also emails the pilots who have an address.
+    expect(find.textContaining('emailed their link'), findsWidgets);
+    expect(find.textContaining('Nobody is emailed'), findsNothing);
     await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
     await tester.pumpAndSettle();
 
@@ -55,10 +57,198 @@ void main() {
       [personParticipationId(1), personParticipationId(2)],
     ]);
     expect(
-      find.text('2 invitations created. Nobody was emailed.'),
+      find.text('2 invitations sent. Nobody was emailed.'),
       findsOneWidget,
     );
   });
+
+  testWidgets('the confirmation lists the pilots by name, not address', (
+    tester,
+  ) async {
+    PilotInvitationSources.current = FakePilotInvitationSource();
+    await pumpParticipantsPage(tester, ParticipantsServer());
+    await tester.tap(_check(1));
+    await tester.tap(_check(2));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('invitations-send')));
+    await tester.pumpAndSettle();
+
+    final names = tester.widget<Text>(
+      find.byKey(const ValueKey('cards-send-names')),
+    );
+    expect(names.data, 'Ann Lee, Bo Ray');
+    expect(find.textContaining('@'), findsNothing);
+    expect(find.byKey(const ValueKey('cards-send-again-note')), findsNothing);
+  });
+
+  testWidgets('sending again says who was emailed before, then emails', (
+    tester,
+  ) async {
+    final source = FakePilotInvitationSource(
+      links: {
+        personParticipationId(1).value: 'https://x.test/1',
+        personParticipationId(2).value: 'https://x.test/2',
+      },
+      emailStatus: {personParticipationId(1).value: 'accepted'},
+      email: (ids) => InvitationEmailReport(
+        kinds: {for (final id in ids) id.value: InvitationEmailKind.emailed},
+      ),
+    );
+    PilotInvitationSources.current = source;
+    await pumpParticipantsPage(tester, ParticipantsServer());
+    await tester.tap(_check(1));
+    await tester.tap(_check(2));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('invitations-send')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        '1 of these pilots was emailed before and will be emailed again.',
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(source.sent, [
+      [personParticipationId(1), personParticipationId(2)],
+    ]);
+    expect(find.text('2 invitations sent. 2 pilots emailed.'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('invitations-result-dialog')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('pilots whose email did not go out are listed by name', (
+    tester,
+  ) async {
+    final source = FakePilotInvitationSource(
+      email: (ids) => InvitationEmailReport(
+        kinds: {
+          ids[0].value: InvitationEmailKind.emailed,
+          ids[1].value: InvitationEmailKind.notSent,
+        },
+      ),
+    );
+    PilotInvitationSources.current = source;
+    await pumpParticipantsPage(tester, ParticipantsServer());
+    await tester.tap(_check(1));
+    await tester.tap(_check(2));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('invitations-send')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+    await tester.pumpAndSettle();
+
+    final dialog = find.byKey(const ValueKey('invitations-result-dialog'));
+    expect(dialog, findsOneWidget);
+    expect(
+      find.descendant(of: dialog, matching: find.text('Bo Ray')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: dialog, matching: find.text('Ann Lee')),
+      findsNothing,
+    );
+    expect(find.textContaining('Copy these pilots'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('invitations-result-close')));
+    await tester.pumpAndSettle();
+    expect(find.text('2 invitations sent. 1 pilot emailed.'), findsOneWidget);
+    // The links exist whatever happened to the email.
+    expect(source.links, hasLength(2));
+  });
+
+  testWidgets('lost answers never say that nobody was emailed', (tester) async {
+    final source = FakePilotInvitationSource(
+      email: (ids) => InvitationEmailReport(
+        kinds: {for (final id in ids) id.value: InvitationEmailKind.unknown},
+      ),
+    );
+    PilotInvitationSources.current = source;
+    await pumpParticipantsPage(tester, ParticipantsServer());
+    await tester.tap(_check(1));
+    await tester.tap(_check(2));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('invitations-send')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('invitations-result-close')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Nobody was emailed'), findsNothing);
+    expect(find.textContaining('2 not confirmed'), findsOneWidget);
+  });
+
+  testWidgets('a server that cannot email says so and keeps the links', (
+    tester,
+  ) async {
+    final source = FakePilotInvitationSource(
+      email: (_) => const InvitationEmailReport.unavailable(),
+    );
+    PilotInvitationSources.current = source;
+    await pumpParticipantsPage(tester, ParticipantsServer());
+    await tester.tap(_check(1));
+    await tester.tap(_check(2));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('invitations-send')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('Email could not be sent right now'),
+      findsOneWidget,
+    );
+    // Both pilots are named, though the server answered for nobody.
+    final dialog = find.byKey(const ValueKey('invitations-result-dialog'));
+    expect(
+      find.descendant(
+        of: dialog,
+        matching: find.textContaining('Ann Lee, Bo Ray'),
+      ),
+      findsOneWidget,
+    );
+    expect(source.links, hasLength(2));
+  });
+
+  testWidgets(
+    'pilots with no address are listed by name and noted in the snack bar',
+    (tester) async {
+      final source = FakePilotInvitationSource(
+        email: (ids) => InvitationEmailReport(
+          kinds: {
+            ids[0].value: InvitationEmailKind.emailed,
+            ids[1].value: InvitationEmailKind.noAddress,
+          },
+        ),
+      );
+      PilotInvitationSources.current = source;
+      await pumpParticipantsPage(tester, ParticipantsServer());
+      await tester.tap(_check(1));
+      await tester.tap(_check(2));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('invitations-send')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
+      await tester.pumpAndSettle();
+
+      final dialog = find.byKey(const ValueKey('invitations-result-dialog'));
+      expect(dialog, findsOneWidget);
+      expect(
+        find.descendant(of: dialog, matching: find.text('Bo Ray')),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const ValueKey('invitations-result-close')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('1 pilot has no email address on file.'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('non-flying participants are not sent invitations', (
     tester,
@@ -165,11 +355,12 @@ void main() {
     await tester.tap(_check(5));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('invitations-copy')), findsNothing);
+    // Everyone selected has a link, and Send sends again to the pilot.
     expect(
       tester
           .widget<TextButton>(find.byKey(const ValueKey('invitations-send')))
           .onPressed,
-      isNull,
+      isNotNull,
     );
 
     // Two pilots are two rows as well.
@@ -181,7 +372,7 @@ void main() {
       tester
           .widget<TextButton>(find.byKey(const ValueKey('invitations-send')))
           .onPressed,
-      isNull,
+      isNotNull,
     );
   });
 

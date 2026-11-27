@@ -118,17 +118,17 @@ class ResultsService {
     };
     final placeholders = {
       for (final placeholder
-          in await repository.scorePlaceholderRepository.listForContest(
-            contestId,
+          in await repository.scorePlaceholderRepository.listForAssignments(
+            groupOf.keys,
           ))
         placeholder.id: placeholder,
     };
     final flights = <RoundFlightResult>[];
     FlightResult? first;
-    for (final result in await repository.flightResultRepository.listForContest(
+    for (final result in await repository.flightResultRepository.listForRound(
       contestId,
+      round.id,
     )) {
-      if (result.creditedRoundId != round.id) continue;
       final group =
           groupOf[placeholders[result.scorePlaceholderId]?.assignmentId];
       if (group == null) continue;

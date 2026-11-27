@@ -6,8 +6,8 @@ import 'package:soar_score_sync/soar_score_sync.dart';
 
 /// Regression test for #875: a pulled page with a Role creation, its
 /// deletion and an unsupported change is replayed after the cursor refuses to
-/// move past the unsupported change. The replay rewrites the intermediate
-/// states, so the data revision moves even though the final data is the same.
+/// move past the unsupported change. The replay must not rewrite the
+/// intermediate states, so the data revision must not move with it.
 ///
 /// Uses the real applier and engine over a real database.
 void main() {
@@ -60,11 +60,11 @@ void main() {
       expect(await DriftSyncStore(database).readCursor(scope), 0);
       expect(engine.state.scopes[scope]!.dataRevision, 1);
     },
-    // Fails today: the replay rewrites the Role create and delete, so the
-    // revision moves with the replay. Observed after each pull:
+    // After each pull the database and cursor are the same; only the first
+    // pull may move the revision, because it is the one that stored the
+    // intermediate states.
     //   pull 1: Role absent, cursor 0, dataRevision 1
-    //   pull 2: Role absent, cursor 0, dataRevision 2
-    skip: 'see #875',
+    //   pull 2: Role absent, cursor 0, dataRevision 1
   );
 }
 
@@ -80,7 +80,7 @@ class _Gateway implements SyncGateway {
     protocolVersion: core.SyncProtocol.protocolVersion,
     minProtocolVersion: 1,
     minSchemaVersion: 1,
-    maxSchemaVersion: 2,
+    maxSchemaVersion: 3,
     serverTime: DateTime.utc(2026, 11, 17),
   );
 

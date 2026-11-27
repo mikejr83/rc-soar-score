@@ -50,6 +50,11 @@ class SyncEngine {
   // Per scope, how many exchanges changed local data or the service's copy.
   final _dataRevision = <SyncScopeKey, int>{};
 
+  // Per scope, the highest sequence stored before a pull stopped on an
+  // unsupported change. A replay of the failed page skips those changes, so
+  // it rewrites nothing and moves no data revision (#875).
+  final _storedBeforeUnsupported = <SyncScopeKey, int>{};
+
   SyncState _state;
   bool _registered = false;
   bool _versionsChecked = false;
@@ -607,14 +612,25 @@ class SyncEngine {
     int cursor,
   ) async {
     if (changes.isEmpty) return cursor;
-    final ordered = [...changes]
-      ..sort((a, b) => a.sequence.compareTo(b.sequence));
-    // Whatever was written before a failure is already in the store. A change
-    // the store already held (a replay after a failed page) writes nothing.
+    // A replay of a failed page skips what that page already stored.
+    final storedBefore = _storedBeforeUnsupported[scope];
+    final ordered = [
+      for (final change in changes)
+        if (storedBefore == null || change.sequence > storedBefore) change,
+    ]..sort((a, b) => a.sequence.compareTo(b.sequence));
+    if (ordered.isEmpty) return cursor;
     var changed = false;
     final watch = Stopwatch()..start();
     try {
       await _applyOrdered(scope, ordered, () => changed = true);
+    } on _UnsupportedChange catch (error) {
+      // Everything before the refused change was stored; remember its
+      // highest sequence so a replay does not rewrite it.
+      final stored = ordered
+          .where((c) => c.sequence < error.sequence)
+          .fold(storedBefore ?? 0, (h, c) => h > c.sequence ? h : c.sequence);
+      if (stored > 0) _storedBeforeUnsupported[scope] = stored;
+      rethrow;
     } finally {
       if (changed) _bumpRevision(scope);
     }
@@ -622,6 +638,11 @@ class SyncEngine {
     final moved = highest > cursor;
     if (moved) {
       await _store.writeCursor(scope, highest, syncedAt: _config.now());
+      // The cursor passed what the failed page stored; the replay guard is
+      // done with it.
+      if (storedBefore != null && highest > storedBefore) {
+        _storedBeforeUnsupported.remove(scope);
+      }
     }
     // After the write, so the cursor reported is the one saved.
     _logger.info(

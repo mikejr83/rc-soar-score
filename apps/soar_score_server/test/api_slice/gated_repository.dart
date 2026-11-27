@@ -59,6 +59,22 @@ class _GatedInvitations implements core.InvitationRepository {
   Future<core.Invitation?> findById(core.Id id) => _real.findById(id);
 
   @override
+  Future<core.Id?> findIdByDeliveryMessageId(String messageId) =>
+      _real.findIdByDeliveryMessageId(messageId);
+
+  @override
+  Future<List<core.Id>> listIdsWithSendingEmail() =>
+      _real.listIdsWithSendingEmail();
+
+  @override
+  Future<List<Map<String, Object?>>?> updateDeliveryOutcomes(
+    core.Id invitationId,
+    List<Map<String, Object?>>? Function(List<Map<String, Object?>> current)
+    change, {
+    core.AuditEvent? audit,
+  }) => _real.updateDeliveryOutcomes(invitationId, change, audit: audit);
+
+  @override
   Future<core.Invitation?> findByClientMutationId({
     required core.Id contestId,
     required String clientMutationId,

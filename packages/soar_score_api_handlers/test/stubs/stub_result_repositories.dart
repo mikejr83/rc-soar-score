@@ -11,6 +11,13 @@ class StubFlightResultRepository implements FlightResultRepository {
   ];
 
   @override
+  Future<List<FlightResult>> listForRound(Id contestId, Id roundId) async => [
+    for (final result in stored)
+      if (result.contestId == contestId && result.creditedRoundId == roundId)
+        result,
+  ];
+
+  @override
   Future<void> replaceForContest(
     Id contestId,
     Iterable<FlightResult> results,

@@ -57,10 +57,25 @@ String? invitationsUnavailableText(
     ? l10n.pilotCardsReminderUnsynced
     : unreachable ?? sendUnavailableText(l10n, invitations);
 
-/// Asks to send invitations for [count] pilots. Answers whether to go on.
-/// Sending is its own confirmation. It creates the QR codes and links only;
-/// nobody is emailed.
-Future<bool> confirmSendInvitations(BuildContext context, int count) async {
+/// The pilots a send is for, by participation id, with their names for the
+/// dialogs (names only: addresses stay off a shared screen).
+typedef InvitationNames = Map<String, String>;
+
+/// Asks to send invitations to [participations]. Answers whether to go on.
+/// Sending is its own confirmation: it creates the links and QR codes of the
+/// pilots who have none and emails every pilot with an address on file their
+/// link, again for those emailed before ([emailedBefore]).
+Future<bool> confirmSendInvitations(
+  BuildContext context,
+  List<Id> participations, {
+  InvitationNames names = const {},
+  int emailedBefore = 0,
+}) async {
+  final count = participations.length;
+  final listed = [
+    for (final id in participations)
+      if (names[id.value] != null) names[id.value]!,
+  ]..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
   final ok = await showDialog<bool>(
     context: context,
     builder: (context) {
@@ -69,33 +84,51 @@ Future<bool> confirmSendInvitations(BuildContext context, int count) async {
         key: const ValueKey('cards-send-dialog'),
         icon: const Icon(Icons.campaign),
         title: Text(l10n.pilotCardsSendTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 12,
-          children: [
-            Text(l10n.pilotCardsSendBody),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 10,
-              children: [
-                const Icon(Icons.qr_code_2, size: 20),
-                Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: l10n.pilotCardsQrCount(count),
-                          style: const TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                        TextSpan(text: l10n.pilotCardsSendCountNote),
-                      ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 12,
+            children: [
+              Text(l10n.pilotCardsSendBody),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 10,
+                children: [
+                  const Icon(Icons.qr_code_2, size: 20),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: l10n.pilotCardsQrCount(count),
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          TextSpan(text: l10n.pilotCardsSendCountNote),
+                        ],
+                      ),
                     ),
                   ),
+                ],
+              ),
+              Text(l10n.invitationsSendEmailNote),
+              if (emailedBefore > 0)
+                Text(
+                  l10n.invitationsSendAgainNote(emailedBefore),
+                  key: const ValueKey('cards-send-again-note'),
+                ),
+              if (listed.isNotEmpty) ...[
+                Text(
+                  l10n.invitationsSendNamesTitle,
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  listed.join(', '),
+                  key: const ValueKey('cards-send-names'),
                 ),
               ],
-            ),
-          ],
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -114,23 +147,114 @@ Future<bool> confirmSendInvitations(BuildContext context, int count) async {
   return ok ?? false;
 }
 
-/// Confirms, then creates invitations for [participations] (those without
-/// one). Never emails. Every entry point (the cards, the workspace and the
-/// participants list) sends through here.
+/// Tells the director which pilots were not emailed and why, in names, after
+/// a send. The links exist whatever happened here.
+Future<void> showInvitationEmailResult(
+  BuildContext context,
+  InvitationEmailReport report,
+  InvitationNames names, {
+  List<Id> targets = const [],
+}) {
+  final l10n = AppLocalizations.of(context);
+  // A service-wide failure answers for nobody in particular: every target
+  // is a pilot whose email did not go out.
+  if (report.serviceUnavailable && report.kinds.isEmpty) {
+    report = InvitationEmailReport(
+      kinds: {for (final id in targets) id.value: InvitationEmailKind.notSent},
+      serviceUnavailable: true,
+    );
+  }
+  String nameOf(String id) => names[id] ?? '';
+  // Pilots whose name is not known are still counted, never dropped.
+  List<String> namesOf(InvitationEmailKind kind) {
+    final listed = <String>[];
+    var unnamed = 0;
+    for (final entry in report.kinds.entries) {
+      if (entry.value != kind) continue;
+      final name = nameOf(entry.key);
+      if (name.isEmpty) {
+        unnamed++;
+      } else {
+        listed.add(name);
+      }
+    }
+    listed.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    if (unnamed > 0) listed.add(l10n.invitationsResultUnnamed(unnamed));
+    return listed;
+  }
+
+  final groups = [
+    (l10n.invitationsResultNotSent, namesOf(InvitationEmailKind.notSent)),
+    (l10n.invitationsResultLimit, namesOf(InvitationEmailKind.limitReached)),
+    (l10n.invitationsResultUnknown, namesOf(InvitationEmailKind.unknown)),
+    (l10n.invitationsResultNoAddress, namesOf(InvitationEmailKind.noAddress)),
+  ].where((group) => group.$2.isNotEmpty);
+  return showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      key: const ValueKey('invitations-result-dialog'),
+      icon: const Icon(Icons.mail_outline),
+      title: Text(l10n.invitationsResultTitle),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 12,
+          children: [
+            Text(
+              report.serviceUnavailable
+                  ? l10n.invitationsResultServiceDown
+                  : l10n.invitationsResultLead,
+            ),
+            for (final (title, listed) in groups) ...[
+              Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+              Text(listed.join(', ')),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        FilledButton(
+          key: const ValueKey('invitations-result-close'),
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.invitationsResultClose),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Confirms, then sends invitations to [participations]: links for those
+/// without one, and an email with the link to every pilot who has an address.
+/// Every entry point (the cards, the workspace and the participants list)
+/// sends through here, so "Send again" is just sending to pilots who already
+/// have links.
 ///
 /// The server's reachability is checked before the confirmation and again
 /// right after it, so a connection lost while the director decides says so
 /// instead of failing a request. With [announce] the result is said in a snack
-/// bar; the cards show it in their banners instead.
+/// bar; the cards show it in their banners instead. Pilots whose email did not
+/// go out are always listed in a dialog, whatever [announce] says.
 Future<bool> sendInvitationsGuarded(
   BuildContext context,
   PilotInvitationSession session,
   List<Id> participations, {
   bool announce = true,
+  InvitationNames names = const {},
 }) async {
   if (participations.isEmpty) return false;
   if (!_reachable(context)) return false;
-  if (!await confirmSendInvitations(context, participations.length)) {
+  final emailedBefore = [
+    for (final id in participations)
+      if (session.invitations.emailKindOf(id) == InvitationEmailKind.emailed)
+        id,
+  ].length;
+  if (!await confirmSendInvitations(
+    context,
+    participations,
+    names: names,
+    emailedBefore: emailedBefore,
+  )) {
     return false;
   }
   // The page may have been left, or the connection lost, while the dialog
@@ -138,12 +262,42 @@ Future<bool> sendInvitationsGuarded(
   if (!context.mounted || !_reachable(context)) return false;
   final ok = await session.send(participations);
   // The send itself is finished either way; only the message needs a page.
-  if (!announce || !context.mounted) return ok;
+  if (!context.mounted) return ok;
   final l10n = AppLocalizations.of(context);
+  final report = session.lastEmail;
+  // A send whose read-back failed still sent.
+  final sent = ok || session.phase == InvitationPhase.sentNotLoaded;
+  if (sent &&
+      (report.serviceUnavailable ||
+          report.count(InvitationEmailKind.notSent) > 0 ||
+          report.count(InvitationEmailKind.limitReached) > 0 ||
+          report.count(InvitationEmailKind.unknown) > 0 ||
+          report.count(InvitationEmailKind.noAddress) > 0)) {
+    await showInvitationEmailResult(
+      context,
+      report,
+      names,
+      targets: participations,
+    );
+    if (!context.mounted) return ok;
+  }
+  if (!announce) return ok;
+  final noAddress = report.count(InvitationEmailKind.noAddress);
+  final unknown = report.count(InvitationEmailKind.unknown);
+  final emailed = report.count(InvitationEmailKind.emailed);
   _say(
     context,
     ok
-        ? l10n.invitationsSentSnack(participations.length)
+        ? (unknown > 0
+                  ? l10n.invitationsSentUnconfirmedSnack(
+                      participations.length,
+                      emailed,
+                      unknown,
+                    )
+                  : l10n.invitationsSentSnack(participations.length, emailed)) +
+              (noAddress > 0
+                  ? l10n.invitationsSentNoAddressNote(noAddress)
+                  : '')
         : session.phase == InvitationPhase.sentNotLoaded
         ? l10n.invitationsSentNotLoadedSnack
         : l10n.invitationsSendFailedSnack,

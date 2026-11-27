@@ -238,4 +238,40 @@ void main() {
       expect(issued.invitations.single.link, endsWith('/invitations/abc.def'));
     },
   );
+
+  test('emailInvitations posts the request and reads each outcome', () async {
+    const id = '019c0000-0000-7000-8000-000000000020';
+    const sent = '019c0000-0000-7000-8000-000000000201';
+    const skipped = '019c0000-0000-7000-8000-000000000202';
+    final client = clientFor(
+      (request) => http.Response(
+        jsonEncode({
+          'results': [
+            {'participation_id': sent, 'status': 'accepted', 'repeated': true},
+            {'participation_id': skipped, 'skipped': 'no_email'},
+          ],
+        }),
+        200,
+        headers: jsonHeaders,
+      ),
+    );
+
+    final answer = await client.emailInvitations(
+      Id.parse(id),
+      EmailInvitationsRequest(
+        requestId: 'r1',
+        participationIds: [Id.parse(sent), Id.parse(skipped)],
+      ),
+    );
+    expect(seen.method, 'POST');
+    expect(seen.url.path, '/api/v1/contests/$id/invitations/email');
+    expect(jsonDecode(seen.body), {
+      'request_id': 'r1',
+      'participation_ids': [sent, skipped],
+    });
+    expect(answer.results.first.status, 'accepted');
+    expect(answer.results.first.repeated, isTrue);
+    expect(answer.results.last.skipped, 'no_email');
+    expect(answer.results.last.status, isNull);
+  });
 }
