@@ -366,8 +366,8 @@ void _tests(SliceBackend backend) {
       expect(await attemptActors(), {otherAccount.value, guest.value});
       expect(
         await overviewStatus(accountToken),
-        401,
-        reason: 'the account signs in again, as after any other open',
+        200,
+        reason: 'the account session depends on the link, not the redeemer',
       );
 
       // The account's next open claims what the guest did since.
