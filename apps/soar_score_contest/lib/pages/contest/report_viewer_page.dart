@@ -26,6 +26,7 @@ import '../../services/reports/viewer/report_options_store.dart';
 import '../../services/reports/viewer/report_spec.dart';
 import '../../services/reports/viewer/report_view_params.dart';
 import '../../services/reports/viewer/report_viewer_controller.dart';
+import '../../services/window/close_window.dart';
 import '../../widgets/app_window_title.dart';
 import '../../widgets/page_states/page_banner.dart';
 import '../../widgets/reports/viewer/report_definitions.dart';
@@ -329,6 +330,21 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
   }
 
   void _goBack() => context.go(contestReportsPath(widget.contestId));
+
+  /// On web, tries to close the tab; if it does not close, navigates to the
+  /// Reports page. On native, navigates directly.
+  Future<void> _closeOrGoBack() async {
+    if (!kIsWeb) {
+      _goBack();
+      return;
+    }
+    await closeWindowOrFallback(() {
+      if (mounted) {
+        _goBack();
+      }
+      return Future<void>.value();
+    });
+  }
 
   void _openPath(String path) =>
       (widget.launcher ?? ReportLaunchers.current).open(context, path);
@@ -756,8 +772,12 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
             setupText: setupText,
             expanded: expanded,
             compact: compact,
-            lead: widget.openedInPlace ? ViewerLead.back : ViewerLead.none,
-            onLead: _goBack,
+            lead: widget.openedInPlace
+                ? kIsWeb
+                      ? ViewerLead.close
+                      : ViewerLead.back
+                : ViewerLead.none,
+            onLead: kIsWeb ? () => unawaited(_closeOrGoBack()) : _goBack,
             printEnabled: printEnabled,
             pdfEnabled: pdfEnabled,
             pdfPrimary: !caps.canPrint && caps.canSavePdf,

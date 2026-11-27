@@ -113,6 +113,7 @@ export 'repositories/write_context.dart';
 export 'enums/enums.dart';
 export 'scoring/scoring.dart';
 export 'services/services.dart';
+export 'preferences/country_locale.dart';
 export 'preferences/locale_number.dart';
 export 'preferences/supported_locales.dart';
 export 'time/time.dart';

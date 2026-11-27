@@ -49,11 +49,13 @@ melos:
     build:dart:win:
       description: Build the pure-Dart CLI apps (Windows; cmd.exe has no mkdir -p, so guard with `if not exist`).
       exec:
+        # An app with an `email/` folder (the server) gets it copied to build/email,
+        # which is where the executable in build/cli looks for it.
         # The `if` is wrapped in its own parentheses so its exit status (0 whether
         # mkdir ran or was skipped) gates the `&&` reliably. A bare
         # `mkdir build\cli && ...` is NOT idempotent: on a re-run the directory
         # already exists, mkdir exits 1, and `&&` skips the compile step.
-        command: (if not exist build\cli (mkdir build\cli)) && dart compile exe lib/main.dart -o build/cli/$MELOS_PACKAGE_NAME.exe
+        command: (if not exist build\cli (mkdir build\cli)) && dart compile exe lib/main.dart -o build/cli/$MELOS_PACKAGE_NAME.exe && (if exist email xcopy email build\email\ /E /I /Y /Q)
       packageFilters:
         category: apps
         flutter: false
@@ -61,7 +63,7 @@ melos:
     build:dart:nix:
       description: Build the pure-Dart CLI apps (Linux/macOS; mkdir -p is idempotent).
       exec:
-        command: mkdir -p build/cli && dart compile exe lib/main.dart -o build/cli/$MELOS_PACKAGE_NAME.exe
+        command: mkdir -p build/cli && dart compile exe lib/main.dart -o build/cli/$MELOS_PACKAGE_NAME.exe && ( [ ! -d email ] || ( mkdir -p build/email && cp -R email/. build/email/ ) )
       packageFilters:
         category: apps
         flutter: false

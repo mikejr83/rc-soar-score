@@ -99,6 +99,35 @@ void main() {
     },
   );
 
+  test('an HTML part is sent beside the text, in both modes', () async {
+    const withHtml = MailMessage(
+      to: ['pilot@example.test'],
+      replyTo: [],
+      subject: 'Hi',
+      text: 'plain',
+      html: '<p>rich</p>',
+    );
+    for (final mode in MailDeliveryMode.values) {
+      requests.clear();
+      await sender(
+        mode: mode,
+        respond: (_) => http.Response('{"MessageId":"abc"}', 200),
+      ).send(withHtml);
+      final content = _body(requests.single)['Content']['Simple']['Body'];
+      expect(content['Text'], {'Data': 'plain', 'Charset': 'UTF-8'});
+      expect(content['Html'], {'Data': '<p>rich</p>', 'Charset': 'UTF-8'});
+    }
+  });
+
+  test('a text-only message has no Html part', () async {
+    await sender(respond: (_) => http.Response('{"MessageId":"abc"}', 200))
+        .send(_message);
+    expect(
+      _body(requests.single)['Content']['Simple']['Body'],
+      isNot(contains('Html')),
+    );
+  });
+
   test('a 200 without a MessageId is unconfirmed', () async {
     final outcome = await sender(respond: (_) => http.Response('{}', 200))
         .send(_message);
