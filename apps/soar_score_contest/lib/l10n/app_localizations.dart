@@ -13353,6 +13353,24 @@ abstract class AppLocalizations {
   /// **'The directory could not be searched. Try again.'**
   String get searchDirectoryFailed;
 
+  /// Tooltip of the disabled directory lookup button while offline.
+  ///
+  /// In en, this message translates to:
+  /// **'The directory can only be searched online'**
+  String get searchDirectoryOffline;
+
+  /// Shown when the server refused a directory lookup because the account asked too often.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many directory searches just now. Wait a few minutes and try again.'**
+  String get searchDirectoryRateLimited;
+
+  /// A directory result's FAI number or national ID, in the subtitle, so pilots sharing an ID can be told apart.
+  ///
+  /// In en, this message translates to:
+  /// **'ID {id}'**
+  String searchDirectoryId(String id);
+
   /// Message when copying a pilot from the directory into the director's list failed.
   ///
   /// In en, this message translates to:

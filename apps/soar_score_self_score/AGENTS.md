@@ -31,7 +31,7 @@ On the web the guest session is an HttpOnly cookie (`__Host-soar_guest`, host-on
 
 ### Auth0 SDK script
 
-`web/index.html` loads the Auth0 SPA SDK from `web/auth0-spa-js-<version>.production.js` (the `dist/auth0-spa-js.production.js` file of the npm package `@auth0/auth0-spa-js`, MIT licence in `web/auth0-spa-js-LICENSE.txt`), not from a CDN, at an exact version with a `sha384` `integrity` attribute. To update: `npm pack @auth0/auth0-spa-js@<version>`, unpack it, copy the file in under the new name (delete the old one, and update the name in `index.html` and `_headers`), and set `integrity` to `sha384-` plus `openssl dgst -sha384 -binary <file> | openssl base64 -A`. Never use a floating version. The contest app's `web/index.html` still loads the CDN script (tracked separately).
+`web/index.html` loads the Auth0 SPA SDK from `web/auth0-spa-js-<version>.production.js` (the `dist/auth0-spa-js.production.js` file of the npm package `@auth0/auth0-spa-js`, MIT licence in `web/auth0-spa-js-LICENSE.txt`), not from a CDN, at an exact version with a `sha384` `integrity` attribute. To update: `npm pack @auth0/auth0-spa-js@<version>`, unpack it, copy the file in under the new name (delete the old one, and update the name in `index.html` and `_headers`), and set `integrity` to `sha384-` plus `openssl dgst -sha384 -binary <file> | openssl base64 -A`. Never use a floating version.  The contest app's `web/` holds the same file the same way; update both together.
 
 ## Contests page
 

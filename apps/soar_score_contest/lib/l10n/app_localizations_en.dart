@@ -8840,6 +8840,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'The directory could not be searched. Try again.';
 
   @override
+  String get searchDirectoryOffline =>
+      'The directory can only be searched online';
+
+  @override
+  String get searchDirectoryRateLimited =>
+      'Too many directory searches just now. Wait a few minutes and try again.';
+
+  @override
+  String searchDirectoryId(String id) {
+    return 'ID $id';
+  }
+
+  @override
   String directoryCopyFailed(String name) {
     return 'Could not add $name from the directory. Try again.';
   }

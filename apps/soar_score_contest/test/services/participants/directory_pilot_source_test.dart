@@ -31,6 +31,7 @@ void main() {
   late List<http.Request> hostedRequests;
   late List<http.Request> localRequests;
   late Map<String, List<Map<String, Object?>>> byKey;
+  late Map<String, int> failKeys; // lookup key -> status to answer with
 
   final created = <String, Map<String, Object?>>{};
   var localLosesAnswer = false;
@@ -53,6 +54,16 @@ void main() {
         final path = request.url.path;
         if (path.endsWith('/directory/lookups')) {
           final body = jsonDecode(request.body) as Map<String, Object?>;
+          final failure = failKeys[body['key']];
+          if (failure != null) {
+            return http.Response(
+              jsonEncode({
+                'error': {'code': 'rate_limited', 'message': 'slow down'},
+              }),
+              failure,
+              headers: {'content-type': 'application/json'},
+            );
+          }
           return http.Response(
             jsonEncode({'results': byKey[body['key']] ?? const []}),
             200,
@@ -126,6 +137,7 @@ void main() {
     hostedRequests = [];
     localRequests = [];
     byKey = {};
+    failKeys = {};
     copyAnswer = 0;
     copyCommits = false;
     created.clear();
@@ -135,7 +147,16 @@ void main() {
   test('text that cannot be a key makes no request', () async {
     final s = source();
 
-    for (final text in ['', 'ab', 'pat@', 'two words 123', 'a@b', 'Zephyr']) {
+    for (final text in [
+      '',
+      'ab',
+      'pat@',
+      'two words 123',
+      'a@b',
+      'a@b.c',
+      'a@b.c1',
+      'Zephyr',
+    ]) {
       expect(await s.search(text), isEmpty, reason: text);
     }
 
@@ -159,39 +180,102 @@ void main() {
       (jsonDecode(r.body) as Map<String, Object?>)['key']! as String,
   ];
 
-  test('an ID with an @ is found, also when it looks like an email', () async {
+  test('an ID with an @ is only asked on purpose', () async {
     byKey['fai_number'] = [_match(_entryA, 'Pat')];
     final s = source();
 
-    // Valid email shape with a digit: asked as every key.
-    final found = await s.search('f1@x.org2');
-    expect(found.map((c) => c.name), ['Pat Pilot']);
+    // Typing text with an @ asks the email key at most (never the IDs).
+    expect(await s.search('F@12'), isEmpty);
+    expect(await s.search('f1@x.org2'), isEmpty);
+    expect(hostedRequests, isEmpty);
+    expect(await s.search('f1@x.org'), isEmpty);
+    expect(keysAsked(), ['email']);
+
+    // The lookup button asks the ID keys, for any text.
+    hostedRequests.clear();
+    expect((await s.lookup('F@12')).map((c) => c.name), ['Pat Pilot']);
     expect(keysAsked(), ['email', 'fai_number', 'national_org_id']);
 
-    // Not an email, with a digit: asked as the ID keys.
-    hostedRequests.clear();
-    expect((await s.search('F@12')).map((c) => c.name), ['Pat Pilot']);
-    expect(keysAsked(), ['fai_number', 'national_org_id']);
-
-    // Not an email and no digit: typing does not ask, the lookup button does.
-    hostedRequests.clear();
-    expect(await s.search('ab@cd'), isEmpty);
-    expect(hostedRequests, isEmpty);
-    expect((await s.lookup('ab@cd')).map((c) => c.name), ['Pat Pilot']);
-    expect(keysAsked(), ['fai_number', 'national_org_id']);
-
-    // An email address the director types by button is also still an email.
+    // An email address the director looks up by button is also still an ID.
     hostedRequests.clear();
     await s.lookup('pat@example.com');
     expect(keysAsked(), ['email', 'fai_number', 'national_org_id']);
+  });
+
+  test('a lookup on purpose asks the email key for any address', () async {
+    byKey['email'] = [_match(_entryA, 'Pat')];
+    final s = source();
+
+    final found = await s.lookup('pilot@example.xn--p1ai');
+
+    expect(found.map((c) => c.name), ['Pat Pilot']);
+    expect(keysAsked(), contains('email'));
+  });
+
+  test('one key failing keeps what the others found', () async {
+    byKey['fai_number'] = [_match(_entryA, 'Pat')];
+    failKeys['email'] = 500;
+    final s = source();
+
+    final found = await s.lookup('pat@example.com');
+
+    expect(found.map((c) => c.name), ['Pat Pilot']);
+  });
+
+  test(
+    'a refused lookup is reported as too many, and not remembered',
+    () async {
+      failKeys['email'] = 429;
+      final s = source();
+
+      await expectLater(
+        s.lookup('pat@example.com'),
+        throwsA(isA<DirectoryRateLimited>()),
+      );
+      // The remaining keys would be refused too.
+      expect(keysAsked(), ['email']);
+
+      // Typed text is asked again once the limit has passed.
+      failKeys.clear();
+      byKey['email'] = [_match(_entryA, 'Pat')];
+      hostedRequests.clear();
+      expect((await s.search('pat@example.com')).map((c) => c.name), [
+        'Pat Pilot',
+      ]);
+    },
+  );
+
+  test('every key failing reports the failure', () async {
+    failKeys['email'] = 500;
+    failKeys['fai_number'] = 500;
+    failKeys['national_org_id'] = 500;
+    final s = source();
+
+    await expectLater(
+      s.lookup('pat@example.com'),
+      throwsA(isA<ApiHttpError>()),
+    );
+  });
+
+  test('several pilots sharing an ID are all offered', () async {
+    byKey['fai_number'] = [
+      {..._match(_entryA, 'Pat'), 'country': 'US'},
+      {..._match(_entryB, 'Bea'), 'country': 'DE'},
+    ];
+    final s = source();
+
+    final found = await s.lookup('F1');
+
+    expect(found.map((c) => c.name), ['Pat Pilot', 'Bea Pilot']);
+    expect(found.map((c) => c.profileId).toSet(), hasLength(2));
   });
 
   test('IDs differing only by case are separate questions', () async {
     byKey['fai_number'] = [_match(_entryA, 'Pat')];
     final s = source();
 
-    await s.search('F@12');
-    await s.search('f@12');
+    await s.search('F123');
+    await s.search('f123');
 
     expect(hostedRequests, hasLength(4));
   });

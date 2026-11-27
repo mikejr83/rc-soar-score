@@ -13,8 +13,9 @@ import 'participant_candidate.dart';
 /// signs in there; the copy becomes a profile on [local] (the same client on
 /// the web). Lookups are exact (a verified email, an FAI number or a national
 /// ID), so [search] waits for the typing to pause and ignores text that
-/// cannot be one of those (names, partial emails); the server limits how many lookups an account can
-/// make.
+/// cannot be one of those (names, partial emails). The server limits how many
+/// lookups an account can make; one that is refused is
+/// [DirectoryRateLimited].
 class DirectoryPilotSource {
   DirectoryPilotSource({
     required this.hosted,
@@ -75,7 +76,10 @@ class DirectoryPilotSource {
     }
   }();
 
-  static final _email = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+  /// An address whose last part looks like a top-level domain (letters only,
+  /// at least two), so text that is still being typed (`a@b.c`) makes no
+  /// request. The server limits how many lookups an account can make.
+  static final _email = RegExp(r'^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$');
 
   /// The listed pilots whose email, FAI number or national ID is exactly
   /// [query], as the director types: empty while the text is not yet any of
@@ -120,9 +124,12 @@ class DirectoryPilotSource {
     DirectoryLookupKeyDto.nationalOrgId,
   ];
 
-  /// An email-shaped text may also be an ID that happens to contain an `@`.
+  /// Text with an `@` may be an email and also an ID that happens to contain
+  /// one.
   static List<DirectoryLookupKeyDto> _keysFor(String text) => [
-    if (_email.hasMatch(text)) DirectoryLookupKeyDto.email,
+    // Asked on purpose, anything with an `@` may be an address, whatever its
+    // last part (a punycode TLD); the server decides what it holds.
+    if (text.contains('@')) DirectoryLookupKeyDto.email,
     ..._idKeys,
   ];
 
@@ -133,10 +140,20 @@ class DirectoryPilotSource {
     await _load();
     final found = <String, DirectoryMatchDto>{};
     final viaEmail = <String>{};
+    Object? failure;
     for (final key in keys) {
-      final response = await hosted.lookupDirectory(
-        DirectoryLookupRequest(key: key, value: text),
-      );
+      final DirectoryLookupResponse response;
+      try {
+        response = await hosted.lookupDirectory(
+          DirectoryLookupRequest(key: key, value: text),
+        );
+      } on Object catch (e) {
+        // One key failing keeps what the others found. A refused (too many)
+        // request ends the rest, which would be refused too.
+        failure = _worse(failure, e);
+        if (_isRateLimit(e)) break;
+        continue;
+      }
       for (final match in response.results) {
         found[match.entryId.value] = match;
         if (key == DirectoryLookupKeyDto.email) {
@@ -145,9 +162,24 @@ class DirectoryPilotSource {
       }
     }
     final answer = _Found(text, found.values.toList(), viaEmail);
+    if (failure != null) {
+      // Partial answers are shown but not reused: the key that failed was
+      // never asked.
+      if (found.isEmpty) {
+        throw _isRateLimit(failure) ? const DirectoryRateLimited() : failure;
+      }
+      return _candidates(answer);
+    }
     _answers[_cacheKey(text, keys)] = (at: _clock(), found: answer);
     return _candidates(answer);
   }
+
+  static bool _isRateLimit(Object e) =>
+      e is ApiHttpError && e.statusCode == 429;
+
+  /// The failure worth reporting: a rate limit over any other.
+  static Object _worse(Object? earlier, Object e) =>
+      earlier != null && _isRateLimit(earlier) ? earlier : e;
 
   List<ParticipantCandidate> _candidates(_Found answer) => [
     for (final match in answer.matches)
@@ -170,14 +202,14 @@ class DirectoryPilotSource {
     // An email is looked up whatever it contains; FAI numbers and national IDs
     // usually carry digits and a name never does, so typing a name makes no
     // lookup. Other IDs use [lookup].
+    if (_email.hasMatch(text)) return const [DirectoryLookupKeyDto.email];
+    // Text with an `@` is an email being typed; an ID that contains one is
+    // asked on purpose with [lookup].
     final idLike =
         text.length >= 4 &&
-        !text.contains(RegExp(r'\s')) &&
+        !text.contains(RegExp(r'[\s@]')) &&
         text.contains(RegExp(r'\d'));
-    return [
-      if (_email.hasMatch(text)) DirectoryLookupKeyDto.email,
-      if (idLike) ..._idKeys,
-    ];
+    return idLike ? _idKeys : const [];
   }
 
   /// Copies the directory pilot [candidate] into the director's pilot list:
@@ -242,6 +274,14 @@ class DirectoryPilotSource {
     copies[entryId.value] = profileId.value;
     await kept.set(accountId, copiesKey, copies);
   }
+}
+
+/// The server refused a lookup because this account asked too often (429).
+class DirectoryRateLimited implements Exception {
+  const DirectoryRateLimited();
+
+  @override
+  String toString() => 'DirectoryRateLimited';
 }
 
 /// The answer to one lookup and which entries the email key returned.

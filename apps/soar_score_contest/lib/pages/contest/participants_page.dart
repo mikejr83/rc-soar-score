@@ -694,6 +694,9 @@ class _ContestParticipantsPageState extends State<ContestParticipantsPage> {
                       onAddProfile: _addProfile,
                       remote: _directory?.search,
                       lookup: _directory?.lookup,
+                      offline:
+                          _monitor?.internetStatus ==
+                          ConnectivityStatus.unavailable,
                       onAddDirectory: (candidate) =>
                           unawaited(_addFromDirectory(candidate)),
                     ),

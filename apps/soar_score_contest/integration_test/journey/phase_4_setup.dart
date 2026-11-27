@@ -54,6 +54,34 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
     }),
   );
   await journey.step(
+    'Participants: the directory lookup is for signed-in directors and a '
+    'refused one says so',
+    () => inContest(() async {
+      await tapRail(tester, 'Participants');
+      await pumpUntilFound(tester, _key('participants-count'));
+      final search = find.descendant(
+        of: _key('participant-search'),
+        matching: find.byType(TextField),
+      );
+      await enterIn(tester, search, 'FAI-0000000');
+      final lookup = _key('directory-lookup');
+      if (lookup.evaluate().isEmpty) {
+        // Signed out (the Windows build runs offline): the search only
+        // lists the director's own profiles.
+        expect(find.text('Directory'), findsNothing);
+      } else {
+        // The web test build is signed in and its server lists nobody: the
+        // button asks on purpose and the answer says nobody matches.
+        await tapVisible(tester, lookup);
+        await pumpUntilFound(tester, _key('directory-lookup-none'));
+        expect(find.text('Directory'), findsNothing);
+      }
+      // Clearing the text clears the answer.
+      await enterIn(tester, search, '');
+      expect(_key('directory-lookup-none'), findsNothing);
+    }),
+  );
+  await journey.step(
     'Participants: a class is edited, discarded, then saved',
     () async {
       await goToMainPage(tester);
