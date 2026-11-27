@@ -67,6 +67,13 @@ abstract class AuthSession extends ChangeNotifier {
   /// Ends the session here and at Auth0.
   Future<void> signOut();
 
+  /// Whether the landing page has already looked for the pilot's directory
+  /// entry in this sign-in. It lives here, not in the page, so the pilot who
+  /// later removes their entry is not sent to the details page again every
+  /// time they open the landing page. Implementations clear it when the
+  /// sign-in ends.
+  bool detailsChecked = false;
+
   /// A current access token for the account routes, or null when signed out.
   /// Throws [AuthTokenUnavailableException] when the pilot is signed in but a
   /// token cannot be produced right now.

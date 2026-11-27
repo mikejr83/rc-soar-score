@@ -60,52 +60,61 @@ class ContestCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          InkWell(
-            onTap: busy ? null : onTap,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(name, style: theme.textTheme.headlineMedium),
-                        const SizedBox(height: 4),
-                        Text(
-                          dates,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: muted,
-                          ),
-                        ),
-                        if (location != null)
+          Semantics(
+            button: true,
+            enabled: !busy && onTap != null,
+            child: InkWell(
+              onTap: busy ? null : onTap,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(name, style: theme.textTheme.headlineMedium),
+                          const SizedBox(height: 4),
                           Text(
-                            location!,
+                            dates,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: muted,
                             ),
                           ),
+                          if (location != null)
+                            Text(
+                              location!,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: muted,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        StatusChip(label: label, icon: icon, style: style),
+                        const SizedBox(height: 8),
+                        if (busy)
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Semantics(
+                              label: l10n.loading,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 3,
+                              ),
+                            ),
+                          )
+                        else
+                          Icon(Icons.chevron_right, color: muted),
                       ],
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      StatusChip(label: label, icon: icon, style: style),
-                      const SizedBox(height: 8),
-                      if (busy)
-                        const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 3),
-                        )
-                      else
-                        Icon(Icons.chevron_right, color: muted),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -114,10 +123,16 @@ class ContestCard extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.only(left: 8, bottom: 4),
-                child: TextButton.icon(
-                  onPressed: onOpenResults,
-                  icon: const Icon(Icons.open_in_new, size: 18),
-                  label: Text(l10n.contestPublicResults),
+                child: Semantics(
+                  label: l10n.contestPublicResultsFor(name),
+                  button: true,
+                  excludeSemantics: true,
+                  onTap: onOpenResults,
+                  child: TextButton.icon(
+                    onPressed: onOpenResults,
+                    icon: const Icon(Icons.open_in_new, size: 18),
+                    label: Text(l10n.contestPublicResults),
+                  ),
                 ),
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../auth/sign_in_again.dart';
 import '../data/self_score_repository.dart';
 import '../data/self_score_scope.dart';
 import '../l10n/app_localizations.dart';
@@ -28,6 +29,7 @@ class _PastContestsSectionState extends State<PastContestsSection> {
   int? _next = 0;
   bool _loading = false;
   bool _failed = false;
+  bool _signedOut = false;
 
   /// Bumped when the repository changes, so an answer to an older request is
   /// dropped.
@@ -43,6 +45,7 @@ class _PastContestsSectionState extends State<PastContestsSection> {
       _contests.clear();
       _next = 0;
       _failed = false;
+      _signedOut = false;
       _loading = false;
       _loadMore();
     }
@@ -56,6 +59,7 @@ class _PastContestsSectionState extends State<PastContestsSection> {
     setState(() {
       _loading = true;
       _failed = false;
+      _signedOut = false;
     });
     try {
       final page = await repository.pastContests(offset: offset);
@@ -65,10 +69,11 @@ class _PastContestsSectionState extends State<PastContestsSection> {
         _next = page.nextOffset;
         _loading = false;
       });
-    } on SelfScoreLoadException {
+    } on SelfScoreLoadException catch (error) {
       if (!mounted || generation != _generation) return;
       setState(() {
         _failed = true;
+        _signedOut = error is SignedOutException;
         _loading = false;
       });
     }
@@ -97,9 +102,14 @@ class _PastContestsSectionState extends State<PastContestsSection> {
         ),
         const SizedBox(height: 8),
         if (firstLoad)
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator()),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: Semantics(
+                label: l10n.loading,
+                child: const CircularProgressIndicator(),
+              ),
+            ),
           )
         else if (_contests.isEmpty && !_failed)
           Text(
@@ -130,14 +140,22 @@ class _PastContestsSectionState extends State<PastContestsSection> {
             children: [
               Expanded(
                 child: Text(
-                  l10n.pastContestsLoadFailed,
+                  _signedOut
+                      ? l10n.accountSignInEnded
+                      : l10n.pastContestsLoadFailed,
                   style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                 ),
               ),
-              TextButton(
-                onPressed: _loadMore,
-                child: Text(l10n.pastContestsRetry),
-              ),
+              if (_signedOut)
+                TextButton(
+                  onPressed: () => signInAgain(context),
+                  child: Text(l10n.signInAgainButton),
+                )
+              else
+                TextButton(
+                  onPressed: _loadMore,
+                  child: Text(l10n.pastContestsRetry),
+                ),
             ],
           )
         else if (_next != null && _contests.isNotEmpty)
@@ -146,10 +164,13 @@ class _PastContestsSectionState extends State<PastContestsSection> {
             child: TextButton(
               onPressed: _loading ? null : _loadMore,
               child: _loading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: Semantics(
+                        label: l10n.loading,
+                        child: const CircularProgressIndicator(strokeWidth: 2),
+                      ),
                     )
                   : Text(l10n.pastContestsShowMore),
             ),
@@ -193,10 +214,16 @@ class _PastContestCard extends StatelessWidget {
                 style: theme.textTheme.bodyMedium?.copyWith(color: muted),
               ),
             if (onOpenResults != null)
-              TextButton.icon(
-                onPressed: onOpenResults,
-                icon: const Icon(Icons.open_in_new, size: 18),
-                label: Text(l10n.contestPublicResults),
+              Semantics(
+                label: l10n.contestPublicResultsFor(contest.name),
+                button: true,
+                excludeSemantics: true,
+                onTap: onOpenResults,
+                child: TextButton.icon(
+                  onPressed: onOpenResults,
+                  icon: const Icon(Icons.open_in_new, size: 18),
+                  label: Text(l10n.contestPublicResults),
+                ),
               ),
           ],
         ),

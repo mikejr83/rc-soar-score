@@ -242,7 +242,7 @@ abstract class AppLocalizations {
   /// Shown when the account's sign-in was refused while claiming an invitation link.
   ///
   /// In en, this message translates to:
-  /// **'Your sign-in has expired. Go to the landing page, sign in again, then open this link again.'**
+  /// **'Your sign-in has expired. Sign in again to continue with your account, or continue as a guest.'**
   String get claimSignInExpired;
 
   /// Shown when the server refuses to link the signed-in account to the pilot, for example when the account's email is not verified.
@@ -773,6 +773,60 @@ abstract class AppLocalizations {
   /// **'Your sign-in has ended. Sign in again to open this contest.'**
   String get contestSignInEnded;
 
+  /// Button that starts a new sign-in after the server stopped accepting the old one.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get signInAgainButton;
+
+  /// Snackbar or message when an account action failed because the sign-in is no longer accepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sign-in has ended. Sign in again to continue.'**
+  String get accountSignInEnded;
+
+  /// Screen reader label of the large brand lockup on the landing and invitation pages.
+  ///
+  /// In en, this message translates to:
+  /// **'RC Soar Score, glider contest scoring'**
+  String get brandLogoLabel;
+
+  /// Screen reader label of the brand mark in the top bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Soar Score'**
+  String get appBarLogoLabel;
+
+  /// Tooltip and label of the top bar button that opens the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get appBarAccountTooltip;
+
+  /// Tooltip and label of the top bar's default back button.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get appBarBackTooltip;
+
+  /// Shown on a page that failed to load for a reason with no message of its own.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load this page. Check your connection and try again.'**
+  String get loadFailedGeneric;
+
+  /// Screen reader label of a pilot's Unlink button on the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink {pilot}'**
+  String accountUnlinkFor(String pilot);
+
+  /// Screen reader label of a contest's Public results button.
+  ///
+  /// In en, this message translates to:
+  /// **'Public results for {contest}'**
+  String contestPublicResultsFor(String contest);
+
   /// Landing page button that opens the signed-in pilot's contest list.
   ///
   /// In en, this message translates to:
@@ -958,18 +1012,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your details could not be saved. Check your connection and try again.'**
   String get detailsSaveFailed;
-
-  /// Shown when the details page could not load.
-  ///
-  /// In en, this message translates to:
-  /// **'Your details could not be loaded.'**
-  String get detailsLoadFailed;
-
-  /// Button that loads the details page again.
-  ///
-  /// In en, this message translates to:
-  /// **'Try again'**
-  String get detailsRetry;
 
   /// Title of the card on the contests page that asks a pilot with no entry to set their details.
   ///

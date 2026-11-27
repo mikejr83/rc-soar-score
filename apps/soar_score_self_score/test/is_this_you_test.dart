@@ -246,6 +246,37 @@ void main() {
     expect(find.text('Is this you?'), findsNothing);
   });
 
+  testWidgets('an answer refused with 401 offers Sign in again', (
+    tester,
+  ) async {
+    await _tall(tester);
+    final auth = E2eAuthSession().._signedInForTest(true);
+    final repository = _Repository(
+      answer: () async => throw const SignedOutException(),
+    );
+    await tester.pumpWidget(
+      AuthScope(
+        session: auth,
+        child: SelfScoreScope(
+          repository: repository,
+          child: MaterialApp(
+            localizationsDelegates: appLocalizationDelegates,
+            home: const Scaffold(body: LinkCandidatesSection()),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text("Yes, that's me"));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Your sign-in has ended'), findsOneWidget);
+    expect(find.text('Is this you?'), findsOneWidget, reason: 'card stays');
+    await tester.tap(find.byKey(const Key('is-this-you-sign-in-again')));
+    await tester.pumpAndSettle();
+    expect(auth.isSignedIn, isTrue);
+  });
+
   testWidgets('a pilot held by another account says so, then goes', (
     tester,
   ) async {

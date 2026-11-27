@@ -19,19 +19,25 @@ this page is the checklist around it.
   features, `PATCH` for fixes only.
 - Every published release deploys, pre-releases included, because the server
   and the clients ship together. Tick **Pre-release** for alpha, beta and rc.
-- **Database schema.** Until the first release that is not an alpha, schema
-  changes are made in place in version 1 and the server migrates on start;
-  testers' data may need a reset, and the release notes must say so. From
-  then on every schema change is a numbered migration, and sync's supported
-  schema range (`min_schema_version` / `max_schema_version`) decides whether
-  an older app can still sync. A release that changes the schema is at least a
-  `MINOR`.
+- **Database schema.** A schema version is frozen when a release ships it
+  (version 2 shipped in 0.1.0-alpha.7). Any later schema change gets the next
+  version number, a transactional upgrade step that keeps existing data, frozen
+  snapshots and migration tests on SQLite and PostgreSQL; a shipped version's
+  upgrade step and snapshots are never edited. Nobody resets a database to
+  take an upgrade. The server migrates on start, and sync's supported schema
+  range (`min_schema_version` / `max_schema_version`) decides whether an older
+  app can still sync (today: the same version only, so deploy the server
+  first and clients follow). The release notes name the new schema version. A
+  release that changes the schema is at least a `MINOR` from 1.0 on. The
+  checklist for the change itself is in `packages/soar_score_data/AGENTS.md`.
 
 ## Cutting a release
 
 1. **Check master.** CI is green on the latest commit. Look at the merged PRs
-   since the last release for schema changes, new secrets or settings, and
-   anything that needs a reset. Do the manual steps they need first (for
+   since the last release for schema changes (a higher `currentSchemaVersion`
+   in `packages/soar_score_data/lib/database.dart`; deploy the server first),
+   new secrets or settings, and anything else that needs a manual step. Do
+   the manual steps they need first (for
    example a new secret in the `Production` environment).
 2. **Do not rotate `INVITATION_SECRET`.** Changing it invalidates every
    printed QR code and guest session.

@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../auth/auth_scope.dart';
+import '../auth/sign_in_again.dart';
 import '../data/self_score_repository.dart';
 import '../data/self_score_scope.dart';
 import '../l10n/app_localizations.dart';
@@ -9,6 +9,7 @@ import '../models/own_directory.dart';
 import '../router.dart';
 import '../widgets/loadable_scaffold.dart';
 import '../widgets/self_score_app_bar.dart';
+import '../widgets/signed_in_gate.dart';
 
 /// Where a signed-in pilot says what contest directors may find (#652): their
 /// name, "Let contest directors find me" and "Keep my email private", both
@@ -25,19 +26,14 @@ class DetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final auth = context.auth;
-    if (!auth.isSignedIn) {
-      if (!auth.isInitializing) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (context.mounted) context.go(homePath);
-        });
-      }
-      return Scaffold(
-        appBar: SelfScoreAppBar(title: l10n.detailsTitle, showAccount: false),
-      );
-    }
+    return SignedInGate(title: l10n.detailsTitle, builder: _buildSignedIn);
+  }
+
+  Widget _buildSignedIn(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final repository = context.repository;
     return LoadableScaffold<OwnDirectory>(
+      onSignedOut: () => signInAgain(context),
       load: repository.ownDirectory,
       reloadKey: repository,
       appBar: (context, data) => SelfScoreAppBar(title: l10n.detailsTitle),
@@ -80,6 +76,9 @@ class _DetailsFormState extends State<_DetailsForm> {
   bool _saving = false;
   bool _failed = false;
 
+  /// The save failed because the server no longer accepts the sign-in.
+  bool _signedOut = false;
+
   @override
   void dispose() {
     for (final controller in [
@@ -102,6 +101,7 @@ class _DetailsFormState extends State<_DetailsForm> {
     setState(() {
       _saving = true;
       _failed = false;
+      _signedOut = false;
     });
     try {
       await repository.saveOwnDirectory(
@@ -123,6 +123,8 @@ class _DetailsFormState extends State<_DetailsForm> {
       if (mounted) {
         router.go(widget.returnToAccount ? accountPath : contestsPath);
       }
+    } on SignedOutException {
+      if (mounted) setState(() => _signedOut = true);
     } on SelfScoreLoadException {
       if (mounted) setState(() => _failed = true);
     } finally {
@@ -233,13 +235,24 @@ class _DetailsFormState extends State<_DetailsForm> {
                 ],
               ),
               const SizedBox(height: 8),
-              if (_failed) ...[
-                Text(
-                  l10n.detailsSaveFailed,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.error,
+              if (_failed || _signedOut) ...[
+                Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    _signedOut
+                        ? l10n.accountSignInEnded
+                        : l10n.detailsSaveFailed,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.error,
+                    ),
                   ),
                 ),
+                if (_signedOut)
+                  TextButton(
+                    key: const Key('details-sign-in-again'),
+                    onPressed: () => signInAgain(context),
+                    child: Text(l10n.signInAgainButton),
+                  ),
                 const SizedBox(height: 8),
               ],
               FilledButton(

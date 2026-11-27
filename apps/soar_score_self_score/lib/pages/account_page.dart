@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../auth/auth_scope.dart';
+import '../auth/sign_in_again.dart';
 import '../data/self_score_repository.dart';
 import '../data/self_score_scope.dart';
 import '../l10n/app_localizations.dart';
@@ -11,6 +11,7 @@ import '../router.dart';
 import '../widgets/loadable_scaffold.dart';
 import '../widgets/past_contests_section.dart';
 import '../widgets/self_score_app_bar.dart';
+import '../widgets/signed_in_gate.dart';
 
 /// What the account page shows: the pilot's directory entry and the pilots
 /// their account is linked to.
@@ -77,6 +78,20 @@ class _AccountPageState extends State<AccountPage> {
     try {
       await change();
       if (mounted) setState(() => _reloads++);
+    } on SignedOutException {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.accountSignInEnded),
+          action: SnackBarAction(
+            label: l10n.signInAgainButton,
+            onPressed: () {
+              if (mounted) signInAgain(context);
+            },
+          ),
+        ),
+      );
     } on SelfScoreLoadException {
       messenger.showSnackBar(SnackBar(content: Text(failure)));
     } finally {
@@ -123,19 +138,14 @@ class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final auth = context.auth;
-    if (!auth.isSignedIn) {
-      if (!auth.isInitializing) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (context.mounted) context.go(homePath);
-        });
-      }
-      return Scaffold(
-        appBar: SelfScoreAppBar(title: l10n.accountTitle, showAccount: false),
-      );
-    }
+    return SignedInGate(title: l10n.accountTitle, builder: _buildSignedIn);
+  }
+
+  Widget _buildSignedIn(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final repository = context.repository;
     return LoadableScaffold<_AccountData>(
+      onSignedOut: () => signInAgain(context),
       load: () async {
         final results = await Future.wait<Object>([
           repository.ownDirectory(),
@@ -267,10 +277,17 @@ class _AccountBody extends StatelessWidget {
                   key: Key('account-link-${link.id}'),
                   child: ListTile(
                     title: Text(link.pilotName),
-                    trailing: TextButton(
-                      key: Key('account-unlink-${link.id}'),
-                      onPressed: busy != null ? null : () => onUnlink(link),
-                      child: Text(l10n.accountUnlink),
+                    // The label names the pilot: the buttons all read "Unlink".
+                    trailing: Semantics(
+                      label: l10n.accountUnlinkFor(link.pilotName),
+                      button: true,
+                      excludeSemantics: true,
+                      onTap: busy != null ? null : () => onUnlink(link),
+                      child: TextButton(
+                        key: Key('account-unlink-${link.id}'),
+                        onPressed: busy != null ? null : () => onUnlink(link),
+                        child: Text(l10n.accountUnlink),
+                      ),
                     ),
                   ),
                 ),

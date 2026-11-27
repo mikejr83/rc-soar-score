@@ -248,6 +248,41 @@ Future<String> phase2Invitation(
         expect(find.text('E2E Self-Scoring Open'), findsNothing);
       },
     );
+    await journey.step(
+      'A pilot who removed their entry is not sent to the details page again',
+      () async {
+        await openPath(tester, accountPath);
+        await pumpUntilFound(
+          tester,
+          find.byKey(const Key('account-remove-entry')),
+        );
+        await tapVisible(tester, find.byKey(const Key('account-remove-entry')));
+        await pumpUntilFound(
+          tester,
+          find.byKey(const Key('account-remove-confirm')),
+        );
+        await tapVisible(
+          tester,
+          find.byKey(const Key('account-remove-confirm')),
+        );
+        await pumpUntilFound(tester, find.text('Set your details'));
+        expect(await contest.pilotDirectoryEntry(), isNull);
+        // The landing page asked once for this sign-in; opening it again
+        // leaves the pilot on it.
+        await openPath(tester, '/');
+        await pumpUntilFound(tester, find.text('Signed in as Penny Pilot'));
+        await tester.pumpAndSettle();
+        expect(find.text('Your details'), findsNothing);
+        // Put the entry back, so the next sign-in does not ask either.
+        await openPath(tester, accountPath);
+        await pumpUntilFound(tester, find.text('Set your details'));
+        await tapVisible(tester, find.byKey(const Key('account-edit-details')));
+        await pumpUntilFound(tester, find.byKey(const Key('details-continue')));
+        await tapVisible(tester, find.byKey(const Key('details-continue')));
+        await pumpUntilFound(tester, find.byKey(const Key('account-details')));
+        expect(await contest.pilotDirectoryEntry(), isNotNull);
+      },
+    );
     await journey.step('Signing out returns to the landing page', () async {
       await openPath(tester, '/');
       await tapVisible(tester, find.widgetWithText(OutlinedButton, 'Sign out'));

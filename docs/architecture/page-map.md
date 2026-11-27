@@ -66,6 +66,8 @@ Documentation, help and support (spec: `plan/ui/public-site/docs-help.md`, `supp
 | --------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------- |
 | Landing page (Sign in / Sign up)                          | `/`                                                          | `pages/home_page.dart`           |
 | Contests list, "Is this you?"                             | `/contests`                                                  | `pages/contests_page.dart`       |
+| Account (linked profiles, past contests, directory entry) | `/account`                                                   | `pages/account_page.dart`        |
+| Directory details (what directors may find)               | `/details`                                                   | `pages/details_page.dart`        |
 | Application info (licences, Privacy Policy, Terms)        | `/app-info`                                                  | `pages/app_info_page.dart`       |
 | Invitation link (guest session)                           | `/invitations/:credential`                                   | `pages/invitation_page.dart`     |
 | Contest entry (guest: pilot overview; else team overview) | `/contests/:contestId`                                       | `router.dart`                    |

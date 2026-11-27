@@ -98,7 +98,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get claimSignInExpired =>
-      'Your sign-in has expired. Go to the landing page, sign in again, then open this link again.';
+      'Your sign-in has expired. Sign in again to continue with your account, or continue as a guest.';
 
   @override
   String get claimCannotLink =>
@@ -419,6 +419,39 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your sign-in has ended. Sign in again to open this contest.';
 
   @override
+  String get signInAgainButton => 'Sign in again';
+
+  @override
+  String get accountSignInEnded =>
+      'Your sign-in has ended. Sign in again to continue.';
+
+  @override
+  String get brandLogoLabel => 'RC Soar Score, glider contest scoring';
+
+  @override
+  String get appBarLogoLabel => 'Soar Score';
+
+  @override
+  String get appBarAccountTooltip => 'Account';
+
+  @override
+  String get appBarBackTooltip => 'Back';
+
+  @override
+  String get loadFailedGeneric =>
+      'Could not load this page. Check your connection and try again.';
+
+  @override
+  String accountUnlinkFor(String pilot) {
+    return 'Unlink $pilot';
+  }
+
+  @override
+  String contestPublicResultsFor(String contest) {
+    return 'Public results for $contest';
+  }
+
+  @override
   String get homeMyContests => 'My contests';
 
   @override
@@ -520,12 +553,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get detailsSaveFailed =>
       'Your details could not be saved. Check your connection and try again.';
-
-  @override
-  String get detailsLoadFailed => 'Your details could not be loaded.';
-
-  @override
-  String get detailsRetry => 'Try again';
 
   @override
   String get detailsPromptTitle => 'Let directors find you';
