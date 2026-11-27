@@ -36,7 +36,7 @@
 - Only registered accounts have an entry. Guest, local, and deleted accounts do not
 - Only a listed entry (`is_listed`) can be found by a director
 - The email is the account's own verified email. It is not stored here, and it never appears in a public projection
-- A director lookup is a server-side exact match on normalized email, FAI number, or national organization ID, plus name suggestions. It returns only the allowed fields of listed entries. The server never reveals whether an unlisted account exists
+- A director lookup is a server-side exact match on normalized email, FAI number, or national organization ID. An email matches only an entry whose `email_visible_to_directors` is true, so a private email gives the same empty answer as an unknown one. An ID can legitimately belong to more than one pilot (two countries can issue the same number), so a lookup returns every match, flags a duplicated key, and the director picks the right person by name. The lookup returns only the allowed fields of listed entries. The server never reveals whether an unlisted account exists. There are no name suggestions
 - Data moves from an entry to a director's profile only when the director pulls or refreshes it. The entry never reads from or writes to a director's profile
 - A director's ParticipantProfile is never visible to another director through this entity
 
@@ -53,5 +53,5 @@ Created when a participant chooses to offer details. Updated by the account hold
 ## Audit and Synchronization
 
 - Creation, changes, listing, and deletion are recorded in application logs
-- A director's pull or refresh is recorded in the director's own audit trail, without the copied values
+- A director's copy is recorded in application logs only. There are no director audit events for it yet
 - Not synced

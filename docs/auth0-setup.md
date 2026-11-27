@@ -118,7 +118,7 @@ every response. The session ends, with a notice on the landing page, only when
 Auth0 refuses the refresh token (revoked, expired, or reused). Being offline or
 an Auth0 outage does not end it; the next request tries again.
 
-### Self-scoring app, web
+## 4. Self-scoring app, web
 
 The self-scoring app (`apps/soar_score_self_score`) has its own application,
 set up the same way as the contest web app in section 2: Single Page Web
@@ -135,7 +135,7 @@ token only to the account routes (`/api/v1/account/...`); the participant
 routes keep the guest session. A build overrides the client with
 `--dart-define=AUTH0_SELF_SCORE_CLIENT_ID=...`.
 
-## 4. Connections
+## 5. Connections
 
 Authentication, Database: keep `Username-Password-Authentication` on and leave
 sign-ups enabled, since registration is part of the product ("Create account"
@@ -285,11 +285,11 @@ states the principle, the code and tickets state the current rules.
 - **Contest app (web and Windows):** signs in with Auth0. "Continue offline" on
   Windows never contacts Auth0.
 - **Self-scoring app (`score.rcsoarscore.com`):** signs in with Auth0, using its
-  own Single Page Web Application (section 3, "Self-scoring app, web").
+  own Single Page Web Application (section 4, "Self-scoring app, web").
 - **Public site (`rcsoarscore.com`):** does not sign in. Results are anonymous
   reads of the public API.
 
-## 5. Not needed yet
+## 6. Not needed yet
 
 - A custom login domain. It changes the token issuer, and the issuer is part of
   every account identity, so decide before release.
@@ -297,7 +297,7 @@ states the principle, the code and tickets state the current rules.
   ticket (#148) decides between that and calling `/userinfo`.
 - A separate production tenant. The free Auth0 plan has one tenant, so the
   tenant above is also the one used for release. If a second tenant is added,
-  repeat sections 1 to 4 (including the email provider) in it and keep its
+  repeat sections 1 to 5 (including the email provider) in it and keep its
   identifiers out of the development defaults. Create your own Google OAuth
   client for it (tracked in release readiness, #157).
 
@@ -311,4 +311,4 @@ states the principle, the code and tickets state the current rules.
    `https://soar-score.com/server`.
 3. Sign out and confirm the browser lands on an allowed URL, not an Auth0
    error page. A "callback URL mismatch" error means the origin is missing from
-   the lists in section 2 or 3.
+   the lists in section 2, 3 or 4.
