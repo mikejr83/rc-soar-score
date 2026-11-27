@@ -77,11 +77,20 @@ class ParticipantCandidate {
         a != null &&
         b != null &&
         a.trim().toLowerCase() == b.trim().toLowerCase();
+    // IDs are only unique within a country, so two listed pilots can share
+    // one: a profile of another country is not this pilot.
+    bool elsewhere(ParticipantProfile p) {
+      final a = p.country?.trim().toLowerCase();
+      final b = match.country?.trim().toLowerCase();
+      return a != null && b != null && a.isNotEmpty && b.isNotEmpty && a != b;
+    }
+
     return [
       for (final p in profiles)
         if (p.id == profileId ||
-            exact(p.faiNumber, match.faiNumber) ||
-            exact(p.nationalOrgId, match.nationalOrgId) ||
+            (!elsewhere(p) &&
+                (exact(p.faiNumber, match.faiNumber) ||
+                    exact(p.nationalOrgId, match.nationalOrgId))) ||
             same(p.email, match.email ?? searchedEmail))
           p,
     ];

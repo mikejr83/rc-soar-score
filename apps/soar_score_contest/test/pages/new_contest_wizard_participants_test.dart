@@ -538,8 +538,10 @@ void main() {
         auth: FakeAuthSession(signedIn: true),
       );
 
+      // Typing never asks for an ID with an @; the button does.
       await tester.enterText(searchField(), 'f1@club.org1');
       await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.byKey(const ValueKey('directory-lookup')));
       await tester.pumpAndSettle();
 
       expect(find.widgetWithText(ListTile, 'Dana Directory'), findsOneWidget);

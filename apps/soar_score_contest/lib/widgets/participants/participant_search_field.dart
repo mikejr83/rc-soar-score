@@ -4,6 +4,10 @@ import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../services/participants/directory_pilot_source.dart';
+
+import 'package:soar_score_api/soar_score_api.dart';
+
 import '../../services/participants/participant_candidate.dart';
 import '../../services/participants/participant_row.dart';
 import 'participant_email_text.dart';
@@ -58,6 +62,9 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
   List<ParticipantCandidate>? _found;
   bool _lookupFailed = false;
 
+  /// The server refused a lookup because this account asked too often.
+  bool _rateLimited = false;
+
   @override
   void dispose() {
     _controller.dispose();
@@ -88,6 +95,9 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
     try {
       final remote = await widget.remote!(query);
       return _arrange(remote, local);
+    } on DirectoryRateLimited {
+      if (mounted) setState(() => _rateLimited = true);
+      return local;
     } on Object {
       return local;
     }
@@ -125,6 +135,7 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
     setState(() {
       _looking = true;
       _lookupFailed = false;
+      _rateLimited = false;
     });
     try {
       final remote = await widget.lookup!(text);
@@ -135,12 +146,14 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
         _found = _arrange(remote, local);
         _looking = false;
       });
-    } on Object {
+    } on Object catch (e) {
       if (!mounted || asked != _edits) return;
+      final limited = e is DirectoryRateLimited;
       setState(() {
         _lookedUp = text.trim();
         _found = null;
-        _lookupFailed = true;
+        _lookupFailed = !limited;
+        _rateLimited = limited;
         _looking = false;
       });
     }
@@ -149,6 +162,7 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
   void _forgetLookup() {
     _edits++;
     _looking = false;
+    _rateLimited = false;
     if (_lookedUp == null && !_lookupFailed) return;
     _lookedUp = null;
     _found = null;
@@ -187,14 +201,21 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
                 hintText: l10n.searchHint,
                 leading: const Icon(Icons.person_search),
                 trailing: [
-                  if (widget.lookup != null && !widget.offline)
+                  if (widget.lookup != null)
                     ValueListenableBuilder(
                       valueListenable: controller,
                       builder: (context, value, _) => IconButton(
                         key: const ValueKey('directory-lookup'),
-                        tooltip: l10n.searchDirectoryLookup,
+                        tooltip: widget.offline
+                            ? l10n.searchDirectoryOffline
+                            : l10n.searchDirectoryLookup,
                         icon: const Icon(Icons.manage_search),
-                        onPressed: _looking || value.text.trim().isEmpty
+                        // The directory is on the server: nothing to ask
+                        // while offline.
+                        onPressed:
+                            widget.offline ||
+                                _looking ||
+                                value.text.trim().isEmpty
                             ? null
                             : () => unawaited(_lookUp(value.text)),
                       ),
@@ -235,7 +256,15 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
           ),
         ),
         if (_looking) const LinearProgressIndicator(),
-        if (_lookupFailed)
+        if (_rateLimited)
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text(
+              l10n.searchDirectoryRateLimited,
+              key: const ValueKey('directory-lookup-rate-limited'),
+            ),
+          )
+        else if (_lookupFailed)
           Padding(
             padding: const EdgeInsets.all(12),
             child: Text(
@@ -352,8 +381,13 @@ class _ResultsMenu extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final already = selected.contains(candidate.profileId.value);
     final remote = candidate.source == ParticipantSource.remote;
+    // Pilots in the directory can share an ID (different countries), so the
+    // director tells them apart by what else the entry says.
+    final entry = candidate.directory;
     final subtitle = [
       candidate.club ?? l10n.searchNoClub,
+      ?_place(entry),
+      ?_id(l10n, entry),
       l10n.searchEmailPrefix(candidate.emailStatus.label(l10n)),
     ].join(' · ');
     final (icon, label) = already
@@ -382,5 +416,18 @@ class _ResultsMenu extends StatelessWidget {
         onTap: already ? null : () => onSelected(candidate),
       ),
     );
+  }
+
+  static String? _place(DirectoryMatchDto? entry) {
+    final parts = [
+      for (final part in [entry?.city, entry?.state, entry?.country])
+        if (part != null && part.trim().isNotEmpty) part.trim(),
+    ];
+    return parts.isEmpty ? null : parts.join(', ');
+  }
+
+  static String? _id(AppLocalizations l10n, DirectoryMatchDto? entry) {
+    final id = entry?.faiNumber ?? entry?.nationalOrgId;
+    return id == null || id.trim().isEmpty ? null : l10n.searchDirectoryId(id);
   }
 }

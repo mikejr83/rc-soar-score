@@ -131,7 +131,13 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
     try {
       final profile = await source.copy(candidate);
       if (!mounted) return;
-      setState(() => _profiles = [...?_profiles, profile]);
+      setState(
+        () => _profiles = [
+          for (final p in _profiles ?? const <ParticipantProfile>[])
+            if (p.id != profile.id) p,
+          profile,
+        ],
+      );
       _add(DraftParticipant.fromProfile(profile));
       widget.onMessage?.call(
         AppLocalizations.of(context).wizardAddedAsPilotShort(candidate.name),

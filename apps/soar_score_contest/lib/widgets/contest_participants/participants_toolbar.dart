@@ -19,6 +19,7 @@ class ParticipantsToolbar extends StatelessWidget {
     this.remote,
     this.lookup,
     this.onAddDirectory,
+    this.offline = false,
   });
 
   final ParticipantsController controller;
@@ -36,6 +37,9 @@ class ParticipantsToolbar extends StatelessWidget {
   /// the copy.
   final ValueChanged<ParticipantCandidate>? onAddDirectory;
 
+  /// Whether the app has no internet: the directory cannot be searched.
+  final bool offline;
+
   @override
   Widget build(BuildContext context) {
     final c = controller;
@@ -45,7 +49,7 @@ class ParticipantsToolbar extends StatelessWidget {
       // Without the right to add, the field only filters the list.
       profiles: canAdd ? c.profiles : const [],
       selected: c.memberProfileIds,
-      offline: false,
+      offline: offline,
       remote: canAdd ? remote : null,
       lookup: canAdd ? lookup : null,
       onQueryChanged: c.setQuery,
