@@ -124,9 +124,12 @@ class DirectoryPilotSource {
     DirectoryLookupKeyDto.nationalOrgId,
   ];
 
-  /// An email-shaped text may also be an ID that happens to contain an `@`.
+  /// Text with an `@` may be an email and also an ID that happens to contain
+  /// one.
   static List<DirectoryLookupKeyDto> _keysFor(String text) => [
-    if (_email.hasMatch(text)) DirectoryLookupKeyDto.email,
+    // Asked on purpose, anything with an `@` may be an address, whatever its
+    // last part (a punycode TLD); the server decides what it holds.
+    if (text.contains('@')) DirectoryLookupKeyDto.email,
     ..._idKeys,
   ];
 

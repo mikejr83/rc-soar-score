@@ -194,12 +194,22 @@ void main() {
     // The lookup button asks the ID keys, for any text.
     hostedRequests.clear();
     expect((await s.lookup('F@12')).map((c) => c.name), ['Pat Pilot']);
-    expect(keysAsked(), ['fai_number', 'national_org_id']);
+    expect(keysAsked(), ['email', 'fai_number', 'national_org_id']);
 
     // An email address the director looks up by button is also still an ID.
     hostedRequests.clear();
     await s.lookup('pat@example.com');
     expect(keysAsked(), ['email', 'fai_number', 'national_org_id']);
+  });
+
+  test('a lookup on purpose asks the email key for any address', () async {
+    byKey['email'] = [_match(_entryA, 'Pat')];
+    final s = source();
+
+    final found = await s.lookup('pilot@example.xn--p1ai');
+
+    expect(found.map((c) => c.name), ['Pat Pilot']);
+    expect(keysAsked(), contains('email'));
   });
 
   test('one key failing keeps what the others found', () async {

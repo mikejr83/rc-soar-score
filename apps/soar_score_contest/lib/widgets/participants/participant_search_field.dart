@@ -195,7 +195,9 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
             }
             widget.onAdd(candidate);
             // A lookup still waiting must not bring results back under the
-            // cleared text.
+            // cleared text. Clearing in a selection does not reach the
+            // typed search, so it is overtaken here.
+            _searches++;
             setState(_forgetLookup);
             _controller.clear();
             widget.onQueryChanged?.call('');
@@ -295,6 +297,7 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
             onSelected: (candidate) {
               if (widget.selected.contains(candidate.profileId.value)) return;
               widget.onAdd(candidate);
+              _searches++;
               setState(() {
                 _forgetLookup();
                 _controller.clear();

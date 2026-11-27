@@ -382,4 +382,48 @@ void main() {
     );
     expect(find.widgetWithText(ListTile, 'Pia Ward'), findsWidgets);
   });
+
+  testWidgets('choosing an option ends a typed search that is still waiting', (
+    tester,
+  ) async {
+    final release = Completer<void>();
+    var held = false;
+    await pumpParticipantsPage(
+      tester,
+      ParticipantsServer(),
+      auth: FakeAuthSession(signedIn: true),
+      intercept: (request) async {
+        if (request.url.path.contains('/directory/')) {
+          held = true;
+          await release.future;
+          return errorResponse(429, 'rate_limited', 'slow down');
+        }
+        if (request.url.path.endsWith('/participants') &&
+            request.method == 'GET') {
+          return json({
+            'participants': [
+              profile('Cass', 'Lower', n: 77, fai: 'F9999').toJson(),
+            ],
+          });
+        }
+        return null;
+      },
+    );
+    // An option stays on screen while the next typed search waits.
+    await tester.enterText(searchField(), 'Cass');
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(ListTile, 'Cass Lower'), findsOneWidget);
+    await tester.enterText(searchField(), 'F9999');
+    await tester.pump(const Duration(seconds: 1));
+    expect(held, isTrue, reason: 'the typed search was sent');
+    await tester.tap(find.widgetWithText(ListTile, 'Cass Lower'));
+    await tester.pump();
+    release.complete();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('directory-lookup-rate-limited')),
+      findsNothing,
+    );
+  });
 }
