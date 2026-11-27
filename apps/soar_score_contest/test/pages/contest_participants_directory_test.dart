@@ -348,4 +348,38 @@ void main() {
     expect(find.textContaining('DE'), findsOneWidget);
     expect(find.textContaining('ID F9999'), findsNWidgets(2));
   });
+
+  testWidgets('a typed search refused after a lookup on purpose stays quiet', (
+    tester,
+  ) async {
+    final release = Completer<void>();
+    var first = true;
+    await pumpParticipantsPage(
+      tester,
+      ParticipantsServer(),
+      auth: FakeAuthSession(signedIn: true),
+      intercept: (request) async {
+        if (!request.url.path.contains('/directory/')) return null;
+        if (first) {
+          first = false;
+          await release.future;
+          return errorResponse(429, 'rate_limited', 'slow down');
+        }
+        return _directory(request);
+      },
+    );
+    await tester.enterText(searchField(), 'F9999');
+    // The typed search starts after its pause and waits on the server.
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.byKey(const ValueKey('directory-lookup')));
+    await tester.pump();
+    release.complete();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('directory-lookup-rate-limited')),
+      findsNothing,
+    );
+    expect(find.widgetWithText(ListTile, 'Pia Ward'), findsWidgets);
+  });
 }

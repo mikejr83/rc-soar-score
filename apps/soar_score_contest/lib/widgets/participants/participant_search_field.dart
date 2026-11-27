@@ -84,7 +84,13 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
     return l10n.searchProfiles;
   }
 
+  /// Counts typed searches and explicit lookups, so a typed search that is
+  /// overtaken (more typing, a clear, or a lookup on purpose) cannot show its
+  /// rate-limit warning afterwards.
+  int _searches = 0;
+
   Future<Iterable<ParticipantCandidate>> _search(String query) async {
+    final mine = ++_searches;
     final local = searchLocalProfiles(widget.profiles ?? const [], query);
     if (!_searchesRemote) return local;
     if (query.trim().isEmpty) {
@@ -96,7 +102,7 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
       final remote = await widget.remote!(query);
       return _arrange(remote, local);
     } on DirectoryRateLimited {
-      if (mounted) setState(() => _rateLimited = true);
+      if (mounted && mine == _searches) setState(() => _rateLimited = true);
       return local;
     } on Object {
       return local;
@@ -131,6 +137,7 @@ class _ParticipantSearchFieldState extends State<ParticipantSearchField> {
   }
 
   Future<void> _lookUp(String text) async {
+    _searches++;
     final asked = _edits;
     setState(() {
       _looking = true;
