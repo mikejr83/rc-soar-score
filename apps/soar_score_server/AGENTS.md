@@ -7,7 +7,7 @@ Thin executable that wires dependencies, starts the shelf_io server, and exposes
 - `lib/main.dart` — entry point; parse flags, wire, call `shelf_io.serve`
 - `lib/server.dart` — startup, dependency injection, port binding
 - `lib/auth/` — Auth0 token verification (JWKS) and the `/userinfo` profile source
-- `tool/e2e_server.dart` � test-only server for the web E2E tests: SQLite, demo data, **no token checks**. Never deploy it.
+- `tool/e2e_server.dart` — test-only server for the web E2E tests: SQLite, demo data, **no token checks**. Never deploy it.
 - `lib/handler.dart` — wires `soar_score_api_handlers` to the repositories
 
 ## Boundaries
@@ -35,3 +35,7 @@ Thin executable that wires dependencies, starts the shelf_io server, and exposes
 ## Guest sessions
 
 `/api/v1/self-scoring/*` is mounted before `/api/v1`, so it skips the Auth0 layer and answers to its own guest session (`guestSessionAuth`, a `ParticipantPrincipal`). `INVITATION_SECRET` turns it on; without it the routes answer 409 `invitations_not_available`. The director's side is `GET`/`POST /api/v1/contests/{id}/invitations` (`invitation_handlers.dart`): list the active links, issue for the listed pilots, never email (#790); links are built from `SELF_SCORING_BASE_URL`. Opening a link is throttled per caller address by `InvitationThrottle`, with counters in the `request_throttles` table (shared by every machine); `TRUSTED_PROXY_SECRET` lets the site's `/api` proxy name the visitor (docs/deploy-api-fly.md, "Throttling invitation links"). The slice test `test/api_slice/invitations_slice_test.dart` runs it on SQLite and PostgreSQL.
+
+## Email
+
+Invitation email sends the HTML and plain-text templates in `email/` (see `email/README-email-template.md`). They are read at startup from `email/` beside `lib/` (beside `bin/` in the container image); keep the Dockerfile copy in step when adding templates.

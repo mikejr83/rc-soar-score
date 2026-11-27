@@ -188,6 +188,8 @@ void _tests(SliceBackend backend) {
     expect(mail.to, _address);
     expect(mail.pilotName, 'Alex Rivera');
     expect(mail.contestName, 'Spring Open');
+    // No account locale and no contest country: the default.
+    expect(mail.locale, 'en-US');
 
     final invitations = (await listing())['invitations'] as List;
     final alex = invitations.cast<Map<String, Object?>>().singleWhere(
