@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/services/participants/directory_pilot_source.dart';
+import 'package:soar_score_contest/services/participants/participant_candidate.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 import 'package:soar_score_ui_storage/soar_score_ui_storage.dart';
 
@@ -386,6 +387,44 @@ void main() {
     expect(candidate.copiesIn([own]), isNotEmpty);
     expect(candidate.copiesIn(const []), isEmpty);
   });
+
+  test(
+    'a profile of another country is not the pilot sharing its ID',
+    () async {
+      byKey['fai_number'] = [
+        {..._match(_entryA, 'Pat'), 'country': 'DE'},
+        {..._match(_entryB, 'Bea'), 'country': 'US'},
+      ];
+      final s = source();
+      final found = await s.lookup('F1');
+      ParticipantProfile own(String? country) => ParticipantProfile(
+        id: Id.create(),
+        ownerAccountId: Id.create(),
+        firstName: 'Una',
+        lastName: 'Local',
+        faiNumber: 'F1',
+        country: country,
+        createdAt: DateTime.utc(2026, 11, 1),
+        updatedAt: DateTime.utc(2026, 11, 1),
+      );
+      final de = found.firstWhere((c) => c.name == 'Pat Pilot');
+      final us = found.firstWhere((c) => c.name == 'Bea Pilot');
+      final american = own(' us ');
+
+      // A US profile holds the US pilot, not the German one.
+      expect(us.copiesIn([american]), [american]);
+      expect(de.copiesIn([american]), isEmpty);
+      // No country on the profile: the ID alone still matches.
+      expect(de.copiesIn([own(null)]), isNotEmpty);
+      // The copy the server names is the same pilot whatever the country.
+      final copy = own('FR');
+      final named = ParticipantCandidate.directory(
+        found.first.directory!,
+        profileId: copy.id,
+      );
+      expect(named.copiesIn([copy]), [copy]);
+    },
+  );
 
   test(
     'a private email the director typed still finds their own profile',
