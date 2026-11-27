@@ -165,7 +165,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
       tablesFor(profile, allTables);
 
   /// The schema version this build creates and upgrades to.
-  static const int currentSchemaVersion = 2;
+  static const int currentSchemaVersion = 3;
 
   @override
   int get schemaVersion => currentSchemaVersion;
@@ -183,37 +183,54 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
       }
     },
     onUpgrade: (m, from, to) async {
-      if (from != 1 || to != 2) {
+      if (from < 1 || to != 3 || from >= to) {
         throw UnsupportedError(
           'Schema upgrade from $from to $to is not supported.',
         );
       }
-      // Rebuilding official_scores on SQLite drops a table other tables point
-      // at. Foreign keys cannot be switched off inside a transaction, so do
-      // it before one (they are already off while Drift upgrades, but do not
-      // rely on that) and restore them afterwards.
-      final sqlite = executor.dialect == SqlDialect.sqlite;
-      final keysWereOn =
-          sqlite &&
-          (await customSelect(
-            'PRAGMA foreign_keys',
-          ).getSingle()).read<bool>('foreign_keys');
-      if (keysWereOn) await customStatement('PRAGMA foreign_keys = OFF');
-      try {
-        await _upgradeFromVersion1(m);
-        if (sqlite) {
-          final broken = await customSelect('PRAGMA foreign_key_check').get();
-          if (broken.isNotEmpty) {
-            throw StateError(
-              'The upgrade left ${broken.length} broken foreign keys.',
-            );
-          }
-        }
-      } finally {
-        if (keysWereOn) await customStatement('PRAGMA foreign_keys = ON');
-      }
+      if (from == 1) await _upgradeVersion1To2(m);
+      await _upgradeVersion2To3();
     },
   );
+
+  /// Version 1 to 2, as released in 0.1.0-alpha.7. Frozen: a shipped
+  /// version's step is never edited; later changes go in the next step.
+  Future<void> _upgradeVersion1To2(Migrator m) async {
+    // Rebuilding official_scores on SQLite drops a table other tables point
+    // at. Foreign keys cannot be switched off inside a transaction, so do
+    // it before one (they are already off while Drift upgrades, but do not
+    // rely on that) and restore them afterwards.
+    final sqlite = executor.dialect == SqlDialect.sqlite;
+    final keysWereOn =
+        sqlite &&
+        (await customSelect(
+          'PRAGMA foreign_keys',
+        ).getSingle()).read<bool>('foreign_keys');
+    if (keysWereOn) await customStatement('PRAGMA foreign_keys = OFF');
+    try {
+      await _upgradeFromVersion1(m);
+      if (sqlite) {
+        final broken = await customSelect('PRAGMA foreign_key_check').get();
+        if (broken.isNotEmpty) {
+          throw StateError(
+            'The upgrade left ${broken.length} broken foreign keys.',
+          );
+        }
+      }
+    } finally {
+      if (keysWereOn) await customStatement('PRAGMA foreign_keys = ON');
+    }
+  }
+
+  /// Version 2 to 3 (participant accounts, #545): `accounts.profile_refreshed_at`
+  /// and the participant-link indexes. One transaction; both steps are
+  /// idempotent.
+  Future<void> _upgradeVersion2To3() async {
+    await transaction(() async {
+      await _addProfileRefreshedAt();
+      await _addParticipantLinkIndexes();
+    });
+  }
 
   Future<void> _upgradeFromVersion1(Migrator m) async {
     {
@@ -236,10 +253,8 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
         await _addSelectionOrigin(m);
         await _addUploadOpen();
         await _addAggregateId();
-        await _addProfileRefreshedAt();
         await _normalizeClientTimes();
-        await _addParticipantLinkIndexes();
-        // Service-only counters (unreleased version 2); IF NOT EXISTS.
+        // Service-only counters (version 2); IF NOT EXISTS.
         if (profileTables.contains(requestThrottles)) {
           await m.createTable(requestThrottles);
         }
@@ -247,7 +262,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     }
   }
 
-  /// Adds `score_placeholders.current_attempt_id` (unreleased version 2) and
+  /// Adds `score_placeholders.current_attempt_id` (version 2) and
   /// fills it: the attempt behind the current official score, else the
   /// latest accepted attempt of the slot.
   Future<void> _addCurrentAttemptId() async {
@@ -286,7 +301,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
   }
 
   /// Gives `official_scores` its selection origin and lets `set_by` be null
-  /// (unreleased version 2). Every existing version was selected by a
+  /// (version 2). Every existing version was selected by a
   /// director, so each reads `Manual`.
   Future<void> _addSelectionOrigin(Migrator m) async {
     final sqlite = executor.dialect == SqlDialect.sqlite;
@@ -325,7 +340,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     );
   }
 
-  /// Adds `mutation_records.aggregate_id` (unreleased version 2): null for
+  /// Adds `mutation_records.aggregate_id` (version 2): null for
   /// every existing record, which is a plain change.
   Future<void> _addAggregateId() async {
     final sqlite = executor.dialect == SqlDialect.sqlite;
@@ -342,7 +357,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     );
   }
 
-  /// Adds `accounts.profile_refreshed_at` (unreleased version 2): null for
+  /// Adds `accounts.profile_refreshed_at` (version 3): null for
   /// every existing account, so the first request refreshes it. Only the
   /// server profile has the table.
   Future<void> _addProfileRefreshedAt() async {
@@ -365,7 +380,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
   }
 
   /// Creates the indexes of the participant account links and of profile
-  /// emails (unreleased version 2, #545); IF NOT EXISTS. A table the profile
+  /// emails (version 3, #545); IF NOT EXISTS. A table the profile
   /// does not have is skipped.
   Future<void> _addParticipantLinkIndexes() async {
     final sqlite = executor.dialect == SqlDialect.sqlite;
@@ -401,7 +416,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     }
   }
 
-  /// Adds `installation_activations.upload_open` (unreleased version 2): false
+  /// Adds `installation_activations.upload_open` (version 2): false
   /// for every existing activation, so no first upload is open after the
   /// upgrade.
   Future<void> _addUploadOpen() async {
