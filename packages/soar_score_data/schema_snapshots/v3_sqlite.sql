@@ -60,6 +60,12 @@ CREATE INDEX IF NOT EXISTS participant_profiles_lower_email ON participant_profi
 CREATE UNIQUE INDEX installation_activations_one_open ON installation_activations (contest_id) WHERE ended_at IS NULL;
 CREATE UNIQUE INDEX delist_requests_one_pending ON delist_requests (publication_id) WHERE state = 'pending';
 CREATE UNIQUE INDEX invitations_one_active ON invitations (contest_participation_id) WHERE state = 'Active';
+CREATE INDEX IF NOT EXISTS invitations_redeemed_by ON invitations (redeemed_by_account_id);
+CREATE INDEX IF NOT EXISTS contest_participations_profile ON contest_participations (participant_profile_id);
+CREATE INDEX IF NOT EXISTS participant_directory_entries_fai_number ON participant_directory_entries (fai_number);
+CREATE INDEX IF NOT EXISTS participant_directory_entries_national_org_id ON participant_directory_entries (national_org_id);
+CREATE INDEX IF NOT EXISTS audit_events_actor ON audit_events (actor_id);
+CREATE INDEX IF NOT EXISTS mutation_records_actor ON mutation_records (actor_id);
 CREATE UNIQUE INDEX matrix_revisions_one_finalized_successor ON matrix_revisions (contest_id, COALESCE(previous_revision_id, '')) WHERE finalized_at IS NOT NULL;
 CREATE UNIQUE INDEX rounds_live_ordinal ON rounds (contest_id, ordinal) WHERE superseded_by_round_id IS NULL AND status <> 'Cancelled';
 CREATE INDEX IF NOT EXISTS rounds_contest ON rounds (contest_id);
@@ -69,9 +75,11 @@ CREATE INDEX IF NOT EXISTS matrix_assignments_scheduled_round ON matrix_assignme
 CREATE INDEX IF NOT EXISTS score_placeholders_contest ON score_placeholders (contest_id);
 CREATE INDEX IF NOT EXISTS score_placeholders_participation ON score_placeholders (contest_participation_id);
 CREATE INDEX IF NOT EXISTS score_attempts_placeholder ON score_attempts (score_placeholder_id);
+CREATE INDEX IF NOT EXISTS score_attempts_actor ON score_attempts (actor_id);
 CREATE INDEX IF NOT EXISTS flight_results_contest_round ON flight_results (contest_id, credited_round_id);
 CREATE INDEX IF NOT EXISTS participation_standings_contest_round ON participation_standings (contest_id, as_of_round);
 CREATE UNIQUE INDEX review_requests_one_open ON review_requests (score_placeholder_id) WHERE state IN ('Submitted', 'UnderReview');
+CREATE INDEX IF NOT EXISTS review_requests_requester ON review_requests (requester_id);
 CREATE UNIQUE INDEX roles_owner_display_name ON roles (COALESCE(owner_account_id, ''), lower(display_name));
 CREATE UNIQUE INDEX roles_one_pilot ON roles (type) WHERE type = 'Pilot';
 CREATE UNIQUE INDEX contest_configuration_presets_owner_name ON contest_configuration_presets (owner_account_id, lower(name));

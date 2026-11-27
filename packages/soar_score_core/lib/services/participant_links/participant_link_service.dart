@@ -15,6 +15,7 @@ import '../../models/id.dart';
 import '../../models/participants/contest_participation.dart';
 import '../../models/scores/invitation.dart';
 import '../../repositories/repository.dart';
+import '../../repositories/stale_revision_error.dart';
 import '../invitations/invitation_service.dart';
 import '../invitations/participant_access.dart';
 import 'linked_participation.dart';
@@ -29,7 +30,7 @@ final _logger = Logger('ParticipantLinks');
 ///
 /// - Three ways in: a director copies the pilot from the directory
 ///   ([linkFromDirectory]), the pilot opens an invitation while signed in
-///   ([linkFromInvitation]), or the pilot confirms an email match
+///   ([claimInvitation]), or the pilot confirms an email match
 ///   ([candidatesFor], [confirmCandidate]). The first two are Confirmed at
 ///   once; the third only when the pilot says so.
 /// - A profile has one Confirmed link. A second account is refused with
@@ -70,6 +71,10 @@ class ParticipantLinkService {
   /// `link_not_found` when [accountId] is not an active registered account
   /// with a listed directory entry.
   /// Repeating it returns the same link.
+  ///
+  /// A pair whose link the pilot ended (or declined) is not linked again by a
+  /// director: only the pilot's own actions revive a link. That is refused as
+  /// `link_not_found`, the answer for an unlisted pilot.
   Future<ParticipantAccountLink> linkFromDirectory({
     required Id profileId,
     required Id accountId,
@@ -93,31 +98,12 @@ class ParticipantLinkService {
       profileId: profileId,
       accountId: accountId,
       origin: ParticipantLinkOrigin.directoryPull,
-    );
-  }
-
-  /// Links [accountId] to the profile behind the invitation [credential]:
-  /// the director's invitation identifies the pilot, so the link is
-  /// Confirmed at once and claims the entries of the guests of the profile.
-  ///
-  /// Throws `invalid_invitation` (an `InvitationAccessError`) for a link
-  /// that does not open, exactly as opening it anonymously does, and
-  /// `already_linked` when another account holds the profile.
-  Future<ParticipantAccountLink> linkFromInvitation({
-    required String credential,
-    required Id accountId,
-  }) async {
-    await _requireLinkable(accountId);
-    final opened = await invitations.lookup(credential);
-    return _confirm(
-      profileId: opened.participation.participantProfileId,
-      accountId: accountId,
-      origin: ParticipantLinkOrigin.invitationRedemption,
+      reviveEnded: false,
     );
   }
 
   /// The pilot, signed in, opens the invitation [credential]: the link is
-  /// confirmed (as [linkFromInvitation]) and the guest entries are claimed,
+  /// confirmed and the guest entries are claimed,
   /// in one transaction, and the answer is the session to keep, acting as
   /// the account, as [InvitationService.resolve] gives a guest.
   ///
@@ -322,16 +308,29 @@ class ParticipantLinkService {
     // the account holds then, each with its own guest, so a claim that
     // completed first (even of an invitation issued after this call began)
     // is released too.
-    final ended = await links.saveReleasingInvitations(
-      _ended(link),
-      releases: () async => {
-        for (final invitation in await _invitationsOf(
-          link.participantProfileId,
-        ))
-          if (invitation.redeemedByAccountId == accountId)
-            invitation.id: invitations.codec.guestAccountIdFor(invitation.id),
-      },
-    );
+    final ParticipantAccountLink ended;
+    try {
+      ended = await links.saveReleasingInvitations(
+        _ended(link),
+        releases: () async => {
+          for (final invitation in await _invitationsOf(
+            link.participantProfileId,
+          ))
+            if (invitation.redeemedByAccountId == accountId)
+              invitation.id: invitations.codec.guestAccountIdFor(invitation.id),
+        },
+      );
+    } on StaleRevisionError {
+      // A concurrent end of the same link won the lock first: ending an
+      // ended link changes nothing, so that is the answer.
+      final latest = await links.findById(linkId);
+      if (latest != null &&
+          latest.accountId == accountId &&
+          latest.status == ParticipantLinkStatus.ended) {
+        return latest;
+      }
+      rethrow;
+    }
     _logger.info('Link ${ended.id.value} ended.');
     return ended;
   }
@@ -587,11 +586,14 @@ class ParticipantLinkService {
   }
 
   /// Makes the link of [accountId] to [profileId] Confirmed, claiming the
-  /// guests of the profile, as one transaction.
+  /// guests of the profile, as one transaction. Only the pilot's own actions
+  /// pass [reviveEnded]; a director's copy refuses a pair that is not Confirmed
+  /// (`link_not_found`).
   Future<ParticipantAccountLink> _confirm({
     required Id profileId,
     required Id accountId,
     required ParticipantLinkOrigin origin,
+    bool reviveEnded = true,
   }) async {
     final links = repository.participantAccountLinkRepository;
     final existing = await _existingConfirmed(profileId, accountId);
@@ -620,6 +622,10 @@ class ParticipantLinkService {
       participantProfileId: profileId,
       accountId: accountId,
     );
+    // A director's action never undoes what the pilot ended or declined.
+    if (!reviveEnded && earlier != null && !earlier.isConfirmed) {
+      throw ParticipantLinkError.linkNotFound();
+    }
     final now = _clock().toUtc();
     // Re-opening an Ended (or Candidate) row keeps its id, its creation time
     // and its revision, so the pair stays one row.

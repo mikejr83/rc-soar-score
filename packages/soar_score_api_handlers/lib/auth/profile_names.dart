@@ -29,6 +29,31 @@ String? _clean(String? value) {
   return null;
 }
 
+/// The parts of the name [profile] really gives, null for a part it does not
+/// give. A refresh keeps the stored value of a null part, so a provider that
+/// only knows a given name does not turn the stored last name into `Unknown`.
+({String? first, String? last}) profileNameParts(
+  UserProfile profile,
+  String? email,
+) {
+  final given = _clean(profile.givenName);
+  final family = _clean(profile.familyName);
+  if (given != null && family != null) return (first: given, last: family);
+
+  final full = _clean(profile.name);
+  if (full != null && full != email) {
+    final parts = full.split(RegExp(r'\s+'));
+    if (parts.length > 1) {
+      return (
+        first: given ?? parts.first,
+        last: family ?? parts.skip(1).join(' '),
+      );
+    }
+    return (first: given ?? full, last: family);
+  }
+  return (first: given, last: family);
+}
+
 /// The names for a new account: [profileNames], else the email's local part.
 (String, String) newAccountNames(UserProfile profile, String? email) {
   final names = profileNames(profile, email);

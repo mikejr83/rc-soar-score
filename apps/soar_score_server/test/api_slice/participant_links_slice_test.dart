@@ -212,6 +212,16 @@ void _tests(SliceBackend backend) {
   });
   tearDown(() => api.close());
 
+  /// Links [accountId] through the invitation [credential], as a pilot who
+  /// opens it while signed in does.
+  Future<core.ParticipantAccountLink> linkFromInvitation({
+    required String credential,
+    required core.Id accountId,
+  }) async => (await links.claimInvitation(
+    credential: credential,
+    accountId: accountId,
+  )).link;
+
   Future<core.IssuedInvitation> issue(int pilot) => invitations.issue(
     contestId: id(_contestId),
     participationId: id(_participationId(pilot)),
@@ -441,7 +451,7 @@ void _tests(SliceBackend backend) {
       );
 
       for (final attempt in [
-        () => links.linkFromInvitation(
+        () => linkFromInvitation(
           credential: issued.credential,
           accountId: otherAccount,
         ),
@@ -481,12 +491,10 @@ void _tests(SliceBackend backend) {
         links
             .confirmCandidate(profileId: id(_profileId(1)), accountId: pat)
             .then<Object>((link) => link, onError: (Object e) => e),
-        links
-            .linkFromInvitation(
-              credential: issued.credential,
-              accountId: otherAccount,
-            )
-            .then<Object>((link) => link, onError: (Object e) => e),
+        linkFromInvitation(
+          credential: issued.credential,
+          accountId: otherAccount,
+        ).then<Object>((link) => link, onError: (Object e) => e),
       ]);
 
       expect(results.whereType<core.ParticipantAccountLink>(), hasLength(1));
@@ -513,7 +521,7 @@ void _tests(SliceBackend backend) {
       final issued = await issue(1);
       final guest = await guestScores(issued.credential);
 
-      final link = await links.linkFromInvitation(
+      final link = await linkFromInvitation(
         credential: issued.credential,
         accountId: otherAccount, // the email need not match the profile's
       );
@@ -527,7 +535,7 @@ void _tests(SliceBackend backend) {
 
     test('a link that does not open is the usual invalid link', () async {
       await expectLater(
-        links.linkFromInvitation(credential: 'nonsense', accountId: pat),
+        linkFromInvitation(credential: 'nonsense', accountId: pat),
         throwsA(isA<core.InvitationAccessError>()),
       );
       expect(
@@ -541,10 +549,7 @@ void _tests(SliceBackend backend) {
       final guest = await guestScores(issued.credential);
       for (final who in [guest, core.Id.create()]) {
         await expectLater(
-          links.linkFromInvitation(
-            credential: issued.credential,
-            accountId: who,
-          ),
+          linkFromInvitation(credential: issued.credential, accountId: who),
           throwsA(isA<core.ParticipantLinkError>()),
         );
       }
@@ -676,7 +681,7 @@ void _tests(SliceBackend backend) {
 
     test('an invitation no guest ever held goes back to nobody', () async {
       final issued = await issue(1);
-      final link = await links.linkFromInvitation(
+      final link = await linkFromInvitation(
         credential: issued.credential,
         accountId: pat,
       );
@@ -693,7 +698,7 @@ void _tests(SliceBackend backend) {
 
     test('is only the account\'s own', () async {
       final issued = await issue(1);
-      final link = await links.linkFromInvitation(
+      final link = await linkFromInvitation(
         credential: issued.credential,
         accountId: pat,
       );
@@ -722,13 +727,13 @@ void _tests(SliceBackend backend) {
 
     test('a pilot can link again after ending, on the same row', () async {
       final issued = await issue(1);
-      final first = await links.linkFromInvitation(
+      final first = await linkFromInvitation(
         credential: issued.credential,
         accountId: pat,
       );
       await links.end(linkId: first.id, accountId: pat);
 
-      final again = await links.linkFromInvitation(
+      final again = await linkFromInvitation(
         credential: issued.credential,
         accountId: pat,
       );
@@ -749,7 +754,7 @@ void _tests(SliceBackend backend) {
     test('holds only confirmed links with an active invitation', () async {
       await issue(1);
       await issue(2);
-      await links.linkFromInvitation(
+      await linkFromInvitation(
         credential: (await issue(1)).credential,
         accountId: pat,
       );
@@ -762,10 +767,7 @@ void _tests(SliceBackend backend) {
 
     test('a contest drops off a day after it completed', () async {
       final issued = await issue(1);
-      await links.linkFromInvitation(
-        credential: issued.credential,
-        accountId: pat,
-      );
+      await linkFromInvitation(credential: issued.credential, accountId: pat);
       await api.database.customStatement(
         "UPDATE contests SET lifecycle_state = 'Completed', "
         "updated_at = '${clock.toIso8601String()}' WHERE id = '$_contestId'",
@@ -800,10 +802,7 @@ void _tests(SliceBackend backend) {
         'both succeed and claim the guest once', () async {
       final issued = await issue(1);
       await guestScores(issued.credential);
-      await links.linkFromInvitation(
-        credential: issued.credential,
-        accountId: pat,
-      );
+      await linkFromInvitation(credential: issued.credential, accountId: pat);
       // The pilot's guest browser opens the link again and scores round 2.
       final guestAgain = await invitations.resolve(issued.credential);
       expect(await submitAs(guestAgain.sessionToken, 2, 'guest-2'), 201);
@@ -859,7 +858,7 @@ void _tests(SliceBackend backend) {
         'after the link ended', () async {
       final issued = await issue(1);
       await guestScores(issued.credential);
-      final link = await links.linkFromInvitation(
+      final link = await linkFromInvitation(
         credential: issued.credential,
         accountId: pat,
       );
@@ -922,7 +921,7 @@ void _tests(SliceBackend backend) {
         'back to the guest', () async {
       final issued = await issue(1);
       await guestScores(issued.credential);
-      final link = await links.linkFromInvitation(
+      final link = await linkFromInvitation(
         credential: issued.credential,
         accountId: pat,
       );
@@ -963,11 +962,98 @@ void _tests(SliceBackend backend) {
       );
     });
 
+    test('an open of a never-opened invitation that waits while the link '
+        'ends leaves the invitation unredeemed', () async {
+      await issue(1);
+      // A directory link: no guest ever opened the invitation.
+      await listInDirectory(pat);
+      final link = await links.linkFromDirectory(
+        profileId: id(_profileId(1)),
+        accountId: pat,
+        directorAccountId: api.director,
+      );
+      expect(await redeemers(1), {'null'});
+
+      final gated = GatedRepository(api.database);
+      final paused = Completer<void>();
+      final release = Completer<void>();
+      gated.beforeRedeem = (newRedeemer, needsLink) {
+        expect(needsLink, isTrue, reason: 'an account open needs its link');
+        paused.complete();
+        return release.future;
+      };
+      final racing = core.ParticipantLinkService(
+        gated,
+        core.InvitationService(gated, invitations.codec, clock: () => clock),
+        clock: () => clock,
+      );
+
+      final opening = racing.openParticipation(
+        participationId: id(_participationId(1)),
+        accountId: pat,
+      );
+      final outcome = expectLater(
+        opening,
+        throwsA(
+          isA<core.ParticipantLinkError>().having(
+            (e) => e.code,
+            'code',
+            'link_not_found',
+          ),
+        ),
+      );
+      await paused.future;
+      await links.end(linkId: link.id, accountId: pat);
+      release.complete();
+      await outcome;
+
+      expect(await redeemers(1), {
+        'null',
+      }, reason: 'the ended account holds none');
+    });
+
+    test('ending a link twice at once is a no-op for the second', () async {
+      await issue(1);
+      await listInDirectory(pat);
+      final link = await links.linkFromDirectory(
+        profileId: id(_profileId(1)),
+        accountId: pat,
+        directorAccountId: api.director,
+      );
+      final gated = GatedRepository(api.database);
+      final waiting = <Completer<void>>[];
+      gated.beforeRelease = () {
+        // Both ends have read the Confirmed link; the first goes on once the
+        // second is waiting too.
+        final gate = Completer<void>();
+        waiting.add(gate);
+        if (waiting.length == 2) {
+          waiting.first.complete();
+          waiting.last.complete();
+        }
+        return gate.future;
+      };
+      final racing = core.ParticipantLinkService(
+        gated,
+        core.InvitationService(gated, invitations.codec, clock: () => clock),
+        clock: () => clock,
+      );
+
+      final ended = await Future.wait([
+        for (var i = 0; i < 2; i++) racing.end(linkId: link.id, accountId: pat),
+      ]);
+
+      expect(
+        ended.map((l) => l.status),
+        everyElement(core.ParticipantLinkStatus.ended),
+      );
+    });
+
     test('an open paused after its claim cannot bring back a link that was '
         'ended meanwhile', () async {
       final issued = await issue(1);
       await guestScores(issued.credential);
-      final link = await links.linkFromInvitation(
+      final link = await linkFromInvitation(
         credential: issued.credential,
         accountId: pat,
       );
@@ -1028,10 +1114,7 @@ void _tests(SliceBackend backend) {
         'are both audited, and only the account\'s session works', () async {
       final issued = await issue(1);
       final guest = await guestScores(issued.credential);
-      await links.linkFromInvitation(
-        credential: issued.credential,
-        accountId: pat,
-      );
+      await linkFromInvitation(credential: issued.credential, accountId: pat);
       Future<int> opens() async => (await column(
         "SELECT COUNT(*) AS v FROM audit_events WHERE action = "
         "'InvitationAccessed'",
@@ -1145,10 +1228,7 @@ void _tests(SliceBackend backend) {
         'in between', () async {
       final issued = await issue(1);
       await guestScores(issued.credential);
-      await links.linkFromInvitation(
-        credential: issued.credential,
-        accountId: pat,
-      );
+      await linkFromInvitation(credential: issued.credential, accountId: pat);
       // A guest opens again after the claim: the redeemer is the guest.
       await invitations.resolve(issued.credential);
       final scripted = _GuestOpensBetweenAttempts(

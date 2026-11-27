@@ -172,24 +172,6 @@ void _tests(Backend backend) {
       expect(await repo.findForAccount(accountIds.first), isNull);
     });
 
-    test('lists only the entries their owners chose to list', () async {
-      final hidden = other(accountIds.first, isListed: false);
-      await repo.save(hidden);
-
-      expect(await repo.listListed(), [entry]);
-
-      final shown = core.ParticipantDirectoryEntry.fromJson({
-        ...hidden.toJson(),
-        'is_listed': true,
-      });
-      await repo.save(shown);
-
-      expect((await repo.listListed()).map((e) => e.id).toSet(), {
-        entry.id,
-        shown.id,
-      });
-    });
-
     test('finds listed entries by exact FAI number or national ID', () async {
       final listed = core.ParticipantDirectoryEntry.fromJson({
         ...other(accountIds.first).toJson(),

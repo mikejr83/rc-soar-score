@@ -383,8 +383,8 @@ void main() {
       updatedAt: DateTime.utc(2026, 11, 1),
     );
 
-    expect(candidate.isCopiedIn([own]), isTrue);
-    expect(candidate.isCopiedIn(const []), isFalse);
+    expect(candidate.copiesIn([own]), isNotEmpty);
+    expect(candidate.copiesIn(const []), isEmpty);
   });
 
   test(
@@ -405,8 +405,8 @@ void main() {
       );
 
       expect(candidate.directory!.email, isNull);
-      expect(candidate.isCopiedIn([own('Bea@Example.com', 'other')]), isTrue);
-      expect(candidate.isCopiedIn([own('x@example.com', 'other')]), isFalse);
+      expect(candidate.copiesIn([own('Bea@Example.com', 'other')]), isNotEmpty);
+      expect(candidate.copiesIn([own('x@example.com', 'other')]), isEmpty);
     },
   );
 
@@ -473,7 +473,7 @@ void main() {
       createdAt: DateTime.utc(2026, 11, 1),
       updatedAt: DateTime.utc(2026, 11, 1),
     );
-    expect(candidate.isCopiedIn([own]), isTrue);
+    expect(candidate.copiesIn([own]), isNotEmpty);
   });
 
   test(

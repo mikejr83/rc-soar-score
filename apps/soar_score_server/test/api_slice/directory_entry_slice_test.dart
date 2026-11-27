@@ -153,7 +153,8 @@ void _tests(SliceBackend backend) {
     expect(entryOf(unlisted)['fai_number'], '12345');
     expect(unlisted.body['email_available'], isFalse);
     expect(
-      await repository.participantDirectoryEntryRepository.listListed(),
+      await repository.participantDirectoryEntryRepository
+          .listListedByFaiNumber('12345'),
       isEmpty,
     );
   });
@@ -199,6 +200,29 @@ void _tests(SliceBackend backend) {
     expect((await api.actAs(pat, 'GET', _path)).body['entry'], isNotNull);
   });
 
+  test('a concurrent first save becomes an update of the winner', () async {
+    final pat = await account(core.AccountKind.registered);
+    final racing = _RivalFirstSave(api.database, pat, now);
+
+    final saved = await core.DirectoryEntryService(racing, clock: () => now)
+        .put(
+          accountId: pat,
+          firstName: 'Patricia',
+          lastName: 'Pilot',
+          isListed: true,
+          emailVisibleToDirectors: false,
+        );
+
+    // One entry: the rival's id, with this save's details.
+    final stored = await repository.participantDirectoryEntryRepository
+        .findForAccount(pat);
+    expect(racing.rivalSaved, isTrue);
+    expect(stored!.id, racing.rivalId);
+    expect(stored.firstName, 'Patricia');
+    expect(saved.entry!.id, racing.rivalId);
+    expect(saved.entry!.firstName, 'Patricia');
+  });
+
   for (final kind in [
     core.AccountKind.guest,
     core.AccountKind.local,
@@ -226,4 +250,74 @@ void _tests(SliceBackend backend) {
       );
     });
   }
+}
+
+/// A repository whose first directory-entry save is preceded by another
+/// request storing the account's entry, as a concurrent first save would.
+class _RivalFirstSave extends Repository {
+  _RivalFirstSave(super.db, this.accountId, this.now);
+
+  final core.Id accountId;
+  final DateTime now;
+  final rivalId = core.Id.create();
+  bool rivalSaved = false;
+
+  late final _entries = _RivalEntries(
+    super.participantDirectoryEntryRepository,
+    this,
+  );
+
+  @override
+  core.ParticipantDirectoryEntryRepository
+  get participantDirectoryEntryRepository => _entries;
+}
+
+class _RivalEntries implements core.ParticipantDirectoryEntryRepository {
+  _RivalEntries(this._real, this._owner);
+
+  final core.ParticipantDirectoryEntryRepository _real;
+  final _RivalFirstSave _owner;
+
+  @override
+  Future<core.ParticipantDirectoryEntry> save(
+    core.ParticipantDirectoryEntry entry,
+  ) async {
+    if (!_owner.rivalSaved) {
+      _owner.rivalSaved = true;
+      await _real.save(
+        core.ParticipantDirectoryEntry(
+          id: _owner.rivalId,
+          accountId: _owner.accountId,
+          firstName: 'Pat',
+          lastName: 'Pilot',
+          isListed: true,
+          emailVisibleToDirectors: false,
+          createdAt: _owner.now,
+          updatedAt: _owner.now,
+        ),
+      );
+    }
+    return _real.save(entry);
+  }
+
+  @override
+  Future<core.ParticipantDirectoryEntry?> findById(core.Id id) =>
+      _real.findById(id);
+
+  @override
+  Future<core.ParticipantDirectoryEntry?> findForAccount(core.Id accountId) =>
+      _real.findForAccount(accountId);
+
+  @override
+  Future<List<core.ParticipantDirectoryEntry>> listListedByFaiNumber(
+    String faiNumber,
+  ) => _real.listListedByFaiNumber(faiNumber);
+
+  @override
+  Future<List<core.ParticipantDirectoryEntry>> listListedByNationalOrgId(
+    String nationalOrgId,
+  ) => _real.listListedByNationalOrgId(nationalOrgId);
+
+  @override
+  Future<bool> remove(core.Id id) => _real.remove(id);
 }

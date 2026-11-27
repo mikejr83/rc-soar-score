@@ -5,13 +5,15 @@ import 'package:soar_score_data/soar_score_data.dart';
 /// by a test, to place two requests exactly where a race would.
 ///
 /// Everything else is the real database. [afterRedeem] runs after a
-/// conditional redemption has been written; [beforeClaim] runs before a
+/// conditional redemption has been written; [beforeRedeem] runs before one is
+/// written (with the account whose link it needs, if any); [beforeClaim] runs before a
 /// guest claim is written and [afterClaim] after it was; [beforeRelease]
 /// runs before a link is ended and its invitations released.
 class GatedRepository extends Repository {
   GatedRepository(super.db);
 
   Future<void> Function(core.Id newRedeemer, bool applied)? afterRedeem;
+  Future<void> Function(core.Id newRedeemer, bool needsLink)? beforeRedeem;
   Future<void> Function()? beforeClaim;
   Future<void> Function()? afterClaim;
   Future<void> Function()? beforeRelease;
@@ -39,12 +41,15 @@ class _GatedInvitations implements core.InvitationRepository {
     required core.Id? expectedRedeemer,
     required core.Id newRedeemer,
     required DateTime usedAt,
+    ({core.Id profileId, core.Id accountId})? requireConfirmedLinkOf,
   }) async {
+    await _gate.beforeRedeem?.call(newRedeemer, requireConfirmedLinkOf != null);
     final applied = await _real.redeem(
       invitationId,
       expectedRedeemer: expectedRedeemer,
       newRedeemer: newRedeemer,
       usedAt: usedAt,
+      requireConfirmedLinkOf: requireConfirmedLinkOf,
     );
     await _gate.afterRedeem?.call(newRedeemer, applied);
     return applied;

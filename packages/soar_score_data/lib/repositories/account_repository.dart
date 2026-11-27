@@ -31,10 +31,33 @@ class AccountRepository extends DriftRepository
   }
 
   @override
-  Future<core.Account> save(core.Account account) async {
-    await _store.upsertJson(_store.encode(account));
-    return account;
-  }
+  Future<core.Account> save(core.Account account) => db.transaction(() async {
+    // A full-row save from an account read earlier must not move the refresh
+    // time back: a refresh claimed since then stays claimed.
+    // The row is locked first (PostgreSQL; SQLite has one writer), so a claim
+    // cannot land between this read and the write and be overwritten.
+    final lock = db.executor.dialect == SqlDialect.postgres
+        ? ' FOR UPDATE'
+        : '';
+    final stored = await db
+        .customSelect(
+          portableSql(
+            db,
+            'SELECT profile_refreshed_at FROM accounts WHERE id = ?$lock',
+          ),
+          variables: [Variable<String>(account.id.value)],
+        )
+        .getSingleOrNull();
+    final storedAt = stored?.data['profile_refreshed_at'] as String?;
+    final json = _store.encode(account);
+    final incoming = json['profile_refreshed_at'] as String?;
+    if (storedAt != null &&
+        (incoming == null || storedAt.compareTo(incoming) > 0)) {
+      json['profile_refreshed_at'] = storedAt;
+    }
+    await _store.upsertJson(json);
+    return _store.decode(json);
+  });
 
   @override
   Future<bool> claimProfileRefresh(

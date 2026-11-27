@@ -56,11 +56,18 @@ abstract interface class InvitationRepository {
   /// overwrite each other or any other field. Returns whether it applied;
   /// false means another open changed the redeemer first, or the invitation
   /// is no longer active.
+  ///
+  /// With [requireConfirmedLinkOf] (the profile and the account that opens),
+  /// the write also needs that account's Confirmed link to the profile at
+  /// that moment, taken under the link's row lock, so an unlink that wins the
+  /// lock first leaves the invitation alone (false) and one that comes second
+  /// releases it.
   Future<bool> redeem(
     Id invitationId, {
     required Id? expectedRedeemer,
     required Id newRedeemer,
     required DateTime usedAt,
+    ({Id profileId, Id accountId})? requireConfirmedLinkOf,
   });
 
   /// Stores every invitation in [invitations] and every event in [audits] in
