@@ -12,7 +12,16 @@ class FakePilotInvitationSource implements PilotInvitationSource {
     this.failReadAfterSend = false,
     this.readGate,
     this.sendGate,
+    this.email,
+    this.emailStatus = const {},
   });
+
+  /// What the email step reports, by participation id; `null` means no email
+  /// was attempted. Called with the ids that were sent.
+  final InvitationEmailReport Function(List<Id> ids)? email;
+
+  /// Stored email statuses the read returns, by participation id.
+  Map<String, String> emailStatus;
 
   final Completer<void>? readGate;
   final Completer<void>? sendGate;
@@ -32,12 +41,17 @@ class FakePilotInvitationSource implements PilotInvitationSource {
     }
     return PilotInvitations(
       links: Map.of(links),
+      emailStatus: Map.of(emailStatus),
       sendUnavailableReason: reason,
     );
   }
 
   @override
-  Future<void> send(ApiClient client, Id contestId, List<Id> ids) async {
+  Future<InvitationEmailReport> send(
+    ApiClient client,
+    Id contestId,
+    List<Id> ids,
+  ) async {
     await sendGate?.future;
     if (failSend) throw StateError('no');
     _sentOnce = true;
@@ -46,5 +60,6 @@ class FakePilotInvitationSource implements PilotInvitationSource {
       ...links,
       for (final id in ids) id.value: 'https://x.test/${id.value}',
     };
+    return email?.call(ids) ?? const InvitationEmailReport.none();
   }
 }

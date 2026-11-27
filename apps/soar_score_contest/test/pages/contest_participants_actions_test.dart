@@ -86,9 +86,10 @@ void main() {
       expect(tester.widget<Checkbox>(_check(1)).value, isFalse);
       expect(tester.widget<Checkbox>(_check(2)).value, isTrue);
       await openRow(tester, 1);
+      // Everyone has a link now: the same action sends again.
       expect(
         tester.widget<MenuItemButton>(rowAction('send', 1)).onPressed,
-        isNull,
+        isNotNull,
       );
       expect(
         tester.widget<MenuItemButton>(rowAction('copy', 1)).onPressed,
@@ -194,12 +195,12 @@ void main() {
         links: {personParticipationId(1).value: 'https://x.test/one'},
       );
       await pumpParticipantsPage(tester, ParticipantsServer(retiredPilot: 1));
-      // The retired pilot already has a link: Copy works, Send has nothing
-      // to do.
+      // The retired pilot already has a link: Copy works, and Send sends
+      // again (the email again).
       await openRow(tester, 1);
       expect(
         tester.widget<MenuItemButton>(rowAction('send', 1)).onPressed,
-        isNull,
+        isNotNull,
       );
       expect(
         tester.widget<MenuItemButton>(rowAction('copy', 1)).onPressed,
@@ -270,7 +271,7 @@ void main() {
     ]);
   });
 
-  testWidgets('multiple selection sends only eligible pilots without links', (
+  testWidgets('multiple selection sends every selected pilot, not non-pilots', (
     tester,
   ) async {
     final source = FakePilotInvitationSource(
@@ -287,8 +288,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('cards-send-confirm')));
     await tester.pumpAndSettle();
+    // Pilot 1 already has a link and is sent again; the non-pilot is not.
     expect(source.sent, [
-      [personParticipationId(2)],
+      [personParticipationId(1), personParticipationId(2)],
     ]);
   });
 

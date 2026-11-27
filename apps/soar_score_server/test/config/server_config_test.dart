@@ -45,6 +45,28 @@ void main() {
       );
     });
 
+    test('SES_FEEDBACK_TOPIC_ARN is optional and must be an SNS topic ARN', () {
+      expect(ServerConfig.parse(minimal).sesFeedbackTopic, isNull);
+      final ok = ServerConfig.parse({
+        ...minimal,
+        'SES_FEEDBACK_TOPIC_ARN': 'arn:aws:sns:us-east-2:123456789012:feedback',
+      });
+      expect(ok.sesFeedbackTopic!.host, 'sns.us-east-2.amazonaws.com');
+      expect(
+        () => ServerConfig.parse({
+          ...minimal,
+          'SES_FEEDBACK_TOPIC_ARN': 'not-an-arn',
+        }),
+        throwsA(
+          isA<ConfigException>().having(
+            (e) => e.toString(),
+            'message',
+            contains('SES_FEEDBACK_TOPIC_ARN'),
+          ),
+        ),
+      );
+    });
+
     test('SELF_SCORING_BASE_URL is an http(s) origin and optional', () {
       expect(ServerConfig.parse(minimal).selfScoringBaseUrl, isNull);
       expect(

@@ -6,7 +6,9 @@
   X-Robots-Tag: noindex, nofollow
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
   Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-inline' https://cdn.auth0.com https://cdn.flutter.io https://www.gstatic.com/flutter-canvaskit/; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.rcsoarscore.com https://login.rcsoarscore.com https://www.gstatic.com/flutter-canvaskit/ https://lh3.googleusercontent.com https://lh4.googleusercontent.com https://graph.facebook.com https://*.fbcdn.net https://avatars.githubusercontent.com https://pbs.twimg.com https://abs.twimg.com https://is1-ssl.mzstatic.com https://media.licdn.com https://static.licdn.com https://s.yimg.com https://s.gravatar.com https://secure.gravatar.com https://www.gravatar.com; img-src 'self' data: blob: https://lh3.googleusercontent.com https://lh4.googleusercontent.com https://graph.facebook.com https://*.fbcdn.net https://avatars.githubusercontent.com https://pbs.twimg.com https://abs.twimg.com https://is1-ssl.mzstatic.com https://media.licdn.com https://static.licdn.com https://s.yimg.com https://s.gravatar.com https://secure.gravatar.com https://www.gravatar.com; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'
 
 # Entry points and version files must always revalidate so deploys are picked up.
 /

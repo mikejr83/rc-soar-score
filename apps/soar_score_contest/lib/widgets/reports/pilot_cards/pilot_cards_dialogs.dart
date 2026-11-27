@@ -92,9 +92,15 @@ Future<bool> remindAboutMissingQr({
       return true;
     case _Reminder.sendAndPrint:
       if (!context.mounted) return false;
-      return sendInvitationsGuarded(context, session, [
-        for (final p in missing) p.participationId,
-      ], announce: false);
+      return sendInvitationsGuarded(
+        context,
+        session,
+        [for (final p in selected) p.participationId],
+        announce: false,
+        names: {
+          for (final p in selected) p.participationId.value: p.givenSurname,
+        },
+      );
     case _Reminder.cancel:
     case null:
       return false;
@@ -117,7 +123,7 @@ List<ReportBanner> invitationBanners({
           kind: ViewerBannerKind.neutral,
           icon: Icons.hourglass_top,
           lead: l10n.pilotCardsSendingLead,
-          text: l10n.pilotCardsSendingText(missing.length),
+          text: l10n.pilotCardsSendingText(selected.length),
           busy: true,
           key: const ValueKey('cards-banner-sending'),
         ),
@@ -132,7 +138,7 @@ List<ReportBanner> invitationBanners({
           actions: [
             ReportBannerAction(
               l10n.pilotCardsRetry,
-              (context) => _send(context, session, missing),
+              (context) => _send(context, session, selected),
               filled: true,
               key: const ValueKey('cards-banner-retry'),
             ),
@@ -197,8 +203,32 @@ List<ReportBanner> invitationBanners({
     case InvitationPhase.sent:
       break;
   }
-  if (missing.isEmpty || selected.isEmpty) {
+  if (selected.isEmpty) {
     return const [];
+  }
+  if (missing.isEmpty) {
+    // Every selected card has its code: sending again re-emails the pilots.
+    if (!online ||
+        !invitations.synchronized ||
+        sendUnavailableText(l10n, invitations) != null) {
+      return const [];
+    }
+    return [
+      ReportBanner(
+        kind: ViewerBannerKind.neutral,
+        icon: Icons.qr_code_2,
+        lead: l10n.pilotCardsResendLead,
+        text: l10n.pilotCardsResendText,
+        actions: [
+          ReportBannerAction(
+            l10n.pilotCardsSendAction,
+            (context) => _send(context, session, selected),
+            key: const ValueKey('cards-banner-resend-action'),
+          ),
+        ],
+        key: const ValueKey('cards-banner-resend'),
+      ),
+    ];
   }
   if (!invitations.synchronized) {
     return [
@@ -237,7 +267,9 @@ List<ReportBanner> invitationBanners({
       actions: [
         ReportBannerAction(
           l10n.pilotCardsSendAction,
-          reason == null ? (context) => _send(context, session, missing) : null,
+          reason == null
+              ? (context) => _send(context, session, selected)
+              : null,
           filled: true,
           key: const ValueKey('cards-banner-send'),
         ),
@@ -247,12 +279,18 @@ List<ReportBanner> invitationBanners({
   ];
 }
 
+/// Sends to every selected pilot: links are created for those without one and
+/// every pilot with an address is emailed, so this is also how to send again.
 Future<void> _send(
   BuildContext context,
   PilotInvitationSession session,
-  List<ReportPilot> missing,
+  List<ReportPilot> selected,
 ) async {
-  await sendInvitationsGuarded(context, session, [
-    for (final p in missing) p.participationId,
-  ], announce: false);
+  await sendInvitationsGuarded(
+    context,
+    session,
+    [for (final p in selected) p.participationId],
+    announce: false,
+    names: {for (final p in selected) p.participationId.value: p.givenSurname},
+  );
 }

@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show QueryExecutor, QueryInterceptor;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:test/test.dart';
@@ -12,9 +13,14 @@ void main() => forEachBackend(_tests);
 void _tests(Backend backend) {
   late Installation inst;
   late Repository repository;
+  final counter = _StatementCounter();
 
   setUp(() async {
-    inst = await Installation.open(backend, profile: DatabaseProfile.server);
+    inst = await Installation.open(
+      backend,
+      profile: DatabaseProfile.server,
+      interceptor: counter,
+    );
     await loadExamples(inst);
     repository = Repository(inst.db);
   });
@@ -91,6 +97,74 @@ void _tests(Backend backend) {
         ),
       );
     });
+
+    test('lists by assignments in creation order', () async {
+      final ids = {for (final p in placeholders.take(2)) p.assignmentId};
+      final expected =
+          placeholders.where((p) => ids.contains(p.assignmentId)).toList()
+            ..sort((a, b) => a.id.compareTo(b.id));
+
+      expect(await repo.listForAssignments(ids), expected);
+      expect(await repo.listForAssignments(const []), isEmpty);
+    });
+
+    test(
+      'keeps creation order and the statement count across 400-id chunks',
+      () async {
+        final assignmentTemplate = exampleRows('matrix_assignment').first;
+        final placeholderTemplate = placeholders.first.toJson();
+        final supersededBy = assignmentTemplate['id'] as String;
+        final created = <core.ScorePlaceholder>[];
+        final assignmentIds = <core.Id>[];
+        for (var i = 0; i < 401; i++) {
+          final assignmentId = core.Id.create();
+          // Superseded rows are excluded from the live-assignment unique
+          // indexes, so they need no distinct participation or round.
+          await inst.stores.of('MatrixAssignment').upsertJson({
+            ...assignmentTemplate,
+            'id': assignmentId.value,
+            'superseded_by_assignment_id': supersededBy,
+          });
+          final placeholder = core.ScorePlaceholder.fromJson({
+            ...placeholderTemplate,
+            'id': core.Id.create().value,
+            'assignment_id': assignmentId.value,
+          });
+          await inst.stores
+              .of('ScorePlaceholder')
+              .upsertJson(placeholder.toJson());
+          assignmentIds.add(assignmentId);
+          created.add(placeholder);
+        }
+
+        // Id.create is time-ordered, so created is in creation (id) order.
+        final byId = created.toList()..sort((a, b) => a.id.compareTo(b.id));
+        expect(created, byId);
+
+        // The earliest-created placeholder's assignment is last, so its row
+        // comes from the second 400-id chunk.
+        final input = [...assignmentIds.sublist(1), assignmentIds.first];
+        expect(await repo.listForAssignments(input), created);
+
+        counter.reset();
+        await repo.listForAssignments(input);
+        expect(counter.selectsOf('score_placeholders'), 2);
+        counter.reset();
+        await repo.listForAssignments(input.take(400));
+        expect(counter.selectsOf('score_placeholders'), 1);
+
+        // The freshness-check reads of ResultsService.round: every
+        // placeholder of the contest, then every current official score.
+        counter.reset();
+        await repo.listForContest(placeholders.first.contestId);
+        expect(counter.selectsOf('score_placeholders'), 1);
+        counter.reset();
+        await repository.officialScoreRepository.currentForPlaceholders([
+          for (final placeholder in created) placeholder.id,
+        ]);
+        expect(counter.selectsOf('official_scores'), 2);
+      },
+    );
 
     test('save bumps the revision and refuses a stale copy', () async {
       final saved = await repo.save(
@@ -354,4 +428,26 @@ void _tests(Backend backend) {
       );
     });
   });
+}
+
+/// Counts the SELECT statements a database runs, for the chunk-boundary
+/// assertions.
+class _StatementCounter extends QueryInterceptor {
+  final List<String> _selects = [];
+
+  void reset() => _selects.clear();
+
+  /// How many SELECTs since the last [reset] read from [table].
+  int selectsOf(String table) =>
+      _selects.where((s) => RegExp('\\b$table\\b').hasMatch(s)).length;
+
+  @override
+  Future<List<Map<String, Object?>>> runSelect(
+    QueryExecutor executor,
+    String statement,
+    List<Object?> args,
+  ) {
+    _selects.add(statement);
+    return super.runSelect(executor, statement, args);
+  }
 }

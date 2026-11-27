@@ -26,6 +26,10 @@ abstract interface class ScorePlaceholderRepository {
     Id contestParticipationId,
   );
 
+  /// The placeholders of the assignments in [assignmentIds], in the order
+  /// they were created.
+  Future<List<ScorePlaceholder>> listForAssignments(Iterable<Id> assignmentIds);
+
   /// Inserts [placeholder], or updates the stored row with the same id.
   ///
   /// Throws a `StaleRevisionError` when it was read at an older revision.

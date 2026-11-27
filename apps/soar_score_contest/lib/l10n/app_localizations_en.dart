@@ -4224,7 +4224,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pilotCardsSendBody =>
-      'QR codes will be created for these pilots, and each of these cards will carry one. Nobody is emailed: print the cards to hand them out.';
+      'A link and QR code will be created for each of these pilots who has none, so the cards can carry them. Pilots with an email address on file are also emailed their link.';
 
   @override
   String pilotCardsQrCount(int count) {
@@ -4346,8 +4346,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pilotCardsSentLead => 'QR codes created.';
 
   @override
-  String get pilotCardsSentText =>
-      'The cards now carry them. Nothing was emailed.';
+  String get pilotCardsSentText => 'The cards now carry them.';
 
   @override
   String get pilotCardsDismiss => 'Dismiss';
@@ -4397,6 +4396,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get pilotCardsResendLead => 'Every card has a QR code.';
+
+  @override
+  String get pilotCardsResendText =>
+      'To email these pilots their link again, send invitations. Nothing new is created.';
+
+  @override
   String get pilotCardsSendAction => 'Send invitations';
 
   @override
@@ -4421,7 +4427,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$total pilots have',
       one: '1 pilot has',
     );
-    return '$have of $_temp0 a QR code. Sending creates the rest. Nobody is emailed.';
+    return '$have of $_temp0 a QR code. Sending creates the rest and emails the pilots who have an address.';
   }
 
   @override
@@ -4432,7 +4438,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: 'All $total pilots have',
       one: 'The pilot has',
     );
-    return '$_temp0 a QR code. Print the pilot cards to hand them out.';
+    return '$_temp0 a QR code. Print the pilot cards to hand them out, or send again to email the link again.';
   }
 
   @override
@@ -4444,15 +4450,101 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String invitationsSentSnack(int count) {
+  String invitationsSentSnack(int count, int emailed) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count invitations created',
-      one: '1 invitation created',
+      other: '$count invitations sent',
+      one: '1 invitation sent',
     );
-    return '$_temp0. Nobody was emailed.';
+    String _temp1 = intl.Intl.pluralLogic(
+      emailed,
+      locale: localeName,
+      other: '$emailed pilots emailed.',
+      one: '1 pilot emailed.',
+      zero: 'Nobody was emailed.',
+    );
+    return '$_temp0. $_temp1';
   }
+
+  @override
+  String invitationsSentUnconfirmedSnack(int count, int emailed, int unknown) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count invitations sent',
+      one: '1 invitation sent',
+    );
+    return '$_temp0. $emailed confirmed emailed, $unknown not confirmed: they may or may not have been emailed, so check before sending again.';
+  }
+
+  @override
+  String invitationsResultUnnamed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pilots whose names could not be loaded',
+      one: '1 pilot whose name could not be loaded',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String invitationsSentNoAddressNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pilots have no email address on file.',
+      one: '1 pilot has no email address on file.',
+    );
+    return ' $_temp0';
+  }
+
+  @override
+  String get invitationsSendNamesTitle => 'Sending to';
+
+  @override
+  String get invitationsSendEmailNote =>
+      'Pilots with an email address on file are emailed their link from the notifications address. Replies to that address are not read. The link and QR code work whatever happens to the email.';
+
+  @override
+  String invitationsSendAgainNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count of these pilots were emailed before and will be emailed again.',
+      one: '1 of these pilots was emailed before and will be emailed again.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get invitationsResultTitle => 'Some pilots were not emailed';
+
+  @override
+  String get invitationsResultLead =>
+      'The links and QR codes are ready. Copy these pilots\' links or print their cards to hand them over.';
+
+  @override
+  String get invitationsResultServiceDown =>
+      'Email could not be sent right now, so nobody was emailed. The links and QR codes are ready: copy them or print the cards, or send again later.';
+
+  @override
+  String get invitationsResultNoAddress => 'No email address on file';
+
+  @override
+  String get invitationsResultNotSent => 'Email not sent';
+
+  @override
+  String get invitationsResultLimit =>
+      'Hourly limit of emails reached. Send again later';
+
+  @override
+  String get invitationsResultUnknown => 'May or may not have been sent';
+
+  @override
+  String get invitationsResultClose => 'Close';
 
   @override
   String get invitationsSentNotLoadedSnack =>
@@ -4481,10 +4573,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invitationsSelectOne => 'Select one pilot to copy a link.';
-
-  @override
-  String get invitationsAllHaveLinks =>
-      'The selected pilots already have an invitation.';
 
   @override
   String get invitationsNoLinkYet =>
@@ -4518,10 +4606,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get participantActions => 'Participant actions';
-
-  @override
-  String get participantInvitationExists =>
-      'This pilot already has an invitation.';
 
   @override
   String get participantRemoveHasFlights =>

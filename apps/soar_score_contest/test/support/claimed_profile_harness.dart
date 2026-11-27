@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:soar_score_api/soar_score_api.dart';
@@ -48,6 +49,12 @@ class ClaimedProfileHarness {
   late LocalAccountClaimer claimer;
   final problems = <SyncProblem?>[];
 
+  /// Completes when the claimer first brackets a re-pointing on this start of
+  /// the app, so a test waits for the claim itself rather than for event-loop
+  /// turns.
+  Completer<void> _claimStarted = Completer<void>();
+  Future<void> get claimStarted => _claimStarted.future;
+
   /// Runs after the Local data was re-pointed (and committed) but before the
   /// claimer carries on, so a test can sign out at that exact moment.
   Future<void> Function()? afterReassign;
@@ -79,6 +86,7 @@ class ClaimedProfileHarness {
       baseUrl: server.baseUrl,
       tokenProvider: () async => server.secret,
     );
+    _claimStarted = Completer<void>();
     auth = SubjectAuthSession(subject: subject);
     final epoch = AuthEpoch(auth);
     acting = ActingAccount(server, epoch);
@@ -91,7 +99,11 @@ class ClaimedProfileHarness {
       ),
       claim: (request) => claim(request),
       onSignedIn: acting.signedIn,
-      onClaimStarting: acting.claimStarting,
+      onClaimStarting: (id, subject) {
+        final bracketed = acting.claimStarting(id, subject);
+        if (!_claimStarted.isCompleted) _claimStarted.complete();
+        return bracketed;
+      },
       onClaimRecorded: acting.claimRecorded,
       onClaimFinished: acting.claimFinished,
       onClaimPostponed: () {

@@ -6330,10 +6330,10 @@ abstract class AppLocalizations {
   /// **'Send invitations?'**
   String get pilotCardsSendTitle;
 
-  /// Body of the confirmation before QR codes are created. Issuing never emails.
+  /// Body of the confirmation before invitations are sent: links and QR codes are created, and pilots with an address are emailed.
   ///
   /// In en, this message translates to:
-  /// **'QR codes will be created for these pilots, and each of these cards will carry one. Nobody is emailed: print the cards to hand them out.'**
+  /// **'A link and QR code will be created for each of these pilots who has none, so the cards can carry them. Pilots with an email address on file are also emailed their link.'**
   String get pilotCardsSendBody;
 
   /// How many QR codes will be created.
@@ -6483,7 +6483,7 @@ abstract class AppLocalizations {
   /// Text of the banner after the QR codes were created.
   ///
   /// In en, this message translates to:
-  /// **'The cards now carry them. Nothing was emailed.'**
+  /// **'The cards now carry them.'**
   String get pilotCardsSentText;
 
   /// Dismiss button on the QR codes created banner.
@@ -6552,6 +6552,18 @@ abstract class AppLocalizations {
   /// **'{reason} You can still print without QR codes.'**
   String pilotCardsMissingReason(String reason);
 
+  /// Lead of the banner shown when every selected pilot already has an invitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Every card has a QR code.'**
+  String get pilotCardsResendLead;
+
+  /// Text of the banner that offers to send invitations again to the selected pilots.
+  ///
+  /// In en, this message translates to:
+  /// **'To email these pilots their link again, send invitations. Nothing new is created.'**
+  String get pilotCardsResendText;
+
   /// Button on the banner that creates the QR codes.
   ///
   /// In en, this message translates to:
@@ -6585,13 +6597,13 @@ abstract class AppLocalizations {
   /// Workspace invitations card text when some pilots have no invitation.
   ///
   /// In en, this message translates to:
-  /// **'{have} of {total, plural, =1{1 pilot has} other{{total} pilots have}} a QR code. Sending creates the rest. Nobody is emailed.'**
+  /// **'{have} of {total, plural, =1{1 pilot has} other{{total} pilots have}} a QR code. Sending creates the rest and emails the pilots who have an address.'**
   String invitationsCoverage(int have, int total);
 
   /// Workspace invitations card text when every pilot has an invitation.
   ///
   /// In en, this message translates to:
-  /// **'{total, plural, =1{The pilot has} other{All {total} pilots have}} a QR code. Print the pilot cards to hand them out.'**
+  /// **'{total, plural, =1{The pilot has} other{All {total} pilots have}} a QR code. Print the pilot cards to hand them out, or send again to email the link again.'**
   String invitationsCoverageAll(int total);
 
   /// Button on the workspace invitations card that opens the pilot cards report.
@@ -6600,17 +6612,101 @@ abstract class AppLocalizations {
   /// **'Open pilot cards'**
   String get invitationsOpenCards;
 
-  /// Workspace button that sends invitations to the pilots who have none.
+  /// Workspace button that sends invitations to the pilots who have none and emails those who have an address.
   ///
   /// In en, this message translates to:
   /// **'Send invitations ({count})'**
   String invitationsSendMissing(int count);
 
-  /// Snack bar after invitations were created.
+  /// Snack bar after invitations were sent: how many pilots were sent one and how many were emailed.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 invitation created} other{{count} invitations created}}. Nobody was emailed.'**
-  String invitationsSentSnack(int count);
+  /// **'{count, plural, =1{1 invitation sent} other{{count} invitations sent}}. {emailed, plural, =0{Nobody was emailed.} =1{1 pilot emailed.} other{{emailed} pilots emailed.}}'**
+  String invitationsSentSnack(int count, int emailed);
+
+  /// Snack bar after sending when the outcome of some emails is unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 invitation sent} other{{count} invitations sent}}. {emailed} confirmed emailed, {unknown} not confirmed: they may or may not have been emailed, so check before sending again.'**
+  String invitationsSentUnconfirmedSnack(int count, int emailed, int unknown);
+
+  /// Shown in the send result dialog for pilots whose names are not known, so they are still counted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 pilot whose name could not be loaded} other{{count} pilots whose names could not be loaded}}'**
+  String invitationsResultUnnamed(int count);
+
+  /// Added to the snack bar after sending when some pilots have no email address, so only their link exists.
+  ///
+  /// In en, this message translates to:
+  /// **' {count, plural, =1{1 pilot has no email address on file.} other{{count} pilots have no email address on file.}}'**
+  String invitationsSentNoAddressNote(int count);
+
+  /// Heading above the names of the pilots in the send invitations confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending to'**
+  String get invitationsSendNamesTitle;
+
+  /// Note in the send invitations confirmation about how the email is sent and that the link never depends on it.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots with an email address on file are emailed their link from the notifications address. Replies to that address are not read. The link and QR code work whatever happens to the email.'**
+  String get invitationsSendEmailNote;
+
+  /// Note in the send invitations confirmation when some pilots were already emailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 of these pilots was emailed before and will be emailed again.} other{{count} of these pilots were emailed before and will be emailed again.}}'**
+  String invitationsSendAgainNote(int count);
+
+  /// Title of the dialog after sending when some pilots could not be emailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Some pilots were not emailed'**
+  String get invitationsResultTitle;
+
+  /// Lead of the dialog listing the pilots who were not emailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The links and QR codes are ready. Copy these pilots\' links or print their cards to hand them over.'**
+  String get invitationsResultLead;
+
+  /// Dialog text when the server could not send email at all after the links were created.
+  ///
+  /// In en, this message translates to:
+  /// **'Email could not be sent right now, so nobody was emailed. The links and QR codes are ready: copy them or print the cards, or send again later.'**
+  String get invitationsResultServiceDown;
+
+  /// Heading above the pilots who have no email address in the send result.
+  ///
+  /// In en, this message translates to:
+  /// **'No email address on file'**
+  String get invitationsResultNoAddress;
+
+  /// Heading above the pilots whose email the mail service refused or could not send.
+  ///
+  /// In en, this message translates to:
+  /// **'Email not sent'**
+  String get invitationsResultNotSent;
+
+  /// Heading above the pilots who were not emailed because the hourly limit was reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly limit of emails reached. Send again later'**
+  String get invitationsResultLimit;
+
+  /// Heading above the pilots whose email has an unknown outcome.
+  ///
+  /// In en, this message translates to:
+  /// **'May or may not have been sent'**
+  String get invitationsResultUnknown;
+
+  /// Button that closes the send result dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get invitationsResultClose;
 
   /// Snack bar after invitations were created but could not be read back.
   ///
@@ -6630,13 +6726,13 @@ abstract class AppLocalizations {
   /// **'Invitations'**
   String get invitationsMenu;
 
-  /// Participants invitations menu item that creates invitations for the selected pilots.
+  /// Participants invitations menu item that sends invitations to the selected pilots: creates links for those who have none and emails every pilot with an address.
   ///
   /// In en, this message translates to:
   /// **'Send invitations'**
   String get invitationsMenuSend;
 
-  /// Participants invitations menu item with the number of selected pilots that have none.
+  /// Participants invitations menu item with the number of selected pilots it sends to.
   ///
   /// In en, this message translates to:
   /// **'Send invitations ({count})'**
@@ -6659,12 +6755,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select one pilot to copy a link.'**
   String get invitationsSelectOne;
-
-  /// Reason sending is off: every selected pilot has an invitation.
-  ///
-  /// In en, this message translates to:
-  /// **'The selected pilots already have an invitation.'**
-  String get invitationsAllHaveLinks;
 
   /// Reason the copy link item is off: the pilot has no invitation.
   ///
@@ -6725,12 +6815,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Participant actions'**
   String get participantActions;
-
-  /// Reason Send invitation is off in a participant row menu: the pilot already has one.
-  ///
-  /// In en, this message translates to:
-  /// **'This pilot already has an invitation.'**
-  String get participantInvitationExists;
 
   /// Reason Remove is off in a participant row menu: the pilot has flights.
   ///

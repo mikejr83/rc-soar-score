@@ -890,6 +890,27 @@ class ApiClient {
     );
   }
 
+  /// `POST /api/v1/contests/{id}/invitations/email` — emails the active
+  /// invitation link of each pilot in [request] that has an address (#790).
+  ///
+  /// The link exists whatever the outcome. Repeating the same request id
+  /// sends nothing again and returns the stored outcomes; a resend uses a new
+  /// request id. A pilot that cannot be emailed comes back with a `skipped`
+  /// reason. A server that cannot send email answers 409
+  /// `email_not_available`.
+  Future<EmailInvitationsResponse> emailInvitations(
+    Id id,
+    EmailInvitationsRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/contests/${id.value}/invitations/email');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<EmailInvitationsResponse>(
+      response,
+      uri,
+      EmailInvitationsResponse.fromJson,
+    );
+  }
+
   /// `POST /api/v1/contests/{id}/participations` — adds one of the caller's
   /// profiles to contest [id].
   ///
