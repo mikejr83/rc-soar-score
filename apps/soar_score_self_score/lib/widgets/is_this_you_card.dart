@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../auth/sign_in_again.dart';
 import '../data/self_score_repository.dart';
 import '../l10n/app_localizations.dart';
 import '../models/link_candidate.dart';
@@ -38,6 +39,9 @@ class _IsThisYouCardState extends State<IsThisYouCard> {
   /// answers, so a second request cannot race the dismissal.
   bool _gone = false;
   String? _error;
+
+  /// The answer failed because the server no longer accepts the sign-in.
+  bool _signedOut = false;
   Timer? _dismissal;
 
   @override
@@ -52,6 +56,7 @@ class _IsThisYouCardState extends State<IsThisYouCard> {
     setState(() {
       _busy = true;
       _error = null;
+      _signedOut = false;
     });
     try {
       await send();
@@ -77,6 +82,7 @@ class _IsThisYouCardState extends State<IsThisYouCard> {
       if (mounted) {
         setState(() {
           _busy = false;
+          _signedOut = true;
           _error = AppLocalizations.of(context).accountSignInEnded;
         });
       }
@@ -156,6 +162,15 @@ class _IsThisYouCardState extends State<IsThisYouCard> {
                   color: scheme.error,
                 ),
               ),
+              if (_signedOut)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    key: const Key('is-this-you-sign-in-again'),
+                    onPressed: () => signInAgain(context),
+                    child: Text(l10n.signInAgainButton),
+                  ),
+                ),
             ],
             const SizedBox(height: 14),
             Row(
