@@ -33,9 +33,13 @@ void main() {
     );
   });
 
+  test('accepts spaces inside the braces', () {
+    final t = EmailTemplate('x {{ a }} y {{b }}', allowed: allowed);
+    expect(t.fill({'a': '1', 'b': '2'}), 'x 1 y 2');
+  });
+
   test('rejects malformed placeholders instead of sending them', () {
     for (final bad in [
-      'href="{{ a }}"',
       'href="{{a-b}}"',
       'href="{{}}"',
       'href="{{a}"',

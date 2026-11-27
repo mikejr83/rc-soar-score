@@ -6,25 +6,25 @@ import 'dart:io';
 /// [fill] puts the values in.
 class EmailTemplate {
   EmailTemplate(this.source, {required Set<String> allowed}) {
-    // Every double-brace expression must be exactly `{{name}}` for a name the
-    // mailer fills: `{{ link }}` or `{{scoring-link}}` would otherwise reach
-    // the recipient as literal text.
-    for (final match in _expression.allMatches(source)) {
-      final name = match.group(1)!;
-      if (!_name.hasMatch(name) || !allowed.contains(name)) {
-        throw FormatException('Bad placeholder {{$name}} in template.');
+    for (final match in _placeholder.allMatches(source)) {
+      final name = match.group(2)!;
+      if (!allowed.contains(name)) {
+        throw FormatException('Unknown placeholder {{$name}} in template.');
       }
     }
-    if (source.replaceAll(_expression, '').contains('{{')) {
-      throw const FormatException('Unclosed {{ in template.');
+    // Anything still opening with `{{` is not a placeholder we can read (for
+    // example `{{scoring-link}}`, `{{}}` or an unclosed `{{`) and would reach
+    // the recipient as literal text.
+    if (source.replaceAll(_placeholder, '').contains('{{')) {
+      throw const FormatException('Malformed {{ placeholder in template.');
     }
   }
 
   final String source;
 
-  static final _placeholder = RegExp(r'( ?)\{\{(\w+)\}\}');
-  static final _expression = RegExp(r'\{\{(.*?)\}\}');
-  static final _name = RegExp(r'^\w+$');
+  /// `{{name}}`, with optional spaces inside the braces, and the one space
+  /// before it that [fill] drops when the value is empty.
+  static final _placeholder = RegExp(r'( ?)\{\{\s*(\w+)\s*\}\}');
 
   /// The template with each placeholder replaced by its value in [values].
   ///
