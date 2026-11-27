@@ -6,11 +6,10 @@ import 'package:web/web.dart' as web;
 /// by direct link, not by script), falls back to [onClosed].
 Future<void> closeWindowOrFallback(Future<void> Function() onClosed) async {
   web.window.close();
-  // The window.closed property is not available in package:web yet.
-  // Instead, wait briefly and check if we're still alive.
+  // Wait briefly to give the window a chance to close. If window.close()
+  // succeeds, the document is destroyed and this function never reaches
+  // the fallback. If it fails (e.g., tab opened by direct link), the
+  // fallback runs.
   await Future<void>.delayed(const Duration(milliseconds: 100));
-  if (!web.document.hidden) {
-    // Still alive: the window did not close, so run the fallback.
-    await onClosed();
-  }
+  await onClosed();
 }
