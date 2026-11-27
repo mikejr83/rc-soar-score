@@ -324,7 +324,12 @@ void main() {
         return json({
           'results': body['key'] == 'fai_number'
               ? [
-                  {..._match(), 'email': null, 'country': 'US'},
+                  {
+                    ..._match(),
+                    'email': null,
+                    'country': 'US',
+                    'shared_key': true,
+                  },
                   {
                     ..._match(),
                     'entry_id': '019c0000-0000-7000-8000-0000000000a2',
@@ -332,6 +337,7 @@ void main() {
                     'last_name': 'Wardt',
                     'email': null,
                     'country': 'DE',
+                    'shared_key': true,
                   },
                 ]
               : [],
@@ -347,6 +353,7 @@ void main() {
     expect(find.textContaining('US'), findsOneWidget);
     expect(find.textContaining('DE'), findsOneWidget);
     expect(find.textContaining('ID F9999'), findsNWidgets(2));
+    expect(find.textContaining('Shares ID F9999'), findsNWidgets(2));
   });
 
   testWidgets('a typed search refused after a lookup on purpose stays quiet', (

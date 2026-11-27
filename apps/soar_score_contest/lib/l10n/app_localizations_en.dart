@@ -8937,6 +8937,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String searchDirectorySharedId(String id) {
+    return 'Shares ID $id with another pilot';
+  }
+
+  @override
   String directoryCopyFailed(String name) {
     return 'Could not add $name from the directory. Try again.';
   }
