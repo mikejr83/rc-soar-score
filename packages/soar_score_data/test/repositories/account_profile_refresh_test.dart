@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:test/test.dart';
@@ -38,6 +40,36 @@ void _tests(Backend backend) {
 
       // A request that read the account before the claim saves it whole.
       await repo.save(read);
+
+      expect((await repo.findById(read.id))!.profileRefreshedAt, at);
+    });
+
+    test('waits for a refresh claim in progress on another connection and '
+        'keeps it', () async {
+      if (backend != Backend.postgres) return;
+      final read = await repo.save(account('alex@example.org'));
+      final peer = await inst.reopen();
+      addTearDown(peer.close);
+      final peerAccounts = Repository(peer.db).accountRepository;
+      final at = t0.add(const Duration(minutes: 11));
+
+      final claimed = Completer<void>();
+      final commit = Completer<void>();
+      final claiming = peer.db.transaction(() async {
+        await peerAccounts.claimProfileRefresh(read.id, expected: null, at: at);
+        claimed.complete();
+        await commit.future;
+      });
+      await claimed.future;
+
+      // A full-row save of the older read, started while the claim is
+      // uncommitted: without the row lock it would read the old timestamp and
+      // overwrite the claim once it commits.
+      final saving = repo.save(read);
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      commit.complete();
+      await claiming;
+      await saving;
 
       expect((await repo.findById(read.id))!.profileRefreshedAt, at);
     });
