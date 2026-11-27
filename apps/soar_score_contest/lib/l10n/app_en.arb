@@ -7364,6 +7364,8 @@
   "@searchDirectoryRateLimited": {"description": "Shown when the server refused a directory lookup because the account asked too often."},
   "searchDirectoryId": "ID {id}",
   "@searchDirectoryId": {"description": "A directory result's FAI number or national ID, in the subtitle, so pilots sharing an ID can be told apart.", "placeholders": {"id": {"type": "String"}}},
+  "searchDirectorySharedId": "Shares ID {id} with another pilot",
+  "@searchDirectorySharedId": {"description": "Subtitle note on a directory result found by an FAI number or national ID that another listed pilot also holds (IDs are only unique within a country), so the director checks the name and place before adding.", "placeholders": {"id": {"type": "String"}}},
   "directoryCopyFailed": "Could not add {name} from the directory. Try again.",
   "@directoryCopyFailed": {"description": "Message when copying a pilot from the directory into the director's list failed.", "placeholders": {"name": {"type": "String"}}},
   "searchYourProfiles": "Your profiles",

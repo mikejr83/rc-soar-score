@@ -15,6 +15,7 @@ class ParticipantCandidate {
     this.emailVisible = true,
     this.directory,
     this.searchedEmail,
+    this.sharedId,
   });
 
   /// A listed pilot the directory found (#653). [profileId] is the id the
@@ -23,6 +24,7 @@ class ParticipantCandidate {
     DirectoryMatchDto match, {
     required Id profileId,
     String? searchedEmail,
+    String? sharedId,
   }) => ParticipantCandidate(
     profileId: profileId,
     name: '${match.firstName} ${match.lastName}',
@@ -32,6 +34,7 @@ class ParticipantCandidate {
     emailVisible: match.email != null,
     directory: match,
     searchedEmail: searchedEmail,
+    sharedId: sharedId,
   );
 
   /// One of the director's own [profile]s (its email is always shown).
@@ -62,6 +65,11 @@ class ParticipantCandidate {
   /// keep private from the result: still enough to see a profile of the
   /// director's already holds it.
   final String? searchedEmail;
+
+  /// The FAI number or national ID another listed pilot also holds, when the
+  /// lookup that found this pilot was by it (IDs are only unique within a
+  /// country), so the director checks name and place before adding.
+  final String? sharedId;
 
   /// The director's own [profiles] that already hold this directory pilot:
   /// the copy made before, or one with the same FAI number, national ID or

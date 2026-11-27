@@ -13371,6 +13371,12 @@ abstract class AppLocalizations {
   /// **'ID {id}'**
   String searchDirectoryId(String id);
 
+  /// Subtitle note on a directory result found by an FAI number or national ID that another listed pilot also holds (IDs are only unique within a country), so the director checks the name and place before adding.
+  ///
+  /// In en, this message translates to:
+  /// **'Shares ID {id} with another pilot'**
+  String searchDirectorySharedId(String id);
+
   /// Message when copying a pilot from the directory into the director's list failed.
   ///
   /// In en, this message translates to:

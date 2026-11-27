@@ -398,6 +398,7 @@ class _ResultsMenu extends StatelessWidget {
       candidate.club ?? l10n.searchNoClub,
       ?_place(entry),
       ?_id(l10n, entry),
+      if (candidate.sharedId case final id?) l10n.searchDirectorySharedId(id),
       l10n.searchEmailPrefix(candidate.emailStatus.label(l10n)),
     ].join(' · ');
     final (icon, label) = already
