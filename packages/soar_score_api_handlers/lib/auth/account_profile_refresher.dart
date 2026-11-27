@@ -78,6 +78,16 @@ class AccountProfileRefresher {
         'Profile refresh skipped: provider unavailable '
         '(${e.runtimeType}).',
       );
+      // The claim must not shut the account out for a whole day: a verified
+      // account is due again after [minInterval] (an unverified one already
+      // is).
+      if (account.emailVerified) {
+        await accounts.claimProfileRefresh(
+          account.id,
+          expected: now,
+          at: now.subtract(staleAfter - minInterval),
+        );
+      }
       return;
     }
 
@@ -103,9 +113,9 @@ class AccountProfileRefresher {
 
     // The name follows the provider until a person edits it (AM-3 will stop
     // the refresh for an edited name).
-    final names = profileNames(profile, fresh);
-    final firstName = names?.$1 ?? account.firstName;
-    final lastName = names?.$2 ?? account.lastName;
+    final names = profileNameParts(profile, fresh);
+    final firstName = names.first ?? account.firstName;
+    final lastName = names.last ?? account.lastName;
 
     if (email == account.email &&
         verified == account.emailVerified &&

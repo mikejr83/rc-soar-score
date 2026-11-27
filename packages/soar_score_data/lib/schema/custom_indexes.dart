@@ -45,6 +45,34 @@ const customIndexes = <String, List<String>>{
     // At most one active invitation per participation.
     'CREATE UNIQUE INDEX invitations_one_active ON invitations '
         "(contest_participation_id) WHERE state = 'Active'",
+    // A claim re-points the invitations a guest opened (UPDATE ... WHERE
+    // redeemed_by_account_id = guest), and an unlink releases the ones an
+    // account holds, both while the link row is locked.
+    'CREATE INDEX IF NOT EXISTS invitations_redeemed_by ON invitations '
+        '(redeemed_by_account_id)',
+  ],
+  'contest_participations': [
+    // "Which contests is this profile in": the pilot's contests and history,
+    // the invitations of a profile and the unlink all start from a profile.
+    'CREATE INDEX IF NOT EXISTS contest_participations_profile ON '
+        'contest_participations (participant_profile_id)',
+  ],
+  'participant_directory_entries': [
+    // A director's lookup by an exact FAI number or national ID.
+    'CREATE INDEX IF NOT EXISTS participant_directory_entries_fai_number ON '
+        'participant_directory_entries (fai_number)',
+    'CREATE INDEX IF NOT EXISTS participant_directory_entries_national_org_id '
+        'ON participant_directory_entries (national_org_id)',
+  ],
+  'audit_events': [
+    // A claim re-points the guest's audit events (UPDATE ... WHERE actor_id).
+    'CREATE INDEX IF NOT EXISTS audit_events_actor ON audit_events (actor_id)',
+  ],
+  'mutation_records': [
+    // A claim re-points the guest's mutation records (UPDATE ... WHERE
+    // actor_id).
+    'CREATE INDEX IF NOT EXISTS mutation_records_actor ON '
+        'mutation_records (actor_id)',
   ],
   'matrix_revisions': [
     // At most one finalized revision extends any given revision; the first
@@ -86,6 +114,9 @@ const customIndexes = <String, List<String>>{
   'score_attempts': [
     'CREATE INDEX IF NOT EXISTS score_attempts_placeholder ON '
         'score_attempts (score_placeholder_id)',
+    // A claim re-points the guest's attempts (UPDATE ... WHERE actor_id).
+    'CREATE INDEX IF NOT EXISTS score_attempts_actor ON '
+        'score_attempts (actor_id)',
   ],
   'flight_results': [
     'CREATE INDEX IF NOT EXISTS flight_results_contest_round ON '
@@ -99,6 +130,10 @@ const customIndexes = <String, List<String>>{
     // One open review request per score.
     'CREATE UNIQUE INDEX review_requests_one_open ON review_requests '
         "(score_placeholder_id) WHERE state IN ('Submitted', 'UnderReview')",
+    // A claim re-points the guest's review requests (UPDATE ... WHERE
+    // requester_id).
+    'CREATE INDEX IF NOT EXISTS review_requests_requester ON '
+        'review_requests (requester_id)',
   ],
   'roles': [
     // System roles (no owner) share one namespace, so a missing owner counts

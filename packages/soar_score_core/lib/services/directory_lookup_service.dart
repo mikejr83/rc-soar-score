@@ -32,6 +32,7 @@ class DirectoryMatch extends Equatable {
     required this.email,
     required this.emailAvailable,
     this.copiedProfileId,
+    this.sharedKey = false,
   });
 
   final ParticipantDirectoryEntry entry;
@@ -44,8 +45,28 @@ class DirectoryMatch extends Equatable {
   /// ever named.
   final Id? copiedProfileId;
 
+  /// More than one listed pilot holds the key this match was found by (an FAI
+  /// number or national ID; two countries can issue the same one). The
+  /// director tells them apart by name and details; an ID alone proves
+  /// nothing.
+  final bool sharedKey;
+
+  DirectoryMatch withSharedKey() => DirectoryMatch(
+    entry: entry,
+    email: email,
+    emailAvailable: emailAvailable,
+    copiedProfileId: copiedProfileId,
+    sharedKey: true,
+  );
+
   @override
-  List<Object?> get props => [entry, email, emailAvailable, copiedProfileId];
+  List<Object?> get props => [
+    entry,
+    email,
+    emailAvailable,
+    copiedProfileId,
+    sharedKey,
+  ];
 }
 
 /// A director finds listed pilots in the directory and copies one into their
@@ -55,8 +76,11 @@ class DirectoryMatch extends Equatable {
 ///   organization ID); there is no name search and no listing. An unlisted
 ///   pilot, an account without an entry and a key nobody holds all answer
 ///   the same empty list.
-/// - A stored email is returned only when the pilot made it visible; the
-///   address a director typed is never logged.
+/// - A stored email is returned only when the pilot made it visible, and a
+///   pilot who keeps it private is not found by it (same empty answer as an
+///   unknown address); the address a director typed is never logged.
+/// - An ID lookup returns every listed pilot holding it, flagged
+///   [DirectoryMatch.sharedKey] when several do; the director picks by name.
 /// - Copying links the pilot's account to the director's profile (see
 ///   [ParticipantLinkService.linkFromDirectory]); the profile itself is the
 ///   director's own and independent of the account. Any number of directors
@@ -89,7 +113,7 @@ class DirectoryLookupService {
       throw ArgumentError.value(value, 'value', 'must not be blank');
     }
     final entries = repository.participantDirectoryEntryRepository;
-    final matches = switch (key) {
+    final found = switch (key) {
       DirectoryLookupKey.email => await _byEmail(text, directorAccountId),
       DirectoryLookupKey.faiNumber => [
         for (final entry in await entries.listListedByFaiNumber(text))
@@ -100,11 +124,18 @@ class DirectoryLookupService {
           await _match(entry, directorAccountId),
       ],
     };
+    // Every pilot holding an ID comes back, never just one: the ID is the
+    // pilot's own claim, so the director picks by name, and a key held by
+    // several is flagged.
+    final present = [for (final m in found) ?m];
+    final matches = key != DirectoryLookupKey.email && present.length > 1
+        ? [for (final m in present) m.withSharedKey()]
+        : present;
     _logger.info(
       'lookup director=${directorAccountId.value} key=${key.name} '
       'results=${matches.length}',
     );
-    return [for (final m in matches) ?m];
+    return matches;
   }
 
   /// Copies the listed entry [entryId] for [directorAccountId]: links the
@@ -181,8 +212,11 @@ class DirectoryLookupService {
     return entry;
   }
 
-  /// The match of the verified [email], if its account is listed.
+  /// The match of the verified [email], if its account is listed and shows
+  /// its email to directors.
   ///
+  /// A pilot who keeps the email private is not found by it: a stranger
+  /// could otherwise confirm that an address belongs to a listed pilot.
   /// Every outcome that answers "nobody" (no such account, an unverified
   /// email, no entry, an unlisted one) does the same two reads, so the
   /// answer's timing says nothing about which it was.
@@ -196,7 +230,8 @@ class DirectoryLookupService {
     if (account == null ||
         !account.emailVerified ||
         entry == null ||
-        !entry.isListed) {
+        !entry.isListed ||
+        !entry.emailVisibleToDirectors) {
       return const [];
     }
     return [await _view(entry, account, directorAccountId)];

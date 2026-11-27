@@ -30,6 +30,36 @@ void _tests(Backend backend) {
     updatedAt: t0,
   );
 
+  group('save', () {
+    test('a full-row save from an older read keeps a later refresh', () async {
+      final read = await repo.save(account('alex@example.org'));
+      final at = t0.add(const Duration(minutes: 11));
+      await repo.claimProfileRefresh(read.id, expected: null, at: at);
+
+      // A request that read the account before the claim saves it whole.
+      await repo.save(read);
+
+      expect((await repo.findById(read.id))!.profileRefreshedAt, at);
+    });
+
+    test('a newer refresh time in the saved account is kept', () async {
+      final read = await repo.save(
+        account('alex@example.org', refreshedAt: t0),
+      );
+      final later = t0.add(const Duration(hours: 1));
+
+      final saved = await repo.save(
+        core.Account.fromJson({
+          ...read.toJson(),
+          'profile_refreshed_at': later.toIso8601String(),
+        }),
+      );
+
+      expect(saved.profileRefreshedAt, later);
+      expect((await repo.findById(read.id))!.profileRefreshedAt, later);
+    });
+  });
+
   group('claimProfileRefresh', () {
     test('only one claim of the same stored value wins', () async {
       final a = await repo.save(account('alex@example.org'));

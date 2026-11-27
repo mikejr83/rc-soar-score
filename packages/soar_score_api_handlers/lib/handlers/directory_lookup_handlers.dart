@@ -16,7 +16,10 @@ import 'package:soar_score_core/soar_score_core.dart';
 ///   verified email, an FAI number or a national organization ID. It is a
 ///   POST so a typed email never reaches a URL or an access log. A pilot who
 ///   is not listed answers exactly as one who does not exist: an empty list.
-///   A blank value is 400. Lookups are limited per account (429).
+///   A pilot who keeps their email private is not found by it either. An ID
+///   answers every pilot holding it, each flagged `shared_key` when several
+///   do (two countries can issue the same ID). A blank value is 400.
+///   Lookups are limited per account (429).
 /// - `POST /directory/copies` ([DirectoryCopyRequest], answers a
 ///   [DirectoryMatchDto]) links the pilot's account to the director's own
 ///   participant profile (which may not have synced yet) and returns the
@@ -70,6 +73,7 @@ void addDirectoryLookupRoutes(
     email: match.email,
     emailAvailable: match.emailAvailable,
     copiedProfileId: match.copiedProfileId,
+    sharedKey: match.sharedKey,
   );
 
   Response answer(Map<String, dynamic> json) =>

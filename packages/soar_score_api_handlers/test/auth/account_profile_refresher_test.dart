@@ -236,6 +236,48 @@ void main() {
     expect(profiles.fetches, 0);
   });
 
+  test('a given name alone keeps the stored last name', () async {
+    final a = await store(account(refreshedAt: start));
+    profiles.profile = const UserProfile(
+      givenName: 'Augusta',
+      email: 'ada@example.com',
+      emailVerified: true,
+    );
+
+    await refresher.refresh(a, 'jwt');
+
+    expect(stored(a).firstName, 'Augusta');
+    expect(stored(a).lastName, 'Lovelace');
+  });
+
+  test('a provider that is down does not shut a verified account out for '
+      'a day', () async {
+    final a = await store(
+      account(verified: true, refreshedAt: start, email: 'ada@example.com'),
+    );
+    clock = start.add(const Duration(hours: 25));
+    profiles.profile = null;
+
+    await refresher.refresh(a, 'jwt');
+    expect(profiles.fetches, 1);
+
+    // Not again straight away, but after the ten-minute minimum.
+    clock = clock.add(const Duration(minutes: 5));
+    await refresher.refresh(stored(a), 'jwt');
+    expect(profiles.fetches, 1);
+
+    clock = clock.add(const Duration(minutes: 6));
+    profiles.profile = const UserProfile(
+      givenName: 'Ada',
+      familyName: 'Lovelace',
+      email: 'ada@example.com',
+      emailVerified: true,
+    );
+    await refresher.refresh(stored(a), 'jwt');
+    expect(profiles.fetches, 2);
+    expect(stored(a).profileRefreshedAt, clock);
+  });
+
   test('keeps the stored name when the provider gives none', () async {
     final a = await store(account(refreshedAt: start));
     profiles.profile = const UserProfile(

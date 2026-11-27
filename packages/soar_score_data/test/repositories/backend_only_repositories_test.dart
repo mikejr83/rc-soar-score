@@ -27,7 +27,7 @@ void main() {
     'participant account links': (r) =>
         r.participantAccountLinkRepository.listForAccount(anyId),
     'participant directory entries': (r) =>
-        r.participantDirectoryEntryRepository.listListed(),
+        r.participantDirectoryEntryRepository.findForAccount(anyId),
     'invitations': (r) => r.invitationRepository.listForContest(anyId),
   };
 

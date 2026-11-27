@@ -532,7 +532,15 @@ class InvitationService {
     }
     final redeemer = stored.redeemedByAccountId;
     if (redeemer != null && redeemer != accountId) return null;
-    return _session(stored, checked, now, actorId: accountId);
+    // The write also needs the account's Confirmed link, so an unlink that
+    // lands first leaves the invitation with its guest.
+    return _session(
+      stored,
+      checked,
+      now,
+      actorId: accountId,
+      requireConfirmedLink: true,
+    );
   }
 
   /// Stores that [stored] was opened by [actorId] and returns the session, or
@@ -553,12 +561,19 @@ class InvitationService {
     checked,
     DateTime now, {
     required Id actorId,
+    bool requireConfirmedLink = false,
   }) async {
     final applied = await repository.invitationRepository.redeem(
       stored.id,
       expectedRedeemer: stored.redeemedByAccountId,
       newRedeemer: actorId,
       usedAt: now,
+      requireConfirmedLinkOf: requireConfirmedLink
+          ? (
+              profileId: checked.participation.participantProfileId,
+              accountId: actorId,
+            )
+          : null,
     );
     if (!applied) return null;
     // Built from the write that applied, not read back: a read could see a

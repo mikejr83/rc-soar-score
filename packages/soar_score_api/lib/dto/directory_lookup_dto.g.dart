@@ -62,6 +62,7 @@ DirectoryMatchDto _$DirectoryMatchDtoFromJson(Map<String, dynamic> json) =>
               const IdConverter().fromJson,
             ),
           ),
+          sharedKey: $checkedConvert('shared_key', (v) => v as bool? ?? false),
         );
         return val;
       },
@@ -73,6 +74,7 @@ DirectoryMatchDto _$DirectoryMatchDtoFromJson(Map<String, dynamic> json) =>
         'nationalOrgId': 'national_org_id',
         'emailAvailable': 'email_available',
         'copiedProfileId': 'copied_profile_id',
+        'sharedKey': 'shared_key',
       },
     );
 
@@ -93,6 +95,7 @@ Map<String, dynamic> _$DirectoryMatchDtoToJson(DirectoryMatchDto instance) =>
         instance.copiedProfileId,
         const IdConverter().toJson,
       ),
+      'shared_key': instance.sharedKey,
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

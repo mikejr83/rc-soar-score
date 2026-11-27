@@ -101,7 +101,37 @@ class DirectoryEntryService {
     if (existing != null && _sameDetails(existing, entry)) {
       return _view(existing, account);
     }
-    return _view(await repository.save(entry), account);
+    try {
+      return _view(await repository.save(entry), account);
+    } on Object {
+      // A concurrent first save stored the account's entry between the read
+      // and this write (the database allows one entry per account). That
+      // entry is the one to update: the later save wins, as for any two saves.
+      if (existing != null) rethrow;
+      final winner = await repository.findForAccount(accountId);
+      if (winner == null) rethrow;
+      return _view(
+        await repository.save(
+          ParticipantDirectoryEntry(
+            id: winner.id,
+            accountId: accountId,
+            firstName: entry.firstName,
+            lastName: entry.lastName,
+            club: entry.club,
+            faiNumber: entry.faiNumber,
+            nationalOrgId: entry.nationalOrgId,
+            city: entry.city,
+            state: entry.state,
+            country: entry.country,
+            isListed: entry.isListed,
+            emailVisibleToDirectors: entry.emailVisibleToDirectors,
+            createdAt: winner.createdAt,
+            updatedAt: entry.updatedAt,
+          ),
+        ),
+        account,
+      );
+    }
   }
 
   /// Removes the entry of [accountId]; whether it had one.

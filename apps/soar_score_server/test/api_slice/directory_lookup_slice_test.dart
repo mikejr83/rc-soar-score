@@ -143,7 +143,7 @@ void _tests(SliceBackend backend) {
 
   group('lookup', () {
     test('finds a listed pilot by each of the three keys', () async {
-      await entry(pat, fai: 'FAI-123', national: 'NSS-9');
+      await entry(pat, emailVisible: true, fai: 'FAI-123', national: 'NSS-9');
 
       for (final (key, value) in [
         ('email', ' Pat.Pilot@Example.com '),
@@ -180,6 +180,49 @@ void _tests(SliceBackend backend) {
       expect(unlisted.status, 200);
       expect(unlisted.text, nobody.text);
       expect(byEmail.text, nobody.text);
+    });
+
+    test('a pilot who keeps the email private is not found by it', () async {
+      await entry(pat, fai: 'FAI-123');
+
+      final byEmail = await call(
+        dana,
+        '/directory/lookups',
+        body: {'key': 'email', 'value': _email},
+      );
+      final nobody = await call(
+        dana,
+        '/directory/lookups',
+        body: {'key': 'email', 'value': 'nobody@example.com'},
+      );
+
+      expect(byEmail.status, 200);
+      expect(byEmail.text, nobody.text);
+      expect(byEmail.json['results'], isEmpty);
+      // Still found by the ID the pilot chose to publish.
+      expect(await lookup(dana, 'fai_number', 'FAI-123'), hasLength(1));
+    });
+
+    test('every pilot holding an ID is returned, flagged as shared', () async {
+      final other = await account('Otto', email: 'otto@example.com');
+      await entry(pat, fai: 'F1', national: 'N-1');
+      await entry(other, fai: 'F1', national: 'N-2');
+
+      final shared = (await lookup(
+        dana,
+        'fai_number',
+        'F1',
+      )).cast<Map<String, Object?>>();
+      final single = (await lookup(
+        dana,
+        'national_org_id',
+        'N-1',
+      )).cast<Map<String, Object?>>();
+
+      expect(shared, hasLength(2));
+      expect(shared.map((m) => m['shared_key']), [true, true]);
+      expect(single, hasLength(1));
+      expect(single.single['shared_key'], isFalse);
     });
 
     test('an unverified email finds nothing', () async {
@@ -356,6 +399,40 @@ void _tests(SliceBackend backend) {
         expect(seen.json['links'], hasLength(1));
       },
     );
+
+    test('a copy does not revive a link the pilot ended', () async {
+      final first = await call(
+        dana,
+        '/directory/copies',
+        body: copyBody(patEntry.id, profile),
+      );
+      expect(first.status, 200, reason: first.text);
+      final link =
+          (await repository.participantAccountLinkRepository.listForAccount(
+            pat,
+          )).single;
+      final ended = await call(pat, '/account/links/${link.id.value}/end');
+      expect(ended.status, 200, reason: ended.text);
+
+      final again = await call(
+        dana,
+        '/directory/copies',
+        body: copyBody(patEntry.id, profile),
+      );
+
+      expect(again.status, 404, reason: again.text);
+      expect((again.json['error']! as Map)['code'], 'link_not_found');
+      final stored =
+          (await repository.participantAccountLinkRepository.listForAccount(
+            pat,
+          )).single;
+      expect(stored.status, core.ParticipantLinkStatus.ended);
+      expect(
+        await repository.participantAccountLinkRepository
+            .findConfirmedForProfile(profile),
+        isNull,
+      );
+    });
 
     test('a repeated search names the director\'s own copy only', () async {
       final created = await call(

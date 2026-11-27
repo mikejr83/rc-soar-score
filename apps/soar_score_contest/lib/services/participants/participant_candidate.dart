@@ -87,10 +87,6 @@ class ParticipantCandidate {
     ];
   }
 
-  /// Whether one of the director's own [profiles] already holds this pilot.
-  bool isCopiedIn(Iterable<ParticipantProfile> profiles) =>
-      copiesIn(profiles).isNotEmpty;
-
   /// What the email cell says for this person.
   ParticipantEmailStatus get emailStatus {
     if (source == ParticipantSource.remote && !emailVisible) {

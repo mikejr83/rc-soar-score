@@ -53,6 +53,7 @@ class DirectoryMatchDto {
     this.email,
     required this.emailAvailable,
     this.copiedProfileId,
+    this.sharedKey = false,
   });
 
   factory DirectoryMatchDto.fromJson(Map<String, dynamic> json) =>
@@ -74,6 +75,11 @@ class DirectoryMatchDto {
   /// repeated search offers that copy, not a new one. Never another
   /// director's profile.
   final Id? copiedProfileId;
+
+  /// Several listed pilots hold the ID this one was found by: tell them
+  /// apart by name and details.
+  @JsonKey(defaultValue: false)
+  final bool sharedKey;
 
   Map<String, dynamic> toJson() => _$DirectoryMatchDtoToJson(this);
 }
