@@ -52,7 +52,7 @@ void _tests(Backend backend) {
 
     test('a schema above the maximum is told to wait', () async {
       expect(
-        () => harness.exchange(scope, schemaVersion: 2),
+        () => harness.exchange(scope, schemaVersion: 4),
         refusal('unsupported_protocol_version', 409),
       );
     });
