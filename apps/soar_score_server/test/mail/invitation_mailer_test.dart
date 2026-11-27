@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:intl/date_symbol_data_local.dart';
@@ -68,9 +69,12 @@ void main() {
     });
 
     test('an empty name reads Hello,', () {
+      // Compare whole lines: a checkout may use CRLF.
       expect(
-        invitationMailText(_mail(pilotName: '  '), templates),
-        contains('\nHello,\n'),
+        const LineSplitter().convert(
+          invitationMailText(_mail(pilotName: '  '), templates),
+        ),
+        contains('Hello,'),
       );
     });
 

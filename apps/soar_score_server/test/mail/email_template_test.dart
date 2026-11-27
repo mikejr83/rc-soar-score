@@ -33,6 +33,22 @@ void main() {
     );
   });
 
+  test('rejects malformed placeholders instead of sending them', () {
+    for (final bad in [
+      'href="{{ a }}"',
+      'href="{{a-b}}"',
+      'href="{{}}"',
+      'href="{{a}"',
+      'href="{{a',
+    ]) {
+      expect(
+        () => EmailTemplate(bad, allowed: allowed),
+        throwsFormatException,
+        reason: bad,
+      );
+    }
+  });
+
   group('InvitationTemplates', () {
     test('loads the shipped files and accepts every placeholder', () async {
       final templates = await InvitationTemplates.load(Directory('email'));

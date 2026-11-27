@@ -6,17 +6,25 @@ import 'dart:io';
 /// [fill] puts the values in.
 class EmailTemplate {
   EmailTemplate(this.source, {required Set<String> allowed}) {
-    for (final match in _placeholder.allMatches(source)) {
-      final name = match.group(2)!;
-      if (!allowed.contains(name)) {
-        throw FormatException('Unknown placeholder {{$name}} in template.');
+    // Every double-brace expression must be exactly `{{name}}` for a name the
+    // mailer fills: `{{ link }}` or `{{scoring-link}}` would otherwise reach
+    // the recipient as literal text.
+    for (final match in _expression.allMatches(source)) {
+      final name = match.group(1)!;
+      if (!_name.hasMatch(name) || !allowed.contains(name)) {
+        throw FormatException('Bad placeholder {{$name}} in template.');
       }
+    }
+    if (source.replaceAll(_expression, '').contains('{{')) {
+      throw const FormatException('Unclosed {{ in template.');
     }
   }
 
   final String source;
 
   static final _placeholder = RegExp(r'( ?)\{\{(\w+)\}\}');
+  static final _expression = RegExp(r'\{\{(.*?)\}\}');
+  static final _name = RegExp(r'^\w+$');
 
   /// The template with each placeholder replaced by its value in [values].
   ///
