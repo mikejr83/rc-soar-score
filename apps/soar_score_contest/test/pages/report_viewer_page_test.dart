@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
@@ -704,6 +705,73 @@ void main() {
   testWidgets('a web tab has no leading button', (tester) async {
     await _pump(tester, _server());
     expect(find.byKey(const ValueKey('viewer-back')), findsNothing);
+  });
+
+  group('window close', () {
+    testWidgets('closing the window does not throw if disposed during fallback', (
+      tester,
+    ) async {
+      // Regression test: when the page is disposed during the 100ms fallback
+      // delay (on web, when window.close() is refused), the mounted check
+      // prevents _goBack() from running on a dead context.
+      //
+      // This test uses GoRouter to set up proper navigation context, since the
+      // back button triggers GoRouter navigation.
+      final server = _server();
+      final router = GoRouter(
+        initialLocation: '/contests/test',
+        routes: [
+          GoRoute(
+            path: '/contests/:id',
+            builder: (context, state) {
+              return ApiClientInherited(
+                client: ApiClient(
+                  baseUrl: Uri.parse('http://localhost'),
+                  httpClient: MockClient(server.handle),
+                ),
+                child: ReportViewerPage(
+                  contestId: 'test',
+                  report: ReportKind.standings,
+                  openedInPlace: true,
+                  definitionFor: (_) => const StandInReport(),
+                  printer: FakeReportPrinter(ReportPrintResult.sent),
+                  launcher: FakeReportLauncher(),
+                ),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/contests/test/reports',
+            builder: (context, state) {
+              return const Center(child: Text('Reports'));
+            },
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en', 'US'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Trigger the close action by tapping the back button.
+      await tester.tap(find.byKey(const ValueKey('viewer-back')));
+      await tester.pump();
+
+      // Dispose the widget immediately (simulating disposal during the
+      // fallback delay on web).
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+
+      // No exception should be thrown by the fallback navigating on a
+      // disposed page.
+      expect(tester.takeException(), isNull);
+    });
   });
 
   test('paper defaults by locale', () {

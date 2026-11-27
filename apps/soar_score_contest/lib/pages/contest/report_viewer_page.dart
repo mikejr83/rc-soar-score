@@ -339,7 +339,9 @@ class _ReportViewerPageState extends State<ReportViewerPage> {
       return;
     }
     await closeWindowOrFallback(() {
-      _goBack();
+      if (mounted) {
+        _goBack();
+      }
       return Future<void>.value();
     });
   }
