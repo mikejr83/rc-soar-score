@@ -3143,6 +3143,10 @@
   "@viewerBackToReports": {
     "description": "Viewer app bar back button when the report was opened in place."
   },
+  "viewerCloseReport": "Close report",
+  "@viewerCloseReport": {
+    "description": "Viewer app bar close button on web when the report was opened in place. Closes the tab or navigates to Reports."
+  },
   "viewerPrint": "Print",
   "@viewerPrint": {
     "description": "Viewer app bar primary button that prints the sheet."
