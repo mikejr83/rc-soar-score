@@ -1,6 +1,7 @@
 import 'package:logging/logging.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
+import 'email_takeover.dart';
 import 'profile_names.dart';
 import 'user_profile.dart';
 
@@ -94,6 +95,8 @@ class AccountProfileRefresher {
     var email = account.email;
     var verified = account.emailVerified;
     final fresh = profile.email?.trim().toLowerCase();
+    final providerEmailDiffers =
+        fresh != null && fresh.isNotEmpty && fresh != account.email;
     if (fresh != null && fresh.isNotEmpty) {
       if (fresh == email) {
         verified = profile.emailVerified;
@@ -102,10 +105,23 @@ class AccountProfileRefresher {
         if (holder == null || holder.id == account.id) {
           email = fresh;
           verified = profile.emailVerified;
+        } else if (profile.emailVerified &&
+            await freeEmailForVerifiedClaimant(
+              accounts,
+              fresh,
+              claimant: account.id,
+              now: now,
+            )) {
+          // The holder had not verified it: the provider says it is ours.
+          email = fresh;
+          verified = true;
         } else {
+          // The provider no longer reports the stored address, so it is not
+          // verified for this account any more, whatever it was before.
+          verified = false;
           _logger.warning(
-            'Profile refresh kept the stored email: the new one belongs to '
-            'another account.',
+            'Profile refresh kept the stored email unverified: the new one '
+            'belongs to another account.',
           );
         }
       }
@@ -143,7 +159,8 @@ class AccountProfileRefresher {
         firstName: firstName,
         lastName: lastName,
         email: account.email,
-        emailVerified: account.emailVerified,
+        // A stored address the provider does not report is not verified.
+        emailVerified: providerEmailDiffers ? false : account.emailVerified,
         now: now,
       );
     }

@@ -236,6 +236,42 @@ void _tests(Backend backend) {
       expect(await held(_guests), before);
     });
 
+    test('an invitation that is no longer active refuses the link and the '
+        'claim', () async {
+      final invitationId = core.Id.parse(
+        (await inst.db
+                .customSelect('SELECT id FROM invitations LIMIT 1')
+                .getSingle())
+            .read<String>('id'),
+      );
+      final before = await held(_guests);
+      final link = confirmed(core.Id.create());
+
+      // Active: the link is made.
+      await links.saveClaimingGuests(
+        link,
+        guestAccountIds: const [],
+        requireActiveInvitation: invitationId,
+      );
+      expect(await links.findById(link.id), isNotNull);
+
+      // Revoked after the check a service made: nothing is stored or claimed.
+      await inst.db.customStatement(
+        "UPDATE invitations SET state = 'Revoked', revoked_at = '2026-10-18T00:00:00Z' WHERE id = '${invitationId.value}'",
+      );
+      final other = confirmed(core.Id.create());
+      await expectLater(
+        links.saveClaimingGuests(
+          other,
+          guestAccountIds: _guests,
+          requireActiveInvitation: invitationId,
+        ),
+        throwsA(isA<core.InvitationAccessError>()),
+      );
+      expect(await links.findById(other.id), isNull);
+      expect(await held(_guests), before);
+    });
+
     test('a refused link leaves the guest\'s entries alone', () async {
       // The example profile already has a confirmed link to another account.
       final before = await held(_guests);

@@ -39,9 +39,15 @@ abstract interface class ParticipantAccountLinkRepository {
   ///
   /// Either both happen or neither. Repeating it is a no-op once nothing is
   /// held by the guests. The guest account rows are kept.
+  ///
+  /// With [requireActiveInvitation], the transaction first locks that
+  /// invitation and refuses (an [InvitationAccessError.invalidLink], storing
+  /// nothing) unless it is still Active, so a link made by opening an
+  /// invitation cannot commit after a director revoked or replaced it.
   Future<ParticipantAccountLink> saveClaimingGuests(
     ParticipantAccountLink link, {
     required Iterable<Id> guestAccountIds,
+    Id? requireActiveInvitation,
   });
 
   /// Makes the account of [link] the owner of what the guest accounts in

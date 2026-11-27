@@ -145,9 +145,11 @@ void main() {
     expect(stored(a).emailVerified, isFalse);
   });
 
-  test('an email another account holds changes nothing', () async {
-    final other = await store(account(email: 'taken@example.com'));
-    final a = await store(account(verified: false, refreshedAt: start));
+  test('an email a verified account holds changes nothing', () async {
+    final other = await store(
+      account(email: 'taken@example.com', verified: true),
+    );
+    final a = await store(account(verified: true, refreshedAt: start));
     profiles.profile = UserProfile(
       givenName: 'Ada',
       familyName: 'Lovelace',
@@ -155,8 +157,49 @@ void main() {
       emailVerified: true,
     );
 
+    clock = start.add(const Duration(hours: 25));
+
     await refresher.refresh(a, 'jwt');
 
+    expect(stored(a).email, 'ada@example.com');
+    expect(stored(a).emailVerified, isFalse);
+    expect(stored(other).email, 'taken@example.com');
+  });
+
+  test(
+    'a verified claimant takes an email from an unverified holder',
+    () async {
+      final other = await store(account(email: 'taken@example.com'));
+      final a = await store(account(verified: false, refreshedAt: start));
+      profiles.profile = UserProfile(
+        givenName: 'Ada',
+        familyName: 'Lovelace',
+        email: other.email,
+        emailVerified: true,
+      );
+
+      await refresher.refresh(a, 'jwt');
+
+      expect(stored(a).email, 'taken@example.com');
+      expect(stored(a).emailVerified, isTrue);
+      expect(stored(other).email, isNull);
+    },
+  );
+
+  test('an unverified claimant never takes a held email', () async {
+    final other = await store(account(email: 'taken@example.com'));
+    final a = await store(account(verified: true, refreshedAt: start));
+    profiles.profile = UserProfile(
+      givenName: 'Ada',
+      familyName: 'Lovelace',
+      email: other.email,
+    );
+
+    clock = start.add(const Duration(hours: 25));
+
+    await refresher.refresh(a, 'jwt');
+
+    expect(stored(other).email, 'taken@example.com');
     expect(stored(a).email, 'ada@example.com');
     expect(stored(a).emailVerified, isFalse);
   });
