@@ -112,6 +112,9 @@ class DirectoryLookupService {
     if (text.isEmpty) {
       throw ArgumentError.value(value, 'value', 'must not be blank');
     }
+    if (text.length > 254) {
+      throw ArgumentError.value(text.length, 'value', 'is too long');
+    }
     final entries = repository.participantDirectoryEntryRepository;
     final found = switch (key) {
       DirectoryLookupKey.email => await _byEmail(text, directorAccountId),
