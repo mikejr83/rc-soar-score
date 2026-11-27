@@ -93,10 +93,21 @@ class ParticipantCandidate {
       return a != null && b != null && a.isNotEmpty && b.isNotEmpty && a != b;
     }
 
+    // When another listed pilot holds the same ID, an ID alone does not say
+    // which of them a profile is: it needs the same, known country too.
+    bool sameCountry(ParticipantProfile p) {
+      final a = p.country?.trim().toLowerCase();
+      final b = match.country?.trim().toLowerCase();
+      return a != null && b != null && a.isNotEmpty && a == b;
+    }
+
+    bool idMatches(ParticipantProfile p) =>
+        !elsewhere(p) && (sharedId == null || sameCountry(p));
+
     return [
       for (final p in profiles)
         if (p.id == profileId ||
-            (!elsewhere(p) &&
+            (idMatches(p) &&
                 (exact(p.faiNumber, match.faiNumber) ||
                     exact(p.nationalOrgId, match.nationalOrgId))) ||
             same(p.email, match.email ?? searchedEmail))
