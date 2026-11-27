@@ -6,7 +6,14 @@ import 'package:soar_score_contest/widgets/matrix/pilot_row_tile.dart';
 import 'package:soar_score_contest/widgets/reports/pilot_cards/qr_code_view.dart';
 
 import '../support/configuration_fields.dart';
-import '../support/interact.dart';
+import '../support/interact.dart'
+    show
+        goToMainPage,
+        tapVisible,
+        tapRail,
+        enterIn,
+        fieldWithKey,
+        viewerLeadKey;
 import '../support/launch_app.dart';
 import '../support/open_demo_contest.dart';
 import '../support/pump_until_gone.dart';
@@ -303,7 +310,7 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       // The paper sheet, its filter and page panel, and Print.
       expect(find.textContaining('Page 1 of'), findsWidgets);
       expect(find.text('Print'), findsWidgets);
-      await tapVisible(tester, _key('viewer-back'));
+      await tapVisible(tester, find.byKey(viewerLeadKey()));
       await pumpUntilFound(tester, find.text('Reports are built from'));
     }),
   );
@@ -322,7 +329,7 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
 
       // Back to Reports, then reopen: the option comes back on, and the URL
       // carries it.
-      await tapVisible(tester, _key('viewer-back'));
+      await tapVisible(tester, find.byKey(viewerLeadKey()));
       await pumpUntilFound(tester, find.text('Reports are built from'));
       await tapVisible(tester, _key('report-open-matrix'));
       await pumpUntilFound(tester, _key('viewer-title'));
@@ -361,7 +368,7 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
         isFalse,
       );
 
-      await tapVisible(tester, _key('viewer-back'));
+      await tapVisible(tester, find.byKey(viewerLeadKey()));
       await pumpUntilFound(tester, find.text('Reports are built from'));
     }),
   );
@@ -387,7 +394,7 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
       await pumpUntilGone(tester, find.text('No pilots selected'));
 
       // The viewer has no shell, so leave it for the next step.
-      await tapVisible(tester, _key('viewer-back'));
+      await tapVisible(tester, find.byKey(viewerLeadKey()));
       await pumpUntilFound(tester, find.text('Reports are built from'));
     }),
   );
@@ -426,7 +433,7 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
         );
 
         // Leave and reopen: the same codes, and nothing new is issued.
-        await tapVisible(tester, _key('viewer-back'));
+        await tapVisible(tester, find.byKey(viewerLeadKey()));
         await pumpUntilFound(tester, find.text('Reports are built from'));
         await tapVisible(tester, _key('report-open-cards'));
         await pumpUntilFound(tester, _key('cards-summary'));
@@ -435,7 +442,7 @@ Future<void> runSetupPhase(Journey journey, JourneyContext data) async {
         expect(find.byKey(const ValueKey('cards-banner-send')), findsNothing);
         expect(stub.issuingSends, 1);
 
-        await tapVisible(tester, _key('viewer-back'));
+        await tapVisible(tester, find.byKey(viewerLeadKey()));
         await pumpUntilFound(tester, find.text('Reports are built from'));
       } finally {
         PilotInvitationSources.current = original;

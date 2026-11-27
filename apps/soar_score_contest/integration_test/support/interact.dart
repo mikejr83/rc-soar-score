@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:soar_score_contest/pages/home_page.dart';
 import 'package:soar_score_contest/pages/landing_page.dart';
@@ -33,6 +34,12 @@ Future<void> continueFromLanding(WidgetTester tester) async {
   );
 }
 
+/// The report viewer's leading button key, platform-appropriate: on web the
+/// viewer is opened in place and shows a close button, on native it shows a
+/// back arrow.
+ValueKey viewerLeadKey() =>
+    kIsWeb ? const ValueKey('viewer-close') : const ValueKey('viewer-back');
+
 /// Goes back to the main page (the contest list) from wherever the app is:
 /// the report viewer's Back (the viewer sits outside the shell), the
 /// header's Contests crumb inside a contest, or the rail's Contests entry
@@ -41,9 +48,9 @@ Future<void> continueFromLanding(WidgetTester tester) async {
 Future<void> goToMainPage(WidgetTester tester) async {
   // A report opened in place is outside the shell, so neither the crumb nor
   // the rail exists there; tap its Back to pop out onto the shell first.
-  final viewerBack = find.byKey(const ValueKey('viewer-back'));
-  while (viewerBack.evaluate().isNotEmpty) {
-    await tapVisible(tester, viewerBack);
+  final viewerLead = find.byKey(viewerLeadKey());
+  while (viewerLead.evaluate().isNotEmpty) {
+    await tapVisible(tester, viewerLead);
   }
   final crumb = find.byKey(const ValueKey('breadcrumb-contests'));
   if (crumb.evaluate().isNotEmpty) {
