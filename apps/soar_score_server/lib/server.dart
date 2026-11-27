@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:logging/logging.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:soar_score_api_handlers/soar_score_api_handlers.dart';
@@ -11,6 +12,7 @@ import 'package:soar_score_data/soar_score_data.dart';
 import 'auth/auth0_token_verifier.dart';
 import 'auth/auth0_user_profile_source.dart';
 import 'config/server_config.dart';
+import 'mail/email_template.dart';
 import 'mail/invitation_mailer.dart';
 import 'mail/ses_feedback/ses_feedback_handler.dart';
 import 'mail/ses_feedback/sns_verifier.dart';
@@ -83,6 +85,7 @@ Future<RunningServer> startServer(
   FutureOr<void> Function(SoarScoreDatabase database)? onDatabaseOpen,
   InternetAddress? address,
   AuthMiddleware? authMiddleware,
+  Directory? emailTemplates,
 }) async {
   final db =
       database ??
@@ -99,8 +102,15 @@ Future<RunningServer> startServer(
     if (support == null) {
       _logger.warning('Public support endpoint disabled: settings incomplete.');
     }
+    InvitationTemplates? invitationTemplates;
     if (config.mail == null) {
       _logger.warning('Invitation email disabled: mail settings incomplete.');
+    } else {
+      // Read the templates now: a missing file stops startup, not a send.
+      await initializeDateFormatting();
+      invitationTemplates = await InvitationTemplates.load(
+        emailTemplates ?? InvitationTemplates.defaultDirectory(),
+      );
     }
     final feedbackTopic = config.sesFeedbackTopic;
     if (feedbackTopic == null) {
@@ -122,6 +132,7 @@ Future<RunningServer> startServer(
                   credentials: config.mail!.sesCredentials,
                   mode: config.mail!.mode,
                 ),
+                invitationTemplates!,
               ),
         sesFeedbackHandler: feedbackTopic == null
             ? null

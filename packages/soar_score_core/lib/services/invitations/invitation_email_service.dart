@@ -8,6 +8,7 @@ import '../../errors/contest_state_error.dart';
 import '../../errors/entity_not_found_error.dart';
 import '../../models/contest/contest.dart';
 import '../../models/id.dart';
+import '../../preferences/country_locale.dart';
 import '../../models/participants/participant_profile.dart';
 import '../../models/scores/invitation.dart';
 import '../../models/sync/audit_event.dart';
@@ -89,6 +90,7 @@ class InvitationMail {
     required this.timeZone,
     required this.location,
     required this.link,
+    this.locale = 'en-US',
   });
 
   final String to;
@@ -103,6 +105,10 @@ class InvitationMail {
   /// Host, city, state and country that are set, in that order; may be empty.
   final List<String> location;
   final String link;
+
+  /// The locale the dates are written in (a supported BCP 47 tag): the
+  /// pilot's account preference, else the contest country's, else the default.
+  final String locale;
 }
 
 /// The answer to [InvitationMailer.send].
@@ -459,6 +465,22 @@ class InvitationEmailService {
     return results;
   }
 
+  /// The preferred locale of the account confirmed for [profileId], if any.
+  Future<String?> _preferredLocale(Id profileId) async {
+    try {
+      final link = await repository.participantAccountLinkRepository
+          .findConfirmedForProfile(profileId);
+      if (link == null) return null;
+      final account = await repository.accountRepository.findById(
+        link.accountId,
+      );
+      return account?.preferredLocale;
+    } on Object {
+      // A locale is a nicety: never let it stop an invitation going out.
+      return null;
+    }
+  }
+
   Future<InvitationEmailResult> _email({
     required Contest contest,
     required IssuedInvitation issued,
@@ -559,6 +581,10 @@ class InvitationEmailService {
               if (part != null && part.trim().isNotEmpty) part.trim(),
           ],
           link: linkFor(issued.credential),
+          locale: CountryLocale.resolve(
+            preferred: await _preferredLocale(profile.id),
+            country: contest.country,
+          ),
         ),
       );
     } on Object {

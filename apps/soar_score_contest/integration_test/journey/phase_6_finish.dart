@@ -6,7 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:soar_score_contest/widgets/reports/standings/standings_table_view.dart';
 
-import '../support/interact.dart';
+import '../support/interact.dart'
+    show goToMainPage, tapVisible, tapRail, viewerLeadKey;
 import '../support/launch_app.dart';
 import '../support/open_demo_contest.dart';
 import '../support/pump_until_gone.dart';
@@ -257,7 +258,7 @@ Future<void> runFinishPhase(Journey journey, JourneyContext data) async {
       );
       await pumpUntilFound(tester, find.textContaining(RegExp(r'\d+:\d{2}')));
 
-      await tapVisible(tester, _key('viewer-back'));
+      await tapVisible(tester, find.byKey(viewerLeadKey()));
       await pumpUntilFound(tester, find.text('Reports are built from'));
     }),
   );

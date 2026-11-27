@@ -45,6 +45,8 @@ FROM scratch
 # Minimal Dart runtime libs and certs, needed for the AOT binary and HTTPS calls
 COPY --from=build /runtime/ /
 COPY --from=build /app/bin/server /app/bin/server
+# Email templates, read at startup from email/ beside bin/.
+COPY --from=build /app/apps/soar_score_server/email /app/email
 
 # If you serve files or need other assets, copy them too, e.g.:
 # COPY --from=build /app/public /app/public

@@ -2501,6 +2501,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewerBackToReports => 'Back to Reports';
 
   @override
+  String get viewerCloseReport => 'Close report';
+
+  @override
   String get viewerPrint => 'Print';
 
   @override

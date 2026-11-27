@@ -3876,6 +3876,12 @@ abstract class AppLocalizations {
   /// **'Back to Reports'**
   String get viewerBackToReports;
 
+  /// Viewer app bar close button on web when the report was opened in place. Closes the tab or navigates to Reports.
+  ///
+  /// In en, this message translates to:
+  /// **'Close report'**
+  String get viewerCloseReport;
+
   /// Viewer app bar primary button that prints the sheet.
   ///
   /// In en, this message translates to:

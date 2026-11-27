@@ -42,6 +42,7 @@ MailMessage applyDeliveryMode(MailMessage message, MailDeliveryMode mode) {
     replyTo: const [redirectRecipient],
     subject: '$redirectSubjectPrefix${message.subject}',
     text: message.text,
+    html: message.html,
   );
 }
 
@@ -158,6 +159,8 @@ class SesV2Sender implements TransactionalMailSender {
         'Subject': {'Data': message.subject, 'Charset': 'UTF-8'},
         'Body': {
           'Text': {'Data': message.text, 'Charset': 'UTF-8'},
+          if (message.html != null)
+            'Html': {'Data': message.html, 'Charset': 'UTF-8'},
         },
       },
     },

@@ -9,6 +9,10 @@ enum ViewerLead {
 
   /// Opened in place (no second window): back to the Reports page.
   back,
+
+  /// Web, opened in place: close the tab, or navigate to Reports if the
+  /// tab cannot be closed.
+  close,
 }
 
 /// The viewer's slim app bar: report and contest name, the page setup the
@@ -83,14 +87,21 @@ class ViewerAppBar extends StatelessWidget implements PreferredSizeWidget {
       scrolledUnderElevation: 0,
       centerTitle: true,
       toolbarHeight: 64,
-      leading: lead == ViewerLead.back
-          ? IconButton(
-              key: const ValueKey('viewer-back'),
-              tooltip: l10n.viewerBackToReports,
-              onPressed: onLead,
-              icon: const Icon(Icons.arrow_back),
-            )
-          : null,
+      leading: switch (lead) {
+        ViewerLead.back => IconButton(
+          key: const ValueKey('viewer-back'),
+          tooltip: l10n.viewerBackToReports,
+          onPressed: onLead,
+          icon: const Icon(Icons.arrow_back),
+        ),
+        ViewerLead.close => IconButton(
+          key: const ValueKey('viewer-close'),
+          tooltip: l10n.viewerCloseReport,
+          onPressed: onLead,
+          icon: const Icon(Icons.close),
+        ),
+        ViewerLead.none => null,
+      },
       automaticallyImplyLeading: false,
       title: Column(
         mainAxisSize: MainAxisSize.min,
