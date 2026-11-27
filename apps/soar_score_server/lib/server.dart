@@ -12,6 +12,8 @@ import 'auth/auth0_token_verifier.dart';
 import 'auth/auth0_user_profile_source.dart';
 import 'config/server_config.dart';
 import 'mail/invitation_mailer.dart';
+import 'mail/ses_feedback/ses_feedback_handler.dart';
+import 'mail/ses_feedback/sns_verifier.dart';
 import 'mail/ses_v2_sender.dart';
 import 'support/support_wiring.dart';
 import 'handler.dart';
@@ -100,6 +102,10 @@ Future<RunningServer> startServer(
     if (config.mail == null) {
       _logger.warning('Invitation email disabled: mail settings incomplete.');
     }
+    final feedbackTopic = config.sesFeedbackTopic;
+    if (feedbackTopic == null) {
+      _logger.warning('SES feedback endpoint disabled: no topic configured.');
+    }
     final server = await shelf_io.serve(
       createServerHandler(
         db,
@@ -116,6 +122,13 @@ Future<RunningServer> startServer(
                   credentials: config.mail!.sesCredentials,
                   mode: config.mail!.mode,
                 ),
+              ),
+        sesFeedbackHandler: feedbackTopic == null
+            ? null
+            : (feedback) => sesFeedbackHandler(
+                verifier: SnsVerifier(topic: feedbackTopic, client: upstream),
+                feedback: feedback,
+                client: upstream,
               ),
         supportHandler: support == null
             ? null
