@@ -11,6 +11,7 @@ import 'package:soar_score_self_score/l10n/app_localizations.dart';
 import 'package:soar_score_self_score/models/guest_session.dart';
 import 'package:soar_score_self_score/models/pilot_overview.dart';
 import 'package:soar_score_self_score/router.dart';
+import 'package:soar_score_self_score/session/contest_open_gate.dart';
 import 'package:soar_score_self_score/session/guest_session_scope.dart';
 import 'package:soar_score_self_score/session/guest_session_store.dart';
 
@@ -69,6 +70,7 @@ Future<void> _pump(
   required GuestSessionStore store,
   SelfScoreRepository repository = const SampleSelfScoreRepository(),
   AuthSession? auth,
+  ContestOpenGate? gate,
 }) async {
   tester.view.physicalSize = const Size(800, 2400);
   tester.view.devicePixelRatio = 1;
@@ -84,6 +86,7 @@ Future<void> _pump(
       ),
     ),
   );
+  if (gate != null) app = ContestOpenScope(gate: gate, child: app);
   if (auth != null) app = AuthScope(session: auth, child: app);
   await tester.pumpWidget(app);
 }
@@ -581,6 +584,32 @@ void _accountTests() {
       router.routeInformationProvider.value.uri.path,
       contains('/pilots/'),
     );
+  });
+
+  testWidgets('a claim during sign-out is not sent and stores nothing', (
+    tester,
+  ) async {
+    final store = MemoryGuestSessionStore();
+    final repository = _AccountRepository();
+    final auth = E2eAuthSession();
+    await auth.signIn();
+    final gate = ContestOpenGate();
+    await _pump(
+      tester,
+      store: store,
+      repository: repository,
+      auth: auth,
+      gate: gate,
+    );
+    router.go(invitationPath('sample-link'));
+    await tester.pumpAndSettle();
+
+    await gate.closeAndSettle();
+    await tester.tap(find.text('Continue as Penny Pilot'));
+    await tester.pumpAndSettle();
+
+    expect(repository.claimed, isEmpty);
+    expect(store.read(), isNull);
   });
 
   testWidgets('signed in, Continue as guest does not claim', (tester) async {

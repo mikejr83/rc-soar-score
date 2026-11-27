@@ -10,6 +10,7 @@ import '../l10n/app_localizations.dart';
 import '../public_site.dart';
 import '../models/guest_session.dart';
 import '../router.dart';
+import '../session/contest_open_gate.dart';
 import '../session/guest_session_scope.dart';
 import '../widgets/legal_footer.dart';
 import '../widgets/load_error_view.dart';
@@ -51,9 +52,16 @@ class _InvitationPageState extends State<InvitationPage> {
   /// the pilot under the account, and the session answered acts as it.
   Future<ClaimFailure?> _claim() async {
     try {
-      final session = await context.repository.claimInvitation(
-        widget.credential,
+      final repository = context.repository;
+      final gate = context.contestOpenGate;
+      // Through the gate, so a sign-out waits for this claim to settle and a
+      // claim started during one is not sent.
+      final session = await gate.run(
+        () => repository.claimInvitation(widget.credential),
       );
+      if (session == null || gate.isClosed) {
+        return ClaimFailure.signInExpired;
+      }
       if (!mounted) return null;
       _continueAsGuest(session);
       return null;
