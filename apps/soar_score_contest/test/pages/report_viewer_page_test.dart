@@ -683,6 +683,14 @@ void main() {
     expect(find.byKey(const ValueKey('viewer-back')), findsOneWidget);
   });
 
+  testWidgets('native back arrow is present when opened in place', (
+    tester,
+  ) async {
+    await _pump(tester, _server(), openedInPlace: true);
+    expect(find.byKey(const ValueKey('viewer-back')), findsOneWidget);
+    expect(find.byKey(const ValueKey('viewer-close')), findsNothing);
+  });
+
   testWidgets('the header is opaque and does not tint when scrolled', (
     tester,
   ) async {
