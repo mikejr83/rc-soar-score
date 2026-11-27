@@ -353,7 +353,7 @@ void main() {
     expect(find.textContaining('US'), findsOneWidget);
     expect(find.textContaining('DE'), findsOneWidget);
     expect(find.textContaining('ID F9999'), findsNWidgets(2));
-    expect(find.textContaining('Shares this ID'), findsNWidgets(2));
+    expect(find.textContaining('Shares ID F9999'), findsNWidgets(2));
   });
 
   testWidgets('a typed search refused after a lookup on purpose stays quiet', (

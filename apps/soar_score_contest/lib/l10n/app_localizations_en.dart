@@ -8853,7 +8853,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get searchDirectorySharedId => 'Shares this ID with another pilot';
+  String searchDirectorySharedId(String id) {
+    return 'Shares ID $id with another pilot';
+  }
 
   @override
   String directoryCopyFailed(String name) {

@@ -140,6 +140,9 @@ class DirectoryPilotSource {
     await _load();
     final found = <String, DirectoryMatchDto>{};
     final viaEmail = <String>{};
+    // The ID another listed pilot also holds, by entry: the answer of the key
+    // that flagged it (a later answer of another key must not clear it).
+    final shared = <String, String>{};
     Object? failure;
     for (final key in keys) {
       final DirectoryLookupResponse response;
@@ -156,12 +159,18 @@ class DirectoryPilotSource {
       }
       for (final match in response.results) {
         found[match.entryId.value] = match;
+        if (match.sharedKey) {
+          final id = key == DirectoryLookupKeyDto.faiNumber
+              ? match.faiNumber
+              : match.nationalOrgId;
+          if (id != null) shared.putIfAbsent(match.entryId.value, () => id);
+        }
         if (key == DirectoryLookupKeyDto.email) {
           viaEmail.add(match.entryId.value);
         }
       }
     }
-    final answer = _Found(text, found.values.toList(), viaEmail);
+    final answer = _Found(text, found.values.toList(), viaEmail, shared);
     if (failure != null) {
       // Partial answers are shown but not reused: the key that failed was
       // never asked.
@@ -195,6 +204,7 @@ class DirectoryPilotSource {
         searchedEmail: answer.viaEmail.contains(match.entryId.value)
             ? answer.text
             : null,
+        sharedId: answer.shared[match.entryId.value],
       ),
   ];
 
@@ -286,9 +296,12 @@ class DirectoryRateLimited implements Exception {
 
 /// The answer to one lookup and which entries the email key returned.
 class _Found {
-  const _Found(this.text, this.matches, this.viaEmail);
+  const _Found(this.text, this.matches, this.viaEmail, this.shared);
 
   final String text;
   final List<DirectoryMatchDto> matches;
   final Set<String> viaEmail;
+
+  /// Entry id -> the ID it shares with another listed pilot.
+  final Map<String, String> shared;
 }
