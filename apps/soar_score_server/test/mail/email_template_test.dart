@@ -38,9 +38,14 @@ void main() {
     expect(t.fill({'a': '1', 'b': '2'}), 'x 1 y 2');
   });
 
+  test('accepts hyphens and underscores in names', () {
+    final t = EmailTemplate('{{a-b}} {{ c_d }}', allowed: {'a-b', 'c_d'});
+    expect(t.fill({'a-b': '1', 'c_d': '2'}), '1 2');
+  });
+
   test('rejects malformed placeholders instead of sending them', () {
     for (final bad in [
-      'href="{{a-b}}"',
+      'href="{{a-b}}"', // a well-formed name the mailer does not fill
       'href="{{}}"',
       'href="{{a}"',
       'href="{{a',

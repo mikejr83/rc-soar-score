@@ -22,9 +22,10 @@ class EmailTemplate {
 
   final String source;
 
-  /// `{{name}}`, with optional spaces inside the braces, and the one space
+  /// `{{name}}` (letters, digits, `-` and `_`), with optional spaces inside the
+  /// braces, and the one space
   /// before it that [fill] drops when the value is empty.
-  static final _placeholder = RegExp(r'( ?)\{\{\s*(\w+)\s*\}\}');
+  static final _placeholder = RegExp(r'( ?)\{\{\s*([\w-]+)\s*\}\}');
 
   /// The template with each placeholder replaced by its value in [values].
   ///
