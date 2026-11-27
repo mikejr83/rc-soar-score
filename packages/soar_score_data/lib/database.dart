@@ -384,7 +384,17 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
   /// does not have is skipped.
   Future<void> _addParticipantLinkIndexes() async {
     final sqlite = executor.dialect == SqlDialect.sqlite;
-    for (final table in ['participant_account_links', 'participant_profiles']) {
+    for (final table in [
+      'participant_account_links',
+      'participant_profiles',
+      'contest_participations',
+      'participant_directory_entries',
+      'invitations',
+      'score_attempts',
+      'review_requests',
+      'audit_events',
+      'mutation_records',
+    ]) {
       final lookup = sqlite
           ? "SELECT 1 AS x FROM sqlite_master WHERE type = 'table' AND name = '$table'"
           : "SELECT 1 AS x FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = '$table'";

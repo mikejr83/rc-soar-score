@@ -50,6 +50,20 @@ class _Version2Database extends SoarScoreDatabase {
   );
 }
 
+/// The indexes added by the 2 to 3 step for claims, unlinks and directory
+/// lookups; every database has the first, the server also the rest.
+const _everywhere = ['contest_participations_profile'];
+const _serverOnly = [
+  'participant_account_links_account',
+  'participant_directory_entries_fai_number',
+  'participant_directory_entries_national_org_id',
+  'invitations_redeemed_by',
+  'score_attempts_actor',
+  'review_requests_requester',
+  'audit_events_actor',
+  'mutation_records_actor',
+];
+
 Future<Set<String>> _indexNames(GeneratedDatabase db) async {
   final sql = db.executor.dialect == SqlDialect.sqlite
       ? "SELECT name FROM sqlite_master WHERE type = 'index'"
@@ -100,6 +114,9 @@ void main() => forEachBackend((backend) {
         final old = _Version2Database(openExecutor(), profile: databaseProfile);
         openDatabase = old;
         expect(await _hasColumn(old, 'participant_profiles', 'id'), isTrue);
+        for (final name in [..._everywhere, if (server) ..._serverOnly]) {
+          expect(await _indexNames(old), isNot(contains(name)), reason: name);
+        }
         expect(
           await _indexNames(old),
           isNot(contains('participant_profiles_lower_email')),
@@ -133,6 +150,9 @@ void main() => forEachBackend((backend) {
             await _indexNames(upgraded),
             contains('participant_profiles_lower_email'),
           );
+          for (final name in [..._everywhere, if (server) ..._serverOnly]) {
+            expect(await _indexNames(upgraded), contains(name), reason: name);
+          }
           if (server) {
             expect(
               await _hasColumn(upgraded, 'accounts', 'profile_refreshed_at'),
