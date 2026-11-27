@@ -1,0 +1,15 @@
+{{contestName}}
+
+Hello {{pilotName}},
+
+You are entered in {{contestName}}{{locationLine}}{{dateLine}}.
+
+Use this personal link to enter and review your scores:
+
+{{link}}
+
+This link is yours alone, so please do not share it. It stops working 24 hours after the contest is completed.
+
+Your contest director sent this invitation. Replies to this address are not read; please contact the director with any questions.
+
+RC Soar Score

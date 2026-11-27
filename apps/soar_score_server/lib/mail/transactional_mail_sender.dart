@@ -1,4 +1,5 @@
-/// A plain-text message for the shared transactional sender.
+/// A message for the shared transactional sender: plain text, with an
+/// optional HTML alternative.
 ///
 /// Callers describe the intended destinations; [TransactionalMailSender]
 /// applies the delivery mode (live or redirect) before anything is sent.
@@ -11,6 +12,7 @@ class MailMessage {
     required this.replyTo,
     required this.subject,
     required this.text,
+    this.html,
   });
 
   final List<String> to;
@@ -19,6 +21,9 @@ class MailMessage {
   final List<String> replyTo;
   final String subject;
   final String text;
+
+  /// The HTML alternative of [text]; null for a text-only message.
+  final String? html;
 }
 
 /// The result of one send.
