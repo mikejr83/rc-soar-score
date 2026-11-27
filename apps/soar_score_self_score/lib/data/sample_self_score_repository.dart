@@ -1,8 +1,12 @@
+import '../models/account_link.dart';
 import '../models/contests_view.dart';
 import '../models/entry_context.dart';
 import '../models/group_results.dart';
 import '../models/guest_session.dart';
 import '../models/landing_result.dart';
+import '../models/link_candidate.dart';
+import '../models/own_directory.dart';
+import '../models/past_contests.dart';
 import '../models/pilot_overview.dart';
 import '../models/pilot_round.dart';
 import '../models/results_view.dart';
@@ -48,25 +52,93 @@ class SampleSelfScoreRepository implements SelfScoreRepository {
   }
 
   @override
+  Future<GuestSession> claimInvitation(String credential) =>
+      acceptInvitation(credential);
+
+  @override
   Future<SubmitResult> submitScore(ScoreSubmission submission) async {
     _requireContest(submission.contestId);
     return const ScoreAccepted(flightScore: '863');
   }
 
   @override
-  Future<ContestsView> contests() async => const ContestsView(
-    matchPrompt:
-        'Your email matches ${SampleData.pilotName}, pilot 12, in '
-        '${SampleData.contestName}.',
+  Future<ContestsView> contests() async => ContestsView(
     contests: [
       ContestSummary(
-        id: SampleData.contestId,
+        participationId: '12',
+        contestId: SampleData.contestId,
         name: SampleData.contestName,
-        dates: 'Sat 10 Oct 2026 to Sun 11 Oct 2026',
-        next: 'Round 4, Group B, lane 2',
+        startDate: DateTime.utc(2026, 10, 10),
+        endDate: DateTime.utc(2026, 10, 11),
+        phase: ContestPhase.inProgress,
+        location: 'Denver, CO',
       ),
     ],
   );
+
+  @override
+  Future<PastContestsPage> pastContests({int offset = 0}) async =>
+      PastContestsPage(
+        contests: [
+          PastContest(
+            participationId: '7',
+            contestId: '019c0000-0000-7000-8000-000000000007',
+            name: 'Spring Open 2026',
+            startDate: DateTime.utc(2026, 4, 11),
+            endDate: DateTime.utc(2026, 4, 12),
+            location: 'Boulder, CO',
+          ),
+        ],
+      );
+
+  @override
+  Future<GuestSession> openContest(String participationId) async {
+    if (participationId != '12') throw const ContestNotOnListException();
+    return acceptInvitation(sampleCredential);
+  }
+
+  @override
+  Future<List<LinkCandidate>> linkCandidates() async => [
+    LinkCandidate(
+      id: 'sample-candidate',
+      pilotName: SampleData.pilotName,
+      contests: [
+        LinkCandidateContest(
+          name: SampleData.contestName,
+          startDate: DateTime.utc(2026, 10, 10),
+          endDate: DateTime.utc(2026, 10, 11),
+        ),
+      ],
+    ),
+  ];
+
+  /// Already has an entry, so signing in goes straight on.
+  @override
+  Future<OwnDirectory> ownDirectory() async => const OwnDirectory(
+    hasEntry: true,
+    initial: DirectoryDetails(firstName: 'Penny', lastName: 'Pilot'),
+    emailAvailable: true,
+  );
+
+  @override
+  Future<void> saveOwnDirectory(DirectoryDetails details) async {}
+
+  @override
+  Future<void> deleteOwnDirectory() async {}
+
+  @override
+  Future<List<AccountLink>> accountLinks() async => const [
+    AccountLink(id: 'sample-link', pilotName: SampleData.pilotName),
+  ];
+
+  @override
+  Future<void> endAccountLink(String linkId) async {}
+
+  @override
+  Future<void> confirmLinkCandidate(String candidateId) async {}
+
+  @override
+  Future<void> declineLinkCandidate(String candidateId) async {}
 
   @override
   Future<TeamOverview> teamOverview(String contestId) async {

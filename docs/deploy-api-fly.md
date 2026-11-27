@@ -361,9 +361,11 @@ fly deploy --remote-only --ha=false \
 Or run the Deploy workflow by hand (Actions > Deploy > Run workflow) with the
 earlier tag.
 
-Schema changes are made in place in version 1 and the server migrates on start,
-so a rollback across a schema change needs a Neon restore (point-in-time
-history) as well. Check the release's schema changes first.
+The server migrates its database on start with numbered, data-preserving
+upgrade steps, and upgrades are not rolled back. A rollback across a release
+that raised the schema version therefore needs a Neon restore (point-in-time
+history) as well, and the earlier server only accepts clients of its own
+schema version. Check the release's schema version first.
 
 ## Moving to another host
 

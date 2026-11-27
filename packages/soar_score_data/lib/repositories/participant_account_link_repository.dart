@@ -1,5 +1,8 @@
+import 'package:drift/drift.dart' show SqlDialect, UpdateKind, Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
+import '../schema/guest_account_references.dart';
+import '../sync/sql_placeholders.dart';
 import 'drift_repository.dart';
 
 /// Participant account links in the database; backend only, so written
@@ -48,6 +51,117 @@ class ParticipantAccountLinkRepository extends DriftRepository
   Future<List<core.ParticipantAccountLink>> listForAccount(
     core.Id accountId,
   ) async => _store.whereId('account_id', accountId, orderBy: 'id');
+
+  @override
+  Future<List<core.ParticipantAccountLink>> listForProfiles(
+    Iterable<core.Id> participantProfileIds,
+  ) async =>
+      (await _store.whereIdIn('participant_profile_id', participantProfileIds))
+        ..sort((a, b) => a.id.value.compareTo(b.id.value));
+
+  @override
+  Future<core.ParticipantAccountLink> saveClaimingGuests(
+    core.ParticipantAccountLink link, {
+    required Iterable<core.Id> guestAccountIds,
+  }) => db.transaction(() async {
+    final saved = await save(link);
+    await _claim(link.accountId, guestAccountIds);
+    return saved;
+  });
+
+  @override
+  Future<bool> claimGuests(
+    core.ParticipantAccountLink link, {
+    required Iterable<core.Id> guestAccountIds,
+  }) => db.transaction(() async {
+    // Ending or moving the link waits for this claim (see _lockLink).
+    final stored = await _lockLink(link.id);
+    if (stored == null ||
+        stored['status'] != 'Confirmed' ||
+        stored['account_id'] != link.accountId.value ||
+        stored['participant_profile_id'] != link.participantProfileId.value) {
+      return false;
+    }
+    await _claim(link.accountId, guestAccountIds);
+    return true;
+  });
+
+  Future<void> _claim(
+    core.Id accountId,
+    Iterable<core.Id> guestAccountIds,
+  ) async {
+    for (final guest in guestAccountIds.toSet()) {
+      if (guest == accountId) continue;
+      for (final MapEntry(key: table, value: columns)
+          in guestAccountReferences.entries) {
+        for (final column in columns) {
+          await _repoint(
+            table,
+            'UPDATE $table SET $column = ? WHERE $column = ?',
+            [Variable<String>(accountId.value), Variable<String>(guest.value)],
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  Future<core.ParticipantAccountLink> saveReleasingInvitations(
+    core.ParticipantAccountLink link, {
+    required Future<Map<core.Id, core.Id?>> Function() releases,
+  }) => db.transaction(() async {
+    // Under the same lock a claim takes, so a claim in progress finishes
+    // first, and what the account holds is decided here, not before.
+    await _lockLink(link.id);
+    final saved = await save(link);
+    for (final MapEntry(key: invitationId, value: guest)
+        in (await releases()).entries) {
+      // Only an invitation the account holds now moves, and only to its guest
+      // when that guest account exists (else to nobody).
+      await _repoint(
+        'invitations',
+        'UPDATE invitations SET redeemed_by_account_id = '
+            '(SELECT id FROM accounts WHERE id = ?) '
+            'WHERE id = ? AND redeemed_by_account_id = ?',
+        [
+          Variable<String>(guest?.value),
+          Variable<String>(invitationId.value),
+          Variable<String>(link.accountId.value),
+        ],
+      );
+    }
+    return saved;
+  });
+
+  /// Locks the stored link row until the transaction ends (PostgreSQL; SQLite
+  /// has one writer) and returns its status, account and profile.
+  Future<Map<String, Object?>?> _lockLink(core.Id linkId) async {
+    final lock = db.executor.dialect == SqlDialect.postgres
+        ? ' FOR UPDATE'
+        : '';
+    final rows = await db
+        .customSelect(
+          portableSql(
+            db,
+            'SELECT status, account_id, participant_profile_id '
+            'FROM participant_account_links WHERE id = ?$lock',
+          ),
+          variables: [Variable<String>(linkId.value)],
+        )
+        .get();
+    return rows.firstOrNull?.data;
+  }
+
+  Future<void> _repoint(
+    String table,
+    String sql,
+    List<Variable<String>> variables,
+  ) => db.customUpdate(
+    portableSql(db, sql),
+    variables: variables,
+    updates: {db.allTables.firstWhere((t) => t.actualTableName == table)},
+    updateKind: UpdateKind.update,
+  );
 
   @override
   Future<core.ParticipantAccountLink> save(core.ParticipantAccountLink link) =>

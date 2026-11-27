@@ -11,8 +11,16 @@ abstract interface class ParticipantDirectoryEntryRepository {
   /// The entry of [accountId], or `null`. An account has at most one.
   Future<ParticipantDirectoryEntry?> findForAccount(Id accountId);
 
-  /// Every entry its owner chose to list, in id order.
-  Future<List<ParticipantDirectoryEntry>> listListed();
+  /// The listed entries whose FAI number is exactly [faiNumber], in id order.
+  Future<List<ParticipantDirectoryEntry>> listListedByFaiNumber(
+    String faiNumber,
+  );
+
+  /// The listed entries whose national organization ID is exactly
+  /// [nationalOrgId], in id order.
+  Future<List<ParticipantDirectoryEntry>> listListedByNationalOrgId(
+    String nationalOrgId,
+  );
 
   /// Stores [entry], replacing the stored one with the same id. The database
   /// refuses a second entry for an account.

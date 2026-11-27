@@ -36,7 +36,6 @@ class ResultsPage extends StatelessWidget {
         contextLine: data?.contestName,
         onBack: () =>
             context.canPop() ? context.pop() : context.go(teamPath(contestId)),
-        backLabel: 'Back',
         actions: const [ConnectionIndicator()],
         showAccount: false,
       ),

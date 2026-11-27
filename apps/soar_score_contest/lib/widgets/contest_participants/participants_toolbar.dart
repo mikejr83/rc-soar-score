@@ -16,12 +16,29 @@ class ParticipantsToolbar extends StatelessWidget {
     required this.narrow,
     required this.onAddNew,
     required this.onAddProfile,
+    this.remote,
+    this.lookup,
+    this.onAddDirectory,
+    this.offline = false,
   });
 
   final ParticipantsController controller;
   final bool narrow;
   final VoidCallback onAddNew;
   final ValueChanged<ParticipantProfile> onAddProfile;
+
+  /// The directory search, when the director is signed in (#653).
+  final RemoteParticipantSearch? remote;
+
+  /// Looks the typed text up in the directory on purpose.
+  final RemoteParticipantSearch? lookup;
+
+  /// Copies a pilot the directory found into the director's list and adds
+  /// the copy.
+  final ValueChanged<ParticipantCandidate>? onAddDirectory;
+
+  /// Whether the app has no internet: the directory cannot be searched.
+  final bool offline;
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +49,15 @@ class ParticipantsToolbar extends StatelessWidget {
       // Without the right to add, the field only filters the list.
       profiles: canAdd ? c.profiles : const [],
       selected: c.memberProfileIds,
-      offline: false,
+      offline: offline,
+      remote: canAdd ? remote : null,
+      lookup: canAdd ? lookup : null,
       onQueryChanged: c.setQuery,
       onAdd: (ParticipantCandidate candidate) {
+        if (candidate.directory != null) {
+          onAddDirectory?.call(candidate);
+          return;
+        }
         final profile = c.profiles
             .where((p) => p.id == candidate.profileId)
             .firstOrNull;

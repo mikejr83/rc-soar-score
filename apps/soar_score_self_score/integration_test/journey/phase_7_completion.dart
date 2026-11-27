@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_self_score/router.dart';
 
 import '../support/director_api.dart';
@@ -55,6 +56,15 @@ Future<void> phase7Completion(
       await signInAs(tester, contest, pilot);
       expect(find.text('Contest completed'), findsOneWidget);
     });
+    await journey.step(
+      'The account is linked to the finished contest',
+      () async {
+        // The link is made while the contest still opens; it is the account's
+        // history that the 24 hours below move the contest into.
+        await contest.linkPilotAccount(pilot, state: 'confirmed');
+        expect(await contest.linkedPilotNames(), contains(pilot));
+      },
+    );
     await journey.step('After 24 hours the session has ended', () async {
       await contest.advanceClock(25);
       await openPath(tester, groupResultsPath(contest.id, pilotId, '1'));
@@ -71,5 +81,39 @@ Future<void> phase7Completion(
       await pumpUntilFound(tester, find.text('This link does not work'));
       expect(find.text('Continue as guest'), findsNothing);
     });
+    await journey.step(
+      'The finished contest leaves the contests page for the past contests',
+      () async {
+        await openPath(tester, '/');
+        await tapVisible(tester, find.text('Sign in'));
+        await pumpUntilFound(tester, find.text('Signed in as Penny Pilot'));
+        // Past the 24 hours it is no longer on the list.
+        await openPath(tester, contestsPath);
+        await pumpUntilFound(tester, find.text('No contests yet'));
+        expect(find.text('E2E Self-Scoring Open'), findsNothing);
+        // It is in the history on the account page, with no way to open it.
+        await openPath(tester, accountPath);
+        await pumpUntilFound(tester, find.text('Past contests'));
+        await pumpUntilFound(tester, find.text('E2E Self-Scoring Open'));
+      },
+    );
+    await journey.step(
+      'Unlinking removes the pilot\'s contests from the history',
+      () async {
+        await tapVisible(tester, find.text('Unlink'));
+        await pumpUntilFound(tester, find.text('Unlink this pilot?'));
+        await tapVisible(
+          tester,
+          find.byKey(const Key('account-unlink-confirm')),
+        );
+        await pumpUntilFound(
+          tester,
+          find.text(
+            'No finished contests yet. They show up here after they end.',
+          ),
+        );
+        expect(find.text('E2E Self-Scoring Open'), findsNothing);
+      },
+    );
   });
 }

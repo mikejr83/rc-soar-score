@@ -26,6 +26,10 @@
 /main.dart.js
   Cache-Control: no-cache
 
+# The Auth0 SDK file carries its version in the name, so it never changes.
+/auth0-spa-js-*
+  Cache-Control: public, max-age=31536000, immutable
+
 # Static assets have stable names but rarely change: revalidate daily.
 /assets/*
   Cache-Control: public, max-age=3600

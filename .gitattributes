@@ -1,1 +1,5 @@
 graphify-out/graph.json merge=graphify
+
+# The Auth0 SDK files are pinned by a sha384 integrity hash in index.html, so a
+# checkout must never change their line endings (core.autocrlf on Windows).
+apps/*/web/auth0-spa-js-* text eol=lf

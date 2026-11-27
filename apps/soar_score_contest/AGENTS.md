@@ -26,6 +26,7 @@ Contest management application for directors, pilots, and helpers. Runs on web a
 
 - Offline-aware: UI must not assume connectivity (see `plan/architecture-requirements/offline-usage.md`). Show pending-changes state, provide manual sync trigger.
 - The web build stores no contest data in the browser (IndexedDB is limited to preferences and front-end functionality). The native build syncs on connect, then writes locally first and immediately through the remote API.
+- Auth0 SDK script: `web/index.html` loads the Auth0 SPA SDK from `web/auth0-spa-js-<version>.production.js` (the `dist/auth0-spa-js.production.js` file of the npm package `@auth0/auth0-spa-js`, MIT licence in `web/auth0-spa-js-LICENSE.txt`), not from a CDN, at an exact version with a `sha384` `integrity` attribute. It is the same file as in `soar_score_self_score/web`; update both together as described in that app's AGENTS.md. Never use a floating version.
 - Routing constructs are shared with `soar_score_self_score` via `soar_score_ui`; the public site is a separate Next.js app (`soar_score_web`).
 - Mobile-first responsive layouts (see `plan/architecture-requirements/responsive-design.md`).
 

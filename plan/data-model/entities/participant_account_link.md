@@ -18,7 +18,7 @@
 | `id`                     | UUIDv7      | Yes      | —       | Primary key for the link                                                                                                                                                                 |
 | `participant_profile_id` | UUIDv7      | Yes      | —       | Foreign key to ParticipantProfile                                                                                                                                                        |
 | `account_id`             | UUIDv7      | Yes      | —       | Foreign key to Account                                                                                                                                                                   |
-| `status`                 | Enum        | Yes      | —       | `Candidate` (a suggested match the participant has not confirmed), `Confirmed`, or `Ended` (replaced or withdrawn)                                                                       |
+| `status`                 | Enum        | Yes      | —       | `Confirmed` or `Ended` (replaced or withdrawn). A suggested match is not stored: it is computed on read                                                                                  |
 | `origin`                 | Enum        | Yes      | —       | How the link arose: `EmailMatch` (a verified account email equals the profile's email), `DirectoryPull` (a director copied the participant's directory entry), or `InvitationRedemption` |
 | `created_at`             | timestamptz | Yes      | now     | When the link was created                                                                                                                                                                |
 | `confirmed_at`           | timestamptz | No       | null    | When the link became `Confirmed`                                                                                                                                                         |
@@ -29,13 +29,16 @@
 
 - (`participant_profile_id`, `account_id`) is unique
 - A profile has at most one `Confirmed` link at a time. Linking a replacement account ends the earlier link
-- A link created from a verified email match starts as `Candidate` and becomes `Confirmed` only when the participant confirms it. A `DirectoryPull` link is `Confirmed` on creation, because listing in the directory is the participant's consent. An `InvitationRedemption` link is `Confirmed` on creation, because the director's invitation identifies the person
+- A verified email match is a suggestion computed on read; no `Candidate` row is stored. It becomes a `Confirmed` link only when the participant confirms it, and a participant who declines it is recorded as an `Ended` row. A `DirectoryPull` link is `Confirmed` on creation, because listing in the directory is the participant's consent. An `InvitationRedemption` link is `Confirmed` on creation, because the director's invitation identifies the person
 - An email match uses a verified account email only. A director never learns from a `Candidate` that the person has an account
 - Linking never copies account data into the profile, and never merges or rewrites the profile or any contest participation
+- Confirming a link and claiming the entries of the profile's guest accounts (score attempts, the invitations they opened, their audit events and mutation records) is one transaction, so a claim never leaves a Confirmed link with entries unclaimed at that moment, or claimed entries without the link. The claimed columns are listed in `guestAccountReferences` (`packages/soar_score_data/lib/schema/guest_account_references.dart`): `score_attempts.actor_id`, `invitations.redeemed_by_account_id`, `audit_events.actor_id`, `review_requests.requester_id` and `mutation_records.actor_id`. The guest account rows are kept. A guest that opens an invitation of the profile after the link was confirmed is claimed the next time the account opens a contest from its list; claiming is idempotent
+- Ending a link hands the invitations the account holds back to the guest accounts they came from (to nobody when no guest ever held them), in one transaction. The account's score attempts stay attributed to it. Nothing published changes
+- Re-linking an `Ended` pair re-opens the same row. A candidate the participant declined (`Ended`, never confirmed) or a link they ended is not offered as a candidate again
 
 ## Lifecycle
 
-- `Candidate` -> `Confirmed` -> `Ended`. A `Candidate` the participant declines is `Ended`
+- A link is `Confirmed` -> `Ended`. A suggested match the participant declines is stored as `Ended`
 - Ended links are kept, so history stays explainable. They are deleted only when the account is erased, as described in the Account entity
 
 ## Privacy and Scope

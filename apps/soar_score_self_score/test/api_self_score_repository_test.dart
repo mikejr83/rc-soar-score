@@ -7,6 +7,7 @@ import 'package:http/testing.dart';
 import 'package:soar_score_api/soar_score_api.dart';
 import 'package:soar_score_self_score/data/api_self_score_repository.dart';
 import 'package:soar_score_self_score/data/self_score_repository.dart';
+import 'package:soar_score_self_score/models/contests_view.dart';
 import 'package:soar_score_self_score/models/entry_context.dart';
 import 'package:soar_score_self_score/models/group_result_row.dart';
 import 'package:soar_score_self_score/models/guest_session.dart';
@@ -68,6 +69,9 @@ http.Response _fixtures(http.Request request) => switch (request.url.path) {
   ),
   '/api/v1/self-scoring/results' => _json(_fixture('overall_results')),
   '/api/v1/self-scoring/invitations/resolve' => _json(
+    _fixture('resolve_invitation_response'),
+  ),
+  '/api/v1/account/invitation-claims' => _json(
     _fixture('resolve_invitation_response'),
   ),
   _ => _json('{}', 404),
@@ -218,6 +222,68 @@ void main() {
     expect(session.pilotId, '0192f6a0-0000-7000-8000-000000000002');
     expect(session.role, 'pilot');
     expect(session.expiresAt, DateTime.utc(2026, 11, 8, 23));
+  });
+
+  test('claiming a link gives the session the account acts in', () async {
+    final session = await _repository(_fixtures).claimInvitation('abc');
+    expect(session.pilotName, 'Alex Rivera');
+    expect(session.pilotId, '0192f6a0-0000-7000-8000-000000000002');
+  });
+
+  test('claiming a pilot another account holds says so', () {
+    final repository = _repository(
+      (_) => _json('{"error":{"code":"already_linked"}}', 409),
+    );
+    expect(
+      repository.claimInvitation('abc'),
+      throwsA(isA<PilotAlreadyLinkedException>()),
+    );
+  });
+
+  test('another 409 on a claim is not "already linked"', () async {
+    for (final code in ['invitations_not_available', 'backend_only', '']) {
+      final repository = _repository(
+        (_) => _json(code.isEmpty ? '' : '{"error":{"code":"$code"}}', 409),
+      );
+      await expectLater(
+        repository.claimInvitation('abc'),
+        throwsA(
+          allOf(
+            isA<SelfScoreLoadException>(),
+            isNot(isA<PilotAlreadyLinkedException>()),
+          ),
+        ),
+        reason: code,
+      );
+    }
+  });
+
+  test('claiming with a refused sign-in says the sign-in expired', () {
+    final repository = _repository((_) => _json('{}', 401));
+    expect(
+      repository.claimInvitation('abc'),
+      throwsA(isA<AccountSignInExpiredException>()),
+    );
+  });
+
+  test('claiming with an account that cannot link is not the link', () {
+    final repository = _repository(
+      (_) => _json('{"error":{"code":"link_not_found"}}', 404),
+    );
+    expect(
+      repository.claimInvitation('abc'),
+      throwsA(isA<AccountCannotLinkException>()),
+    );
+  });
+
+  test('claiming a bad link is the invalid-link failure', () {
+    final repository = _repository(
+      (_) => _json(_fixture('error_invalid_invitation'), 404),
+    );
+    expect(
+      repository.claimInvitation('nope'),
+      throwsA(isA<InvalidInvitationException>()),
+    );
   });
 
   test('a cookie session keeps no token in the stored session', () async {
@@ -539,6 +605,197 @@ void main() {
     );
   });
 
+  group('Is this you', () {
+    const candidateId = '019c0000-0000-7000-8000-00000000c101';
+    const linkBody =
+        '{"id":"$candidateId","pilot_name":"Pat Pilot","status":"Confirmed",'
+        '"origin":"EmailMatch","confirmed_at":"2026-10-17T14:00:00.000Z",'
+        '"ended_at":null}';
+
+    test('candidates read as pilot name and dated contests', () async {
+      final repository = _repository((request) {
+        expect(request.url.path, '/api/v1/account/link-candidates');
+        return _json(
+          '{"candidates":[{"id":"$candidateId","first_name":"Pat",'
+          '"last_name":"Pilot","contests":[{"name":"Spring Open",'
+          '"start_date_time":"2026-10-17T14:00:00.000Z",'
+          '"end_date_time":"2026-10-18T22:00:00.000Z",'
+          '"start_date":"2026-10-17","end_date":"2026-10-18",'
+          '"timezone":"America/Denver","host":null,"city":null,'
+          '"state":null,"country":null}]}]}',
+        );
+      });
+
+      final result = await repository.linkCandidates();
+
+      expect(result.single.id, candidateId);
+      expect(result.single.pilotName, 'Pat Pilot');
+      expect(result.single.contests.single.name, 'Spring Open');
+      expect(
+        result.single.contests.single.startDate,
+        DateTime.utc(2026, 10, 17),
+      );
+      expect(result.single.contests.single.endDate, DateTime.utc(2026, 10, 18));
+    });
+
+    test('a one-day contest shows one date', () async {
+      final repository = _repository(
+        (_) => _json(
+          '{"candidates":[{"id":"$candidateId","first_name":"Pat",'
+          '"last_name":"Pilot","contests":[{"name":"Spring Open",'
+          '"start_date_time":"2026-10-17T14:00:00.000Z",'
+          '"end_date_time":"2026-10-17T22:00:00.000Z",'
+          '"start_date":"2026-10-17","end_date":"2026-10-17",'
+          '"timezone":"America/Denver"}]}]}',
+        ),
+      );
+      final result = await repository.linkCandidates();
+      final day = result.single.contests.single;
+      expect(day.startDate, DateTime.utc(2026, 10, 17));
+      expect(day.endDate, day.startDate);
+    });
+
+    test(
+      'a day in the contest zone shows once, whatever the UTC dates',
+      () async {
+        // Sydney, Saturday 9 am to 3 pm (daylight saving): Friday 22:00 to
+        // Saturday 04:00 UTC, two UTC dates for one local day.
+        final repository = _repository(
+          (_) => _json(
+            '{"candidates":[{"id":"$candidateId","first_name":"Pat",'
+            '"last_name":"Pilot","contests":[{"name":"Sydney Open",'
+            '"start_date_time":"2026-11-27T22:00:00.000Z",'
+            '"end_date_time":"2026-11-28T04:00:00.000Z",'
+            '"start_date":"2026-11-28","end_date":"2026-11-28",'
+            '"timezone":"Australia/Sydney"}]}]}',
+          ),
+        );
+        final result = await repository.linkCandidates();
+        final day = result.single.contests.single;
+        expect(day.startDate, DateTime.utc(2026, 11, 28));
+        expect(day.endDate, day.startDate);
+      },
+    );
+
+    test('confirm and decline post to the candidate', () async {
+      final seen = <String>[];
+      final repository = _repository((request) {
+        seen.add('${request.method} ${request.url.path}');
+        return request.url.path.endsWith('/confirm')
+            ? _json(linkBody)
+            : http.Response('', 204);
+      });
+
+      await repository.confirmLinkCandidate(candidateId);
+      await repository.declineLinkCandidate(candidateId);
+
+      expect(seen, [
+        'POST /api/v1/account/link-candidates/$candidateId/confirm',
+        'POST /api/v1/account/link-candidates/$candidateId/decline',
+      ]);
+    });
+
+    test('409 and 404 end the card, other failures may pass', () async {
+      LinkCandidateGoneReason? reasonOf(Object? error) =>
+          error is LinkCandidateGoneException ? error.reason : null;
+
+      const taken409 = '{"error":{"code":"already_linked","message":"x"}}';
+      const gone404 = '{"error":{"code":"link_not_found","message":"x"}}';
+      final taken = _repository((_) => _json(taken409, 409));
+      await expectLater(
+        taken.confirmLinkCandidate(candidateId),
+        throwsA(
+          predicate(
+            (e) => reasonOf(e) == LinkCandidateGoneReason.alreadyLinked,
+          ),
+        ),
+      );
+      final gone = _repository((_) => _json(gone404, 404));
+      await expectLater(
+        gone.declineLinkCandidate(candidateId),
+        throwsA(
+          predicate((e) => reasonOf(e) == LinkCandidateGoneReason.notAvailable),
+        ),
+      );
+      final down = _repository((_) => _json('{}', 500));
+      await expectLater(
+        down.confirmLinkCandidate(candidateId),
+        throwsA(
+          isA<SelfScoreLoadException>().having(
+            (e) => e is LinkCandidateGoneException,
+            'gone',
+            false,
+          ),
+        ),
+      );
+    });
+
+    test(
+      'other 409 and 404 answers keep the card eligible for retry',
+      () async {
+        for (final (status, code) in [
+          (409, 'invitations_not_available'),
+          (409, 'backend_only'),
+          (404, 'not_found'),
+        ]) {
+          final repository = _repository(
+            (_) => _json('{"error":{"code":"$code","message":"x"}}', status),
+          );
+          await expectLater(
+            repository.confirmLinkCandidate(candidateId),
+            throwsA(
+              isA<SelfScoreLoadException>().having(
+                (e) => e is LinkCandidateGoneException,
+                'gone for $status $code',
+                false,
+              ),
+            ),
+          );
+        }
+      },
+    );
+
+    test('an expired account token does not end the guest session', () async {
+      final repository = _repository((_) => _json('{}', 401));
+      await expectLater(
+        repository.linkCandidates(),
+        throwsA(
+          isA<SelfScoreLoadException>().having(
+            (e) => e is SessionEndedException,
+            'session ended',
+            false,
+          ),
+        ),
+      );
+    });
+
+    test('a 401 on any account route is the sign-in ending (#546)', () async {
+      // Not "could not reach the server": the pages offer signing in again.
+      final repository = _repository((_) => _json('{}', 401));
+      final calls = <String, Future<Object?> Function()>{
+        'link candidates': repository.linkCandidates,
+        'confirm': () => repository.confirmLinkCandidate(
+          '0192f6a0-0000-7000-8000-000000000002',
+        ),
+        'decline': () => repository.declineLinkCandidate(
+          '0192f6a0-0000-7000-8000-000000000002',
+        ),
+        'own directory': repository.ownDirectory,
+        'delete entry': repository.deleteOwnDirectory,
+        'links': repository.accountLinks,
+        'end link': () =>
+            repository.endAccountLink('0192f6a0-0000-7000-8000-000000000002'),
+      };
+      for (final entry in calls.entries) {
+        await expectLater(
+          entry.value(),
+          throwsA(isA<SignedOutException>()),
+          reason: entry.key,
+        );
+      }
+    });
+  });
+
   test('score and ordinal formatting', () {
     expect(ScoreFormat.score(2184), '2,184');
     expect(ScoreFormat.score(962.5), '962.5');
@@ -556,5 +813,174 @@ void main() {
       '22nd',
       '103rd',
     ]);
+  });
+
+  group('past contests', () {
+    String page({String? results, int? next}) => jsonEncode({
+      'contests': [
+        {
+          'participation_id': '019c0000-0000-7000-8000-00000000d201',
+          'contest_id': '019c0000-0000-7000-8000-000000000045',
+          'contest_name': 'Spring Open',
+          'start_date_time': '2026-04-11T14:00:00.000Z',
+          'end_date_time': '2026-04-12T22:00:00.000Z',
+          'start_date': '2026-04-11',
+          'end_date': '2026-04-12',
+          'timezone': 'America/Denver',
+          'host': null,
+          'city': 'Boulder',
+          'state': 'CO',
+          'country': null,
+          'public_results_url': results,
+        },
+      ],
+      'next_offset': next,
+    });
+
+    test('reads a page and asks for the offset', () async {
+      final result = await _repository((request) {
+        expect(request.url.path, '/api/v1/account/history');
+        expect(request.url.queryParameters['offset'], '50');
+        return _json(
+          page(results: 'https://rcsoarscore.com/results/x', next: 100),
+        );
+      }).pastContests(offset: 50);
+
+      final contest = result.contests.single;
+      expect(contest.name, 'Spring Open');
+      expect(contest.startDate, DateTime.utc(2026, 4, 11));
+      expect(contest.endDate, DateTime.utc(2026, 4, 12));
+      expect(contest.location, 'Boulder, CO');
+      expect(
+        contest.publicResultsUrl,
+        Uri.parse('https://rcsoarscore.com/results/x'),
+      );
+      expect(result.nextOffset, 100);
+    });
+
+    test('an address that is not a web page is no address', () async {
+      final result = await _repository(
+        (_) => _json(page(results: 'javascript:alert(1)')),
+      ).pastContests();
+
+      expect(result.contests.single.publicResultsUrl, isNull);
+      expect(result.nextOffset, isNull);
+    });
+
+    test('a 401 is the sign-in ending, not the guest session', () async {
+      await expectLater(
+        _repository((_) => _json('', 401)).pastContests(),
+        throwsA(isA<SignedOutException>()),
+      );
+    });
+  });
+
+  group('contests', () {
+    const participation = '019c0000-0000-7000-8000-00000000d201';
+
+    String list(Map<String, Object?> extra) => jsonEncode({
+      'participations': [
+        {
+          'participation_id': participation,
+          'contest_id': '019c0000-0000-7000-8000-000000000045',
+          'contest_name': 'Spring Open',
+          'start_date_time': '2026-10-17T14:00:00.000Z',
+          'end_date_time': '2026-10-19T04:00:00.000Z',
+          'start_date': '2026-10-17',
+          'end_date': '2026-10-18',
+          'timezone': 'America/Denver',
+          'phase': 'in_progress',
+          'read_only': false,
+          'host': null,
+          'city': 'Denver',
+          'state': 'CO',
+          'country': ' ',
+          'public_results_url': null,
+          ...extra,
+        },
+      ],
+    });
+
+    test('reads the list, with dates as the contest wrote them', () async {
+      final view = await _repository((request) {
+        expect(request.url.path, '/api/v1/account/participations');
+        return _json(
+          list({'public_results_url': 'https://rcsoarscore.com/results/x'}),
+        );
+      }).contests();
+
+      final contest = view.contests.single;
+      expect(contest.participationId, participation);
+      expect(contest.name, 'Spring Open');
+      expect(contest.startDate, DateTime.utc(2026, 10, 17));
+      expect(contest.endDate, DateTime.utc(2026, 10, 18));
+      expect(contest.phase, ContestPhase.inProgress);
+      expect(contest.location, 'Denver, CO');
+      expect(
+        contest.publicResultsUrl,
+        Uri.parse('https://rcsoarscore.com/results/x'),
+      );
+    });
+
+    test('an address that is not a web page is no address', () async {
+      final view = await _repository(
+        (_) => _json(list({'public_results_url': 'javascript:alert(1)'})),
+      ).contests();
+
+      expect(view.contests.single.publicResultsUrl, isNull);
+    });
+
+    test('a 401 is the sign-in ending, not the guest session', () async {
+      await expectLater(
+        _repository((_) => _json('', 401)).contests(),
+        throwsA(isA<SignedOutException>()),
+      );
+    });
+
+    test('opening a contest gives the session the server sent', () async {
+      final session = await _repository((request) {
+        expect(
+          request.url.path,
+          '/api/v1/account/participations/$participation/session',
+        );
+        expect(request.method, 'POST');
+        return _json(_fixture('resolve_invitation_response'));
+      }).openContest(participation);
+
+      expect(session.pilotName, 'Alex Rivera');
+      expect(session.token, 'example-session-token');
+    });
+
+    test('a contest that left the list is said so', () async {
+      await expectLater(
+        _repository((_) => _json('{"error":{"code":"link_not_found"}}', 404))
+            .openContest(participation),
+        throwsA(isA<ContestNotOnListException>()),
+      );
+    });
+
+    test('a 404 with no link_not_found code is not "left the list"', () async {
+      // A wrong address or a proxy error page, not the server's answer.
+      for (final body in ['{}', '<html>', '{"error":{"code":"other"}}']) {
+        await expectLater(
+          _repository((_) => _json(body, 404)).openContest(participation),
+          throwsA(
+            isA<SelfScoreLoadException>().having(
+              (e) => e is ContestNotOnListException,
+              'left the list',
+              false,
+            ),
+          ),
+          reason: body,
+        );
+      }
+    });
+
+    test('a 401 opening a contest is the sign-in ending', () async {
+      await expectLater(
+        _repository((_) => _json('', 401)).openContest(participation),
+        throwsA(isA<SignedOutException>()),
+      );
+    });
   });
 }

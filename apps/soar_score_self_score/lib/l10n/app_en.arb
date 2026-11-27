@@ -82,6 +82,52 @@
   "@accountsComingSoon": {
     "description": "Shown under the Sign in and Create account buttons while they are not connected."
   },
+  "invitationClaimBody": "You are scoring for {contest}. Continue with your account to keep this pilot's scores with it, including any you entered as a guest.",
+  "@invitationClaimBody": {
+    "description": "Explains the invitation page to a signed-in pilot. Placeholder is the contest name.",
+    "placeholders": {
+      "contest": {
+        "type": "String"
+      }
+    }
+  },
+  "continueAsName": "Continue as {name}",
+  "@continueAsName": {
+    "description": "Primary button on the invitation page when the pilot is signed in. Placeholder is the account's name or email.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "continueAsAccount": "Continue with my account",
+  "@continueAsAccount": {
+    "description": "Primary button on the invitation page when the pilot is signed in and the account has no name to show."
+  },
+  "invitationKeepScores": "Sign in or create an account to keep your scores with it. Scores you enter as a guest come along.",
+  "@invitationKeepScores": {
+    "description": "Hint under the Sign in and Create account buttons on the invitation page."
+  },
+  "claimAlreadyLinked": "This pilot is already linked to another account. You can continue as a guest.",
+  "@claimAlreadyLinked": {
+    "description": "Shown when a signed-in pilot opens an invitation link for a pilot that another account holds."
+  },
+  "claimInvalid": "This link no longer works. Ask the contest director for a new one.",
+  "@claimInvalid": {
+    "description": "Shown when the invitation link stopped working while the pilot was signing in."
+  },
+  "claimSignInExpired": "Your sign-in has expired. Sign in again to continue with your account, or continue as a guest.",
+  "@claimSignInExpired": {
+    "description": "Shown when the account's sign-in was refused while claiming an invitation link."
+  },
+  "claimCannotLink": "Your account cannot be linked to this pilot. You can continue as a guest.",
+  "@claimCannotLink": {
+    "description": "Shown when the server refuses to link the signed-in account to the pilot, for example when the account's email is not verified."
+  },
+  "claimFailed": "Could not continue with your account. Try again, or continue as a guest.",
+  "@claimFailed": {
+    "description": "Shown when the invitation could not be claimed for the signed-in pilot."
+  },
   "invalidLinkTitle": "This link does not work",
   "@invalidLinkTitle": {
     "description": "Heading when an invitation link is unknown, expired or replaced."
@@ -359,5 +405,409 @@
   "zeroReasonOverflight": "overflight over one minute",
   "@zeroReasonOverflight": {
     "description": "Zero reason: the flight overran the window by more than a minute. Follows 'Zero: '."
+  },
+  "homeHeadline": "Score your flights at the field",
+  "@homeHeadline": {
+    "description": "Headline of the landing page."
+  },
+  "homeIntro": "This is the self-scoring app for RC Soar Score. Open the link your contest director sent you to start scoring.",
+  "@homeIntro": {
+    "description": "Intro text of the landing page."
+  },
+  "homeSignUpButton": "Sign up",
+  "@homeSignUpButton": {
+    "description": "Landing page button that opens the sign-up page of the identity provider."
+  },
+  "homeAccountsComingSoon": "Sign in and sign up are coming in a future release, when pilots can create accounts that track their results over time.",
+  "@homeAccountsComingSoon": {
+    "description": "Landing page note shown in a build where signing in is not available."
+  },
+  "homeAccountsUnavailableHint": "Sign in and sign up are not available yet. Use the link your contest director sent you.",
+  "@homeAccountsUnavailableHint": {
+    "description": "Screen reader hint of the landing page's disabled sign-in buttons."
+  },
+  "homeSignedInAs": "Signed in as {name}",
+  "@homeSignedInAs": {
+    "description": "Landing page line for a signed-in pilot. The placeholder is their name or email.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSignedIn": "You are signed in.",
+  "@homeSignedIn": {
+    "description": "Landing page line for a signed-in pilot whose name is not known."
+  },
+  "contestsTitle": "Contests",
+  "@contestsTitle": {
+    "description": "Title of the signed-in pilot's contests page."
+  },
+  "contestsSignedOutMessage": "Sign in to see the contests you are in.",
+  "@contestsSignedOutMessage": {
+    "description": "Contests page when nobody is signed in."
+  },
+  "contestsEmptyTitle": "No contests yet",
+  "@contestsEmptyTitle": {
+    "description": "Heading of the contests page when the signed-in pilot has no contest."
+  },
+  "contestsEmptyBody": "When a contest director invites you, the contest shows up here. You can also open the link or scan the QR code on your score card.",
+  "@contestsEmptyBody": {
+    "description": "Explains how a contest gets onto the empty contests page."
+  },
+  "contestPhaseInvited": "Invited",
+  "@contestPhaseInvited": {
+    "description": "Section heading and status of a contest that has not started running."
+  },
+  "contestPhaseInProgress": "In progress",
+  "@contestPhaseInProgress": {
+    "description": "Section heading and status of a running contest."
+  },
+  "contestPhaseCompleted": "Completed",
+  "@contestPhaseCompleted": {
+    "description": "Section heading and status of a finished contest."
+  },
+  "contestsCompletedNote": "Completed contests stay on this list for a day.",
+  "@contestsCompletedNote": {
+    "description": "Under the Completed heading on the contests page."
+  },
+  "pastContestsTitle": "Past contests",
+  "@pastContestsTitle": {
+    "description": "Heading of the list of the signed-in pilot's finished contests on the account page."
+  },
+  "pastContestsNote": "Contests move here a day after they finish.",
+  "@pastContestsNote": {
+    "description": "Under the Past contests heading: when a finished contest leaves the contests page and appears here."
+  },
+  "pastContestsEmpty": "No finished contests yet. They show up here after they end.",
+  "@pastContestsEmpty": {
+    "description": "Past contests list when the pilot has no finished contest."
+  },
+  "pastContestsLoadFailed": "Could not load your past contests.",
+  "@pastContestsLoadFailed": {
+    "description": "Past contests list when loading a page failed."
+  },
+  "pastContestsRetry": "Try again",
+  "@pastContestsRetry": {
+    "description": "Button that loads the past contests again after a failure."
+  },
+  "pastContestsShowMore": "Show more",
+  "@pastContestsShowMore": {
+    "description": "Button that loads the next page of past contests."
+  },
+  "contestDatesRange": "{start} to {end}",
+  "@contestDatesRange": {
+    "description": "The first and last day of a contest. The placeholders are dates already formatted for the language.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "contestPublicResults": "Public results",
+  "@contestPublicResults": {
+    "description": "Button on a contest in the list that opens its results on the public site."
+  },
+  "contestOpenFailed": "Could not open this contest. Check your connection and try again.",
+  "@contestOpenFailed": {
+    "description": "Snackbar when opening a contest from the list failed."
+  },
+  "contestNotOnList": "This contest is no longer on your list.",
+  "@contestNotOnList": {
+    "description": "Snackbar when the contest the pilot tapped has left their list."
+  },
+  "contestSignInEnded": "Your sign-in has ended. Sign in again to open this contest.",
+  "@contestSignInEnded": {
+    "description": "Snackbar when opening a contest failed because the sign-in is no longer accepted."
+  },
+  "signInAgainButton": "Sign in again",
+  "@signInAgainButton": {
+    "description": "Button that starts a new sign-in after the server stopped accepting the old one."
+  },
+  "accountSignInEnded": "Your sign-in has ended. Sign in again to continue.",
+  "@accountSignInEnded": {
+    "description": "Snackbar or message when an account action failed because the sign-in is no longer accepted."
+  },
+  "brandLogoLabel": "RC Soar Score, glider contest scoring",
+  "@brandLogoLabel": {
+    "description": "Screen reader label of the large brand lockup on the landing and invitation pages."
+  },
+  "appBarLogoLabel": "Soar Score",
+  "@appBarLogoLabel": {
+    "description": "Screen reader label of the brand mark in the top bar."
+  },
+  "appBarAccountTooltip": "Account",
+  "@appBarAccountTooltip": {
+    "description": "Tooltip and label of the top bar button that opens the account page."
+  },
+  "appBarBackTooltip": "Back",
+  "@appBarBackTooltip": {
+    "description": "Tooltip and label of the top bar's default back button."
+  },
+  "loadFailedGeneric": "Could not load this page. Check your connection and try again.",
+  "@loadFailedGeneric": {
+    "description": "Shown on a page that failed to load for a reason with no message of its own."
+  },
+  "accountUnlinkFor": "Unlink {pilot}",
+  "@accountUnlinkFor": {
+    "description": "Screen reader label of a pilot's Unlink button on the account page.",
+    "placeholders": {
+      "pilot": {"type": "String"}
+    }
+  },
+  "contestPublicResultsFor": "Public results for {contest}",
+  "@contestPublicResultsFor": {
+    "description": "Screen reader label of a contest's Public results button.",
+    "placeholders": {
+      "contest": {"type": "String"}
+    }
+  },
+  "homeMyContests": "My contests",
+  "@homeMyContests": {
+    "description": "Landing page button that opens the signed-in pilot's contest list."
+  },
+  "homeSignOutButton": "Sign out",
+  "@homeSignOutButton": {
+    "description": "Landing page button that signs the pilot out."
+  },
+  "homeSignInFailed": "Sign-in could not be started. Try again.",
+  "@homeSignInFailed": {
+    "description": "Landing page message when the sign-in redirect could not start."
+  },
+  "homeLostLink": "Lost your link? Ask your contest director to send your link again.",
+  "@homeLostLink": {
+    "description": "Landing page hint for a pilot who lost their invitation link."
+  },
+  "homeSignOutFailed": "Sign-out could not be completed. Try again.",
+  "@homeSignOutFailed": {
+    "description": "Landing page message when signing out failed."
+  },
+  "isThisYouTitle": "Is this you?",
+  "@isThisYouTitle": {
+    "description": "Title of the card that asks a signed-in pilot to confirm the pilot their email matches."
+  },
+  "isThisYouMatches": "The email on your account matches the pilot {name}.",
+  "@isThisYouMatches": {
+    "description": "Body of the Is this you card. The placeholder is the pilot name as the contest director typed it.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "isThisYouContest": "{contest}, {dates}",
+  "@isThisYouContest": {
+    "description": "One contest line of the Is this you card.",
+    "placeholders": {
+      "contest": {
+        "type": "String"
+      },
+      "dates": {
+        "type": "String"
+      }
+    }
+  },
+  "isThisYouConfirm": "Yes, that's me",
+  "@isThisYouConfirm": {
+    "description": "Is this you card button that links the account to the pilot."
+  },
+  "isThisYouDecline": "Not me",
+  "@isThisYouDecline": {
+    "description": "Is this you card button that says the pilot is someone else; the match is not offered again."
+  },
+  "isThisYouFailed": "Could not save your answer. Try again.",
+  "@isThisYouFailed": {
+    "description": "Is this you card message when the answer could not be sent."
+  },
+  "isThisYouAlreadyLinked": "This pilot is already linked to another account.",
+  "@isThisYouAlreadyLinked": {
+    "description": "Is this you card message when another account holds the pilot."
+  },
+  "isThisYouNoLongerAvailable": "This match is no longer available.",
+  "@isThisYouNoLongerAvailable": {
+    "description": "Is this you card message when the match no longer exists."
+  },
+  "isThisYouLoadFailed": "Could not check for matching pilots.",
+  "@isThisYouLoadFailed": {
+    "description": "Contests page note when the Is this you matches could not be loaded."
+  },
+  "isThisYouRetry": "Try again",
+  "@isThisYouRetry": {
+    "description": "Button that loads the Is this you matches again."
+  },
+  "detailsTitle": "Your details",
+  "@detailsTitle": {
+    "description": "Title of the page where a pilot says what contest directors may find."
+  },
+  "detailsIntro": "Check your name and choose what contest directors can see. You can change this later.",
+  "@detailsIntro": {
+    "description": "Intro under the details page title."
+  },
+  "detailsFirstName": "First name",
+  "@detailsFirstName": {
+    "description": "Label of the first name field on the details page."
+  },
+  "detailsLastName": "Last name",
+  "@detailsLastName": {
+    "description": "Label of the last name field on the details page."
+  },
+  "detailsNameRequired": "Enter your name",
+  "@detailsNameRequired": {
+    "description": "Error under a blank name field on the details page."
+  },
+  "detailsListedTitle": "Let contest directors find me",
+  "@detailsListedTitle": {
+    "description": "Checkbox on the details page that lists the pilot in the directory."
+  },
+  "detailsListedHelp": "A director can look you up and add you to a contest without typing your details. They never see whether you are unlisted.",
+  "@detailsListedHelp": {
+    "description": "Help under the 'find me' checkbox."
+  },
+  "detailsEmailPrivateTitle": "Keep my email private",
+  "@detailsEmailPrivateTitle": {
+    "description": "Checkbox on the details page; ticked means directors do not see the email."
+  },
+  "detailsEmailPrivateHelp": "Directors are only told that an email is available to the system.",
+  "@detailsEmailPrivateHelp": {
+    "description": "Help under the 'keep my email private' checkbox."
+  },
+  "detailsMoreHeading": "More details (optional)",
+  "@detailsMoreHeading": {
+    "description": "Heading of the collapsed section with the optional directory fields."
+  },
+  "detailsFaiNumber": "FAI number",
+  "@detailsFaiNumber": {
+    "description": "Label of the optional FAI number field."
+  },
+  "detailsNationalId": "National ID",
+  "@detailsNationalId": {
+    "description": "Label of the optional national organization ID field."
+  },
+  "detailsClub": "Club",
+  "@detailsClub": {
+    "description": "Label of the optional club field."
+  },
+  "detailsCountry": "Country",
+  "@detailsCountry": {
+    "description": "Label of the optional country field."
+  },
+  "detailsContinue": "Continue",
+  "@detailsContinue": {
+    "description": "Button that saves the details and goes to the contests."
+  },
+  "detailsSaveFailed": "Your details could not be saved. Check your connection and try again.",
+  "@detailsSaveFailed": {
+    "description": "Shown when saving the details page failed."
+  },
+  "detailsPromptTitle": "Let directors find you",
+  "@detailsPromptTitle": {
+    "description": "Title of the card on the contests page that asks a pilot with no entry to set their details."
+  },
+  "detailsPromptBody": "Choose whether contest directors can find you, so they can add you to a contest.",
+  "@detailsPromptBody": {
+    "description": "Body of the details prompt card."
+  },
+  "detailsPromptAction": "Set your details",
+  "@detailsPromptAction": {
+    "description": "Button on the details prompt card."
+  },
+  "detailsSave": "Save",
+  "@detailsSave": {
+    "description": "Button on the details page that saves and returns to the account page."
+  },
+  "accountTitle": "Your account",
+  "@accountTitle": {
+    "description": "Title of the account page."
+  },
+  "accountDetailsHeading": "Your details",
+  "@accountDetailsHeading": {
+    "description": "Heading of the directory details section on the account page."
+  },
+  "accountNoEntry": "Contest directors cannot find you yet. Set your details to let them add you to a contest.",
+  "@accountNoEntry": {
+    "description": "Shown on the account page when the pilot has no directory entry."
+  },
+  "accountEditDetails": "Edit details",
+  "@accountEditDetails": {
+    "description": "Button on the account page that opens the details form."
+  },
+  "accountSetDetails": "Set your details",
+  "@accountSetDetails": {
+    "description": "Button on the account page when there is no directory entry."
+  },
+  "accountListed": "Contest directors can find you",
+  "@accountListed": {
+    "description": "Account page line when the pilot is listed."
+  },
+  "accountUnlisted": "Contest directors cannot find you",
+  "@accountUnlisted": {
+    "description": "Account page line when the pilot is not listed."
+  },
+  "accountEmailPrivate": "Your email is private",
+  "@accountEmailPrivate": {
+    "description": "Account page line when the email is private."
+  },
+  "accountEmailShared": "Contest directors can see your email",
+  "@accountEmailShared": {
+    "description": "Account page line when the email is visible to directors."
+  },
+  "accountRemoveEntry": "Remove me from the directory",
+  "@accountRemoveEntry": {
+    "description": "Button on the account page that deletes the directory entry."
+  },
+  "accountRemoveTitle": "Remove your directory entry?",
+  "@accountRemoveTitle": {
+    "description": "Title of the dialog confirming removal of the directory entry."
+  },
+  "accountRemoveBody": "Directors will no longer be able to find you. Nothing already published changes.",
+  "@accountRemoveBody": {
+    "description": "Body of the dialog confirming removal of the directory entry."
+  },
+  "accountRemoveConfirm": "Remove",
+  "@accountRemoveConfirm": {
+    "description": "Confirm button in the remove-entry dialog."
+  },
+  "accountRemoveFailed": "Your entry could not be removed. Check your connection and try again.",
+  "@accountRemoveFailed": {
+    "description": "Snack bar when removing the directory entry failed."
+  },
+  "accountLinksHeading": "Pilots linked to your account",
+  "@accountLinksHeading": {
+    "description": "Heading of the linked pilots section on the account page."
+  },
+  "accountLinksEmpty": "No pilots are linked to your account.",
+  "@accountLinksEmpty": {
+    "description": "Shown when the account has no confirmed links."
+  },
+  "accountUnlink": "Unlink",
+  "@accountUnlink": {
+    "description": "Button that ends a link to a pilot."
+  },
+  "accountUnlinkTitle": "Unlink this pilot?",
+  "@accountUnlinkTitle": {
+    "description": "Title of the unlink dialog."
+  },
+  "accountUnlinkBody": "This removes the contests of this pilot from your list and ends access through your account. Nothing already published changes, and later results use the name the contest director typed. Your invitation link still works without signing in.",
+  "@accountUnlinkBody": {
+    "description": "Body of the unlink dialog."
+  },
+  "accountUnlinkConfirm": "Unlink",
+  "@accountUnlinkConfirm": {
+    "description": "Confirm button in the unlink dialog."
+  },
+  "accountUnlinkFailed": "The link could not be ended. Check your connection and try again.",
+  "@accountUnlinkFailed": {
+    "description": "Snack bar when ending a link failed."
+  },
+  "accountCancel": "Cancel",
+  "@accountCancel": {
+    "description": "Cancel button in the account page dialogs."
+  },
+  "accountBackToContests": "Back to contests",
+  "@accountBackToContests": {
+    "description": "Tooltip of the back arrow on the account page."
   }
 }

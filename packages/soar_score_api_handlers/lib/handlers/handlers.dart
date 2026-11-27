@@ -9,9 +9,12 @@ import 'package:soar_score_core/services/matrix/draw_job.dart';
 import 'package:soar_score_core/services/sync/sync_versions.dart';
 import 'package:soar_score_api_handlers/handlers/account_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/account_claim_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/account_link_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/account_preferences_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/configuration_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/contests_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/directory_entry_handlers.dart';
+import 'package:soar_score_api_handlers/handlers/directory_lookup_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/landing_table_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/matrix_handlers.dart';
 import 'package:soar_score_api_handlers/handlers/models_handlers.dart';
@@ -56,11 +59,15 @@ createHandlers(
   String? trustedProxySecret,
   Set<String> corsAllowedOrigins = const {},
   String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
+  String publicSiteBaseUrl = defaultPublicSiteBaseUrl,
   PromotionIntentPolicy? promotionIntents,
 }) {
   // One recalculation service for every route that triggers the automatic
   // officialization, so an installation whose contest syncs never accepts
   // scores on its own.
+  // One throttle for opening a link anonymously and signed in, so both count
+  // the same attempts.
+  invitationThrottle ??= InvitationThrottle();
   recalculation ??= RecalculationService.automatic(
     repository,
     promotionIntents: promotionIntents,
@@ -73,6 +80,16 @@ createHandlers(
   addAccountClaimRoutes(router, repository);
   addAccountRoutes(router);
   addAccountPreferencesRoutes(router, repository);
+  addDirectoryEntryRoutes(router, repository);
+  addDirectoryLookupRoutes(router, repository, invitations: invitations);
+  addAccountLinkRoutes(
+    router,
+    repository,
+    invitations: invitations,
+    throttle: invitationThrottle,
+    trustedProxySecret: trustedProxySecret,
+    publicSiteBaseUrl: publicSiteBaseUrl,
+  );
   addContestRoutes(router, repository, publishingEnabled: publishingEnabled);
   addConfigurationRoutes(router, repository, recalculation: recalculation);
   addLandingTableRoutes(router, repository);

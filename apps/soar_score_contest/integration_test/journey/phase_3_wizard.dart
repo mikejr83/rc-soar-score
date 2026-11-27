@@ -64,6 +64,7 @@ Future<void> runWizardPhase(Journey journey, JourneyContext data) async {
       tester,
       find.text('${person.first} ${person.last} is added as Pilot.'),
     );
+    await _directorySearchFindsNobody(tester);
     await wizardPrimary(tester);
   });
 
@@ -389,3 +390,19 @@ final Finder _modelsButton = find.byWidgetPredicate(
       (w.key! as ValueKey<String>).value.startsWith('edit-models-'),
   description: 'a pilot models button',
 );
+
+/// An FAI number nobody listed is looked up in the directory and finds
+/// nothing: no result appears and the search still works afterwards. (The
+/// journey's server answers as the installation's Local account, which
+/// cannot use the directory, so this also covers a refused lookup.)
+Future<void> _directorySearchFindsNobody(WidgetTester tester) async {
+  final search = find.descendant(
+    of: find.byKey(const ValueKey('participant-search')),
+    matching: find.byType(TextField),
+  );
+  await enterIn(tester, search, 'FAI-0000000');
+  // The lookup waits for the typing to pause, then answers.
+  await tester.pump(const Duration(seconds: 2));
+  expect(find.text('Directory'), findsNothing);
+  await enterIn(tester, search, '');
+}

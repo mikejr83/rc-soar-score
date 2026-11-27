@@ -29,7 +29,7 @@ A participant with an account can reach the same participant link without openin
 2. The service lists those contests for the signed-in account. Opening one from the list counts as redeeming the invitation for the account, and the invitation is the access reference recorded on each submission.
 3. A confirmed link belongs to the director's participant record, not to one contest. A new participation of the same record is reachable as soon as the director invites the participant, without another confirmation.
 4. An account that redeems an invitation link and signs in must confirm that the participation is theirs before the link is created. Entries made earlier under the guest identity are attached to the account.
-5. A guest identity is created once per participant link. A second device that opens the same link acts as the same guest, and the source device recorded on each submission tells the devices apart.
+5. A guest identity is created once per invitation. A regenerated invitation has its own guest, and confirming a link claims the guests of every invitation of the participation. A second device that opens the same link acts as the same guest, and the source device recorded on each submission tells the devices apart.
 6. The authorization rules for the link apply unchanged to the account route: team scope, lifecycle, scoring access, locks, retirement, and score state.
 
 ## Invitation delivery and audit

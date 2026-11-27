@@ -1,8 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import 'pages/account_page.dart';
 import 'pages/app_info_page.dart';
 import 'pages/contests_page.dart';
+import 'pages/details_page.dart';
 import 'pages/group_results_page.dart';
 import 'pages/home_page.dart';
 import 'pages/invitation_page.dart';
@@ -16,6 +18,12 @@ import 'session/guest_session_scope.dart';
 const homePath = '/';
 const contestsPath = '/contests';
 const appInfoPath = '/app-info';
+const detailsPath = '/details';
+const accountPath = '/account';
+
+/// The details page, told to come back to the account page after a save
+/// (the only place it returns to besides the contests).
+const detailsFromAccountPath = '$detailsPath?from=account';
 
 /// The address an invitation link carries. Matches `/invitations/{credential}`
 /// in the participant-scoring spec.
@@ -39,6 +47,16 @@ String groupResultsPath(String contestId, String pilotId, String roundId) =>
 final router = GoRouter(
   routes: [
     GoRoute(path: homePath, builder: (context, state) => const HomePage()),
+    GoRoute(
+      path: detailsPath,
+      builder: (context, state) => DetailsPage(
+        returnToAccount: state.uri.queryParameters['from'] == 'account',
+      ),
+    ),
+    GoRoute(
+      path: accountPath,
+      builder: (context, state) => const AccountPage(),
+    ),
     GoRoute(
       path: appInfoPath,
       builder: (context, state) => const AppInfoPage(),

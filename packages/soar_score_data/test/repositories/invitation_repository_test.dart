@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:soar_score_core/soar_score_core.dart' as core;
 import 'package:soar_score_data/soar_score_data.dart';
 import 'package:test/test.dart';
@@ -119,6 +121,221 @@ void _tests(Backend backend) {
       await repo.findActiveForParticipation(first.contestParticipationId),
       next,
     );
+  });
+
+  group('redeem', () {
+    final account = core.Id.create();
+    final other = core.Id.create();
+    final at = DateTime.utc(2026, 11, 25, 12);
+
+    Future<core.Invitation> unredeemed() async => repo.save(
+      variant(first, {
+        'redeemed_by_account_id': null,
+        'first_used_at': null,
+        'last_used_at': null,
+      }),
+    );
+
+    test('sets the redeemer and both times on the first open', () async {
+      final stored = await unredeemed();
+
+      final applied = await repo.redeem(
+        stored.id,
+        expectedRedeemer: null,
+        newRedeemer: account,
+        usedAt: at,
+      );
+
+      expect(applied, isTrue);
+      final after = (await repo.findById(stored.id))!;
+      expect(after.redeemedByAccountId, account);
+      expect(after.firstUsedAt, at);
+      expect(after.lastUsedAt, at);
+    });
+
+    test('keeps the first use and moves the last', () async {
+      final stored = await unredeemed();
+      await repo.redeem(
+        stored.id,
+        expectedRedeemer: null,
+        newRedeemer: account,
+        usedAt: at,
+      );
+      final later = at.add(const Duration(hours: 1));
+
+      final applied = await repo.redeem(
+        stored.id,
+        expectedRedeemer: account,
+        newRedeemer: other,
+        usedAt: later,
+      );
+
+      expect(applied, isTrue);
+      final after = (await repo.findById(stored.id))!;
+      expect(after.redeemedByAccountId, other);
+      expect(after.firstUsedAt, at);
+      expect(after.lastUsedAt, later);
+    });
+
+    test('does nothing when the redeemer is not the expected one', () async {
+      final stored = await unredeemed();
+      await repo.redeem(
+        stored.id,
+        expectedRedeemer: null,
+        newRedeemer: account,
+        usedAt: at,
+      );
+      final before = (await repo.findById(stored.id))!;
+
+      expect(
+        await repo.redeem(
+          stored.id,
+          expectedRedeemer: null,
+          newRedeemer: other,
+          usedAt: at.add(const Duration(hours: 1)),
+        ),
+        isFalse,
+      );
+      expect(
+        await repo.redeem(
+          stored.id,
+          expectedRedeemer: other,
+          newRedeemer: other,
+          usedAt: at.add(const Duration(hours: 1)),
+        ),
+        isFalse,
+      );
+      expect(await repo.findById(stored.id), before);
+    });
+
+    test('does nothing for an invitation that is no longer active', () async {
+      final stored = await repo.save(
+        variant(first, {
+          'state': 'Replaced',
+          'redeemed_by_account_id': null,
+          'first_used_at': null,
+          'last_used_at': null,
+        }),
+      );
+
+      expect(
+        await repo.redeem(
+          stored.id,
+          expectedRedeemer: null,
+          newRedeemer: account,
+          usedAt: at,
+        ),
+        isFalse,
+      );
+      expect((await repo.findById(stored.id))!.redeemedByAccountId, isNull);
+    });
+
+    test('leaves every other field as stored', () async {
+      final stored = await unredeemed();
+
+      await repo.redeem(
+        stored.id,
+        expectedRedeemer: null,
+        newRedeemer: account,
+        usedAt: at,
+      );
+
+      final after = (await repo.findById(stored.id))!;
+      expect({
+        ...after.toSyncJson(),
+        'redeemed_by_account_id': null,
+        'first_used_at': null,
+        'last_used_at': null,
+      }, stored.toSyncJson());
+    });
+  });
+
+  group('redeem that needs the account\'s Confirmed link', () {
+    final at = DateTime.utc(2026, 11, 27, 12);
+    final link = core.ParticipantAccountLink.fromJson(
+      exampleRows('participant_account_link').single,
+    );
+
+    Future<core.Invitation> unredeemed() async => repo.save(
+      variant(first, {
+        'redeemed_by_account_id': null,
+        'first_used_at': null,
+        'last_used_at': null,
+      }),
+    );
+
+    Future<bool> redeemForLink(core.Invitation stored) => repo.redeem(
+      stored.id,
+      expectedRedeemer: null,
+      newRedeemer: link.accountId,
+      usedAt: at,
+      requireConfirmedLinkOf: (
+        profileId: link.participantProfileId,
+        accountId: link.accountId,
+      ),
+    );
+
+    test('applies while the link is Confirmed', () async {
+      final stored = await unredeemed();
+
+      expect(await redeemForLink(stored), isTrue);
+      expect(
+        (await repo.findById(stored.id))!.redeemedByAccountId,
+        link.accountId,
+      );
+    });
+
+    test('does nothing once the link ended, with no guest involved', () async {
+      final stored = await unredeemed();
+      final links = Repository(inst.db).participantAccountLinkRepository;
+      await links.save(
+        core.ParticipantAccountLink.fromJson({
+          ...link.toJson(),
+          'status': 'Ended',
+          'ended_at': '2026-11-27T11:00:00.000Z',
+        }),
+      );
+
+      expect(await redeemForLink(stored), isFalse);
+      expect((await repo.findById(stored.id))!.redeemedByAccountId, isNull);
+    });
+
+    test('waits for an unlink in progress on another connection and then '
+        'finds the link ended', () async {
+      final stored = await unredeemed();
+      final peer = await inst.reopen();
+      addTearDown(peer.close);
+      final peerLinks = Repository(peer.db).participantAccountLinkRepository;
+      final ended = core.ParticipantAccountLink.fromJson({
+        ...link.toJson(),
+        'status': 'Ended',
+        'ended_at': '2026-11-27T11:00:00.000Z',
+      });
+
+      // The peer holds the link row (its lock is taken before the release
+      // callback runs) until the test lets it commit.
+      final holding = Completer<void>();
+      final commit = Completer<void>();
+      final unlinking = peerLinks.saveReleasingInvitations(
+        ended,
+        releases: () async {
+          holding.complete();
+          await commit.future;
+          return {};
+        },
+      );
+      await holding.future;
+
+      // Started while the peer's transaction is open: with no row lock it
+      // would read the still-Confirmed link and apply at once.
+      final redeeming = redeemForLink(stored);
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      commit.complete();
+      await unlinking;
+
+      expect(await redeeming, isFalse);
+      expect((await repo.findById(stored.id))!.redeemedByAccountId, isNull);
+    });
   });
 
   test('the database refuses a second active invitation', () async {

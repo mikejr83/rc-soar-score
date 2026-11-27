@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:drift/drift.dart' show Variable, UpdateKind;
+import 'package:drift/drift.dart' show SqlDialect, UpdateKind, Variable;
 import 'package:soar_score_core/soar_score_core.dart' as core;
 
 import 'audit_event_repository.dart';
@@ -97,6 +97,22 @@ class InvitationRepository extends DriftRepository
   );
 
   @override
+  Future<List<core.Invitation>> listForParticipations(
+    Iterable<core.Id> contestParticipationIds,
+  ) async =>
+      (await _store.whereIdIn(
+        'contest_participation_id',
+        contestParticipationIds,
+      ))..sort((a, b) {
+        final byParticipation = a.contestParticipationId.value.compareTo(
+          b.contestParticipationId.value,
+        );
+        return byParticipation != 0
+            ? byParticipation
+            : a.invitationRevision.compareTo(b.invitationRevision);
+      });
+
+  @override
   Future<core.Invitation?> findActiveForParticipation(
     core.Id contestParticipationId,
   ) async {
@@ -130,7 +146,31 @@ class InvitationRepository extends DriftRepository
     required core.Id? expectedRedeemer,
     required core.Id newRedeemer,
     required DateTime usedAt,
-  }) async {
+    ({core.Id profileId, core.Id accountId})? requireConfirmedLinkOf,
+  }) => db.transaction(() async {
+    final link = requireConfirmedLinkOf;
+    if (link != null) {
+      // The same row lock an unlink and a claim take (PostgreSQL; SQLite has
+      // one writer), so the link cannot end between this check and the write.
+      final lock = db.executor.dialect == SqlDialect.postgres
+          ? ' FOR UPDATE'
+          : '';
+      final held = await db
+          .customSelect(
+            portableSql(
+              db,
+              'SELECT id FROM participant_account_links '
+              'WHERE participant_profile_id = ? AND account_id = ? '
+              "AND status = 'Confirmed'$lock",
+            ),
+            variables: [
+              Variable<String>(link.profileId.value),
+              Variable<String>(link.accountId.value),
+            ],
+          )
+          .get();
+      if (held.isEmpty) return false;
+    }
     final stamp = const core.UtcTimestampConverter().toJson(usedAt.toUtc());
     // `IS ?` is not portable to PostgreSQL, so a missing redeemer is its own
     // condition.
@@ -157,7 +197,7 @@ class InvitationRepository extends DriftRepository
       updateKind: UpdateKind.update,
     );
     return changed > 0;
-  }
+  });
 
   @override
   Future<List<Map<String, Object?>>?> updateDeliveryOutcomes(

@@ -10,6 +10,9 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// Where the self-scoring site lives, unless the server is told otherwise.
 const defaultSelfScoringBaseUrl = 'https://score.rcsoarscore.com';
 
+/// The public site that serves published results (apex, `www` redirects to it).
+const defaultPublicSiteBaseUrl = 'https://rcsoarscore.com';
+
 /// Adds the director's invitation routes to [router] (mounted under
 /// `/api/v1`):
 ///

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:soar_score_api/soar_score_api.dart';
 
+import '../auth/auth_session.dart';
+import '../models/account_link.dart';
 import '../models/contests_view.dart';
 import '../models/entry_context.dart';
 import '../models/group_result_row.dart';
@@ -9,6 +11,9 @@ import '../models/group_results.dart';
 import '../models/guest_session.dart';
 import '../models/officialization_policy.dart';
 import '../models/landing_result.dart';
+import '../models/link_candidate.dart';
+import '../models/own_directory.dart';
+import '../models/past_contests.dart';
 import '../models/pilot_overview.dart';
 import '../models/pilot_round.dart';
 import '../models/results_snapshot.dart';
@@ -32,6 +37,14 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   /// session, so pages that only need a name do not ask the server again.
   final GuestSessionStore _sessions;
 
+  static const _notFound = 'This page could not be found.';
+
+  /// The 409 code for a pilot another account already holds.
+  static const _alreadyLinked = 'already_linked';
+
+  /// The 404 code for a link or match that is not the account's (any more).
+  static const _linkNotFound = 'link_not_found';
+
   static const _unreachable =
       'Could not reach the server. Check your connection and try again.';
 
@@ -42,6 +55,8 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
     try {
       return await call();
     } on ApiNetworkError {
+      throw const SelfScoreLoadException(_unreachable);
+    } on AuthTokenUnavailableException {
       throw const SelfScoreLoadException(_unreachable);
     } on ApiHttpError catch (error) {
       final code = _codeOf(error);
@@ -83,7 +98,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
         'Scoring is closed for this contest.',
       ParticipantErrorCodes.staleMatrix =>
         'The draw changed. Reload the page to see the new draw.',
-      _ when status == 404 => 'This page could not be found.',
+      _ when status == 404 => _notFound,
       _ when status == 403 => 'You cannot open this page.',
       _ when status == 429 => 'Too many requests. Wait a moment and try again.',
       _ => 'Could not load this page. Check your connection and try again.',
@@ -91,22 +106,44 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   }
 
   @override
-  Future<GuestSession> acceptInvitation(String credential) async {
+  Future<GuestSession> acceptInvitation(String credential) => _openInvitation(
+    () => _client.resolveInvitation(
+      ResolveInvitationRequest(credential: credential),
+    ),
+  );
+
+  @override
+  Future<GuestSession> claimInvitation(String credential) => _openInvitation(
+    () => _client.claimInvitation(
+      ResolveInvitationRequest(credential: credential),
+    ),
+    claim: true,
+  );
+
+  Future<GuestSession> _openInvitation(
+    Future<ResolveInvitationResponse> Function() open, {
+    bool claim = false,
+  }) async {
     try {
-      final answer = await _client.resolveInvitation(
-        ResolveInvitationRequest(credential: credential),
-      );
-      return GuestSession(
-        contestId: answer.contest.contestId.value,
-        contestName: answer.contest.name,
-        pilotId: answer.participant.participationId.value,
-        pilotName: answer.participant.pilotName,
-        pilotNumber: answer.participant.pilotNumber,
-        token: answer.sessionToken,
-        role: answer.participant.role,
-        expiresAt: answer.sessionExpiresAt,
-      );
+      return _sessionOf(await open());
     } on ApiHttpError catch (error) {
+      // Another account already holds this pilot: the pilot can still
+      // continue as a guest. Other 409 answers (`invitations_not_available`,
+      // `backend_only`) are not that: they fall through to the generic
+      // failure below.
+      if (claim &&
+          error.statusCode == 409 &&
+          _codeOf(error) == _alreadyLinked) {
+        throw const PilotAlreadyLinkedException();
+      }
+      if (claim && error.statusCode == 401) {
+        throw const AccountSignInExpiredException();
+      }
+      // 404 `link_not_found` is the account, not the link: an invalid link
+      // answers `invalid_invitation`.
+      if (claim && _codeOf(error) == _linkNotFound) {
+        throw const AccountCannotLinkException();
+      }
       // Every way the server says no to a link reads the same, whatever
       // the body: the bare error, the envelope, or nothing at all.
       if (_codeOf(error) == ParticipantErrorCodes.invalidInvitation ||
@@ -119,6 +156,18 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       throw const SelfScoreLoadException(_unreachable);
     }
   }
+
+  static GuestSession _sessionOf(ResolveInvitationResponse answer) =>
+      GuestSession(
+        contestId: answer.contest.contestId.value,
+        contestName: answer.contest.name,
+        pilotId: answer.participant.participationId.value,
+        pilotName: answer.participant.pilotName,
+        pilotNumber: answer.participant.pilotNumber,
+        token: answer.sessionToken,
+        role: answer.participant.role,
+        expiresAt: answer.sessionExpiresAt,
+      );
 
   @override
   Future<SubmitResult> submitScore(ScoreSubmission submission) async {
@@ -198,12 +247,254 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   }
 
   @override
-  // `async`, so the error reaches the page as a failed future. A plain `=>
-  // throw` threw while the page built, which crashed the contests page that
-  // sits under every pilot page in the router's stack.
-  Future<ContestsView> contests() async => throw const SelfScoreLoadException(
-    'Signing in is coming soon. Use the link from your contest director.',
+  Future<ContestsView> contests() async {
+    try {
+      final answer = await _read(_client.accountParticipations);
+      return ContestsView(
+        contests: [for (final row in answer.participations) _summary(row)],
+      );
+    } on SessionEndedException {
+      // The account routes answer 401 when the access token is no longer
+      // good. That is the sign-in, not the guest session.
+      throw const SignedOutException();
+    }
+  }
+
+  @override
+  Future<PastContestsPage> pastContests({int offset = 0}) async {
+    try {
+      final answer = await _read(() => _client.accountHistory(offset: offset));
+      return PastContestsPage(
+        contests: [
+          for (final row in answer.contests)
+            PastContest(
+              participationId: row.participationId.value,
+              contestId: row.contestId.value,
+              name: row.contestName,
+              startDate: _day(row.startDate),
+              endDate: _day(row.endDate),
+              location: _placeOf(row.city, row.state, row.country),
+              publicResultsUrl: _publicUrl(row.publicResultsUrl),
+            ),
+        ],
+        nextOffset: answer.nextOffset,
+      );
+    } on SessionEndedException {
+      throw const SignedOutException();
+    }
+  }
+
+  static ContestSummary _summary(AccountParticipationDto row) => ContestSummary(
+    participationId: row.participationId.value,
+    contestId: row.contestId.value,
+    name: row.contestName,
+    startDate: _day(row.startDate),
+    endDate: _day(row.endDate),
+    phase: switch (row.phase) {
+      AccountParticipationPhase.inProgress => ContestPhase.inProgress,
+      AccountParticipationPhase.completed => ContestPhase.completed,
+      _ => ContestPhase.invited,
+    },
+    location: _place(row),
+    publicResultsUrl: _publicUrl(row.publicResultsUrl),
   );
+
+  /// `YYYY-MM-DD` as UTC midnight.
+  static DateTime _day(String text) {
+    final parts = text.split('-').map(int.parse).toList();
+    return DateTime.utc(parts[0], parts[1], parts[2]);
+  }
+
+  static String? _place(AccountParticipationDto row) =>
+      _placeOf(row.city, row.state, row.country);
+
+  static String? _placeOf(String? city, String? state, String? country) {
+    final parts = [
+      for (final part in [city, state, country])
+        if (part != null && part.trim().isNotEmpty) part.trim(),
+    ];
+    return parts.isEmpty ? null : parts.join(', ');
+  }
+
+  /// Only a web address the page can open; anything else is no address.
+  static Uri? _publicUrl(String? text) {
+    final uri = text == null ? null : Uri.tryParse(text);
+    return uri != null && (uri.isScheme('https') || uri.isScheme('http'))
+        ? uri
+        : null;
+  }
+
+  @override
+  Future<GuestSession> openContest(String participationId) async {
+    try {
+      return _sessionOf(
+        await _readAccount(
+          () => _client.openAccountParticipation(participationId),
+        ),
+      );
+    } on ApiHttpError catch (error) {
+      // Only the server's own `link_not_found` means the contest left the
+      // list: any other 404 is not that.
+      if (error.statusCode == 404 && _codeOf(error) == _linkNotFound) {
+        throw const ContestNotOnListException();
+      }
+      throw SelfScoreLoadException(
+        _messageFor(error.statusCode, _codeOf(error)),
+      );
+    }
+  }
+
+  @override
+  Future<List<LinkCandidate>> linkCandidates() async {
+    final answer = await _readAccount(_client.linkCandidates);
+    return [
+      for (final candidate in answer.candidates)
+        LinkCandidate(
+          id: candidate.id.value,
+          pilotName: '${candidate.firstName} ${candidate.lastName}'.trim(),
+          contests: [
+            for (final contest in candidate.contests)
+              LinkCandidateContest(
+                name: contest.name,
+                startDate: _day(contest.startDate),
+                endDate: _day(contest.endDate),
+              ),
+          ],
+        ),
+    ];
+  }
+
+  @override
+  Future<OwnDirectory> ownDirectory() async {
+    final state = await _readDirectory(_client.getDirectoryEntry);
+    final entry = state.entry;
+    return OwnDirectory(
+      hasEntry: entry != null,
+      emailAvailable: state.emailAvailable,
+      initial: entry == null
+          ? DirectoryDetails(
+              firstName: state.suggestedFirstName,
+              lastName: state.suggestedLastName,
+            )
+          : DirectoryDetails(
+              firstName: entry.firstName,
+              lastName: entry.lastName,
+              club: entry.club,
+              faiNumber: entry.faiNumber,
+              nationalOrgId: entry.nationalOrgId,
+              country: entry.country,
+              city: entry.city,
+              state: entry.state,
+              isListed: entry.isListed,
+              emailVisibleToDirectors: entry.emailVisibleToDirectors,
+            ),
+    );
+  }
+
+  @override
+  Future<void> saveOwnDirectory(DirectoryDetails details) => _readDirectory(
+    () => _client.putDirectoryEntry(
+      PutDirectoryEntryRequest(
+        firstName: details.firstName,
+        lastName: details.lastName,
+        club: details.club,
+        faiNumber: details.faiNumber,
+        nationalOrgId: details.nationalOrgId,
+        country: details.country,
+        city: details.city,
+        state: details.state,
+        isListed: details.isListed,
+        emailVisibleToDirectors: details.emailVisibleToDirectors,
+      ),
+    ),
+  );
+
+  @override
+  Future<void> deleteOwnDirectory() =>
+      _readDirectory(_client.deleteDirectoryEntry);
+
+  @override
+  Future<List<AccountLink>> accountLinks() async {
+    final answer = await _readDirectory(_client.accountLinks);
+    return [
+      for (final link in answer.links)
+        AccountLink(id: link.id.value, pilotName: link.pilotName),
+    ];
+  }
+
+  @override
+  Future<void> endAccountLink(String linkId) async {
+    try {
+      await _readAccount(() => _client.endAccountLink(ApiId.parse(linkId)));
+    } on ApiHttpError catch (error) {
+      // A link that is gone is the answer the pilot wanted.
+      if (error.statusCode == 404 && _codeOf(error) == 'link_not_found') return;
+      throw const SelfScoreLoadException(_unreachable);
+    }
+  }
+
+  @override
+  Future<void> confirmLinkCandidate(String candidateId) => _answerCandidate(
+    () => _client.confirmLinkCandidate(ApiId.parse(candidateId)),
+  );
+
+  @override
+  Future<void> declineLinkCandidate(String candidateId) => _answerCandidate(
+    () => _client.declineLinkCandidate(ApiId.parse(candidateId)),
+  );
+
+  /// Sends an "Is this you?" answer. Only the two documented refusals end the
+  /// card: `already_linked` (another account holds the pilot) and
+  /// `link_not_found` (not a match any more). Any other answer, whatever its
+  /// status (a 409 `invitations_not_available` or `backend_only` included),
+  /// may pass, so the card stays and the answer can be sent again.
+  Future<void> _answerCandidate(Future<Object?> Function() send) async {
+    try {
+      await _readAccount(send);
+    } on ApiHttpError catch (error) {
+      throw switch ((error.statusCode, _codeOf(error))) {
+        (409, _alreadyLinked) => const LinkCandidateGoneException(
+          LinkCandidateGoneReason.alreadyLinked,
+        ),
+        (404, _linkNotFound) => const LinkCandidateGoneException(
+          LinkCandidateGoneReason.notAvailable,
+        ),
+        _ => const SelfScoreLoadException(_unreachable),
+      };
+    }
+  }
+
+  /// Runs a call to the directory entry routes: every failure, a 404 or 409
+  /// included, is a [SelfScoreLoadException] the pages handle. (`_readAccount`
+  /// lets those two through for the "Is this you?" answers.)
+  Future<T> _readDirectory<T>(Future<T> Function() call) async {
+    try {
+      return await _readAccount(call);
+    } on ApiHttpError {
+      throw const SelfScoreLoadException(_unreachable);
+    }
+  }
+
+  /// Runs a call to an account route. Unlike [_read], a refusal is never a
+  /// guest session ending: the account token has its own life, and the pilot
+  /// can still use their guest link.
+  ///
+  /// A 401 is the sign-in ending ([SignedOutException]), never "could not
+  /// reach the server": the pages offer signing in again.
+  Future<T> _readAccount<T>(Future<T> Function() call) async {
+    try {
+      return await call();
+    } on ApiHttpError catch (error) {
+      if (error.statusCode == 401) throw const SignedOutException();
+      // The answers of a link candidate keep their code for the caller.
+      if (error.statusCode == 404 || error.statusCode == 409) rethrow;
+      throw const SelfScoreLoadException(_unreachable);
+    } on AuthTokenUnavailableException {
+      throw const SelfScoreLoadException(_unreachable);
+    } on ApiException {
+      throw const SelfScoreLoadException(_unreachable);
+    }
+  }
 
   @override
   Future<TeamOverview> teamOverview(String contestId) async =>

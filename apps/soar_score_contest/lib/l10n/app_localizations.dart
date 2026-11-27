@@ -13362,7 +13362,7 @@ abstract class AppLocalizations {
   /// Search source line when online with a remote directory.
   ///
   /// In en, this message translates to:
-  /// **'Online: searching remote first, then your profiles'**
+  /// **'Online: also finds listed pilots by exact email, FAI number or national ID'**
   String get searchOnline;
 
   /// Search source line when offline.
@@ -13380,7 +13380,7 @@ abstract class AppLocalizations {
   /// Header of the search results when remote is available.
   ///
   /// In en, this message translates to:
-  /// **'Add from remote and your profiles'**
+  /// **'Add from the directory and your profiles'**
   String get searchHeaderRemote;
 
   /// Header of the search results from saved profiles.
@@ -13413,11 +13413,65 @@ abstract class AppLocalizations {
   /// **'Already in this contest'**
   String get searchAlready;
 
-  /// A result found in the remote directory.
+  /// A result found in the pilot directory.
   ///
   /// In en, this message translates to:
-  /// **'Remote'**
+  /// **'Directory'**
   String get searchRemote;
+
+  /// Tooltip of the button that looks the typed text up in the pilot directory on purpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up in the directory by exact email, FAI number or national ID'**
+  String get searchDirectoryLookup;
+
+  /// Header of the directory results of an explicit lookup.
+  ///
+  /// In en, this message translates to:
+  /// **'Directory results for “{text}”'**
+  String searchDirectoryResults(String text);
+
+  /// Shown when an explicit directory lookup found nobody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody listed matches “{text}” exactly.'**
+  String searchDirectoryNone(String text);
+
+  /// Shown when an explicit directory lookup failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The directory could not be searched. Try again.'**
+  String get searchDirectoryFailed;
+
+  /// Tooltip of the disabled directory lookup button while offline.
+  ///
+  /// In en, this message translates to:
+  /// **'The directory can only be searched online'**
+  String get searchDirectoryOffline;
+
+  /// Shown when the server refused a directory lookup because the account asked too often.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many directory searches just now. Wait a few minutes and try again.'**
+  String get searchDirectoryRateLimited;
+
+  /// A directory result's FAI number or national ID, in the subtitle, so pilots sharing an ID can be told apart.
+  ///
+  /// In en, this message translates to:
+  /// **'ID {id}'**
+  String searchDirectoryId(String id);
+
+  /// Subtitle note on a directory result found by an FAI number or national ID that another listed pilot also holds (IDs are only unique within a country), so the director checks the name and place before adding.
+  ///
+  /// In en, this message translates to:
+  /// **'Shares ID {id} with another pilot'**
+  String searchDirectorySharedId(String id);
+
+  /// Message when copying a pilot from the directory into the director's list failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not add {name} from the directory. Try again.'**
+  String directoryCopyFailed(String name);
 
   /// A result from the director's own profiles.
   ///

@@ -72,6 +72,43 @@ class AppLocalizationsEn extends AppLocalizations {
       'Accounts are coming soon. For now, continue as a guest.';
 
   @override
+  String invitationClaimBody(String contest) {
+    return 'You are scoring for $contest. Continue with your account to keep this pilot\'s scores with it, including any you entered as a guest.';
+  }
+
+  @override
+  String continueAsName(String name) {
+    return 'Continue as $name';
+  }
+
+  @override
+  String get continueAsAccount => 'Continue with my account';
+
+  @override
+  String get invitationKeepScores =>
+      'Sign in or create an account to keep your scores with it. Scores you enter as a guest come along.';
+
+  @override
+  String get claimAlreadyLinked =>
+      'This pilot is already linked to another account. You can continue as a guest.';
+
+  @override
+  String get claimInvalid =>
+      'This link no longer works. Ask the contest director for a new one.';
+
+  @override
+  String get claimSignInExpired =>
+      'Your sign-in has expired. Sign in again to continue with your account, or continue as a guest.';
+
+  @override
+  String get claimCannotLink =>
+      'Your account cannot be linked to this pilot. You can continue as a guest.';
+
+  @override
+  String get claimFailed =>
+      'Could not continue with your account. Try again, or continue as a guest.';
+
+  @override
   String get invalidLinkTitle => 'This link does not work';
 
   @override
@@ -289,4 +326,318 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get zeroReasonOverflight => 'overflight over one minute';
+
+  @override
+  String get homeHeadline => 'Score your flights at the field';
+
+  @override
+  String get homeIntro =>
+      'This is the self-scoring app for RC Soar Score. Open the link your contest director sent you to start scoring.';
+
+  @override
+  String get homeSignUpButton => 'Sign up';
+
+  @override
+  String get homeAccountsComingSoon =>
+      'Sign in and sign up are coming in a future release, when pilots can create accounts that track their results over time.';
+
+  @override
+  String get homeAccountsUnavailableHint =>
+      'Sign in and sign up are not available yet. Use the link your contest director sent you.';
+
+  @override
+  String homeSignedInAs(String name) {
+    return 'Signed in as $name';
+  }
+
+  @override
+  String get homeSignedIn => 'You are signed in.';
+
+  @override
+  String get contestsTitle => 'Contests';
+
+  @override
+  String get contestsSignedOutMessage =>
+      'Sign in to see the contests you are in.';
+
+  @override
+  String get contestsEmptyTitle => 'No contests yet';
+
+  @override
+  String get contestsEmptyBody =>
+      'When a contest director invites you, the contest shows up here. You can also open the link or scan the QR code on your score card.';
+
+  @override
+  String get contestPhaseInvited => 'Invited';
+
+  @override
+  String get contestPhaseInProgress => 'In progress';
+
+  @override
+  String get contestPhaseCompleted => 'Completed';
+
+  @override
+  String get contestsCompletedNote =>
+      'Completed contests stay on this list for a day.';
+
+  @override
+  String get pastContestsTitle => 'Past contests';
+
+  @override
+  String get pastContestsNote => 'Contests move here a day after they finish.';
+
+  @override
+  String get pastContestsEmpty =>
+      'No finished contests yet. They show up here after they end.';
+
+  @override
+  String get pastContestsLoadFailed => 'Could not load your past contests.';
+
+  @override
+  String get pastContestsRetry => 'Try again';
+
+  @override
+  String get pastContestsShowMore => 'Show more';
+
+  @override
+  String contestDatesRange(String start, String end) {
+    return '$start to $end';
+  }
+
+  @override
+  String get contestPublicResults => 'Public results';
+
+  @override
+  String get contestOpenFailed =>
+      'Could not open this contest. Check your connection and try again.';
+
+  @override
+  String get contestNotOnList => 'This contest is no longer on your list.';
+
+  @override
+  String get contestSignInEnded =>
+      'Your sign-in has ended. Sign in again to open this contest.';
+
+  @override
+  String get signInAgainButton => 'Sign in again';
+
+  @override
+  String get accountSignInEnded =>
+      'Your sign-in has ended. Sign in again to continue.';
+
+  @override
+  String get brandLogoLabel => 'RC Soar Score, glider contest scoring';
+
+  @override
+  String get appBarLogoLabel => 'Soar Score';
+
+  @override
+  String get appBarAccountTooltip => 'Account';
+
+  @override
+  String get appBarBackTooltip => 'Back';
+
+  @override
+  String get loadFailedGeneric =>
+      'Could not load this page. Check your connection and try again.';
+
+  @override
+  String accountUnlinkFor(String pilot) {
+    return 'Unlink $pilot';
+  }
+
+  @override
+  String contestPublicResultsFor(String contest) {
+    return 'Public results for $contest';
+  }
+
+  @override
+  String get homeMyContests => 'My contests';
+
+  @override
+  String get homeSignOutButton => 'Sign out';
+
+  @override
+  String get homeSignInFailed => 'Sign-in could not be started. Try again.';
+
+  @override
+  String get homeLostLink =>
+      'Lost your link? Ask your contest director to send your link again.';
+
+  @override
+  String get homeSignOutFailed => 'Sign-out could not be completed. Try again.';
+
+  @override
+  String get isThisYouTitle => 'Is this you?';
+
+  @override
+  String isThisYouMatches(String name) {
+    return 'The email on your account matches the pilot $name.';
+  }
+
+  @override
+  String isThisYouContest(String contest, String dates) {
+    return '$contest, $dates';
+  }
+
+  @override
+  String get isThisYouConfirm => 'Yes, that\'s me';
+
+  @override
+  String get isThisYouDecline => 'Not me';
+
+  @override
+  String get isThisYouFailed => 'Could not save your answer. Try again.';
+
+  @override
+  String get isThisYouAlreadyLinked =>
+      'This pilot is already linked to another account.';
+
+  @override
+  String get isThisYouNoLongerAvailable => 'This match is no longer available.';
+
+  @override
+  String get isThisYouLoadFailed => 'Could not check for matching pilots.';
+
+  @override
+  String get isThisYouRetry => 'Try again';
+
+  @override
+  String get detailsTitle => 'Your details';
+
+  @override
+  String get detailsIntro =>
+      'Check your name and choose what contest directors can see. You can change this later.';
+
+  @override
+  String get detailsFirstName => 'First name';
+
+  @override
+  String get detailsLastName => 'Last name';
+
+  @override
+  String get detailsNameRequired => 'Enter your name';
+
+  @override
+  String get detailsListedTitle => 'Let contest directors find me';
+
+  @override
+  String get detailsListedHelp =>
+      'A director can look you up and add you to a contest without typing your details. They never see whether you are unlisted.';
+
+  @override
+  String get detailsEmailPrivateTitle => 'Keep my email private';
+
+  @override
+  String get detailsEmailPrivateHelp =>
+      'Directors are only told that an email is available to the system.';
+
+  @override
+  String get detailsMoreHeading => 'More details (optional)';
+
+  @override
+  String get detailsFaiNumber => 'FAI number';
+
+  @override
+  String get detailsNationalId => 'National ID';
+
+  @override
+  String get detailsClub => 'Club';
+
+  @override
+  String get detailsCountry => 'Country';
+
+  @override
+  String get detailsContinue => 'Continue';
+
+  @override
+  String get detailsSaveFailed =>
+      'Your details could not be saved. Check your connection and try again.';
+
+  @override
+  String get detailsPromptTitle => 'Let directors find you';
+
+  @override
+  String get detailsPromptBody =>
+      'Choose whether contest directors can find you, so they can add you to a contest.';
+
+  @override
+  String get detailsPromptAction => 'Set your details';
+
+  @override
+  String get detailsSave => 'Save';
+
+  @override
+  String get accountTitle => 'Your account';
+
+  @override
+  String get accountDetailsHeading => 'Your details';
+
+  @override
+  String get accountNoEntry =>
+      'Contest directors cannot find you yet. Set your details to let them add you to a contest.';
+
+  @override
+  String get accountEditDetails => 'Edit details';
+
+  @override
+  String get accountSetDetails => 'Set your details';
+
+  @override
+  String get accountListed => 'Contest directors can find you';
+
+  @override
+  String get accountUnlisted => 'Contest directors cannot find you';
+
+  @override
+  String get accountEmailPrivate => 'Your email is private';
+
+  @override
+  String get accountEmailShared => 'Contest directors can see your email';
+
+  @override
+  String get accountRemoveEntry => 'Remove me from the directory';
+
+  @override
+  String get accountRemoveTitle => 'Remove your directory entry?';
+
+  @override
+  String get accountRemoveBody =>
+      'Directors will no longer be able to find you. Nothing already published changes.';
+
+  @override
+  String get accountRemoveConfirm => 'Remove';
+
+  @override
+  String get accountRemoveFailed =>
+      'Your entry could not be removed. Check your connection and try again.';
+
+  @override
+  String get accountLinksHeading => 'Pilots linked to your account';
+
+  @override
+  String get accountLinksEmpty => 'No pilots are linked to your account.';
+
+  @override
+  String get accountUnlink => 'Unlink';
+
+  @override
+  String get accountUnlinkTitle => 'Unlink this pilot?';
+
+  @override
+  String get accountUnlinkBody =>
+      'This removes the contests of this pilot from your list and ends access through your account. Nothing already published changes, and later results use the name the contest director typed. Your invitation link still works without signing in.';
+
+  @override
+  String get accountUnlinkConfirm => 'Unlink';
+
+  @override
+  String get accountUnlinkFailed =>
+      'The link could not be ended. Check your connection and try again.';
+
+  @override
+  String get accountCancel => 'Cancel';
+
+  @override
+  String get accountBackToContests => 'Back to contests';
 }

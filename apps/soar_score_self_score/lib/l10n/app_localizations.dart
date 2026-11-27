@@ -203,6 +203,60 @@ abstract class AppLocalizations {
   /// **'Accounts are coming soon. For now, continue as a guest.'**
   String get accountsComingSoon;
 
+  /// Explains the invitation page to a signed-in pilot. Placeholder is the contest name.
+  ///
+  /// In en, this message translates to:
+  /// **'You are scoring for {contest}. Continue with your account to keep this pilot\'s scores with it, including any you entered as a guest.'**
+  String invitationClaimBody(String contest);
+
+  /// Primary button on the invitation page when the pilot is signed in. Placeholder is the account's name or email.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as {name}'**
+  String continueAsName(String name);
+
+  /// Primary button on the invitation page when the pilot is signed in and the account has no name to show.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with my account'**
+  String get continueAsAccount;
+
+  /// Hint under the Sign in and Create account buttons on the invitation page.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in or create an account to keep your scores with it. Scores you enter as a guest come along.'**
+  String get invitationKeepScores;
+
+  /// Shown when a signed-in pilot opens an invitation link for a pilot that another account holds.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot is already linked to another account. You can continue as a guest.'**
+  String get claimAlreadyLinked;
+
+  /// Shown when the invitation link stopped working while the pilot was signing in.
+  ///
+  /// In en, this message translates to:
+  /// **'This link no longer works. Ask the contest director for a new one.'**
+  String get claimInvalid;
+
+  /// Shown when the account's sign-in was refused while claiming an invitation link.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sign-in has expired. Sign in again to continue with your account, or continue as a guest.'**
+  String get claimSignInExpired;
+
+  /// Shown when the server refuses to link the signed-in account to the pilot, for example when the account's email is not verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account cannot be linked to this pilot. You can continue as a guest.'**
+  String get claimCannotLink;
+
+  /// Shown when the invitation could not be claimed for the signed-in pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not continue with your account. Try again, or continue as a guest.'**
+  String get claimFailed;
+
   /// Heading when an invitation link is unknown, expired or replaced.
   ///
   /// In en, this message translates to:
@@ -562,6 +616,564 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'overflight over one minute'**
   String get zeroReasonOverflight;
+
+  /// Headline of the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'Score your flights at the field'**
+  String get homeHeadline;
+
+  /// Intro text of the landing page.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the self-scoring app for RC Soar Score. Open the link your contest director sent you to start scoring.'**
+  String get homeIntro;
+
+  /// Landing page button that opens the sign-up page of the identity provider.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get homeSignUpButton;
+
+  /// Landing page note shown in a build where signing in is not available.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in and sign up are coming in a future release, when pilots can create accounts that track their results over time.'**
+  String get homeAccountsComingSoon;
+
+  /// Screen reader hint of the landing page's disabled sign-in buttons.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in and sign up are not available yet. Use the link your contest director sent you.'**
+  String get homeAccountsUnavailableHint;
+
+  /// Landing page line for a signed-in pilot. The placeholder is their name or email.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {name}'**
+  String homeSignedInAs(String name);
+
+  /// Landing page line for a signed-in pilot whose name is not known.
+  ///
+  /// In en, this message translates to:
+  /// **'You are signed in.'**
+  String get homeSignedIn;
+
+  /// Title of the signed-in pilot's contests page.
+  ///
+  /// In en, this message translates to:
+  /// **'Contests'**
+  String get contestsTitle;
+
+  /// Contests page when nobody is signed in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to see the contests you are in.'**
+  String get contestsSignedOutMessage;
+
+  /// Heading of the contests page when the signed-in pilot has no contest.
+  ///
+  /// In en, this message translates to:
+  /// **'No contests yet'**
+  String get contestsEmptyTitle;
+
+  /// Explains how a contest gets onto the empty contests page.
+  ///
+  /// In en, this message translates to:
+  /// **'When a contest director invites you, the contest shows up here. You can also open the link or scan the QR code on your score card.'**
+  String get contestsEmptyBody;
+
+  /// Section heading and status of a contest that has not started running.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited'**
+  String get contestPhaseInvited;
+
+  /// Section heading and status of a running contest.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get contestPhaseInProgress;
+
+  /// Section heading and status of a finished contest.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get contestPhaseCompleted;
+
+  /// Under the Completed heading on the contests page.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed contests stay on this list for a day.'**
+  String get contestsCompletedNote;
+
+  /// Heading of the list of the signed-in pilot's finished contests on the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Past contests'**
+  String get pastContestsTitle;
+
+  /// Under the Past contests heading: when a finished contest leaves the contests page and appears here.
+  ///
+  /// In en, this message translates to:
+  /// **'Contests move here a day after they finish.'**
+  String get pastContestsNote;
+
+  /// Past contests list when the pilot has no finished contest.
+  ///
+  /// In en, this message translates to:
+  /// **'No finished contests yet. They show up here after they end.'**
+  String get pastContestsEmpty;
+
+  /// Past contests list when loading a page failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your past contests.'**
+  String get pastContestsLoadFailed;
+
+  /// Button that loads the past contests again after a failure.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get pastContestsRetry;
+
+  /// Button that loads the next page of past contests.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get pastContestsShowMore;
+
+  /// The first and last day of a contest. The placeholders are dates already formatted for the language.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} to {end}'**
+  String contestDatesRange(String start, String end);
+
+  /// Button on a contest in the list that opens its results on the public site.
+  ///
+  /// In en, this message translates to:
+  /// **'Public results'**
+  String get contestPublicResults;
+
+  /// Snackbar when opening a contest from the list failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open this contest. Check your connection and try again.'**
+  String get contestOpenFailed;
+
+  /// Snackbar when the contest the pilot tapped has left their list.
+  ///
+  /// In en, this message translates to:
+  /// **'This contest is no longer on your list.'**
+  String get contestNotOnList;
+
+  /// Snackbar when opening a contest failed because the sign-in is no longer accepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sign-in has ended. Sign in again to open this contest.'**
+  String get contestSignInEnded;
+
+  /// Button that starts a new sign-in after the server stopped accepting the old one.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get signInAgainButton;
+
+  /// Snackbar or message when an account action failed because the sign-in is no longer accepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sign-in has ended. Sign in again to continue.'**
+  String get accountSignInEnded;
+
+  /// Screen reader label of the large brand lockup on the landing and invitation pages.
+  ///
+  /// In en, this message translates to:
+  /// **'RC Soar Score, glider contest scoring'**
+  String get brandLogoLabel;
+
+  /// Screen reader label of the brand mark in the top bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Soar Score'**
+  String get appBarLogoLabel;
+
+  /// Tooltip and label of the top bar button that opens the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get appBarAccountTooltip;
+
+  /// Tooltip and label of the top bar's default back button.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get appBarBackTooltip;
+
+  /// Shown on a page that failed to load for a reason with no message of its own.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load this page. Check your connection and try again.'**
+  String get loadFailedGeneric;
+
+  /// Screen reader label of a pilot's Unlink button on the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink {pilot}'**
+  String accountUnlinkFor(String pilot);
+
+  /// Screen reader label of a contest's Public results button.
+  ///
+  /// In en, this message translates to:
+  /// **'Public results for {contest}'**
+  String contestPublicResultsFor(String contest);
+
+  /// Landing page button that opens the signed-in pilot's contest list.
+  ///
+  /// In en, this message translates to:
+  /// **'My contests'**
+  String get homeMyContests;
+
+  /// Landing page button that signs the pilot out.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get homeSignOutButton;
+
+  /// Landing page message when the sign-in redirect could not start.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in could not be started. Try again.'**
+  String get homeSignInFailed;
+
+  /// Landing page hint for a pilot who lost their invitation link.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost your link? Ask your contest director to send your link again.'**
+  String get homeLostLink;
+
+  /// Landing page message when signing out failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-out could not be completed. Try again.'**
+  String get homeSignOutFailed;
+
+  /// Title of the card that asks a signed-in pilot to confirm the pilot their email matches.
+  ///
+  /// In en, this message translates to:
+  /// **'Is this you?'**
+  String get isThisYouTitle;
+
+  /// Body of the Is this you card. The placeholder is the pilot name as the contest director typed it.
+  ///
+  /// In en, this message translates to:
+  /// **'The email on your account matches the pilot {name}.'**
+  String isThisYouMatches(String name);
+
+  /// One contest line of the Is this you card.
+  ///
+  /// In en, this message translates to:
+  /// **'{contest}, {dates}'**
+  String isThisYouContest(String contest, String dates);
+
+  /// Is this you card button that links the account to the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, that\'s me'**
+  String get isThisYouConfirm;
+
+  /// Is this you card button that says the pilot is someone else; the match is not offered again.
+  ///
+  /// In en, this message translates to:
+  /// **'Not me'**
+  String get isThisYouDecline;
+
+  /// Is this you card message when the answer could not be sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save your answer. Try again.'**
+  String get isThisYouFailed;
+
+  /// Is this you card message when another account holds the pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'This pilot is already linked to another account.'**
+  String get isThisYouAlreadyLinked;
+
+  /// Is this you card message when the match no longer exists.
+  ///
+  /// In en, this message translates to:
+  /// **'This match is no longer available.'**
+  String get isThisYouNoLongerAvailable;
+
+  /// Contests page note when the Is this you matches could not be loaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check for matching pilots.'**
+  String get isThisYouLoadFailed;
+
+  /// Button that loads the Is this you matches again.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get isThisYouRetry;
+
+  /// Title of the page where a pilot says what contest directors may find.
+  ///
+  /// In en, this message translates to:
+  /// **'Your details'**
+  String get detailsTitle;
+
+  /// Intro under the details page title.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your name and choose what contest directors can see. You can change this later.'**
+  String get detailsIntro;
+
+  /// Label of the first name field on the details page.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get detailsFirstName;
+
+  /// Label of the last name field on the details page.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get detailsLastName;
+
+  /// Error under a blank name field on the details page.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your name'**
+  String get detailsNameRequired;
+
+  /// Checkbox on the details page that lists the pilot in the directory.
+  ///
+  /// In en, this message translates to:
+  /// **'Let contest directors find me'**
+  String get detailsListedTitle;
+
+  /// Help under the 'find me' checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'A director can look you up and add you to a contest without typing your details. They never see whether you are unlisted.'**
+  String get detailsListedHelp;
+
+  /// Checkbox on the details page; ticked means directors do not see the email.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep my email private'**
+  String get detailsEmailPrivateTitle;
+
+  /// Help under the 'keep my email private' checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Directors are only told that an email is available to the system.'**
+  String get detailsEmailPrivateHelp;
+
+  /// Heading of the collapsed section with the optional directory fields.
+  ///
+  /// In en, this message translates to:
+  /// **'More details (optional)'**
+  String get detailsMoreHeading;
+
+  /// Label of the optional FAI number field.
+  ///
+  /// In en, this message translates to:
+  /// **'FAI number'**
+  String get detailsFaiNumber;
+
+  /// Label of the optional national organization ID field.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID'**
+  String get detailsNationalId;
+
+  /// Label of the optional club field.
+  ///
+  /// In en, this message translates to:
+  /// **'Club'**
+  String get detailsClub;
+
+  /// Label of the optional country field.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get detailsCountry;
+
+  /// Button that saves the details and goes to the contests.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get detailsContinue;
+
+  /// Shown when saving the details page failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your details could not be saved. Check your connection and try again.'**
+  String get detailsSaveFailed;
+
+  /// Title of the card on the contests page that asks a pilot with no entry to set their details.
+  ///
+  /// In en, this message translates to:
+  /// **'Let directors find you'**
+  String get detailsPromptTitle;
+
+  /// Body of the details prompt card.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose whether contest directors can find you, so they can add you to a contest.'**
+  String get detailsPromptBody;
+
+  /// Button on the details prompt card.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your details'**
+  String get detailsPromptAction;
+
+  /// Button on the details page that saves and returns to the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get detailsSave;
+
+  /// Title of the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account'**
+  String get accountTitle;
+
+  /// Heading of the directory details section on the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Your details'**
+  String get accountDetailsHeading;
+
+  /// Shown on the account page when the pilot has no directory entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest directors cannot find you yet. Set your details to let them add you to a contest.'**
+  String get accountNoEntry;
+
+  /// Button on the account page that opens the details form.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit details'**
+  String get accountEditDetails;
+
+  /// Button on the account page when there is no directory entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your details'**
+  String get accountSetDetails;
+
+  /// Account page line when the pilot is listed.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest directors can find you'**
+  String get accountListed;
+
+  /// Account page line when the pilot is not listed.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest directors cannot find you'**
+  String get accountUnlisted;
+
+  /// Account page line when the email is private.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email is private'**
+  String get accountEmailPrivate;
+
+  /// Account page line when the email is visible to directors.
+  ///
+  /// In en, this message translates to:
+  /// **'Contest directors can see your email'**
+  String get accountEmailShared;
+
+  /// Button on the account page that deletes the directory entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove me from the directory'**
+  String get accountRemoveEntry;
+
+  /// Title of the dialog confirming removal of the directory entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove your directory entry?'**
+  String get accountRemoveTitle;
+
+  /// Body of the dialog confirming removal of the directory entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Directors will no longer be able to find you. Nothing already published changes.'**
+  String get accountRemoveBody;
+
+  /// Confirm button in the remove-entry dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get accountRemoveConfirm;
+
+  /// Snack bar when removing the directory entry failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your entry could not be removed. Check your connection and try again.'**
+  String get accountRemoveFailed;
+
+  /// Heading of the linked pilots section on the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilots linked to your account'**
+  String get accountLinksHeading;
+
+  /// Shown when the account has no confirmed links.
+  ///
+  /// In en, this message translates to:
+  /// **'No pilots are linked to your account.'**
+  String get accountLinksEmpty;
+
+  /// Button that ends a link to a pilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get accountUnlink;
+
+  /// Title of the unlink dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink this pilot?'**
+  String get accountUnlinkTitle;
+
+  /// Body of the unlink dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the contests of this pilot from your list and ends access through your account. Nothing already published changes, and later results use the name the contest director typed. Your invitation link still works without signing in.'**
+  String get accountUnlinkBody;
+
+  /// Confirm button in the unlink dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get accountUnlinkConfirm;
+
+  /// Snack bar when ending a link failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The link could not be ended. Check your connection and try again.'**
+  String get accountUnlinkFailed;
+
+  /// Cancel button in the account page dialogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get accountCancel;
+
+  /// Tooltip of the back arrow on the account page.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to contests'**
+  String get accountBackToContests;
 }
 
 class _AppLocalizationsDelegate

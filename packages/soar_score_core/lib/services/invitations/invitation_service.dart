@@ -50,6 +50,10 @@ class InvitationService {
   final DateTime Function() _clock;
   final Id Function() _newId;
 
+  /// The current time as this service reads it, so services built on it (the
+  /// participant links) agree with it, including a clock a test moves.
+  DateTime now() => _clock();
+
   /// How long after a contest completes its links still open the read-only
   /// overview.
   static const completedGrace = Duration(hours: 24);
@@ -400,13 +404,37 @@ class InvitationService {
   String credentialOf(Invitation invitation) =>
       codec.credentialFor(invitation.id, invitation.invitationRevision);
 
-  /// Opens [credential]: finds the one invitation, contest and participation
-  /// it names, creates the participation's guest account on first use, and
-  /// returns the session to keep.
+  /// Finds the invitation [credential] names and checks that it opens now,
+  /// without redeeming it: no guest account is made and nothing is stored on
+  /// success.
   ///
-  /// Throws [InvitationAccessError.invalidLink] for a link that is unknown,
-  /// replaced, revoked or expired, always the same way.
-  Future<InvitationResolution> resolve(String credential) async {
+  /// A failure is [InvitationAccessError.invalidLink], logged and audited
+  /// (the failed attempt is stored as an audit event) exactly as [resolve] does, so an account that submits a link learns no
+  /// more than an anonymous visitor.
+  Future<OpenedInvitation> lookup(String credential) async {
+    final opened = await _open(credential);
+    return OpenedInvitation(
+      invitation: opened.invitation,
+      participation: opened.checked.participation,
+      contest: opened.checked.contest,
+      readOnly: opened.checked.readOnly,
+    );
+  }
+
+  Future<
+    ({
+      Invitation invitation,
+      DateTime now,
+      ({
+        ContestParticipation participation,
+        Contest contest,
+        bool readOnly,
+        DateTime? expiry,
+      })
+      checked,
+    })
+  >
+  _open(String credential) async {
     final id = codec.idOf(credential);
     final stored = id == null
         ? null
@@ -429,60 +457,157 @@ class InvitationService {
       );
       throw InvitationAccessError.invalidLink();
     }
+    return (invitation: stored, now: now, checked: checked);
+  }
 
-    // Only the redeemer and the usage times are written, as one conditional
-    // update: a whole-row save would put back whatever else this read saw (a
-    // delivery outcome stored meanwhile, for one).
-    var current = stored;
-    var guestId =
-        stored.redeemedByAccountId ??
-        await _guestFor(stored.id, checked.participation, now);
-    var redeemed = false;
-    for (var attempt = 0; attempt < 3 && !redeemed; attempt++) {
-      redeemed = await repository.invitationRepository.redeem(
-        current.id,
-        expectedRedeemer: current.redeemedByAccountId,
-        newRedeemer: guestId,
-        usedAt: now,
+  /// Opens [credential]: finds the one invitation, contest and participation
+  /// it names, creates the participation's guest account on first use, and
+  /// returns the session to keep, acting as that guest.
+  ///
+  /// Opening anonymously never acts as a registered account, even when an
+  /// account has claimed the link: the redeemer moves back to the guest, and
+  /// the account's next open claims the guest's entries again.
+  ///
+  /// Throws [InvitationAccessError.invalidLink] for a link that is unknown,
+  /// replaced, revoked or expired, always the same way.
+  Future<InvitationResolution> resolve(String credential) async {
+    final opened = await _open(credential);
+    var stored = opened.invitation;
+    final guest = await _guestFor(
+      stored.id,
+      opened.checked.participation,
+      opened.now,
+    );
+    for (var attempt = 0; attempt < 3; attempt++) {
+      final session = await _session(
+        stored,
+        opened.checked,
+        opened.now,
+        actorId: guest,
       );
-      if (redeemed) break;
-      // A concurrent open changed the redeemer first: read it again.
-      final latest = await repository.invitationRepository.findById(current.id);
-      if (latest == null || !latest.isActive) break;
-      current = latest;
-      guestId = latest.redeemedByAccountId ?? guestId;
+      if (session != null) return session;
+      // A concurrent open changed the redeemer first: read it again, when
+      // another attempt follows.
+      if (attempt == 2) break;
+      final latest = await repository.invitationRepository.findById(stored.id);
+      if (latest == null) break;
+      stored = latest;
     }
-    if (!redeemed) throw InvitationAccessError.invalidLink();
+    throw InvitationAccessError.invalidLink();
+  }
+
+  /// Opens [invitation] for the signed-in, linked [accountId]: the same
+  /// session [resolve] gives a guest, acting as the account.
+  ///
+  /// The caller (the participant link service) has already confirmed the
+  /// account's link to the invitation's profile and claimed the guests'
+  /// entries. The invitation is stored as redeemed by the account when
+  /// nobody has opened it yet.
+  ///
+  /// Returns null when a guest opened the invitation in the meantime (it is
+  /// redeemed by another account): the caller claims that guest and calls
+  /// again. Throws [InvitationAccessError.invalidLink] when [invitation] no
+  /// longer opens, exactly like [resolve].
+  Future<InvitationResolution?> resolveForAccount(
+    Invitation invitation,
+    Id accountId,
+  ) async {
+    final now = _clock().toUtc();
+    // Read again: the row the caller holds may be older than a guest's open.
+    final stored = await repository.invitationRepository.findById(
+      invitation.id,
+    );
+    final checked = stored == null ? null : await _check(stored, now);
+    if (stored == null || checked == null) {
+      if (stored != null) {
+        await _audit(
+          stored,
+          AuditAction.invitationAccessFailed,
+          authority: Authority.participant,
+          now: now,
+          outcome: AuditOutcome.rejected,
+        );
+      }
+      throw InvitationAccessError.invalidLink();
+    }
+    final redeemer = stored.redeemedByAccountId;
+    if (redeemer != null && redeemer != accountId) return null;
+    // The write also needs the account's Confirmed link, so an unlink that
+    // lands first leaves the invitation with its guest.
+    return _session(
+      stored,
+      checked,
+      now,
+      actorId: accountId,
+      requireConfirmedLink: true,
+    );
+  }
+
+  /// Stores that [stored] was opened by [actorId] and returns the session, or
+  /// null when a concurrent open changed the redeemer meanwhile.
+  ///
+  /// The write is one conditional update on the redeemer that was read
+  /// ([InvitationRepository.redeem]), so it changes nothing else and two opens
+  /// cannot both win. A successful update is the answer; only a failed one
+  /// makes the caller re-read and decide who to act as.
+  Future<InvitationResolution?> _session(
+    Invitation stored,
+    ({
+      ContestParticipation participation,
+      Contest contest,
+      bool readOnly,
+      DateTime? expiry,
+    })
+    checked,
+    DateTime now, {
+    required Id actorId,
+    bool requireConfirmedLink = false,
+  }) async {
+    final applied = await repository.invitationRepository.redeem(
+      stored.id,
+      expectedRedeemer: stored.redeemedByAccountId,
+      newRedeemer: actorId,
+      usedAt: now,
+      requireConfirmedLinkOf: requireConfirmedLink
+          ? (
+              profileId: checked.participation.participantProfileId,
+              accountId: actorId,
+            )
+          : null,
+    );
+    if (!applied) return null;
+    // Built from the write that applied, not read back: a read could see a
+    // later open and make this one look lost although its update succeeded.
     final invitation = Invitation(
-      id: current.id,
-      contestId: current.contestId,
-      contestParticipationId: current.contestParticipationId,
-      type: current.type,
-      protectedCredential: current.protectedCredential,
-      invitationRevision: current.invitationRevision,
-      state: current.state,
-      audience: current.audience,
-      issuedBy: current.issuedBy,
-      issuedAt: current.issuedAt,
-      expiresAt: current.expiresAt,
-      firstUsedAt: current.firstUsedAt ?? now,
+      id: stored.id,
+      contestId: stored.contestId,
+      contestParticipationId: stored.contestParticipationId,
+      type: stored.type,
+      protectedCredential: stored.protectedCredential,
+      invitationRevision: stored.invitationRevision,
+      state: stored.state,
+      audience: stored.audience,
+      issuedBy: stored.issuedBy,
+      issuedAt: stored.issuedAt,
+      expiresAt: stored.expiresAt,
+      firstUsedAt: stored.firstUsedAt ?? now,
       lastUsedAt: now,
-      revokedAt: current.revokedAt,
-      replacesInvitationId: current.replacesInvitationId,
-      redeemedByAccountId: guestId,
-      deliveryOutcomes: current.deliveryOutcomes,
-      clientMutationId: current.clientMutationId,
+      revokedAt: stored.revokedAt,
+      replacesInvitationId: stored.replacesInvitationId,
+      redeemedByAccountId: actorId,
+      deliveryOutcomes: stored.deliveryOutcomes,
+      clientMutationId: stored.clientMutationId,
     );
     await _audit(
       invitation,
       AuditAction.invitationAccessed,
-      actorId: guestId,
+      actorId: actorId,
       authority: Authority.participant,
       now: now,
     );
 
     final access = ParticipantAccess(
-      guestAccountId: guestId,
+      guestAccountId: actorId,
       invitation: invitation,
       participation: checked.participation,
       contest: checked.contest,
@@ -498,7 +623,7 @@ class InvitationService {
       sessionToken: codec.signSession({
         'exp': sessionEnds.millisecondsSinceEpoch ~/ 1000,
         'v': 1,
-        'acct': guestId.value,
+        'acct': actorId.value,
         'inv': invitation.id.value,
         'rev': invitation.invitationRevision,
         'part': invitation.contestParticipationId.value,
@@ -550,6 +675,19 @@ class InvitationService {
     final checked = await _check(invitation, now);
     if (checked == null) throw InvitationAccessError.invalidSession();
 
+    // A session of a signed-in account (not the invitation's own guest) is
+    // good only while the account still holds the Confirmed link to the
+    // pilot, checked on every request: unlinking ends it at once.
+    if (accountId != codec.guestAccountIdFor(invitation.id)) {
+      final link = await repository.participantAccountLinkRepository.find(
+        participantProfileId: checked.participation.participantProfileId,
+        accountId: accountId,
+      );
+      if (link == null || !link.isConfirmed) {
+        throw InvitationAccessError.invalidSession();
+      }
+    }
+
     if (write) _requireAcceptsScores(checked.contest, checked.readOnly);
     return ParticipantAccess(
       guestAccountId: accountId,
@@ -592,12 +730,46 @@ class InvitationService {
     })?
   >
   _check(Invitation invitation, DateTime now) async {
-    if (invitation.state != InvitationState.active) return null;
-    if (invitation.audience != InvitationAudience.pilot) return null;
+    // Cheap refusals first, so no read is made for an invitation that cannot
+    // authorize.
+    if (invitation.state != InvitationState.active ||
+        invitation.audience != InvitationAudience.pilot) {
+      return null;
+    }
     final contest = await repository.contestRepository.findById(
       invitation.contestId,
     );
-    if (contest == null || contest.lifecycleState == LifecycleState.created) {
+    final participation = await repository.contestParticipationRepository
+        .findById(invitation.contestParticipationId);
+    if (contest == null || participation == null) return null;
+    final opens = opening(invitation, contest, participation, now);
+    if (opens == null) return null;
+    return (
+      participation: participation,
+      contest: contest,
+      readOnly: opens.readOnly,
+      expiry: opens.expiry,
+    );
+  }
+
+  /// Whether [invitation] authorizes access at [now] for [contest] and
+  /// [participation], the rows it names: the one rule behind every check, so
+  /// a list of many invitations can apply it to rows read in bulk.
+  ///
+  /// Returns null when it does not authorize. An active, pilot-audience
+  /// invitation opens while its contest is past Created, until the invitation
+  /// expires or [completedGrace] after the contest completed; `readOnly` is
+  /// true once the contest is completed.
+  static ({bool readOnly, DateTime? expiry})? opening(
+    Invitation invitation,
+    Contest contest,
+    ContestParticipation participation,
+    DateTime now,
+  ) {
+    if (invitation.state != InvitationState.active) return null;
+    if (invitation.audience != InvitationAudience.pilot) return null;
+    if (contest.id != invitation.contestId ||
+        contest.lifecycleState == LifecycleState.created) {
       return null;
     }
     final completed = contest.lifecycleState == LifecycleState.completed;
@@ -607,19 +779,12 @@ class InvitationService {
         invitation.expiresAt ??
         (completed ? contest.updatedAt.add(completedGrace) : null);
     if (expiry != null && !now.isBefore(expiry)) return null;
-    final participation = await repository.contestParticipationRepository
-        .findById(invitation.contestParticipationId);
-    if (participation == null ||
+    if (participation.id != invitation.contestParticipationId ||
         participation.contestId != invitation.contestId ||
         participation.roleType != RoleType.pilot) {
       return null;
     }
-    return (
-      participation: participation,
-      contest: contest,
-      readOnly: completed,
-      expiry: expiry,
-    );
+    return (readOnly: completed, expiry: expiry);
   }
 
   /// The guest account of [invitationId], made if it is not there yet.

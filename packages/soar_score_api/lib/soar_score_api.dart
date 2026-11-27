@@ -5,13 +5,17 @@
 /// only `package:soar_score_api/soar_score_api.dart`.
 library;
 
+export 'api_id.dart';
 export 'client/api_client.dart';
 export 'dto/activate_installation_request.dart';
 export 'sync_limits.dart';
 export 'dto/add_model_link_request.dart';
+export 'dto/account_participation_dto.dart';
 export 'dto/add_participation_request.dart';
 export 'dto/add_profile_model_request.dart';
 export 'dto/claim_local_account_request.dart';
+export 'dto/directory_entry_dto.dart';
+export 'dto/directory_lookup_dto.dart';
 export 'dto/add_team_member_request.dart';
 export 'dto/api_error_dto.dart';
 export 'dto/audit_event_dto.dart';

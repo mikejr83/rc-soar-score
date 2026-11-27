@@ -106,21 +106,11 @@ Handler buildParticipantHandler(
     }
     try {
       final resolution = await invitations.resolve(body.credential.trim());
-      final answer = await _resolution(repository, resolution);
-      final json = answer.toJson();
-      // The web app (it sends X-Requested-With) keeps the session in a
-      // cookie and never sees the token; other clients get it in the body.
-      final web = (request.headers[webClientHeader] ?? '').isNotEmpty;
-      if (web) json['session_token'] = null;
-      return jsonResponse(json).change(
-        headers: {
-          'cache-control': 'no-store',
-          if (web)
-            'set-cookie': guestSessionSetCookie(
-              resolution.sessionToken,
-              resolution.sessionExpiresAt.difference(now()),
-            ),
-        },
+      return await resolutionResponse(
+        repository,
+        request,
+        resolution,
+        now: now,
       );
     } on InvitationAccessError {
       await limits.recordFailure(address);
@@ -254,6 +244,31 @@ Handler buildParticipantHandler(
           ),
   );
   return router.call;
+}
+
+/// The answer to opening an invitation: a [ResolveInvitationResponse] with
+/// the session, in a cookie for the web app (it sends X-Requested-With and
+/// never sees the token) and in the body for other clients.
+Future<Response> resolutionResponse(
+  Repository repository,
+  Request request,
+  InvitationResolution resolution, {
+  DateTime Function()? now,
+}) async {
+  final answer = await _resolution(repository, resolution);
+  final json = answer.toJson();
+  final web = (request.headers[webClientHeader] ?? '').isNotEmpty;
+  if (web) json['session_token'] = null;
+  return jsonResponse(json).change(
+    headers: {
+      'cache-control': 'no-store',
+      if (web)
+        'set-cookie': guestSessionSetCookie(
+          resolution.sessionToken,
+          resolution.sessionExpiresAt.difference((now ?? DateTime.now)()),
+        ),
+    },
+  );
 }
 
 Future<ResolveInvitationResponse> _resolution(

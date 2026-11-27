@@ -12,6 +12,7 @@ import '../../../services/new_contest/draft_list_rules.dart';
 import '../../../services/new_contest/draft_participant.dart';
 import '../../../services/new_contest/draft_validation.dart';
 import '../../../services/new_contest/participant_rules.dart';
+import '../../../services/participants/directory_pilot_source.dart';
 import '../../../services/participants/participant_candidate.dart';
 import '../../../services/participants/pilot_models_backend.dart';
 import '../../../services/participants/participant_option.dart';
@@ -21,6 +22,7 @@ import '../../participants/cell_focus_registry.dart';
 import '../../participants/participant_card.dart';
 import '../../participants/participant_editing.dart';
 import '../../participants/pilot_models_dialog.dart';
+import '../../participants/directory_source.dart';
 import '../../participants/participant_search_field.dart';
 import '../../participants/participants_table.dart';
 import '../wizard_banner.dart';
@@ -66,6 +68,13 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
   String _query = '';
   List<ParticipantProfile>? _profiles;
   List<Role> _roles = [SystemRoles.pilot];
+  DirectoryPilotSource? _directory;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _directory = directorySourceOf(context, _directory);
+  }
 
   @override
   void initState() {
@@ -111,6 +120,33 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
       }
     } on Object {
       // Without the role list every new participant is a Pilot.
+    }
+  }
+
+  /// Copies a pilot the directory found into the director's list, then adds
+  /// the copy as a Pilot like any of their own profiles.
+  Future<void> _addFromDirectory(ParticipantCandidate candidate) async {
+    final source = _directory;
+    if (source == null) return;
+    try {
+      final profile = await source.copy(candidate);
+      if (!mounted) return;
+      setState(
+        () => _profiles = [
+          for (final p in _profiles ?? const <ParticipantProfile>[])
+            if (p.id != profile.id) p,
+          profile,
+        ],
+      );
+      _add(DraftParticipant.fromProfile(profile));
+      widget.onMessage?.call(
+        AppLocalizations.of(context).wizardAddedAsPilotShort(candidate.name),
+      );
+    } on Object {
+      if (!mounted) return;
+      widget.onMessage?.call(
+        AppLocalizations.of(context).directoryCopyFailed(candidate.name),
+      );
     }
   }
 
@@ -367,9 +403,14 @@ class _ParticipantsStepState extends State<ParticipantsStep> {
               profiles: _profiles,
               selected: ids,
               offline: widget.offline,
-              remote: widget.remote,
+              remote: widget.remote ?? _directory?.search,
+              lookup: _directory?.lookup,
               onQueryChanged: (value) => setState(() => _query = value),
               onAdd: (candidate) {
+                if (candidate.directory != null) {
+                  unawaited(_addFromDirectory(candidate));
+                  return;
+                }
                 _add(candidate.toParticipant());
                 widget.onMessage?.call(
                   AppLocalizations.of(context)

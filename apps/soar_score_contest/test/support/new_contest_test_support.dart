@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:soar_score_contest/l10n/app_localization_delegates.dart';
 import 'package:soar_score_contest/l10n/app_localizations.dart';
+import 'package:soar_score_contest/auth/auth_session.dart';
+import 'package:soar_score_contest/auth/auth_session_inherited.dart';
 import 'package:soar_score_contest/api_client_provider.dart';
 import 'package:soar_score_contest/app_mode_provider.dart';
 import 'package:soar_score_contest/contest_draft_provider.dart';
@@ -71,6 +73,7 @@ Future<PumpedWizard> pumpWizard(
   ContestDraftStore? store,
   String initial = newContestPath,
   Size size = const Size(1280, 1000),
+  AuthSession? auth,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -81,18 +84,19 @@ Future<PumpedWizard> pumpWizard(
     appMode: AppModeNotifier(isOfflineMode: true),
   );
   addTearDown(router.dispose);
-  await tester.pumpWidget(
-    ContestDraftInherited(
-      store: draftStore,
-      child: ApiClientInherited(
-        client: clientFor(respond),
-        child: MaterialApp.router(
-          routerConfig: router,
-          localizationsDelegates: appLocalizationDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-        ),
+  final app = ContestDraftInherited(
+    store: draftStore,
+    child: ApiClientInherited(
+      client: clientFor(respond),
+      child: MaterialApp.router(
+        routerConfig: router,
+        localizationsDelegates: appLocalizationDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
       ),
     ),
+  );
+  await tester.pumpWidget(
+    auth == null ? app : AuthSessionInherited(session: auth, child: app),
   );
   await tester.pumpAndSettle();
   return PumpedWizard(router, draftStore);

@@ -6,8 +6,8 @@ import 'package:soar_score_core/soar_score_core.dart';
 /// [ParticipantPrincipal].
 const String participantPrincipalContextKey = 'soar_score.participant';
 
-/// Who a participant request acts as: a guest opened through an invitation
-/// link, for that one participation.
+/// Who a participant request acts as, for one participation: a guest opened
+/// through an invitation link, or the signed-in account linked to the pilot.
 ///
 /// It is a different type, under a different context key, from the director
 /// [Principal]: a participant route reads this one, and a director route

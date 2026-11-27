@@ -1221,7 +1221,7 @@ void main() {
     test('a different schema version is refused naming both', () async {
       final file = await source.exportNamed(_autumn);
       final json = file.toJson();
-      (json['header'] as Map)['schema_version'] = 3;
+      (json['header'] as Map)['schema_version'] = 4;
       final changed = ExchangeFile.decode(utf8.encode(jsonEncode(json)));
       final preview = await target.importer.preview(
         changed,
@@ -1231,11 +1231,20 @@ void main() {
       expect(refusal.code, 'schema_mismatch');
       expect(
         refusal.message,
-        allOf(contains('3'), contains('${target.db.schemaVersion}')),
+        allOf(contains('4'), contains('${target.db.schemaVersion}')),
       );
     });
 
-    test('a version 1 contest export imports into version 2', () async {
+    test('a version 2 contest export imports into version 3', () async {
+      final file = await source.exportNamed(_autumn);
+      final json = file.toJson();
+      (json['header'] as Map)['schema_version'] = 2;
+      final previous = ExchangeFile.decode(utf8.encode(jsonEncode(json)));
+      final result = await importInspection(previous);
+      expect(result.contestId.value, file.header.contestId);
+    });
+
+    test('a version 1 contest export imports into version 3', () async {
       final file = await source.exportNamed(_autumn);
       final json = file.toJson();
       (json['header'] as Map)['schema_version'] = 1;

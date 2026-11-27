@@ -129,6 +129,7 @@ for file in "${files[@]}"; do
     -d web-server --browser-name=chrome ${chrome_args[@]+"${chrome_args[@]}"} \
     --no-web-resources-cdn \
     --dart-define=SOAR_SCORE_API_BASE_URL="http://localhost:$port" \
+    --dart-define=SOAR_SCORE_E2E=true \
     ${stop_after[@]+"${stop_after[@]}"} ${extra[@]+"${extra[@]}"} || {
       code=$?
       [ "$code" -eq 124 ] && echo "TIMEOUT: $file ran longer than ${test_timeout}s and was stopped." >&2

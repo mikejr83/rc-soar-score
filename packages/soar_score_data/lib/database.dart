@@ -10,6 +10,7 @@ import 'contests_table.dart';
 import 'migrate.dart';
 import 'sync/current_attempt_pointer.dart';
 import 'sync/table_mapper.dart' show sortableTimestamp;
+import 'schema/custom_indexes.dart';
 import 'schema/database_profile.dart';
 import 'schema/enum_values.dart';
 import 'schema/tables/audit_events_table.dart';
@@ -164,7 +165,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
       tablesFor(profile, allTables);
 
   /// The schema version this build creates and upgrades to.
-  static const int currentSchemaVersion = 2;
+  static const int currentSchemaVersion = 3;
 
   @override
   int get schemaVersion => currentSchemaVersion;
@@ -182,37 +183,54 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
       }
     },
     onUpgrade: (m, from, to) async {
-      if (from != 1 || to != 2) {
+      if (from < 1 || to != 3 || from >= to) {
         throw UnsupportedError(
           'Schema upgrade from $from to $to is not supported.',
         );
       }
-      // Rebuilding official_scores on SQLite drops a table other tables point
-      // at. Foreign keys cannot be switched off inside a transaction, so do
-      // it before one (they are already off while Drift upgrades, but do not
-      // rely on that) and restore them afterwards.
-      final sqlite = executor.dialect == SqlDialect.sqlite;
-      final keysWereOn =
-          sqlite &&
-          (await customSelect(
-            'PRAGMA foreign_keys',
-          ).getSingle()).read<bool>('foreign_keys');
-      if (keysWereOn) await customStatement('PRAGMA foreign_keys = OFF');
-      try {
-        await _upgradeFromVersion1(m);
-        if (sqlite) {
-          final broken = await customSelect('PRAGMA foreign_key_check').get();
-          if (broken.isNotEmpty) {
-            throw StateError(
-              'The upgrade left ${broken.length} broken foreign keys.',
-            );
-          }
-        }
-      } finally {
-        if (keysWereOn) await customStatement('PRAGMA foreign_keys = ON');
-      }
+      if (from == 1) await _upgradeVersion1To2(m);
+      await _upgradeVersion2To3();
     },
   );
+
+  /// Version 1 to 2, as released in 0.1.0-alpha.7. Frozen: a shipped
+  /// version's step is never edited; later changes go in the next step.
+  Future<void> _upgradeVersion1To2(Migrator m) async {
+    // Rebuilding official_scores on SQLite drops a table other tables point
+    // at. Foreign keys cannot be switched off inside a transaction, so do
+    // it before one (they are already off while Drift upgrades, but do not
+    // rely on that) and restore them afterwards.
+    final sqlite = executor.dialect == SqlDialect.sqlite;
+    final keysWereOn =
+        sqlite &&
+        (await customSelect(
+          'PRAGMA foreign_keys',
+        ).getSingle()).read<bool>('foreign_keys');
+    if (keysWereOn) await customStatement('PRAGMA foreign_keys = OFF');
+    try {
+      await _upgradeFromVersion1(m);
+      if (sqlite) {
+        final broken = await customSelect('PRAGMA foreign_key_check').get();
+        if (broken.isNotEmpty) {
+          throw StateError(
+            'The upgrade left ${broken.length} broken foreign keys.',
+          );
+        }
+      }
+    } finally {
+      if (keysWereOn) await customStatement('PRAGMA foreign_keys = ON');
+    }
+  }
+
+  /// Version 2 to 3 (participant accounts, #545): `accounts.profile_refreshed_at`
+  /// and the participant-link indexes. One transaction; both steps are
+  /// idempotent.
+  Future<void> _upgradeVersion2To3() async {
+    await transaction(() async {
+      await _addProfileRefreshedAt();
+      await _addParticipantLinkIndexes();
+    });
+  }
 
   Future<void> _upgradeFromVersion1(Migrator m) async {
     {
@@ -236,7 +254,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
         await _addUploadOpen();
         await _addAggregateId();
         await _normalizeClientTimes();
-        // Service-only counters (unreleased version 2); IF NOT EXISTS.
+        // Service-only counters (version 2); IF NOT EXISTS.
         if (profileTables.contains(requestThrottles)) {
           await m.createTable(requestThrottles);
         }
@@ -244,7 +262,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     }
   }
 
-  /// Adds `score_placeholders.current_attempt_id` (unreleased version 2) and
+  /// Adds `score_placeholders.current_attempt_id` (version 2) and
   /// fills it: the attempt behind the current official score, else the
   /// latest accepted attempt of the slot.
   Future<void> _addCurrentAttemptId() async {
@@ -283,7 +301,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
   }
 
   /// Gives `official_scores` its selection origin and lets `set_by` be null
-  /// (unreleased version 2). Every existing version was selected by a
+  /// (version 2). Every existing version was selected by a
   /// director, so each reads `Manual`.
   Future<void> _addSelectionOrigin(Migrator m) async {
     final sqlite = executor.dialect == SqlDialect.sqlite;
@@ -322,7 +340,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     );
   }
 
-  /// Adds `mutation_records.aggregate_id` (unreleased version 2): null for
+  /// Adds `mutation_records.aggregate_id` (version 2): null for
   /// every existing record, which is a plain change.
   Future<void> _addAggregateId() async {
     final sqlite = executor.dialect == SqlDialect.sqlite;
@@ -337,6 +355,56 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     await customStatement(
       'ALTER TABLE mutation_records ADD COLUMN aggregate_id TEXT',
     );
+  }
+
+  /// Adds `accounts.profile_refreshed_at` (version 3): null for
+  /// every existing account, so the first request refreshes it. Only the
+  /// server profile has the table.
+  Future<void> _addProfileRefreshedAt() async {
+    final sqlite = executor.dialect == SqlDialect.sqlite;
+    final table = sqlite
+        ? "SELECT 1 AS x FROM sqlite_master WHERE type = 'table' AND name = 'accounts'"
+        : "SELECT 1 AS x FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'accounts'";
+    if ((await customSelect(table).get()).isEmpty) return;
+    final has = sqlite
+        ? await customSelect(
+            "SELECT 1 AS x FROM pragma_table_info('accounts') WHERE name = 'profile_refreshed_at'",
+          ).get()
+        : await customSelect(
+            "SELECT 1 AS x FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'accounts' AND column_name = 'profile_refreshed_at'",
+          ).get();
+    if (has.isNotEmpty) return;
+    await customStatement(
+      'ALTER TABLE accounts ADD COLUMN profile_refreshed_at TEXT',
+    );
+  }
+
+  /// Creates the indexes of the participant account links and of profile
+  /// emails (version 3, #545); IF NOT EXISTS. A table the profile
+  /// does not have is skipped.
+  Future<void> _addParticipantLinkIndexes() async {
+    final sqlite = executor.dialect == SqlDialect.sqlite;
+    for (final table in [
+      'participant_account_links',
+      'participant_profiles',
+      'contest_participations',
+      'participant_directory_entries',
+      'invitations',
+      'score_attempts',
+      'review_requests',
+      'audit_events',
+      'mutation_records',
+    ]) {
+      final lookup = sqlite
+          ? "SELECT 1 AS x FROM sqlite_master WHERE type = 'table' AND name = '$table'"
+          : "SELECT 1 AS x FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = '$table'";
+      if ((await customSelect(lookup).get()).isEmpty) continue;
+      for (final sql in customIndexes[table] ?? const <String>[]) {
+        if (sql.startsWith('CREATE INDEX IF NOT EXISTS')) {
+          await customStatement(sql);
+        }
+      }
+    }
   }
 
   /// Rewrites `mutation_records.client_time` with a six-digit fraction, the
@@ -358,7 +426,7 @@ class SoarScoreDatabase extends _$SoarScoreDatabase {
     }
   }
 
-  /// Adds `installation_activations.upload_open` (unreleased version 2): false
+  /// Adds `installation_activations.upload_open` (version 2): false
   /// for every existing activation, so no first upload is open after the
   /// upgrade.
   Future<void> _addUploadOpen() async {

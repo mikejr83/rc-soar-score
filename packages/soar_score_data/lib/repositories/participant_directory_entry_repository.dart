@@ -25,10 +25,22 @@ class ParticipantDirectoryEntryRepository extends DriftRepository
   }
 
   @override
-  Future<List<core.ParticipantDirectoryEntry>> listListed() async {
-    final entries = await _store.all(orderBy: 'id');
+  Future<List<core.ParticipantDirectoryEntry>> listListedByFaiNumber(
+    String faiNumber,
+  ) => _listedWhere('fai_number', faiNumber);
+
+  @override
+  Future<List<core.ParticipantDirectoryEntry>> listListedByNationalOrgId(
+    String nationalOrgId,
+  ) => _listedWhere('national_org_id', nationalOrgId);
+
+  Future<List<core.ParticipantDirectoryEntry>> _listedWhere(
+    String column,
+    String value,
+  ) async {
+    final found = await _store.whereText(column, value, orderBy: 'id');
     return [
-      for (final entry in entries)
+      for (final entry in found)
         if (entry.isListed) entry,
     ];
   }

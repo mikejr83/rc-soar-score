@@ -8877,7 +8877,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchOnline =>
-      'Online: searching remote first, then your profiles';
+      'Online: also finds listed pilots by exact email, FAI number or national ID';
 
   @override
   String get searchOffline => 'Offline: searching your profiles only';
@@ -8886,7 +8886,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchProfiles => 'Searching your participant profiles';
 
   @override
-  String get searchHeaderRemote => 'Add from remote and your profiles';
+  String get searchHeaderRemote => 'Add from the directory and your profiles';
 
   @override
   String get searchHeaderProfiles => 'Add from saved profiles';
@@ -8906,7 +8906,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchAlready => 'Already in this contest';
 
   @override
-  String get searchRemote => 'Remote';
+  String get searchRemote => 'Directory';
+
+  @override
+  String get searchDirectoryLookup =>
+      'Look up in the directory by exact email, FAI number or national ID';
+
+  @override
+  String searchDirectoryResults(String text) {
+    return 'Directory results for “$text”';
+  }
+
+  @override
+  String searchDirectoryNone(String text) {
+    return 'Nobody listed matches “$text” exactly.';
+  }
+
+  @override
+  String get searchDirectoryFailed =>
+      'The directory could not be searched. Try again.';
+
+  @override
+  String get searchDirectoryOffline =>
+      'The directory can only be searched online';
+
+  @override
+  String get searchDirectoryRateLimited =>
+      'Too many directory searches just now. Wait a few minutes and try again.';
+
+  @override
+  String searchDirectoryId(String id) {
+    return 'ID $id';
+  }
+
+  @override
+  String searchDirectorySharedId(String id) {
+    return 'Shares ID $id with another pilot';
+  }
+
+  @override
+  String directoryCopyFailed(String name) {
+    return 'Could not add $name from the directory. Try again.';
+  }
 
   @override
   String get searchYourProfiles => 'Your profiles';

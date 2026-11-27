@@ -88,7 +88,8 @@ try {
                 "--target=integration_test/$($file.Name)",
                 '-d', 'web-server', '--browser-name=chrome',
                 '--no-web-resources-cdn',
-                "--dart-define=SOAR_SCORE_API_BASE_URL=http://localhost:$port"
+                "--dart-define=SOAR_SCORE_API_BASE_URL=http://localhost:$port",
+                '--dart-define=SOAR_SCORE_E2E=true'
             )
             if ($chrome) { $flutterArgs += "--chrome-binary=$chrome" }
             if ($env:E2E_STOP_AFTER) { $flutterArgs += "--dart-define=E2E_STOP_AFTER=$($env:E2E_STOP_AFTER)" }

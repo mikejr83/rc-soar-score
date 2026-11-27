@@ -80,11 +80,23 @@ class InvitationCodec {
   /// Derived, not random, so that two first opens of one link at the same
   /// moment make the same account and agree on it, instead of racing to
   /// create two. A valid UUIDv7 shape, unguessable without the secret.
-  Id guestAccountIdFor(Id invitationId) {
+  Id guestAccountIdFor(Id invitationId) =>
+      _derivedId('guest:${invitationId.value}');
+
+  /// The id an "Is this you?" candidate goes by for [accountId]: derived from
+  /// the account, the profile and the secret, so the pilot never sees (or can
+  /// work back to) the id of the director's profile, and one account's id
+  /// for a profile is useless to another.
+  ///
+  /// Stable, so a candidate keeps its id across reads without being stored.
+  Id candidateIdFor({required Id accountId, required Id profileId}) =>
+      _derivedId('candidate:${accountId.value}:${profileId.value}');
+
+  Id _derivedId(String text) {
     final bytes = Hmac(
       sha256,
       _credentialKey,
-    ).convert(utf8.encode('guest:${invitationId.value}')).bytes.sublist(0, 16);
+    ).convert(utf8.encode(text)).bytes.sublist(0, 16);
     bytes[6] = (bytes[6] & 0x0f) | 0x70;
     bytes[8] = (bytes[8] & 0x3f) | 0x80;
     final hex = [for (final b in bytes) b.toRadixString(16).padLeft(2, '0')]

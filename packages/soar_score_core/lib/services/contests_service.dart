@@ -15,6 +15,7 @@ import '../repositories/stale_revision_error.dart';
 import 'contest_details.dart';
 import 'contest_lifecycle.dart';
 import 'contest_transition_audit.dart';
+import '../time/contest_time_zones.dart';
 import 'scores_service.dart';
 import 'new_contest.dart';
 
@@ -78,6 +79,15 @@ class ContestsService {
     if (stored != null) {
       if (_sameRequest(stored, contest)) return stored;
       throw AlreadyStoredError(entityType: 'Contest', entityId: input.id);
+    }
+    // Checked only for a new contest: a replay of a contest stored before
+    // zones were validated must still find it.
+    if (!ContestTimeZones.isValid(input.timezone)) {
+      throw ArgumentError.value(
+        input.timezone,
+        'timezone',
+        'not a known IANA time zone',
+      );
     }
     return repository.contestRepository.save(contest, metadata: metadata);
   }

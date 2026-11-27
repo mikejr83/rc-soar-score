@@ -29,6 +29,7 @@ class Account extends Equatable implements BackendOnly {
     this.isSystemAdmin = false,
     String? preferredTimeZone,
     String? preferredLocale,
+    DateTime? profileRefreshedAt,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) : firstName = requireNotBlank(firstName, 'firstName'),
@@ -40,6 +41,7 @@ class Account extends Equatable implements BackendOnly {
        ).preferredTimeZone,
        preferredLocale = AccountPreferences(preferredLocale: preferredLocale)
            .preferredLocale,
+       profileRefreshedAt = profileRefreshedAt?.toUtc(),
        createdAt = createdAt.toUtc(),
        updatedAt = updatedAt.toUtc() {
     if ((status == AccountStatus.archived) != (archivedAt != null)) {
@@ -89,6 +91,10 @@ class Account extends Equatable implements BackendOnly {
   /// The person's preferred locale; null until chosen.
   final String? preferredLocale;
 
+  /// When the backend last asked the identity provider for the name and email
+  /// (see `AccountProfileRefresher`); null until the first refresh.
+  final DateTime? profileRefreshedAt;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -112,6 +118,7 @@ class Account extends Equatable implements BackendOnly {
         isSystemAdmin: isSystemAdmin,
         preferredTimeZone: preferences.preferredTimeZone,
         preferredLocale: preferences.preferredLocale,
+        profileRefreshedAt: profileRefreshedAt,
         createdAt: createdAt,
         updatedAt: now,
       );
@@ -135,6 +142,7 @@ class Account extends Equatable implements BackendOnly {
     isSystemAdmin,
     preferredTimeZone,
     preferredLocale,
+    profileRefreshedAt,
     createdAt,
     updatedAt,
   ];

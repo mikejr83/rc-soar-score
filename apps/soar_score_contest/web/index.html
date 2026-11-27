@@ -35,8 +35,16 @@
   <title>RC Soar Score</title>
   <link rel="manifest" href="manifest.json">
 
-  <!-- Auth0 SPA SDK, used by auth0_flutter on web for sign-in. -->
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js" defer></script>
+  <!--
+    Auth0 SPA SDK (@auth0/auth0-spa-js 2.24.1, MIT, see auth0-spa-js-LICENSE.txt),
+    used by auth0_flutter on web for sign-in. Served from this origin at an
+    exact version, with an integrity hash, so a change at a third party
+    cannot reach the page that holds the director's tokens. To update, see
+    "Auth0 SDK script" in AGENTS.md.
+  -->
+  <script src="auth0-spa-js-2.24.1.production.js"
+          integrity="sha384-ud3t911pIaxXyWP/lPEPMllPp0bTexE+ZvKKGxwPIRakLmTFjlT/FXR6S5VpuIE7"
+          defer></script>
 </head>
 <body>
   <noscript>RC Soar Score needs JavaScript enabled to run. Please turn JavaScript on and reload this page.</noscript>

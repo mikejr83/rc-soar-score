@@ -5,6 +5,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import '../dto/activate_installation_request.dart';
 import '../dto/add_model_link_request.dart';
+import '../dto/account_participation_dto.dart';
 import '../dto/add_participation_request.dart';
 import '../dto/add_profile_model_request.dart';
 import '../dto/add_team_member_request.dart';
@@ -18,6 +19,8 @@ import '../dto/create_landing_table_request.dart';
 import '../dto/create_participant_request.dart';
 import '../dto/create_role_request.dart';
 import '../dto/create_team_request.dart';
+import '../dto/directory_entry_dto.dart';
+import '../dto/directory_lookup_dto.dart';
 import '../dto/draw_matrix_request.dart';
 import '../dto/draw_status_dto.dart';
 import '../dto/enter_score_request.dart';
@@ -87,6 +90,7 @@ class ApiClient {
     required this.baseUrl,
     http.Client? httpClient,
     this.tokenProvider,
+    this.accountTokenProvider,
     this.defaultHeaders = const {},
   }) : _httpClient = httpClient ?? http.Client();
 
@@ -96,6 +100,15 @@ class ApiClient {
 
   /// Optional bearer-token provider; `null` means no token is ever sent.
   final TokenProvider? tokenProvider;
+
+  /// When set, the bearer-token provider of the signed-in account routes
+  /// (`/api/v1/account/...`), used there instead of [tokenProvider].
+  ///
+  /// The self-scoring app needs two credentials side by side: its guest
+  /// session (which the participant routes read from `Authorization` ahead of
+  /// the cookie, so an account token there would end the session) and the
+  /// identity provider's access token, which only the account routes take.
+  final TokenProvider? accountTokenProvider;
 
   /// Headers added to every request, such as `X-Requested-With`, which the
   /// server wants on cookie-authenticated writes.
@@ -547,6 +560,129 @@ class ApiClient {
     );
   }
 
+  /// `GET /api/v1/account/participations` — the contests the signed-in
+  /// account reaches through its confirmed links, newest first.
+  Future<AccountParticipationsDto> accountParticipations() async {
+    final uri = _resolve('/api/v1/account/participations');
+    final response = await _send('GET', uri);
+    return _decode<AccountParticipationsDto>(
+      response,
+      uri,
+      AccountParticipationsDto.fromJson,
+    );
+  }
+
+  /// `GET /api/v1/account/history` — one page of the finished contests the
+  /// signed-in account reaches through its confirmed links, newest first.
+  /// [AccountHistoryDto.nextOffset] is the [offset] of the next page.
+  Future<AccountHistoryDto> accountHistory({int? limit, int offset = 0}) async {
+    final query = {
+      if (limit != null) 'limit': '$limit',
+      if (offset != 0) 'offset': '$offset',
+    };
+    var uri = _resolve('/api/v1/account/history');
+    if (query.isNotEmpty) uri = uri.replace(queryParameters: query);
+    final response = await _send('GET', uri);
+    return _decode<AccountHistoryDto>(
+      response,
+      uri,
+      AccountHistoryDto.fromJson,
+    );
+  }
+
+  /// `GET /api/v1/account/link-candidates` — the "Is this you?" matches of
+  /// the account's verified email; empty when there are none.
+  Future<LinkCandidatesDto> linkCandidates() async {
+    final uri = _resolve('/api/v1/account/link-candidates');
+    final response = await _send('GET', uri);
+    return _decode<LinkCandidatesDto>(
+      response,
+      uri,
+      LinkCandidatesDto.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/account/link-candidates/{id}/confirm` — says the
+  /// candidate [candidateId] is the caller. Repeating it returns the same
+  /// link. Another account that holds the pilot is an [ApiHttpError] with
+  /// status 409 (`already_linked`); a candidate that is not (or no longer)
+  /// one is status 404 (`link_not_found`).
+  Future<AccountLinkDto> confirmLinkCandidate(Id candidateId) async {
+    final uri = _resolve(
+      '/api/v1/account/link-candidates/${candidateId.value}/confirm',
+    );
+    final response = await _send('POST', uri);
+    return _decode<AccountLinkDto>(response, uri, AccountLinkDto.fromJson);
+  }
+
+  /// `POST /api/v1/account/link-candidates/{id}/decline` — says the
+  /// candidate [candidateId] is not the caller, so it is not offered again.
+  /// Repeating it changes nothing.
+  Future<void> declineLinkCandidate(Id candidateId) async {
+    await _send(
+      'POST',
+      _resolve('/api/v1/account/link-candidates/${candidateId.value}/decline'),
+    );
+  }
+
+  /// `GET /api/v1/account/links` — the caller's confirmed links.
+  Future<AccountLinksDto> accountLinks() async {
+    final uri = _resolve('/api/v1/account/links');
+    final response = await _send('GET', uri);
+    return _decode<AccountLinksDto>(response, uri, AccountLinksDto.fromJson);
+  }
+
+  /// `POST /api/v1/account/links/{id}/end` — ends the caller's link
+  /// [linkId]. Ending an ended link returns it unchanged; a link that is not
+  /// the caller's is an [ApiHttpError] with status 404 (`link_not_found`).
+  Future<AccountLinkDto> endAccountLink(Id linkId) async {
+    final uri = _resolve('/api/v1/account/links/${linkId.value}/end');
+    final response = await _send('POST', uri);
+    return _decode<AccountLinkDto>(response, uri, AccountLinkDto.fromJson);
+  }
+
+  /// `POST /api/v1/account/invitation-claims` — the signed-in pilot opens an
+  /// invitation link: the account is linked to the pilot the link is for, the
+  /// guest entries are claimed, and the answer is the session to keep,
+  /// acting as the account. Needs the account token. The credential is a
+  /// secret: never log it.
+  ///
+  /// A link that does not open is an [ApiHttpError] whose
+  /// [ApiHttpError.participantError] has code `invalid_invitation`; a pilot
+  /// another account already holds is status 409 (`already_linked`).
+  Future<ResolveInvitationResponse> claimInvitation(
+    ResolveInvitationRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/account/invitation-claims');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<ResolveInvitationResponse>(
+      response,
+      uri,
+      ResolveInvitationResponse.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/account/participations/{id}/session` — opens a contest of
+  /// the participations list: the session, acting as the account. A
+  /// participation that is not on the caller's list is an [ApiHttpError]
+  /// with status 404 (`link_not_found`). [participationId] is the id the
+  /// list gave; a text that is not an id throws [FormatException] before any
+  /// request.
+  Future<ResolveInvitationResponse> openAccountParticipation(
+    String participationId,
+  ) async {
+    final uri = _resolve(
+      '/api/v1/account/participations/${Id.parse(participationId).value}/'
+      'session',
+    );
+    final response = await _send('POST', uri);
+    return _decode<ResolveInvitationResponse>(
+      response,
+      uri,
+      ResolveInvitationResponse.fromJson,
+    );
+  }
+
   /// `GET /api/v1/account` — the id of the account the caller acts as: the
   /// id the audit trail records as the actor of the caller's actions. It is
   /// not the sign-in identity's subject.
@@ -587,6 +723,93 @@ class ApiClient {
       uri,
       AccountPreferences.fromJson,
     );
+  }
+
+  /// `GET /api/v1/account/directory-entry` — the details the signed-in
+  /// account offers contest directors (`entry` is null until it has made
+  /// them), with the account's own name to start from.
+  ///
+  /// A guest, local or deleted account is an [ApiHttpError] with status 403.
+  Future<DirectoryEntryStateDto> getDirectoryEntry() async {
+    final uri = _resolve('/api/v1/account/directory-entry');
+    final response = await _send('GET', uri);
+    return _decode<DirectoryEntryStateDto>(
+      response,
+      uri,
+      DirectoryEntryStateDto.fromJson,
+    );
+  }
+
+  /// `PUT /api/v1/account/directory-entry` — creates the signed-in account's
+  /// directory entry or replaces its details. Repeating it changes nothing.
+  ///
+  /// A blank name is an [ApiHttpError] with status 400; a guest, local or
+  /// deleted account one with status 403.
+  Future<DirectoryEntryStateDto> putDirectoryEntry(
+    PutDirectoryEntryRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/account/directory-entry');
+    final response = await _send('PUT', uri, body: request.toJson());
+    return _decode<DirectoryEntryStateDto>(
+      response,
+      uri,
+      DirectoryEntryStateDto.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/directory/lookups` — the listed pilots whose [key] is
+  /// exactly [value] (empty when there are none). Needs a signed-in director
+  /// account; rate limited (status 429). A stored email is returned only for
+  /// a pilot who made it visible.
+  Future<DirectoryLookupResponse> lookupDirectory(
+    DirectoryLookupRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/directory/lookups');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<DirectoryLookupResponse>(
+      response,
+      uri,
+      DirectoryLookupResponse.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/directory/copies` — links the pilot of the listed entry
+  /// to the director's profile [DirectoryCopyRequest.profileId] and returns
+  /// the details to copy. Repeating it changes nothing. A pilot who is not
+  /// listed is status 404 (`link_not_found`); a profile owned by another
+  /// director is 403 (`profile_not_owned`).
+  Future<DirectoryMatchDto> copyDirectoryEntry(
+    DirectoryCopyRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/directory/copies');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<DirectoryMatchDto>(
+      response,
+      uri,
+      DirectoryMatchDto.fromJson,
+    );
+  }
+
+  /// `POST /api/v1/directory/refreshes` — the pilot's current details, for a
+  /// profile this director copied them to. Writes nothing; status 404
+  /// (`link_not_found`) for any other profile or an entry no longer listed.
+  Future<DirectoryMatchDto> refreshDirectoryEntry(
+    DirectoryCopyRequest request,
+  ) async {
+    final uri = _resolve('/api/v1/directory/refreshes');
+    final response = await _send('POST', uri, body: request.toJson());
+    return _decode<DirectoryMatchDto>(
+      response,
+      uri,
+      DirectoryMatchDto.fromJson,
+    );
+  }
+
+  /// `DELETE /api/v1/account/directory-entry` — removes the entry; nothing
+  /// happens when there is none.
+  Future<void> deleteDirectoryEntry() async {
+    final uri = _resolve('/api/v1/account/directory-entry');
+    await _send('DELETE', uri);
   }
 
   /// `PUT /api/v1/roles/{id}` — renames the caller's role [id].
@@ -1708,7 +1931,13 @@ class ApiClient {
       ...defaultHeaders,
       'accept': 'application/json',
     };
-    final token = authenticated ? await tokenProvider?.call() : null;
+    final isAccountRoute =
+        uri.path == '/api/v1/account' ||
+        uri.path.startsWith('/api/v1/account/');
+    final provider = isAccountRoute
+        ? (accountTokenProvider ?? tokenProvider)
+        : tokenProvider;
+    final token = authenticated ? await provider?.call() : null;
     if (token != null) {
       headers['authorization'] = 'Bearer $token';
     }
