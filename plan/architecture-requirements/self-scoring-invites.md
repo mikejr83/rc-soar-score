@@ -39,7 +39,8 @@ A participant with an account can reach the same participant link without openin
 3. Issuance, replacement, revocation, access, failed access attempts subject to rate limits, and delivery requests must be auditable with the contest, participant link, actor, source, time, and resulting invitation revision. Credentials and message contents must not be recorded in the audit trail.
 4. Invitation issuance and revocation requests must be safe to retry. A retry identified by the same request identifier must not create multiple active credentials or duplicate delivery effects.
 5. The service must rate-limit credential guessing and delivery requests without revealing whether a contest, participant, or credential exists. Errors for an invalid, expired, revoked, or unauthorized credential must not provide an attacker with additional information.
-6. A successful issuance or replacement response must provide the current invitation link, its invitation revision, and its expiry or revocation status so the director can resend the link when a participant closes the application or loses it.
+6. A bounce or complaint reported by the email provider afterwards must update the stored delivery outcome of that email, through a channel the provider cannot be impersonated on, without changing or revoking the invitation link.
+7. A successful issuance or replacement response must provide the current invitation link, its invitation revision, and its expiry or revocation status so the director can resend the link when a participant closes the application or loses it.
 
 ## Related requirements
 

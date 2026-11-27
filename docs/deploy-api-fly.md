@@ -21,6 +21,7 @@ enough. No secret lives in the repository: `DATABASE_URL` is a Fly secret.
 | `API_AUDIENCE`                    | `fly.toml`            | `https://soar-score.com/server`                                                                                                                                     |
 | `CORS_ALLOWED_ORIGINS`            | `fly.toml`            | app, score and public site origins                                                                                                                                  |
 | `PORT`, `LOG_LEVEL`, `LOG_FORMAT` | `fly.toml`            | `8080`, `INFO`, `json`                                                                                                                                              |
+| `SES_FEEDBACK_TOPIC_ARN`          | Fly secret (optional) | The SNS topic that carries SES bounce and complaint reports (`arn:aws:sns:us-east-2:...`). Without it `POST /webhooks/ses-feedback` answers 503 and bounces are not recorded (see [Bounce and complaint reports](#bounce-and-complaint-reports-790)). |
 | `LOG_DB_STATEMENT_DURATIONS`      | Fly secret (optional) | off. `true` logs every database statement's duration while you measure (see [Measuring statement durations](#measuring-statement-durations))                        |
 
 The full list is in `apps/soar_score_server/lib/config/server_config.dart`.
@@ -384,6 +385,17 @@ setting below is valid. Disabling it never stops the rest of the API.
 | `SUPPORT_ALLOWED_HOSTNAMES`                  | Comma-separated exact hostnames the widget may report, without scheme or port (for example `localhost` locally, the public site host in production).                                                            |
 | `SUPPORT_THROTTLE_SECRET`                    | At least 32 characters; keys the shared per-caller attempt count (5 attempts per 10 minutes).                                                                                                                   |
 
+Invitation emails (`POST /api/v1/contests/{id}/invitations/email`, #790) use
+only the first two variables, the delivery mode and the SES key pair, so they
+work as soon as those are valid, with or without the support settings. They are
+sent from `notifications@rcsoarscore.com` with no Reply-To. In redirect mode
+every invitation email goes to `test@rcsoarscore.com` with a `[TEST]` subject.
+A director may start at most 300 new invitation emails per contest per hour (a counter in the service database, shared by every instance; retries of a request id are not counted); past it a pilot comes back `limited` and nothing is sent. Without valid mail settings the route answers 409 `email_not_available` and the
+server logs "Invitation email disabled" at startup. Outcomes are stored per
+invitation (no address, text or link); a bounce or complaint reported by SES is
+recorded later (see [Bounce and complaint reports](#bounce-and-complaint-reports-790)),
+so `accepted` never means delivered.
+
 The public site needs the matching Turnstile site key, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`,
 in its Vercel production environment before the production build (see
 [deploying.md](deploying.md), "Environment variables on each host"). The site key is
@@ -397,3 +409,84 @@ Production IAM for the sender must allow `ses:SendEmail` only for the
 `notifications@rcsoarscore.com` From address and the `support@rcsoarscore.com`
 recipient, as described in the setup plan for #220. Rotate the key pair by
 installing and testing a replacement before retiring the old one.
+
+## Bounce and complaint reports (#790)
+
+SES tells an SNS topic when a message bounced or the recipient complained. SNS
+posts the report to `POST /webhooks/ses-feedback`, which marks the invitation
+email `bounced` or `complained`. The contest app then shows the pilot as not
+emailed, and the director copies the link or prints the QR code. The link
+itself never changes. The endpoint is anonymous because SNS sends no
+credentials, so it accepts only messages with a valid SNS signature from the
+configured topic (the signing certificate is fetched only from
+`sns.<region>.amazonaws.com`). Anything else answers 400 or 403 and changes
+nothing; a report about mail that is not an invitation (a support message, a
+delivery event) answers 200 and changes nothing.
+
+The mail the identity already forwards to `operations@rcsoarscore.com` stays on
+as the operator's copy. The endpoint adds the automatic update beside it; it
+does not replace it. Reports are recorded even if sending is switched off.
+
+### One-time AWS setup (Ohio, `us-east-2`)
+
+1. **Create the topic.** SNS > Topics > Create topic > Standard, name
+   `rcsoarscore-ses-feedback`. Under Access policy add a statement that lets SES
+   publish, with your account id in place of `123456789012`:
+
+   ```json
+   {
+     "Sid": "AllowSesPublish",
+     "Effect": "Allow",
+     "Principal": { "Service": "ses.amazonaws.com" },
+     "Action": "sns:Publish",
+     "Resource": "arn:aws:sns:us-east-2:123456789012:rcsoarscore-ses-feedback",
+     "Condition": { "StringEquals": { "AWS:SourceAccount": "123456789012" } }
+   }
+   ```
+
+   Optionally set the topic's `SignatureVersion` attribute to `2` (SHA-256); the
+   server accepts both versions.
+
+2. **Point SES at it.** SES > Configuration > Identities > `rcsoarscore.com` >
+   Notifications > Feedback notifications > Edit. Choose the topic for **Bounce
+   feedback** and **Complaint feedback**. Leave "Include original email headers"
+   off, and leave email feedback forwarding to `operations@` on.
+3. **Tell the server the topic.**
+   `fly secrets set SES_FEEDBACK_TOPIC_ARN='arn:aws:sns:us-east-2:123456789012:rcsoarscore-ses-feedback' --app rc-soar-score-api`
+   (restarts the machine). A malformed ARN stops the server at start.
+4. **Subscribe the endpoint.** SNS > the topic > Create subscription > Protocol
+   HTTPS, endpoint `https://api.rcsoarscore.com/webhooks/ses-feedback`. The
+   server confirms the subscription itself; refresh until the status is
+   Confirmed. If it stays Pending, check `fly logs` for "Feedback subscription".
+   Do step 3 first: the server must already know the topic.
+5. **Try it.** In the contest app, add a pilot with the address
+   `bounce@simulator.amazonses.com` to a contest in production, send
+   invitations, and within a minute the pilot shows as not emailed.
+   `complaint@simulator.amazonses.com` does the same for a complaint. These
+   simulator addresses do not count against the SES bounce rate. Run this
+   against production (live mode); in redirect mode the mail goes to `test@`
+   and never reaches the simulator.
+
+The IAM key the server uses to send needs no new permission: SNS calls the
+endpoint, and the server calls nothing but the public SNS certificate address.
+
+### Operating notes
+
+- The log has one line per recorded report ("An invitation email was reported
+  as bounce") and one per subscription event. Message ids, addresses, headers
+  and links are never logged.
+- The endpoint answers 503 when it should be asked again: the SNS signing
+  certificate could not be fetched, a subscription confirmation request failed,
+  or a report arrived while an invitation email was still being sent (SES can
+  report before the send's own answer is stored). SNS retries a 5xx delivery
+  (its default HTTP policy makes a few attempts over about a minute; raise it
+  with a topic delivery policy if reports are ever lost during a long outage).
+  A 403 or 400 is never retried, and is only given to messages that are not
+  genuine. A repeated report is harmless.
+- A bounce marks the email, whatever its type; `bounce_type` (`permanent`,
+  `transient` or `undetermined`) is kept on the stored entry.
+- The message id is looked up by scanning the invitations' delivery outcomes
+  once per report. Reports are rare, so there is no index; if bounces ever
+  arrive in volume, add one.
+- Reports about mail the server did not send as an invitation email are
+  acknowledged and ignored.

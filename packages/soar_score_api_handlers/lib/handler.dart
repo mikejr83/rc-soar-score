@@ -6,6 +6,7 @@ import 'package:soar_score_api_handlers/middleware/invitation_throttle.dart';
 import 'package:soar_score_api_handlers/middleware/middleware.dart';
 import 'package:soar_score_core/repositories/promotion_intent_policy.dart';
 import 'package:soar_score_core/repositories/repository.dart';
+import 'package:soar_score_core/services/invitations/invitation_email_service.dart';
 import 'package:soar_score_core/services/invitations/invitation_service.dart';
 import 'package:soar_score_core/services/recalculation/recalculation_service.dart';
 import 'package:soar_score_core/services/sync/sync_versions.dart';
@@ -83,6 +84,10 @@ final _logger = Logger('Handler');
 /// support form). Only the hosted server wires it; the embedded instance
 /// omits it, so the route answers 404.
 ///
+/// [sesFeedbackHandler], when provided, serves `POST /webhooks/ses-feedback`
+/// (SES bounce and complaint reports delivered by SNS). It authenticates every
+/// message itself, so the route sits outside the Auth0 subtree.
+///
 /// [corsAllowedOrigins] are the exact browser origins (for example
 /// `http://127.0.0.1:8091`) allowed to call the API cross-origin. Empty, the
 /// default, adds no CORS headers.
@@ -99,11 +104,13 @@ Handler buildApiHandler({
   DrawRunner? drawRunner,
   Set<String> corsAllowedOrigins = const {},
   InvitationService? invitations,
+  InvitationEmailService? invitationEmail,
   InvitationThrottle? invitationThrottle,
   String? trustedProxySecret,
   String selfScoringBaseUrl = defaultSelfScoringBaseUrl,
   PromotionIntentPolicy? promotionIntents,
   Handler? supportHandler,
+  Handler? sesFeedbackHandler,
 }) {
   final handlers = createHandlers(
     name,
@@ -117,6 +124,7 @@ Handler buildApiHandler({
     gliderScoreImport: gliderScoreImport,
     drawRunner: drawRunner,
     invitations: invitations,
+    invitationEmail: invitationEmail,
     invitationThrottle: invitationThrottle,
     trustedProxySecret: trustedProxySecret,
     corsAllowedOrigins: corsAllowedOrigins,
@@ -142,6 +150,9 @@ Handler buildApiHandler({
     // Anonymous, outside the Auth0 subtree. Registered before `/public`
     // so the publication router never sees it.
     app.post('/public/support', supportHandler);
+  }
+  if (sesFeedbackHandler != null) {
+    app.all('/webhooks/ses-feedback', sesFeedbackHandler);
   }
   app
     ..mount('/api/v1', api)

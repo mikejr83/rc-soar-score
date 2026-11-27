@@ -26,7 +26,7 @@ class ParticipantActions extends StatelessWidget {
   /// How many rows the actions target.
   final int count;
 
-  /// How many of them would get a new invitation.
+  /// How many of them (the pilots) an invitation would be sent to.
   final int sendCount;
   final VoidCallback? onSend;
   final VoidCallback? onCopy;

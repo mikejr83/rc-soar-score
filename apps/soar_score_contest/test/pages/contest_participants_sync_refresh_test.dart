@@ -74,7 +74,7 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(source.sent, hasLength(1));
     expect(
-      find.text('2 invitations created. Nobody was emailed.'),
+      find.text('2 invitations sent. Nobody was emailed.'),
       findsOneWidget,
     );
   });
