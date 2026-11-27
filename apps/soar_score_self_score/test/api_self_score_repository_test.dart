@@ -240,6 +240,24 @@ void main() {
     );
   });
 
+  test('another 409 on a claim is not "already linked"', () async {
+    for (final code in ['invitations_not_available', 'backend_only', '']) {
+      final repository = _repository(
+        (_) => _json(code.isEmpty ? '' : '{"error":{"code":"$code"}}', 409),
+      );
+      await expectLater(
+        repository.claimInvitation('abc'),
+        throwsA(
+          allOf(
+            isA<SelfScoreLoadException>(),
+            isNot(isA<PilotAlreadyLinkedException>()),
+          ),
+        ),
+        reason: code,
+      );
+    }
+  });
+
   test('claiming with a refused sign-in says the sign-in expired', () {
     final repository = _repository((_) => _json('{}', 401));
     expect(
@@ -750,6 +768,32 @@ void main() {
         ),
       );
     });
+
+    test('a 401 on any account route is the sign-in ending (#546)', () async {
+      // Not "could not reach the server": the pages offer signing in again.
+      final repository = _repository((_) => _json('{}', 401));
+      final calls = <String, Future<Object?> Function()>{
+        'link candidates': repository.linkCandidates,
+        'confirm': () => repository.confirmLinkCandidate(
+          '0192f6a0-0000-7000-8000-000000000002',
+        ),
+        'decline': () => repository.declineLinkCandidate(
+          '0192f6a0-0000-7000-8000-000000000002',
+        ),
+        'own directory': repository.ownDirectory,
+        'delete entry': repository.deleteOwnDirectory,
+        'links': repository.accountLinks,
+        'end link': () =>
+            repository.endAccountLink('0192f6a0-0000-7000-8000-000000000002'),
+      };
+      for (final entry in calls.entries) {
+        await expectLater(
+          entry.value(),
+          throwsA(isA<SignedOutException>()),
+          reason: entry.key,
+        );
+      }
+    });
   });
 
   test('score and ordinal formatting', () {
@@ -909,8 +953,33 @@ void main() {
 
     test('a contest that left the list is said so', () async {
       await expectLater(
-        _repository((_) => _json('{}', 404)).openContest(participation),
+        _repository((_) => _json('{"error":{"code":"link_not_found"}}', 404))
+            .openContest(participation),
         throwsA(isA<ContestNotOnListException>()),
+      );
+    });
+
+    test('a 404 with no link_not_found code is not "left the list"', () async {
+      // A wrong address or a proxy error page, not the server's answer.
+      for (final body in ['{}', '<html>', '{"error":{"code":"other"}}']) {
+        await expectLater(
+          _repository((_) => _json(body, 404)).openContest(participation),
+          throwsA(
+            isA<SelfScoreLoadException>().having(
+              (e) => e is ContestNotOnListException,
+              'left the list',
+              false,
+            ),
+          ),
+          reason: body,
+        );
+      }
+    });
+
+    test('a 401 opening a contest is the sign-in ending', () async {
+      await expectLater(
+        _repository((_) => _json('', 401)).openContest(participation),
+        throwsA(isA<SignedOutException>()),
       );
     });
   });

@@ -39,6 +39,12 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
 
   static const _notFound = 'This page could not be found.';
 
+  /// The 409 code for a pilot another account already holds.
+  static const _alreadyLinked = 'already_linked';
+
+  /// The 404 code for a link or match that is not the account's (any more).
+  static const _linkNotFound = 'link_not_found';
+
   static const _unreachable =
       'Could not reach the server. Check your connection and try again.';
 
@@ -122,8 +128,12 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       return _sessionOf(await open());
     } on ApiHttpError catch (error) {
       // Another account already holds this pilot: the pilot can still
-      // continue as a guest.
-      if (claim && error.statusCode == 409) {
+      // continue as a guest. Other 409 answers (`invitations_not_available`,
+      // `backend_only`) are not that: they fall through to the generic
+      // failure below.
+      if (claim &&
+          error.statusCode == 409 &&
+          _codeOf(error) == _alreadyLinked) {
         throw const PilotAlreadyLinkedException();
       }
       if (claim && error.statusCode == 401) {
@@ -131,7 +141,7 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       }
       // 404 `link_not_found` is the account, not the link: an invalid link
       // answers `invalid_invitation`.
-      if (claim && _codeOf(error) == 'link_not_found') {
+      if (claim && _codeOf(error) == _linkNotFound) {
         throw const AccountCannotLinkException();
       }
       // Every way the server says no to a link reads the same, whatever
@@ -318,15 +328,19 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   Future<GuestSession> openContest(String participationId) async {
     try {
       return _sessionOf(
-        await _read(() => _client.openAccountParticipation(participationId)),
+        await _readAccount(
+          () => _client.openAccountParticipation(participationId),
+        ),
       );
-    } on SessionEndedException {
-      throw const SignedOutException();
-    } on SelfScoreLoadException catch (error) {
-      // `_read` words a 404 as a missing page; here it means the contest left
-      // the list (`link_not_found`).
-      if (error.message == _notFound) throw const ContestNotOnListException();
-      rethrow;
+    } on ApiHttpError catch (error) {
+      // Only the server's own `link_not_found` means the contest left the
+      // list: any other 404 is not that.
+      if (error.statusCode == 404 && _codeOf(error) == _linkNotFound) {
+        throw const ContestNotOnListException();
+      }
+      throw SelfScoreLoadException(
+        _messageFor(error.statusCode, _codeOf(error)),
+      );
     }
   }
 
@@ -439,10 +453,10 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
       await _readAccount(send);
     } on ApiHttpError catch (error) {
       throw switch ((error.statusCode, _codeOf(error))) {
-        (409, 'already_linked') => const LinkCandidateGoneException(
+        (409, _alreadyLinked) => const LinkCandidateGoneException(
           LinkCandidateGoneReason.alreadyLinked,
         ),
-        (404, 'link_not_found') => const LinkCandidateGoneException(
+        (404, _linkNotFound) => const LinkCandidateGoneException(
           LinkCandidateGoneReason.notAvailable,
         ),
         _ => const SelfScoreLoadException(_unreachable),
@@ -464,10 +478,14 @@ class ApiSelfScoreRepository implements SelfScoreRepository {
   /// Runs a call to an account route. Unlike [_read], a refusal is never a
   /// guest session ending: the account token has its own life, and the pilot
   /// can still use their guest link.
+  ///
+  /// A 401 is the sign-in ending ([SignedOutException]), never "could not
+  /// reach the server": the pages offer signing in again.
   Future<T> _readAccount<T>(Future<T> Function() call) async {
     try {
       return await call();
     } on ApiHttpError catch (error) {
+      if (error.statusCode == 401) throw const SignedOutException();
       // The answers of a link candidate keep their code for the caller.
       if (error.statusCode == 404 || error.statusCode == 409) rethrow;
       throw const SelfScoreLoadException(_unreachable);

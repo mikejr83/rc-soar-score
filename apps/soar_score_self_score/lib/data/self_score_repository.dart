@@ -117,7 +117,8 @@ abstract interface class SelfScoreRepository {
   /// is linked to the pilot the link is for, the entries made as a guest are
   /// kept under the account, and the session returned acts as the account.
   /// Throws [InvalidInvitationException] for a link that does not open and
-  /// [PilotAlreadyLinkedException] when another account holds the pilot,
+  /// [PilotAlreadyLinkedException] when another account holds the pilot (409
+  /// `already_linked`; any other 409 is a plain load failure),
   /// [AccountSignInExpiredException] when the sign-in was refused and
   /// [AccountCannotLinkException] when the account cannot be linked.
   Future<GuestSession> claimInvitation(String credential);
@@ -146,11 +147,15 @@ abstract interface class SelfScoreRepository {
 
   /// Opens a contest of [contests] for the signed-in person: a session that
   /// acts as their account, like the one an invitation link gives. Throws
-  /// [ContestNotOnListException] when it is no longer on their list.
+  /// [ContestNotOnListException] when it is no longer on their list (the
+  /// server's 404 `link_not_found`) and [SignedOutException] when the server
+  /// no longer accepts the sign-in.
   Future<GuestSession> openContest(String participationId);
 
   /// The pilots the signed-in account's verified email matches ("Is this
-  /// you?"); empty when there are none. Needs the account token.
+  /// you?"); empty when there are none. Needs the account token. Like every
+  /// account route it throws [SignedOutException] when the server no longer
+  /// accepts the sign-in.
   Future<List<LinkCandidate>> linkCandidates();
 
   /// Says the pilot behind [candidateId] is the signed-in account. Repeating

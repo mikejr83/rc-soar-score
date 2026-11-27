@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:soar_score_ui/soar_score_ui.dart';
 
 import '../auth/auth_scope.dart';
+import '../l10n/app_localizations.dart';
 import '../router.dart';
 import 'app_info_button.dart';
 
@@ -13,7 +14,7 @@ class SelfScoreAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.contextLine,
     this.onBack,
-    this.backLabel = 'Back',
+    this.backLabel,
     this.actions = const [],
     this.showAccount = true,
     this.onCopyInvitationLink,
@@ -25,7 +26,9 @@ class SelfScoreAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// Small line above the title, such as the contest name.
   final String? contextLine;
   final VoidCallback? onBack;
-  final String backLabel;
+
+  /// Tooltip of the back button; the localized "Back" when null.
+  final String? backLabel;
   final List<Widget> actions;
   final bool showAccount;
 
@@ -39,6 +42,7 @@ class SelfScoreAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLowest,
@@ -54,14 +58,17 @@ class SelfScoreAppBar extends StatelessWidget implements PreferredSizeWidget {
               children: [
                 if (onBack != null)
                   IconButton(
-                    tooltip: backLabel,
+                    tooltip: backLabel ?? l10n.appBarBackTooltip,
                     onPressed: onBack,
                     icon: const Icon(Icons.arrow_back),
                   )
                 else
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: BrandLogo(height: 32, semanticLabel: 'Soar Score'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: BrandLogo(
+                      height: 32,
+                      semanticLabel: l10n.appBarLogoLabel,
+                    ),
                   ),
                 const SizedBox(width: 4),
                 Expanded(
@@ -90,7 +97,7 @@ class SelfScoreAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ...actions,
                 if (showAccount)
                   IconButton(
-                    tooltip: 'Account',
+                    tooltip: l10n.appBarAccountTooltip,
                     onPressed: context.auth.isSignedIn
                         ? () => context.go(accountPath)
                         : null,

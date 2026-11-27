@@ -30,12 +30,10 @@ class _HomePageState extends State<HomePage> {
   bool _failed = false;
   bool _busy = false;
 
-  /// The pilot's directory entry has been looked for in this visit.
-  bool _checkedDetails = false;
-
-  /// A pilot with no directory entry goes to the details page once after
-  /// signing in (#652). A failed look leaves them where they are: the
-  /// contests page asks again.
+  /// A pilot with no directory entry goes to the details page once per
+  /// sign-in (#652; `AuthSession.detailsChecked` remembers it across visits
+  /// to this page). A failed look leaves them where they are: the contests
+  /// page asks again.
   Future<void> _sendToDetailsIfNew(SelfScoreRepository repository) async {
     try {
       final directory = await repository.ownDirectory();
@@ -58,8 +56,8 @@ class _HomePageState extends State<HomePage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) context.go(back);
       });
-    } else if (auth.isSignedIn && !_checkedDetails) {
-      _checkedDetails = true;
+    } else if (auth.isSignedIn && !auth.detailsChecked) {
+      auth.detailsChecked = true;
       _sendToDetailsIfNew(context.repository);
     }
   }
@@ -99,12 +97,11 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Center(
+                        Center(
                           child: BrandLogo(
                             variant: BrandLogoVariant.lockup,
                             height: 120,
-                            semanticLabel:
-                                'RC Soar Score, glider contest scoring',
+                            semanticLabel: l10n.brandLogoLabel,
                           ),
                         ),
                         const SizedBox(height: 32),
