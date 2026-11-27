@@ -656,4 +656,53 @@ void _accountTests() {
       isNotNull,
     );
   });
+
+  testWidgets('a refused sign-in on a claim offers Sign in again', (
+    tester,
+  ) async {
+    final auth = _RecordingAuth();
+    await auth.signIn();
+    auth.signIns.clear();
+    await _pump(
+      tester,
+      store: MemoryGuestSessionStore(),
+      repository: _AccountRepository(
+        claimError: const AccountSignInExpiredException(),
+      ),
+      auth: auth,
+    );
+    router.go(invitationPath('sample-link'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('claim-sign-in-again')), findsNothing);
+    await tester.tap(find.text('Continue as Penny Pilot'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('sign-in has expired'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('claim-sign-in-again')));
+    await tester.pumpAndSettle();
+    // The new sign-in comes back to this link.
+    expect(auth.signIns, [invitationPath('sample-link')]);
+  });
+
+  testWidgets('other claim failures have no Sign in again button', (
+    tester,
+  ) async {
+    final auth = E2eAuthSession();
+    await auth.signIn();
+    await _pump(
+      tester,
+      store: MemoryGuestSessionStore(),
+      repository: _AccountRepository(
+        claimError: const PilotAlreadyLinkedException(),
+      ),
+      auth: auth,
+    );
+    router.go(invitationPath('sample-link'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Continue as Penny Pilot'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('claim-sign-in-again')), findsNothing);
+  });
 }

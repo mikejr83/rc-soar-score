@@ -7,6 +7,7 @@ import '../router.dart';
 import '../session/guest_session_scope.dart';
 import 'load_error_view.dart';
 import 'results_refresh_bar.dart';
+import 'signed_in_gate.dart';
 
 /// A page scaffold that loads its data, shows a loading state while waiting,
 /// an error with Retry when the load fails, and [builder] once it succeeds.
@@ -110,12 +111,7 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
         final loading = snapshot.connectionState != ConnectionState.done;
         if (loading) {
           body = data == null
-              ? Center(
-                  child: Semantics(
-                    label: AppLocalizations.of(context).loading,
-                    child: const CircularProgressIndicator(),
-                  ),
-                )
+              ? const PageLoading()
               : widget.builder(context, data);
         } else if (snapshot.hasError) {
           final error = snapshot.error;
@@ -140,17 +136,11 @@ class _LoadableScaffoldState<T> extends State<LoadableScaffold<T>> {
               : LoadErrorView(
                   message: error is SelfScoreLoadException
                       ? error.message
-                      : 'Could not load this page. Check your connection and try '
-                            'again.',
+                      : AppLocalizations.of(context).loadFailedGeneric,
                   onRetry: _retry,
                 );
         } else if (data == null) {
-          body = Center(
-            child: Semantics(
-              label: AppLocalizations.of(context).loading,
-              child: const CircularProgressIndicator(),
-            ),
-          );
+          body = const PageLoading();
         } else {
           body = widget.builder(context, data);
         }

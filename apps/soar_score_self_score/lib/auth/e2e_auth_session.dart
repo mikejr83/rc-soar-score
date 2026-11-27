@@ -29,6 +29,7 @@ class E2eAuthSession extends AuthSession {
   @override
   Future<void> signOut() async {
     _signedIn = false;
+    detailsChecked = false;
     notifyListeners();
   }
 

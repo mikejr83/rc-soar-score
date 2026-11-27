@@ -270,7 +270,7 @@ void main() {
 
     await tester.tap(find.text('Spring Open'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(SnackBarAction, 'Sign in'));
+    await tester.tap(find.widgetWithText(SnackBarAction, 'Sign in again'));
     await tester.pumpAndSettle();
 
     expect(auth.signIns, 1);

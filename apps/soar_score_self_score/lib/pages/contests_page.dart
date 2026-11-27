@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../api_client_provider.dart';
 import '../auth/auth_scope.dart';
+import '../auth/sign_in_again.dart';
 import '../auth/auth_session.dart';
 import '../data/self_score_repository.dart';
 import '../data/self_score_scope.dart';
@@ -20,6 +21,7 @@ import '../widgets/directory_prompt_card.dart';
 import '../widgets/link_candidates_section.dart';
 import '../widgets/loadable_scaffold.dart';
 import '../widgets/self_score_app_bar.dart';
+import '../widgets/signed_in_gate.dart';
 
 /// The signed-in person's contests: in progress, invited and completed, each
 /// opening the contest as their account. Signed out it asks the person to
@@ -82,8 +84,10 @@ class _ContestsPageState extends State<ContestsPage> {
         SnackBar(
           content: Text(l10n.contestSignInEnded),
           action: SnackBarAction(
-            label: l10n.signInButton,
-            onPressed: () => _reauthenticate(auth),
+            label: l10n.signInAgainButton,
+            onPressed: () {
+              if (mounted) signInAgain(context);
+            },
           ),
         ),
       );
@@ -94,31 +98,26 @@ class _ContestsPageState extends State<ContestsPage> {
     }
   }
 
-  Future<void> _reauthenticate(AuthSession auth) async {
-    try {
-      await auth.signIn();
-    } on AuthException {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).homeSignInFailed)),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    if (!context.auth.isSignedIn) {
-      return Scaffold(
+    return SignedInGate(
+      title: l10n.contestsTitle,
+      signedOut: (context) => Scaffold(
         appBar: SelfScoreAppBar(title: l10n.contestsTitle),
         body: SafeArea(child: _SignedOut(auth: context.auth)),
-      );
-    }
+      ),
+      builder: _buildSignedIn,
+    );
+  }
+
+  Widget _buildSignedIn(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final repository = context.repository;
     return LoadableScaffold<ContestsView>(
       load: repository.contests,
       reloadKey: (repository, _reloads),
-      onSignedOut: () => _reauthenticate(context.auth),
+      onSignedOut: () => signInAgain(context),
       appBar: (context, data) => SelfScoreAppBar(
         title: l10n.contestsTitle,
         actions: const [ConnectionIndicator()],
