@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:drift/drift.dart' show QueryExecutor, QueryInterceptor;
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:logging/logging.dart';
@@ -50,6 +51,8 @@ void main() {
 
 void _tests(SliceBackend backend) {
   late SliceClient api;
+  // Runs just before the scan for sends in flight, to finish one then.
+  Future<void> Function()? beforePendingScan;
   late Handler handler;
   late List<Uri> confirmed;
   var certificateDown = false;
@@ -137,7 +140,11 @@ void _tests(SliceBackend backend) {
     logs = [];
     Logger.root.level = Level.ALL;
     logSubscription = Logger.root.onRecord.listen(logs.add);
-    api = await SliceClient.open(backend);
+    api = await SliceClient.open(
+      backend,
+      interceptor: _BeforePendingScan(() => beforePendingScan),
+    );
+    beforePendingScan = null;
     handler = build();
     await api.expectOk(
       'POST',
@@ -361,6 +368,48 @@ void _tests(SliceBackend backend) {
     expect(stored.first['status'], 'accepted');
   });
 
+  test(
+    'records a report whose send finishes between the two lookups',
+    () async {
+      final invitations = Repository(api.database).invitationRepository;
+      final id = (await invitations.listForParticipation(
+        core.Id.parse(_participation),
+      )).single.id;
+      const late = '0100019a-4b6c-7000-ffff-000000000006-000000';
+      await invitations.updateDeliveryOutcomes(
+        id,
+        (current) => [
+          ...current,
+          {
+            'request_id': 'send-2',
+            'channel': 'email',
+            'status': 'sending',
+            'at': DateTime.now().toUtc().toIso8601String(),
+          },
+        ],
+      );
+      // The first lookup finds nothing; the send then stores its answer, and
+      // the scan for sends in flight finds none. The report must not be
+      // acknowledged as unmatched.
+      beforePendingScan = () async {
+        beforePendingScan = null;
+        await invitations.updateDeliveryOutcomes(
+          id,
+          (current) => [
+            for (final entry in current)
+              if (entry['request_id'] == 'send-2')
+                {...entry, 'status': 'accepted', 'message_id': late}
+              else
+                entry,
+          ],
+        );
+      };
+      expect((await report('Bounce', late)).statusCode, 200);
+      final stored = (await invitations.findById(id))!.deliveryOutcomes;
+      expect(stored.last['status'], 'bounced');
+    },
+  );
+
   test('does not hold reports for a send that stopped long ago', () async {
     final invitations = Repository(api.database).invitationRepository;
     final id = (await invitations.listForParticipation(
@@ -443,6 +492,25 @@ void _tests(SliceBackend backend) {
     expect(text, isNot(contains(link)));
     expect(text, isNot(contains(link.split('/').last)));
   });
+}
+
+/// Calls the test's hook just before the query that looks for sends in flight.
+class _BeforePendingScan extends QueryInterceptor {
+  _BeforePendingScan(this._hook);
+  final Future<void> Function()? Function() _hook;
+
+  @override
+  Future<List<Map<String, Object?>>> runSelect(
+    QueryExecutor executor,
+    String statement,
+    List<Object?> args,
+  ) async {
+    if (args.length == 1 && args.first == '%"status":"sending"%') {
+      final hook = _hook();
+      if (hook != null) await hook();
+    }
+    return super.runSelect(executor, statement, args);
+  }
 }
 
 Future<Map<String, Object?>> _listing(Handler handler, String contest) async {

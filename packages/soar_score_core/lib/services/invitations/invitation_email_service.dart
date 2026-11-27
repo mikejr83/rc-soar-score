@@ -211,12 +211,19 @@ class InvitationDeliveryFeedback {
     required InvitationEmailFeedback feedback,
     String? bounceType,
   }) async {
-    final invitationId = await repository.invitationRepository
+    var invitationId = await repository.invitationRepository
         .findIdByDeliveryMessageId(messageId);
     if (invitationId == null) {
-      return await _anySendPending()
-          ? InvitationFeedbackResult.pending
-          : InvitationFeedbackResult.unmatched;
+      final pending = await _anySendPending();
+      // A send may have stored its answer after the first lookup and before
+      // the scan found nothing in flight; look again before giving up.
+      invitationId = await repository.invitationRepository
+          .findIdByDeliveryMessageId(messageId);
+      if (invitationId == null) {
+        return pending
+            ? InvitationFeedbackResult.pending
+            : InvitationFeedbackResult.unmatched;
+      }
     }
     final reportedAt = _clock().toUtc().toIso8601String();
     var changed = false;
