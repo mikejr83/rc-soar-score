@@ -80,7 +80,7 @@ class _Gateway implements SyncGateway {
     protocolVersion: core.SyncProtocol.protocolVersion,
     minProtocolVersion: 1,
     minSchemaVersion: 1,
-    maxSchemaVersion: 2,
+    maxSchemaVersion: 3,
     serverTime: DateTime.utc(2026, 11, 17),
   );
 
