@@ -147,8 +147,13 @@ class _GatedLinks implements core.ParticipantAccountLinkRepository {
   Future<core.ParticipantAccountLink> saveClaimingGuests(
     core.ParticipantAccountLink link, {
     required Iterable<core.Id> guestAccountIds,
+    core.Id? requireActiveInvitation,
   }) => _claiming(
-    () => _real.saveClaimingGuests(link, guestAccountIds: guestAccountIds),
+    () => _real.saveClaimingGuests(
+      link,
+      guestAccountIds: guestAccountIds,
+      requireActiveInvitation: requireActiveInvitation,
+    ),
   );
 
   @override

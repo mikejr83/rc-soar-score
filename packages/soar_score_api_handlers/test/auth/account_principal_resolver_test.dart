@@ -150,6 +150,33 @@ void main() {
     expect(account.emailVerified, isFalse);
   });
 
+  test('a verified sign-up takes an email from an unverified holder', () async {
+    profiles.profile = const UserProfile(
+      givenName: 'Ada',
+      familyName: 'Lovelace',
+      email: 'ada@example.com',
+    );
+    final first = await resolver.resolve(token, 'jwt');
+    profiles.profile = const UserProfile(
+      givenName: 'Ada',
+      familyName: 'Lovelace',
+      email: 'ada@example.com',
+      emailVerified: true,
+    );
+
+    final second = await resolver.resolve(
+      const VerifiedToken(
+        issuer: 'https://tenant.us.auth0.com/',
+        subject: 'google|1',
+      ),
+      'jwt',
+    );
+
+    expect(accounts.byId[second.accountId.value]!.email, 'ada@example.com');
+    expect(accounts.byId[second.accountId.value]!.emailVerified, isTrue);
+    expect(accounts.byId[first.accountId.value]!.email, isNull);
+  });
+
   test('does not mark an unverified email as verified', () async {
     profiles.profile = const UserProfile(
       givenName: 'Ada',

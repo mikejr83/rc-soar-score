@@ -33,6 +33,13 @@ class StubAccountRepository implements core.AccountRepository {
     required bool emailVerified,
     required DateTime now,
   }) async => false;
+
+  @override
+  Future<bool> releaseUnverifiedEmail(
+    core.Id id,
+    String email, {
+    required DateTime now,
+  }) async => false;
 }
 
 /// In-memory account aliases for tests; like the real repository, the first

@@ -667,9 +667,15 @@ class InvitationService {
     final invitation = await repository.invitationRepository.findById(
       invitationId,
     );
-    if (invitation == null ||
-        invitation.invitationRevision != revision ||
-        invitation.redeemedByAccountId != accountId) {
+    if (invitation == null || invitation.invitationRevision != revision) {
+      throw InvitationAccessError.invalidSession();
+    }
+    final isGuest = accountId == codec.guestAccountIdFor(invitation.id);
+    // The guest's session lasts while the guest is the redeemer. A signed-in
+    // account's does not depend on the redeemer: an anonymous open of the same
+    // link moves the redeemer back to the guest, and must not end the
+    // account's session on another tab or device.
+    if (isGuest && invitation.redeemedByAccountId != accountId) {
       throw InvitationAccessError.invalidSession();
     }
     final checked = await _check(invitation, now);
@@ -678,7 +684,7 @@ class InvitationService {
     // A session of a signed-in account (not the invitation's own guest) is
     // good only while the account still holds the Confirmed link to the
     // pilot, checked on every request: unlinking ends it at once.
-    if (accountId != codec.guestAccountIdFor(invitation.id)) {
+    if (!isGuest) {
       final link = await repository.participantAccountLinkRepository.find(
         participantProfileId: checked.participation.participantProfileId,
         accountId: accountId,

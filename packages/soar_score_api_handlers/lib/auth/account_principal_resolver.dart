@@ -3,6 +3,7 @@ import 'package:soar_score_core/soar_score_core.dart';
 
 import 'account_profile_refresher.dart';
 import 'principal.dart';
+import 'email_takeover.dart';
 import 'profile_names.dart';
 import 'token_verifier.dart';
 import 'user_profile.dart';
@@ -74,9 +75,22 @@ class AccountPrincipalResolver {
     // An email another account already uses is not copied: the same email at
     // a second login is only a candidate link, which a person confirms.
     var email = profile.email?.trim().toLowerCase();
-    if (email != null &&
-        (email.isEmpty || await accounts.findByEmail(email) != null)) {
-      email = null;
+    if (email != null) {
+      if (email.isEmpty) {
+        email = null;
+      } else if (await accounts.findByEmail(email) != null) {
+        // Only an address the provider verified can take it from an account
+        // that never verified it.
+        final freed =
+            profile.emailVerified &&
+            await freeEmailForVerifiedClaimant(
+              accounts,
+              email,
+              claimant: null,
+              now: now,
+            );
+        if (!freed) email = null;
+      }
     }
     final names = newAccountNames(profile, email);
     final account = Account(

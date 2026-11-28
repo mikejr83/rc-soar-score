@@ -392,8 +392,8 @@ void main() {
     'a profile of another country is not the pilot sharing its ID',
     () async {
       byKey['fai_number'] = [
-        {..._match(_entryA, 'Pat'), 'country': 'DE'},
-        {..._match(_entryB, 'Bea'), 'country': 'US'},
+        {..._match(_entryA, 'Pat'), 'country': 'DE', 'shared_key': true},
+        {..._match(_entryB, 'Bea'), 'country': 'US', 'shared_key': true},
       ];
       final s = source();
       final found = await s.lookup('F1');
@@ -414,8 +414,11 @@ void main() {
       // A US profile holds the US pilot, not the German one.
       expect(us.copiesIn([american]), [american]);
       expect(de.copiesIn([american]), isEmpty);
-      // No country on the profile: the ID alone still matches.
-      expect(de.copiesIn([own(null)]), isNotEmpty);
+      // No country on the profile: two listed pilots hold the ID, so it does
+      // not say which of them the profile is, and neither is collapsed.
+      expect(de.sharedId, 'F1');
+      expect(de.copiesIn([own(null)]), isEmpty);
+      expect(us.copiesIn([own(null)]), isEmpty);
       // The copy the server names is the same pilot whatever the country.
       final copy = own('FR');
       final named = ParticipantCandidate.directory(

@@ -120,6 +120,7 @@ class ParticipantLinkService {
       profileId: profileId,
       accountId: accountId,
       origin: ParticipantLinkOrigin.invitationRedemption,
+      requireActiveInvitation: opened.invitation.id,
     );
     return (
       link: link,
@@ -594,6 +595,7 @@ class ParticipantLinkService {
     required Id accountId,
     required ParticipantLinkOrigin origin,
     bool reviveEnded = true,
+    Id? requireActiveInvitation,
   }) async {
     final links = repository.participantAccountLinkRepository;
     final existing = await _existingConfirmed(profileId, accountId);
@@ -644,12 +646,16 @@ class ParticipantLinkService {
       final stored = await links.saveClaimingGuests(
         link,
         guestAccountIds: guests,
+        requireActiveInvitation: requireActiveInvitation,
       );
       _logger.info(
         'Account ${accountId.value} linked to a profile by '
         '${origin.name} (${guests.length} guest accounts claimed).',
       );
       return stored;
+    } on InvitationAccessError {
+      // The invitation was revoked or replaced meanwhile: nothing was linked.
+      rethrow;
     } on Object {
       // A concurrent request may have confirmed first: the database refuses
       // a second Confirmed link for the profile. Whoever won is the answer:

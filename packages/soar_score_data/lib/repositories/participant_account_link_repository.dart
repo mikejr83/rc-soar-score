@@ -63,7 +63,24 @@ class ParticipantAccountLinkRepository extends DriftRepository
   Future<core.ParticipantAccountLink> saveClaimingGuests(
     core.ParticipantAccountLink link, {
     required Iterable<core.Id> guestAccountIds,
+    core.Id? requireActiveInvitation,
   }) => db.transaction(() async {
+    if (requireActiveInvitation != null) {
+      // A director's revoke or replace writes this row, so reading it with a
+      // lock (PostgreSQL; SQLite has one writer) decides which comes first.
+      final lock = db.executor.dialect == SqlDialect.postgres
+          ? ' FOR UPDATE'
+          : '';
+      final rows = await db
+          .customSelect(
+            portableSql(db, 'SELECT state FROM invitations WHERE id = ?$lock'),
+            variables: [Variable<String>(requireActiveInvitation.value)],
+          )
+          .get();
+      if (rows.isEmpty || rows.single.read<String>('state') != 'Active') {
+        throw core.InvitationAccessError.invalidLink();
+      }
+    }
     final saved = await save(link);
     await _claim(link.accountId, guestAccountIds);
     return saved;

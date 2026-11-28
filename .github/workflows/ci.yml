@@ -2,8 +2,9 @@ name: CI
 
 on:
   # Documentation-only changes skip the whole workflow. A push or PR runs
-  # unless every changed file matches these patterns. `feature/**` runs on pull
-  # requests only, so a push to a feature branch with an open PR is not run twice.
+  # unless every changed file matches these patterns. `feature/**` branches run
+  # on push too, so a PR merged into a shared feature branch is checked there
+  # as well as on the PR; a feature branch with its own open PR runs twice.
   push:
     branches: [master, "hotfix/**", "feature/**"]
     paths-ignore:

@@ -228,4 +228,67 @@ void _tests(Backend backend) {
       );
     });
   });
+
+  group('releaseUnverifiedEmail', () {
+    test('clears an unverified email and the names stay', () async {
+      final saved = await repo.save(account('alex@example.org'));
+      final now = t0.add(const Duration(minutes: 1));
+
+      expect(
+        await repo.releaseUnverifiedEmail(
+          saved.id,
+          'Alex@Example.org',
+          now: now,
+        ),
+        isTrue,
+      );
+
+      final after = (await repo.findById(saved.id))!;
+      expect(after.email, isNull);
+      expect(after.emailVerified, isFalse);
+      expect(after.firstName, 'Alex');
+      expect(after.lastName, 'Kim');
+    });
+
+    test('leaves a verified email alone', () async {
+      final saved = await repo.save(
+        core.Account(
+          id: core.Id.create(),
+          firstName: 'Alex',
+          lastName: 'Kim',
+          email: 'alex@example.org',
+          emailVerified: true,
+          kind: core.AccountKind.registered,
+          createdAt: t0,
+          updatedAt: t0,
+        ),
+      );
+
+      expect(
+        await repo.releaseUnverifiedEmail(
+          saved.id,
+          'alex@example.org',
+          now: t0,
+        ),
+        isFalse,
+      );
+
+      expect((await repo.findById(saved.id))!.email, 'alex@example.org');
+    });
+
+    test('leaves a different email alone', () async {
+      final saved = await repo.save(account('alex@example.org'));
+
+      expect(
+        await repo.releaseUnverifiedEmail(
+          saved.id,
+          'other@example.org',
+          now: t0,
+        ),
+        isFalse,
+      );
+
+      expect((await repo.findById(saved.id))!.email, 'alex@example.org');
+    });
+  });
 }

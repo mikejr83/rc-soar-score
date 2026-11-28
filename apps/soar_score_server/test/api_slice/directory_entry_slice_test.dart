@@ -176,6 +176,23 @@ void _tests(SliceBackend backend) {
     );
   });
 
+  test('oversized details are 400 and store nothing', () async {
+    final pat = await account(core.AccountKind.registered);
+
+    for (final oversized in [
+      body(fai: 'A' * 5000),
+      body(club: 'C' * 5000),
+      body(firstName: 'N' * 5000),
+    ]) {
+      final response = await api.actAs(pat, 'PUT', _path, body: oversized);
+      expect(response.status, 400);
+    }
+    expect(
+      await repository.participantDirectoryEntryRepository.findForAccount(pat),
+      isNull,
+    );
+  });
+
   test('delete removes the entry and is repeatable', () async {
     final pat = await account(core.AccountKind.registered);
     await api.actAs(pat, 'PUT', _path, body: body());

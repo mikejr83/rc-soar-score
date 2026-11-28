@@ -47,4 +47,15 @@ abstract interface class AccountRepository {
     required bool emailVerified,
     required DateTime now,
   });
+
+  /// Clears [email] from the registered account [id], in one conditional
+  /// write that applies only while that account still holds exactly [email]
+  /// unverified. Touches the email columns only. Returns whether it released
+  /// the address; false means the account changed meanwhile (the address was
+  /// verified, replaced or removed) and the caller looks again.
+  Future<bool> releaseUnverifiedEmail(
+    Id id,
+    String email, {
+    required DateTime now,
+  });
 }

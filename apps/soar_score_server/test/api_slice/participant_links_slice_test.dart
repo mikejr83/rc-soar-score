@@ -1163,6 +1163,29 @@ void _tests(SliceBackend backend) {
         throwsA(isA<core.InvitationAccessError>()),
       );
     });
+
+    test('an account session outlives an anonymous open of the same link, '
+        'which only takes the redeemer back', () async {
+      final issued = await issue(1);
+      await guestScores(issued.credential);
+      await linkFromInvitation(credential: issued.credential, accountId: pat);
+      final accountSession = await links.openParticipation(
+        participationId: id(_participationId(1)),
+        accountId: pat,
+      );
+
+      final anonymous = await invitations.resolve(issued.credential);
+
+      expect(
+        (await invitations.authorize(accountSession.sessionToken))
+            .guestAccountId,
+        pat,
+      );
+      expect(
+        (await invitations.authorize(anonymous.sessionToken)).guestAccountId,
+        isNot(pat),
+      );
+    });
   });
 
   group('contest zones at the REST boundary', () {

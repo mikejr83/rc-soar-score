@@ -49,6 +49,25 @@ class DirectoryEntryService {
   final Repository _repository;
   final DateTime Function() _clock;
 
+  /// Longest first or last name, in characters.
+  static const maxNameLength = 100;
+
+  /// Longest FAI or national organization number.
+  static const maxIdLength = 40;
+
+  /// Longest club, city, state or country.
+  static const maxTextLength = 100;
+
+  static void _limit(String name, String? text, int max) {
+    if (text != null && text.trim().length > max) {
+      throw ArgumentError.value(
+        text.length,
+        name,
+        'must be at most $max characters',
+      );
+    }
+  }
+
   /// The view of [accountId]'s entry; its `entry` is null when it has none.
   ///
   /// Throws [ForbiddenError] (`registered_account_required`) for a guest,
@@ -64,7 +83,7 @@ class DirectoryEntryService {
   /// it. Repeating a request changes nothing; the id and creation time of an
   /// existing entry are kept. Blank optional details are stored as none.
   ///
-  /// A blank name is an [ArgumentError].
+  /// A blank name, or a detail longer than its limit, is an [ArgumentError].
   Future<OwnDirectoryEntry> put({
     required Id accountId,
     required String firstName,
@@ -79,6 +98,14 @@ class DirectoryEntryService {
     required bool emailVisibleToDirectors,
   }) async {
     final account = await _registered(accountId);
+    _limit('firstName', firstName, maxNameLength);
+    _limit('lastName', lastName, maxNameLength);
+    _limit('club', club, maxTextLength);
+    _limit('faiNumber', faiNumber, maxIdLength);
+    _limit('nationalOrgId', nationalOrgId, maxIdLength);
+    _limit('city', city, maxTextLength);
+    _limit('state', state, maxTextLength);
+    _limit('country', country, maxTextLength);
     final repository = _repository.participantDirectoryEntryRepository;
     final existing = await repository.findForAccount(accountId);
     final now = _clock().toUtc();
