@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
-import 'package:go_router/go_router.dart';
 import 'package:soar_score_core/soar_score_core.dart';
 
 import '../../../api_client_provider.dart';
@@ -10,6 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../router.dart';
 import '../../../services/reports/pilot_cards/pilot_invitations.dart';
 import '../../../services/reports/report_kind.dart';
+import '../../../services/reports/report_launcher.dart';
 import '../../invitations/send_invitations_flow.dart';
 import '../../sync/reload_on_sync.dart';
 
@@ -245,7 +245,8 @@ class _InvitationsSectionState extends State<InvitationsSection> {
                   ),
                   OutlinedButton(
                     key: const ValueKey('workspace-invitations-cards'),
-                    onPressed: () => context.go(
+                    onPressed: () => ReportLaunchers.current.openHere(
+                      context,
                       contestReportPath(
                         widget.contest.id.value,
                         ReportKind.cards,
