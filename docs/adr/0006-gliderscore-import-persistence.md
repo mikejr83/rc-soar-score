@@ -92,7 +92,7 @@ Rules:
 
 ### Schema
 
-Schema changes go in version 1 in place (a director deletes a stale local `soar_score.db`). *Superseded 2026-11-27: version 2 shipped in 0.1.0-alpha.7, so every later schema change is a new numbered version with an upgrade step; see `docs/releasing.md`.* `database.g.dart` is regenerated. Tests run on SQLite and PostgreSQL.
+Schema changes go in version 1 in place (a director deletes a stale local `soar_score.db`). _Superseded 2026-11-27: version 2 shipped in 0.1.0-alpha.7, so every later schema change is a new numbered version with an upgrade step; see `docs/releasing.md`._ `database.g.dart` is regenerated. Tests run on SQLite and PostgreSQL.
 
 ## Amendment: restore semantics and the draw import (2026-11-04, #767)
 
