@@ -69,6 +69,28 @@ class FakeAccountRepository implements AccountRepository {
     return true;
   }
 
+  /// Called inside [releaseUnverifiedEmail] before the condition is checked,
+  /// to simulate a concurrent refresh.
+  void Function()? beforeRelease;
+
+  @override
+  Future<bool> releaseUnverifiedEmail(
+    Id id,
+    String email, {
+    required DateTime now,
+  }) async {
+    beforeRelease?.call();
+    final account = byId[id.value];
+    if (account == null ||
+        account.kind != AccountKind.registered ||
+        account.email != email.trim().toLowerCase() ||
+        account.emailVerified) {
+      return false;
+    }
+    byId[id.value] = _with(account, email: null, updatedAt: now);
+    return true;
+  }
+
   Account _with(
     Account a, {
     String? firstName,

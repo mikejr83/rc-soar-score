@@ -186,6 +186,37 @@ void main() {
     },
   );
 
+  test('a holder that verifies the email meanwhile keeps it', () async {
+    final other = await store(account(email: 'taken@example.com'));
+    final a = await store(account(verified: false, refreshedAt: start));
+    profiles.profile = UserProfile(
+      givenName: 'Ada',
+      familyName: 'Lovelace',
+      email: other.email,
+      emailVerified: true,
+    );
+    // A concurrent refresh verifies the holder after it was inspected.
+    accounts.beforeRelease = () {
+      accounts.byId[other.id.value] = Account(
+        id: other.id,
+        firstName: other.firstName,
+        lastName: other.lastName,
+        email: other.email,
+        emailVerified: true,
+        kind: other.kind,
+        createdAt: start,
+        updatedAt: start,
+      );
+    };
+
+    await refresher.refresh(a, 'jwt');
+
+    expect(stored(other).email, 'taken@example.com');
+    expect(stored(other).emailVerified, isTrue);
+    expect(stored(a).email, 'ada@example.com');
+    expect(stored(a).emailVerified, isFalse);
+  });
+
   test('an unverified claimant never takes a held email', () async {
     final other = await store(account(email: 'taken@example.com'));
     final a = await store(account(verified: true, refreshedAt: start));

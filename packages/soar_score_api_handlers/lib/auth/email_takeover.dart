@@ -20,12 +20,11 @@ Future<bool> freeEmailForVerifiedClaimant(
   if (holder.kind != AccountKind.registered || holder.emailVerified) {
     return false;
   }
-  return accounts.applyProfile(
-    holder.id,
-    firstName: holder.firstName,
-    lastName: holder.lastName,
-    email: null,
-    emailVerified: false,
-    now: now,
-  );
+  // One conditional write: it applies only while the holder still has this
+  // address unverified, so a refresh that verified or replaced it meanwhile
+  // is not undone, and no other column is rewritten from a stale read.
+  await accounts.releaseUnverifiedEmail(holder.id, email, now: now);
+  // Whether or not this call released it, free means nobody holds it now.
+  final after = await accounts.findByEmail(email);
+  return after == null || after.id == claimant;
 }

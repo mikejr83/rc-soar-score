@@ -111,4 +111,30 @@ class AccountRepository extends DriftRepository
     );
     return changed > 0;
   }
+
+  @override
+  Future<bool> releaseUnverifiedEmail(
+    core.Id id,
+    String email, {
+    required DateTime now,
+  }) async {
+    _store;
+    final changed = await db.customUpdate(
+      portableSql(
+        db,
+        "UPDATE accounts SET email = NULL, email_verified = ?, updated_at = ? "
+        "WHERE id = ? AND email = ? AND email_verified = ? "
+        "AND kind = 'registered'",
+      ),
+      variables: [
+        Variable<bool>(false),
+        Variable<String>(core.formatUtcTimestamp(now)),
+        Variable<String>(id.value),
+        Variable<String>(email.trim().toLowerCase()),
+        Variable<bool>(false),
+      ],
+      updates: {db.accounts},
+    );
+    return changed > 0;
+  }
 }
