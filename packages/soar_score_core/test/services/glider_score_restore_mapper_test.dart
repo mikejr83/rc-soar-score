@@ -639,7 +639,8 @@ void main() {
       if (io.Platform.environment['UPDATE_GOLDEN'] == '1') {
         file.writeAsStringSync(text);
       }
-      expect(file.readAsStringSync(), text);
+      final actual = file.readAsStringSync().replaceAll('\r\n', '\n');
+      expect(actual, text);
     }
 
     test('comp 19, later version', () {
